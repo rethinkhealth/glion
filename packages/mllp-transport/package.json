@@ -1,0 +1,67 @@
+{
+  "name": "@glion/mllp-transport",
+  "version": "0.15.3",
+  "description": "MLLP wire protocol primitives — framing, encoding, decoding, and base error types",
+  "keywords": [
+    "decoder",
+    "encoder",
+    "framing",
+    "health",
+    "healthcare",
+    "hl7",
+    "hl7v2",
+    "mllp",
+    "protocol",
+    "transport",
+    "typescript"
+  ],
+  "homepage": "https://glion.dev",
+  "license": "MIT",
+  "author": {
+    "name": "Melek Somai",
+    "email": "melek@rethinkhealth.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rethinkhealth/glion.git",
+    "directory": "packages/mllp-transport"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown && tsc --emitDeclarationOnly",
+    "check-types": "tsc --noEmit",
+    "check:readme": "glion-check-readme",
+    "publint": "publint --strict",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@glion/check-readme": "workspace:*",
+    "@glion/testing": "workspace:*",
+    "@glion/tsconfig": "workspace:*",
+    "@types/node": "^25.5.0",
+    "@vitest/coverage-v8": "4.1.2",
+    "publint": "0.3.18",
+    "tsdown": "0.21.7",
+    "typescript": "^5.9.3",
+    "vitest": "4.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.14.0"
+}

@@ -2,10 +2,10 @@ import {
   MLLP_END_BYTE_1,
   MLLP_END_BYTE_2,
   MLLP_START_BYTE,
-} from "../../src/transport/constants.js";
-import { decode } from "../../src/transport/decoder.js";
-import { TransportError } from "../../src/transport/errors.js";
-import { TransportErrorCode } from "../../src/transport/types.js";
+} from "../src/constants.js";
+import { decode } from "../src/decoder.js";
+import { TransportError } from "../src/errors.js";
+import { TransportErrorCode } from "../src/types.js";
 
 /** Wrap raw text in MLLP framing bytes without using the encoder. */
 function encode(text: string): Uint8Array {

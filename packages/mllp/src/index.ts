@@ -1,7 +1,9 @@
 // biome-ignore-all lint/performance/noBarrelFile: fine
 
 // -------------
-// Transport (framing, encoding, decoding)
+// Transport (framing, encoding, decoding) — re-exported from
+// `@glion/mllp-transport` for backwards compatibility. Prefer
+// importing from `@glion/mllp-transport` directly in new code.
 // -------------
 export {
   createDecoderStream,
@@ -16,19 +18,15 @@ export {
   MLLP_START_BYTE,
   MLLP_TRAILER,
   MLLPDecoderStream,
-} from "./transport";
+  MllpError,
+} from "@glion/mllp-transport";
 export type {
   DecodedMessage,
   DecoderOptions,
   EncoderInput,
   EncoderOptions,
-} from "./transport";
-
-// -------------
-// Errors
-// -------------
-export { MllpError } from "./errors";
-export type { MllpErrorOptions } from "./errors";
+  MllpErrorOptions,
+} from "@glion/mllp-transport";
 
 // -------------
 // Server

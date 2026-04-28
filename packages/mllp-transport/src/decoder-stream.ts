@@ -93,16 +93,23 @@ const defaultDecoderOptions: Required<
  *
  * ## Error recovery
  *
- * The stream is **resilient** — it never throws. All framing errors
- * are reported via the `onError` callback, and the decoder continues
- * scanning for the next valid frame. Error scenarios:
+ * The decoder offers two error modes, selected by what the
+ * caller-supplied `onError` callback does (see {@link DecoderOptions.onError}):
+ *
+ * - **Lenient (default)** — `onError` returns normally; the decoder logs the
+ *   error and keeps scanning for the next valid frame. The stream stays open
+ *   and continues processing subsequent frames.
+ * - **Fatal** — `onError` throws; the throw propagates out of the underlying
+ *   `transform()` call and errors the readable side of the `TransformStream`.
+ *   Downstream `for await ... of` consumers reject with the thrown value.
+ *
+ * Error scenarios:
  *
  * - **Garbage before VT** — bytes are skipped, `INVALID_START_BYTE` reported.
- * - **Oversized message** — frame is abandoned, `MESSAGE_TOO_LARGE` reported,
- *   scanning resumes.
+ * - **Oversized message** — frame is abandoned, `MESSAGE_TOO_LARGE` reported.
  * - **Incomplete frame at stream end** — `INCOMPLETE_MESSAGE` reported during
- *   `flush()`. This is the only error that can't be recovered from, since there
- *   is no more data coming.
+ *   `flush()`. Recovery is impossible at this point because the stream has
+ *   already ended; the consumer sees end-of-stream regardless of error mode.
  *
  * ## Size enforcement
  *
@@ -372,25 +379,44 @@ function createDecoderTransformer(options?: DecoderOptions) {
  * how the bytes are chunked on the wire.
  *
  * @example
+ *   Lenient (default) — log and keep scanning:
+ *
  *   ```typescript
- *   import { createDecoderStream } from "@glion/mllp";
+ *   import { createDecoderStream } from "@glion/mllp-transport";
  *
  *   const decoder = createDecoderStream({
- *     maxMessageSize: 1024 * 1024, // 1 MB limit
- *     onError: (err) => log.warn(err), // custom error handler
+ *   maxMessageSize: 1024 * 1024,
+ *   onError: (err) => log.warn(err),
  *   });
  *
- *   const messages = socket.readable.pipeThrough(decoder).getReader();
+ *   for await (const frame of socket.readable.pipeThrough(decoder)) {
+ *   console.log(frame.text);
+ *   }
+ *   ```;
  *
- *   while (true) {
- *     const { done, value } = await messages.read();
- *     if (done) break;
- *     console.log(value.text); // HL7v2 message string
+ * @example
+ *   Fatal — throw to error the stream on any frame error:
+ *
+ *   ```typescript
+ *   const decoder = createDecoderStream({
+ *   maxMessageSize: 1024 * 1024,
+ *   onError: (err) => {
+ *   throw new Error(`framing failed: ${err.message}`, { cause: err });
+ *   },
+ *   });
+ *
+ *   try {
+ *   for await (const frame of socket.readable.pipeThrough(decoder)) {
+ *   handle(frame);
+ *   }
+ *   } catch (err) {
+ *   // err is the value thrown from onError
  *   }
  *   ```;
  *
  * @param options - Optional decoder settings (max size, encoding, error
- *   handler).
+ *   handler). See {@link DecoderOptions.onError} for the lenient/fatal
+ *   error-mode contract.
  * @returns A `TransformStream<Uint8Array, DecodedMessage>`.
  */
 export function createDecoderStream(

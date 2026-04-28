@@ -62,7 +62,7 @@
     "zod-to-json-schema": "3.25.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "packageManager": "pnpm@10.14.0"
 }

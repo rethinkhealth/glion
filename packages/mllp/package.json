@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "@glion/ast": "workspace:*",
+    "@glion/mllp-transport": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/util-query": "workspace:*",
     "unified": "11.0.5",
@@ -71,7 +72,7 @@
     "vitest": "4.1.2"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "packageManager": "pnpm@10.14.0"
 }

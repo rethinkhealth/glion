@@ -1,10 +1,10 @@
 import {
   createDecoderStream,
   MLLPDecoderStream,
-} from "../../src/transport/decoder-stream.js";
-import { encode, encodeMultiple } from "../../src/transport/encoder.js";
-import type { DecodedMessage } from "../../src/transport/types.js";
-import { TransportErrorCode } from "../../src/transport/types.js";
+} from "../src/decoder-stream.js";
+import { encode, encodeMultiple } from "../src/encoder.js";
+import type { DecodedMessage } from "../src/types.js";
+import { TransportErrorCode } from "../src/types.js";
 
 /**
  * Helper to collect all messages from a decoder stream
@@ -339,5 +339,84 @@ describe("MLLPDecoderStream", () => {
 
     expect(messages.length).toBe(0);
     expect(onError).toHaveBeenCalled();
+  });
+});
+
+describe("createDecoderStream — fatal error mode (onError throws)", () => {
+  // Throwing from inside the user-supplied onError callback is the
+  // documented way to opt into "fatal" framing-error semantics: the
+  // throw propagates out of the underlying transform() call and errors
+  // both sides of the TransformStream. These tests pin that contract
+  // so consumers (e.g. @glion/mllp-client) can rely on it.
+  //
+  // Each test ignores the writer.write() rejection because both sides
+  // of a TransformStream error simultaneously when the transformer
+  // throws. The contract under test is the *readable* rejection — that
+  // is what `for await ... of` consumers observe.
+
+  function ignoreRejection<T>(promise: Promise<T>): void {
+    promise.catch(() => {
+      /* observed elsewhere; suppress unhandled-rejection warning */
+    });
+  }
+
+  it("errors the readable when onError throws on garbage bytes", async () => {
+    const fatal = new Error("garbage in stream");
+    const decoder = createDecoderStream({
+      onError: () => {
+        throw fatal;
+      },
+    });
+
+    const writer = decoder.writable.getWriter();
+    const readPromise = collectMessages(decoder.readable);
+
+    // Send garbage with no VT — triggers INVALID_START_BYTE inside transform().
+    ignoreRejection(writer.write(new Uint8Array([0x01, 0x02, 0x03])));
+
+    await expect(readPromise).rejects.toBe(fatal);
+  });
+
+  it("errors the readable when onError throws on oversized frame", async () => {
+    const fatal = new Error("too big");
+    const decoder = createDecoderStream({
+      maxMessageSize: 5,
+      onError: () => {
+        throw fatal;
+      },
+    });
+
+    const writer = decoder.writable.getWriter();
+    const readPromise = collectMessages(decoder.readable);
+
+    ignoreRejection(writer.write(encode("0123456789"))); // payload exceeds 5
+
+    await expect(readPromise).rejects.toBe(fatal);
+  });
+
+  it("preserves the thrown value verbatim through the rejection", async () => {
+    class CustomFramingError extends Error {
+      readonly tag = "custom" as const;
+    }
+    const fatal = new CustomFramingError("framing failed");
+
+    const decoder = createDecoderStream({
+      onError: () => {
+        throw fatal;
+      },
+    });
+
+    const writer = decoder.writable.getWriter();
+    const readPromise = collectMessages(decoder.readable);
+
+    ignoreRejection(writer.write(new Uint8Array([0xff])));
+
+    try {
+      await readPromise;
+      expect.fail("expected throw");
+    } catch (error) {
+      expect(error).toBeInstanceOf(CustomFramingError);
+      expect((error as CustomFramingError).tag).toBe("custom");
+    }
   });
 });

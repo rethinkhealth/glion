@@ -1,8 +1,8 @@
 // oxlint-disable unicorn/no-array-for-each
-import { createDecoderStream } from "../../src/transport/decoder-stream.js";
-import { decode } from "../../src/transport/decoder.js";
-import { encode, encodeMultiple } from "../../src/transport/encoder.js";
-import type { DecodedMessage } from "../../src/transport/types.js";
+import { createDecoderStream } from "../src/decoder-stream.js";
+import { decode } from "../src/decoder.js";
+import { encode, encodeMultiple } from "../src/encoder.js";
+import type { DecodedMessage } from "../src/types.js";
 
 /**
  * Helper to collect all messages from a stream

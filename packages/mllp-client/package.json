@@ -1,0 +1,100 @@
+{
+  "name": "@glion/mllp-client",
+  "version": "0.15.3",
+  "description": "MLLP client for sending HL7v2 messages and receiving acknowledgments",
+  "keywords": [
+    "client",
+    "health",
+    "healthcare",
+    "hl7",
+    "hl7v2",
+    "mllp",
+    "nodejs",
+    "typescript"
+  ],
+  "homepage": "https://glion.dev",
+  "license": "MIT",
+  "author": {
+    "name": "Melek Somai",
+    "email": "melek@rethinkhealth.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rethinkhealth/glion.git",
+    "directory": "packages/mllp-client"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "workerd": {
+        "types": "./dist/runtimes/workers.d.ts",
+        "import": "./dist/runtimes/workers.js"
+      },
+      "deno": {
+        "types": "./dist/runtimes/deno.d.ts",
+        "import": "./dist/runtimes/deno.js"
+      },
+      "default": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./node": {
+      "types": "./dist/runtimes/node.d.ts",
+      "import": "./dist/runtimes/node.js"
+    },
+    "./deno": {
+      "types": "./dist/runtimes/deno.d.ts",
+      "import": "./dist/runtimes/deno.js"
+    },
+    "./workers": {
+      "types": "./dist/runtimes/workers.d.ts",
+      "import": "./dist/runtimes/workers.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown && tsc --emitDeclarationOnly",
+    "check-types": "tsc --noEmit",
+    "check:readme": "glion-check-readme",
+    "publint": "publint --strict",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@glion/ack": "workspace:*",
+    "@glion/ast": "workspace:*",
+    "@glion/mllp-transport": "workspace:*",
+    "@glion/parser": "workspace:*",
+    "@glion/util-query": "workspace:*"
+  },
+  "devDependencies": {
+    "@glion/check-readme": "workspace:*",
+    "@glion/hl7v2": "workspace:*",
+    "@glion/mllp": "workspace:*",
+    "@glion/mllp-ack": "workspace:*",
+    "@glion/testing": "workspace:*",
+    "@glion/tsconfig": "workspace:*",
+    "@types/node": "^25.5.0",
+    "@vitest/coverage-v8": "4.1.2",
+    "publint": "0.3.18",
+    "tsdown": "0.21.7",
+    "typescript": "^5.9.3",
+    "vitest": "4.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.14.0"
+}

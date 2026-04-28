@@ -11,6 +11,12 @@ import type {
 export interface AckExceptionOptions extends ErrorOptions {
   errorCode: Hl7ErrorCodeValue;
   severity?: SeverityValue;
+  /**
+   * The raw HL7v2 ACK message associated with this exception, when one
+   * exists. Set when the exception is derived from an existing ACK;
+   * left undefined when no ACK has been produced yet.
+   */
+  raw?: string;
 }
 
 /**
@@ -26,11 +32,18 @@ export abstract class AckException extends Error {
   abstract readonly code: AckCodeValue;
   readonly errorCode: Hl7ErrorCodeValue;
   readonly severity: SeverityValue | undefined;
+  /**
+   * The raw HL7v2 ACK message associated with this exception, when one
+   * exists. Set when the exception is derived from an existing ACK;
+   * left undefined when no ACK has been produced yet.
+   */
+  readonly raw: string | undefined;
 
   constructor(message: string, options: AckExceptionOptions) {
     super(message, { cause: options.cause });
     this.errorCode = options.errorCode;
     this.severity = options.severity;
+    this.raw = options.raw;
   }
 
   /**

@@ -1,9 +1,9 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
+import { MllpError } from "@glion/mllp-transport";
 import { hl7v2Parser } from "@glion/parser";
 import { unified } from "unified";
 
-import { MllpError } from "../../src/errors.js";
 import { Mllp } from "../../src/server/mllp.js";
 import type { ConnectionInfo, Hl7v2Processor } from "../../src/server/types.js";
 

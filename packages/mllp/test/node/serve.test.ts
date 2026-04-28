@@ -4,15 +4,15 @@
 import net from "node:net";
 
 import { parseHL7v2 } from "@glion/hl7v2";
+import {
+  encode,
+  MLLP_END_BYTE_1,
+  MLLP_END_BYTE_2,
+} from "@glion/mllp-transport";
 
 import { serve } from "../../src/node/serve.js";
 import type { Server } from "../../src/node/serve.js";
 import { Mllp } from "../../src/server/mllp.js";
-import {
-  MLLP_END_BYTE_1,
-  MLLP_END_BYTE_2,
-} from "../../src/transport/constants.js";
-import { encode } from "../../src/transport/encoder.js";
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",

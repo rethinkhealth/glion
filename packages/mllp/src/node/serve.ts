@@ -10,12 +10,12 @@
  * @module
  */
 
+import { createDecoderStream, encode } from "@glion/mllp-transport";
+
 import type { AdapterSocket } from "../server/adapter";
 import type { MessageInfo, Mllp } from "../server/mllp";
 import { getMessageInfo } from "../server/mllp";
 import type { ConnectionInfo } from "../server/types";
-import { createDecoderStream } from "../transport/decoder-stream";
-import { encode } from "../transport/encoder";
 import { nodeAdapter } from "./adapter";
 
 /** Monotonically-increasing connection ID counter. */

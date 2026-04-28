@@ -1,4 +1,5 @@
-import { MllpError } from "../errors";
+import { MllpError } from "@glion/mllp-transport";
+
 import { compose } from "./compose";
 import { createContext } from "./context";
 import { Router } from "./router";

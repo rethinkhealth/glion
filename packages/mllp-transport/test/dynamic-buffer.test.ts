@@ -1,4 +1,4 @@
-import { DynamicBuffer } from "../../src/transport/dynamic-buffer.js";
+import { DynamicBuffer } from "../src/dynamic-buffer.js";
 
 describe("DynamicBuffer", () => {
   it("starts empty with given initial capacity", () => {
