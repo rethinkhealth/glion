@@ -1,4 +1,0 @@
-# Wrangler test artifacts created by `wrangler.unstable_dev` during `pnpm test:cf`.
-# The harness Worker stays in test/workers/ but the runtime cache is
-# regenerated on every test run.
-test/workers/.wrangler/
