@@ -1,0 +1,68 @@
+{
+  "name": "@glion/ack",
+  "version": "0.16.0",
+  "description": "HL7v2 acknowledgment message builder and typed error classes",
+  "keywords": [
+    "ack",
+    "health",
+    "healthcare",
+    "hl7",
+    "hl7v2",
+    "nodejs",
+    "typescript"
+  ],
+  "homepage": "https://glion.dev",
+  "license": "MIT",
+  "author": {
+    "name": "Melek Somai",
+    "email": "melek@rethinkhealth.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rethinkhealth/glion.git",
+    "directory": "packages/ack"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown && tsc --emitDeclarationOnly",
+    "check-types": "tsc --noEmit",
+    "check:readme": "glion-check-readme",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "publint": "publint --strict"
+  },
+  "dependencies": {
+    "@glion/ast": "workspace:*",
+    "@glion/builder": "workspace:*",
+    "@glion/util-query": "workspace:*",
+    "@glion/util-timestamp": "workspace:*",
+    "nanoid": "5.1.7"
+  },
+  "devDependencies": {
+    "@glion/check-readme": "workspace:*",
+    "@glion/testing": "workspace:*",
+    "@glion/to-hl7v2": "workspace:*",
+    "@glion/tsconfig": "workspace:*",
+    "@types/node": "25.6.0",
+    "@vitest/coverage-v8": "4.1.5",
+    "publint": "0.3.18",
+    "tsdown": "0.21.10",
+    "typescript": "6.0.3",
+    "vitest": "4.1.5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.14.0"
+}
