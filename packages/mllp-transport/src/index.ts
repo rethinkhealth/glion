@@ -233,6 +233,54 @@ export class FrameDecoder {
 }
 
 // ---------------------------------------------------------------------------
+// FrameDecoderStream
+// ---------------------------------------------------------------------------
+
+/**
+ * Web Streams wrapper around {@link FrameDecoder}. Pipe a
+ * `ReadableStream<Uint8Array>` of socket chunks through this to get
+ * a `ReadableStream<Uint8Array>` of complete frame payloads.
+ *
+ * Same semantics as `FrameDecoder` — push chunks, get complete
+ * frames as they arrive; partial-frame state lives in the instance;
+ * structural violations throw `MllpFramingError` which the stream
+ * surfaces as an error on the readable side.
+ *
+ * Modelled on `TextDecoderStream` and `CompressionStream` from the
+ * Web Streams standard: a {@link TransformStream} subclass with no
+ * required options.
+ *
+ * @example
+ *   ```ts
+ *   import { FrameDecoderStream } from "@glion/mllp-transport";
+ *
+ *   for await (const frame of duplex.readable.pipeThrough(new FrameDecoderStream())) {
+ *   handleFrame(frame);
+ *   }
+ *   ```
+ *
+ *   When the writable side closes with bytes still buffered for an
+ *   incomplete frame, those bytes are dropped silently — there is no
+ *   way for the stream to deliver a partial frame. Consumers can
+ *   detect this if they care by counting deliveries against expectations.
+ */
+export class FrameDecoderStream extends TransformStream<
+  Uint8Array,
+  Uint8Array
+> {
+  constructor() {
+    const decoder = new FrameDecoder();
+    super({
+      transform(chunk, controller) {
+        for (const frame of decoder.push(chunk)) {
+          controller.enqueue(frame);
+        }
+      },
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Internals
 // ---------------------------------------------------------------------------
 
