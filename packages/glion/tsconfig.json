@@ -1,0 +1,11 @@
+{
+  "extends": "@glion/tsconfig/library.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "outDir": "./dist",
+    "rootDir": "."
+  },
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["test/e2e/fixtures/**"]
+}

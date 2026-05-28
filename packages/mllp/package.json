@@ -1,0 +1,78 @@
+{
+  "name": "@glion/mllp",
+  "version": "0.16.0",
+  "description": "Transport-agnostic MLLP (Minimal Lower Layer Protocol) engine for HL7v2 messaging",
+  "keywords": [
+    "health",
+    "healthcare",
+    "hl7",
+    "hl7v2",
+    "mllp",
+    "nodejs",
+    "streaming",
+    "typescript"
+  ],
+  "homepage": "https://glion.dev",
+  "license": "MIT",
+  "author": {
+    "name": "Melek Somai",
+    "email": "melek@rethinkhealth.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rethinkhealth/glion.git",
+    "directory": "packages/mllp"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.ts",
+      "import": "./dist/node.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown && tsc --emitDeclarationOnly",
+    "check-types": "tsc --noEmit",
+    "check:readme": "glion-check-readme",
+    "bench": "vitest bench --run",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "publint": "publint --strict"
+  },
+  "dependencies": {
+    "@glion/ast": "workspace:*",
+    "@glion/mllp-transport": "workspace:*",
+    "@glion/parser": "workspace:*",
+    "@glion/util-query": "workspace:*",
+    "unified": "11.0.5",
+    "vfile": "6.0.3"
+  },
+  "devDependencies": {
+    "@glion/check-readme": "workspace:*",
+    "@glion/hl7v2": "workspace:*",
+    "@glion/testing": "workspace:*",
+    "@glion/tsconfig": "workspace:*",
+    "@types/node": "25.6.0",
+    "@vitest/coverage-v8": "4.1.5",
+    "publint": "0.3.18",
+    "tsdown": "0.21.10",
+    "typescript": "6.0.3",
+    "vitest": "4.1.5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.14.0"
+}
