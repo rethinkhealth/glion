@@ -1,10 +1,25 @@
 /**
- * MLLP byte-level framing codec.
+ * MLLP byte-level framing primitives.
  *
  * MLLP (Minimal Lower Layer Protocol) wraps each HL7v2 message in a
  * single-byte start marker (VT, 0x0B) and a two-byte terminator
- * (FS+CR, 0x1C 0x0D). The codec is pure: no streams, no sockets, no
- * classes — just bytes in, bytes out.
+ * (FS+CR, 0x1C 0x0D). This package ships the framing primitives —
+ * constants, a one-shot decode, a streaming decoder, and a payload
+ * validator. **It does not ship an `encode` function.** Callers that
+ * need to write a frame to a socket compose three writes:
+ *
+ * ```ts
+ * import { FRAME_START, FRAME_END, validate } from "@glion/mllp-transport";
+ *
+ * validate(payload);
+ * await writer.write(FRAME_START);
+ * await writer.write(payload);
+ * await writer.write(FRAME_END);
+ * ```
+ *
+ * The three-write pattern avoids copying the payload into a third
+ * buffer. TCP coalesces the writes; the receiver sees one contiguous
+ * stream.
  *
  * See HL7v2 Transport Specification §2.3.1.
  *
@@ -12,26 +27,32 @@
  */
 
 // ---------------------------------------------------------------------------
-// Constants
+// Byte constants
 // ---------------------------------------------------------------------------
 
+/** Start-of-block marker (Vertical Tab, 0x0B). */
+export const VT = 0x0b;
+/** End-of-block marker (File Separator, 0x1C). */
+export const FS = 0x1c;
 /**
- * MLLP framing markers. VT and FS are byte sentinels reserved for the
- * framing layer; the payload between them carries the HL7v2 message.
+ * End-of-data marker (Carriage Return, 0x0D). Always follows FS to
+ * terminate a frame. CR may also appear inside a payload — HL7v2
+ * uses it as the segment terminator.
  */
-// oxlint-disable-next-line sort-keys
-export const MLLP = {
-  /** Start-of-block marker (Vertical Tab, 0x0B). */
-  VT: 0x0b,
-  /** End-of-block marker (File Separator, 0x1C). */
-  FS: 0x1c,
-  /**
-   * End-of-data marker (Carriage Return, 0x0D). Always follows FS to
-   * terminate a frame. CR may also appear inside a payload — HL7v2
-   * uses it as the segment terminator.
-   */
-  CR: 0x0d,
-} as const;
+export const CR = 0x0d;
+
+/**
+ * Shared one-byte buffer containing `[VT]`. Suitable for the first
+ * write when streaming a frame to a socket. **Do not mutate** — the
+ * buffer is shared across every caller in the process.
+ */
+export const FRAME_START: Uint8Array = new Uint8Array([VT]);
+
+/**
+ * Shared two-byte buffer containing `[FS, CR]`. Suitable for the
+ * final write when streaming a frame to a socket. **Do not mutate.**
+ */
+export const FRAME_END: Uint8Array = new Uint8Array([FS, CR]);
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -43,24 +64,8 @@ export const MLLP = {
  * caller's `switch` on `code` never needs context to disambiguate.
  */
 export const MllpFramingErrorCode = {
-  /**
-   * The payload contained a VT (0x0B) or FS (0x1C) byte. Both are
-   * framing markers and forbidden inside a frame's content. Thrown
-   * by {@link encode}. ({@link decodeOne} and {@link decodeStream}
-   * are lenient — they don't double-check incoming content for these
-   * bytes; downstream parsers will reject the resulting payload.)
-   */
   EMBEDDED_CONTROL_CHAR: "EMBEDDED_CONTROL_CHAR",
-  /**
-   * No FS+CR terminator was found, or an FS was present but not
-   * followed by CR. Thrown by {@link decodeOne} and
-   * {@link decodeStream}.
-   */
   MISSING_END_BLOCK: "MISSING_END_BLOCK",
-  /**
-   * The frame (or stream) did not begin with a VT byte. Thrown by
-   * {@link decodeOne} and {@link decodeStream}.
-   */
   MISSING_START_BLOCK: "MISSING_START_BLOCK",
 } as const;
 
@@ -69,8 +74,7 @@ export type MllpFramingErrorCode =
 
 /**
  * Error thrown by the codec for any structural framing failure. The
- * {@link code} field discriminates the failure mode for typed
- * handling.
+ * {@link code} field discriminates the failure mode.
  */
 export class MllpFramingError extends Error {
   readonly code: MllpFramingErrorCode;
@@ -83,49 +87,40 @@ export class MllpFramingError extends Error {
 }
 
 // ---------------------------------------------------------------------------
-// encode
+// validate
 // ---------------------------------------------------------------------------
 
 /**
- * Wrap an HL7v2 payload in the MLLP frame envelope
- * `<VT> payload <FS> <CR>`.
+ * Throw if `payload` contains a byte that would desynchronise the
+ * receiver's decoder. VT (0x0B) and FS (0x1C) are framing markers and
+ * must not appear inside the payload. CR (0x0D) is allowed — HL7v2
+ * uses it as the segment terminator.
  *
- * String input is UTF-8 encoded. The payload must not contain VT
- * (0x0B) or FS (0x1C) — both are framing markers and would
- * desynchronise the receiver's decoder. CR (0x0D) IS allowed; HL7v2
- * uses it as the segment terminator inside the message body.
+ * String input is UTF-8 encoded and validated against the resulting
+ * bytes.
  *
- * Throws {@link MllpFramingError} with code `EMBEDDED_CONTROL_CHAR`
- * when validation fails.
+ * Throws {@link MllpFramingError} with code `EMBEDDED_CONTROL_CHAR`.
  */
-export function encode(payload: Uint8Array | string): Uint8Array {
+export function validate(payload: Uint8Array | string): void {
   const bytes =
     typeof payload === "string" ? new TextEncoder().encode(payload) : payload;
-
   for (let i = 0; i < bytes.length; i++) {
-    const b = bytes[i];
-    if (b === MLLP.VT || b === MLLP.FS) {
+    const b = bytes[i] as number;
+    if (b === VT || b === FS) {
       throw new MllpFramingError(
         MllpFramingErrorCode.EMBEDDED_CONTROL_CHAR,
         `Payload contains a reserved framing byte (0x${b.toString(16).padStart(2, "0")}) at offset ${i}`
       );
     }
   }
-
-  const out = new Uint8Array(bytes.length + 3);
-  out[0] = MLLP.VT;
-  out.set(bytes, 1);
-  out[out.length - 2] = MLLP.FS;
-  out[out.length - 1] = MLLP.CR;
-  return out;
 }
 
 // ---------------------------------------------------------------------------
-// decodeOne
+// decode
 // ---------------------------------------------------------------------------
 
 /**
- * Parse exactly one complete MLLP frame and return its payload.
+ * Decode exactly one complete MLLP frame and return its payload.
  *
  * The frame MUST begin with VT and end with FS+CR. The payload is
  * the bytes between (exclusive). The decoder is **lenient** about
@@ -135,89 +130,105 @@ export function encode(payload: Uint8Array | string): Uint8Array {
  * Throws {@link MllpFramingError} when the frame's envelope is
  * structurally invalid.
  */
-export function decodeOne(frame: Uint8Array): Uint8Array {
-  if (frame.length === 0 || frame[0] !== MLLP.VT) {
+export function decode(input: Uint8Array): Uint8Array {
+  if (input.length === 0 || input[0] !== VT) {
     throw new MllpFramingError(
       MllpFramingErrorCode.MISSING_START_BLOCK,
       "Frame does not begin with VT (0x0B)"
     );
   }
-  if (
-    frame.length < 3 ||
-    frame.at(-2) !== MLLP.FS ||
-    frame.at(-1) !== MLLP.CR
-  ) {
+  if (input.length < 3 || input.at(-2) !== FS || input.at(-1) !== CR) {
     throw new MllpFramingError(
       MllpFramingErrorCode.MISSING_END_BLOCK,
       "Frame does not end with FS+CR (0x1C 0x0D)"
     );
   }
-  return frame.slice(1, -2);
+  return input.slice(1, -2);
 }
 
 // ---------------------------------------------------------------------------
-// decodeStream
+// FrameDecoder
 // ---------------------------------------------------------------------------
 
 /**
- * Consume arbitrarily-chunked bytes and yield complete MLLP payloads
- * as frames arrive. Implemented as a sync generator so callers can
- * drive it from any iterable — a `for…of` over Node's `socket` async
- * iterator, a `ReadableStream` reader loop, an in-memory test fixture.
+ * Stateful, push-based decoder for socket reads. Mirrors the shape
+ * of `redis-parser` and `llhttp`: caller pushes chunks as they
+ * arrive from the wire, the decoder returns the complete frames it
+ * could extract.
  *
- * Frames must be contiguous on the wire: the first byte after a
- * frame's FS+CR terminator must be VT (the next frame's start) or
- * end-of-input. Any other byte triggers `MISSING_START_BLOCK`.
+ * @example
+ *   ```ts
+ *   const decoder = new FrameDecoder();
+ *   const reader = duplex.readable.getReader();
+ *   while (true) {
+ *   const { done, value } = await reader.read();
+ *   if (done) break;
+ *   for (const frame of decoder.push(value)) {
+ *   handleFrame(frame);
+ *   }
+ *   }
+ *   ```
  *
- * A frame can split across any chunk boundary, including between FS
- * and CR; the generator buffers internally until each frame
- * completes. Trailing incomplete bytes at end-of-input are dropped
- * silently — the consumer can detect this if they care by counting
- * yielded frames.
+ *   The decoder requires frames to be contiguous on the wire — the
+ *   first byte after a frame's FS+CR terminator must be VT (start of
+ *   the next frame) or the chunk must end there. Any other byte
+ *   triggers `MISSING_START_BLOCK`.
  *
- * Throws {@link MllpFramingError} as soon as a structural violation
- * is observed. The generator does not recover; callers must restart
- * the stream after handling.
- *
- * @yields Each complete frame's payload (the bytes between VT and FS).
+ *   Throws {@link MllpFramingError} on the first structural violation.
+ *   The instance does not recover after a throw; construct a new
+ *   decoder (or call {@link reset}) before processing further data.
  */
-export function* decodeStream(
-  chunks: Iterable<Uint8Array>
-): Generator<Uint8Array, void, void> {
-  let buffer: Uint8Array = EMPTY;
+export class FrameDecoder {
+  #buffer: Uint8Array = EMPTY;
 
-  for (const chunk of chunks) {
+  /**
+   * Push a chunk of bytes; return all frames that completed as a
+   * result. The returned array is empty when the chunk only
+   * advanced a partially-buffered frame.
+   */
+  push(chunk: Uint8Array): Uint8Array[] {
     if (chunk.length === 0) {
-      continue;
+      return [];
     }
-    buffer = buffer.length === 0 ? chunk : concat(buffer, chunk);
+    this.#buffer =
+      this.#buffer.length === 0 ? chunk : concat(this.#buffer, chunk);
 
-    while (buffer.length > 0) {
-      const firstByte = buffer[0] as number;
-      if (firstByte !== MLLP.VT) {
+    const frames: Uint8Array[] = [];
+    while (this.#buffer.length > 0) {
+      const firstByte = this.#buffer[0] as number;
+      if (firstByte !== VT) {
         throw new MllpFramingError(
           MllpFramingErrorCode.MISSING_START_BLOCK,
           `Expected VT (0x0B) at frame start, got 0x${firstByte.toString(16).padStart(2, "0")}`
         );
       }
-      const fsIndex = buffer.indexOf(MLLP.FS, 1);
+      const fsIndex = this.#buffer.indexOf(FS, 1);
       if (fsIndex === -1) {
-        // No terminator yet; wait for more bytes.
-        break;
+        break; // no terminator yet
       }
-      if (fsIndex + 1 >= buffer.length) {
-        // FS found but no byte after it yet; wait for CR.
-        break;
+      if (fsIndex + 1 >= this.#buffer.length) {
+        break; // FS found, waiting for CR
       }
-      if (buffer[fsIndex + 1] !== MLLP.CR) {
+      if (this.#buffer[fsIndex + 1] !== CR) {
         throw new MllpFramingError(
           MllpFramingErrorCode.MISSING_END_BLOCK,
           `FS (0x1C) at offset ${fsIndex} not followed by CR (0x0D)`
         );
       }
-      yield buffer.slice(1, fsIndex);
-      buffer = buffer.slice(fsIndex + 2);
+      frames.push(this.#buffer.slice(1, fsIndex));
+      this.#buffer = this.#buffer.slice(fsIndex + 2);
     }
+    return frames;
+  }
+
+  /** Bytes currently held for an in-progress frame. */
+  get buffered(): number {
+    return this.#buffer.length;
+  }
+
+  /** Drop any buffered partial-frame bytes. */
+  reset(): void {
+    this.#buffer = EMPTY;
   }
 }
 
