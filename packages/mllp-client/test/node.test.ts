@@ -17,6 +17,7 @@ import { frame } from "@glion/mllp-transport";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { MllpClient } from "../src/index";
+import type { MllpDuplex } from "../src/index";
 import { connectNode } from "../src/runtime/node";
 
 interface ServerHandle {
@@ -91,6 +92,40 @@ async function startEchoAckServer(
     host: address.address,
     port: address.port,
   };
+}
+
+/**
+ * Engage the duplex's read pump and confirm the socket is flowing before the
+ * caller triggers a peer drop, then keep draining in the background.
+ *
+ * `Duplex.toWeb` is pull-based: a socket that has never been read stays
+ * paused and never observes the peer's FIN/RST, so `closed` would not resolve
+ * on drop. Reading one chunk activates the socket's underlying read handle,
+ * which then observes connection events for the rest of its life — exactly
+ * what the client's persistent read loop guarantees from the moment it
+ * connects. Writing a probe frame elicits the echo server's ACK so the first
+ * read resolves deterministically (no reliance on event-loop timing).
+ */
+async function engageReadPump(duplex: MllpDuplex): Promise<void> {
+  const writer = duplex.writable.getWriter();
+  await writer.write(frame(REQUEST));
+  writer.releaseLock();
+  const reader = duplex.readable.getReader();
+  await reader.read();
+  void (async () => {
+    try {
+      for (;;) {
+        const { done } = await reader.read();
+        if (done) {
+          return;
+        }
+      }
+    } catch {
+      // The reader rejects when the socket is destroyed mid-read — expected
+      // on peer drop. `closed` resolution is observed via the socket's own
+      // "close" event, independent of this reader.
+    }
+  })();
 }
 
 describe("connectNode — happy path", () => {
@@ -172,6 +207,9 @@ describe("MllpDuplex contract — closed resolves on peer drop", () => {
       port: server.port,
       signal: new AbortController().signal,
     });
+    // Engage the pull-based read pump as the client's read loop does;
+    // otherwise the paused socket never observes the RST (see engageReadPump).
+    await engageReadPump(duplex);
     // Don't await `duplex.closed` until after we trigger the drop.
     const closedPromise = duplex.closed;
     server.dropAllSockets();
@@ -214,6 +252,9 @@ describe("MllpDuplex contract — close() is idempotent and always resolves", ()
       port: server.port,
       signal: new AbortController().signal,
     });
+    // Engage the read pump so the pull-based socket observes the drop and
+    // `closed` resolves (see engageReadPump).
+    await engageReadPump(duplex);
     server.dropAllSockets();
     await duplex.closed;
     await expect(duplex.close()).resolves.toBeUndefined();

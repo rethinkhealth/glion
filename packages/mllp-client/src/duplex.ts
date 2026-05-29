@@ -14,7 +14,11 @@
  *   awaits `close()` in `finally` blocks and fires-and-forgets from abort
  *   handlers.
  * - `closed` MUST resolve when either side ends the connection (peer drop,
- *   explicit close, error). It must not reject.
+ *   explicit close, error) **while the consumer is draining `readable`**. It
+ *   must not reject. A pull-based bridge (e.g. Node's `Duplex.toWeb`) only
+ *   observes a peer FIN/RST while the readable is being read; the client's read
+ *   loop drains `readable` for the connection's whole lifetime, so this
+ *   precondition always holds in practice.
  */
 export interface MllpDuplex {
   readonly readable: ReadableStream<Uint8Array>;
