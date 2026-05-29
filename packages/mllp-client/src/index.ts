@@ -436,7 +436,12 @@ export class MllpClient {
       }
     } catch (error) {
       // reader.read() rejects if the lock is released or the stream
-      // errors. Surface to any waiter.
+      // errors. If close()/drop already swapped duplex, the teardown
+      // owns the error state — don't write a stale TypeError on top
+      // of the just-cleared #streamError.
+      if (this.#duplex !== duplex) {
+        return;
+      }
       this.#dispatchError(
         error instanceof Error ? error : new Error(String(error))
       );
