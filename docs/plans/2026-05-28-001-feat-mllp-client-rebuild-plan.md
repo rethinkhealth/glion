@@ -56,16 +56,19 @@ Out of scope for this rebuild — to migrate after the new client lands:
 
 The build stays red on the server packages between phase 1 and phase 6. That's the price of starting from zero. If the user wants a non-red intermediate state, the alternative is to keep `mllp-transport` and `ack` as-is and only rebuild `mllp-client` — but that locks in the existing codec / ACK API shape.
 
-## Public API sketch (the target)
+## Public API sketch (locked after adversarial review)
 
 ```ts
-// @glion/mllp-transport — pure functions, no classes, no streams
-export const MLLP = { VT: 0x0b, FS: 0x1c, CR: 0x0d } as const;
-export function encode(payload: Uint8Array | string): Uint8Array;
-export function decodeOne(frame: Uint8Array): Uint8Array;        // single complete frame in/out
-export function* decodeStream(chunks: Iterable<Uint8Array>): Generator<Uint8Array>;
-// Web Streams wrappers ship as a sibling export, not the default.
-export function createDecoderStream(opts?): TransformStream<Uint8Array, Uint8Array>;
+// @glion/mllp-transport — pure functions + one Web Streams class
+export const VT = 0x0b;
+export const FS = 0x1c;
+export const CR = 0x0d;
+export function validate(payload: Uint8Array | string): void;
+export function frame(payload: Uint8Array | string): Uint8Array;
+export function decode(input: Uint8Array): Uint8Array;
+export function createFrameDecoder(opts?: FrameDecoderOptions): FrameDecoder;
+export class FrameDecoderStream extends TransformStream<Uint8Array, Uint8Array> { … }
+export class FramingError extends Error { readonly code: FramingErrorCode }
 
 // @glion/ack — types + parser + predicates
 export interface Acknowledgment { code, controlId, textMessage?, errorCode?, severity?, raw, tree }
@@ -122,6 +125,15 @@ Every phase is one commit (or one small series). Tests land in the same commit a
 | 10  | Changeset + release notes                      | Major-version bump on all three packages. Migration notes for downstream consumers.                                                                                                                                                                                                                                                     |
 
 Branch state across phases: red builds on `@glion/mllp` and `@glion/glion` from phase 0 until phase 8/9. The branch keeps moving forward — we don't try to keep every intermediate commit shippable; we keep every phase reviewable and self-contained.
+
+## Locked decisions (revised after the four-reviewer adversarial sweep)
+
+- **Send path is `frame(payload)`, not three writes.** Earlier Phase 1 drafted `FRAME_START` / `FRAME_END` shared buffers + manual three-write streaming. The adversarial review found two reasons to reverse: (1) the shared mutable buffers are a P0 process-wide footgun — anyone can mutate them, no language-level defence exists for typed arrays; (2) the "three writes saves a copy" rationale was unmeasured and likely wrong on real Node sockets, where per-write WriteWrap + libuv-tick overhead exceeds the cost of a single 1–10 KB allocation. `frame()` ships one allocation per send and one socket write. The decision is sized for typical HL7v2 payloads (200 B – 10 KB); we'll revisit if a multi-MB attachment use case lands.
+- **Streaming decoder is a closure factory, not a class.** `createFrameDecoder()` returns a plain object — matches CLAUDE.md §4 ("functional over class for internal types") and avoids the `#private` field syntax. `FrameDecoderStream` is a class only because it has to extend `TransformStream`.
+- **`push()` does not throw.** Returns `FramingError | null` and delivers frames via callback. Frames already extracted in the same chunk are not lost when a later byte fails — they're emitted before the error returns.
+- **Growth-doubling buffer + `maxBufferedBytes` (default 16 MiB).** Closes the slow-loris O(n²) concat and the unbounded-frame OOM that three reviewers independently flagged.
+- **Decode and streaming decode share one `findFsCr` helper.** They now agree on every wire input. Lenient on embedded FS-not-followed-by-CR (matches Mirth / HAPI / Iguana).
+- **`FrameDecoderStream` errors `MISSING_END_BLOCK` on close with buffered bytes.** No silent data loss.
 
 ## Decisions deferred to "when we need it"
 
