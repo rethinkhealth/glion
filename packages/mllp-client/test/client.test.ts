@@ -682,6 +682,11 @@ describe("send() — late ACK from previously-timed-out send", () => {
 
     // Late ACK for the timed-out request arrives between sends.
     peerRef!.injectPeerBytes(frame(requestAck("AA", "MSG_FIRST")));
+    // Yield to the read loop so the late frame reaches #pendingFrames
+    // before the next send registers its waiter. Without this the test
+    // depends on undocumented microtask ordering inside send().
+    await Promise.resolve();
+    await Promise.resolve();
 
     // Second send picks up the queued late ACK first — controlId
     // mismatch (expected MSG_SECOND, actual MSG_FIRST).
