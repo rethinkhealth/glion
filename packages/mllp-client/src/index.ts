@@ -117,15 +117,55 @@ export class MllpTimeoutError extends MllpClientError {
 }
 
 /**
+ * Why a connection ended. Lets the caller branch on cause without
+ * parsing the message string.
+ */
+export type MllpDropReason =
+  | "peer-drop"
+  | "stream-ended"
+  | "framing-error"
+  | "frame-queue-overflow"
+  | "write-failed";
+
+/**
  * The peer or the transport ended the connection while a send was
- * waiting for an ACK (peer FIN, RST, transport error). Distinct from
- * `MllpClientError(CLOSED)`, which is thrown when the caller has
- * already closed the client.
+ * waiting for an ACK (peer FIN, RST, transport error, decoder error,
+ * write failure). Distinct from `MllpClientError(CLOSED)`, which is
+ * thrown when the caller has already closed the client.
  */
 export class MllpDroppedError extends MllpClientError {
-  constructor(message = "Connection dropped before ACK received") {
-    super(MllpErrorCode.DROPPED, message);
+  readonly reason: MllpDropReason;
+  constructor(
+    reason: MllpDropReason,
+    message = defaultDropMessage(reason),
+    opts?: { cause?: unknown }
+  ) {
+    super(MllpErrorCode.DROPPED, message, opts);
     this.name = "MllpDroppedError";
+    this.reason = reason;
+  }
+}
+
+function defaultDropMessage(reason: MllpDropReason): string {
+  switch (reason) {
+    case "peer-drop": {
+      return "Peer closed the connection";
+    }
+    case "stream-ended": {
+      return "Stream ended before ACK received";
+    }
+    case "framing-error": {
+      return "Decoder rejected peer bytes; connection unrecoverable";
+    }
+    case "frame-queue-overflow": {
+      return "Peer flooded the client with unsolicited frames";
+    }
+    case "write-failed": {
+      return "Write to socket failed; connection unrecoverable";
+    }
+    default: {
+      return "Connection dropped";
+    }
   }
 }
 
@@ -269,7 +309,21 @@ export interface MllpSendOptions {
 
 const DEFAULT_CONNECT_TIMEOUT_MS = 30_000;
 const DEFAULT_SEND_TIMEOUT_MS = 30_000;
-const TEXT_DECODER = new TextDecoder("utf-8");
+/**
+ * Strict UTF-8 decoder — throws on invalid bytes. HL7v2 messages SHOULD
+ * be ASCII / UTF-8 in 2.x and later. Latin-1 / Windows-1252 peers will
+ * fail PARSE_FAILED rather than silently substitute U+FFFD.
+ */
+const TEXT_DECODER = new TextDecoder("utf-8", { fatal: true });
+
+/**
+ * Maximum unsolicited frames buffered between sends. A well-behaved
+ * peer sends at most one ACK per request; multiple ACKs (e.g. an
+ * unsolicited late frame from a previous timeout) are legitimate and
+ * queue here. A flood of more than this is a buggy or hostile peer
+ * and terminates the connection.
+ */
+const MAX_PENDING_FRAMES = 16;
 
 /**
  * Internal frame-waiter slot. The read loop dispatches each decoded
@@ -302,7 +356,10 @@ export class MllpClient {
   #decoder: FrameDecoder | null = null;
   #pendingFrames: Uint8Array[] = [];
   #frameWaiter: FrameWaiter | null = null;
-  #streamError: Error | null = null;
+  // Race recovery: dispatchError may fire between writer.write() and
+  // #waitForFrame's waiter registration. Stash the error here so the
+  // imminent send.#waitForFrame call surfaces it instead of hanging.
+  #pendingError: Error | null = null;
 
   constructor(opts: MllpClientOptions) {
     this.#host = opts.host;
@@ -312,6 +369,16 @@ export class MllpClient {
       opts.connectTimeoutMs ?? DEFAULT_CONNECT_TIMEOUT_MS;
     this.#sendTimeoutMs = opts.sendTimeoutMs ?? DEFAULT_SEND_TIMEOUT_MS;
     this.#maxBufferedBytes = opts.maxBufferedBytes;
+  }
+
+  /** Target host the client is configured for. Useful in error logs. */
+  get host(): string {
+    return this.#host;
+  }
+
+  /** Target port the client is configured for. Useful in error logs. */
+  get port(): number {
+    return this.#port;
   }
 
   get state(): MllpClientState {
@@ -393,8 +460,7 @@ export class MllpClient {
       return;
     }
     if (this.#duplex === duplex) {
-      this.#state = "closed";
-      this.#tearDownConnection();
+      this.#dispatchError(new MllpDroppedError("peer-drop"));
     }
   }
 
@@ -412,39 +478,36 @@ export class MllpClient {
       return;
     }
     try {
-      let stopped = false;
-      while (!stopped) {
+      while (true) {
         const { done, value: chunk } = await reader.read();
         if (this.#duplex !== duplex) {
-          // We've moved on (close or drop already cleaned up).
           return;
         }
         if (done) {
-          // End-of-stream is reported as a drop via #watchForDrop, but
-          // we also dispatch here in case the waiter was already
-          // registered before the drop watcher fires.
-          this.#dispatchError(new MllpDroppedError("Stream ended before ACK"));
+          // #watchForDrop is awaiting duplex.closed and will dispatch
+          // the peer-drop error. Just exit the loop.
           return;
         }
         const error = decoder.push(chunk, (decoded) => {
           this.#dispatchFrame(decoded);
         });
         if (error) {
-          stopped = true;
-          this.#dispatchError(error);
+          // Decoder errors are terminal (its buffer state becomes
+          // undefined). Wrap as a MllpDroppedError so the user sees
+          // one error class for "connection unrecoverable" with a
+          // reason discriminator.
+          this.#dispatchError(
+            new MllpDroppedError("framing-error", error.message, {
+              cause: error,
+            })
+          );
+          return;
         }
       }
-    } catch (error) {
-      // reader.read() rejects if the lock is released or the stream
-      // errors. If close()/drop already swapped duplex, the teardown
-      // owns the error state — don't write a stale TypeError on top
-      // of the just-cleared #streamError.
-      if (this.#duplex !== duplex) {
-        return;
-      }
-      this.#dispatchError(
-        error instanceof Error ? error : new Error(String(error))
-      );
+    } catch {
+      // reader.read() rejected — close() released the lock or the
+      // underlying stream errored. #watchForDrop or close() owns the
+      // teardown; nothing to do here.
     }
   }
 
@@ -455,27 +518,43 @@ export class MllpClient {
       waiter.resolve(bytes);
       return;
     }
+    if (this.#pendingFrames.length >= MAX_PENDING_FRAMES) {
+      // Peer has flooded us with unsolicited frames — terminal.
+      this.#dispatchError(new MllpDroppedError("frame-queue-overflow"));
+      return;
+    }
     this.#pendingFrames.push(bytes);
   }
 
+  /**
+   * A stream-level error is terminal: the decoder's buffer state is
+   * undefined after a framing error, write failures imply a dead socket,
+   * and a peer that's sending garbage isn't going to recover. Transition
+   * to "closed" so subsequent sends fail fast with CLOSED instead of
+   * writing into a dead wire and hanging until sendTimeoutMs.
+   */
   #dispatchError(error: Error): void {
-    // Stored so the next send (or in-flight send) surfaces it instead
-    // of waiting forever.
-    this.#streamError = error;
     const waiter = this.#frameWaiter;
-    if (waiter) {
-      this.#frameWaiter = null;
-      waiter.reject(error);
-    }
-  }
-
-  #tearDownConnection(): void {
-    this.#duplex = null;
-    this.#decoder = null;
-    this.#reader = null;
-    this.#pendingFrames = [];
     this.#frameWaiter = null;
-    this.#streamError = null;
+    if (this.#state === "ready" || this.#state === "sending") {
+      this.#state = "closed";
+      const duplex = this.#duplex;
+      this.#duplex = null;
+      this.#decoder = null;
+      this.#reader = null;
+      this.#pendingFrames = [];
+      if (duplex) {
+        // Fire-and-forget — adapter contract guarantees close() resolves.
+        void duplex.close();
+      }
+    }
+    if (waiter) {
+      waiter.reject(error);
+    } else {
+      // No waiter to reject — but a send may be mid-flight and about
+      // to call #waitForFrame. Stash so it doesn't hang.
+      this.#pendingError = error;
+    }
   }
 
   async send(
@@ -525,8 +604,22 @@ export class MllpClient {
         timeoutMs: opts.timeoutMs ?? this.#sendTimeoutMs,
       });
     } catch (error) {
+      // Slowloris recovery: on send timeout, if the decoder is mid-frame,
+      // reset its buffer. A complete late ACK would already have been
+      // emitted (buffered === 0); a partial frame (buffered > 0) is
+      // garbage that would otherwise compound into FRAME_TOO_LARGE on
+      // a later send.
+      if (
+        error instanceof MllpTimeoutError &&
+        error.phase === "send" &&
+        this.#decoder !== null &&
+        this.#decoder.buffered > 0
+      ) {
+        this.#decoder.reset();
+      }
       // Only restore "ready" if the connection is still up. If the
-      // drop watcher or close() already advanced state, respect that.
+      // drop watcher, close(), or #dispatchError already advanced state,
+      // respect that.
       if (this.#state === "sending") {
         this.#state = this.#duplex === null ? "closed" : "ready";
       }
@@ -557,11 +650,16 @@ export class MllpClient {
       try {
         await writer.write(framed);
       } catch (error) {
-        throw new MllpClientError(
-          MllpErrorCode.WRITE_FAILED,
+        // Write failure is terminal — the socket half is dead. Mark
+        // closed so subsequent sends fail fast with CLOSED, and throw
+        // a MllpDroppedError with the original cause for triage.
+        const dropped = new MllpDroppedError(
+          "write-failed",
           "Failed to write frame to socket",
           { cause: error }
         );
+        this.#dispatchError(dropped);
+        throw dropped;
       }
     } finally {
       writer.releaseLock();
@@ -588,16 +686,17 @@ export class MllpClient {
     timeoutMs: number,
     signal: AbortSignal | undefined
   ): Promise<Uint8Array> {
+    // A stream-level error fired between writer.write() and this
+    // registration — surface it instead of waiting on a dead stream.
+    if (this.#pendingError !== null) {
+      const error = this.#pendingError;
+      this.#pendingError = null;
+      return Promise.reject(error);
+    }
     // Drain a previously-queued frame first.
     const queued = this.#pendingFrames.shift();
     if (queued !== undefined) {
       return Promise.resolve(queued);
-    }
-    // A stream-level error landed before we asked — surface it.
-    if (this.#streamError !== null) {
-      const error = this.#streamError;
-      this.#streamError = null;
-      return Promise.reject(error);
     }
 
     const timeoutSignal = AbortSignal.timeout(timeoutMs);
@@ -660,16 +759,22 @@ export class MllpClient {
     this.#state = "closing";
     const duplex = this.#duplex;
 
-    // Reject any in-flight waiter so send() doesn't hang.
+    // Reject any in-flight waiter so send() doesn't hang. CLOSED (not
+    // DROPPED) — the caller initiated this teardown.
     const waiter = this.#frameWaiter;
     if (waiter) {
       this.#frameWaiter = null;
-      waiter.reject(new MllpDroppedError("Client closed during send"));
+      waiter.reject(
+        new MllpClientError(
+          MllpErrorCode.CLOSED,
+          "Client closed during in-flight send"
+        )
+      );
     }
 
     // Release the reader's lock so duplex.close() can drain cleanly.
     // Spec-compliant adapters MAY reject pending read() with TypeError;
-    // the read loop catches that and tears down.
+    // the read loop catches that and bails.
     if (this.#reader !== null) {
       try {
         this.#reader.releaseLock();
@@ -681,7 +786,7 @@ export class MllpClient {
     this.#decoder = null;
     this.#duplex = null;
     this.#pendingFrames = [];
-    this.#streamError = null;
+    this.#pendingError = null;
 
     if (duplex) {
       await duplex.close();

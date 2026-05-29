@@ -65,6 +65,14 @@ function respondWith(
   };
 }
 
+/** Yield to the event loop for the given number of ms. */
+function sleep(ms: number): Promise<void> {
+  // oxlint-disable-next-line promise/avoid-new -- canonical sleep helper
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 /** Adapter that never connects; rejects only when its signal aborts. */
 function abortableConnect(signal: AbortSignal): Promise<MllpDuplex> {
   // oxlint-disable-next-line promise/avoid-new -- wrapping signal
@@ -430,13 +438,16 @@ describe("send() — timeout / abort / drop", () => {
     expect(client.state).toBe("closed");
   });
 
-  it("rejects pending send with MllpDroppedError on close() during send", async () => {
+  it("rejects pending send with MllpClientError(CLOSED) on close() during send", async () => {
     const fake = createFakeDuplex({ onWrite: () => {} });
     const client = makeClient(fake);
     await client.connect();
     const p = client.send(REQUEST);
     setTimeout(() => void client.close(), 10);
-    await expect(p).rejects.toBeInstanceOf(MllpDroppedError);
+    await expect(p).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+    });
+    await expect(p).rejects.toBeInstanceOf(MllpClientError);
     expect(client.state).toBe("closed");
   });
 });
@@ -589,7 +600,7 @@ describe("multiple sends on one connection", () => {
 // ---------------------------------------------------------------------------
 
 describe("send() — write failure", () => {
-  it("rejects with WRITE_FAILED when the duplex write fails", async () => {
+  it("rejects with MllpDroppedError(write-failed) when the duplex write fails", async () => {
     const fake = createFakeDuplex({ writeError: new Error("EPIPE") });
     const client = makeClient(fake);
     await client.connect();
@@ -599,9 +610,11 @@ describe("send() — write failure", () => {
     } catch (error) {
       captured = error;
     }
-    expect(captured).toBeInstanceOf(MllpClientError);
-    expect((captured as MllpClientError).code).toBe(MllpErrorCode.WRITE_FAILED);
-    expect((captured as MllpClientError).cause).toBeDefined();
+    expect(captured).toBeInstanceOf(MllpDroppedError);
+    expect((captured as MllpDroppedError).reason).toBe("write-failed");
+    expect((captured as MllpDroppedError).cause).toBeDefined();
+    // Write failure is terminal — connection is closed, not "ready".
+    expect(client.state).toBe("closed");
   });
 });
 
@@ -610,10 +623,10 @@ describe("send() — write failure", () => {
 // ---------------------------------------------------------------------------
 
 describe("send() — peer sends unframed garbage", () => {
-  it("rejects the in-flight send with a FramingError from the decoder", async () => {
+  it("rejects with MllpDroppedError(framing-error) and transitions to closed", async () => {
     const fake = createFakeDuplex({
       onWrite: (_chunk, peer) => {
-        // No VT prefix — decoder will throw MISSING_START_BLOCK.
+        // No VT prefix — decoder will report MISSING_START_BLOCK.
         peer.injectPeerBytes(new Uint8Array([0x41, 0x42, 0x43]));
       },
     });
@@ -625,7 +638,11 @@ describe("send() — peer sends unframed garbage", () => {
     } catch (error) {
       captured = error;
     }
-    expect((captured as Error).name).toBe("FramingError");
+    expect(captured).toBeInstanceOf(MllpDroppedError);
+    expect((captured as MllpDroppedError).reason).toBe("framing-error");
+    expect((captured as MllpDroppedError).cause).toBeDefined();
+    // Stream-level error is terminal — subsequent sends fail fast.
+    expect(client.state).toBe("closed");
   });
 });
 
@@ -696,9 +713,123 @@ describe("send() — late ACK from previously-timed-out send", () => {
     } catch (error) {
       captured = error;
     }
+
     expect(captured).toBeInstanceOf(MllpCorrelationError);
     expect((captured as MllpCorrelationError).expected).toBe("MSG_SECOND");
     expect((captured as MllpCorrelationError).actual).toBe("MSG_FIRST");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Round-3 contracts: stream errors are terminal
+// ---------------------------------------------------------------------------
+
+describe("send() — stream errors are terminal", () => {
+  it("framing error closes the connection (subsequent sends throw CLOSED)", async () => {
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => {
+        peer.injectPeerBytes(new Uint8Array([0x41]));
+      },
+    });
+    const client = makeClient(fake);
+    await client.connect();
+    await expect(client.send(REQUEST)).rejects.toBeInstanceOf(MllpDroppedError);
+    expect(client.state).toBe("closed");
+    await expect(client.send(REQUEST)).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+    });
+  });
+
+  it("write failure closes the connection (subsequent sends throw CLOSED)", async () => {
+    const fake = createFakeDuplex({ writeError: new Error("EPIPE") });
+    const client = makeClient(fake);
+    await client.connect();
+    await expect(client.send(REQUEST)).rejects.toBeInstanceOf(MllpDroppedError);
+    expect(client.state).toBe("closed");
+    await expect(client.send(REQUEST)).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+    });
+  });
+});
+
+describe("frame-queue overflow protection", () => {
+  it("closes the connection when the peer floods unsolicited frames", async () => {
+    // Don't emit a useful first ACK — the first send times out, then
+    // we inject the overflow flood as a discrete event. This avoids
+    // the race where the flood + the legit ACK arrive in one decoder
+    // pass and the overflow's pendingError races the legit send's
+    // resolution.
+    let peerRef: FakeDuplex | null = null;
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => {
+        peerRef = peer;
+      },
+    });
+    const client = makeClient(fake);
+    await client.connect();
+    // Flood the peer with frames the client never asked for.
+    const single = frame(ACK_AA);
+    const coalesced = new Uint8Array(single.length * 32);
+    for (let i = 0; i < 32; i++) {
+      coalesced.set(single, i * single.length);
+    }
+    // Without a send pending, inject the flood. The read loop processes
+    // it, queue overflows, state → closed.
+    await client.send(REQUEST, { timeoutMs: 30 }).catch(() => {
+      // First send times out (peer didn't respond).
+    });
+    expect(client.state).toBe("ready");
+    peerRef!.injectPeerBytes(coalesced);
+    // Yield for the read loop to drain the chunk.
+    await sleep(10);
+    expect(client.state).toBe("closed");
+  });
+});
+
+describe("decoder reset on SEND_TIMEOUT (slowloris recovery)", () => {
+  it("clears mid-frame buffer so a subsequent send is not corrupted", async () => {
+    // First call: trickle in just VT — partial frame, will time out.
+    // Second call: peer responds correctly with a full ACK.
+    let callCount = 0;
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => {
+        callCount += 1;
+        if (callCount === 1) {
+          // Trickle VT only — leaves the decoder with a partial frame.
+          peer.injectPeerBytes(new Uint8Array([0x0b]));
+        } else {
+          peer.injectPeerBytes(frame(ACK_AA));
+        }
+      },
+    });
+    const client = makeClient(fake);
+    await client.connect();
+    await expect(
+      client.send(REQUEST, { timeoutMs: 20 })
+    ).rejects.toBeInstanceOf(MllpTimeoutError);
+    // If the decoder retained the dangling VT, the next send's ACK
+    // would land into the corrupted buffer and the test would fail
+    // (likely with FramingError). With the reset, the second send
+    // gets a clean response.
+    const response = await client.send(REQUEST);
+    expect(response.code).toBe("AA");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Round-3 getters: host / port for error logs
+// ---------------------------------------------------------------------------
+
+describe("MllpClient — observability getters", () => {
+  it("exposes host and port", () => {
+    const fake = createFakeDuplex();
+    const client = new MllpClient({
+      connect: () => Promise.resolve(fake.duplex),
+      host: "hospital.example",
+      port: 2575,
+    });
+    expect(client.host).toBe("hospital.example");
+    expect(client.port).toBe(2575);
   });
 });
 

@@ -15,6 +15,8 @@ import { Duplex } from "node:stream";
 
 import type { MllpConnector, MllpDuplex } from "../index";
 
+const GRACEFUL_CLOSE_MS = 1000;
+
 /**
  * Open a TCP connection and return an {@link MllpDuplex}.
  *
@@ -25,7 +27,13 @@ export const connectNode: MllpConnector = (opts) =>
   // oxlint-disable-next-line promise/avoid-new -- wrapping Node event emitter
   new Promise<MllpDuplex>((resolve, reject) => {
     const socket = new Socket();
+    // No Nagle — MLLP ACKs are tiny and latency-sensitive.
     socket.setNoDelay(true);
+    // Keepalive after 30 s idle — protects against silent NAT / firewall
+    // drops on long-lived persistent connections. Without this the
+    // client only learns about a half-open connection when the next
+    // send() times out.
+    socket.setKeepAlive(true, 30_000);
 
     const cleanupOnSettle = () => {
       socket.removeListener("error", onError);
@@ -95,19 +103,26 @@ function adaptSocket(socket: Socket): MllpDuplex {
         resolve();
         return;
       }
-      const finish = () => resolve();
-      socket.once("close", finish);
-      // `end()` triggers a graceful FIN; if the peer never closes we'd
-      // wait forever, so we follow with `destroy()` to force a TCP RST
-      // path. The "close" listener still fires for either path.
+      // Graceful close: send FIN, then give the peer a brief window
+      // (1 s) to respond with its own FIN before we issue destroy().
+      // This avoids the FIN-immediately-followed-by-RST sequence that
+      // some integration engines log as a protocol error.
       try {
         socket.end();
       } catch {
-        // ignore — fall through to destroy()
+        // Already destroyed or in an error state; destroy() below
+        // makes the "close" event fire.
       }
-      if (!socket.destroyed) {
-        socket.destroy();
-      }
+      const graceTimer = setTimeout(() => {
+        if (!socket.destroyed) {
+          socket.destroy();
+        }
+      }, GRACEFUL_CLOSE_MS);
+      socket.once("close", () => {
+        clearTimeout(graceTimer);
+        // oxlint-disable-next-line promise/no-multiple-resolved -- guarded by early return at the top
+        resolve();
+      });
     });
     return closePromise;
   };
