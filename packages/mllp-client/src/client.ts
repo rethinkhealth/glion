@@ -121,6 +121,16 @@ export class MllpClient {
   }
 
   async connect(opts: { signal?: AbortSignal } = {}): Promise<void> {
+    if (this.#state === "closed" || this.#state === "closing") {
+      throw new MllpClientError(
+        MllpErrorCode.CLIENT_CONSUMED,
+        `MllpClient instance has been consumed (state: "${this.#state}"). ` +
+          "Each instance manages a single TCP connection lifecycle. " +
+          "Construct a new instance to open a fresh connection. " +
+          "Automatic reconnect with retry policy will be available in v0.2 " +
+          "via the `reconnect` constructor option."
+      );
+    }
     if (this.#state !== "idle") {
       throw new MllpClientError(
         MllpErrorCode.ALREADY_CONNECTED,
