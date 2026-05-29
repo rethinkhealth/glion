@@ -1,17 +1,12 @@
 /**
- * Tests for `validate(payload)`. The library does not ship an
- * `encode` function (callers stream `FRAME_START`, payload,
- * `FRAME_END` directly to a socket writer to avoid copying). The
- * payload pre-check lives here as a standalone function.
- *
- * HL7v2 Transport §2.3.1 forbids VT (0x0B) and FS (0x1C) inside the
- * payload — they're framing markers. CR (0x0D) is allowed; HL7v2
- * uses it as the segment terminator.
+ * Tests for `validate(payload)` — the pre-flight check used by
+ * `frame()` and available standalone for callers that want to fail
+ * early without allocating the framed output.
  */
 
 import { describe, expect, it } from "vitest";
 
-import { FS, MllpFramingError, validate, VT } from "../src/index";
+import { FramingError, FS, validate, VT } from "../src/index";
 
 describe("validate", () => {
   describe("Uint8Array input", () => {
@@ -29,24 +24,29 @@ describe("validate", () => {
       ).not.toThrow();
     });
 
-    it("throws EMBEDDED_CONTROL_CHAR when payload contains VT", () => {
+    it("throws EMBEDDED_CONTROL_CHAR on embedded VT", () => {
       const bad = new Uint8Array([0x41, VT, 0x42]);
-      expect(() => validate(bad)).toThrow(MllpFramingError);
-      try {
-        validate(bad);
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpFramingError);
-        expect((error as MllpFramingError).code).toBe("EMBEDDED_CONTROL_CHAR");
-      }
+      expect(() => validate(bad)).toThrowError(
+        expect.objectContaining({
+          code: "EMBEDDED_CONTROL_CHAR",
+          name: "FramingError",
+        })
+      );
     });
 
-    it("throws EMBEDDED_CONTROL_CHAR when payload contains FS", () => {
+    it("throws EMBEDDED_CONTROL_CHAR on embedded FS", () => {
       const bad = new Uint8Array([0x41, FS, 0x42]);
-      expect(() => validate(bad)).toThrow(MllpFramingError);
+      expect(() => validate(bad)).toThrowError(
+        expect.objectContaining({ code: "EMBEDDED_CONTROL_CHAR" })
+      );
+    });
+
+    it("error is an instance of FramingError", () => {
       try {
-        validate(bad);
+        validate(new Uint8Array([VT]));
+        expect.fail("expected throw");
       } catch (error) {
-        expect((error as MllpFramingError).code).toBe("EMBEDDED_CONTROL_CHAR");
+        expect(error).toBeInstanceOf(FramingError);
       }
     });
   });
@@ -60,9 +60,9 @@ describe("validate", () => {
       expect(() => validate("é")).not.toThrow();
     });
 
-    it("throws when the encoded string contains VT", () => {
-      // 0x0B is the VT byte.
-      expect(() => validate("")).toThrow(MllpFramingError);
+    it("rejects strings whose UTF-8 encoding contains a reserved byte", () => {
+      // U+000B is the VT byte.
+      expect(() => validate("")).toThrow(FramingError);
     });
   });
 });
