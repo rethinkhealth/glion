@@ -84,35 +84,54 @@ export class MllpClientError<
 }
 
 export class MllpConnectError extends MllpClientError {
-  constructor(message: string, opts?: { cause?: unknown }) {
-    super(MllpErrorCode.CONNECT_FAILED, message, opts);
+  readonly host: string;
+  readonly port: number;
+  constructor(opts: { host: string; port: number; cause?: unknown }) {
+    super(
+      MllpErrorCode.CONNECT_FAILED,
+      `Failed to connect to ${opts.host}:${opts.port}`,
+      {
+        cause: opts.cause,
+      }
+    );
     this.name = "MllpConnectError";
+    this.host = opts.host;
+    this.port = opts.port;
   }
 }
 
 export class MllpTimeoutError extends MllpClientError {
+  readonly phase: "connect" | "send";
   readonly timeoutMs: number;
-  constructor(code: "CONNECT_TIMEOUT" | "SEND_TIMEOUT", timeoutMs: number) {
+  constructor(phase: "connect" | "send", timeoutMs: number) {
     super(
-      code === "CONNECT_TIMEOUT"
+      phase === "connect"
         ? MllpErrorCode.CONNECT_TIMEOUT
         : MllpErrorCode.SEND_TIMEOUT,
-      `${code === "CONNECT_TIMEOUT" ? "Connect" : "Send"} timed out after ${timeoutMs}ms`
+      `${phase === "connect" ? "Connect" : "Send"} timed out after ${timeoutMs}ms`
     );
     this.name = "MllpTimeoutError";
+    this.phase = phase;
     this.timeoutMs = timeoutMs;
   }
 }
 
-export class MllpClosedError extends MllpClientError {
-  constructor(message: string) {
+/**
+ * The peer or the transport ended the connection while a send was
+ * waiting for an ACK (peer FIN, RST, transport error). Distinct from
+ * `MllpClientError(CLOSED)`, which is thrown when the caller has
+ * already closed the client.
+ */
+export class MllpDroppedError extends MllpClientError {
+  constructor(message = "Connection dropped before ACK received") {
     super(MllpErrorCode.DROPPED, message);
-    this.name = "MllpClosedError";
+    this.name = "MllpDroppedError";
   }
 }
 
 export class MllpRejectedError extends MllpClientError<NakCode> {
   readonly controlId: string;
+  readonly requestControlId: string;
   readonly tree: Root;
   readonly raw: Uint8Array;
   readonly timestamp: Date;
@@ -120,6 +139,7 @@ export class MllpRejectedError extends MllpClientError<NakCode> {
   constructor(opts: {
     code: NakCode;
     controlId: string;
+    requestControlId: string;
     tree: Root;
     raw: Uint8Array;
     timestamp: Date;
@@ -128,6 +148,7 @@ export class MllpRejectedError extends MllpClientError<NakCode> {
     super(opts.code, `Peer rejected message with code ${opts.code}`);
     this.name = "MllpRejectedError";
     this.controlId = opts.controlId;
+    this.requestControlId = opts.requestControlId;
     this.tree = opts.tree;
     this.raw = opts.raw;
     this.timestamp = opts.timestamp;
@@ -166,10 +187,12 @@ export interface MllpClientResponse {
   /** MSA-1 (always {@link AcceptCode} — NAK throws). */
   readonly code: AcceptCode;
   /**
-   * MSA-2 — correlation ID (echoes the request's MSH-10). Empty if peer
-   * omitted.
+   * MSA-2 — correlation ID echoed by the peer. Empty if the peer
+   * omitted it (some early-HL7 peers don't).
    */
   readonly controlId: string;
+  /** MSH-10 of the request that this ACK responds to. */
+  readonly requestControlId: string;
   /** Parsed AST of the ACK message. */
   readonly tree: Root;
   /** De-framed payload bytes. */
@@ -191,7 +214,7 @@ export interface MllpClientResponse {
  * defend against violations — adapter tests enforce them):
  *
  * - `close()` MUST resolve (never reject) and MUST be idempotent. The client
- *   awaits `close()` in finally blocks and fires-and-forgets from abort
+ *   awaits `close()` in `finally` blocks and fires-and-forgets from abort
  *   handlers.
  * - `closed` MUST resolve when either side ends the connection (peer drop,
  *   explicit close, error). It must not reject.
@@ -231,8 +254,8 @@ export interface MllpClientOptions {
   /** Default 30 000 ms. Per-send `timeoutMs` overrides. */
   readonly sendTimeoutMs?: number;
   /**
-   * Maximum bytes buffered while decoding the ACK frame. Defence against
-   * peers that send unterminated data. Default 16 MiB.
+   * Maximum bytes buffered while decoding inbound ACK frames. Defence
+   * against peers that send unterminated data. Default 16 MiB.
    */
   readonly maxBufferedBytes?: number;
 }
@@ -248,6 +271,17 @@ const DEFAULT_CONNECT_TIMEOUT_MS = 30_000;
 const DEFAULT_SEND_TIMEOUT_MS = 30_000;
 const TEXT_DECODER = new TextDecoder("utf-8");
 
+/**
+ * Internal frame-waiter slot. The read loop dispatches each decoded
+ * frame here if a `send()` is waiting, otherwise queues it. Only one
+ * waiter is active at a time (enforced by the `CONCURRENT_SEND`
+ * guard).
+ */
+interface FrameWaiter {
+  resolve(bytes: Uint8Array): void;
+  reject(error: Error): void;
+}
+
 export class MllpClient {
   readonly #host: string;
   readonly #port: number;
@@ -259,6 +293,16 @@ export class MllpClient {
   #state: MllpClientState = "idle";
   #duplex: MllpDuplex | null = null;
   #closingExplicit = false;
+
+  // Persistent connection-scoped state. Set on connect(), torn down on
+  // close() or drop. The decoder retains its byte buffer across sends
+  // — this is what makes late-ACK-after-timeout land cleanly on the
+  // next send (and trip the correlation check).
+  #reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+  #decoder: FrameDecoder | null = null;
+  #pendingFrames: Uint8Array[] = [];
+  #frameWaiter: FrameWaiter | null = null;
+  #streamError: Error | null = null;
 
   constructor(opts: MllpClientOptions) {
     this.#host = opts.host;
@@ -272,6 +316,11 @@ export class MllpClient {
 
   get state(): MllpClientState {
     return this.#state;
+  }
+
+  /** True when ready or sending — i.e., the wire is up. */
+  get connected(): boolean {
+    return this.#state === "ready" || this.#state === "sending";
   }
 
   async connect(opts: { signal?: AbortSignal } = {}): Promise<void> {
@@ -305,16 +354,36 @@ export class MllpClient {
         );
       }
       if (timeoutSignal.aborted) {
-        throw new MllpTimeoutError("CONNECT_TIMEOUT", this.#connectTimeoutMs);
+        throw new MllpTimeoutError("connect", this.#connectTimeoutMs);
       }
-      throw new MllpConnectError(
-        `Failed to connect to ${this.#host}:${this.#port}`,
-        { cause: error }
+      throw new MllpConnectError({
+        cause: error,
+        host: this.#host,
+        port: this.#port,
+      });
+    }
+
+    // Close-during-connect race: while we were awaiting the adapter,
+    // someone may have called close(). If so, state is no longer
+    // "connecting" — we own the just-returned duplex, so close it and
+    // surface CONNECT_ABORTED to the caller.
+    if (this.#state !== "connecting") {
+      await duplex.close();
+      throw new MllpClientError(
+        MllpErrorCode.CONNECT_ABORTED,
+        "Connect interrupted by close()"
       );
     }
 
     this.#duplex = duplex;
+    this.#decoder = createFrameDecoder(
+      this.#maxBufferedBytes === undefined
+        ? undefined
+        : { maxBufferedBytes: this.#maxBufferedBytes }
+    );
+    this.#reader = duplex.readable.getReader();
     this.#state = "ready";
+    void this.#runReadLoop(duplex);
     void this.#watchForDrop(duplex);
   }
 
@@ -324,9 +393,84 @@ export class MllpClient {
       return;
     }
     if (this.#duplex === duplex) {
-      this.#duplex = null;
       this.#state = "closed";
+      this.#tearDownConnection();
     }
+  }
+
+  /**
+   * Persistent read loop. Runs from `connect()` until the duplex
+   * closes or the decoder errors. Each emitted frame goes to a waiting
+   * `send()` if one exists, otherwise queues for the next send to
+   * pick up — that's what lets late ACKs after a timeout still trip
+   * the correlation check.
+   */
+  async #runReadLoop(duplex: MllpDuplex): Promise<void> {
+    const reader = this.#reader;
+    const decoder = this.#decoder;
+    if (reader === null || decoder === null) {
+      return;
+    }
+    try {
+      let stopped = false;
+      while (!stopped) {
+        const { done, value: chunk } = await reader.read();
+        if (this.#duplex !== duplex) {
+          // We've moved on (close or drop already cleaned up).
+          return;
+        }
+        if (done) {
+          // End-of-stream is reported as a drop via #watchForDrop, but
+          // we also dispatch here in case the waiter was already
+          // registered before the drop watcher fires.
+          this.#dispatchError(new MllpDroppedError("Stream ended before ACK"));
+          return;
+        }
+        const error = decoder.push(chunk, (decoded) => {
+          this.#dispatchFrame(decoded);
+        });
+        if (error) {
+          stopped = true;
+          this.#dispatchError(error);
+        }
+      }
+    } catch (error) {
+      // reader.read() rejects if the lock is released or the stream
+      // errors. Surface to any waiter.
+      this.#dispatchError(
+        error instanceof Error ? error : new Error(String(error))
+      );
+    }
+  }
+
+  #dispatchFrame(bytes: Uint8Array): void {
+    const waiter = this.#frameWaiter;
+    if (waiter) {
+      this.#frameWaiter = null;
+      waiter.resolve(bytes);
+      return;
+    }
+    this.#pendingFrames.push(bytes);
+  }
+
+  #dispatchError(error: Error): void {
+    // Stored so the next send (or in-flight send) surfaces it instead
+    // of waiting forever.
+    this.#streamError = error;
+    const waiter = this.#frameWaiter;
+    if (waiter) {
+      this.#frameWaiter = null;
+      waiter.reject(error);
+    }
+  }
+
+  #tearDownConnection(): void {
+    this.#duplex = null;
+    this.#decoder = null;
+    this.#reader = null;
+    this.#pendingFrames = [];
+    this.#frameWaiter = null;
+    this.#streamError = null;
   }
 
   async send(
@@ -354,29 +498,30 @@ export class MllpClient {
 
     const duplex = this.#duplex;
     if (duplex === null) {
+      // By construction this should be unreachable from state "ready" —
+      // assert with a typed error so a future invariant break is loud.
       throw new MllpClientError(
         MllpErrorCode.NOT_CONNECTED,
         "Internal: duplex is null while state is ready"
       );
     }
 
-    // Validate payload before we mutate state — invalid input shouldn't
-    // leave the client stuck in "sending".
+    // Validate payload before any state mutation — invalid input
+    // shouldn't leave the client stuck in "sending".
     validate(message);
     const requestControlId = extractMshControlId(message);
 
     this.#state = "sending";
     let result: MllpClientResponse;
     try {
-      result = await doSend(duplex, message, requestControlId, {
+      result = await this.#doSend(duplex, message, requestControlId, {
         maxBufferedBytes: this.#maxBufferedBytes,
         signal: opts.signal,
         timeoutMs: opts.timeoutMs ?? this.#sendTimeoutMs,
       });
     } catch (error) {
-      // Only transition back to ready if no concurrent path (drop watcher,
-      // close()) has moved state forward. If state is no longer "sending",
-      // they own the transition and we don't clobber it.
+      // Only restore "ready" if the connection is still up. If the
+      // drop watcher or close() already advanced state, respect that.
       if (this.#state === "sending") {
         this.#state = this.#duplex === null ? "closed" : "ready";
       }
@@ -386,6 +531,115 @@ export class MllpClient {
       this.#state = "ready";
     }
     return result;
+  }
+
+  async #doSend(
+    duplex: MllpDuplex,
+    message: string | Uint8Array,
+    requestControlId: string,
+    opts: {
+      timeoutMs: number;
+      signal: AbortSignal | undefined;
+      maxBufferedBytes: number | undefined;
+    }
+  ): Promise<MllpClientResponse> {
+    const framed = frame(message);
+    const sentMonotonic = performance.now();
+
+    // Write the frame. Lock acquisition / release is bracketed.
+    const writer = duplex.writable.getWriter();
+    try {
+      try {
+        await writer.write(framed);
+      } catch (error) {
+        throw new MllpClientError(
+          MllpErrorCode.WRITE_FAILED,
+          "Failed to write frame to socket",
+          { cause: error }
+        );
+      }
+    } finally {
+      writer.releaseLock();
+    }
+
+    // Wait for the next frame from the persistent read loop. The
+    // decoder retains its buffer across sends, so a late ACK from a
+    // previously-timed-out request will land here and be checked by
+    // correlation.
+    const ackBytes = await this.#waitForFrame(opts.timeoutMs, opts.signal);
+
+    const timestamp = new Date();
+    const durationMs = performance.now() - sentMonotonic;
+
+    return parseResponse({
+      durationMs,
+      raw: ackBytes,
+      requestControlId,
+      timestamp,
+    });
+  }
+
+  #waitForFrame(
+    timeoutMs: number,
+    signal: AbortSignal | undefined
+  ): Promise<Uint8Array> {
+    // Drain a previously-queued frame first.
+    const queued = this.#pendingFrames.shift();
+    if (queued !== undefined) {
+      return Promise.resolve(queued);
+    }
+    // A stream-level error landed before we asked — surface it.
+    if (this.#streamError !== null) {
+      const error = this.#streamError;
+      this.#streamError = null;
+      return Promise.reject(error);
+    }
+
+    const timeoutSignal = AbortSignal.timeout(timeoutMs);
+    const signals: AbortSignal[] = [timeoutSignal];
+    if (signal) {
+      signals.push(signal);
+    }
+    const abortSignal = AbortSignal.any(signals);
+
+    // oxlint-disable-next-line promise/avoid-new -- canonical waiter wrapper
+    return new Promise<Uint8Array>((resolve, reject) => {
+      const onAbort = () => {
+        // Detach ourselves so the read loop doesn't try to resolve us
+        // after the fact.
+        if (this.#frameWaiter === waiter) {
+          this.#frameWaiter = null;
+        }
+        if (timeoutSignal.aborted) {
+          reject(new MllpTimeoutError("send", timeoutMs));
+        } else {
+          reject(
+            new MllpClientError(
+              MllpErrorCode.SEND_ABORTED,
+              "Send aborted by caller signal"
+            )
+          );
+        }
+      };
+
+      const waiter: FrameWaiter = {
+        reject: (error) => {
+          abortSignal.removeEventListener("abort", onAbort);
+          reject(error);
+        },
+        resolve: (bytes) => {
+          abortSignal.removeEventListener("abort", onAbort);
+          resolve(bytes);
+        },
+      };
+
+      this.#frameWaiter = waiter;
+      if (abortSignal.aborted) {
+        onAbort();
+        return;
+      }
+      abortSignal.addEventListener("abort", onAbort, { once: true });
+    });
   }
 
   async close(): Promise<void> {
@@ -400,7 +654,30 @@ export class MllpClient {
     this.#closingExplicit = true;
     this.#state = "closing";
     const duplex = this.#duplex;
+
+    // Reject any in-flight waiter so send() doesn't hang.
+    const waiter = this.#frameWaiter;
+    if (waiter) {
+      this.#frameWaiter = null;
+      waiter.reject(new MllpDroppedError("Client closed during send"));
+    }
+
+    // Release the reader's lock so duplex.close() can drain cleanly.
+    // Spec-compliant adapters MAY reject pending read() with TypeError;
+    // the read loop catches that and tears down.
+    if (this.#reader !== null) {
+      try {
+        this.#reader.releaseLock();
+      } catch {
+        // The read loop may have already released or rejected — fine.
+      }
+    }
+    this.#reader = null;
+    this.#decoder = null;
     this.#duplex = null;
+    this.#pendingFrames = [];
+    this.#streamError = null;
+
     if (duplex) {
       await duplex.close();
     }
@@ -409,187 +686,6 @@ export class MllpClient {
 
   async [Symbol.asyncDispose](): Promise<void> {
     await this.close();
-  }
-}
-
-// ===========================================================================
-// Send pipeline — extracted from the class because it's `this`-less and
-// easier to reason about as a sequence of pure-ish steps.
-// ===========================================================================
-
-interface DoSendOptions {
-  readonly timeoutMs: number;
-  readonly signal: AbortSignal | undefined;
-  readonly maxBufferedBytes: number | undefined;
-}
-
-async function doSend(
-  duplex: MllpDuplex,
-  message: string | Uint8Array,
-  requestControlId: string,
-  opts: DoSendOptions
-): Promise<MllpClientResponse> {
-  const framed = frame(message);
-  const sentMonotonic = performance.now();
-
-  await writeFrame(duplex, framed);
-  const ackBytes = await readAckFrame(duplex, opts);
-
-  const timestamp = new Date();
-  const durationMs = performance.now() - sentMonotonic;
-
-  return parseResponse({
-    durationMs,
-    raw: ackBytes,
-    requestControlId,
-    timestamp,
-  });
-}
-
-async function writeFrame(
-  duplex: MllpDuplex,
-  framed: Uint8Array
-): Promise<void> {
-  const writer = duplex.writable.getWriter();
-  try {
-    await writer.write(framed);
-  } catch (error) {
-    safeReleaseWriter(writer);
-    throw new MllpClientError(
-      MllpErrorCode.WRITE_FAILED,
-      "Failed to write frame to socket",
-      { cause: error }
-    );
-  }
-  writer.releaseLock();
-}
-
-function safeReleaseWriter(
-  writer: WritableStreamDefaultWriter<Uint8Array>
-): void {
-  try {
-    writer.releaseLock();
-  } catch {
-    // Writer may already be released if the stream errored.
-  }
-}
-
-async function readAckFrame(
-  duplex: MllpDuplex,
-  opts: DoSendOptions
-): Promise<Uint8Array> {
-  const reader = duplex.readable.getReader();
-  const decoder = createFrameDecoder(
-    opts.maxBufferedBytes === undefined
-      ? undefined
-      : { maxBufferedBytes: opts.maxBufferedBytes }
-  );
-
-  const timeoutSignal = AbortSignal.timeout(opts.timeoutMs);
-  const signals: AbortSignal[] = [timeoutSignal];
-  if (opts.signal) {
-    signals.push(opts.signal);
-  }
-  const abortSignal = AbortSignal.any(signals);
-
-  const result = deferred<Uint8Array>();
-
-  const onAbort = () => {
-    if (timeoutSignal.aborted) {
-      result.reject(new MllpTimeoutError("SEND_TIMEOUT", opts.timeoutMs));
-    } else {
-      result.reject(
-        new MllpClientError(
-          MllpErrorCode.SEND_ABORTED,
-          "Send aborted by caller signal"
-        )
-      );
-    }
-  };
-  if (abortSignal.aborted) {
-    onAbort();
-  } else {
-    abortSignal.addEventListener("abort", onAbort, { once: true });
-  }
-
-  void watchDrop(duplex, result);
-  void readLoop(reader, decoder, result);
-
-  try {
-    return await result.promise;
-  } finally {
-    await safeCancelReader(reader);
-  }
-}
-
-async function watchDrop(
-  duplex: MllpDuplex,
-  result: Deferred<Uint8Array>
-): Promise<void> {
-  await duplex.closed;
-  result.reject(new MllpClosedError("Connection dropped before ACK received"));
-}
-
-async function readLoop(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  decoder: FrameDecoder,
-  result: Deferred<Uint8Array>
-): Promise<void> {
-  try {
-    let frameBytes: Uint8Array | null = null;
-    while (frameBytes === null) {
-      const next = await reader.read();
-      if (next.done) {
-        result.reject(new MllpClosedError("Stream ended before ACK received"));
-        return;
-      }
-      const outcome = pushChunk(decoder, next.value);
-      if (outcome.error !== null) {
-        result.reject(outcome.error);
-        return;
-      }
-      frameBytes = outcome.frame;
-    }
-    result.resolve(frameBytes);
-  } catch (error) {
-    result.reject(
-      error instanceof Error
-        ? error
-        : new MllpClientError(MllpErrorCode.DROPPED, "Read failed", {
-            cause: error,
-          })
-    );
-  }
-}
-
-interface ChunkOutcome {
-  readonly frame: Uint8Array | null;
-  readonly error: Error | null;
-}
-
-function pushChunk(decoder: FrameDecoder, chunk: Uint8Array): ChunkOutcome {
-  let firstFrame: Uint8Array | null = null;
-  const onFrame = (f: Uint8Array): void => {
-    if (firstFrame === null) {
-      firstFrame = f;
-    }
-  };
-  const error = decoder.push(chunk, onFrame);
-  return { error, frame: firstFrame };
-}
-
-async function safeCancelReader(
-  reader: ReadableStreamDefaultReader<Uint8Array>
-): Promise<void> {
-  try {
-    await reader.cancel();
-  } catch {
-    // Reader may already be cancelled or released; nothing actionable.
-  }
-  try {
-    reader.releaseLock();
-  } catch {
-    // Already released by cancel() in some implementations.
   }
 }
 
@@ -651,12 +747,18 @@ function parseResponse(input: ParseInput): MllpClientResponse {
     });
   }
 
-  if (isNakCode(codeRaw)) {
+  if (
+    codeRaw === "AE" ||
+    codeRaw === "AR" ||
+    codeRaw === "CE" ||
+    codeRaw === "CR"
+  ) {
     throw new MllpRejectedError({
       code: codeRaw,
       controlId,
       durationMs,
       raw,
+      requestControlId,
       timestamp,
       tree,
     });
@@ -667,6 +769,7 @@ function parseResponse(input: ParseInput): MllpClientResponse {
     controlId,
     durationMs,
     raw,
+    requestControlId,
     timestamp,
     tree,
   };
@@ -675,23 +778,6 @@ function parseResponse(input: ParseInput): MllpClientResponse {
 // ===========================================================================
 // Module-internal helpers
 // ===========================================================================
-
-interface Deferred<T> {
-  readonly promise: Promise<T>;
-  resolve(value: T): void;
-  reject(error: Error): void;
-}
-
-function deferred<T>(): Deferred<T> {
-  let resolveFn!: (value: T) => void;
-  let rejectFn!: (error: Error) => void;
-  // oxlint-disable-next-line promise/avoid-new -- canonical Deferred wrapper
-  const promise = new Promise<T>((resolve, reject) => {
-    resolveFn = resolve;
-    rejectFn = reject;
-  });
-  return { promise, reject: rejectFn, resolve: resolveFn };
-}
 
 function isAckCode(s: string): s is AckCode {
   return (
@@ -702,10 +788,6 @@ function isAckCode(s: string): s is AckCode {
     s === "CE" ||
     s === "CR"
   );
-}
-
-function isNakCode(s: AckCode): s is NakCode {
-  return s === "AE" || s === "AR" || s === "CE" || s === "CR";
 }
 
 function readValue(tree: Root, path: string): string | null {
@@ -727,13 +809,16 @@ const MSH_SCAN_LIMIT = 1024;
  * Returns `""` if the message doesn't begin with `MSH|…` or has fewer than
  * 10 fields. The send proceeds (real-world peers tolerate weird inputs)
  * but correlation verification will then be skipped.
+ *
+ * Scans only the first {@link MSH_SCAN_LIMIT} bytes — the MSH segment is
+ * always the first segment and never that long. Multi-MB payloads stay
+ * cheap. If a caller manages to push MSH-10 past byte 1024 with absurdly
+ * long segments before it, correlation will be skipped — a degenerate
+ * case we accept rather than scan the whole payload on every send.
  */
 function extractMshControlId(message: string | Uint8Array): string {
   const text =
     typeof message === "string" ? message : TEXT_DECODER.decode(message);
-  // First segment terminator is at the first CR / LF; the MSH segment is
-  // the first ~150 bytes typically. Slice to keep this cheap even on
-  // multi-MB messages.
   const slice =
     text.length > MSH_SCAN_LIMIT ? text.slice(0, MSH_SCAN_LIMIT) : text;
   const firstLineEnd = slice.search(/[\r\n]/);

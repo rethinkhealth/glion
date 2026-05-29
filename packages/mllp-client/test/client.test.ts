@@ -13,7 +13,8 @@ import { describe, expect, it } from "vitest";
 import {
   AckCode,
   MllpClient,
-  MllpClosedError,
+  MllpClientError,
+  MllpDroppedError,
   MllpConnectError,
   MllpCorrelationError,
   MllpErrorCode,
@@ -371,7 +372,7 @@ describe("send() — state guards", () => {
     });
     // Cleanup: drop the peer so the first send rejects, not hang
     fake.closePeer();
-    await expect(first).rejects.toBeInstanceOf(MllpClosedError);
+    await expect(first).rejects.toBeInstanceOf(MllpDroppedError);
   });
 
   it("throws EMBEDDED_CONTROL_CHAR via mllp-transport on invalid bytes", async () => {
@@ -419,23 +420,23 @@ describe("send() — timeout / abort / drop", () => {
     expect(client.state).toBe("ready");
   });
 
-  it("rejects pending send with MllpClosedError when peer drops", async () => {
+  it("rejects pending send with MllpDroppedError when peer drops", async () => {
     const fake = createFakeDuplex({ onWrite: () => {} });
     const client = makeClient(fake);
     await client.connect();
     const p = client.send(REQUEST);
     setTimeout(() => fake.closePeer(), 10);
-    await expect(p).rejects.toBeInstanceOf(MllpClosedError);
+    await expect(p).rejects.toBeInstanceOf(MllpDroppedError);
     expect(client.state).toBe("closed");
   });
 
-  it("rejects pending send with MllpClosedError on close() during send", async () => {
+  it("rejects pending send with MllpDroppedError on close() during send", async () => {
     const fake = createFakeDuplex({ onWrite: () => {} });
     const client = makeClient(fake);
     await client.connect();
     const p = client.send(REQUEST);
     setTimeout(() => void client.close(), 10);
-    await expect(p).rejects.toBeInstanceOf(MllpClosedError);
+    await expect(p).rejects.toBeInstanceOf(MllpDroppedError);
     expect(client.state).toBe("closed");
   });
 });
@@ -534,3 +535,178 @@ describe("multi-chunk ACK", () => {
     expect(response.code).toBe("AA");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Connection persistence — verifies that one connection survives many sends
+// (regression: an earlier implementation called reader.cancel() between
+// sends, which destroys the underlying stream on real adapters).
+// ---------------------------------------------------------------------------
+
+describe("multiple sends on one connection", () => {
+  it("does three back-to-back sends without reconnecting", async () => {
+    const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
+    const client = makeClient(fake);
+    await client.connect();
+    const r1 = await client.send(REQUEST);
+    const r2 = await client.send(REQUEST);
+    const r3 = await client.send(REQUEST);
+    expect(r1.code).toBe("AA");
+    expect(r2.code).toBe("AA");
+    expect(r3.code).toBe("AA");
+    expect(client.state).toBe("ready");
+  });
+
+  it("decodes coalesced peer frames (two ACKs in one chunk) across two sends", async () => {
+    // Peer pipelines two ACKs in one write — the second is queued by the
+    // persistent decoder and consumed by the second send.
+    let sendCount = 0;
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => {
+        sendCount += 1;
+        if (sendCount === 1) {
+          // First write: peer sends BOTH ACKs coalesced.
+          const a = frame(ACK_AA);
+          const b = frame(ACK_AA);
+          const coalesced = new Uint8Array(a.length + b.length);
+          coalesced.set(a, 0);
+          coalesced.set(b, a.length);
+          peer.injectPeerBytes(coalesced);
+        }
+        // Second write: peer is silent — we consume the queued frame.
+      },
+    });
+    const client = makeClient(fake);
+    await client.connect();
+    const r1 = await client.send(REQUEST);
+    const r2 = await client.send(REQUEST);
+    expect(r1.code).toBe("AA");
+    expect(r2.code).toBe("AA");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Write failure
+// ---------------------------------------------------------------------------
+
+describe("send() — write failure", () => {
+  it("rejects with WRITE_FAILED when the duplex write fails", async () => {
+    const fake = createFakeDuplex({ writeError: new Error("EPIPE") });
+    const client = makeClient(fake);
+    await client.connect();
+    let captured: unknown;
+    try {
+      await client.send(REQUEST);
+    } catch (error) {
+      captured = error;
+    }
+    expect(captured).toBeInstanceOf(MllpClientError);
+    expect((captured as MllpClientError).code).toBe(MllpErrorCode.WRITE_FAILED);
+    expect((captured as MllpClientError).cause).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Stream-level errors propagating from the read loop
+// ---------------------------------------------------------------------------
+
+describe("send() — peer sends unframed garbage", () => {
+  it("rejects the in-flight send with a FramingError from the decoder", async () => {
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => {
+        // No VT prefix — decoder will throw MISSING_START_BLOCK.
+        peer.injectPeerBytes(new Uint8Array([0x41, 0x42, 0x43]));
+      },
+    });
+    const client = makeClient(fake);
+    await client.connect();
+    let captured: unknown;
+    try {
+      await client.send(REQUEST);
+    } catch (error) {
+      captured = error;
+    }
+    expect((captured as Error).name).toBe("FramingError");
+  });
+});
+
+describe("send() — parseHL7v2 throws on the ACK bytes", () => {
+  it("rejects with PARSE_FAILED carrying the underlying cause", async () => {
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => {
+        peer.injectPeerBytes(frame("GARBAGE WITHOUT MSH SEGMENT"));
+      },
+    });
+    const client = makeClient(fake);
+    await client.connect();
+    let captured: unknown;
+    try {
+      await client.send(REQUEST);
+    } catch (error) {
+      captured = error;
+    }
+    expect(captured).toBeInstanceOf(MllpClientError);
+    expect((captured as MllpClientError).code).toBe(MllpErrorCode.PARSE_FAILED);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Out-of-band late ACK — the headline scenario the persistent decoder
+// + correlation check exists to handle.
+// ---------------------------------------------------------------------------
+
+describe("send() — late ACK from previously-timed-out send", () => {
+  it("late ACK lands on the next send and trips correlation", async () => {
+    let firstWrite = true;
+    let peerRef: FakeDuplex | null = null;
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => {
+        peerRef = peer;
+        if (firstWrite) {
+          firstWrite = false;
+          // First send: peer never responds (will time out).
+          return;
+        }
+        // Second send: peer responds, BUT the late ACK from send #1
+        // is already queued ahead of it.
+        peer.injectPeerBytes(frame(requestAck("AA", "MSG_SECOND")));
+      },
+    });
+    const client = makeClient(fake);
+    await client.connect();
+
+    // First send times out.
+    await expect(
+      client.send(requestWithControlId("MSG_FIRST"), { timeoutMs: 20 })
+    ).rejects.toBeInstanceOf(MllpTimeoutError);
+    expect(client.state).toBe("ready");
+
+    // Late ACK for the timed-out request arrives between sends.
+    peerRef!.injectPeerBytes(frame(requestAck("AA", "MSG_FIRST")));
+
+    // Second send picks up the queued late ACK first — controlId
+    // mismatch (expected MSG_SECOND, actual MSG_FIRST).
+    let captured: unknown;
+    try {
+      await client.send(requestWithControlId("MSG_SECOND"));
+    } catch (error) {
+      captured = error;
+    }
+    expect(captured).toBeInstanceOf(MllpCorrelationError);
+    expect((captured as MllpCorrelationError).expected).toBe("MSG_SECOND");
+    expect((captured as MllpCorrelationError).actual).toBe("MSG_FIRST");
+  });
+});
+
+function requestWithControlId(controlId: string): string {
+  return [
+    `MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|${controlId}|P|2.5`,
+    "PID|1||12345^^^MRN||Doe^John",
+  ].join("\r");
+}
+
+function requestAck(code: string, controlId: string): string {
+  return [
+    "MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|ACK001|P|2.5",
+    `MSA|${code}|${controlId}`,
+  ].join("\r");
+}
