@@ -11,20 +11,21 @@
  * @module
  */
 
+import {
+  AckApplicationError,
+  AckApplicationReject,
+  AckCommitError,
+  AckCommitReject,
+  isAckCode,
+} from "@glion/ack";
+import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { frame } from "@glion/mllp-transport";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
-import type { AcceptCode } from "./codes";
-import { isAckCode } from "./codes";
-import {
-  MllpClientError,
-  MllpCorrelationError,
-  MllpErrorCode,
-  MllpRejectedError,
-} from "./errors";
+import { MllpClientError, MllpCorrelationError, MllpErrorCode } from "./errors";
 
 /**
  * Strict UTF-8 decoder — throws on invalid bytes. HL7v2 messages SHOULD
@@ -41,8 +42,11 @@ const TEXT_DECODER = new TextDecoder("utf-8", { fatal: true });
 export type SendInput = string | Uint8Array | Root;
 
 export interface MllpClientResponse {
-  /** MSA-1 (always {@link AcceptCode} — NAK throws). */
-  readonly code: AcceptCode;
+  /**
+   * MSA-1 — always an accept ({@link AckSuccessCode}). A NAK (AE/AR/CE/CR)
+   * throws the matching `@glion/ack` `AckException` instead of resolving.
+   */
+  readonly code: AckSuccessCode;
   /**
    * MSA-2 — correlation ID echoed by the peer. Empty if the peer
    * omitted it (some early-HL7 peers don't).
@@ -168,15 +172,33 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
     codeRaw === "CE" ||
     codeRaw === "CR"
   ) {
-    throw new MllpRejectedError({
-      code: codeRaw,
+    // A NAK is an ACK-level rejection — the same domain @glion/ack models for
+    // the server side — so the client throws that package's typed exceptions
+    // (caught via `instanceof AckException`) rather than a parallel hierarchy.
+    // ERR-3 / ERR-4 come straight from the peer and may be absent or
+    // non-standard, so they pass through verbatim.
+    const message = `Peer rejected message with acknowledgment code ${codeRaw}`;
+    const options = {
       controlId,
-      durationMs,
-      raw,
-      requestControlId,
-      timestamp,
+      errorCode: readValue(tree, "ERR-3[1].1.1") ?? undefined,
+      raw: text,
+      severity: readValue(tree, "ERR-4[1].1.1") ?? undefined,
       tree,
-    });
+    };
+    switch (codeRaw) {
+      case "AE": {
+        throw new AckApplicationError(message, options);
+      }
+      case "AR": {
+        throw new AckApplicationReject(message, options);
+      }
+      case "CE": {
+        throw new AckCommitError(message, options);
+      }
+      default: {
+        throw new AckCommitReject(message, options);
+      }
+    }
   }
 
   return {
