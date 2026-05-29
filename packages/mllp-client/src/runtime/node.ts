@@ -13,7 +13,7 @@
 import { Socket } from "node:net";
 import { Duplex } from "node:stream";
 
-import type { MllpConnector, MllpDuplex } from "../index";
+import type { MllpConnector, MllpDuplex } from "../duplex";
 
 const GRACEFUL_CLOSE_MS = 1000;
 
