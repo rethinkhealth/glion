@@ -4,16 +4,16 @@
  * One connection, one send on the wire at a time. `send()` accepts a
  * `string` / `Uint8Array` / `Root`: the caller's bytes (or a serialized
  * `Root`) go on the wire unchanged, while the tree is used to read MSH-10 for
- * correlation and to parse the ACK. NAK responses throw
- * {@link MllpRejectedError}. Runtime adapters live behind
- * {@link MllpConnector} — the default Node adapter is in
+ * correlation and to parse the ACK. A NAK (AE/AR/CE/CR) throws the central
+ * `@glion/ack` exception family (`AckApplicationError`, `AckApplicationReject`,
+ * `AckCommitError`, `AckCommitReject`) — the same types the server throws;
+ * import them and `AckException` from `@glion/ack`. Runtime adapters live
+ * behind {@link MllpConnector} — the default Node adapter is in
  * `@glion/mllp-client/node`.
  *
  * @module
  */
 
-export { AckCode } from "./codes";
-export type { AcceptCode, NakCode } from "./codes";
 export { MllpClient } from "./client";
 export type {
   MllpClientOptions,
@@ -27,7 +27,6 @@ export {
   MllpCorrelationError,
   MllpDroppedError,
   MllpErrorCode,
-  MllpRejectedError,
   MllpTimeoutError,
 } from "./errors";
 export type { MllpDropReason } from "./errors";

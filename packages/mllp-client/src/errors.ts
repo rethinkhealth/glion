@@ -10,8 +10,6 @@
 
 import type { Root } from "@glion/ast";
 
-import type { NakCode } from "./codes";
-
 export const MllpErrorCode = {
   ALREADY_CONNECTED: "ALREADY_CONNECTED",
   CLOSED: "CLOSED",
@@ -119,33 +117,6 @@ function defaultDropMessage(reason: MllpDropReason): string {
     default: {
       return "Connection dropped";
     }
-  }
-}
-
-export class MllpRejectedError extends MllpClientError<NakCode> {
-  readonly controlId: string;
-  readonly requestControlId: string;
-  readonly tree: Root;
-  readonly raw: Uint8Array;
-  readonly timestamp: Date;
-  readonly durationMs: number;
-  constructor(opts: {
-    code: NakCode;
-    controlId: string;
-    requestControlId: string;
-    tree: Root;
-    raw: Uint8Array;
-    timestamp: Date;
-    durationMs: number;
-  }) {
-    super(opts.code, `Peer rejected message with code ${opts.code}`);
-    this.name = "MllpRejectedError";
-    this.controlId = opts.controlId;
-    this.requestControlId = opts.requestControlId;
-    this.tree = opts.tree;
-    this.raw = opts.raw;
-    this.timestamp = opts.timestamp;
-    this.durationMs = opts.durationMs;
   }
 }
 

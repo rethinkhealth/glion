@@ -1732,6 +1732,9 @@ importers:
 
   packages/mllp-client:
     dependencies:
+      '@glion/ack':
+        specifier: workspace:*
+        version: link:../ack
       '@glion/ast':
         specifier: workspace:*
         version: link:../ast

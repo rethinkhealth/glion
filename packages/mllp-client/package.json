@@ -44,6 +44,7 @@
     "publint": "publint --strict"
   },
   "dependencies": {
+    "@glion/ack": "workspace:*",
     "@glion/ast": "workspace:*",
     "@glion/mllp-transport": "workspace:*",
     "@glion/parser": "workspace:*",

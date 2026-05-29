@@ -7,18 +7,23 @@
  * tests; for v0 the fake duplex is sufficient to enforce the contract).
  */
 
+import {
+  AckApplicationError,
+  AckApplicationReject,
+  AckCommitError,
+  AckCommitReject,
+  AckException,
+} from "@glion/ack";
 import { frame } from "@glion/mllp-transport";
 import { describe, expect, it } from "vitest";
 
 import {
-  AckCode,
   MllpClient,
   MllpClientError,
-  MllpDroppedError,
   MllpConnectError,
   MllpCorrelationError,
+  MllpDroppedError,
   MllpErrorCode,
-  MllpRejectedError,
   MllpTimeoutError,
 } from "../src/index";
 import type { MllpClient as MllpClientType, MllpDuplex } from "../src/index";
@@ -82,23 +87,6 @@ function abortableConnect(signal: AbortSignal): Promise<MllpDuplex> {
     });
   });
 }
-
-// ---------------------------------------------------------------------------
-// Codes
-// ---------------------------------------------------------------------------
-
-describe("AckCode constants", () => {
-  it("exports the six standard codes", () => {
-    expect(AckCode).toEqual({
-      AA: "AA",
-      AE: "AE",
-      AR: "AR",
-      CA: "CA",
-      CE: "CE",
-      CR: "CR",
-    });
-  });
-});
 
 // ---------------------------------------------------------------------------
 // connect()
@@ -233,33 +221,37 @@ describe("send() — accept codes", () => {
 // send() — NAKs
 // ---------------------------------------------------------------------------
 
-describe("send() — NAK codes", () => {
-  it.each([
-    ["AE", ACK_AE],
-    ["AR", ACK_AR],
-    ["CE", ACK_CE],
-    ["CR", ACK_CR],
-  ])("throws MllpRejectedError on %s", async (code, ack) => {
-    const fake = createFakeDuplex({ onWrite: respondWith(ack) });
-    const client = makeClient(fake);
-    await client.connect();
-    try {
-      await client.send(REQUEST);
-      expect.fail("send should have thrown");
-    } catch (error) {
-      expect(error).toBeInstanceOf(MllpRejectedError);
-      const rej = error as MllpRejectedError;
-      expect(rej.code).toBe(code);
-      expect(rej.controlId).toBe(REQUEST_CONTROL_ID);
-      expect(rej.tree).toBeDefined();
-      expect(rej.raw).toBeInstanceOf(Uint8Array);
-      expect(rej.timestamp).toBeInstanceOf(Date);
-      expect(rej.durationMs).toBeGreaterThanOrEqual(0);
-    }
-    expect(client.state).toBe("ready");
-  });
+const NAK_CASES = [
+  { ack: ACK_AE, code: "AE", errorClass: AckApplicationError },
+  { ack: ACK_AR, code: "AR", errorClass: AckApplicationReject },
+  { ack: ACK_CE, code: "CE", errorClass: AckCommitError },
+  { ack: ACK_CR, code: "CR", errorClass: AckCommitReject },
+] as const;
 
-  it("carries the AST so callers can walk ERR segments", async () => {
+describe("send() — NAK codes", () => {
+  it.each(NAK_CASES)(
+    "throws the $code AckException subclass",
+    async ({ ack, code, errorClass }) => {
+      const fake = createFakeDuplex({ onWrite: respondWith(ack) });
+      const client = makeClient(fake);
+      await client.connect();
+      try {
+        await client.send(REQUEST);
+        expect.fail("send should have thrown");
+      } catch (error) {
+        expect(error).toBeInstanceOf(AckException);
+        expect(error).toBeInstanceOf(errorClass);
+        const rej = error as AckException;
+        expect(rej.code).toBe(code);
+        expect(rej.controlId).toBe(REQUEST_CONTROL_ID);
+        expect(rej.tree).toBeDefined();
+        expect(typeof rej.raw).toBe("string");
+      }
+      expect(client.state).toBe("ready");
+    }
+  );
+
+  it("reads errorCode/severity and the AST from the ERR segment", async () => {
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AE_WITH_ERR) });
     const client = makeClient(fake);
     await client.connect();
@@ -267,9 +259,11 @@ describe("send() — NAK codes", () => {
       await client.send(REQUEST);
       expect.fail("send should have thrown");
     } catch (error) {
-      expect(error).toBeInstanceOf(MllpRejectedError);
-      const rej = error as MllpRejectedError;
-      expect(rej.tree.children.length).toBeGreaterThan(1);
+      expect(error).toBeInstanceOf(AckApplicationError);
+      const rej = error as AckException;
+      expect(rej.errorCode).toBe("204");
+      expect(rej.severity).toBe("E");
+      expect(rej.tree?.children.length).toBeGreaterThan(1);
     }
   });
 });
