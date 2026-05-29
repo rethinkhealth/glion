@@ -117,7 +117,7 @@ export function validate(payload: Uint8Array | string): void {
     if (b === VT || b === FS) {
       throw new FramingError(
         FramingErrorCode.EMBEDDED_CONTROL_CHAR,
-        `Payload contains a reserved framing byte (0x${b.toString(16).padStart(2, "0")}) at offset ${i}`
+        `Payload contains an MLLP framing byte 0x${b.toString(16).padStart(2, "0")} at offset ${i}; payloads must not contain VT (0x0B) or FS (0x1C)`
       );
     }
   }
@@ -161,17 +161,30 @@ export function frame(payload: Uint8Array | string): Uint8Array {
  * @throws {@link FramingError} On any structural violation.
  */
 export function decode(input: Uint8Array): Uint8Array {
-  if (input.length === 0 || input[0] !== VT) {
+  if (input.length === 0) {
     throw new FramingError(
       FramingErrorCode.MISSING_START_BLOCK,
-      "Input does not begin with VT (0x0B)"
+      "Cannot decode empty input; expected an MLLP frame starting with VT (0x0B)"
+    );
+  }
+  if (input[0] !== VT) {
+    throw new FramingError(
+      FramingErrorCode.MISSING_START_BLOCK,
+      `Expected MLLP frame to start with VT (0x0B); got 0x${(input[0] as number).toString(16).padStart(2, "0")}`
     );
   }
   const fsIndex = findFsCr(input, 1, input.length);
-  if (fsIndex === -1 || fsIndex !== input.length - 2) {
+  if (fsIndex === -1) {
     throw new FramingError(
       FramingErrorCode.MISSING_END_BLOCK,
-      "Input does not terminate with FS+CR (0x1C 0x0D) at end"
+      "MLLP frame is not terminated by FS+CR (0x1C 0x0D)"
+    );
+  }
+  if (fsIndex !== input.length - 2) {
+    const trailing = input.length - (fsIndex + 2);
+    throw new FramingError(
+      FramingErrorCode.MISSING_END_BLOCK,
+      `MLLP frame has ${trailing} byte(s) of trailing data after the FS+CR terminator at offset ${fsIndex}`
     );
   }
   return input.slice(1, fsIndex);
@@ -299,7 +312,7 @@ export function createFrameDecoder(
       if (needed > max) {
         return new FramingError(
           FramingErrorCode.FRAME_TOO_LARGE,
-          `Buffered ${length} + chunk ${chunk.length} exceeds maxBufferedBytes (${max})`
+          `Incoming MLLP data exceeds maxBufferedBytes limit (${max} bytes); the peer may be sending malformed or unterminated frames`
         );
       }
 
@@ -330,10 +343,11 @@ export function createFrameDecoder(
         // byte of a candidate frame and MUST be VT. Anything else
         // is the peer writing garbage between frames — fail eagerly
         // here rather than buffering until the next FS+CR arrives.
-        if (buffer[scan] !== VT) {
+        const got = buffer[scan] as number;
+        if (got !== VT) {
           return new FramingError(
             FramingErrorCode.MISSING_START_BLOCK,
-            `Expected VT (0x0B) at offset ${scan}, got 0x${(buffer[scan] as number).toString(16).padStart(2, "0")}`
+            `Expected MLLP start-of-block marker (VT, 0x0B) at start of next frame; got 0x${got.toString(16).padStart(2, "0")}`
           );
         }
 
@@ -413,7 +427,7 @@ export class FrameDecoderStream extends TransformStream<
           controller.error(
             new FramingError(
               FramingErrorCode.MISSING_END_BLOCK,
-              `Stream closed with ${decoder.buffered} bytes buffered for an incomplete frame`
+              `Stream closed with ${decoder.buffered} byte(s) of an incomplete frame remaining; the peer did not terminate the final frame`
             )
           );
         }
