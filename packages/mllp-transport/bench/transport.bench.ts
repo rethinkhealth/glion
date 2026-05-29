@@ -46,14 +46,31 @@ function buildPayload(obxCount: number): Uint8Array {
   return TEXT.encode(segments.join("\r"));
 }
 
-// Approximate sizes after framing: 200 B, 2 KB, 20 KB.
+// Approximate sizes after framing: 200 B, 2 KB, 20 KB, 200 KB, 2 MB.
+// The small/medium/large set is generated as real-shaped HL7v2 (MSH + PID
+// + N OBX segments). XL and XXL would take ~10 ms to build segment-by-
+// segment; we tile the medium payload instead. The codec doesn't inspect
+// payload content (only VT/FS bytes), so tiled bytes exercise the same
+// memcpy / indexOf paths as freshly-built ones.
 const SMALL_PAYLOAD = buildPayload(2);
 const MEDIUM_PAYLOAD = buildPayload(30);
 const LARGE_PAYLOAD = buildPayload(300);
+const XL_PAYLOAD = tilePayload(MEDIUM_PAYLOAD, 200 * 1024);
+const XXL_PAYLOAD = tilePayload(MEDIUM_PAYLOAD, 2 * 1024 * 1024);
 
 const SMALL_FRAME = frame(SMALL_PAYLOAD);
 const MEDIUM_FRAME = frame(MEDIUM_PAYLOAD);
 const LARGE_FRAME = frame(LARGE_PAYLOAD);
+const XL_FRAME = frame(XL_PAYLOAD);
+const XXL_FRAME = frame(XXL_PAYLOAD);
+
+function tilePayload(base: Uint8Array, targetSize: number): Uint8Array {
+  const out = new Uint8Array(targetSize);
+  for (let off = 0; off < targetSize; off += base.length) {
+    out.set(base.subarray(0, Math.min(base.length, targetSize - off)), off);
+  }
+  return out;
+}
 
 function chunkBytes(bytes: Uint8Array, chunkSize: number): Uint8Array[] {
   const out: Uint8Array[] = [];
@@ -75,6 +92,16 @@ const MEDIUM_FRAME_64B_CHUNKS = chunkBytes(MEDIUM_FRAME, 64);
 const MEDIUM_FRAME_1B_CHUNKS = chunkBytes(MEDIUM_FRAME, 1);
 const TEN_MEDIUM_FRAMES = concatFrames(MEDIUM_FRAME, 10);
 
+// Realistic socket-read chunk shapes for large messages: app-level reads
+// are typically 8–64 KB on Node TCP sockets (not the 64 B from MTU-sized
+// tests). 1-byte and 10-coalesced workloads are skipped at this scale:
+// 1-byte would take hours and 10× a 2 MB frame would exceed the default
+// 16 MiB maxBufferedBytes.
+const XL_FRAME_8K_CHUNKS = chunkBytes(XL_FRAME, 8 * 1024);
+const XL_FRAME_1K_CHUNKS = chunkBytes(XL_FRAME, 1024);
+const XXL_FRAME_64K_CHUNKS = chunkBytes(XXL_FRAME, 64 * 1024);
+const XXL_FRAME_8K_CHUNKS = chunkBytes(XXL_FRAME, 8 * 1024);
+
 const NOOP = (_frame: Uint8Array): void => {
   // discard
 };
@@ -95,6 +122,14 @@ describe("frame() — encode by payload size", () => {
   bench("large payload (~20 KB)", () => {
     frame(LARGE_PAYLOAD);
   });
+
+  bench("xl payload (~200 KB)", () => {
+    frame(XL_PAYLOAD);
+  });
+
+  bench("xxl payload (~2 MB)", () => {
+    frame(XXL_PAYLOAD);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -113,6 +148,14 @@ describe("decode() — one-shot decode by frame size", () => {
   bench("large frame (~20 KB)", () => {
     decode(LARGE_FRAME);
   });
+
+  bench("xl frame (~200 KB)", () => {
+    decode(XL_FRAME);
+  });
+
+  bench("xxl frame (~2 MB)", () => {
+    decode(XXL_FRAME);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -130,6 +173,14 @@ describe("validate() — scan by payload size", () => {
 
   bench("large payload (~20 KB)", () => {
     validate(LARGE_PAYLOAD);
+  });
+
+  bench("xl payload (~200 KB)", () => {
+    validate(XL_PAYLOAD);
+  });
+
+  bench("xxl payload (~2 MB)", () => {
+    validate(XXL_PAYLOAD);
   });
 });
 
@@ -164,6 +215,52 @@ describe("createFrameDecoder() — streaming workloads (~2 KB frame)", () => {
 });
 
 // ---------------------------------------------------------------------------
+// createFrameDecoder().push() — large-message workloads (200 KB / 2 MB)
+// ---------------------------------------------------------------------------
+
+describe("createFrameDecoder() — large messages (200 KB)", () => {
+  bench("1 frame, 1 push", () => {
+    const decoder = createFrameDecoder();
+    decoder.push(XL_FRAME, NOOP);
+  });
+
+  bench("1 frame, 8 KB chunks (~25 pushes, typical socket recv)", () => {
+    const decoder = createFrameDecoder();
+    for (const chunk of XL_FRAME_8K_CHUNKS) {
+      decoder.push(chunk, NOOP);
+    }
+  });
+
+  bench("1 frame, 1 KB chunks (~200 pushes)", () => {
+    const decoder = createFrameDecoder();
+    for (const chunk of XL_FRAME_1K_CHUNKS) {
+      decoder.push(chunk, NOOP);
+    }
+  });
+});
+
+describe("createFrameDecoder() — large messages (2 MB)", () => {
+  bench("1 frame, 1 push", () => {
+    const decoder = createFrameDecoder();
+    decoder.push(XXL_FRAME, NOOP);
+  });
+
+  bench("1 frame, 64 KB chunks (~32 pushes, large-payload socket recv)", () => {
+    const decoder = createFrameDecoder();
+    for (const chunk of XXL_FRAME_64K_CHUNKS) {
+      decoder.push(chunk, NOOP);
+    }
+  });
+
+  bench("1 frame, 8 KB chunks (~256 pushes)", () => {
+    const decoder = createFrameDecoder();
+    for (const chunk of XXL_FRAME_8K_CHUNKS) {
+      decoder.push(chunk, NOOP);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // FrameDecoderStream — Web Streams wrapper overhead
 // ---------------------------------------------------------------------------
 
@@ -186,5 +283,13 @@ describe("FrameDecoderStream — Web Streams overhead", () => {
 
   bench("10 coalesced frames through TransformStream", async () => {
     await drainStream(TEN_MEDIUM_FRAMES);
+  });
+
+  bench("1 frame through TransformStream (~200 KB)", async () => {
+    await drainStream(XL_FRAME);
+  });
+
+  bench("1 frame through TransformStream (~2 MB)", async () => {
+    await drainStream(XXL_FRAME);
   });
 });
