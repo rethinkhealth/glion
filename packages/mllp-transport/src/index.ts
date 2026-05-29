@@ -221,18 +221,53 @@ const DEFAULT_MAX_BUFFERED_BYTES = 16 * 1024 * 1024;
 const INITIAL_CAPACITY = 64;
 
 /**
- * Create a stateful, push-based decoder for socket reads. Backed by
- * a growth-doubling internal buffer (amortised O(n)).
+ * Create a stateful, push-based decoder for socket reads.
+ *
+ * ## How it works
+ *
+ * The decoder owns two fields captured in the closure:
+ *
+ * - `buffer` — a `Uint8Array` holding bytes received but not yet emitted as a
+ *   complete frame. Grows by doubling, never shrinks.
+ * - `length` — the logical byte count in `buffer[0..length)`. Always ≤
+ *   `buffer.length`; bytes at `buffer[length..]` are unused capacity, not data.
+ *   We track this separately because typed arrays have fixed capacity, so we
+ *   can't use `.length` to mean "current size" the way you would with `Array`.
+ *
+ * ## Invariant
+ *
+ * After every successful `push()`, `buffer[0..length)` either is
+ * empty OR begins with VT. The decoder never holds "garbage between
+ * frames": if the byte following an emitted frame isn't VT, `push`
+ * returns `MISSING_START_BLOCK` immediately rather than waiting to
+ * see what comes next. This keeps failure detection eager and the
+ * scan loop's first check meaningful.
+ *
+ * ## Complexity
+ *
+ * Each `push(chunk)` does O(chunk.length + buffered) work — append,
+ * scan forward, compact. Capacity grows by doubling, so N pushes
+ * that buffer K bytes total amortise to O(N + K) work overall — the
+ * same guarantee as `Vec::push` / `ArrayList.add`. Memory is bounded
+ * by `maxBufferedBytes` (or the largest single frame ever buffered,
+ * rounded up to the next power of two).
+ *
+ * ## Frames are copied on emit
+ *
+ * `onFrame(frame)` receives a fresh `Uint8Array` via
+ * `Uint8Array#slice`, not a `subarray` view. The buffer's underlying
+ * `ArrayBuffer` is reused — a later `push` may overwrite those
+ * bytes during compaction or replace the buffer entirely during
+ * growth. A view would silently alias data we're about to clobber.
+ * Copying makes the emitted frame independent and safe for the
+ * consumer to retain across pushes.
  *
  * @example
  *   ```ts
  *   const decoder = createFrameDecoder();
- *   const reader = duplex.readable.getReader();
- *   while (true) {
- *   const { done, value } = await reader.read();
- *   if (done) break;
- *   const err = decoder.push(value, handleFrame);
- *   if (err) throw err;
+ *   for await (const chunk of socket) {
+ *     const err = decoder.push(chunk, handleFrame);
+ *     if (err) throw err;
  *   }
  *   ```;
  */
@@ -249,9 +284,17 @@ export function createFrameDecoder(
     },
 
     push(chunk, onFrame) {
+      // Empty chunks: some adapters yield a zero-byte read before
+      // EOF (e.g. Node's `'data'` after `socket.end()` in some
+      // edge cases). Treat as no-op so correct callers aren't
+      // punished for a transport quirk.
       if (chunk.length === 0) {
         return null;
       }
+
+      // Reject before allocating. A peer that sends VT followed by
+      // an unterminated byte stream must not force a max-sized
+      // allocation just to be told we'd reject.
       const needed = length + chunk.length;
       if (needed > max) {
         return new FramingError(
@@ -259,6 +302,12 @@ export function createFrameDecoder(
           `Buffered ${length} + chunk ${chunk.length} exceeds maxBufferedBytes (${max})`
         );
       }
+
+      // Doubling growth gives O(N) amortised total cost across N
+      // appends (each byte is copied at most O(log N) times, and
+      // the geometric series collapses to a constant factor).
+      // Cap the capacity at `max`: with a small budget there's no
+      // reason to over-allocate above the rejection threshold.
       if (needed > buffer.length) {
         let cap = buffer.length || INITIAL_CAPACITY;
         while (cap < needed) {
@@ -271,22 +320,46 @@ export function createFrameDecoder(
       buffer.set(chunk, length);
       length += chunk.length;
 
+      // Scan from offset 0 every push, not from a remembered
+      // cursor. The previous push compacted the unparsed tail to
+      // offset 0, so any stored offset would be stale. The scan
+      // cost is bounded by `length`, which is bounded by `max`.
       let scan = 0;
       while (scan < length) {
+        // By the post-push invariant, `buffer[scan]` is the first
+        // byte of a candidate frame and MUST be VT. Anything else
+        // is the peer writing garbage between frames — fail eagerly
+        // here rather than buffering until the next FS+CR arrives.
         if (buffer[scan] !== VT) {
           return new FramingError(
             FramingErrorCode.MISSING_START_BLOCK,
             `Expected VT (0x0B) at offset ${scan}, got 0x${(buffer[scan] as number).toString(16).padStart(2, "0")}`
           );
         }
+
+        // -1 means the FS+CR terminator is split across pushes (or
+        // hasn't arrived yet). Break and resume on the next push,
+        // when more bytes will be appended after the in-progress
+        // frame's tail.
         const fsIndex = findFsCr(buffer, scan + 1, length);
         if (fsIndex === -1) {
           break;
         }
+
+        // `slice` copies into a fresh ArrayBuffer; `subarray` would
+        // alias bytes we're about to overwrite during compaction
+        // (or free during growth). See the docblock for the full
+        // story.
         onFrame(buffer.slice(scan + 1, fsIndex));
         scan = fsIndex + 2;
       }
 
+      // Compact the unparsed tail back to offset 0 so the next
+      // push appends contiguously. Two fast paths skip the memmove:
+      //   * fully drained (scan >= length) — just reset length.
+      //   * nothing parsed (scan === 0) — nothing to move.
+      // Otherwise `copyWithin` runs an in-place memmove via the
+      // engine's typed-array intrinsic — no alloc, no extra `set()`.
       if (scan >= length) {
         length = 0;
       } else if (scan > 0) {
@@ -297,6 +370,10 @@ export function createFrameDecoder(
     },
 
     reset() {
+      // Note: we don't shrink `buffer` here. A reset usually
+      // follows an error, and the decoder is likely about to be
+      // discarded anyway. If the caller reuses it, the existing
+      // capacity is a free head-start for the next stream.
       length = 0;
     },
   };
