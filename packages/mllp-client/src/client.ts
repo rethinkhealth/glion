@@ -164,10 +164,16 @@ export class MllpClient {
       );
     }
 
-    // Close-during-connect race: while we were awaiting the adapter,
-    // someone may have called close(). If so, state is no longer
-    // "connecting" — we own the just-returned duplex, so close it and
-    // surface CONNECT_ABORTED to the caller.
+    // Close-during-connect race. We set #state = "connecting" before the
+    // `await` above; an `await` is a yield point, so a concurrent close() can
+    // run while we are suspended. Re-check that invariant rather than test for
+    // one specific state: anything other than "connecting" means we were
+    // superseded (close() advances to "closing"/"closed"; a future state would
+    // land here too). "ready" is impossible — it is set only below, after this
+    // guard. Because close() ran while #duplex was still null (it is assigned
+    // just below — the commit point), it could not have torn down the socket
+    // the adapter just returned. We now own that orphaned, open duplex: close
+    // it to avoid a leak, then surface CONNECT_ABORTED.
     if (this.#state !== "connecting") {
       await duplex.close();
       throw new MllpClientError(
