@@ -400,20 +400,18 @@ export class MllpClient {
     // Write the frame. Lock acquisition / release is bracketed.
     const writer = duplex.writable.getWriter();
     try {
-      try {
-        await writer.write(framed);
-      } catch (error) {
-        // Write failure is terminal — the socket half is dead. Mark
-        // closed so subsequent sends fail fast with CLOSED, and throw
-        // DROPPED (reason `write-failed`) with the original cause for triage.
-        const dropped = new MllpClientError(
-          MllpErrorCode.DROPPED,
-          `Failed to write the framed message to ${this.#host}:${this.#port}; the connection is no longer usable (see the error's cause).`,
-          { cause: error, reason: "write-failed" }
-        );
-        this.#dispatchError(dropped);
-        throw dropped;
-      }
+      await writer.write(framed);
+    } catch (error) {
+      // Write failure is terminal — the socket half is dead. Mark closed so
+      // subsequent sends fail fast with CLOSED, and throw DROPPED (reason
+      // `write-failed`) with the original cause for triage.
+      const dropped = new MllpClientError(
+        MllpErrorCode.DROPPED,
+        `Failed to write the framed message to ${this.#host}:${this.#port}; the connection is no longer usable (see the error's cause).`,
+        { cause: error, reason: "write-failed" }
+      );
+      this.#dispatchError(dropped);
+      throw dropped;
     } finally {
       writer.releaseLock();
     }
