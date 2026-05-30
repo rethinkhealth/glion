@@ -469,7 +469,7 @@ export class MllpClient {
           reject(
             new MllpClientError(
               MllpErrorCode.SEND_TIMEOUT,
-              `Send timed out after ${timeoutMs}ms`,
+              `Timed out after ${timeoutMs}ms waiting for the peer to acknowledge the message.`,
               { timeoutMs }
             )
           );
@@ -477,7 +477,7 @@ export class MllpClient {
           reject(
             new MllpClientError(
               MllpErrorCode.SEND_ABORTED,
-              "Send aborted by caller signal"
+              "Send aborted by the caller's abort signal before the ACK was received."
             )
           );
         }
@@ -524,7 +524,7 @@ export class MllpClient {
       waiter.reject(
         new MllpClientError(
           MllpErrorCode.CLOSED,
-          "Client closed during in-flight send"
+          "close() was called while this message was still being sent, so the send did not complete. The message may or may not have reached the peer; if it is not safe to resend blindly, confirm receipt before retrying."
         )
       );
     }
