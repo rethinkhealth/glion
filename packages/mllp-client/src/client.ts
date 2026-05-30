@@ -124,7 +124,7 @@ export class MllpClient {
     if (this.#state !== "idle") {
       throw new MllpClientError(
         MllpErrorCode.ALREADY_CONNECTED,
-        `Cannot connect: state is "${this.#state}"`
+        `Cannot connect while ${this.#state}: an MllpClient opens one connection in its lifetime. Await the in-flight connect, or use a separate client for a concurrent connection.`
       );
     }
     this.#state = "connecting";
@@ -146,20 +146,20 @@ export class MllpClient {
       if (opts.signal?.aborted) {
         throw new MllpClientError(
           MllpErrorCode.CONNECT_ABORTED,
-          "Connect aborted by caller signal",
+          `Connect to ${this.#host}:${this.#port} was aborted by the caller's abort signal.`,
           { cause: error }
         );
       }
       if (timeoutSignal.aborted) {
         throw new MllpClientError(
           MllpErrorCode.CONNECT_TIMEOUT,
-          `Connect timed out after ${this.#connectTimeoutMs}ms`,
+          `Connect to ${this.#host}:${this.#port} timed out after ${this.#connectTimeoutMs}ms.`,
           { timeoutMs: this.#connectTimeoutMs }
         );
       }
       throw new MllpClientError(
         MllpErrorCode.CONNECT_FAILED,
-        `Failed to connect to ${this.#host}:${this.#port}`,
+        `Failed to connect to ${this.#host}:${this.#port}: the runtime adapter rejected the connection (see the error's cause).`,
         { cause: error }
       );
     }
@@ -172,7 +172,7 @@ export class MllpClient {
       await duplex.close();
       throw new MllpClientError(
         MllpErrorCode.CONNECT_ABORTED,
-        "Connect interrupted by close()"
+        `Connect to ${this.#host}:${this.#port} was interrupted: close() was called while the connection was still being established.`
       );
     }
 
@@ -197,7 +197,7 @@ export class MllpClient {
       this.#dispatchError(
         new MllpClientError(
           MllpErrorCode.DROPPED,
-          "Peer closed the connection",
+          `The peer at ${this.#host}:${this.#port} closed the connection.`,
           {
             reason: "peer-drop",
           }
@@ -265,7 +265,7 @@ export class MllpClient {
       this.#dispatchError(
         new MllpClientError(
           MllpErrorCode.DROPPED,
-          "Peer flooded the client with unsolicited frames",
+          `The peer sent more than ${MAX_PENDING_FRAMES} unsolicited frames with no matching request; closing the connection to avoid unbounded buffering.`,
           { reason: "frame-queue-overflow" }
         )
       );
@@ -318,13 +318,13 @@ export class MllpClient {
     if (this.#state === "closing" || this.#state === "closed") {
       throw new MllpClientError(
         MllpErrorCode.CLOSED,
-        `Cannot send: client is "${this.#state}"`
+        `Cannot send: this client is ${this.#state} — it has been closed. Construct a new MllpClient to send again.`
       );
     }
     if (this.#state !== "ready") {
       throw new MllpClientError(
         MllpErrorCode.NOT_CONNECTED,
-        `Cannot send: state is "${this.#state}"`
+        `Cannot send: the client is ${this.#state}, not connected. Call connect() before send().`
       );
     }
 
@@ -402,7 +402,7 @@ export class MllpClient {
         // DROPPED (reason `write-failed`) with the original cause for triage.
         const dropped = new MllpClientError(
           MllpErrorCode.DROPPED,
-          "Failed to write frame to socket",
+          `Failed to write the framed message to ${this.#host}:${this.#port}; the connection is no longer usable (see the error's cause).`,
           { cause: error, reason: "write-failed" }
         );
         this.#dispatchError(dropped);

@@ -133,7 +133,7 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
     // just as the request side (readableTree) already guards it.
     throw new MllpClientError(
       MllpErrorCode.PARSE_FAILED,
-      "ACK bytes are not valid UTF-8",
+      "The peer's ACK is not valid UTF-8; HL7v2 messages must be ASCII/UTF-8 (a Latin-1 / Windows-1252 peer trips this). See the error's cause.",
       { cause: error }
     );
   }
@@ -144,7 +144,7 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
   } catch (error) {
     throw new MllpClientError(
       MllpErrorCode.PARSE_FAILED,
-      "Failed to parse ACK as HL7v2",
+      "Could not parse the peer's ACK as an HL7v2 message (see the error's cause).",
       { cause: error }
     );
   }
@@ -153,7 +153,7 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
   if (codeRaw === null || codeRaw === "") {
     throw new MllpClientError(
       MllpErrorCode.PARSE_FAILED,
-      "Response has no MSA-1 (acknowledgment code)"
+      "The peer's ACK has no MSA-1 acknowledgment code, so accept/reject cannot be determined."
     );
   }
   if (!isAckCode(codeRaw)) {
@@ -175,7 +175,7 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
   ) {
     throw new MllpClientError(
       MllpErrorCode.CORRELATION_MISMATCH,
-      `Response controlId mismatch: expected "${requestControlId}", got "${controlId}"`,
+      `ACK control-ID mismatch: the response's MSA-2 ("${controlId}") does not match the request's MSH-10 ("${requestControlId}"). This usually means a late ACK from a previously-timed-out request arrived on this connection.`,
       { actual: controlId, expected: requestControlId, raw, tree }
     );
   }
