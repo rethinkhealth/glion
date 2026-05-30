@@ -70,8 +70,9 @@ export interface MllpClientResponse {
  * parse→serialize round trip. A `Root` has no original bytes, so it is
  * serialized with `@glion/to-hl7v2`.
  *
- * @throws {FramingError} When the message carries an embedded MLLP control
- *   byte (VT / FS / CR) that cannot be framed.
+ * @throws {FramingError} When the message carries an embedded MLLP framing
+ *   byte (VT or FS) that cannot be framed. CR is allowed — it is the HL7v2
+ *   segment terminator.
  */
 export function toWireFrame(input: SendInput): Uint8Array {
   if (typeof input === "string" || input instanceof Uint8Array) {
@@ -121,7 +122,21 @@ interface ParseInput {
 
 export function parseResponse(input: ParseInput): MllpClientResponse {
   const { raw, timestamp, durationMs, requestControlId } = input;
-  const text = TEXT_DECODER.decode(raw);
+
+  let text: string;
+  try {
+    text = TEXT_DECODER.decode(raw);
+  } catch (error) {
+    // Strict UTF-8 decode (fatal): a Latin-1 / Windows-1252 peer must surface
+    // as PARSE_FAILED, not a raw TypeError, so the contract "every failure is
+    // an MllpClientError you can branch on by `code`" holds on the ACK path
+    // just as the request side (readableTree) already guards it.
+    throw new MllpClientError(
+      MllpErrorCode.PARSE_FAILED,
+      "ACK bytes are not valid UTF-8",
+      { cause: error }
+    );
+  }
 
   let tree: Root;
   try {

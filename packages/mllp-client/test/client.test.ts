@@ -334,6 +334,27 @@ describe("send() — malformed ACK responses", () => {
       code: MllpErrorCode.UNKNOWN_ACK_CODE,
     });
   });
+
+  it("throws PARSE_FAILED (not a raw TypeError) when the ACK bytes are not valid UTF-8", async () => {
+    // A Latin-1 / Windows-1252 peer emits a lone 0xE9. The strict (fatal) UTF-8
+    // decoder must surface this as MllpClientError(PARSE_FAILED), not leak a
+    // raw TypeError — the error contract is "branch on code".
+    const invalid = new Uint8Array([0x4d, 0x53, 0x48, 0xe9]); // "MSH" + 0xE9
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => peer.injectPeerBytes(frame(invalid)),
+    });
+    const client = makeClient(fake);
+    await client.connect();
+    let captured: unknown;
+    try {
+      await client.send(REQUEST);
+      expect.fail("send should have thrown");
+    } catch (error) {
+      captured = error;
+    }
+    expect(captured).toBeInstanceOf(MllpClientError);
+    expect((captured as MllpClientError).code).toBe(MllpErrorCode.PARSE_FAILED);
+  });
 });
 
 // ---------------------------------------------------------------------------
