@@ -21,13 +21,6 @@ export type {
   MllpSendOptions,
 } from "./client";
 export type { MllpConnector, MllpDuplex } from "./duplex";
-export {
-  MllpClientError,
-  MllpConnectError,
-  MllpCorrelationError,
-  MllpDroppedError,
-  MllpErrorCode,
-  MllpTimeoutError,
-} from "./errors";
-export type { MllpDropReason } from "./errors";
+export { MllpClientError, MllpErrorCode } from "./errors";
+export type { MllpClientErrorDetails, MllpDropReason } from "./errors";
 export type { MllpClientResponse, SendInput } from "./hl7v2";

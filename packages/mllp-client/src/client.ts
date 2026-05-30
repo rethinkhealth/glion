@@ -8,13 +8,7 @@ import { createFrameDecoder } from "@glion/mllp-transport";
 import type { FrameDecoder } from "@glion/mllp-transport";
 
 import type { MllpConnector, MllpDuplex } from "./duplex";
-import {
-  MllpClientError,
-  MllpConnectError,
-  MllpDroppedError,
-  MllpErrorCode,
-  MllpTimeoutError,
-} from "./errors";
+import { MllpClientError, MllpErrorCode } from "./errors";
 import { parseResponse, readRequestControlId, toWireFrame } from "./hl7v2";
 import type { MllpClientResponse, SendInput } from "./hl7v2";
 
@@ -157,13 +151,17 @@ export class MllpClient {
         );
       }
       if (timeoutSignal.aborted) {
-        throw new MllpTimeoutError("connect", this.#connectTimeoutMs);
+        throw new MllpClientError(
+          MllpErrorCode.CONNECT_TIMEOUT,
+          `Connect timed out after ${this.#connectTimeoutMs}ms`,
+          { timeoutMs: this.#connectTimeoutMs }
+        );
       }
-      throw new MllpConnectError({
-        cause: error,
-        host: this.#host,
-        port: this.#port,
-      });
+      throw new MllpClientError(
+        MllpErrorCode.CONNECT_FAILED,
+        `Failed to connect to ${this.#host}:${this.#port}`,
+        { cause: error }
+      );
     }
 
     // Close-during-connect race: while we were awaiting the adapter,
@@ -196,7 +194,15 @@ export class MllpClient {
       return;
     }
     if (this.#duplex === duplex) {
-      this.#dispatchError(new MllpDroppedError("peer-drop"));
+      this.#dispatchError(
+        new MllpClientError(
+          MllpErrorCode.DROPPED,
+          "Peer closed the connection",
+          {
+            reason: "peer-drop",
+          }
+        )
+      );
     }
   }
 
@@ -229,12 +235,12 @@ export class MllpClient {
         });
         if (error) {
           // Decoder errors are terminal (its buffer state becomes
-          // undefined). Wrap as a MllpDroppedError so the user sees
-          // one error class for "connection unrecoverable" with a
-          // reason discriminator.
+          // undefined). Surface as DROPPED with a `framing-error` reason —
+          // one "connection unrecoverable" code, discriminated by reason.
           this.#dispatchError(
-            new MllpDroppedError("framing-error", error.message, {
+            new MllpClientError(MllpErrorCode.DROPPED, error.message, {
               cause: error,
+              reason: "framing-error",
             })
           );
           return;
@@ -256,7 +262,13 @@ export class MllpClient {
     }
     if (this.#pendingFrames.length >= MAX_PENDING_FRAMES) {
       // Peer has flooded us with unsolicited frames — terminal.
-      this.#dispatchError(new MllpDroppedError("frame-queue-overflow"));
+      this.#dispatchError(
+        new MllpClientError(
+          MllpErrorCode.DROPPED,
+          "Peer flooded the client with unsolicited frames",
+          { reason: "frame-queue-overflow" }
+        )
+      );
       return;
     }
     this.#pendingFrames.push(bytes);
@@ -347,8 +359,8 @@ export class MllpClient {
       // garbage that would otherwise compound into FRAME_TOO_LARGE on
       // a later send.
       if (
-        error instanceof MllpTimeoutError &&
-        error.phase === "send" &&
+        error instanceof MllpClientError &&
+        error.code === MllpErrorCode.SEND_TIMEOUT &&
         this.#decoder !== null &&
         this.#decoder.buffered > 0
       ) {
@@ -387,11 +399,11 @@ export class MllpClient {
       } catch (error) {
         // Write failure is terminal — the socket half is dead. Mark
         // closed so subsequent sends fail fast with CLOSED, and throw
-        // a MllpDroppedError with the original cause for triage.
-        const dropped = new MllpDroppedError(
-          "write-failed",
+        // DROPPED (reason `write-failed`) with the original cause for triage.
+        const dropped = new MllpClientError(
+          MllpErrorCode.DROPPED,
           "Failed to write frame to socket",
-          { cause: error }
+          { cause: error, reason: "write-failed" }
         );
         this.#dispatchError(dropped);
         throw dropped;
@@ -450,7 +462,13 @@ export class MllpClient {
           this.#frameWaiter = null;
         }
         if (timeoutSignal.aborted) {
-          reject(new MllpTimeoutError("send", timeoutMs));
+          reject(
+            new MllpClientError(
+              MllpErrorCode.SEND_TIMEOUT,
+              `Send timed out after ${timeoutMs}ms`,
+              { timeoutMs }
+            )
+          );
         } else {
           reject(
             new MllpClientError(

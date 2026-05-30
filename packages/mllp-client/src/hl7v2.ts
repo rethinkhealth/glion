@@ -25,7 +25,7 @@ import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
-import { MllpClientError, MllpCorrelationError, MllpErrorCode } from "./errors";
+import { MllpClientError, MllpErrorCode } from "./errors";
 
 /**
  * Strict UTF-8 decoder — throws on invalid bytes. HL7v2 messages SHOULD
@@ -158,12 +158,11 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
     controlId !== "" &&
     requestControlId !== controlId
   ) {
-    throw new MllpCorrelationError({
-      actual: controlId,
-      expected: requestControlId,
-      raw,
-      tree,
-    });
+    throw new MllpClientError(
+      MllpErrorCode.CORRELATION_MISMATCH,
+      `Response controlId mismatch: expected "${requestControlId}", got "${controlId}"`,
+      { actual: controlId, expected: requestControlId, raw, tree }
+    );
   }
 
   if (

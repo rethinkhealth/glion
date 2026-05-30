@@ -17,15 +17,7 @@ import {
 import { frame } from "@glion/mllp-transport";
 import { describe, expect, it } from "vitest";
 
-import {
-  MllpClient,
-  MllpClientError,
-  MllpConnectError,
-  MllpCorrelationError,
-  MllpDroppedError,
-  MllpErrorCode,
-  MllpTimeoutError,
-} from "../src/index";
+import { MllpClient, MllpClientError, MllpErrorCode } from "../src/index";
 import type { MllpClient as MllpClientType, MllpDuplex } from "../src/index";
 import { createFakeDuplex } from "./fake-duplex";
 import type { FakeDuplex } from "./fake-duplex";
@@ -112,25 +104,29 @@ describe("connect()", () => {
     });
   });
 
-  it("throws MllpConnectError when the adapter rejects", async () => {
+  it("throws CONNECT_FAILED when the adapter rejects", async () => {
     const original = new Error("ECONNREFUSED");
     const client = new MllpClient({
       connect: () => Promise.reject(original),
       host: "x",
       port: 1,
     });
-    await expect(client.connect()).rejects.toBeInstanceOf(MllpConnectError);
+    await expect(client.connect()).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_FAILED,
+    });
     expect(client.state).toBe("closed");
   });
 
-  it("throws MllpTimeoutError when the adapter exceeds connectTimeoutMs", async () => {
+  it("throws CONNECT_TIMEOUT when the adapter exceeds connectTimeoutMs", async () => {
     const client = new MllpClient({
       connect: ({ signal }) => abortableConnect(signal),
       connectTimeoutMs: 10,
       host: "x",
       port: 1,
     });
-    await expect(client.connect()).rejects.toBeInstanceOf(MllpTimeoutError);
+    await expect(client.connect()).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_TIMEOUT,
+    });
     expect(client.state).toBe("closed");
   });
 
@@ -273,7 +269,7 @@ describe("send() — NAK codes", () => {
 // ---------------------------------------------------------------------------
 
 describe("send() — correlation verification", () => {
-  it("throws MllpCorrelationError when MSA-2 mismatches MSH-10", async () => {
+  it("throws CORRELATION_MISMATCH when MSA-2 mismatches MSH-10", async () => {
     const fake = createFakeDuplex({
       onWrite: respondWith(ACK_AA_WRONG_CONTROL),
     });
@@ -283,8 +279,11 @@ describe("send() — correlation verification", () => {
       await client.send(REQUEST);
       expect.fail("send should have thrown");
     } catch (error) {
-      expect(error).toBeInstanceOf(MllpCorrelationError);
-      const corr = error as MllpCorrelationError;
+      expect(error).toBeInstanceOf(MllpClientError);
+      expect((error as MllpClientError).code).toBe(
+        MllpErrorCode.CORRELATION_MISMATCH
+      );
+      const corr = error as MllpClientError;
       expect(corr.expected).toBe(REQUEST_CONTROL_ID);
       expect(corr.actual).toBe("OTHER");
     }
@@ -374,7 +373,7 @@ describe("send() — state guards", () => {
     });
     // Cleanup: drop the peer so the first send rejects, not hang
     fake.closePeer();
-    await expect(first).rejects.toBeInstanceOf(MllpDroppedError);
+    await expect(first).rejects.toMatchObject({ code: MllpErrorCode.DROPPED });
   });
 
   it("throws EMBEDDED_CONTROL_CHAR via mllp-transport on invalid bytes", async () => {
@@ -395,7 +394,7 @@ describe("send() — state guards", () => {
 // ---------------------------------------------------------------------------
 
 describe("send() — timeout / abort / drop", () => {
-  it("throws MllpTimeoutError when no ACK arrives in time", async () => {
+  it("throws SEND_TIMEOUT when no ACK arrives in time", async () => {
     const fake = createFakeDuplex({ onWrite: () => {} });
     const client = makeClient(fake);
     await client.connect();
@@ -403,8 +402,9 @@ describe("send() — timeout / abort / drop", () => {
       await client.send(REQUEST, { timeoutMs: 20 });
       expect.fail("send should have thrown");
     } catch (error) {
-      expect(error).toBeInstanceOf(MllpTimeoutError);
-      expect((error as MllpTimeoutError).timeoutMs).toBe(20);
+      expect(error).toBeInstanceOf(MllpClientError);
+      expect((error as MllpClientError).code).toBe(MllpErrorCode.SEND_TIMEOUT);
+      expect((error as MllpClientError).timeoutMs).toBe(20);
     }
     expect(client.state).toBe("ready");
   });
@@ -422,13 +422,13 @@ describe("send() — timeout / abort / drop", () => {
     expect(client.state).toBe("ready");
   });
 
-  it("rejects pending send with MllpDroppedError when peer drops", async () => {
+  it("rejects pending send with DROPPED when peer drops", async () => {
     const fake = createFakeDuplex({ onWrite: () => {} });
     const client = makeClient(fake);
     await client.connect();
     const p = client.send(REQUEST);
     setTimeout(() => fake.closePeer(), 10);
-    await expect(p).rejects.toBeInstanceOf(MllpDroppedError);
+    await expect(p).rejects.toMatchObject({ code: MllpErrorCode.DROPPED });
     expect(client.state).toBe("closed");
   });
 
@@ -594,7 +594,7 @@ describe("multiple sends on one connection", () => {
 // ---------------------------------------------------------------------------
 
 describe("send() — write failure", () => {
-  it("rejects with MllpDroppedError(write-failed) when the duplex write fails", async () => {
+  it("rejects with DROPPED(write-failed) when the duplex write fails", async () => {
     const fake = createFakeDuplex({ writeError: new Error("EPIPE") });
     const client = makeClient(fake);
     await client.connect();
@@ -604,9 +604,9 @@ describe("send() — write failure", () => {
     } catch (error) {
       captured = error;
     }
-    expect(captured).toBeInstanceOf(MllpDroppedError);
-    expect((captured as MllpDroppedError).reason).toBe("write-failed");
-    expect((captured as MllpDroppedError).cause).toBeDefined();
+    expect(captured).toBeInstanceOf(MllpClientError);
+    expect((captured as MllpClientError).reason).toBe("write-failed");
+    expect((captured as MllpClientError).cause).toBeDefined();
     // Write failure is terminal — connection is closed, not "ready".
     expect(client.state).toBe("closed");
   });
@@ -617,7 +617,7 @@ describe("send() — write failure", () => {
 // ---------------------------------------------------------------------------
 
 describe("send() — peer sends unframed garbage", () => {
-  it("rejects with MllpDroppedError(framing-error) and transitions to closed", async () => {
+  it("rejects with DROPPED(framing-error) and transitions to closed", async () => {
     const fake = createFakeDuplex({
       onWrite: (_chunk, peer) => {
         // No VT prefix — decoder will report MISSING_START_BLOCK.
@@ -632,9 +632,9 @@ describe("send() — peer sends unframed garbage", () => {
     } catch (error) {
       captured = error;
     }
-    expect(captured).toBeInstanceOf(MllpDroppedError);
-    expect((captured as MllpDroppedError).reason).toBe("framing-error");
-    expect((captured as MllpDroppedError).cause).toBeDefined();
+    expect(captured).toBeInstanceOf(MllpClientError);
+    expect((captured as MllpClientError).reason).toBe("framing-error");
+    expect((captured as MllpClientError).cause).toBeDefined();
     // Stream-level error is terminal — subsequent sends fail fast.
     expect(client.state).toBe("closed");
   });
@@ -688,7 +688,7 @@ describe("send() — late ACK from previously-timed-out send", () => {
     // First send times out.
     await expect(
       client.send(requestWithControlId("MSG_FIRST"), { timeoutMs: 20 })
-    ).rejects.toBeInstanceOf(MllpTimeoutError);
+    ).rejects.toMatchObject({ code: MllpErrorCode.SEND_TIMEOUT });
     expect(client.state).toBe("ready");
 
     // Late ACK for the timed-out request arrives between sends.
@@ -708,9 +708,12 @@ describe("send() — late ACK from previously-timed-out send", () => {
       captured = error;
     }
 
-    expect(captured).toBeInstanceOf(MllpCorrelationError);
-    expect((captured as MllpCorrelationError).expected).toBe("MSG_SECOND");
-    expect((captured as MllpCorrelationError).actual).toBe("MSG_FIRST");
+    expect(captured).toBeInstanceOf(MllpClientError);
+    expect((captured as MllpClientError).code).toBe(
+      MllpErrorCode.CORRELATION_MISMATCH
+    );
+    expect((captured as MllpClientError).expected).toBe("MSG_SECOND");
+    expect((captured as MllpClientError).actual).toBe("MSG_FIRST");
   });
 });
 
@@ -727,7 +730,9 @@ describe("send() — stream errors are terminal", () => {
     });
     const client = makeClient(fake);
     await client.connect();
-    await expect(client.send(REQUEST)).rejects.toBeInstanceOf(MllpDroppedError);
+    await expect(client.send(REQUEST)).rejects.toMatchObject({
+      code: MllpErrorCode.DROPPED,
+    });
     expect(client.state).toBe("closed");
     await expect(client.send(REQUEST)).rejects.toMatchObject({
       code: MllpErrorCode.CLOSED,
@@ -738,7 +743,9 @@ describe("send() — stream errors are terminal", () => {
     const fake = createFakeDuplex({ writeError: new Error("EPIPE") });
     const client = makeClient(fake);
     await client.connect();
-    await expect(client.send(REQUEST)).rejects.toBeInstanceOf(MllpDroppedError);
+    await expect(client.send(REQUEST)).rejects.toMatchObject({
+      code: MllpErrorCode.DROPPED,
+    });
     expect(client.state).toBe("closed");
     await expect(client.send(REQUEST)).rejects.toMatchObject({
       code: MllpErrorCode.CLOSED,
@@ -798,9 +805,9 @@ describe("decoder reset on SEND_TIMEOUT (slowloris recovery)", () => {
     });
     const client = makeClient(fake);
     await client.connect();
-    await expect(
-      client.send(REQUEST, { timeoutMs: 20 })
-    ).rejects.toBeInstanceOf(MllpTimeoutError);
+    await expect(client.send(REQUEST, { timeoutMs: 20 })).rejects.toMatchObject(
+      { code: MllpErrorCode.SEND_TIMEOUT }
+    );
     // If the decoder retained the dangling VT, the next send's ACK
     // would land into the corrupted buffer and the test would fail
     // (likely with FramingError). With the reset, the second send

@@ -1,9 +1,18 @@
 /**
- * Error codes and typed error classes for `@glion/mllp-client`.
+ * The single error type for `@glion/mllp-client`.
  *
- * Every error extends {@link MllpClientError} and carries a `code` from
- * {@link MllpErrorCode}; a caller's `switch` on the code never needs to
- * inspect client state.
+ * Every failure the client itself raises is an {@link MllpClientError}
+ * carrying a {@link MllpErrorCode}. **Branch on `code`** — it is the stable,
+ * exhaustive discriminant; a `switch` on it never needs to inspect client
+ * state. Code-specific detail rides on optional fields (only the fields
+ * relevant to a given `code` are populated); a wrapped underlying failure is
+ * on `cause`.
+ *
+ * A NAK is deliberately *not* an `MllpClientError`: `send()` throws an
+ * `@glion/ack` `AckException` when the peer understood the message and
+ * rejected it. The two are separate buckets — "the wire/protocol failed or
+ * the call was misused" (`MllpClientError`) vs. "the peer said no"
+ * (`AckException`) — so a caller catches them separately.
  *
  * @module
  */
@@ -27,52 +36,9 @@ export const MllpErrorCode = {
 } as const;
 export type MllpErrorCode = (typeof MllpErrorCode)[keyof typeof MllpErrorCode];
 
-export class MllpClientError<
-  TCode extends string = MllpErrorCode,
-> extends Error {
-  readonly code: TCode;
-  constructor(code: TCode, message: string, opts?: { cause?: unknown }) {
-    super(message, opts);
-    this.name = "MllpClientError";
-    this.code = code;
-  }
-}
-
-export class MllpConnectError extends MllpClientError {
-  readonly host: string;
-  readonly port: number;
-  constructor(opts: { host: string; port: number; cause?: unknown }) {
-    super(
-      MllpErrorCode.CONNECT_FAILED,
-      `Failed to connect to ${opts.host}:${opts.port}`,
-      {
-        cause: opts.cause,
-      }
-    );
-    this.name = "MllpConnectError";
-    this.host = opts.host;
-    this.port = opts.port;
-  }
-}
-
-export class MllpTimeoutError extends MllpClientError {
-  readonly phase: "connect" | "send";
-  readonly timeoutMs: number;
-  constructor(phase: "connect" | "send", timeoutMs: number) {
-    super(
-      phase === "connect"
-        ? MllpErrorCode.CONNECT_TIMEOUT
-        : MllpErrorCode.SEND_TIMEOUT,
-      `${phase === "connect" ? "Connect" : "Send"} timed out after ${timeoutMs}ms`
-    );
-    this.name = "MllpTimeoutError";
-    this.phase = phase;
-    this.timeoutMs = timeoutMs;
-  }
-}
-
 /**
- * Why a connection ended. Lets the caller branch on cause without
+ * Why a connection ended — set on {@link MllpClientError.reason} when `code`
+ * is `DROPPED`. Lets the caller branch on cause (e.g. a retry policy) without
  * parsing the message string.
  */
 export type MllpDropReason =
@@ -82,63 +48,55 @@ export type MllpDropReason =
   | "write-failed";
 
 /**
- * The peer or the transport ended the connection while a send was
- * waiting for an ACK (peer FIN, RST, transport error, decoder error,
- * write failure). Distinct from `MllpClientError(CLOSED)`, which is
- * thrown when the caller has already closed the client.
+ * Optional, code-specific detail for an {@link MllpClientError}. Only the
+ * fields relevant to a given `code` are set.
  */
-export class MllpDroppedError extends MllpClientError {
-  readonly reason: MllpDropReason;
+export interface MllpClientErrorDetails {
+  /**
+   * Underlying error being wrapped (e.g. the socket error behind
+   * `CONNECT_FAILED`).
+   */
+  cause?: unknown;
+  /** `DROPPED`: why the wire ended. */
+  reason?: MllpDropReason;
+  /** `CONNECT_TIMEOUT` / `SEND_TIMEOUT`: the deadline that elapsed, in ms. */
+  timeoutMs?: number;
+  /** `CORRELATION_MISMATCH`: the request's MSH-10 (the expected MSA-2). */
+  expected?: string;
+  /** `CORRELATION_MISMATCH`: the response's actual MSA-2. */
+  actual?: string;
+  /** `CORRELATION_MISMATCH`: parsed AST of the offending ACK. */
+  tree?: Root;
+  /** `CORRELATION_MISMATCH`: de-framed bytes of the offending ACK. */
+  raw?: Uint8Array;
+}
+
+/**
+ * The one error class `@glion/mllp-client` raises. Discriminate with `code`;
+ * read the optional detail fields only for the codes that populate them.
+ */
+export class MllpClientError extends Error {
+  readonly code: MllpErrorCode;
+  readonly reason: MllpDropReason | undefined;
+  readonly timeoutMs: number | undefined;
+  readonly expected: string | undefined;
+  readonly actual: string | undefined;
+  readonly tree: Root | undefined;
+  readonly raw: Uint8Array | undefined;
+
   constructor(
-    reason: MllpDropReason,
-    message = defaultDropMessage(reason),
-    opts?: { cause?: unknown }
+    code: MllpErrorCode,
+    message: string,
+    details: MllpClientErrorDetails = {}
   ) {
-    super(MllpErrorCode.DROPPED, message, opts);
-    this.name = "MllpDroppedError";
-    this.reason = reason;
-  }
-}
-
-function defaultDropMessage(reason: MllpDropReason): string {
-  switch (reason) {
-    case "peer-drop": {
-      return "Peer closed the connection";
-    }
-    case "framing-error": {
-      return "Decoder rejected peer bytes; connection unrecoverable";
-    }
-    case "frame-queue-overflow": {
-      return "Peer flooded the client with unsolicited frames";
-    }
-    case "write-failed": {
-      return "Write to socket failed; connection unrecoverable";
-    }
-    default: {
-      return "Connection dropped";
-    }
-  }
-}
-
-export class MllpCorrelationError extends MllpClientError {
-  readonly expected: string;
-  readonly actual: string;
-  readonly tree: Root;
-  readonly raw: Uint8Array;
-  constructor(opts: {
-    expected: string;
-    actual: string;
-    tree: Root;
-    raw: Uint8Array;
-  }) {
-    super(
-      MllpErrorCode.CORRELATION_MISMATCH,
-      `Response controlId mismatch: expected "${opts.expected}", got "${opts.actual}"`
-    );
-    this.name = "MllpCorrelationError";
-    this.expected = opts.expected;
-    this.actual = opts.actual;
-    this.tree = opts.tree;
-    this.raw = opts.raw;
+    super(message, { cause: details.cause });
+    this.name = "MllpClientError";
+    this.code = code;
+    this.reason = details.reason;
+    this.timeoutMs = details.timeoutMs;
+    this.expected = details.expected;
+    this.actual = details.actual;
+    this.tree = details.tree;
+    this.raw = details.raw;
   }
 }
