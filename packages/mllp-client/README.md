@@ -4,7 +4,7 @@ Persistent, single-flight MLLP client for HL7v2.
 
 ## What it does
 
-`@glion/mllp-client` opens one long-lived MLLP/TCP connection and sends HL7v2 messages over it, one in flight at a time. Each `send()` writes a framed message, waits for the peer's ACK, parses it, verifies the MSA-2 correlation ID against the request's MSH-10, and resolves with a structured response. Application/commit accept codes (`AA`/`CA`) resolve; reject codes (`AE`/`AR`/`CE`/`CR`) throw the matching `@glion/ack` `AckException` (`AckApplicationError`, `AckApplicationReject`, `AckCommitError`, `AckCommitReject`).
+`@glion/mllp-client` opens one long-lived MLLP/TCP connection and sends HL7v2 messages over it, one in flight at a time. `send()` accepts a `string`, `Uint8Array`, or parsed `Root` AST. The client follows the grain of the AST: it uses the tree for _reading_ meaning (MSH-10 correlation, the parsed ACK) and the caller's own bytes for the _wire_. A `string`/`Uint8Array` is framed verbatim — never round-tripped through the parser, which (being an AST, not a byte-exact CST) would silently normalize it — while a `Root` is serialized with `@glion/to-hl7v2`. Each `send()` waits for the peer's ACK, verifies the MSA-2 correlation ID against the request's MSH-10, and resolves with a structured response. Application/commit accept codes (`AA`/`CA`) resolve; reject codes (`AE`/`AR`/`CE`/`CR`) throw the matching `@glion/ack` `AckException` (`AckApplicationError`, `AckApplicationReject`, `AckCommitError`, `AckCommitReject`).
 
 The client is one class managing one socket lifecycle: `connect()` initializes, `send()` uses, `close()` tears down. Concurrent sends queue (FIFO) and run one at a time. The wire transport is supplied by a runtime adapter — the Node adapter ships at `@glion/mllp-client/node`. A peer drop, write failure, or decoder framing error is terminal: the connection moves to `closed` and the instance is spent. Reconnect is deferred to a later version.
 
@@ -94,19 +94,20 @@ All are an `MllpClientError`; branch on `code`:
 
 ### `client.send(message, options?): Promise<MllpClientResponse>`
 
-Frames `message` (a `string` or `Uint8Array`), writes it, and resolves with the parsed ACK. `options.signal` cancels the wait; `options.timeoutMs` overrides the default deadline (the deadline covers the wait for the ACK).
+Accepts a `string`, `Uint8Array`, or `Root` (`SendInput`). A `string`/`Uint8Array` is sent on the wire **verbatim** — the caller's exact bytes, never round-tripped through the parser — while the tree is read (best-effort) for the MSH-10 correlation ID. A `Root` has no original bytes, so it is serialized with `@glion/to-hl7v2`. Resolves with the parsed ACK. `options.signal` cancels the wait; `options.timeoutMs` overrides the default deadline (the deadline covers the wait for the ACK).
 
 **Throws**
 
 - `AckException` (from `@glion/ack`) — the peer returned a NAK (`AE`/`AR`/`CE`/`CR`). The concrete subclass encodes the code (`AckApplicationError` = AE, `AckApplicationReject` = AR, `AckCommitError` = CE, `AckCommitReject` = CR); it carries `code`, `errorCode` / `severity` (ERR-3 / ERR-4), `controlId`, `raw`, and the parsed `tree`.
-- `FramingError` (from `@glion/mllp-transport`) — the payload contains an embedded control character that cannot be framed (thrown before any state change).
+- `FramingError` (from `@glion/mllp-transport`) — the message contains an embedded MLLP control character (VT / FS / CR) that cannot be framed (thrown before any state change).
 - otherwise an `MllpClientError`; branch on `code`:
   - `CORRELATION_MISMATCH` — both the request's MSH-10 and the response's MSA-2 are non-empty and differ (carries `expected` / `actual` / `tree` / `raw`). If either is empty, correlation is skipped.
   - `SEND_TIMEOUT` — no ACK arrived within the deadline (`timeoutMs` is set).
   - `DROPPED` — the connection ended (peer drop, write failure, framing error, frame flood); `reason` discriminates. Terminal.
   - `SEND_ABORTED` — `options.signal` aborted.
   - `NOT_CONNECTED` / `CLOSED` — the client is not connected, or has been closed (the in-flight send and every queued send reject).
-  - `PARSE_FAILED` / `UNKNOWN_ACK_CODE` — the ACK is not parseable HL7v2 or carries a non-standard MSA-1.
+  - `PARSE_FAILED` — the ACK is not parseable HL7v2. (Reading the request's MSH-10 is best-effort and never throws; an unparseable request is still sent verbatim, with correlation skipped.)
+  - `UNKNOWN_ACK_CODE` — the ACK carries a non-standard MSA-1.
 
 ### `client.close(): Promise<void>`
 

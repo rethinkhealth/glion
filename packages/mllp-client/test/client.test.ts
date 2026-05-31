@@ -207,6 +207,21 @@ describe("send() — accept codes", () => {
     expect(written.at(-1)).toBe(0x0d);
   });
 
+  it("sends string input on the wire verbatim — a trailing empty field survives", async () => {
+    // The wire-fidelity guarantee: caller bytes are framed verbatim, never
+    // round-tripped through the parser (which, being an AST, would drop the
+    // trailing field delimiter in "PID|1|"). MSH-9 carries no MSH-10, so
+    // correlation is skipped and the ACK resolves.
+    const request = ["MSH|^~\\&|S|F|R|RF|20240101||ADT^A01", "PID|1|"].join(
+      "\r"
+    );
+    const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
+    const client = makeClient(fake);
+    await client.connect();
+    await client.send(request);
+    expect(fake.capturedWrites()).toEqual(frame(request));
+  });
+
   it("accepts Uint8Array message input", async () => {
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
@@ -317,11 +332,44 @@ describe("send() — correlation verification", () => {
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
-    // Request without MSH-10 — must be a valid HL7v2-ish line with no
-    // VT/FS bytes; we don't pre-parse the request beyond the MSH scan.
+    // Request without MSH-10 — a valid HL7v2-ish line with no VT/FS bytes.
     const noControl = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|";
     const response = await client.send(noControl);
     expect(response.code).toBe("AA");
+  });
+
+  it("correlates MSH-10 to MSA-2 at the component level", async () => {
+    // Request MSH-10 carries a component suffix; the peer echoes only its
+    // first component in MSA-2. They correlate at the component level —
+    // request and response are both extracted via the parser, so a
+    // field-level "MSGID^suffix" vs "MSGID" false mismatch can't happen.
+    const request =
+      "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|MSGID^suffix|P|2.5\rPID|1||x";
+    const fake = createFakeDuplex({
+      onWrite: respondWith(requestAck("AA", "MSGID")),
+    });
+    const client = makeClient(fake);
+    await client.connect();
+    const response = await client.send(request);
+    expect(response.code).toBe("AA");
+    expect(response.requestControlId).toBe("MSGID");
+    expect(response.controlId).toBe("MSGID");
+  });
+
+  it("honours a non-standard MSH-1 field separator when extracting MSH-10", async () => {
+    // Field separator is '#', not '|'. The parser reads MSH-1 and honours it,
+    // so MSH-10 ("CUSTOMID") is extracted and the mismatch against the peer's
+    // MSA-2 is caught. A "#"-delimited request would have defeated a
+    // split("|") scanner, which would skip correlation entirely.
+    const request = "MSH#^~\\&#S#F#R#RF#20240101##ADT^A01#CUSTOMID#P#2.5";
+    const fake = createFakeDuplex({
+      onWrite: respondWith(requestAck("AA", "OTHERID")),
+    });
+    const client = makeClient(fake);
+    await client.connect();
+    await expect(client.send(request)).rejects.toMatchObject({
+      code: MllpErrorCode.CORRELATION_MISMATCH,
+    });
   });
 });
 

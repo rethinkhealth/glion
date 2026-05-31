@@ -169,6 +169,19 @@ export class MllpClient {
     return this.#queue.length;
   }
 
+  /**
+   * Open the wire through the runtime adapter and start the read loop.
+   * Single-shot: each instance manages one connection lifecycle.
+   *
+   * @param opts.signal - Cancels an in-flight connect.
+   * @throws {MllpClientError} `CLOSED` when the instance is already
+   *   `closed`/`closing` (construct a new instance); `ALREADY_CONNECTED` when
+   *   called while `connecting`/`ready`/`sending`; `CONNECT_ABORTED` when
+   *   `opts.signal` aborts or `close()` interrupts the connect.
+   *   `CONNECT_FAILED` when the adapter rejects (underlying error on `cause`);
+   *   `CONNECT_TIMEOUT` when the adapter exceeds `connectTimeoutMs`
+   *   (`timeoutMs` set).
+   */
   async connect(opts: { signal?: AbortSignal } = {}): Promise<void> {
     if (this.#state === "closed" || this.#state === "closing") {
       throw new MllpClientError(
@@ -372,6 +385,26 @@ export class MllpClient {
     }
   }
 
+  /**
+   * Frame and enqueue `message`, then resolve with the parsed ACK. Concurrent
+   * sends queue (FIFO) and run one at a time.
+   *
+   * @param opts.signal - Cancels the send; may abort while it is still queued.
+   * @param opts.timeoutMs - Overrides the default deadline (it spans the queue
+   *   wait as well as the wire round-trip).
+   * @throws {AckException} (from `@glion/ack`) The peer returned a NAK — the
+   *   subclass encodes the code: `AckApplicationError`/`AckApplicationReject`/
+   *   `AckCommitError`/`AckCommitReject` for AE/AR/CE/CR.
+   * @throws {MllpClientError} Otherwise; branch on `code`: `CORRELATION_MISMATCH`
+   *   (request MSH-10 and response MSA-2 both non-empty and differ),
+   *   `SEND_TIMEOUT` (no ACK in time), `DROPPED` (connection ended; `reason`
+   *   discriminates — terminal), `SEND_ABORTED` (`opts.signal` aborted),
+   *   `NOT_CONNECTED`/`CLOSED` (state guard), `PARSE_FAILED`/`UNKNOWN_ACK_CODE`
+   *   (ACK unparseable or non-standard MSA-1). Reading the request's MSH-10 is
+   *   best-effort and never throws.
+   * @throws {FramingError} The message carries an embedded MLLP framing byte
+   *   (VT or FS) that cannot be framed. CR is allowed (segment terminator).
+   */
   // `async` keeps the Promise contract: the synchronous guard and toWireFrame()
   // failures below surface as rejections, never as synchronous throws — which
   // is what callers (and the tests) rely on. No `await` is needed in the body.
@@ -639,6 +672,11 @@ export class MllpClient {
     });
   }
 
+  /**
+   * Tear the connection down. Idempotent: resolves from any state and never
+   * rejects. The in-flight `send()` rejects with `MllpClientError` (`CLOSED`),
+   * as does every queued send.
+   */
   async close(): Promise<void> {
     if (this.#state === "closed" || this.#state === "closing") {
       return;
@@ -696,6 +734,7 @@ export class MllpClient {
     this.#state = "closed";
   }
 
+  /** Calls {@link close}. Enables `await using`. */
   async [Symbol.asyncDispose](): Promise<void> {
     await this.close();
   }
