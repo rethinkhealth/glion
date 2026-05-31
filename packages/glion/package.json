@@ -1,7 +1,7 @@
 {
   "name": "@glion/cli",
   "version": "0.16.0",
-  "description": "MLLP server dev tool — dev server with live TUI, production JSON-line events, hot reload",
+  "description": "MLLP dev tool — dev server with live TUI, production JSON-line events, hot reload, and a send command for HL7v2 messages",
   "keywords": [
     "cli",
     "dev-server",
