@@ -723,6 +723,9 @@ importers:
       '@glion/ack':
         specifier: workspace:*
         version: link:../ack
+      '@glion/ast':
+        specifier: workspace:*
+        version: link:../ast
       '@glion/mllp':
         specifier: workspace:*
         version: link:../mllp
@@ -732,6 +735,12 @@ importers:
       '@glion/parser':
         specifier: workspace:*
         version: link:../parser
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../to-hl7v2
+      '@glion/util-query':
+        specifier: workspace:*
+        version: link:../util-query
       rolldown:
         specifier: 1.0.0-rc.14
         version: 1.0.0-rc.14

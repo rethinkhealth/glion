@@ -54,9 +54,12 @@
   },
   "dependencies": {
     "@glion/ack": "workspace:*",
+    "@glion/ast": "workspace:*",
     "@glion/mllp": "workspace:*",
     "@glion/mllp-client": "workspace:*",
     "@glion/parser": "workspace:*",
+    "@glion/to-hl7v2": "workspace:*",
+    "@glion/util-query": "workspace:*",
     "rolldown": "1.0.0-rc.14",
     "zod": "3.25.76"
   },
