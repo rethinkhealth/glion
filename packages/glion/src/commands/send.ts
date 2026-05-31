@@ -1,12 +1,16 @@
 /**
  * `glion send` — send one HL7v2 message over MLLP and report the ACK.
  *
- * This module currently exposes only the pure argument parser. The
- * command handler (target resolution, message read, structural gate,
- * MLLP exchange, rendering) lands in later increments. Keeping the
- * parser pure and standalone makes it exhaustively unit-testable
- * without sockets, config loading, or process state.
+ * This module exposes the pure, side-effect-free pieces of the command:
+ * the argument parser (`parseSendArgs`) and the structural gate
+ * (`parseAndGate`). The command handler (target resolution, message read,
+ * MLLP exchange, rendering) lands in later increments. Keeping these pure
+ * makes them exhaustively unit-testable without sockets, config loading,
+ * or process state.
  */
+
+import type { Root } from "@glion/ast";
+import { parseHL7v2 } from "@glion/parser";
 
 /** Connect + ACK-wait deadline used when `--timeout` is omitted. */
 export const DEFAULT_SEND_TIMEOUT_MS = 30_000;
@@ -170,3 +174,90 @@ export function parseSendArgs(argv: readonly string[]): ParseSendResult {
     ok: true,
   };
 }
+
+/**
+ * Outcome of the structural gate: either a canonical {@link Root} parsed from a
+ * message that leads with a real MSH header, or a precise reason why the input
+ * is not an HL7v2 message.
+ *
+ * The reason maps to exit code 2 and the `{"ok":false,"kind":"invalid"}` JSON
+ * line the handler emits; `message` is the authored, human-readable
+ * explanation.
+ */
+export type GateResult =
+  | { ok: true; tree: Root }
+  | { ok: false; message: string };
+
+/** First three characters every HL7v2 message must carry. */
+const MSH_SEGMENT_NAME = "MSH";
+
+/**
+ * Parses the raw message and confirms it leads with a real MSH header.
+ *
+ * `@glion/parser` is fully lenient — it never throws and turns any string into
+ * a tree, always labelling the first segment "MSH" regardless of its real
+ * three-character prefix (the MSH bootstrap in the tokenizer only fires when
+ * the input literally starts with "MSH"). So "leads with a real MSH header" is
+ * enforced here in two parts:
+ *
+ * 1. The text must begin with the uppercase segment ID `MSH` — without it, the
+ *    parser never bootstraps delimiters and the first field carries no
+ *    separator. This also rejects empty input, plain prose, JSON, and a non-MSH
+ *    leading segment in one check.
+ * 2. The character right after `MSH` must be a real field separator (MSH-1) — a
+ *    non-alphanumeric, non-whitespace delimiter — and the header must carry
+ *    encoding characters (MSH-2). This rejects a truncated `MSH`, `MSHxyz` (the
+ *    positional bootstrap would otherwise read "x" as MSH-1), and `MSH|`.
+ */
+export const parseAndGate = (text: string): GateResult => {
+  if (text.length === 0) {
+    return {
+      message:
+        "The message is empty (no bytes were read from the file or stdin).",
+      ok: false,
+    };
+  }
+  if (!text.startsWith(MSH_SEGMENT_NAME)) {
+    return {
+      message:
+        'Not an HL7v2 message: it must begin with an MSH segment. The first three characters must be the uppercase segment ID "MSH".',
+      ok: false,
+    };
+  }
+
+  // The character at index 3 is the field separator (MSH-1). It must be a
+  // real delimiter, not a letter, digit, or whitespace: the tokenizer's MSH
+  // bootstrap slices positionally — char[3] → MSH-1, chars[4..7] → MSH-2 —
+  // so it treats "MSHxyz" as MSH-1 "x", MSH-2 "yz" even though no separator
+  // is present. Requiring a non-alphanumeric, non-space separator is what
+  // distinguishes a true header ("MSH|^~\\&|...") from a stray "MSH" prefix.
+  const fieldSeparator = text.charAt(MSH_SEGMENT_NAME.length);
+  if (fieldSeparator.length === 0 || /[A-Za-z0-9\s]/.test(fieldSeparator)) {
+    return {
+      message:
+        'Not an HL7v2 message: the MSH header is missing its field separator (MSH-1). A valid header looks like "MSH|^~\\&|...".',
+      ok: false,
+    };
+  }
+
+  // Read MSH-2 from the same raw string as MSH-1, not from the parsed tree:
+  // the tokenizer populates MSH-2 by positionally slicing a fixed window after
+  // "MSH", so a tree-based check would only assert "some chars follow the
+  // separator", accepting a stray "MSH|X". The encoding characters are the run
+  // between the field separator (index 3) and the next field separator.
+  const encodingStart = MSH_SEGMENT_NAME.length + 1;
+  const nextSeparator = text.indexOf(fieldSeparator, encodingStart);
+  const encodingCharacters = text.slice(
+    encodingStart,
+    nextSeparator === -1 ? undefined : nextSeparator
+  );
+  if (encodingCharacters.length === 0) {
+    return {
+      message:
+        'Not an HL7v2 message: the MSH header is missing its encoding characters (MSH-2). A valid header looks like "MSH|^~\\&|...".',
+      ok: false,
+    };
+  }
+
+  return { ok: true, tree: parseHL7v2(text) };
+};
