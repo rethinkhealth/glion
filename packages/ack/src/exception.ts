@@ -1,22 +1,42 @@
-import type { Segment } from "@glion/ast";
+import type { Root, Segment } from "@glion/ast";
 import { f, s } from "@glion/builder";
 
 import { AckCode, Severity } from "./constants";
-import type {
-  AckCodeValue,
-  Hl7ErrorCodeValue,
-  SeverityValue,
-} from "./constants";
+import type { AckCodeValue } from "./constants";
 
 export interface AckExceptionOptions extends ErrorOptions {
-  errorCode: Hl7ErrorCodeValue;
-  severity?: SeverityValue;
+  /**
+   * ERR-3 condition code (Table 0357 — see {@link Hl7ErrorCode}). A known
+   * code when building an outbound rejection; an arbitrary peer-supplied
+   * string — or absent — when derived from an inbound ACK that may carry a
+   * non-standard code or no ERR segment at all.
+   */
+  errorCode?: string;
+  /**
+   * ERR-4 severity (Table 0516 — see {@link Severity}); optional for inbound
+   * ACKs.
+   */
+  severity?: string;
   /**
    * The raw HL7v2 ACK message associated with this exception, when one
    * exists. Set when the exception is derived from an existing ACK;
    * left undefined when no ACK has been produced yet.
    */
   raw?: string;
+  /**
+   * MSA-2 message control ID echoed from the original MSH-10 of the
+   * message the receiver is rejecting. Present when the exception is
+   * derived from an inbound ACK; absent when synthesised before any
+   * acknowledgment exists.
+   */
+  controlId?: string;
+  /**
+   * Parsed AST of the ACK this exception was derived from, when one exists.
+   * Lets a consumer walk ERR repetitions or other segments without
+   * re-parsing `raw`. Absent when the exception is synthesised before any
+   * acknowledgment.
+   */
+  tree?: Root;
 }
 
 /**
@@ -30,20 +50,33 @@ export interface AckExceptionOptions extends ErrorOptions {
  */
 export abstract class AckException extends Error {
   abstract readonly code: AckCodeValue;
-  readonly errorCode: Hl7ErrorCodeValue;
-  readonly severity: SeverityValue | undefined;
+  readonly errorCode: string | undefined;
+  readonly severity: string | undefined;
   /**
    * The raw HL7v2 ACK message associated with this exception, when one
    * exists. Set when the exception is derived from an existing ACK;
    * left undefined when no ACK has been produced yet.
    */
   readonly raw: string | undefined;
+  /**
+   * MSA-2 control ID echoed from the original MSH-10. Present when the
+   * exception is derived from an inbound ACK; absent otherwise.
+   */
+  readonly controlId: string | undefined;
+  /**
+   * Parsed AST of the ACK this exception was derived from. Present when
+   * derived from an inbound ACK; absent when synthesised. Lets a consumer
+   * walk ERR repetitions or other segments without re-parsing `raw`.
+   */
+  readonly tree: Root | undefined;
 
   constructor(message: string, options: AckExceptionOptions) {
     super(message, { cause: options.cause });
     this.errorCode = options.errorCode;
     this.severity = options.severity;
     this.raw = options.raw;
+    this.controlId = options.controlId;
+    this.tree = options.tree;
   }
 
   /**
@@ -55,7 +88,7 @@ export abstract class AckException extends Error {
       "ERR",
       f(""),
       f(""),
-      f(this.errorCode),
+      f(this.errorCode ?? ""),
       f(this.severity ?? Severity.Error)
     );
   }

@@ -1,4 +1,7 @@
 {
   "extends": "@glion/tsconfig/library.json",
-  "compilerOptions": { "outDir": "dist", "strictNullChecks": true }
+  "compilerOptions": {
+    "outDir": "dist",
+    "strictNullChecks": true
+  }
 }

@@ -67,7 +67,6 @@ Start a Node.js or Bun TCP server that dispatches incoming MLLP frames through t
 | ------------------------------- | ------------------------------------------------------ |
 | `encode(message)`               | Encode a message string into an MLLP frame.            |
 | `decode(frame)`                 | Decode a single MLLP frame to its message.             |
-| `encodeMultiple(messages)`      | Encode an array of messages in one pass.               |
 | `createDecoderStream(options?)` | TransformStream for streaming decode from chunked TCP. |
 
 ### Types
@@ -261,13 +260,11 @@ const server = serve(app, {
 ### Simple API
 
 ```ts
-import { encode, decode, encodeMultiple } from "@glion/mllp";
+import { encode, decode } from "@glion/mllp";
 
 const mllpFrame = encode(hl7Message);
 const decoded = decode(mllpFrame);
 console.log(decoded.text);
-
-const frames = encodeMultiple(["MSH|1", "MSH|2"]);
 ```
 
 ### Streaming API

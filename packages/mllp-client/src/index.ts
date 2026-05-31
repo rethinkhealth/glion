@@ -1,39 +1,26 @@
 /**
- * Default entry point of `@glion/mllp-client`.
+ * `@glion/mllp-client` — persistent MLLP client for HL7v2.
  *
- * `import { MllpClient } from "@glion/mllp-client"` resolves here on
- * Node and Bun. This module is a thin re-export of
- * `@glion/mllp-client/node` so the common case stays a single
- * import line.
- *
- * For other runtimes:
- *
- * - Deno: `@glion/mllp-client/deno`
- * - Cloudflare Workers: `@glion/mllp-client/workers`
- * - Custom transport / browser via a bridge: `@glion/mllp-client/core`
- *
- * Bundlers that honour the `workerd` and `deno` keys in this
- * package's `exports` map will automatically pick the right entry
- * for the target runtime — the per-runtime subpaths are also
- * available as explicit imports for clarity.
+ * One connection, one send on the wire at a time. `send()` accepts a
+ * `string` / `Uint8Array` / `Root`: the caller's bytes (or a serialized
+ * `Root`) go on the wire unchanged, while the tree is used to read MSH-10 for
+ * correlation and to parse the ACK. A NAK (AE/AR/CE/CR) throws the central
+ * `@glion/ack` exception family (`AckApplicationError`, `AckApplicationReject`,
+ * `AckCommitError`, `AckCommitReject`) — the same types the server throws;
+ * import them and `AckException` from `@glion/ack`. Runtime adapters live
+ * behind {@link MllpConnector} — the default Node adapter is in
+ * `@glion/mllp-client/node`.
  *
  * @module
  */
 
-// biome-ignore-all lint/performance/noBarrelFile: public package surface
-
-export type { Acknowledgment } from "./core/acknowledgment";
+export { MllpClient } from "./client";
 export type {
-  MllpConnect,
-  MllpConnectParams,
-  MllpDuplexStream,
-} from "./core/connect";
-export { MllpClientError, MllpClientErrorCode } from "./core/errors";
-export { MllpClient, nodeConnect } from "./runtimes/node";
-export type {
-  BoundMllpClientOptions,
   MllpClientOptions,
-  MllpClientTlsOptions,
-  SendMode,
-  SendOptions,
-} from "./runtimes/node";
+  MllpClientState,
+  MllpSendOptions,
+} from "./client";
+export type { MllpConnector, MllpDuplex } from "./duplex";
+export { MllpClientError, MllpErrorCode } from "./errors";
+export type { MllpClientErrorDetails, MllpDropReason } from "./errors";
+export type { MllpClientResponse, SendInput } from "./hl7v2";

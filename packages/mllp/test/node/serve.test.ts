@@ -4,11 +4,7 @@
 import net from "node:net";
 
 import { parseHL7v2 } from "@glion/hl7v2";
-import {
-  encode,
-  MLLP_END_BYTE_1,
-  MLLP_END_BYTE_2,
-} from "@glion/mllp-transport";
+import { CR, frame, FS } from "@glion/mllp-transport";
 
 import { serve } from "../../src/node/serve.js";
 import type { Server } from "../../src/node/serve.js";
@@ -48,7 +44,7 @@ function sendMessage(
 ): Promise<string | undefined> {
   return new Promise((resolve, reject) => {
     const client = net.connect({ host: "127.0.0.1", port }, () => {
-      client.write(encode(message));
+      client.write(frame(message));
     });
 
     const chunks: Buffer[] = [];
@@ -68,8 +64,8 @@ function sendMessage(
       // Check if we have a complete MLLP frame (ends with FS CR)
       if (
         combined.length >= 3 &&
-        combined.at(-2) === MLLP_END_BYTE_1 &&
-        combined.at(-1) === MLLP_END_BYTE_2
+        combined.at(-2) === FS &&
+        combined.at(-1) === CR
       ) {
         resolved = true;
         clearTimeout(timer);
@@ -119,8 +115,8 @@ function createPersistentClient(port: number): {
         const combined = Buffer.concat(chunks);
         if (
           combined.length >= 3 &&
-          combined.at(-2) === MLLP_END_BYTE_1 &&
-          combined.at(-1) === MLLP_END_BYTE_2
+          combined.at(-2) === FS &&
+          combined.at(-1) === CR
         ) {
           resolved = true;
           clearTimeout(timer);
@@ -140,7 +136,7 @@ function createPersistentClient(port: number): {
       client.on("data", onData);
       client.once("error", onError);
 
-      client.write(encode(message));
+      client.write(frame(message));
     });
 
   return {

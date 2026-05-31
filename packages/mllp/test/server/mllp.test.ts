@@ -1,9 +1,9 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
-import { MllpError } from "@glion/mllp-transport";
 import { hl7v2Parser } from "@glion/parser";
 import { unified } from "unified";
 
+import { MllpServerError } from "../../src/errors.js";
 import { Mllp } from "../../src/server/mllp.js";
 import type { ConnectionInfo, Hl7v2Processor } from "../../src/server/types.js";
 
@@ -63,27 +63,27 @@ describe("Mllp", () => {
   });
 
   describe("parser() lifecycle stage", () => {
-    it("throws MllpError when handle() called without parser", async () => {
+    it("throws MllpServerError when handle() called without parser", async () => {
       const app = new Mllp();
       app.on("*", async () => RESPONSE_OK);
 
       await expect(
         app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION)
-      ).rejects.toThrow(MllpError);
+      ).rejects.toThrow(MllpServerError);
 
       await expect(
         app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION)
       ).rejects.toThrow("No parser registered");
     });
 
-    it("missing-parser error has ERR_NO_PARSER code", async () => {
+    it("missing-parser error has NO_PARSER code", async () => {
       const app = new Mllp();
       try {
         await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
         expect.unreachable("should have thrown");
       } catch (error) {
-        expect(error).toBeInstanceOf(MllpError);
-        expect((error as MllpError).code).toBe("ERR_NO_PARSER");
+        expect(error).toBeInstanceOf(MllpServerError);
+        expect((error as MllpServerError).code).toBe("NO_PARSER");
       }
     });
 
@@ -97,7 +97,7 @@ describe("Mllp", () => {
 
       await expect(
         app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION)
-      ).rejects.toThrow(MllpError);
+      ).rejects.toThrow(MllpServerError);
       expect(errorHandlerCalled.value).toBe(false);
     });
 

@@ -35,6 +35,29 @@ describe("AckException", () => {
       expect(e).toBeInstanceOf(AckException);
     }
   });
+
+  it("preserves controlId when provided", () => {
+    const subclasses = [
+      AckApplicationError,
+      AckApplicationReject,
+      AckCommitError,
+      AckCommitReject,
+    ];
+    for (const Subclass of subclasses) {
+      const error = new Subclass("test", {
+        controlId: "MSG001",
+        errorCode: Hl7ErrorCode.ApplicationInternalError,
+      });
+      expect(error.controlId).toBe("MSG001");
+    }
+  });
+
+  it("controlId defaults to undefined when omitted", () => {
+    const error = new AckApplicationError("test", {
+      errorCode: Hl7ErrorCode.ApplicationInternalError,
+    });
+    expect(error.controlId).toBeUndefined();
+  });
 });
 
 describe("AckApplicationError", () => {

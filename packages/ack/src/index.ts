@@ -1,8 +1,9 @@
 export { acknowledge } from "./acknowledge";
 export type { AcknowledgeOptions, SendingInfo } from "./acknowledge";
-export { AckCode, Hl7ErrorCode, Severity } from "./constants";
+export { AckCode, Hl7ErrorCode, isAckCode, Severity } from "./constants";
 export type {
   AckCodeValue,
+  AckNakCode,
   AckSuccessCode,
   Hl7ErrorCodeValue,
   SeverityValue,

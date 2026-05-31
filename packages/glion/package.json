@@ -61,6 +61,7 @@
     "@glion/check-readme": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/mllp-ack": "workspace:*",
+    "@glion/mllp-transport": "workspace:*",
     "@glion/testing": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "@types/node": "25.6.0",

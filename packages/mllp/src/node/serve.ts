@@ -10,7 +10,7 @@
  * @module
  */
 
-import { createDecoderStream, encode } from "@glion/mllp-transport";
+import { frame, FrameDecoderStream } from "@glion/mllp-transport";
 
 import type { AdapterSocket } from "../server/adapter";
 import type { MessageInfo, Mllp } from "../server/mllp";
@@ -21,6 +21,9 @@ import { nodeAdapter } from "./adapter";
 /** Monotonically-increasing connection ID counter. */
 // oxlint-disable-next-line prefer-const
 let nextConnectionId = 1;
+
+/** Decodes a de-framed payload's bytes to its HL7v2 text for the handler. */
+const TEXT_DECODER = new TextDecoder();
 
 /**
  * Lifecycle callback invoked for connection events.
@@ -280,7 +283,7 @@ function handleConnection(
   socket: AdapterSocket,
   lifecycle: LifecycleOptions
 ): void {
-  const decoder = createDecoderStream();
+  const decoder = new FrameDecoderStream();
   const reader = socket.readable.pipeThrough(decoder).getReader();
   const writer = socket.writable.getWriter();
 
@@ -307,17 +310,21 @@ function handleConnection(
       // ── Message loop ───────────────────────────────────────────────
       try {
         while (true) {
-          const { done, value: message } = await reader.read();
+          const { done, value: payload } = await reader.read();
           if (done) {
             break;
           }
+
+          // FrameDecoderStream emits the de-framed payload bytes; the handler
+          // takes the HL7v2 text plus the raw bytes.
+          const text = TEXT_DECODER.decode(payload);
 
           // Inner try/catch separates handler errors from stream errors.
           // Only handler errors route to onError; stream errors (connection
           // reset, decode failure) flow to the outer catch for cleanup.
           let response: Awaited<ReturnType<Mllp["handle"]>>;
           try {
-            response = await app.handle(message.text, message.data, connection);
+            response = await app.handle(text, payload, connection);
           } catch (handlerError) {
             const err =
               handlerError instanceof Error
@@ -331,7 +338,7 @@ function handleConnection(
           // Write is outside the handler error catch — write failures
           // are transport errors and flow to the outer catch.
           if (response) {
-            await writer.write(encode(response.raw));
+            await writer.write(frame(response.raw));
           }
         }
       } catch {

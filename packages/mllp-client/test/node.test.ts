@@ -1,709 +1,262 @@
-// oxlint-disable promise/avoid-new
-// oxlint-disable no-empty-function
-// oxlint-disable promise/prefer-await-to-callbacks
-import { createServer } from "node:net";
-import type { Server as NetServer, Socket } from "node:net";
-import { createServer as createTlsServer } from "node:tls";
-import type { Server as TlsServer } from "node:tls";
+/**
+ * Integration tests for the Node runtime adapter.
+ *
+ * Uses a real localhost `net.createServer` so the WHATWG-Streams →
+ * Node `Duplex.toWeb` bridge is exercised. These are slower than
+ * the in-memory `client.test.ts` suite (each test pays a few ms for
+ * socket setup) but they verify the live contract — `close()` is
+ * idempotent, `closed` resolves on peer FIN, signal cancellation
+ * destroys an in-flight socket — that the fake duplex can only
+ * stub.
+ */
 
-import {
-  AckApplicationError,
-  AckApplicationReject,
-  AckCommitError,
-  AckCommitReject,
-  Hl7ErrorCode,
-  Severity,
-} from "@glion/ack";
-import { parseHL7v2 } from "@glion/hl7v2";
-import { Mllp } from "@glion/mllp";
-import { ackMiddleware } from "@glion/mllp-ack";
-import { MllpError } from "@glion/mllp-transport";
-import { serve } from "@glion/mllp/node";
-import type { Server } from "@glion/mllp/node";
+import { createServer } from "node:net";
+import type { AddressInfo, Server, Socket } from "node:net";
+
+import { frame } from "@glion/mllp-transport";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { MllpClientError, MllpClientErrorCode } from "../src/core/errors";
-import {
-  looksLikeTlsHandshakeError,
-  mapSocketError,
-} from "../src/runtimes/internal/node-error-mapping";
-import { MllpClient } from "../src/runtimes/node";
-import { frame, SAMPLE_ADT, VALID_AA } from "./fixtures";
-import { SELF_SIGNED_CERT_PEM, SELF_SIGNED_KEY_PEM } from "./tls-fixtures";
+import { MllpClient } from "../src/index";
+import type { MllpDuplex } from "../src/index";
+import { connectNode } from "../src/runtime/node";
 
 interface ServerHandle {
-  server: Server;
-  port: number;
-}
-
-async function startServer(app: Mllp): Promise<ServerHandle> {
-  const server = serve(app, { port: 0 });
-  await server.listening;
-  return { port: server.port, server };
-}
-
-/**
- * Raw TCP server for transport-level test cases. Lets each test
- * control exactly what bytes get sent back (or not sent at all),
- * which is needed to exercise MALFORMED_ACK / MALFORMED_FRAME /
- * CONNECTION_CLOSED paths that a well-behaved MLLP server would
- * never produce.
- */
-interface RawServerHandle {
-  port: number;
-  /** Sockets accepted so far. Useful for asserting cleanup state. */
-  sockets: Socket[];
+  readonly host: string;
+  readonly port: number;
+  /** Stop accepting and destroy any open sockets. */
   close(): Promise<void>;
+  /** Destroy all currently open client sockets (simulate peer drop). */
+  dropAllSockets(): void;
 }
 
-async function startRawServer(
-  onConnection: (socket: Socket) => void
-): Promise<RawServerHandle> {
-  const sockets: Socket[] = [];
-  const server: NetServer = createServer((socket) => {
-    sockets.push(socket);
-    onConnection(socket);
+interface ServerOptions {
+  /**
+   * Called for each accepted socket. Default: echo MLLP-framed ACK_AA
+   * whenever the client sends a complete frame.
+   */
+  onConnection?: (socket: Socket) => void;
+}
+
+const ACK_AA = [
+  "MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|ACK001|P|2.5",
+  "MSA|AA|MSG001",
+].join("\r");
+
+const REQUEST = [
+  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|MSG001|P|2.5",
+  "PID|1||12345^^^MRN||Doe^John",
+].join("\r");
+
+async function startEchoAckServer(
+  opts: ServerOptions = {}
+): Promise<ServerHandle> {
+  const sockets = new Set<Socket>();
+  const server: Server = createServer((socket) => {
+    sockets.add(socket);
+    socket.on("close", () => sockets.delete(socket));
+    if (opts.onConnection) {
+      opts.onConnection(socket);
+      return;
+    }
+    // Default: respond with ACK_AA to any inbound MLLP frame.
+    socket.on("data", () => {
+      socket.write(frame(ACK_AA));
+    });
   });
-  await new Promise<void>((resolve) => {
-    server.listen(0, "127.0.0.1", () => resolve());
+
+  // oxlint-disable-next-line promise/avoid-new -- wrapping Node event
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      server.removeListener("error", reject);
+      resolve();
+    });
   });
-  const address = server.address();
-  if (!address || typeof address === "string") {
-    throw new Error("Failed to determine server port");
-  }
+
+  const address = server.address() as AddressInfo;
   return {
-    close() {
-      return new Promise<void>((resolve) => {
-        for (const socket of sockets) {
-          socket.destroy();
-        }
+    async close() {
+      for (const s of sockets) {
+        s.destroy();
+      }
+      // oxlint-disable-next-line promise/avoid-new -- wrapping Node event
+      await new Promise<void>((resolve) => {
         server.close(() => resolve());
       });
     },
+    dropAllSockets() {
+      for (const s of sockets) {
+        s.destroy();
+      }
+    },
+    host: address.address,
     port: address.port,
-    sockets,
   };
 }
 
-describe("MllpClient.send", () => {
-  let handle: ServerHandle | undefined;
-
-  afterEach(async () => {
-    if (handle) {
-      await handle.server.close();
-      handle = undefined;
-    }
-  });
-
-  describe("AA (success)", () => {
-    beforeEach(async () => {
-      const app = new Mllp().parser(parseHL7v2);
-      app.use(ackMiddleware());
-      app.on("ADT^A01", () => {});
-      handle = await startServer(app);
-    });
-
-    it("returns the parsed ACK on AA", async () => {
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: handle!.port,
-        tls: false,
-      });
-      const ack = await client.send(SAMPLE_ADT);
-
-      expect(ack.code).toBe("AA");
-      expect(ack.controlId).toBe("MSG001");
-      expect(ack.tree).toBeDefined();
-    });
-
-    it("accepts a Uint8Array payload", async () => {
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: handle!.port,
-        tls: false,
-      });
-      const bytes = new TextEncoder().encode(SAMPLE_ADT);
-
-      const ack = await client.send(bytes);
-
-      expect(ack.code).toBe("AA");
-    });
-  });
-
-  describe("AE (application error)", () => {
-    beforeEach(async () => {
-      const app = new Mllp().parser(parseHL7v2);
-      app.use(ackMiddleware());
-      app.on("ADT^A01", () => {
-        throw new AckApplicationError("Validation failed", {
-          errorCode: Hl7ErrorCode.UnknownKeyIdentifier,
-          severity: Severity.Error,
-        });
-      });
-      handle = await startServer(app);
-    });
-
-    it("throws AckApplicationError with the receiver's message and codes", async () => {
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: handle!.port,
-        tls: false,
-      });
-
-      const promise = client.send(SAMPLE_ADT);
-
-      await expect(promise).rejects.toBeInstanceOf(AckApplicationError);
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(AckApplicationError);
-        const ackErr = error as AckApplicationError;
-        expect(ackErr.message).toBe("Validation failed");
-        expect(ackErr.errorCode).toBe(Hl7ErrorCode.UnknownKeyIdentifier);
-        expect(ackErr.severity).toBe(Severity.Error);
-      }
-    });
-
-    it("attaches the raw ACK to the thrown exception", async () => {
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: handle!.port,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(AckApplicationError);
-        const ackErr = error as AckApplicationError;
-        expect(ackErr.raw).toBeTypeOf("string");
-        expect(ackErr.raw).toContain("MSA|AE|MSG001|Validation failed");
-      }
-    });
-  });
-
-  describe("AR (application reject)", () => {
-    beforeEach(async () => {
-      const app = new Mllp().parser(parseHL7v2);
-      app.use(ackMiddleware());
-      app.on("ADT^A01", () => {
-        throw new AckApplicationReject("Unsupported version", {
-          errorCode: Hl7ErrorCode.UnsupportedVersionId,
-          severity: Severity.Error,
-        });
-      });
-      handle = await startServer(app);
-    });
-
-    it("throws AckApplicationReject", async () => {
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: handle!.port,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(AckApplicationReject);
-        expect((error as AckApplicationReject).errorCode).toBe(
-          Hl7ErrorCode.UnsupportedVersionId
-        );
-      }
-    });
-  });
-
-  describe("CE (commit error)", () => {
-    beforeEach(async () => {
-      const app = new Mllp().parser(parseHL7v2);
-      app.use(ackMiddleware());
-      app.on("ADT^A01", () => {
-        throw new AckCommitError("Storage unavailable", {
-          errorCode: Hl7ErrorCode.ApplicationInternalError,
-          severity: Severity.Error,
-        });
-      });
-      handle = await startServer(app);
-    });
-
-    it("throws AckCommitError", async () => {
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: handle!.port,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(AckCommitError);
-        expect((error as AckCommitError).message).toBe("Storage unavailable");
-      }
-    });
-  });
-
-  describe("CR (commit reject)", () => {
-    beforeEach(async () => {
-      const app = new Mllp().parser(parseHL7v2);
-      app.use(ackMiddleware());
-      app.on("ADT^A01", () => {
-        throw new AckCommitReject("Cannot commit", {
-          errorCode: Hl7ErrorCode.ApplicationInternalError,
-          severity: Severity.Error,
-        });
-      });
-      handle = await startServer(app);
-    });
-
-    it("throws AckCommitReject", async () => {
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: handle!.port,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(AckCommitReject);
-      }
-    });
-  });
-
-  describe("transport errors", () => {
-    it("throws CONNECTION_REFUSED when no server is listening", async () => {
-      // Bind and immediately close to obtain a definitely-free port.
-      const app = new Mllp().parser(parseHL7v2).on("ADT^A01", () => {});
-      app.use(ackMiddleware());
-      const tmp = serve(app, { port: 0 });
-      await tmp.listening;
-      const closedPort = tmp.port;
-      await tmp.close();
-
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: closedPort,
-        timeout: 2000,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpClientError);
-        expect((error as MllpClientError).code).toBe(
-          MllpClientErrorCode.CONNECTION_REFUSED
-        );
-      }
-    });
-
-    it("throws TIMEOUT when the server never responds", async () => {
-      const app = new Mllp().parser(parseHL7v2);
-      // No middleware, no handler — message is decoded but no response is written.
-      app.on("ADT^A01", () => {});
-      handle = await startServer(app);
-
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: handle.port,
-        timeout: 200,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpClientError);
-        expect((error as MllpClientError).code).toBe(
-          MllpClientErrorCode.TIMEOUT
-        );
-      }
-    });
-
-    it("throws CONNECTION_CLOSED when the peer closes without sending an ACK", async () => {
-      // Server accepts then immediately ends — no MLLP frame ever arrives.
-      const raw = await startRawServer((socket) => {
-        socket.on("data", () => socket.end());
-      });
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: raw.port,
-        timeout: 5000,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpClientError);
-        expect((error as MllpClientError).code).toBe(
-          MllpClientErrorCode.CONNECTION_CLOSED
-        );
-      } finally {
-        await raw.close();
-      }
-    });
-
-    it("throws MALFORMED_ACK when the response is not a valid HL7v2 ACK", async () => {
-      // Reply with a properly framed MLLP envelope whose payload isn't HL7v2
-      // (no MSA segment to read MSA-1 from). The decoder hands it off; the
-      // parser fails to extract MSA-1; parseAck throws MALFORMED_ACK.
-      const raw = await startRawServer((socket) => {
-        socket.on("data", () => {
-          socket.write(frame("not an HL7v2 message at all"));
-        });
-      });
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: raw.port,
-        timeout: 5000,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpClientError);
-        expect((error as MllpClientError).code).toBe(
-          MllpClientErrorCode.MALFORMED_ACK
-        );
-      } finally {
-        await raw.close();
-      }
-    });
-
-    it("throws MALFORMED_FRAME when an inbound frame exceeds maxAckSize", async () => {
-      // Reply with a valid frame whose payload exceeds the configured cap.
-      // The decoder reports MESSAGE_TOO_LARGE; the client maps it to
-      // MALFORMED_FRAME.
-      const oversizedAck = "MSH|^~\\&|".padEnd(2048, "X");
-      const raw = await startRawServer((socket) => {
-        socket.on("data", () => {
-          socket.write(frame(oversizedAck));
-        });
-      });
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        maxAckSize: 256,
-        port: raw.port,
-        timeout: 5000,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpClientError);
-        expect((error as MllpClientError).code).toBe(
-          MllpClientErrorCode.MALFORMED_FRAME
-        );
-      } finally {
-        await raw.close();
-      }
-    });
-
-    it("transport errors are also instanceof MllpError (cross-package identity)", async () => {
-      // Catches the case where MllpError is duplicated across builds —
-      // the client must throw an error that the shared base class
-      // recognises so consumers can do `instanceof MllpError` once.
-      const app = new Mllp().parser(parseHL7v2).on("ADT^A01", () => {});
-      app.use(ackMiddleware());
-      const tmp = serve(app, { port: 0 });
-      await tmp.listening;
-      const closedPort = tmp.port;
-      await tmp.close();
-
-      const client = new MllpClient({
-        host: "127.0.0.1",
-        port: closedPort,
-        timeout: 2000,
-        tls: false,
-      });
-
-      try {
-        await client.send(SAMPLE_ADT);
-        expect.fail("expected throw");
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpError);
-        expect(error).toBeInstanceOf(MllpClientError);
-      }
-    });
-
-    it("destroys the socket after a successful send", async () => {
-      // Capture the server-side socket and verify it gets closed by
-      // the client's graceful end (FIN). Demonstrates the cleanup
-      // contract for resource-conscious deployments.
-      const raw = await startRawServer((socket) => {
-        socket.on("data", () => {
-          socket.write(
-            frame(
-              "MSH|^~\\&|R|F|S|F|20240101120000||ACK|MSG001|P|2.5.1\rMSA|AA|MSG001"
-            )
-          );
-        });
-      });
-
-      try {
-        const client = new MllpClient({
-          host: "127.0.0.1",
-          port: raw.port,
-          timeout: 5000,
-          tls: false,
-        });
-
-        const ack = await client.send(SAMPLE_ADT);
-        expect(ack.code).toBe("AA");
-        expect(raw.sockets.length).toBe(1);
-
-        // Wait deterministically for the server-side socket to enter
-        // a closed/half-closed state instead of polling on a fixed
-        // sleep — fixed sleeps are flaky on slow CI runners.
-        const peer = raw.sockets[0];
-        if (peer && !(peer.destroyed || peer.readableEnded)) {
-          await new Promise<void>((resolve) => {
-            peer.once("close", () => resolve());
-            peer.once("end", () => resolve());
-          });
+/**
+ * Engage the duplex's read pump and confirm the socket is flowing before the
+ * caller triggers a peer drop, then keep draining in the background.
+ *
+ * `Duplex.toWeb` is pull-based: a socket that has never been read stays
+ * paused and never observes the peer's FIN/RST, so `closed` would not resolve
+ * on drop. Reading one chunk activates the socket's underlying read handle,
+ * which then observes connection events for the rest of its life — exactly
+ * what the client's persistent read loop guarantees from the moment it
+ * connects. Writing a probe frame elicits the echo server's ACK so the first
+ * read resolves deterministically (no reliance on event-loop timing).
+ */
+async function engageReadPump(duplex: MllpDuplex): Promise<void> {
+  const writer = duplex.writable.getWriter();
+  await writer.write(frame(REQUEST));
+  writer.releaseLock();
+  const reader = duplex.readable.getReader();
+  await reader.read();
+  void (async () => {
+    try {
+      for (;;) {
+        const { done } = await reader.read();
+        if (done) {
+          return;
         }
-        expect(peer?.destroyed || peer?.readableEnded).toBe(true);
-      } finally {
-        await raw.close();
       }
-    });
-  });
-});
-
-describe("MllpClient (node adapter) — connect-phase abort", () => {
-  it("rejects with TIMEOUT when the abort signal fires before connect completes", async () => {
-    // Pre-aborted signal forces the abort path inside `nodeConnect`.
-    // The adapter must destroy the half-open socket and reject with
-    // a typed TIMEOUT error rather than leaking the descriptor.
-    const controller = new AbortController();
-    controller.abort();
-
-    // Bind and immediately close to obtain a definitely-free port,
-    // so we don't race against an unrelated listener.
-    const server = createServer();
-    await new Promise<void>((resolve) => {
-      server.listen(0, "127.0.0.1", () => resolve());
-    });
-    const address = server.address();
-    if (!address || typeof address === "string") {
-      throw new Error("Failed to determine server port");
+    } catch {
+      // The reader rejects when the socket is destroyed mid-read — expected
+      // on peer drop. `closed` resolution is observed via the socket's own
+      // "close" event, independent of this reader.
     }
-    const port = address.port;
-    await new Promise<void>((resolve) => {
-      server.close(() => resolve());
-    });
+  })();
+}
 
-    const client = new MllpClient({
-      host: "127.0.0.1",
-      port,
-      timeout: 5000,
-      tls: false,
-    });
-
-    try {
-      await client.send(SAMPLE_ADT, { signal: controller.signal });
-      expect.fail("expected throw");
-    } catch (error) {
-      expect(error).toBeInstanceOf(MllpClientError);
-      expect((error as MllpClientError).code).toBe(MllpClientErrorCode.TIMEOUT);
-    }
+describe("connectNode — happy path", () => {
+  let server: ServerHandle;
+  beforeEach(async () => {
+    server = await startEchoAckServer();
   });
-});
-
-describe("MllpClient (node adapter) — TLS", () => {
-  let tlsHandle: { server: TlsServer; port: number } | undefined;
-
   afterEach(async () => {
-    if (tlsHandle) {
-      await new Promise<void>((resolve) => {
-        tlsHandle!.server.close(() => resolve());
-      });
-      tlsHandle = undefined;
-    }
+    await server.close();
   });
 
-  async function startTlsEchoServer(
-    payload: Uint8Array
-  ): Promise<{ server: TlsServer; port: number }> {
-    const server = createTlsServer(
-      {
-        cert: SELF_SIGNED_CERT_PEM,
-        key: SELF_SIGNED_KEY_PEM,
-      },
-      (socket) => {
-        socket.on("data", () => {
-          socket.write(payload);
-        });
-      }
-    );
-    await new Promise<void>((resolve) => {
-      server.listen(0, "127.0.0.1", () => resolve());
+  it("resolves to an MllpDuplex when the server accepts", async () => {
+    const ac = new AbortController();
+    const duplex = await connectNode({
+      host: server.host,
+      port: server.port,
+      signal: ac.signal,
     });
-    const address = server.address();
-    if (!address || typeof address === "string") {
-      throw new Error("Failed to determine TLS server port");
-    }
-    return { port: address.port, server };
-  }
-
-  it("succeeds against a self-signed TLS server when insecure: true", async () => {
-    // `insecure: true` is the explicit opt-out for self-signed /
-    // dev-loop TLS. The adapter must wire it to
-    // `rejectUnauthorized: false` and complete the handshake.
-    tlsHandle = await startTlsEchoServer(frame(VALID_AA));
-    const client = new MllpClient({
-      host: "127.0.0.1",
-      port: tlsHandle.port,
-      timeout: 5000,
-      tls: { insecure: true },
-    });
-
-    const ack = await client.send(SAMPLE_ADT);
-
-    expect(ack.code).toBe("AA");
+    expect(duplex.readable).toBeDefined();
+    expect(duplex.writable).toBeDefined();
+    await duplex.close();
   });
 
-  it("succeeds when the caller supplies the matching CA as a Uint8Array", async () => {
-    // Exercises the `Buffer.from(view)` coercion path — non-string
-    // TLS material must reach Node's tls layer in a usable form.
-    // The fixture cert's CN is `localhost`, so we override SNI to
-    // satisfy hostname verification while still connecting to the
-    // loopback IP.
-    tlsHandle = await startTlsEchoServer(frame(VALID_AA));
+  it("round-trips an MLLP message via MllpClient", async () => {
     const client = new MllpClient({
-      host: "127.0.0.1",
-      port: tlsHandle.port,
-      timeout: 5000,
-      tls: {
-        ca: new TextEncoder().encode(SELF_SIGNED_CERT_PEM),
-        servername: "localhost",
-      },
+      connect: connectNode,
+      host: server.host,
+      port: server.port,
     });
-
-    const ack = await client.send(SAMPLE_ADT);
-
-    expect(ack.code).toBe("AA");
-  });
-
-  it("throws TLS_HANDSHAKE_FAILED when verification rejects the self-signed cert", async () => {
-    // No CA supplied, no `insecure: true` — the system trust store
-    // does not know our self-signed cert, so the handshake fails.
-    // The adapter must map the error to TLS_HANDSHAKE_FAILED rather
-    // than the generic CONNECTION_CLOSED bucket.
-    tlsHandle = await startTlsEchoServer(frame(VALID_AA));
-    const client = new MllpClient({
-      host: "127.0.0.1",
-      port: tlsHandle.port,
-      timeout: 5000,
-      tls: true,
-    });
-
-    try {
-      await client.send(SAMPLE_ADT);
-      expect.fail("expected throw");
-    } catch (error) {
-      expect(error).toBeInstanceOf(MllpClientError);
-      expect((error as MllpClientError).code).toBe(
-        MllpClientErrorCode.TLS_HANDSHAKE_FAILED
-      );
-    }
+    await client.connect();
+    const response = await client.send(REQUEST);
+    expect(response.code).toBe("AA");
+    expect(response.controlId).toBe("MSG001");
+    await client.close();
   });
 });
 
-describe("MllpClient (node adapter) — error-mapping drift protection", () => {
-  // The explicit `error.code` list in `mapSocketError` is curated
-  // from Node's docs (see node-error-mapping.ts module JSDoc) and is
-  // not exhaustive by design. These tests pin the routing for a
-  // representative member of each enumerated bucket and — more
-  // importantly — pin the fallback behaviour so a future change can
-  // never silently widen or narrow it without updating a test.
+describe("connectNode — refused connections", () => {
+  it("rejects when nothing is listening on the port", async () => {
+    // Use an arbitrary high port unlikely to be in use.
+    const ac = new AbortController();
+    await expect(
+      connectNode({
+        host: "127.0.0.1",
+        port: 1,
+        signal: ac.signal,
+      })
+    ).rejects.toThrow();
+  });
+});
 
-  it("routes ECONNREFUSED to CONNECTION_REFUSED", () => {
-    const err = Object.assign(new Error("connect ECONNREFUSED"), {
-      code: "ECONNREFUSED",
+describe("connectNode — abort signal", () => {
+  it("destroys the in-flight socket and rejects when signal aborts", async () => {
+    // Use a host that takes a long time to connect (TEST-NET-1).
+    // We abort before the OS can resolve / connect.
+    const ac = new AbortController();
+    const p = connectNode({
+      host: "192.0.2.1",
+      port: 65_535,
+      signal: ac.signal,
     });
-    const mapped = mapSocketError(err, "h", 1);
-    expect(mapped.code).toBe(MllpClientErrorCode.CONNECTION_REFUSED);
-    expect(mapped.cause).toBe(err);
+    setTimeout(() => ac.abort(), 5);
+    await expect(p).rejects.toThrow();
+  });
+});
+
+describe("MllpDuplex contract — closed resolves on peer drop", () => {
+  let server: ServerHandle;
+  beforeEach(async () => {
+    server = await startEchoAckServer();
+  });
+  afterEach(async () => {
+    await server.close();
   });
 
-  it("routes ETIMEDOUT to TIMEOUT", () => {
-    const err = Object.assign(new Error("connect ETIMEDOUT"), {
-      code: "ETIMEDOUT",
+  it("`closed` resolves when the server drops the socket", async () => {
+    const duplex = await connectNode({
+      host: server.host,
+      port: server.port,
+      signal: new AbortController().signal,
     });
-    expect(mapSocketError(err, "h", 1).code).toBe(MllpClientErrorCode.TIMEOUT);
+    // Engage the pull-based read pump as the client's read loop does;
+    // otherwise the paused socket never observes the RST (see engageReadPump).
+    await engageReadPump(duplex);
+    // Don't await `duplex.closed` until after we trigger the drop.
+    const closedPromise = duplex.closed;
+    server.dropAllSockets();
+    // The duplex's closed Promise must resolve, not reject.
+    await expect(closedPromise).resolves.toBeUndefined();
+  });
+});
+
+describe("MllpDuplex contract — close() is idempotent and always resolves", () => {
+  let server: ServerHandle;
+  beforeEach(async () => {
+    server = await startEchoAckServer();
+  });
+  afterEach(async () => {
+    await server.close();
   });
 
-  it("routes a known TLS X.509 error code to TLS_HANDSHAKE_FAILED", () => {
-    const err = Object.assign(new Error("certificate has expired"), {
-      code: "CERT_HAS_EXPIRED",
+  it("close() resolves on a fresh, never-used duplex", async () => {
+    const duplex = await connectNode({
+      host: server.host,
+      port: server.port,
+      signal: new AbortController().signal,
     });
-    expect(mapSocketError(err, "h", 1).code).toBe(
-      MllpClientErrorCode.TLS_HANDSHAKE_FAILED
-    );
+    await expect(duplex.close()).resolves.toBeUndefined();
   });
 
-  it("falls back to TLS_HANDSHAKE_FAILED for code-less TLS-flavoured errors", () => {
-    // The drift-protection branch: a future Node/OpenSSL version
-    // emits a TLS error without a stable `error.code`. Message-sniffing
-    // must keep it routed to TLS_HANDSHAKE_FAILED rather than the
-    // generic CONNECTION_CLOSED bucket.
-    const cases = [
-      "alert handshake failure",
-      "ssl: wrong version number",
-      "tls protocol violation",
-      "unable to verify the first certificate",
-    ];
-    for (const message of cases) {
-      const err = new Error(message);
-      const mapped = mapSocketError(err, "h", 1);
-      expect(mapped.code, `for message: ${message}`).toBe(
-        MllpClientErrorCode.TLS_HANDSHAKE_FAILED
-      );
-    }
+  it("close() called three times all resolve, no EBADF", async () => {
+    const duplex = await connectNode({
+      host: server.host,
+      port: server.port,
+      signal: new AbortController().signal,
+    });
+    await Promise.all([duplex.close(), duplex.close(), duplex.close()]);
+    expect(true).toBe(true);
   });
 
-  it("falls back to CONNECTION_CLOSED for unknown non-TLS errors", () => {
-    const err = new Error("write EPIPE");
-    expect(mapSocketError(err, "h", 1).code).toBe(
-      MllpClientErrorCode.CONNECTION_CLOSED
-    );
-  });
-
-  it("preserves an already-typed MllpClientError unchanged", () => {
-    const original = new MllpClientError(MllpClientErrorCode.TIMEOUT, "preset");
-    expect(mapSocketError(original, "h", 1)).toBe(original);
-  });
-
-  it("looksLikeTlsHandshakeError is positive for ssl/tls/handshake/certificate", () => {
-    expect(looksLikeTlsHandshakeError(new Error("SSL error"))).toBe(true);
-    expect(looksLikeTlsHandshakeError(new Error("TLS abort"))).toBe(true);
-    expect(looksLikeTlsHandshakeError(new Error("HANDSHAKE failed"))).toBe(
-      true
-    );
-    expect(
-      looksLikeTlsHandshakeError(new Error("Certificate not trusted"))
-    ).toBe(true);
-  });
-
-  it("looksLikeTlsHandshakeError is negative for unrelated messages", () => {
-    expect(looksLikeTlsHandshakeError(new Error("write EPIPE"))).toBe(false);
-    expect(looksLikeTlsHandshakeError(new Error("connection reset"))).toBe(
-      false
-    );
+  it("close() resolves even after the peer has already dropped", async () => {
+    const duplex = await connectNode({
+      host: server.host,
+      port: server.port,
+      signal: new AbortController().signal,
+    });
+    // Engage the read pump so the pull-based socket observes the drop and
+    // `closed` resolves (see engageReadPump).
+    await engageReadPump(duplex);
+    server.dropAllSockets();
+    await duplex.closed;
+    await expect(duplex.close()).resolves.toBeUndefined();
   });
 });

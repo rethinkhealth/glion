@@ -86,6 +86,12 @@
       "sourceType": "github",
       "computedHash": "74cd07a31632a72d763b96257a8c86b5c80384770ef67e600f73ffa75b69a1e2"
     },
+    "gh-stack": {
+      "source": "github/gh-stack",
+      "sourceType": "github",
+      "skillPath": "skills/gh-stack/SKILL.md",
+      "computedHash": "11acbd01ba1c789706bfc8b8a23033eaead8d2cf92d574d8f9b5a77824634418"
+    },
     "git-clean-gone-branches": {
       "source": "everyinc/compound-engineering-plugin",
       "sourceType": "github",

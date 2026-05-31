@@ -1,51 +1,60 @@
 /**
- * Shared HL7v2 message and ACK fixtures used across the per-runtime
- * test suites. Centralising these constants here keeps the test
- * scaffolding identical across `core.test.ts`, `node.test.ts`,
- * `deno.test.ts`, and `workers.test.ts` — a fixture change in one
- * place covers every adapter.
+ * Test fixtures: HL7v2 ADT request + ACKs with each MSA-1 code.
+ *
+ * Control ID for the request is `MSG001`; ACKs echo it in MSA-2.
  */
 
-/** Sample ADT^A01 message used as the outbound payload in tests. */
-export const SAMPLE_ADT = [
-  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
-  "EVN|A01|20240101120000",
-  "PID|1||12345^^^MRN||Doe^John",
+export const REQUEST_CONTROL_ID = "MSG001";
+
+export const REQUEST = [
+  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|MSG001|P|2.5",
+  "EVN|A01|20241201120000",
+  "PID|1||12345^^^MRN||Doe^John||19800101|M",
 ].join("\r");
 
-/** Successful AA acknowledgment payload (no MLLP framing). */
-export const VALID_AA =
-  "MSH|^~\\&|R|F|S|F|20240101120000||ACK|MSG001|P|2.5.1\rMSA|AA|MSG001";
-
-/** Application-error AE acknowledgment with ERR-3=204, ERR-4=E. */
-export const VALID_AE =
-  "MSH|^~\\&|R|F|S|F|20240101120000||ACK|MSG001|P|2.5.1\rMSA|AE|MSG001|Validation failed\rERR|||204|E";
-
-/**
- * Commit-accept (CA) acknowledgment used in HL7v2 enhanced mode. The
- * receiver follows up with a separate final ACK after processing.
- */
-export const VALID_CA =
-  "MSH|^~\\&|R|F|S|F|20240101120000||ACK|MSG001|P|2.5.1\rMSA|CA|MSG001";
-
-/** MLLP frame start byte (VT). */
-export const MLLP_VT = 0x0b;
-/** MLLP frame end byte 1 (FS). */
-export const MLLP_FS = 0x1c;
-/** MLLP frame end byte 2 (CR). */
-export const MLLP_CR = 0x0d;
-
-/**
- * Wrap a payload in an MLLP frame: `<VT> payload <FS><CR>`. Used by
- * tests that need to feed pre-framed bytes into a fake duplex or a
- * raw TCP server.
- */
-export function frame(payload: string): Uint8Array {
-  const inner = new TextEncoder().encode(payload);
-  const out = new Uint8Array(inner.length + 3);
-  out[0] = MLLP_VT;
-  out.set(inner, 1);
-  out[out.length - 2] = MLLP_FS;
-  out[out.length - 1] = MLLP_CR;
-  return out;
+function ack(code: string, controlId = REQUEST_CONTROL_ID, text = ""): string {
+  return [
+    "MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|ACK001|P|2.5",
+    `MSA|${code}|${controlId}${text === "" ? "" : `|${text}`}`,
+  ].join("\r");
 }
+
+export const ACK_AA = ack("AA");
+export const ACK_AE = ack("AE", REQUEST_CONTROL_ID, "Validation failed");
+export const ACK_AR = ack("AR");
+export const ACK_CA = ack("CA");
+export const ACK_CE = ack("CE");
+export const ACK_CR = ack("CR");
+
+/** ACK that doesn't echo MSA-2 (empty controlId). Some peers do this. */
+export const ACK_AA_EMPTY_CONTROL = [
+  "MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|ACK002|P|2.5",
+  "MSA|AA|",
+].join("\r");
+
+/** ACK whose MSA-2 doesn't match the request — correlation mismatch. */
+export const ACK_AA_WRONG_CONTROL = ack("AA", "OTHER");
+
+/** ACK with an MSA-1 value not in the standard six. */
+export const ACK_UNKNOWN_CODE = [
+  "MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|ACK003|P|2.5",
+  `MSA|OK|${REQUEST_CONTROL_ID}`,
+].join("\r");
+
+/** ACK with no MSA segment at all — parse failure. */
+export const ACK_NO_MSA = [
+  "MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|ACK004|P|2.5",
+].join("\r");
+
+/** ACK where MSA-1 is present but empty. */
+export const ACK_EMPTY_CODE = [
+  "MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|ACK005|P|2.5",
+  `MSA||${REQUEST_CONTROL_ID}`,
+].join("\r");
+
+/** ACK with an AE code and an ERR segment carrying diagnostic info. */
+export const ACK_AE_WITH_ERR = [
+  "MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|ACK006|P|2.5",
+  "MSA|AE|MSG001|Required field missing",
+  "ERR|||204^Required field missing^HL70357|E|||PID.5",
+].join("\r");
