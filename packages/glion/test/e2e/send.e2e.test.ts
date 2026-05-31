@@ -1,13 +1,24 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import type { AddressInfo, Server } from "node:net";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { resolve as resolvePath } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { frame } from "@glion/mllp-transport";
+import { execa } from "execa";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { runGlion } from "../../src/run.js";
+// Drive the built binary as a subprocess (like the sibling CLI e2e tests)
+// rather than importing runGlion in-process. The in-process path pulls in the
+// config schema, whose top-level `z.object(...)` crashes when vitest transforms
+// the TS source under `bun --bun`; the compiled binary loads zod fine.
+const binPath = resolvePath(
+  fileURLToPath(import.meta.url),
+  "..",
+  "..",
+  "..",
+  "dist",
+  "index.js"
+);
 
 const ADT = [
   "MSH|^~\\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5",
@@ -49,9 +60,6 @@ function closeServer(server: Server): Promise<void> {
 async function startAckServer(ackText: string): Promise<RunningServer> {
   const ack = frame(ackText);
   const server = createServer((socket) => {
-    // Inspect raw bytes (no setEncoding): Buffer.includes(byte) is identical
-    // across Node and Bun, whereas a decoded-string match for the FS control
-    // byte is not. Reply once the frame terminator (FS) has arrived.
     socket.on("data", (chunk: Buffer) => {
       if (chunk.includes(FS_BYTE)) {
         socket.write(ack);
@@ -62,70 +70,44 @@ async function startAckServer(ackText: string): Promise<RunningServer> {
   return { close: () => closeServer(server), port };
 }
 
-function capture() {
-  const state = { err: "", out: "" };
-  const stdout = {
-    write: (chunk: string) => {
-      state.out += chunk;
-      return true;
-    },
-  } as unknown as NodeJS.WritableStream;
-  const stderr = {
-    write: (chunk: string) => {
-      state.err += chunk;
-      return true;
-    },
-  } as unknown as NodeJS.WritableStream;
-  return { state, stderr, stdout };
-}
-
-// This e2e drives runGlion in-process, so `connectNode` (the MLLP client's Node
-// adapter) runs inside the test runtime. `@glion/mllp-client` supports Node and
-// Cloudflare Workers — not Bun — and its `Duplex.toWeb` stream bridge does not
-// deliver the ACK under `bun --bun`, so the send times out. The sibling CLI e2e
-// tests avoid this because they spawn the binary as a Node subprocess. Skip the
-// live-socket case under Bun; Node e2e + the fake-connector integration tests
-// cover this path on supported runtimes.
+// `glion send` exercises the MLLP *client* (@glion/mllp-client's connectNode +
+// Duplex.toWeb), which supports Node and Cloudflare Workers — not Bun. Under the
+// `bun --bun` CI job, process.execPath is the bun binary, so the spawned
+// `dist/index.js send` runs the client under Bun and times out. (The sibling
+// glion-start e2e passes under Bun because it exercises the server, not the
+// client.) Skip here; Node e2e + the fake-connector integration tests cover the
+// send path on supported runtimes.
 const isBun = Boolean(process.versions.bun);
 
-describe.skipIf(isBun)("glion send (e2e against a live MLLP server)", () => {
+describe.skipIf(isBun)("glion send e2e", () => {
   let server: RunningServer | undefined;
-  let dir: string | undefined;
 
   afterEach(async () => {
     await server?.close();
-    if (dir) {
-      await rm(dir, { force: true, recursive: true });
-    }
     server = undefined;
-    dir = undefined;
   });
 
-  it("sends a message from a file and reports the AA accept", async () => {
+  it("sends a message from stdin and reports the AA accept", async () => {
     server = await startAckServer(ACK);
-    dir = await mkdtemp(join(tmpdir(), "glion-send-e2e-"));
-    const file = join(dir, "adt.hl7");
-    await writeFile(file, ADT, "utf8");
+    const args = [
+      binPath,
+      "send",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      String(server.port),
+      "--json",
+    ];
 
-    const { state, stderr, stdout } = capture();
-    const code = await runGlion({
-      argv: [
-        "send",
-        file,
-        "--host",
-        "127.0.0.1",
-        "--port",
-        String(server.port),
-      ],
-      cwd: dir,
-      stderr,
-      stdout,
+    const result = await execa(process.execPath, args, {
+      input: ADT,
+      reject: false,
     });
 
-    expect(code).toBe(0);
-    const json = JSON.parse(state.out);
+    expect(result.exitCode).toBe(0);
+    const json = JSON.parse(result.stdout);
     expect(json.ok).toBe(true);
     expect(json.code).toBe("AA");
     expect(json.controlId).toBe("MSG00001");
-  });
+  }, 10_000);
 });
