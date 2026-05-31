@@ -739,6 +739,9 @@ importers:
       '@glion/mllp-ack':
         specifier: workspace:*
         version: link:../mllp-ack
+      '@glion/mllp-transport':
+        specifier: workspace:*
+        version: link:../mllp-transport
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing

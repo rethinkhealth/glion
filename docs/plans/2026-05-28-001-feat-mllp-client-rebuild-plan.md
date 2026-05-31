@@ -48,13 +48,13 @@ In scope for this rebuild:
 - `@glion/ack` — central ACK vocabulary for client + server: `AckCode` / `Hl7ErrorCode` / `Severity` constants, the `isAckCode` predicate, the `AckException` family (typed NAK errors), and the server-side `acknowledge()` builder
 - `@glion/mllp-client` — persistent client, single socket, queued sends, opt-in reconnect
 
-Out of scope for this rebuild — to migrate after the new client lands:
+Migrated into the foundation (PR #645) so the monorepo builds green:
 
-- `@glion/mllp` (server) — currently consumes `@glion/mllp-transport`, will adopt the new shape
-- `@glion/mllp-ack` (server-side ACK middleware) — currently consumes `@glion/ack`, will adopt the new shape
-- `@glion/glion` (CLI) — consumes both; migrates last
+- `@glion/mllp` (server) — adopts the new `@glion/mllp-transport` shape (`frame` / `FrameDecoderStream`); throws its own `MllpServerError` instead of a transport error, and no longer re-exports the transport surface
+- `@glion/mllp-ack` (server-side ACK middleware) — consumes the centralized `@glion/ack`
+- `@glion/glion` (CLI) — consumes both; e2e tests use `frame` from `@glion/mllp-transport`
 
-The build stays red on the server packages between phase 1 and phase 6. That's the price of starting from zero. If the user wants a non-red intermediate state, the alternative is to keep `mllp-transport` and `ack` as-is and only rebuild `mllp-client` — but that locks in the existing codec / ACK API shape.
+The build is green across the whole stack. The server's Node adapter closes connections gracefully (`resume()` + `end()`) so tearing down after a rejected `onConnect` sends a clean FIN rather than an RST that would surface as ECONNRESET on the peer.
 
 ## Public API sketch (locked after adversarial review)
 

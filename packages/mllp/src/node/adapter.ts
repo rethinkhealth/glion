@@ -116,7 +116,13 @@ function wrapNodeSocket(socket: Socket, secure: boolean): AdapterSocket {
 
   return {
     close() {
-      socket.destroy();
+      // Graceful teardown: `resume()` drains any unread inbound bytes so the
+      // following `end()` can send a clean FIN. A bare `destroy()` while data
+      // sits unread in the RX buffer (e.g. tearing down after `onConnect`
+      // rejects, before the peer's first frame is consumed) makes the kernel
+      // send an RST, surfacing as ECONNRESET on the peer.
+      socket.resume();
+      socket.end();
     },
     get localPort() {
       return socket.localPort ?? 0;
