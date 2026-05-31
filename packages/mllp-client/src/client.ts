@@ -1,5 +1,6 @@
 /**
- * The `MllpClient` class — persistent, single-flight MLLP client for HL7v2.
+ * The `MllpClient` class — persistent MLLP client for HL7v2. One send is on the
+ * wire at a time; concurrent sends queue (FIFO) and run one after another.
  *
  * @module
  */
@@ -57,13 +58,46 @@ const MAX_PENDING_FRAMES = 16;
 
 /**
  * Internal frame-waiter slot. The read loop dispatches each decoded
- * frame here if a `send()` is waiting, otherwise queues it. Only one
- * waiter is active at a time (enforced by the `CONCURRENT_SEND`
- * guard).
+ * frame here if a `send()` is waiting, otherwise queues it. At most one
+ * waiter is active at a time — the send queue serializes sends so only
+ * one is ever on the wire.
  */
 interface FrameWaiter {
   resolve(bytes: Uint8Array): void;
   reject(error: Error): void;
+}
+
+/**
+ * A send awaiting its turn on the wire. The client serializes sends: one
+ * runs at a time, the rest wait here in FIFO order. The per-send deadline
+ * starts when `send()` is called, so it spans the queue wait as well as the
+ * write and the ACK wait — a queued send can time out or be aborted before
+ * it is ever written. The wire bytes are framed up front (see
+ * {@link toWireFrame}); the queue just transports them.
+ */
+interface QueuedSend {
+  readonly framed: Uint8Array;
+  readonly requestControlId: string;
+  readonly timeoutMs: number;
+  /**
+   * Combined deadline + caller signal; drives abort both while queued and on
+   * the wire.
+   */
+  readonly abortSignal: AbortSignal;
+  /**
+   * The deadline half of {@link abortSignal}; lets a waiter tell timeout from
+   * caller-abort.
+   */
+  readonly deadlineSignal: AbortSignal;
+  resolve(response: MllpClientResponse): void;
+  reject(error: Error): void;
+  /** Stop the deadline timer. Idempotent. */
+  clearDeadline(): void;
+  /**
+   * Detach the while-queued abort listener (called when the send goes on the
+   * wire).
+   */
+  detachQueuedAbort(): void;
 }
 
 export class MllpClient {
@@ -90,6 +124,13 @@ export class MllpClient {
   // #waitForFrame's waiter registration. Stash the error here so the
   // imminent send.#waitForFrame call surfaces it instead of hanging.
   #pendingError: Error | null = null;
+
+  // Sends waiting for the wire (FIFO). The one currently on the wire has
+  // been shifted out, so #queue holds only the not-yet-dispatched sends —
+  // which is what #queueDepth reports. #draining guards the drain loop so
+  // only one runs at a time.
+  #queue: QueuedSend[] = [];
+  #draining = false;
 
   constructor(opts: MllpClientOptions) {
     this.#host = opts.host;
@@ -118,6 +159,14 @@ export class MllpClient {
   /** True when ready or sending — i.e., the wire is up. */
   get connected(): boolean {
     return this.#state === "ready" || this.#state === "sending";
+  }
+
+  /**
+   * Number of sends waiting in the queue, excluding the one currently on the
+   * wire. Fire three concurrent sends on a ready client and this reads `2`.
+   */
+  get queueDepth(): number {
+    return this.#queue.length;
   }
 
   async connect(opts: { signal?: AbortSignal } = {}): Promise<void> {
@@ -303,6 +352,12 @@ export class MllpClient {
       this.#decoder = null;
       this.#reader = null;
       this.#pendingFrames = [];
+      // "ended", not "dropped": these sends reject with code CLOSED (they
+      // never reached the wire), so the message stays in the CLOSED vocabulary
+      // rather than borrowing DROPPED's (first-principle #6: disjoint codes).
+      this.#failQueue(
+        "The connection ended before this queued send reached the wire; it was not transmitted."
+      );
       if (duplex) {
         // Fire-and-forget — adapter contract guarantees close() resolves.
         void duplex.close();
@@ -317,96 +372,194 @@ export class MllpClient {
     }
   }
 
+  // `async` keeps the Promise contract: the synchronous guard and toWireFrame()
+  // failures below surface as rejections, never as synchronous throws — which
+  // is what callers (and the tests) rely on. No `await` is needed in the body.
+  // oxlint-disable-next-line eslint/require-await
   async send(
     message: SendInput,
     opts: MllpSendOptions = {}
   ): Promise<MllpClientResponse> {
-    if (this.#state === "sending") {
-      throw new MllpClientError(
-        MllpErrorCode.CONCURRENT_SEND,
-        "A send is already in flight"
-      );
-    }
     if (this.#state === "closing" || this.#state === "closed") {
       throw new MllpClientError(
         MllpErrorCode.CLOSED,
         `Cannot send: this client is ${this.#state} — it has been closed. Construct a new MllpClient to send again.`
       );
     }
-    if (this.#state !== "ready") {
+    if (this.#state !== "ready" && this.#state !== "sending") {
       throw new MllpClientError(
         MllpErrorCode.NOT_CONNECTED,
         `Cannot send: the client is ${this.#state}, not connected. Call connect() before send().`
       );
     }
 
-    const duplex = this.#duplex;
-    if (duplex === null) {
-      // By construction this should be unreachable from state "ready" —
-      // assert with a typed error so a future invariant break is loud.
-      throw new MllpClientError(
-        MllpErrorCode.NOT_CONNECTED,
-        "Internal: duplex is null while state is ready"
-      );
-    }
-
     // Build the wire bytes (caller bytes verbatim, or a serialized Root) and
-    // read MSH-10 for correlation — both before any state mutation. Framing an
-    // unframable payload throws FramingError here; reading MSH-10 is
+    // read MSH-10 for correlation before enqueuing. Framing an unframable
+    // payload rejects here, before it occupies a queue slot; reading MSH-10 is
     // best-effort and never blocks the send.
     const framed = toWireFrame(message);
     const requestControlId = readRequestControlId(message);
+    const timeoutMs = opts.timeoutMs ?? this.#sendTimeoutMs;
 
-    this.#state = "sending";
-    let result: MllpClientResponse;
-    try {
-      result = await this.#doSend(duplex, framed, requestControlId, {
-        signal: opts.signal,
-        timeoutMs: opts.timeoutMs ?? this.#sendTimeoutMs,
-      });
-    } catch (error) {
-      // Slowloris recovery: on send timeout, if the decoder is mid-frame,
-      // reset its buffer. A complete late ACK would already have been
-      // emitted (buffered === 0); a partial frame (buffered > 0) is
-      // garbage that would otherwise compound into FRAME_TOO_LARGE on
-      // a later send.
-      if (
-        error instanceof MllpClientError &&
-        error.code === MllpErrorCode.SEND_TIMEOUT &&
-        this.#decoder !== null &&
-        this.#decoder.buffered > 0
-      ) {
-        this.#decoder.reset();
-      }
-      // Only restore "ready" if the connection is still up. If the
-      // drop watcher, close(), or #dispatchError already advanced state,
-      // respect that.
-      if (this.#state === "sending") {
-        this.#state = this.#duplex === null ? "closed" : "ready";
-      }
-      throw error;
-    }
-    if (this.#state === "sending") {
-      this.#state = "ready";
-    }
-    return result;
+    return this.#enqueue(framed, requestControlId, timeoutMs, opts.signal);
   }
 
-  async #doSend(
-    duplex: MllpDuplex,
+  /**
+   * Wrap a send in a {@link QueuedSend}, start its deadline, and hand it to
+   * the drain loop. The deadline starts here so it covers the time spent
+   * waiting in the queue. `AbortController` + `setTimeout` (not
+   * `AbortSignal.timeout`) so the timer is cancellable on settle and never
+   * lingers.
+   */
+  #enqueue(
     framed: Uint8Array,
     requestControlId: string,
-    opts: {
-      timeoutMs: number;
-      signal: AbortSignal | undefined;
-    }
+    timeoutMs: number,
+    callerSignal: AbortSignal | undefined
   ): Promise<MllpClientResponse> {
+    // oxlint-disable-next-line promise/avoid-new -- queued-send deferred wrapper
+    return new Promise<MllpClientResponse>((resolve, reject) => {
+      const deadlineController = new AbortController();
+      const deadlineTimer = setTimeout(() => {
+        deadlineController.abort();
+      }, timeoutMs);
+      const deadlineSignal = deadlineController.signal;
+      const abortSignal = callerSignal
+        ? AbortSignal.any([deadlineSignal, callerSignal])
+        : deadlineSignal;
+
+      // clearTimeout is a no-op on an already-fired or already-cleared timer,
+      // so this is safe to call from any settle path.
+      const clearDeadline = () => {
+        clearTimeout(deadlineTimer);
+      };
+
+      const onQueuedAbort = () => {
+        // Abort while still queued: drop from the queue and reject. Once on
+        // the wire this listener is detached and #waitForFrame owns abort.
+        const index = this.#queue.indexOf(task);
+        if (index !== -1) {
+          this.#queue.splice(index, 1);
+        }
+        clearDeadline();
+        reject(sendAbortError(deadlineSignal, timeoutMs));
+      };
+      const detachQueuedAbort = () => {
+        abortSignal.removeEventListener("abort", onQueuedAbort);
+      };
+
+      const task: QueuedSend = {
+        abortSignal,
+        clearDeadline,
+        deadlineSignal,
+        detachQueuedAbort,
+        framed,
+        reject,
+        requestControlId,
+        resolve,
+        timeoutMs,
+      };
+
+      if (abortSignal.aborted) {
+        // Caller signal was already aborted before we could queue.
+        clearDeadline();
+        reject(sendAbortError(deadlineSignal, timeoutMs));
+        return;
+      }
+      abortSignal.addEventListener("abort", onQueuedAbort, { once: true });
+      this.#queue.push(task);
+      this.#drain();
+    });
+  }
+
+  /** Kick the drain loop if it isn't already running and the wire is ready. */
+  #drain(): void {
+    if (this.#draining || this.#state !== "ready") {
+      return;
+    }
+    this.#draining = true;
+    void this.#runQueue();
+  }
+
+  /**
+   * Process queued sends one at a time while the wire is ready. A drop or
+   * close during a send advances state out of "ready" and fails the rest of
+   * the queue, so the loop exits cleanly.
+   */
+  async #runQueue(): Promise<void> {
+    try {
+      while (this.#queue.length > 0 && this.#state === "ready") {
+        const task = this.#queue.shift();
+        if (task === undefined) {
+          return;
+        }
+        task.detachQueuedAbort();
+        this.#state = "sending";
+        try {
+          const result = await this.#processSend(task);
+          task.clearDeadline();
+          task.resolve(result);
+        } catch (error) {
+          task.clearDeadline();
+          // Slowloris recovery: on send timeout with a mid-frame decoder
+          // buffer, reset it so the next send isn't corrupted by the
+          // partial. A complete late ACK would already have been emitted
+          // (buffered === 0).
+          if (
+            error instanceof MllpClientError &&
+            error.code === MllpErrorCode.SEND_TIMEOUT &&
+            this.#decoder !== null &&
+            this.#decoder.buffered > 0
+          ) {
+            this.#decoder.reset();
+          }
+          task.reject(error as Error);
+        }
+        // Restore "ready" only if the wire is still up; a drop/close during
+        // the send advanced state already (and failed the rest of the queue).
+        if (this.#state === "sending") {
+          this.#state = this.#duplex === null ? "closed" : "ready";
+        }
+      }
+    } finally {
+      this.#draining = false;
+    }
+  }
+
+  /**
+   * Reject every still-queued send (those not yet on the wire). The on-wire
+   * send, if any, is rejected separately via {@link #frameWaiter}. Called when
+   * the connection ends: a queued send was never dispatched, so it fails with
+   * `CLOSED` rather than `DROPPED` (which means "ended while awaiting an ACK").
+   */
+  #failQueue(message: string): void {
+    if (this.#queue.length === 0) {
+      return;
+    }
+    const tasks = this.#queue.splice(0);
+    for (const task of tasks) {
+      task.detachQueuedAbort();
+      task.clearDeadline();
+      task.reject(new MllpClientError(MllpErrorCode.CLOSED, message));
+    }
+  }
+
+  async #processSend(task: QueuedSend): Promise<MllpClientResponse> {
+    const duplex = this.#duplex;
+    if (duplex === null) {
+      // Unreachable from "ready"/"sending" by construction — assert with a
+      // typed error so a future invariant break is loud.
+      throw new MllpClientError(
+        MllpErrorCode.NOT_CONNECTED,
+        "Internal: duplex is null while sending"
+      );
+    }
     const sentMonotonic = performance.now();
 
     // Write the frame. Lock acquisition / release is bracketed.
     const writer = duplex.writable.getWriter();
     try {
-      await writer.write(framed);
+      await writer.write(task.framed);
     } catch (error) {
       // Write failure is terminal — the socket half is dead. Mark closed so
       // subsequent sends fail fast with CLOSED, and throw DROPPED (reason
@@ -426,7 +579,7 @@ export class MllpClient {
     // decoder retains its buffer across sends, so a late ACK from a
     // previously-timed-out request will land here and be checked by
     // correlation.
-    const ackBytes = await this.#waitForFrame(opts.timeoutMs, opts.signal);
+    const ackBytes = await this.#waitForFrame(task);
 
     const timestamp = new Date();
     const durationMs = performance.now() - sentMonotonic;
@@ -434,15 +587,12 @@ export class MllpClient {
     return parseResponse({
       durationMs,
       raw: ackBytes,
-      requestControlId,
+      requestControlId: task.requestControlId,
       timestamp,
     });
   }
 
-  #waitForFrame(
-    timeoutMs: number,
-    signal: AbortSignal | undefined
-  ): Promise<Uint8Array> {
+  #waitForFrame(task: QueuedSend): Promise<Uint8Array> {
     // A stream-level error fired between writer.write() and this
     // registration — surface it instead of waiting on a dead stream.
     if (this.#pendingError !== null) {
@@ -456,12 +606,7 @@ export class MllpClient {
       return Promise.resolve(queued);
     }
 
-    const timeoutSignal = AbortSignal.timeout(timeoutMs);
-    const signals: AbortSignal[] = [timeoutSignal];
-    if (signal) {
-      signals.push(signal);
-    }
-    const abortSignal = AbortSignal.any(signals);
+    const { abortSignal, deadlineSignal, timeoutMs } = task;
 
     // oxlint-disable-next-line promise/avoid-new -- canonical waiter wrapper
     return new Promise<Uint8Array>((resolve, reject) => {
@@ -471,22 +616,7 @@ export class MllpClient {
         if (this.#frameWaiter === waiter) {
           this.#frameWaiter = null;
         }
-        if (timeoutSignal.aborted) {
-          reject(
-            new MllpClientError(
-              MllpErrorCode.SEND_TIMEOUT,
-              `Timed out after ${timeoutMs}ms waiting for the peer to acknowledge the message.`,
-              { timeoutMs }
-            )
-          );
-        } else {
-          reject(
-            new MllpClientError(
-              MllpErrorCode.SEND_ABORTED,
-              "Send aborted by the caller's abort signal before the ACK was received."
-            )
-          );
-        }
+        reject(sendAbortError(deadlineSignal, timeoutMs));
       };
 
       const waiter: FrameWaiter = {
@@ -524,16 +654,23 @@ export class MllpClient {
 
     // Reject any in-flight waiter so send() doesn't hang. CLOSED (not
     // DROPPED) — the caller initiated this teardown.
+    const closedError = new MllpClientError(
+      MllpErrorCode.CLOSED,
+      "close() was called while this message was still being sent, so the send did not complete. The message may or may not have reached the peer; if it is not safe to resend blindly, confirm receipt before retrying."
+    );
     const waiter = this.#frameWaiter;
     if (waiter) {
       this.#frameWaiter = null;
-      waiter.reject(
-        new MllpClientError(
-          MllpErrorCode.CLOSED,
-          "close() was called while this message was still being sent, so the send did not complete. The message may or may not have reached the peer; if it is not safe to resend blindly, confirm receipt before retrying."
-        )
-      );
+      waiter.reject(closedError);
+    } else {
+      // The on-wire send may be mid-write — between writer.write() and
+      // #waitForFrame's waiter registration. Stash CLOSED in the same
+      // race-recovery slot #dispatchError uses, so that send surfaces it
+      // instead of registering a waiter on a torn-down client and hanging.
+      this.#pendingError = closedError;
     }
+    // Reject every queued send too — none of them will reach the wire.
+    this.#failQueue("Client closed before this queued send was dispatched");
 
     // Release the reader's lock so duplex.close() can drain cleanly.
     // Spec-compliant adapters MAY reject pending read() with TypeError;
@@ -549,7 +686,9 @@ export class MllpClient {
     this.#decoder = null;
     this.#duplex = null;
     this.#pendingFrames = [];
-    this.#pendingError = null;
+    // NOTE: #pendingError is intentionally NOT cleared here — a mid-write
+    // send still needs to read the CLOSED stashed above. The instance is
+    // single-use, so a lingering value is never observed by a later send.
 
     if (duplex) {
       await duplex.close();
@@ -560,4 +699,24 @@ export class MllpClient {
   async [Symbol.asyncDispose](): Promise<void> {
     await this.close();
   }
+}
+
+/**
+ * The error a send rejects with when its combined abort signal fires:
+ * `SEND_TIMEOUT` if the deadline elapsed, `SEND_ABORTED` if the caller's
+ * signal aborted. Shared by the while-queued path and the on-wire waiter so
+ * both report the same cause.
+ */
+function sendAbortError(deadlineSignal: AbortSignal, timeoutMs: number): Error {
+  if (deadlineSignal.aborted) {
+    return new MllpClientError(
+      MllpErrorCode.SEND_TIMEOUT,
+      `Timed out after ${timeoutMs}ms waiting for the peer to acknowledge the message (the deadline spans the queue wait and the wire round-trip).`,
+      { timeoutMs }
+    );
+  }
+  return new MllpClientError(
+    MllpErrorCode.SEND_ABORTED,
+    "Send aborted by the caller's abort signal before the ACK was received."
+  );
 }
