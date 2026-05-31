@@ -2,11 +2,12 @@
 "@glion/cli": minor
 ---
 
-feat(cli): add `glion send` — send one HL7v2 message over MLLP and print the ACK
+Add the `glion send` command — send one HL7v2 message over MLLP and print the acknowledgment. A client utility for the dev loop, alongside `glion dev` and `glion start`.
 
-A client utility for the dev loop, alongside `glion dev` and `glion start`. Reads
-the message from a file or stdin, re-serializes it to canonical CR-delimited form,
-sends it over MLLP, and reports the acknowledgment. Output is TTY-adaptive (a human
-exchange view, or one JSON line when piped or with `--json`); exit codes report the
-result (0 accept, 1 NAK, 2 not delivered). Target comes from `--host`/`--port`, or
-from the project's `glion.config.ts` via `--local`. TLS is not yet supported.
+- Read the message from a file argument or stdin (omit the path, or pass `-`, to read stdin)
+- Re-serialize the parsed message to canonical CR-delimited form before sending, normalizing editor line endings; the receiver decides validity and answers with a NAK
+- Resolve the target from `--host`/`--port`, or from the project's `glion.config.ts` via `--local` (which override per field; a wildcard bind address maps to loopback)
+- Add `--timeout`, `--json`, and `-h`/`--help` flags
+- Adapt output to the destination: a human exchange view on a TTY, one JSON line when piped or with `--json`
+- Exit `0` on accept (AA/CA), `1` on NAK (AE/AR/CE/CR), `2` when the message could not be delivered
+- Connect over plaintext only; TLS targets are not yet supported
