@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "glion dev",
-    "start": "glion start"
+    "start": "glion start",
+    "send": "glion send samples/adt-a01.hl7 --local"
   },
   "dependencies": {
     "@glion/ack": "latest",

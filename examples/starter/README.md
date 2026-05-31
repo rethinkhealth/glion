@@ -25,6 +25,7 @@ The server listens on `127.0.0.1:2575` by default.
 
 - `glion.config.ts` — entry path and port.
 - `src/app.ts` — the `Mllp` instance, exported as the default. The CLI picks it up automatically.
+- `samples/adt-a01.hl7` — a sample HL7v2 message for `glion send`.
 
 The app:
 
@@ -34,12 +35,28 @@ The app:
 
 ## Send a test message
 
-Wrap a raw HL7v2 string in MLLP framing with `nc`:
+With the server running, send the bundled sample from another terminal using the `glion send` CLI command:
 
 ```bash
-printf '\x0bMSH|^~\&|SENDER|SENDER|GLION|NODE|20240101120000||ADT^A01|MSG001|P|2.5.1\rEVN||20240101120000\rPID|||123456^^^MRN||Doe^John\r\x1c\x0d' \
-  | nc 127.0.0.1 2575
+pnpm send     # → AA · MSG001
 ```
+
+That runs `glion send samples/adt-a01.hl7 --local` — the `--local` flag reads the host and port from `glion.config.ts`, so the message goes to this project's server (`127.0.0.1:2575`):
+
+```
+→ sent  127.0.0.1:2575  MSH-10 MSG001  3 segs, 121 B
+← ACK   AA  MSA-2 MSG001  3.0ms
+```
+
+You can also target a host and port explicitly, pipe a message over stdin, or ask for machine-readable output:
+
+```bash
+glion send samples/adt-a01.hl7 --host 127.0.0.1 --port 2575
+cat samples/adt-a01.hl7 | glion send --local
+glion send samples/adt-a01.hl7 --local --json
+```
+
+`glion send` exits `0` on accept (`AA`/`CA`), `1` on a NAK, and `2` when the message could not be delivered.
 
 ## Next steps
 
