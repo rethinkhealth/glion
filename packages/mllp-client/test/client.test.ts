@@ -104,6 +104,28 @@ describe("connect()", () => {
     });
   });
 
+  it("throws CLOSED on connect() after close()", async () => {
+    const fake = createFakeDuplex();
+    const client = makeClient(fake);
+    await client.connect();
+    await client.close();
+    await expect(client.connect()).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+    });
+  });
+
+  it("throws CLOSED on connect() after peer drop", async () => {
+    const fake = createFakeDuplex();
+    const client = makeClient(fake);
+    await client.connect();
+    fake.closePeer();
+    // Wait for the drop watcher to transition the client to "closed".
+    await sleep(5);
+    await expect(client.connect()).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+    });
+  });
+
   it("throws CONNECT_FAILED when the adapter rejects", async () => {
     const original = new Error("ECONNREFUSED");
     const client = new MllpClient({

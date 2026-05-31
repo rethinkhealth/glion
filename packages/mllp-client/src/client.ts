@@ -121,6 +121,12 @@ export class MllpClient {
   }
 
   async connect(opts: { signal?: AbortSignal } = {}): Promise<void> {
+    if (this.#state === "closed" || this.#state === "closing") {
+      throw new MllpClientError(
+        MllpErrorCode.CLOSED,
+        `Cannot connect: this client is ${this.#state} — it has been closed. Construct a new MllpClient to open a fresh connection.`
+      );
+    }
     if (this.#state !== "idle") {
       throw new MllpClientError(
         MllpErrorCode.ALREADY_CONNECTED,
