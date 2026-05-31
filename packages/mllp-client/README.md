@@ -85,8 +85,8 @@ Opens the wire through the runtime adapter and starts the read loop. `options.si
 
 All are an `MllpClientError`; branch on `code`:
 
-- `CLIENT_CONSUMED` — the instance is `closed` or `closing`; construct a new instance.
-- `ALREADY_CONNECTED` — called while `connecting`, `ready`, or `sending`.
+- `CLOSED` — the instance is `closed` or `closing`; construct a new instance.
+- `ALREADY_CONNECTED` — called while `connecting`, `ready`, or `sending` (the connection is live; reuse it).
 - `CONNECT_FAILED` — the adapter rejected (the underlying error is on `cause`).
 - `CONNECT_TIMEOUT` — the adapter exceeded `connectTimeoutMs` (`timeoutMs` is set).
 - `CONNECT_ABORTED` — `options.signal` aborted, or `close()` interrupted the connect.
@@ -131,10 +131,10 @@ Calls `close()`. Enables `await using`.
 
 Every error the client itself raises **is** an `MllpClientError`, carrying a `code` from `MllpErrorCode` — branch on `code`; a `switch` on it never needs to inspect client state. Code-specific detail rides on optional fields (`reason` for `DROPPED`, `timeoutMs` for the timeouts, `expected`/`actual`/`tree`/`raw` for `CORRELATION_MISMATCH`) with `cause` for any wrapped error. A NAK is the exception: `send()` throws an `@glion/ack` `AckException` — the same typed exception the server builds — imported from `@glion/ack`, not from this package.
 
-| Class                         | Code(s) / notes                                                                                                                                                                                                                                     |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MllpClientError`             | `ALREADY_CONNECTED`, `CLIENT_CONSUMED`, `CLOSED`, `CONCURRENT_SEND`, `CONNECT_ABORTED`, `CONNECT_FAILED`, `CONNECT_TIMEOUT`, `CORRELATION_MISMATCH`, `DROPPED`, `NOT_CONNECTED`, `PARSE_FAILED`, `SEND_ABORTED`, `SEND_TIMEOUT`, `UNKNOWN_ACK_CODE` |
-| `AckException` (`@glion/ack`) | NAK — `AckApplicationError` (AE) / `AckApplicationReject` (AR) / `AckCommitError` (CE) / `AckCommitReject` (CR)                                                                                                                                     |
+| Class                         | Code(s) / notes                                                                                                                                                                                                                  |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MllpClientError`             | `ALREADY_CONNECTED`, `CLOSED`, `CONCURRENT_SEND`, `CONNECT_ABORTED`, `CONNECT_FAILED`, `CONNECT_TIMEOUT`, `CORRELATION_MISMATCH`, `DROPPED`, `NOT_CONNECTED`, `PARSE_FAILED`, `SEND_ABORTED`, `SEND_TIMEOUT`, `UNKNOWN_ACK_CODE` |
+| `AckException` (`@glion/ack`) | NAK — `AckApplicationError` (AE) / `AckApplicationReject` (AR) / `AckCommitError` (CE) / `AckCommitReject` (CR)                                                                                                                  |
 
 ## Single-flight and lifecycle
 
@@ -142,7 +142,7 @@ One `send()` is in flight at a time. A second concurrent `send()` throws `CONCUR
 
 The decoder buffer persists across sends, so a late ACK from a previously-timed-out request lands on the next `send()` and trips the correlation check (`CORRELATION_MISMATCH`) rather than being silently accepted.
 
-A stream-level failure is terminal. A peer drop, a write failure, a decoder framing error, or a flood of unsolicited frames moves the client to `closed`; subsequent `send()` calls throw `CLOSED`, and `connect()` throws `CLIENT_CONSUMED`. Recovery is a new instance — automatic reconnect is configured at construction in a later version, never as a `connect()` behaviour.
+A stream-level failure is terminal. A peer drop, a write failure, a decoder framing error, or a flood of unsolicited frames moves the client to `closed`; once closed, both `send()` and `connect()` throw `CLOSED`. Recovery is a new instance — automatic reconnect is configured at construction in a later version, never as a `connect()` behaviour.
 
 ## Runtime adapters
 
