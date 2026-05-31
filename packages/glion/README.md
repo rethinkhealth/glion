@@ -90,7 +90,7 @@ Sends a single HL7v2 message over MLLP, prints the acknowledgment, and exits. It
 glion send [<file>] [flags]
 ```
 
-The message is read from `<file>`, or from stdin when `<file>` is omitted or is `-`. It is parsed and re-serialized to its canonical, CR-delimited form before transmission, so editor line endings are normalized. Input that is not an HL7v2 message (no leading `MSH` header) is rejected before anything reaches the wire; content validity is left to the receiver, which answers with a NAK.
+The message is read from `<file>`, or from stdin when `<file>` is omitted or is `-`. It is parsed and re-serialized to its canonical, CR-delimited form before transmission, so editor line endings are normalized. Whether the message is valid is the receiver's call — it answers with a NAK — so `glion send` does not pre-validate.
 
 | Flag              | Description                                                              |
 | ----------------- | ------------------------------------------------------------------------ |

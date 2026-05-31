@@ -9,11 +9,11 @@
  *   stdout in the handler.
  *
  * The renderers do no IO and never touch the MLLP client, the ack exceptions,
- * or the parser. The handler (a later increment) maps the wire types
- * (`MllpClientResponse`, `@glion/ack` `AckException`, `MllpClientError`, and
- * the pre-send structural gate) into a {@link SendOutcome} and then calls
- * these. Keeping the renderers decoupled from the wire types is what makes them
- * exhaustively unit-testable without sockets or fixtures.
+ * or the parser. The handler maps the wire types (`MllpClientResponse`,
+ * `@glion/ack` `AckException`, `MllpClientError`) and any pre-send usage error
+ * into a {@link SendOutcome} and then calls these. Keeping the renderers
+ * decoupled from the wire types is what makes them exhaustively unit-testable
+ * without sockets or fixtures.
  */
 
 /**
@@ -87,8 +87,8 @@ export interface SendTransportOutcome {
 }
 
 /**
- * Pre-send validation failure: the structural gate rejected the input or the
- * target/usage could not be resolved. Exit 2. No request exists yet.
+ * Pre-send failure: the target/usage could not be resolved or the message
+ * could not be read. Exit 2. No request exists yet.
  */
 export interface SendInvalidOutcome {
   kind: "invalid";

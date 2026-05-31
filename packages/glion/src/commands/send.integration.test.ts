@@ -135,23 +135,6 @@ describe("runSend (integration, fake connector)", () => {
     expect(json.kind).toBe("transport");
   });
 
-  it("exits 2 and reports invalid on non-HL7v2 input", async () => {
-    const { state, stderr, stdout } = capture();
-    const code = await runSend({
-      argv: ["--host", "h", "--port", "1"],
-      connect: fakeConnector(ackFrame("AA")),
-      cwd: "/tmp",
-      stderr,
-      stdin: Readable.from("this is not hl7v2"),
-      stdout,
-    });
-
-    expect(code).toBe(2);
-    const json = JSON.parse(state.out);
-    expect(json.ok).toBe(false);
-    expect(json.kind).toBe("invalid");
-  });
-
   it("errors (exit 2) when no target is given", async () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
