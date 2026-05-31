@@ -720,9 +720,18 @@ importers:
 
   packages/glion:
     dependencies:
+      '@glion/ack':
+        specifier: workspace:*
+        version: link:../ack
       '@glion/mllp':
         specifier: workspace:*
         version: link:../mllp
+      '@glion/mllp-client':
+        specifier: workspace:*
+        version: link:../mllp-client
+      '@glion/parser':
+        specifier: workspace:*
+        version: link:../parser
       rolldown:
         specifier: 1.0.0-rc.14
         version: 1.0.0-rc.14
