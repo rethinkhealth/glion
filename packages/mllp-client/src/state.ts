@@ -163,8 +163,8 @@ export const connectionMachine = setup({
 });
 
 /**
- * The connection machine's state values — the union the client maps onto its
- * public {@link MllpClientState}. Derived from the machine so the two can't
- * drift apart.
+ * The connection machine's state values. This IS the client's public
+ * `MllpClientState` (the manager re-exports it under that name) — derived from
+ * the machine so the public state can never drift from the actual lifecycle.
  */
 export type ConnectionPhase = SnapshotFrom<typeof connectionMachine>["value"];

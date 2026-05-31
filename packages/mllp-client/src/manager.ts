@@ -4,8 +4,8 @@
  * Owns the connection state machine (./state.ts), the FIFO send queue + single
  * drain loop, the dial routine, and the disposition of queued / in-flight sends
  * across the connection lifecycle. It creates a fresh {@link Connection}
- * (./connection.ts) per dial and projects the machine's phase onto the public
- * {@link MllpClientState}.
+ * (./connection.ts) per dial and exposes the machine's phase directly as the
+ * public {@link MllpClientState}.
  *
  * Functional-over-class (CLAUDE.md §4): the manager is a factory + closures;
  * the public `MllpClient` class is a thin facade over it. The instance-scoped
@@ -25,15 +25,16 @@ import { readRequestControlId, toWireFrame } from "./hl7v2";
 import type { MllpClientResponse, SendInput } from "./hl7v2";
 import type { ReconnectPolicy } from "./reconnect";
 import { connectionMachine } from "./state";
+import type { ConnectionPhase } from "./state";
 
-/** The public connection state reported by {@link ConnectionManager.state}. */
-export type MllpClientState =
-  | "idle"
-  | "connecting"
-  | "ready"
-  | "sending"
-  | "closing"
-  | "closed";
+/**
+ * The public connection state reported by {@link ConnectionManager.state}. It
+ * is the connection machine's own phase ({@link ConnectionPhase}) — there is no
+ * separate client vocabulary to keep in sync. Until reconnect is enabled,
+ * `backingOff`/`reconnecting` are unreachable. "Is a message on the wire right
+ * now?" is intentionally NOT modelled here; observe it via lifecycle events.
+ */
+export type MllpClientState = ConnectionPhase;
 
 export interface MllpSendOptions {
   /** Caller-provided cancellation signal. */
@@ -99,17 +100,14 @@ export function createConnectionManager(
     maxBufferedBytes,
   } = opts;
 
-  // The connection lifecycle is owned by the state machine: its value answers
-  // idle/connecting/connected/closed. Two wire-layer facts the machine does not
-  // model are tracked here so `state` can report the public `sending`/`closing`
-  // phases: whether a send is on the wire, and whether close()'s async teardown
-  // is in progress.
+  // The connection lifecycle is owned by the state machine; its value IS the
+  // public connection state (no separate vocabulary to keep in sync). close()
+  // drives the machine to "closed" synchronously, so every guard below can read
+  // the phase directly rather than tracking a separate "closing" flag.
   const machine = createActor(connectionMachine, {
     input: { policy: opts.policy },
   });
   machine.start();
-  let onWire = false;
-  let closing = false;
 
   // The live wire, once connected. The connection owns all per-connection state
   // (decoder, reader, frame buffer, the single-flight exchange) and its own
@@ -125,26 +123,6 @@ export function createConnectionManager(
 
   const phase = () => machine.getSnapshot().value;
   const isConnected = () => phase() === "connected";
-
-  const state = (): MllpClientState => {
-    // close()'s async teardown reports as "closing" even though the machine has
-    // already advanced to "closed" synchronously on CLOSE.
-    if (closing) {
-      return "closing";
-    }
-    const p = phase();
-    if (p === "connected") {
-      return onWire ? "sending" : "ready";
-    }
-    if (p === "idle") {
-      return "idle";
-    }
-    if (p === "closed") {
-      return "closed";
-    }
-    // connecting, plus the (currently unreachable) reconnect phases.
-    return "connecting";
-  };
 
   /**
    * Reject every still-queued send (those not yet on the wire). The on-wire
@@ -181,7 +159,6 @@ export function createConnectionManager(
           return;
         }
         task.detachQueuedAbort();
-        onWire = true;
         try {
           const result = await conn.exchange(task);
           task.clearDeadline();
@@ -189,8 +166,6 @@ export function createConnectionManager(
         } catch (error) {
           task.clearDeadline();
           task.reject(error as Error);
-        } finally {
-          onWire = false;
         }
         // A drop or close during the send advanced the machine out of
         // "connected" (and failed the rest of the queue), so the loop condition
@@ -302,16 +277,16 @@ export function createConnectionManager(
     connectOpts: { signal?: AbortSignal } = {}
   ): Promise<void> => {
     const current = phase();
-    if (current === "closed" || closing) {
+    if (current === "closed") {
       throw new MllpClientError(
         MllpErrorCode.CLOSED,
-        `Cannot connect: this client is ${state()} — it has been closed. Construct a new MllpClient to open a fresh connection.`
+        `Cannot connect: this client is ${current} — it has been closed. Construct a new MllpClient to open a fresh connection.`
       );
     }
     if (current !== "idle") {
       throw new MllpClientError(
         MllpErrorCode.ALREADY_CONNECTED,
-        `Cannot connect while ${state()}: an MllpClient opens one connection in its lifetime. Await the in-flight connect, or use a separate client for a concurrent connection.`
+        `Cannot connect while ${current}: an MllpClient opens one connection in its lifetime. Await the in-flight connect, or use a separate client for a concurrent connection.`
       );
     }
     machine.send({ type: "CONNECT" });
@@ -391,16 +366,16 @@ export function createConnectionManager(
     message: SendInput,
     sendOpts: MllpSendOptions = {}
   ): Promise<MllpClientResponse> => {
-    if (closing || phase() === "closed") {
+    if (phase() === "closed") {
       throw new MllpClientError(
         MllpErrorCode.CLOSED,
-        `Cannot send: this client is ${state()} — it has been closed. Construct a new MllpClient to send again.`
+        `Cannot send: this client is ${phase()} — it has been closed. Construct a new MllpClient to send again.`
       );
     }
     if (!isConnected()) {
       throw new MllpClientError(
         MllpErrorCode.NOT_CONNECTED,
-        `Cannot send: the client is ${state()}, not connected. Call connect() before send().`
+        `Cannot send: the client is ${phase()}, not connected. Call connect() before send().`
       );
     }
 
@@ -416,7 +391,7 @@ export function createConnectionManager(
   };
 
   const doClose = async (): Promise<void> => {
-    if (phase() === "closed" || closing) {
+    if (phase() === "closed") {
       return;
     }
     if (phase() === "idle") {
@@ -424,9 +399,8 @@ export function createConnectionManager(
       return;
     }
 
-    // The machine advances to "closed" synchronously here; `closing` keeps the
-    // public state at "closing" until the async teardown below completes.
-    closing = true;
+    // CLOSE drives the machine to "closed" synchronously, so `state` reports
+    // "closed" immediately while the duplex teardown below is still awaited.
     machine.send({ type: "CLOSE" });
 
     // Reject every queued send — none of them will reach the wire.
@@ -444,7 +418,6 @@ export function createConnectionManager(
         )
       );
     }
-    closing = false;
   };
 
   return {
@@ -460,7 +433,7 @@ export function createConnectionManager(
     },
     send: doSend,
     get state() {
-      return state();
+      return phase();
     },
   };
 }

@@ -94,7 +94,7 @@ describe("connect()", () => {
     const p = client.connect();
     expect(client.state).toBe("connecting");
     await p;
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
   });
 
   it("throws ALREADY_CONNECTED on a second connect()", async () => {
@@ -185,7 +185,7 @@ describe("send() — accept codes", () => {
     expect(response.raw).toBeInstanceOf(Uint8Array);
     expect(response.timestamp).toBeInstanceOf(Date);
     expect(response.durationMs).toBeGreaterThanOrEqual(0);
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
   });
 
   it("returns MllpClientResponse on CA", async () => {
@@ -282,7 +282,7 @@ describe("send() — NAK codes", () => {
         expect(rej.tree).toBeDefined();
         expect(typeof rej.raw).toBe("string");
       }
-      expect(client.state).toBe("ready");
+      expect(client.state).toBe("connected");
     }
   );
 
@@ -461,7 +461,7 @@ describe("send() — state guards", () => {
     await expect(client.send(bad)).rejects.toMatchObject({
       name: "FramingError",
     });
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
   });
 });
 
@@ -482,7 +482,7 @@ describe("send() — timeout / abort / drop", () => {
       expect((error as MllpClientError).code).toBe(MllpErrorCode.SEND_TIMEOUT);
       expect((error as MllpClientError).timeoutMs).toBe(20);
     }
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
   });
 
   it("respects a caller-provided abort signal", async () => {
@@ -495,7 +495,7 @@ describe("send() — timeout / abort / drop", () => {
     await expect(p).rejects.toMatchObject({
       code: MllpErrorCode.SEND_ABORTED,
     });
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
   });
 
   it("rejects pending send with DROPPED when peer drops", async () => {
@@ -559,16 +559,16 @@ describe("close()", () => {
     {
       await using client = makeClient(fake);
       await client.connect();
-      expect(client.state).toBe("ready");
+      expect(client.state).toBe("connected");
     }
     // After the `using` block, close has been called.
     expect(fake.closeCount()).toBe(1);
   });
 
-  it("reports 'closing' while teardown is in flight, then 'closed'", async () => {
+  it("reports 'closed' synchronously even while teardown is in flight", async () => {
     // A duplex whose close() we hold open, so we can observe state mid-teardown.
-    // close() runs its synchronous teardown, then awaits duplex.close() — that
-    // suspension window is the only time the client reports "closing".
+    // close() drives the machine to "closed" synchronously and only then awaits
+    // duplex.close(); state reports "closed" immediately, not a transient phase.
     const fake = createFakeDuplex();
     let releaseClose: (() => void) | undefined;
     // oxlint-disable-next-line promise/avoid-new -- test gate for close()
@@ -587,10 +587,11 @@ describe("close()", () => {
       port: 0,
     });
     await client.connect();
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
 
     const closing = client.close();
-    expect(client.state).toBe("closing");
+    expect(client.state).toBe("closed");
+    expect(client.connected).toBe(false);
 
     releaseClose?.();
     await closing;
@@ -607,7 +608,7 @@ describe("peer drop detection", () => {
     const fake = createFakeDuplex();
     const client = makeClient(fake);
     await client.connect();
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
     fake.closePeer();
     // Wait for the watcher microtask
     await Promise.resolve();
@@ -666,7 +667,7 @@ describe("multiple sends on one connection", () => {
     expect(r1.code).toBe("AA");
     expect(r2.code).toBe("AA");
     expect(r3.code).toBe("AA");
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
   });
 
   it("decodes coalesced peer frames (two ACKs in one chunk) across two sends", async () => {
@@ -797,7 +798,7 @@ describe("send() — late ACK from previously-timed-out send", () => {
     await expect(
       client.send(requestWithControlId("MSG_FIRST"), { timeoutMs: 20 })
     ).rejects.toMatchObject({ code: MllpErrorCode.SEND_TIMEOUT });
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
 
     // Late ACK for the timed-out request arrives between sends.
     peerRef!.injectPeerBytes(frame(requestAck("AA", "MSG_FIRST")));
@@ -887,7 +888,7 @@ describe("frame-queue overflow protection", () => {
     await client.send(REQUEST, { timeoutMs: 30 }).catch(() => {
       // First send times out (peer didn't respond).
     });
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
     peerRef!.injectPeerBytes(coalesced);
     // Yield for the read loop to drain the chunk.
     await sleep(10);
@@ -980,7 +981,7 @@ describe("send() — queue (Phase 4)", () => {
 
     await Promise.all([p1, p2, p3]);
     expect(settled).toEqual(["FIRST", "SECOND", "THIRD"]);
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
     expect(client.queueDepth).toBe(0);
   });
 
@@ -1015,7 +1016,7 @@ describe("send() — queue (Phase 4)", () => {
       code: MllpErrorCode.SEND_ABORTED,
     });
     expect(client.queueDepth).toBe(0);
-    expect(client.state).toBe("sending"); // p1 still in flight
+    expect(client.state).toBe("connected"); // p1 still in flight
 
     await client.close();
     await expect(p1).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
@@ -1099,7 +1100,7 @@ describe("send() — queue (Phase 4)", () => {
     await expect(p1).rejects.toBeInstanceOf(AckApplicationReject);
     const r2 = await p2;
     expect(r2.code).toBe("AA");
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
     expect(client.queueDepth).toBe(0);
   });
 
@@ -1132,7 +1133,7 @@ describe("send() — queue (Phase 4)", () => {
     });
     const r2 = await p2;
     expect(r2.code).toBe("AA");
-    expect(client.state).toBe("ready");
+    expect(client.state).toBe("connected");
     expect(client.queueDepth).toBe(0);
   });
 
