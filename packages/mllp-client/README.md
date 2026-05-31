@@ -6,7 +6,7 @@ Persistent, single-flight MLLP client for HL7v2.
 
 `@glion/mllp-client` opens one long-lived MLLP/TCP connection and sends HL7v2 messages over it, one in flight at a time. Each `send()` writes a framed message, waits for the peer's ACK, parses it, verifies the MSA-2 correlation ID against the request's MSH-10, and resolves with a structured response. Application/commit accept codes (`AA`/`CA`) resolve; reject codes (`AE`/`AR`/`CE`/`CR`) throw the matching `@glion/ack` `AckException` (`AckApplicationError`, `AckApplicationReject`, `AckCommitError`, `AckCommitReject`).
 
-The client is one class managing one socket lifecycle: `connect()` initializes, `send()` uses, `close()` tears down. The wire transport is supplied by a runtime adapter — the Node adapter ships at `@glion/mllp-client/node`. A peer drop, write failure, or decoder framing error is terminal: the connection moves to `closed` and the instance is spent. Reconnect and an internal send queue are deferred to later versions.
+The client is one class managing one socket lifecycle: `connect()` initializes, `send()` uses, `close()` tears down. Concurrent sends queue (FIFO) and run one at a time. The wire transport is supplied by a runtime adapter — the Node adapter ships at `@glion/mllp-client/node`. A peer drop, write failure, or decoder framing error is terminal: the connection moves to `closed` and the instance is spent. Reconnect is deferred to a later version.
 
 ## Install
 
@@ -70,12 +70,13 @@ await client.send(message);
 
 ### Getters
 
-| Getter             | Type              | Description                                                    |
-| ------------------ | ----------------- | -------------------------------------------------------------- |
-| `client.host`      | `string`          | Configured target host.                                        |
-| `client.port`      | `number`          | Configured target port.                                        |
-| `client.state`     | `MllpClientState` | `idle`, `connecting`, `ready`, `sending`, `closing`, `closed`. |
-| `client.connected` | `boolean`         | `true` while the wire is up (`ready` or `sending`).            |
+| Getter              | Type              | Description                                                    |
+| ------------------- | ----------------- | -------------------------------------------------------------- |
+| `client.host`       | `string`          | Configured target host.                                        |
+| `client.port`       | `number`          | Configured target port.                                        |
+| `client.state`      | `MllpClientState` | `idle`, `connecting`, `ready`, `sending`, `closing`, `closed`. |
+| `client.connected`  | `boolean`         | `true` while the wire is up (`ready` or `sending`).            |
+| `client.queueDepth` | `number`          | Sends waiting in the queue, excluding the one in flight.       |
 
 ### `client.connect(options?): Promise<void>`
 
@@ -104,7 +105,7 @@ Frames `message` (a `string` or `Uint8Array`), writes it, and resolves with the 
   - `SEND_TIMEOUT` — no ACK arrived within the deadline (`timeoutMs` is set).
   - `DROPPED` — the connection ended (peer drop, write failure, framing error, frame flood); `reason` discriminates. Terminal.
   - `SEND_ABORTED` — `options.signal` aborted.
-  - `NOT_CONNECTED` / `CLOSED` / `CONCURRENT_SEND` — the client is not `ready`, has been closed, or a send is already in flight.
+  - `NOT_CONNECTED` / `CLOSED` — the client is not connected, or has been closed (the in-flight send and every queued send reject).
   - `PARSE_FAILED` / `UNKNOWN_ACK_CODE` — the ACK is not parseable HL7v2 or carries a non-standard MSA-1.
 
 ### `client.close(): Promise<void>`
@@ -131,18 +132,18 @@ Calls `close()`. Enables `await using`.
 
 Every error the client itself raises **is** an `MllpClientError`, carrying a `code` from `MllpErrorCode` — branch on `code`; a `switch` on it never needs to inspect client state. Code-specific detail rides on optional fields (`reason` for `DROPPED`, `timeoutMs` for the timeouts, `expected`/`actual`/`tree`/`raw` for `CORRELATION_MISMATCH`) with `cause` for any wrapped error. A NAK is the exception: `send()` throws an `@glion/ack` `AckException` — the same typed exception the server builds — imported from `@glion/ack`, not from this package.
 
-| Class                         | Code(s) / notes                                                                                                                                                                                                                  |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MllpClientError`             | `ALREADY_CONNECTED`, `CLOSED`, `CONCURRENT_SEND`, `CONNECT_ABORTED`, `CONNECT_FAILED`, `CONNECT_TIMEOUT`, `CORRELATION_MISMATCH`, `DROPPED`, `NOT_CONNECTED`, `PARSE_FAILED`, `SEND_ABORTED`, `SEND_TIMEOUT`, `UNKNOWN_ACK_CODE` |
-| `AckException` (`@glion/ack`) | NAK — `AckApplicationError` (AE) / `AckApplicationReject` (AR) / `AckCommitError` (CE) / `AckCommitReject` (CR)                                                                                                                  |
+| Class                         | Code(s) / notes                                                                                                                                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MllpClientError`             | `ALREADY_CONNECTED`, `CLOSED`, `CONNECT_ABORTED`, `CONNECT_FAILED`, `CONNECT_TIMEOUT`, `CORRELATION_MISMATCH`, `DROPPED`, `NOT_CONNECTED`, `PARSE_FAILED`, `SEND_ABORTED`, `SEND_TIMEOUT`, `UNKNOWN_ACK_CODE` |
+| `AckException` (`@glion/ack`) | NAK — `AckApplicationError` (AE) / `AckApplicationReject` (AR) / `AckCommitError` (CE) / `AckCommitReject` (CR)                                                                                               |
 
 ## Single-flight and lifecycle
 
-One `send()` is in flight at a time. A second concurrent `send()` throws `CONCURRENT_SEND` until the queue lands in a later version.
+One send is on the wire at a time. Concurrent `send()` calls queue in FIFO order and run one after another; `queueDepth` reports how many are waiting (excluding the one in flight). A per-send timeout starts when `send()` is called, so it spans the queue wait as well as the wire round-trip — a queued send can time out, or be aborted via its `signal`, before it is ever written.
 
 The decoder buffer persists across sends, so a late ACK from a previously-timed-out request lands on the next `send()` and trips the correlation check (`CORRELATION_MISMATCH`) rather than being silently accepted.
 
-A stream-level failure is terminal. A peer drop, a write failure, a decoder framing error, or a flood of unsolicited frames moves the client to `closed`; once closed, both `send()` and `connect()` throw `CLOSED`. Recovery is a new instance — automatic reconnect is configured at construction in a later version, never as a `connect()` behaviour.
+A stream-level failure is terminal. A peer drop, a write failure, a decoder framing error, or a flood of unsolicited frames moves the client to `closed`; the in-flight send rejects (`DROPPED`), every queued send rejects (`CLOSED`), and once closed both `send()` and `connect()` throw `CLOSED`. Recovery is a new instance — automatic reconnect is configured at construction in a later version, never as a `connect()` behaviour.
 
 ## Runtime adapters
 
