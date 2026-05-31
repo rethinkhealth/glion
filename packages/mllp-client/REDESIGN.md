@@ -39,6 +39,19 @@ Why Effect still loses _even under the new framing_:
 
 ---
 
+## 2a. Queue location — stays native (machine does NOT own the send queue)
+
+Re-evaluated directly (a follow-up study, prompted by "should the machine also operate queuing/sending?"). **Verdict: keep the queue, drain loop, and per-send coordination native in the manager; the machine stays connection-lifecycle only.** Four shapes were weighed — Q1 (machine gains `connected.idle↔sending` substates for observability only), Q2 (FIFO as ids in machine context + native side-table for payload), Q3 (per-send spawned child actors), Q4 (status quo). **Q4 chosen.**
+
+Why the queue can't cleanly move in:
+
+- **Every per-send value is non-serializable** — `resolve`/`reject` (the caller's Promise settlers), the framed `Uint8Array`, the `AbortSignal`s, the deadline timer handle, the abort listener. None can live in serializable machine context. So Q2/Q3 can relocate the _control topology_ (FIFO order, single-flight gate, disposition) into the chart but the _payload_ stays native regardless — a hybrid with a new id-correlation or spawned-actor bridge, not a clean win.
+- **Real-Promise (§6) is cheapest native.** `send()` is `new Promise((resolve,reject) => …)` settled directly by the drain loop — no `toPromise`/bridge, no resolver smuggled through events. Q2/Q3 add a bridge the status quo simply doesn't need.
+- **Single-flight makes it not worth it (§1).** With exactly one message on the wire ever, the queue is a tiny array + one drain loop; a statechart adds ceremony (id-correlation, redundant `SETTLED` echo events, split-brain between context-ids and the value-map) without removing a bug class. Q2 makes `DELIVERY_UNKNOWN` _more_ fragile by spreading the in-flight-drop settle across machine+manager+connection instead of one synchronous reset.
+- **Durable coordination doesn't require it.** Hold-across-reconnect / resume-on-reconnect / pause-drain are small local edits to the native drain (gate on `connected`, re-kick `drain()` on the `connected` entry, don't `failQueue` on a transient drop). Hold is actually _easier_ as plain array entries than as machine-referenced actors.
+
+**The one piece worth revisiting later (Q1-lite, deferred to events.ts):** promote _only_ the single-flight gate to `connected.idle ⇄ connected.sending` substates so "is a send on the wire" becomes an inspectable machine signal feeding `events.ts` — **without** moving the queue array, resolvers, or bytes in. Decide this when building `events.ts`, since that's the only consumer that would justify it. (Note: the prior `#onWire` flag is already gone — `client.state` now reports the machine phase, so there is no live "sending" public state demanding this today.)
+
 ## 3. The machine's role — lifecycle authority, **not** full orchestrator
 
 The design study's first instinct ("machine as orchestrator via two invoked actors: dial + delay") was **walked back by the adversarial pass**, correctly:
