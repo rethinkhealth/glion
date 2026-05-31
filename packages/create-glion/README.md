@@ -36,7 +36,6 @@ pnpm create glion my-app --example
 | `starter`         | Starter Glion — minimal HL7v2 MLLP server. The default scaffold. |
 | `mllp-server`     | HL7v2 MLLP server with route handlers (Node.js).                 |
 | `mllp-server-bun` | HL7v2 MLLP server with route handlers (Bun).                     |
-| `mllp-client`     | MLLP client sending sample messages — companion to the server.   |
 
 Each example is fetched from `github:rethinkhealth/glion/examples/<name>` via [`giget`](https://github.com/unjs/giget).
 

@@ -138,7 +138,7 @@ Linting rules and presets for HL7v2 message quality and conformance.
 ## Documentation
 
 - Full documentation at [glion.dev](https://glion.dev).
-- Runnable examples in [`examples/`](./examples) covering zero-config, explicit-config, and low-level transport usage.
+- Runnable examples in [`examples/`](./examples) covering the server (Node and Bun), the `glion` CLI workflow, and sending test messages with `glion send`.
 - API reference and detailed usage in each package's README, linked from the Packages section above.
 
 ## Status

@@ -61,7 +61,7 @@ glion send samples/adt-a01.hl7 --local --json
 ## Next steps
 
 - Add more routes (e.g. `ORM^O01`, `ORU^R01`) — see [`mllp-server`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server) for a richer example with logging middleware and typed NAKs.
-- Send sample messages from the [`mllp-client`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-client) example.
+- For the programmatic client API (streaming, commit-level acks, TLS), see the [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) package.
 
 ## Notes
 

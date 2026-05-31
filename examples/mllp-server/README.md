@@ -25,7 +25,7 @@ The server listens on `127.0.0.1:2575` by default.
 
 - `glion.config.ts` — entry path, port (`2575`), optional TLS / watch.
 - `src/app.ts` — the `Mllp` instance, exported as the default. The CLI picks it up automatically.
-- `samples/adt-a01.hl7` — a sample HL7v2 message for `glion send`.
+- `samples/` — sample HL7v2 messages for `glion send` (`adt-a01` accepts, `oru-r01` is rejected).
 
 The app:
 
@@ -57,12 +57,13 @@ cat samples/adt-a01.hl7 | glion send --local
 glion send samples/adt-a01.hl7 --local --json
 ```
 
-`glion send` exits `0` on accept (`AA`/`CA`), `1` on a NAK (`AE`/`AR`/`CE`/`CR`), and `2` when the message could not be delivered. The companion [`mllp-client`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-client) example shows the programmatic client API, including streaming and a NAK round-trip:
+`glion send` exits `0` on accept (`AA`/`CA`), `1` on a NAK (`AE`/`AR`/`CE`/`CR`), and `2` when the message could not be delivered. The `ORU^R01` route throws a typed NAK, so sending the bundled `oru-r01` sample shows the rejection path end to end:
 
 ```bash
-cd ../mllp-client
-pnpm send --sample oru-r01     # → AE · Patient not available · ERR 200
+glion send samples/oru-r01.hl7 --local     # → AE · Patient not available · exit 1
 ```
+
+For the programmatic client API — streaming, commit-level acks, mutual TLS — see the [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) package.
 
 ## Notes
 
@@ -71,4 +72,4 @@ pnpm send --sample oru-r01     # → AE · Patient not available · ERR 200
 - [`@glion/mllp-ack`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-ack) — ACK middleware.
 - [`@glion/ack`](https://github.com/rethinkhealth/glion/tree/main/packages/ack) — `AckException` hierarchy.
 - [`mllp-server-bun`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server-bun) — same app under Bun.
-- [`mllp-client`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-client) — companion client example.
+- [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) — programmatic MLLP client (streaming, modes, TLS).
