@@ -1753,6 +1753,9 @@ importers:
       '@glion/util-query':
         specifier: workspace:*
         version: link:../util-query
+      xstate:
+        specifier: 5.32.0
+        version: 5.32.0
     devDependencies:
       '@glion/check-readme':
         specifier: workspace:*
@@ -4996,6 +4999,9 @@ packages:
       utf-8-validate:
         optional: true
 
+  xstate@5.32.0:
+    resolution: {integrity: sha512-zsk73aWGmxn9z34P0kbiod5JwTvdYRW3+IDxITq8sd9+VWwMyW7BUzpplnYy9mIEXa6V8IMDv7Hy4m0mhT5+2Q==}
+
   yaml@2.8.3:
     resolution: {integrity: sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg==}
     engines: {node: '>= 14.6'}
@@ -7380,6 +7386,8 @@ snapshots:
 
   ws@8.21.0:
     optional: true
+
+  xstate@5.32.0: {}
 
   yaml@2.8.3: {}
 

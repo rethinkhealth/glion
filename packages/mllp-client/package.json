@@ -49,7 +49,8 @@
     "@glion/mllp-transport": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/to-hl7v2": "workspace:*",
-    "@glion/util-query": "workspace:*"
+    "@glion/util-query": "workspace:*",
+    "xstate": "5.32.0"
   },
   "devDependencies": {
     "@glion/check-readme": "workspace:*",

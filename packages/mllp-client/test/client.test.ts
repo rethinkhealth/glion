@@ -564,6 +564,38 @@ describe("close()", () => {
     // After the `using` block, close has been called.
     expect(fake.closeCount()).toBe(1);
   });
+
+  it("reports 'closing' while teardown is in flight, then 'closed'", async () => {
+    // A duplex whose close() we hold open, so we can observe state mid-teardown.
+    // close() runs its synchronous teardown, then awaits duplex.close() — that
+    // suspension window is the only time the client reports "closing".
+    const fake = createFakeDuplex();
+    let releaseClose: (() => void) | undefined;
+    // oxlint-disable-next-line promise/avoid-new -- test gate for close()
+    const closeGate = new Promise<void>((resolve) => {
+      releaseClose = resolve;
+    });
+    const duplex: MllpDuplex = {
+      close: () => closeGate,
+      closed: fake.duplex.closed,
+      readable: fake.duplex.readable,
+      writable: fake.duplex.writable,
+    };
+    const client = new MllpClient({
+      connect: () => Promise.resolve(duplex),
+      host: "test",
+      port: 0,
+    });
+    await client.connect();
+    expect(client.state).toBe("ready");
+
+    const closing = client.close();
+    expect(client.state).toBe("closing");
+
+    releaseClose?.();
+    await closing;
+    expect(client.state).toBe("closed");
+  });
 });
 
 // ---------------------------------------------------------------------------
