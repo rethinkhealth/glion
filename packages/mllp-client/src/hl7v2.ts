@@ -1,12 +1,32 @@
 /**
- * HL7v2 operations for the client. The split here is deliberate and follows
- * the AST's nature: an AST is an *abstract* tree, not a concrete byte-exact one
- * (a trailing field delimiter, line-ending style, etc. are syntactic details it
- * legitimately drops). So the client uses the tree for what trees are for —
- * *reading* meaning (MSH-10 correlation, the parsed ACK) — and uses the
- * caller's own bytes for the *wire*, never round-tripping them through the
- * parser. A `Root` input has no original bytes, so it (and only it) is
- * serialized with `@glion/to-hl7v2`.
+ * HL7v2 operations for the client. The AST (`Root`) is the first-class send
+ * currency: every `send()` input is normalized to a tree and the wire bytes are
+ * produced from that tree with `@glion/to-hl7v2`. The client is therefore an
+ * *originating / cleaning* client — it emits canonical HL7v2, not a byte-exact
+ * relay of whatever arrived. A `string` / `Uint8Array` is parsed first (it is a
+ * serialized tree); a `Root` is used directly.
+ *
+ * **What "cleaning" changes** (syntactic only — semantics are preserved):
+ * line endings are normalized to CR, and trailing empty fields / segments are
+ * trimmed. Escape sequences (`\F\`, `\X0D\`, …), Z-segments, repetitions, and
+ * components are preserved verbatim by the parser→serializer round trip.
+ *
+ * **Known limitations** (documented, accepted):
+ *
+ * - Trailing-empty-field trimming is NOT idempotent — it drops one trailing empty
+ *   field per pass (`PID|1|||||` → `PID|1||||` → … → `PID|1`), so cleaning the
+ *   same message twice can yield different bytes. Semantically faithful (the
+ *   fields are absent either way); syntactically non-convergent.
+ * - **Decode-implies-encode invariant:** the client parses with the base
+ *   `@glion/parser`, which does NOT decode escape sequences — so `\F\` in →
+ *   `\F\` out, no re-encode needed. Do NOT hand `send()` a `Root` that has
+ *   already been escape-decoded (e.g. via `hl7v2DecodeEscapes`): `toHl7v2` has
+ *   no re-encode step and would emit the decoded literal, corrupting field
+ *   structure.
+ * - Non-UTF-8 input bytes (Latin-1 / Windows-1252) cannot be decoded and are
+ *   rejected. This inherits the glion ecosystem's UTF-8 assumption; whether
+ *   that assumption is correct is tracked separately (see the encoding GH
+ *   issue), not papered over here.
  *
  * @module
  */
@@ -35,9 +55,9 @@ import { MllpClientError, MllpErrorCode } from "./errors";
 const TEXT_DECODER = new TextDecoder("utf-8", { fatal: true });
 
 /**
- * What `MllpClient.send()` accepts. `string` / `Uint8Array` are transmitted
- * verbatim and read (best-effort) for the control ID; a `Root` is serialized
- * for the wire and read directly.
+ * What `MllpClient.send()` accepts. All inputs are normalized to a tree and
+ * serialized to canonical HL7v2 for the wire (see the module JSDoc): a `string`
+ * / `Uint8Array` is parsed first; a `Root` is used directly.
  */
 export type SendInput = string | Uint8Array | Root;
 
@@ -64,53 +84,58 @@ export interface MllpClientResponse {
   readonly durationMs: number;
 }
 
+/** What a send needs on the wire, derived from a single parse of the input. */
+export interface PreparedSend {
+  /** Canonical HL7v2 wire bytes, MLLP-framed. */
+  readonly framed: Uint8Array;
+  /** MSH-10 of the (cleaned) message, for ACK correlation. `""` if absent. */
+  readonly requestControlId: string;
+}
+
 /**
- * Build the MLLP-framed wire bytes for a send. `string` / `Uint8Array` are
- * framed verbatim — the caller's exact bytes reach the wire, with no lossy
- * parse→serialize round trip. A `Root` has no original bytes, so it is
- * serialized with `@glion/to-hl7v2`.
+ * Normalize a send input to its canonical wire form and read its control ID —
+ * from ONE parse. A `string` / `Uint8Array` is parsed to a tree (the bytes are
+ * decoded as UTF-8 first); a `Root` is used directly. The tree is then
+ * serialized with `@glion/to-hl7v2` and MLLP-framed, and MSH-10 is read from
+ * the same tree. The wire bytes are therefore the *cleaned* canonical form, not
+ * the caller's original bytes — see the module JSDoc.
  *
- * @throws {FramingError} When the message carries an embedded MLLP framing
- *   byte (VT or FS) that cannot be framed. CR is allowed — it is the HL7v2
- *   segment terminator.
+ * @throws {MllpClientError} `PARSE_FAILED` when a `Uint8Array` is not valid
+ *   UTF-8 (e.g. a Latin-1 / Windows-1252 feed). The cause carries the decode
+ *   error. This inherits the ecosystem's UTF-8 assumption.
+ * @throws {FramingError} When the serialized message carries an embedded MLLP
+ *   framing byte (VT or FS) that cannot be framed. CR is allowed — it is the
+ *   HL7v2 segment terminator.
  */
-export function toWireFrame(input: SendInput): Uint8Array {
-  if (typeof input === "string" || input instanceof Uint8Array) {
-    return frame(input);
-  }
-  return frame(toHl7v2(input));
+export function prepareSend(input: SendInput): PreparedSend {
+  const tree = toTree(input);
+  return {
+    framed: frame(toHl7v2(tree)),
+    requestControlId: readValue(tree, "MSH-10[1].1.1") ?? "",
+  };
 }
 
-/**
- * Read MSH-10 (the message control ID) for correlation. A `Root` is read
- * directly; `string` / `Uint8Array` is parsed with `@glion/parser`. This is
- * best-effort: reading is for correlation only and never blocks the send, so
- * unparseable or undecodable input simply yields `""` (correlation skipped).
- */
-export function readRequestControlId(input: SendInput): string {
-  const tree = readableTree(input);
-  return tree ? (readValue(tree, "MSH-10[1].1.1") ?? "") : "";
-}
-
-function readableTree(input: SendInput): Root | null {
+function toTree(input: SendInput): Root {
   if (typeof input !== "string" && !(input instanceof Uint8Array)) {
     return input;
   }
   let text: string;
-  try {
-    text = typeof input === "string" ? input : TEXT_DECODER.decode(input);
-  } catch {
-    // Undecodable bytes: the wire still gets them verbatim, but we can't read
-    // MSH-10, so correlation is skipped.
-    return null;
+  if (typeof input === "string") {
+    text = input;
+  } else {
+    try {
+      text = TEXT_DECODER.decode(input);
+    } catch (error) {
+      throw new MllpClientError(
+        MllpErrorCode.PARSE_FAILED,
+        "The message bytes are not valid UTF-8 and cannot be parsed (HL7v2 in the glion ecosystem is UTF-8; a Latin-1 / Windows-1252 feed is not yet supported).",
+        { cause: error }
+      );
+    }
   }
-  try {
-    return parseHL7v2(text);
-  } catch {
-    // Not parseable HL7v2: framable but not structured. Sent verbatim;
-    // correlation skipped.
-    return null;
-  }
+  // The parser is lenient — it never throws — so a tree is always produced,
+  // even for non-HL7v2 text (MSH-10 then reads as "").
+  return parseHL7v2(text);
 }
 
 interface ParseInput {

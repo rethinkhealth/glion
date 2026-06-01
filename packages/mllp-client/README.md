@@ -4,7 +4,7 @@ Persistent, single-flight MLLP client for HL7v2.
 
 ## What it does
 
-`@glion/mllp-client` opens one long-lived MLLP/TCP connection and sends HL7v2 messages over it, one in flight at a time. `send()` accepts a `string`, `Uint8Array`, or parsed `Root` AST. The client follows the grain of the AST: it uses the tree for _reading_ meaning (MSH-10 correlation, the parsed ACK) and the caller's own bytes for the _wire_. A `string`/`Uint8Array` is framed verbatim — never round-tripped through the parser, which (being an AST, not a byte-exact CST) would silently normalize it — while a `Root` is serialized with `@glion/to-hl7v2`. Each `send()` waits for the peer's ACK, verifies the MSA-2 correlation ID against the request's MSH-10, and resolves with a structured response. Application/commit accept codes (`AA`/`CA`) resolve; reject codes (`AE`/`AR`/`CE`/`CR`) throw the matching `@glion/ack` `AckException` (`AckApplicationError`, `AckApplicationReject`, `AckCommitError`, `AckCommitReject`).
+`@glion/mllp-client` opens one long-lived MLLP/TCP connection and sends HL7v2 messages over it, one in flight at a time. `send()` accepts a `string`, `Uint8Array`, or parsed `Root` AST. The AST is the first-class currency: every input is parsed to a tree and re-serialized to **canonical** HL7v2 for the wire — this is an _originating / cleaning_ client, not a byte-exact relay. Cleaning is syntactic only (line endings normalized to CR, trailing empty fields/segments trimmed); escape sequences, Z-segments, repetitions, and components are preserved. The same parse drives MSH-10 correlation. Each `send()` waits for the peer's ACK, verifies the MSA-2 correlation ID against the request's MSH-10, and resolves with a structured response. Application/commit accept codes (`AA`/`CA`) resolve; reject codes (`AE`/`AR`/`CE`/`CR`) throw the matching `@glion/ack` `AckException` (`AckApplicationError`, `AckApplicationReject`, `AckCommitError`, `AckCommitReject`).
 
 The client is one class managing one socket lifecycle: `connect()` initializes, `send()` uses, `close()` tears down. Concurrent sends queue (FIFO) and run one at a time. The wire transport is supplied by a runtime adapter — the Node adapter ships at `@glion/mllp-client/node`. A peer drop, write failure, or decoder framing error is terminal: the connection moves to `closed` and the instance is spent. Reconnect is deferred to a later version.
 
@@ -94,7 +94,7 @@ All are an `MllpClientError`; branch on `code`:
 
 ### `client.send(message, options?): Promise<MllpClientResponse>`
 
-Accepts a `string`, `Uint8Array`, or `Root` (`SendInput`). A `string`/`Uint8Array` is sent on the wire **verbatim** — the caller's exact bytes, never round-tripped through the parser — while the tree is read (best-effort) for the MSH-10 correlation ID. A `Root` has no original bytes, so it is serialized with `@glion/to-hl7v2`. Resolves with the parsed ACK. `options.timeoutMs` overrides the default ACK-wait deadline; the deadline starts when the send reaches the wire (a send waiting behind others may wait longer than this before its clock begins). There is no per-send cancellation signal — `close()` rejects an in-flight or queued send.
+Accepts a `string`, `Uint8Array`, or `Root` (`SendInput`). All inputs are parsed to a tree and re-serialized to **canonical** HL7v2 for the wire (a `string`/`Uint8Array` is parsed first; a `Root` is used directly), and the same tree yields the MSH-10 correlation ID. The wire bytes are the cleaned form, not the caller's original bytes — line endings normalize to CR and trailing empty fields/segments are trimmed, while escape sequences and structure are preserved. (Known limitations: trailing-empty trimming is not idempotent; a `Root` that was escape-_decoded_ upstream must not be passed in, as it would re-serialize the decoded literals; non-UTF-8 input bytes are rejected with `PARSE_FAILED`.) `options.timeoutMs` overrides the default ACK-wait deadline; the deadline starts when the send reaches the wire (a send waiting behind others may wait longer than this before its clock begins). There is no per-send cancellation signal — `close()` rejects an in-flight or queued send.
 
 **Throws**
 
@@ -105,7 +105,7 @@ Accepts a `string`, `Uint8Array`, or `Root` (`SendInput`). A `string`/`Uint8Arra
   - `SEND_TIMEOUT` — no ACK arrived within the deadline (`timeoutMs` is set).
   - `DROPPED` — the connection ended (peer drop, write failure, framing error, frame flood); `reason` discriminates. Terminal.
   - `NOT_CONNECTED` / `CLOSED` — the client is not connected, or has been closed (the in-flight send and every queued send reject).
-  - `PARSE_FAILED` — the ACK is not parseable HL7v2. (Reading the request's MSH-10 is best-effort and never throws; an unparseable request is still sent verbatim, with correlation skipped.)
+  - `PARSE_FAILED` — the ACK is not parseable HL7v2, or the request bytes are not valid UTF-8 (the request is parsed before sending, so a non-UTF-8 `Uint8Array` is rejected here).
   - `UNKNOWN_ACK_CODE` — the ACK carries a non-standard MSA-1.
 
 ### `client.close(): Promise<void>`

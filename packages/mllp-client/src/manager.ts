@@ -19,7 +19,7 @@ import { createConnection } from "./connection";
 import type { Connection } from "./connection";
 import type { MllpConnector, MllpDuplex } from "./duplex";
 import { MllpClientError, MllpErrorCode } from "./errors";
-import { readRequestControlId, toWireFrame } from "./hl7v2";
+import { prepareSend } from "./hl7v2";
 import type { MllpClientResponse, SendInput } from "./hl7v2";
 import { createSendQueue } from "./queue";
 import type { ReconnectPolicy } from "./reconnect";
@@ -264,7 +264,7 @@ export function createConnectionManager(
     });
   };
 
-  // `async` keeps the Promise contract: the synchronous guard and toWireFrame()
+  // `async` keeps the Promise contract: the synchronous guard and prepareSend()
   // failures below surface as rejections, never as synchronous throws — which is
   // what callers (and the tests) rely on. No `await` is needed in the body.
   // oxlint-disable-next-line eslint/require-await
@@ -285,12 +285,10 @@ export function createConnectionManager(
       );
     }
 
-    // Build the wire bytes (caller bytes verbatim, or a serialized Root) and
-    // read MSH-10 for correlation before enqueuing. Framing an unframable
-    // payload rejects here, before it occupies a queue slot; reading MSH-10 is
-    // best-effort and never blocks the send.
-    const framed = toWireFrame(message);
-    const requestControlId = readRequestControlId(message);
+    // Normalize the message to canonical wire bytes and read MSH-10 from the
+    // same parse, before enqueuing. A non-UTF-8 / unframable payload rejects
+    // here, before it occupies a queue slot.
+    const { framed, requestControlId } = prepareSend(message);
     const timeoutMs = sendOpts.timeoutMs ?? sendTimeoutMs;
 
     // enqueue returns the caller's real Promise; the manager kicks the drain

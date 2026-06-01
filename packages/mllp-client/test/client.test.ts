@@ -198,19 +198,59 @@ describe("send() — accept codes", () => {
     expect(written.at(-1)).toBe(0x0d);
   });
 
-  it("sends string input on the wire verbatim — a trailing empty field survives", async () => {
-    // The wire-fidelity guarantee: caller bytes are framed verbatim, never
-    // round-tripped through the parser (which, being an AST, would drop the
-    // trailing field delimiter in "PID|1|"). MSH-9 carries no MSH-10, so
-    // correlation is skipped and the ACK resolves.
+  it("cleans the message on the wire — a trailing empty field is dropped", async () => {
+    // The client is a cleaning client: the message is parsed and re-serialized
+    // to canonical HL7v2, so the trailing field delimiter in "PID|1|" is trimmed
+    // to "PID|1". (Semantically faithful — the field is absent either way.)
     const request = ["MSH|^~\\&|S|F|R|RF|20240101||ADT^A01", "PID|1|"].join(
+      "\r"
+    );
+    const cleaned = ["MSH|^~\\&|S|F|R|RF|20240101||ADT^A01", "PID|1"].join(
       "\r"
     );
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
     await client.send(request);
-    expect(fake.capturedWrites()).toEqual(frame(request));
+    expect(fake.capturedWrites()).toEqual(frame(cleaned));
+  });
+
+  it("normalizes line endings on the wire (CRLF → CR)", async () => {
+    // A CRLF-terminated message is cleaned to canonical CR-delimited HL7v2.
+    const request = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01\r\nPID|1||x";
+    const cleaned = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01\rPID|1||x";
+    const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
+    const client = makeClient(fake);
+    await client.connect();
+    await client.send(request);
+    expect(fake.capturedWrites()).toEqual(frame(cleaned));
+  });
+
+  it("preserves escape sequences on the wire (no decode without re-encode)", async () => {
+    // The base parser does not decode escapes, so \F\ survives the
+    // parse→serialize round trip verbatim — the decode-implies-encode invariant.
+    const request =
+      "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|MSG001|P|2.5\rOBX|1|ST|x||a\\F\\b";
+    const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
+    const client = makeClient(fake);
+    await client.connect();
+    await client.send(request);
+    const onWire = new TextDecoder().decode(decode(fake.capturedWrites()));
+    expect(onWire).toContain("a\\F\\b");
+  });
+
+  it("rejects non-UTF-8 bytes with PARSE_FAILED", async () => {
+    // Clean-everything must decode bytes to parse them; a Latin-1 / Windows-1252
+    // feed (0xE9 = 'é') is not valid UTF-8 and is rejected. (Ecosystem-wide
+    // UTF-8 assumption — tracked separately.)
+    const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
+    const client = makeClient(fake);
+    await client.connect();
+    const latin1 = new Uint8Array([0x4d, 0x53, 0x48, 0xe9]); // "MSH" + 0xE9
+    await expect(client.send(latin1)).rejects.toMatchObject({
+      code: MllpErrorCode.PARSE_FAILED,
+    });
+    expect(client.state).toBe("connected");
   });
 
   it("accepts Uint8Array message input", async () => {

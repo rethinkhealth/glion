@@ -39,13 +39,24 @@ Why Effect still loses _even under the new framing_:
 
 ---
 
-## 2b. Send currency — bytes-verbatim primary, AST a first-class convenience
+## 2b. Send currency — AST-first cleaning client
 
-Re-evaluated directly (a study, prompted by the review note "the first-class citizen should be the AST, not String/Uint8Array"). **Verdict: keep `SendInput = string | Uint8Array | Root` with bytes-verbatim as the load-bearing contract; the AST is a genuine first-class _convenience_ input, not the sole currency.**
+**Decision (maintainer): the client is an _originating / cleaning_ client.** The AST is the first-class send currency: `send(string | Uint8Array | Root)` parses every input to a tree and re-serializes to **canonical** HL7v2 for the wire. Byte-faithful relay is explicitly NOT a goal; emitting clean, canonical HL7v2 IS the goal, so the round-trip's normalization is the feature, not a regression.
 
-The note's instinct is right for the rest of glion (transform/lint/validate/build are all AST-native) but wrong at the **wire boundary**, which is exactly where the AST's abstractness becomes a _fidelity_ liability. `parse → toHl7v2` is provably **not** byte-identical in this repo: CRLF→CR collapse at parse (`preprocessor.ts`), trailing-empty-field drop (`PID|foo|` → `PID|foo`), trailing empty unnamed segments popped, delimiters re-derived from the tree, decoded escapes (`\F\`/`\X..\`) not re-encoded, and a strict-UTF-8 reader that would reject a Latin-1 feed the byte path forwards fine. The dominant MLLP use case is a **relay / interface engine** (Mirth/Rhapsody/Iguana) that holds original bytes and must forward them unchanged — AST-only would force a lossy round-trip on every relayed message. It is also already inconsistent with the internal design: the queue carries `PendingSend.framed: Uint8Array`, so "AST-only inside the client" would mean re-introducing a parse+serialize per dispatch.
+A study first leaned the other way (keep bytes-verbatim, because parse→toHl7v2 isn't byte-identical and a relay needs fidelity). The maintainer overruled it with a different framing — "the client should also clean the message" — which is coherent: once cleaning is the job, byte-alteration is intended. The relay/fidelity argument only applies to a faithful-pipe client, which this is not.
 
-So `send()` correctly uses the tree as the _reading_ surface (MSH-10 correlation, parsed ACK) and the caller's bytes as the _wire_ surface; only a `Root` (which has no source bytes) is serialized. No code change — the contract, the README/JSDoc, and a byte-verbatim regression test (`client.test.ts` "sends string input on the wire verbatim — a trailing empty field survives") were all already in place. A `sendRaw()`/`send()` split was rejected (§1/§5). The note is resolved as _by design_.
+**Characterized empirically** (real parse→toHl7v2 round-trips, not assumed):
+
+- _Altered (intended cleaning, semantics preserved):_ line endings → CR; trailing empty fields/segments trimmed.
+- _Preserved verbatim:_ escape sequences (`\F\`, `\X0D\`), Z-segments, repetitions (`~`), components/subcomponents (`^`/`&`), standard MSH-2.
+
+**Known limitations (accepted, documented in `hl7v2.ts` module JSDoc):**
+
+1. **Not idempotent** — trailing-empty trimming drops one field per pass (`PID|1|||||` → `PID|1||||` → … → `PID|1`). Semantically faithful, syntactically non-convergent. Accepted as a documented limitation (likely a `@glion/parser` quirk to revisit).
+2. **Decode-implies-encode** — the client parses with the base `@glion/parser`, which does NOT decode escapes, so `\F\` round-trips intact and no re-encode is needed. A `Root` that was escape-_decoded_ upstream (e.g. `hl7v2DecodeEscapes`) must NOT be passed to `send()` — `toHl7v2` has no re-encode step and would emit the decoded literal. Documented + tested (escape-preservation test).
+3. **UTF-8 only** — clean-everything must decode bytes to parse them; a non-UTF-8 `Uint8Array` (Latin-1/Windows-1252) is rejected with `PARSE_FAILED`. This inherits a glion-wide UTF-8 assumption whose correctness is **out of scope for the client** and tracked separately (GH issue + regression test demonstrating the ecosystem bug).
+
+**Implementation:** `toWireFrame` + `readRequestControlId` collapsed into one `prepareSend(input): { framed, requestControlId }` — a single parse drives both the canonical wire bytes (`frame(toHl7v2(tree))`) and MSH-10. A `sendRaw()`/`send()` split was rejected (§1/§5). Tests assert the cleaning behavior (trailing-field drop, CRLF→CR, escape preservation, non-UTF-8 rejection).
 
 ## 2a. Queue location — stays native (machine does NOT own the send queue)
 
