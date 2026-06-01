@@ -4,7 +4,7 @@ The `glion` command — development and production runtime for Glion MLLP applic
 
 ## What it does
 
-`@glion/cli` provides the `glion` binary that runs Glion applications. A single-file MLLP app exported as `export default new Mllp()` becomes a running server with `glion dev` (for development with live reload and a terminal UI) or `glion start` (for production with graceful shutdown and structured logs). The CLI reads configuration from a `glion.config.ts` file when present or infers defaults when not.
+`@glion/cli` provides the `glion` binary that runs Glion applications. A single-file MLLP app exported as `export default new Mllp()` becomes a running server with `glion dev` (for development with live reload and a terminal UI) or `glion start` (for production with graceful shutdown and structured logs). `glion send` is a client utility that sends one HL7v2 message over MLLP and prints the acknowledgment. The CLI reads configuration from a `glion.config.ts` file when present or infers defaults when not.
 
 ## Install
 
@@ -81,6 +81,43 @@ Runs the app with live reload. Watches the entry file and any paths listed in `w
 ### `glion start`
 
 Runs the app in production. Emits JSON-line events to stdout for log aggregators, handles `SIGTERM` with a graceful drain (`gracefulCloseMs`, default 5000), and exits cleanly when the drain completes.
+
+### `glion send`
+
+Sends a single HL7v2 message over MLLP, prints the acknowledgment, and exits. It is a client utility for the dev loop — sending a message to a running server and reporting how it responds — rather than part of the server runtime.
+
+```bash
+glion send [<file>] [flags]
+```
+
+The message is read from `<file>`, or from stdin when `<file>` is omitted or is `-`. It is parsed and re-serialized to its canonical, CR-delimited form before transmission, so editor line endings are normalized. Whether the message is valid is the receiver's call — it answers with a NAK — so `glion send` does not pre-validate.
+
+| Flag              | Description                                                              |
+| ----------------- | ------------------------------------------------------------------------ |
+| `--host <host>`   | Target host.                                                             |
+| `--port <port>`   | Target port.                                                             |
+| `--local`         | Reads host and port from `glion.config.ts`; `--host`/`--port` override.  |
+| `--config <path>` | Config file used to resolve `--local` (same discovery as `dev`/`start`). |
+| `--timeout <ms>`  | Deadline spanning connect and the ACK wait. Defaults to `30000`.         |
+| `--json`          | Prints one JSON line instead of the human exchange view.                 |
+
+`--local` resolves the target from the server this project defines: it reads `hostname` and `port` from `glion.config.ts`, mapping a wildcard bind address such as `0.0.0.0` to loopback.
+
+```bash
+glion send adt.hl7 --host 127.0.0.1 --port 2575
+cat adt.hl7 | glion send --port 2575 --json
+glion send adt.hl7 --local
+```
+
+Output adapts to the destination: a terminal receives a human-readable exchange view, while a pipe (or `--json`) receives a single JSON line. The exit code reports the result.
+
+| Code | Meaning                                                            |
+| ---- | ------------------------------------------------------------------ |
+| `0`  | The peer accepted the message (`AA`/`CA`).                         |
+| `1`  | The peer rejected the message (a NAK: `AE`/`AR`/`CE`/`CR`).        |
+| `2`  | The message could not be delivered (transport, validation, usage). |
+
+TLS targets are not supported; `glion send` connects in plaintext.
 
 ### Zero-config mode
 

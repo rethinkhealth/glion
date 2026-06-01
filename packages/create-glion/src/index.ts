@@ -26,11 +26,6 @@ const EXAMPLES = [
     label: "mllp-server-bun",
     value: "mllp-server-bun",
   },
-  {
-    hint: "MLLP client sending sample messages",
-    label: "mllp-client",
-    value: "mllp-client",
-  },
 ] as const;
 
 type ExampleId = (typeof EXAMPLES)[number]["value"];

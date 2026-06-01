@@ -25,6 +25,7 @@ The server listens on `127.0.0.1:2575` by default.
 
 - `glion.config.ts` — entry path, port (`2575`), optional TLS / watch.
 - `src/app.ts` — the `Mllp` instance, exported as the default. The CLI picks it up automatically.
+- `samples/` — sample HL7v2 messages for `glion send` (`adt-a01` accepts, `oru-r01` is rejected).
 
 The app:
 
@@ -35,20 +36,34 @@ The app:
 
 ## Send a test message
 
-The companion [`mllp-client`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-client) example sends bundled samples:
+With the server running, send the bundled sample from another terminal using the `glion send` CLI command:
 
 ```bash
-cd ../mllp-client
-pnpm send --sample adt-a01     # → AA
-pnpm send --sample oru-r01     # → AE · Patient not available · ERR 200
+pnpm send     # → AA · MSG001
 ```
 
-Or wrap a raw HL7v2 string in MLLP framing with `nc`:
+That runs `glion send samples/adt-a01.hl7 --local`. The `--local` flag reads the host and port from `glion.config.ts`, so the message goes to this project's server (`127.0.0.1:2575`) without retyping the address:
+
+```
+→ sent  127.0.0.1:2575  MSH-10 MSG001  3 segs, 121 B
+← ACK   AA  MSA-2 MSG001  3.5ms
+```
+
+You can also target a host and port explicitly, pipe a message over stdin, or ask for machine-readable output:
 
 ```bash
-printf '\x0bMSH|^~\&|SENDER|SENDER|GLION|NODE|20240101120000||ADT^A01|MSG001|P|2.5.1\rEVN||20240101120000\rPID|||123456^^^MRN||Doe^John\r\x1c\x0d' \
-  | nc 127.0.0.1 2575
+glion send samples/adt-a01.hl7 --host 127.0.0.1 --port 2575
+cat samples/adt-a01.hl7 | glion send --local
+glion send samples/adt-a01.hl7 --local --json
 ```
+
+`glion send` exits `0` on accept (`AA`/`CA`), `1` on a NAK (`AE`/`AR`/`CE`/`CR`), and `2` when the message could not be delivered. The `ORU^R01` route throws a typed NAK, so sending the bundled `oru-r01` sample shows the rejection path end to end:
+
+```bash
+glion send samples/oru-r01.hl7 --local     # → AE · Patient not available · exit 1
+```
+
+For the programmatic client API — streaming, commit-level acks, mutual TLS — see the [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) package.
 
 ## Notes
 
@@ -57,4 +72,4 @@ printf '\x0bMSH|^~\&|SENDER|SENDER|GLION|NODE|20240101120000||ADT^A01|MSG001|P|2
 - [`@glion/mllp-ack`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-ack) — ACK middleware.
 - [`@glion/ack`](https://github.com/rethinkhealth/glion/tree/main/packages/ack) — `AckException` hierarchy.
 - [`mllp-server-bun`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server-bun) — same app under Bun.
-- [`mllp-client`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-client) — companion client example.
+- [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) — programmatic MLLP client (streaming, modes, TLS).
