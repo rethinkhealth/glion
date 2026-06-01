@@ -39,6 +39,14 @@ Why Effect still loses _even under the new framing_:
 
 ---
 
+## 2b. Send currency — bytes-verbatim primary, AST a first-class convenience
+
+Re-evaluated directly (a study, prompted by the review note "the first-class citizen should be the AST, not String/Uint8Array"). **Verdict: keep `SendInput = string | Uint8Array | Root` with bytes-verbatim as the load-bearing contract; the AST is a genuine first-class _convenience_ input, not the sole currency.**
+
+The note's instinct is right for the rest of glion (transform/lint/validate/build are all AST-native) but wrong at the **wire boundary**, which is exactly where the AST's abstractness becomes a _fidelity_ liability. `parse → toHl7v2` is provably **not** byte-identical in this repo: CRLF→CR collapse at parse (`preprocessor.ts`), trailing-empty-field drop (`PID|foo|` → `PID|foo`), trailing empty unnamed segments popped, delimiters re-derived from the tree, decoded escapes (`\F\`/`\X..\`) not re-encoded, and a strict-UTF-8 reader that would reject a Latin-1 feed the byte path forwards fine. The dominant MLLP use case is a **relay / interface engine** (Mirth/Rhapsody/Iguana) that holds original bytes and must forward them unchanged — AST-only would force a lossy round-trip on every relayed message. It is also already inconsistent with the internal design: the queue carries `PendingSend.framed: Uint8Array`, so "AST-only inside the client" would mean re-introducing a parse+serialize per dispatch.
+
+So `send()` correctly uses the tree as the _reading_ surface (MSH-10 correlation, parsed ACK) and the caller's bytes as the _wire_ surface; only a `Root` (which has no source bytes) is serialized. No code change — the contract, the README/JSDoc, and a byte-verbatim regression test (`client.test.ts` "sends string input on the wire verbatim — a trailing empty field survives") were all already in place. A `sendRaw()`/`send()` split was rejected (§1/§5). The note is resolved as _by design_.
+
 ## 2a. Queue location — stays native (machine does NOT own the send queue)
 
 Re-evaluated directly (a follow-up study, prompted by "should the machine also operate queuing/sending?"). **Verdict: keep the queue, drain loop, and per-send coordination native in the manager; the machine stays connection-lifecycle only.** Four shapes were weighed — Q1 (machine gains `connected.idle↔sending` substates for observability only), Q2 (FIFO as ids in machine context + native side-table for payload), Q3 (per-send spawned child actors), Q4 (status quo). **Q4 chosen.**
