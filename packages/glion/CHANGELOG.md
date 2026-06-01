@@ -1,5 +1,34 @@
 # @glion/cli
 
+## 0.17.0
+
+### Minor Changes
+
+- be51259: Add the `glion send` command — send one HL7v2 message over MLLP and print the acknowledgment. A client utility for the dev loop, alongside `glion dev` and `glion start`.
+  - Read the message from a file argument or stdin (omit the path, or pass `-`, to read stdin)
+  - Re-serialize the parsed message to canonical CR-delimited form before sending, normalizing editor line endings; the receiver decides validity and answers with a NAK
+  - Resolve the target from `--host`/`--port`, or from the project's `glion.config.ts` via `--local` (which override per field; a wildcard bind address maps to loopback)
+  - Add `--timeout`, `--json`, and `-h`/`--help` flags
+  - Adapt output to the destination: a human exchange view on a TTY, one JSON line when piped or with `--json`
+  - Exit `0` on accept (AA/CA), `1` on NAK (AE/AR/CE/CR), `2` when the message could not be delivered
+  - Connect over plaintext only; TLS targets are not yet supported
+
+### Patch Changes
+
+- Updated dependencies [b3a1921]
+- Updated dependencies [c09d415]
+- Updated dependencies [5d65e92]
+- Updated dependencies [58de708]
+- Updated dependencies [58de708]
+- Updated dependencies [58de708]
+  - @glion/mllp-client@0.17.0
+  - @glion/ack@0.17.0
+  - @glion/mllp@0.17.0
+  - @glion/ast@0.17.0
+  - @glion/parser@0.17.0
+  - @glion/to-hl7v2@0.17.0
+  - @glion/util-query@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes

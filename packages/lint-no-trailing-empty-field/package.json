@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-no-trailing-empty-field",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "hl7v2-lint rule to warn when an empty field (or more) is/are present at the end of a segment",
   "keywords": [
     "definition",

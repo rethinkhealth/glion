@@ -1,5 +1,19 @@
 # @rethinkhealth/hl7v2-mllp
 
+## 0.17.0
+
+### Minor Changes
+
+- 58de708: Migrate the server to the new `@glion/mllp-transport` API (`frame` / `FrameDecoderStream`). The package no longer re-exports the transport surface — import `@glion/mllp-transport` directly. A missing parser now throws `MllpServerError` (`NO_PARSER`) instead of a transport error, and the Node adapter tears connections down gracefully (FIN) so a rejected `onConnect` no longer resets the peer.
+
+### Patch Changes
+
+- Updated dependencies [58de708]
+  - @glion/mllp-transport@0.17.0
+  - @glion/ast@0.17.0
+  - @glion/parser@0.17.0
+  - @glion/util-query@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes
