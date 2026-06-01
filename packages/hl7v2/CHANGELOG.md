@@ -1,5 +1,16 @@
 # @rethinkhealth/hl7v2
 
+## 0.17.0
+
+### Patch Changes
+
+- @glion/ast@0.17.0
+- @glion/decode-escapes@0.17.0
+- @glion/jsonify@0.17.0
+- @glion/parser@0.17.0
+- @glion/preset-lint-profile-recommended@0.17.0
+- @glion/preset-lint-recommended@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes

@@ -1,5 +1,18 @@
 # @rethinkhealth/hl7v2-ack
 
+## 0.17.0
+
+### Minor Changes
+
+- 58de708: Centralized HL7v2 acknowledgment model for the ecosystem: the `AckException` family (`AckApplicationError` / `AckApplicationReject` / `AckCommitError` / `AckCommitReject`) mapping MSA-1 Table 0008, the `acknowledge()` / `toErrSegment()` builders, and the `isAckCode` guard. The server (outbound NAK) and client (inbound NAK) share these types so the two directions cannot drift.
+
+### Patch Changes
+
+- @glion/ast@0.17.0
+- @glion/builder@0.17.0
+- @glion/util-query@0.17.0
+- @glion/util-timestamp@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes

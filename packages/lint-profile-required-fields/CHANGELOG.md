@@ -1,5 +1,13 @@
 # @rethinkhealth/hl7v2-lint-profile-required-fields
 
+## 0.17.0
+
+### Patch Changes
+
+- @glion/ast@0.17.0
+- @glion/util-visit@0.17.0
+- @glion/utils@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes

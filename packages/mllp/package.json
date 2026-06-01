@@ -1,6 +1,6 @@
 {
   "name": "@glion/mllp",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Transport-agnostic MLLP (Minimal Lower Layer Protocol) engine for HL7v2 messaging",
   "keywords": [
     "health",
