@@ -19,7 +19,7 @@ Glion is an open-source application framework for building HL7v2 integrations. I
 
 ### Features
 
-- 🚀 **Zero-config CLI.** `glion dev` runs your app with live reload during development. `glion start` runs it in production with graceful shutdown and structured logs.
+- 🚀 **Zero-config CLI.** `glion dev` runs your app with live reload during development. `glion start` runs it in production with graceful shutdown and structured logs. `glion send` fires an HL7v2 message over MLLP and prints the ACK.
 - 🌍 **MLLP server.** A standards-compliant HL7v2 server with pattern-based routing (`ADT^A01`, `ADT^*`, wildcards), middleware composition, and first-class ACK/NAK responses. Streaming TCP with back-pressure. Runs on Node, Bun, and Deno.
 - 🧰 **Parser and plugin ecosystem.** A [`unified`][github-unified]-based parser that produces typed ASTs with lossless round-tripping, plus 25+ plugins for annotation, linting, encoding, and transformation.
 - ⛑️ **Profile validation.** Validate against HL7-published profiles for fields, data types, table values, and segment order — automatically selected by the version in `MSH-12`.
@@ -63,7 +63,7 @@ The server and tooling that run Glion applications.
 #### Server & transport
 
 - **[@glion/mllp][glion-mllp]** — a transport-agnostic MLLP (Minimal Lower Layer Protocol) engine with pattern-based routing, middleware, and `unified` processor integration.
-- **[@glion/cli][glion-cli]** — the `glion` command for running Glion applications: `glion dev` for live reload during development, `glion start` for production with graceful shutdown and structured logs.
+- **[@glion/cli][glion-cli]** — the `glion` command for running Glion applications: `glion dev` for live reload during development, `glion start` for production with graceful shutdown and structured logs, and `glion send` for sending an HL7v2 message over MLLP and printing the ACK.
 
 #### Acknowledgments
 
@@ -138,7 +138,7 @@ Linting rules and presets for HL7v2 message quality and conformance.
 ## Documentation
 
 - Full documentation at [glion.dev](https://glion.dev).
-- Runnable examples in [`examples/`](./examples) covering zero-config, explicit-config, and low-level transport usage.
+- Runnable examples in [`examples/`](./examples) covering the server (Node and Bun), the `glion` CLI workflow, and sending test messages with `glion send`.
 - API reference and detailed usage in each package's README, linked from the Packages section above.
 
 ## Status

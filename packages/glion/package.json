@@ -1,7 +1,7 @@
 {
   "name": "@glion/cli",
   "version": "0.16.0",
-  "description": "MLLP server dev tool — dev server with live TUI, production JSON-line events, hot reload",
+  "description": "MLLP dev tool — dev server with live TUI, production JSON-line events, hot reload, and a send command for HL7v2 messages",
   "keywords": [
     "cli",
     "dev-server",
@@ -53,7 +53,13 @@
     "publint": "publint --strict"
   },
   "dependencies": {
+    "@glion/ack": "workspace:*",
+    "@glion/ast": "workspace:*",
     "@glion/mllp": "workspace:*",
+    "@glion/mllp-client": "workspace:*",
+    "@glion/parser": "workspace:*",
+    "@glion/to-hl7v2": "workspace:*",
+    "@glion/util-query": "workspace:*",
     "rolldown": "1.0.0-rc.14",
     "zod": "3.25.76"
   },
