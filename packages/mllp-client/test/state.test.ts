@@ -9,19 +9,17 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createActor } from "xstate";
 
 import { DEFAULT_RECONNECT_POLICY, NO_RECONNECT } from "../src/reconnect";
 import type { ReconnectPolicy } from "../src/reconnect";
-import { connectionMachine } from "../src/state";
+import { createConnectionState } from "../src/state";
+import type { ConnectionState } from "../src/state";
 
-function startMachine(policy: ReconnectPolicy) {
-  const actor = createActor(connectionMachine, { input: { policy } });
-  actor.start();
-  return actor;
+function startMachine(policy: ReconnectPolicy): ConnectionState {
+  return createConnectionState(policy);
 }
 
-function phaseOf(actor: ReturnType<typeof startMachine>): string {
+function phaseOf(actor: ConnectionState): string {
   return actor.getSnapshot().value as string;
 }
 

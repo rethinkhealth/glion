@@ -15,8 +15,6 @@
  * @module
  */
 
-import { createActor } from "xstate";
-
 import { createConnection } from "./connection";
 import type { Connection } from "./connection";
 import type { MllpConnector, MllpDuplex } from "./duplex";
@@ -25,7 +23,7 @@ import { readRequestControlId, toWireFrame } from "./hl7v2";
 import type { MllpClientResponse, SendInput } from "./hl7v2";
 import { createSendQueue } from "./queue";
 import type { ReconnectPolicy } from "./reconnect";
-import { connectionMachine } from "./state";
+import { createConnectionState } from "./state";
 import type { ConnectionPhase } from "./state";
 
 /**
@@ -80,10 +78,7 @@ export function createConnectionManager(
   // public connection state (no separate vocabulary to keep in sync). close()
   // drives the machine to "closed" synchronously, so every guard below can read
   // the phase directly rather than tracking a separate "closing" flag.
-  const machine = createActor(connectionMachine, {
-    input: { policy: opts.policy },
-  });
-  machine.start();
+  const machine = createConnectionState(opts.policy);
 
   // The live wire, once connected. The connection owns all per-connection state
   // (decoder, reader, frame buffer, the single-flight exchange) and its own

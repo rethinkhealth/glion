@@ -29,13 +29,13 @@
  * @module
  */
 
-import { assign, setup } from "xstate";
-import type { SnapshotFrom } from "xstate";
+import { assign, createActor, setup } from "xstate";
+import type { Actor, SnapshotFrom } from "xstate";
 
 import { backoffDelay } from "./reconnect";
 import type { ReconnectPolicy } from "./reconnect";
 
-/** Input passed to {@link connectionMachine} when the actor is created. */
+/** Input passed to the connection machine when its actor is created. */
 export interface ConnectionInput {
   readonly policy: ReconnectPolicy;
 }
@@ -62,8 +62,12 @@ export type ConnectionEvent =
   | { type: "RECONNECT_FAILED"; error?: unknown }
   | { type: "CLOSE" };
 
-/** The connection-lifecycle machine. See the module JSDoc for the model. */
-export const connectionMachine = setup({
+/**
+ * The connection-lifecycle machine definition. Internal — callers create a
+ * running instance via {@link createConnectionState}, which keeps the XState
+ * dependency from leaking past this module.
+ */
+const connectionMachine = setup({
   actions: {
     incrementAttempt: assign({
       attempt: ({ context }) => context.attempt + 1,
@@ -168,3 +172,25 @@ export const connectionMachine = setup({
  * the machine so the public state can never drift from the actual lifecycle.
  */
 export type ConnectionPhase = SnapshotFrom<typeof connectionMachine>["value"];
+
+/**
+ * A started connection-lifecycle state instance: send it events
+ * (`CONNECT`/`CONNECTED`/`DROP`/`CLOSE`/…) and read `getSnapshot().value` for
+ * the current {@link ConnectionPhase}. The concrete XState actor type is an
+ * implementation detail behind {@link createConnectionState}.
+ */
+export type ConnectionState = Actor<typeof connectionMachine>;
+
+/**
+ * Create and start a connection-lifecycle state instance for the given
+ * reconnect policy. The XState wiring (`createActor`, `start`, input) lives
+ * here so the rest of the client treats connection state as an opaque
+ * event-driven object — keeping the state machine swappable.
+ */
+export function createConnectionState(
+  policy: ReconnectPolicy
+): ConnectionState {
+  const actor = createActor(connectionMachine, { input: { policy } });
+  actor.start();
+  return actor;
+}
