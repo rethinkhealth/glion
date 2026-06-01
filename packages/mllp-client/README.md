@@ -75,7 +75,7 @@ await client.send(message);
 | `client.host`       | `string`          | Configured target host.                                                                                                          |
 | `client.port`       | `number`          | Configured target port.                                                                                                          |
 | `client.state`      | `MllpClientState` | The connection phase: `idle`, `connecting`, `connected`, `closed` (plus `backingOff`, `reconnecting` once reconnect is enabled). |
-| `client.connected`  | `boolean`         | `true` while the wire is up (`ready` or `sending`).                                                                              |
+| `client.connected`  | `boolean`         | `true` while the wire is up (state is `connected`).                                                                              |
 | `client.queueDepth` | `number`          | Sends waiting in the queue, excluding the one in flight.                                                                         |
 
 ### `client.connect(options?): Promise<void>`
@@ -86,8 +86,8 @@ Opens the wire through the runtime adapter and starts the read loop. `options.si
 
 All are an `MllpClientError`; branch on `code`:
 
-- `CLOSED` — the instance is `closed` or `closing`; construct a new instance.
-- `ALREADY_CONNECTED` — called while `connecting`, `ready`, or `sending` (the connection is live; reuse it).
+- `CLOSED` — the instance is `closed`; construct a new instance.
+- `ALREADY_CONNECTED` — called while `connecting` or `connected` (the connection is live; reuse it).
 - `CONNECT_FAILED` — the adapter rejected (the underlying error is on `cause`).
 - `CONNECT_TIMEOUT` — the adapter exceeded `connectTimeoutMs` (`timeoutMs` is set).
 - `CONNECT_ABORTED` — `options.signal` aborted, or `close()` interrupted the connect.
