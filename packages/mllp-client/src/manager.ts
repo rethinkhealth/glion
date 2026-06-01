@@ -94,6 +94,13 @@ export function createConnectionManager(
   // currently on the wire has been taken out, so depth reports only the
   // not-yet-dispatched sends. `draining` guards the drain loop so only one runs
   // at a time.
+  //
+  // The queue and `draining` live here, NOT in the machine's context, on
+  // purpose: each queued send holds non-serializable payload (the caller's
+  // resolve/reject and the framed bytes), which cannot go into a serializable
+  // statechart context without forfeiting XState's inspector/persistence value.
+  // The machine owns the connection LIFECYCLE; the manager owns the send queue.
+  // (Evaluated directly — see REDESIGN.md "Queue location".)
   const queue = createSendQueue();
   let draining = false;
 
@@ -113,14 +120,21 @@ export function createConnectionManager(
   /**
    * Process queued sends one at a time while the wire is ready. A drop or close
    * during a send advances state out of "connected" and fails the rest of the
-   * queue, so the loop exits cleanly. The wire-only ACK deadline is built HERE,
-   * at the dispatch instant, scoped to exactly one exchange and cleared in
-   * `finally` — the queue holds no timer. `AbortController` + `setTimeout` (not
-   * `AbortSignal.timeout`) so the timer is cancellable and never lingers.
+   * queue, so the loop exits cleanly. The ACK-wait deadline is owned by
+   * `conn.exchange` (built and cleared there, scoped to one exchange); the loop
+   * only hands over the wire bytes and the timeout budget.
    */
   const runQueue = async (): Promise<void> => {
     try {
       while (queue.depth > 0 && isConnected()) {
+        // Defensive type-narrowing, not a real branch: the loop guard already
+        // asserts isConnected(), and `connection` is non-null whenever the
+        // machine is "connected" (it is assigned before CONNECTED is sent and
+        // cleared only as the machine leaves "connected"). If that invariant
+        // ever broke we stop draining rather than throw — the queued sends stay
+        // buffered and a later drain (or close → failAll) settles them. Same for
+        // the `take()` undefined case below: depth > 0 means a record is there,
+        // so undefined would likewise be an impossible-state bail-out.
         const conn = connection;
         if (conn === null) {
           return;
@@ -129,13 +143,11 @@ export function createConnectionManager(
         if (task === undefined) {
           return;
         }
-        const deadline = new AbortController();
-        const deadlineTimer = setTimeout(() => {
-          deadline.abort();
-        }, task.timeoutMs);
+        // The exchange owns the ACK-wait deadline (built and cleared inside
+        // conn.exchange); the manager just hands over the wire bytes, the
+        // correlation id, and the timeout budget.
         try {
           const result = await conn.exchange({
-            deadlineSignal: deadline.signal,
             framed: task.framed,
             requestControlId: task.requestControlId,
             timeoutMs: task.timeoutMs,
@@ -143,8 +155,6 @@ export function createConnectionManager(
           task.resolve(result);
         } catch (error) {
           task.reject(error as Error);
-        } finally {
-          clearTimeout(deadlineTimer);
         }
         // A drop or close during the send advanced the machine out of
         // "connected" (and failed the rest of the queue), so the loop condition

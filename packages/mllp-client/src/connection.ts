@@ -59,11 +59,10 @@ export interface ExchangeRequest {
   readonly framed: Uint8Array;
   readonly requestControlId: string;
   /**
-   * Wire deadline. Aborting it is the only way an on-wire send is cancelled —
-   * the client exposes no caller `AbortSignal`. Built by the manager at the
-   * dispatch instant and scoped to this one exchange.
+   * ACK-wait deadline (ms). `exchange` owns the timer: it starts when the
+   * exchange begins and is cleared the moment it settles. Elapsing is the only
+   * way an on-wire send is cancelled — the client exposes no caller signal.
    */
-  readonly deadlineSignal: AbortSignal;
   readonly timeoutMs: number;
 }
 
@@ -208,7 +207,10 @@ export function createConnection(opts: ConnectionOptions): Connection {
     );
   }
 
-  function waitForFrame(req: ExchangeRequest): Promise<Uint8Array> {
+  function waitForFrame(
+    deadlineSignal: AbortSignal,
+    timeoutMs: number
+  ): Promise<Uint8Array> {
     // A drop fired between writer.write() and this registration — surface it
     // instead of waiting on a dead stream. `pendingError` is a narrowed
     // MllpClientError; the lint false-positives on the closure-local narrowing.
@@ -223,8 +225,6 @@ export function createConnection(opts: ConnectionOptions): Connection {
     if (queued !== undefined) {
       return Promise.resolve(queued);
     }
-
-    const { deadlineSignal, timeoutMs } = req;
 
     // oxlint-disable-next-line promise/avoid-new -- canonical waiter wrapper
     return new Promise<Uint8Array>((resolve, reject) => {
@@ -275,8 +275,17 @@ export function createConnection(opts: ConnectionOptions): Connection {
       writer.releaseLock();
     }
 
+    // The ACK-wait deadline is owned here, scoped to exactly this exchange:
+    // started now, cleared in `finally` the moment the send settles. The timer
+    // elapsing is the only way an on-wire send is cancelled (the client has no
+    // caller signal). `AbortController` + `setTimeout` (not `AbortSignal.timeout`)
+    // so the timer is cancellable and never lingers.
+    const deadline = new AbortController();
+    const deadlineTimer = setTimeout(() => {
+      deadline.abort();
+    }, req.timeoutMs);
     try {
-      const ackBytes = await waitForFrame(req);
+      const ackBytes = await waitForFrame(deadline.signal, req.timeoutMs);
       const timestamp = new Date();
       const durationMs = performance.now() - sentMonotonic;
       return parseResponse({
@@ -299,6 +308,8 @@ export function createConnection(opts: ConnectionOptions): Connection {
         decoder.reset();
       }
       throw error;
+    } finally {
+      clearTimeout(deadlineTimer);
     }
   }
 
