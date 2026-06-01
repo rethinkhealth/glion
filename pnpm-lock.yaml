@@ -543,8 +543,8 @@ importers:
         specifier: 11.0.5
         version: 11.0.5
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.4.3
+        version: 4.4.3
     devDependencies:
       '@glion/check-readme':
         specifier: workspace:*
@@ -575,7 +575,7 @@ importers:
         version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
       zod-to-json-schema:
         specifier: 3.25.0
-        version: 3.25.0(zod@3.25.76)
+        version: 3.25.0(zod@4.4.3)
 
   packages/create-glion:
     dependencies:
@@ -745,8 +745,8 @@ importers:
         specifier: 1.0.0-rc.14
         version: 1.0.0-rc.14
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.4.3
+        version: 4.4.3
     devDependencies:
       '@glion/check-readme':
         specifier: workspace:*
@@ -5046,11 +5046,8 @@ packages:
     peerDependencies:
       zod: ^3.25 || ^4
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
-  zod@4.4.2:
-    resolution: {integrity: sha512-IynmDyxsEsb9RKzO3J9+4SxXnl2FTFSzNBaKKaMV6tsSk0rw9gYw9gs+JFCq/qk2LCZ78KDwyj+Z289TijSkUw==}
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
 
@@ -6798,9 +6795,9 @@ snapshots:
       ignore: 7.0.5
       isbinaryfile: 6.0.0
       pkg-types: 2.3.1
-      query-registry: 4.3.0(zod@4.4.2)
+      query-registry: 4.3.0(zod@4.4.3)
       tinyglobby: 0.2.16
-      zod: 4.4.2
+      zod: 4.4.3
 
   pkg-types@2.3.1:
     dependencies:
@@ -6837,14 +6834,14 @@ snapshots:
 
   quansync@1.0.0: {}
 
-  query-registry@4.3.0(zod@4.4.2):
+  query-registry@4.3.0(zod@4.4.3):
     dependencies:
       query-string: 9.3.1
       quick-lru: 7.3.0
       url-join: 5.0.0
       validate-npm-package-name: 7.0.2
-      zod: 4.4.2
-      zod-package-json: 2.1.0(zod@4.4.2)
+      zod: 4.4.3
+      zod-package-json: 2.1.0(zod@4.4.3)
 
   query-string@9.3.1:
     dependencies:
@@ -7228,7 +7225,7 @@ snapshots:
       jsonc-parser: 3.3.1
       nypm: 0.6.6
       yaml: 2.8.4
-      zod: 4.4.2
+      zod: 4.4.3
     optionalDependencies:
       oxfmt: 0.47.0
       oxlint: 1.62.0
@@ -7410,14 +7407,12 @@ snapshots:
   yoga-layout@3.2.1:
     optional: true
 
-  zod-package-json@2.1.0(zod@4.4.2):
+  zod-package-json@2.1.0(zod@4.4.3):
     dependencies:
-      zod: 4.4.2
+      zod: 4.4.3
 
-  zod-to-json-schema@3.25.0(zod@3.25.76):
+  zod-to-json-schema@3.25.0(zod@4.4.3):
     dependencies:
-      zod: 3.25.76
+      zod: 4.4.3
 
-  zod@3.25.76: {}
-
-  zod@4.4.2: {}
+  zod@4.4.3: {}

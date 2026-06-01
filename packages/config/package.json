@@ -47,7 +47,7 @@
     "@glion/utils": "workspace:*",
     "cosmiconfig": "9.0.1",
     "unified": "11.0.5",
-    "zod": "3.25.76"
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@glion/check-readme": "workspace:*",
