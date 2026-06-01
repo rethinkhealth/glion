@@ -72,6 +72,11 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
+/** Swallow a settlement; used to observe a promise without asserting on it. */
+function noop(): void {
+  // intentionally empty
+}
+
 /** Adapter that never connects; rejects only when its signal aborts. */
 function abortableConnect(signal: AbortSignal): Promise<MllpDuplex> {
   // oxlint-disable-next-line promise/avoid-new -- wrapping signal
@@ -152,20 +157,6 @@ describe("connect()", () => {
       code: MllpErrorCode.CONNECT_TIMEOUT,
     });
     expect(client.state).toBe("closed");
-  });
-
-  it("respects a caller-provided abort signal", async () => {
-    const ac = new AbortController();
-    const client = new MllpClient({
-      connect: ({ signal }) => abortableConnect(signal),
-      host: "x",
-      port: 1,
-    });
-    const p = client.connect({ signal: ac.signal });
-    ac.abort();
-    await expect(p).rejects.toMatchObject({
-      code: MllpErrorCode.CONNECT_ABORTED,
-    });
   });
 });
 
@@ -482,19 +473,6 @@ describe("send() — timeout / abort / drop", () => {
       expect((error as MllpClientError).code).toBe(MllpErrorCode.SEND_TIMEOUT);
       expect((error as MllpClientError).timeoutMs).toBe(20);
     }
-    expect(client.state).toBe("connected");
-  });
-
-  it("respects a caller-provided abort signal", async () => {
-    const fake = createFakeDuplex({ onWrite: () => {} });
-    const client = makeClient(fake);
-    await client.connect();
-    const ac = new AbortController();
-    const p = client.send(REQUEST, { signal: ac.signal });
-    setTimeout(() => ac.abort(), 10);
-    await expect(p).rejects.toMatchObject({
-      code: MllpErrorCode.SEND_ABORTED,
-    });
     expect(client.state).toBe("connected");
   });
 
@@ -1001,46 +979,41 @@ describe("send() — queue (Phase 4)", () => {
     expect(client.queueDepth).toBe(0);
   });
 
-  it("aborts a queued send without disturbing the in-flight one", async () => {
-    const fake = createFakeDuplex({ onWrite: () => {} }); // peer silent
-    const client = makeClient(fake);
-    await client.connect();
-
-    const p1 = client.send(REQUEST); // on the wire
-    const ac = new AbortController();
-    const p2 = client.send(REQUEST, { signal: ac.signal }); // queued
-    expect(client.queueDepth).toBe(1);
-
-    ac.abort();
-    await expect(p2).rejects.toMatchObject({
-      code: MllpErrorCode.SEND_ABORTED,
-    });
-    expect(client.queueDepth).toBe(0);
-    expect(client.state).toBe("connected"); // p1 still in flight
-
-    await client.close();
-    await expect(p1).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
-  });
-
-  it("counts queue wait against the per-send timeout", async () => {
+  it("does not start a queued send's deadline until it reaches the wire", async () => {
+    // The timeout is wire-only: a send waiting behind another does NOT burn its
+    // deadline while queued. p1 occupies the wire indefinitely; p2's 20ms
+    // deadline must NOT fire while it is stuck in the queue (the clock only
+    // starts once p2 is dispatched).
     const fake = createFakeDuplex({ onWrite: () => {} }); // peer never responds
     const client = makeClient(fake);
     await client.connect();
 
     const p1 = client.send(REQUEST); // occupies the wire indefinitely
-    // p2 is stuck behind p1; its 20ms deadline elapses while still queued, so
-    // it must time out without ever being written.
     const p2 = client.send(REQUEST, { timeoutMs: 20 });
+    // Keep both rejections observed so neither is an unhandled rejection.
+    const p1Settled = p1.then(noop, noop);
+    const p2Settled = p2.then(noop, noop);
+    expect(client.queueDepth).toBe(1);
 
-    await expect(p2).rejects.toMatchObject({
-      code: MllpErrorCode.SEND_TIMEOUT,
-    });
-    // Exactly one frame reached the wire (p1's VT); p2 never wrote.
+    // Well past p2's 20ms deadline — but p2 is still queued behind p1, so its
+    // clock has not started. Race it against a sentinel: it must still be
+    // pending (the sentinel wins), not timed out.
+    const sentinel = Symbol("pending");
+    const winner = await Promise.race([
+      p2Settled.then(() => "settled" as const),
+      sleep(60).then(() => sentinel),
+    ]);
+    expect(winner).toBe(sentinel);
+    expect(client.queueDepth).toBe(1);
+    // p2 never reached the wire: exactly one VT (p1's) was written.
     const vtCount = [...fake.capturedWrites()].filter((b) => b === 0x0b).length;
     expect(vtCount).toBe(1);
 
+    // On close, the still-queued p2 fails CLOSED (never reached the wire) —
+    // NOT SEND_TIMEOUT.
     await client.close();
-    await expect(p1).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
+    await expect(p2).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
+    await p1Settled;
   });
 
   it("rejects queued sends with CLOSED when the connection drops", async () => {
@@ -1104,8 +1077,10 @@ describe("send() — queue (Phase 4)", () => {
     expect(client.queueDepth).toBe(0);
   });
 
-  it("aborts the in-flight send and lets the next queued send proceed", async () => {
-    // The peer answers only the second send; the first hangs until aborted.
+  it("times out the in-flight send and lets the next queued send proceed", async () => {
+    // The peer answers only the second send; the first hangs until its deadline
+    // fires. After the in-flight send settles (SEND_TIMEOUT), the drain loop
+    // must dispatch the queued one — a send timeout does not wedge the queue.
     let writes = 0;
     const fake = createFakeDuplex({
       onWrite: (chunk, peer) => {
@@ -1120,38 +1095,17 @@ describe("send() — queue (Phase 4)", () => {
     const client = makeClient(fake);
     await client.connect();
 
-    const ac = new AbortController();
-    const p1 = client.send(requestWithControlId("FIRST"), {
-      signal: ac.signal,
-    }); // on the wire, hangs
+    const p1 = client.send(requestWithControlId("FIRST"), { timeoutMs: 20 }); // on the wire, hangs then times out
     const p2 = client.send(requestWithControlId("SECOND")); // queued
     expect(client.queueDepth).toBe(1);
 
-    ac.abort();
     await expect(p1).rejects.toMatchObject({
-      code: MllpErrorCode.SEND_ABORTED,
+      code: MllpErrorCode.SEND_TIMEOUT,
     });
     const r2 = await p2;
     expect(r2.code).toBe("AA");
     expect(client.state).toBe("connected");
     expect(client.queueDepth).toBe(0);
-  });
-
-  it("rejects a queued send whose signal was already aborted", async () => {
-    const fake = createFakeDuplex({ onWrite: () => {} }); // peer silent
-    const client = makeClient(fake);
-    await client.connect();
-
-    const p1 = client.send(REQUEST); // on the wire
-    // Already-aborted signal: rejects synchronously without ever queuing.
-    const p2 = client.send(REQUEST, { signal: AbortSignal.abort() });
-    await expect(p2).rejects.toMatchObject({
-      code: MllpErrorCode.SEND_ABORTED,
-    });
-    expect(client.queueDepth).toBe(0); // p2 never entered the queue
-
-    await client.close();
-    await expect(p1).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
   });
 
   it("rejects queued sends with CLOSED (not DROPPED) on close()", async () => {

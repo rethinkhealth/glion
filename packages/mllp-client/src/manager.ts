@@ -20,9 +20,10 @@ import { createActor } from "xstate";
 import { createConnection } from "./connection";
 import type { Connection } from "./connection";
 import type { MllpConnector, MllpDuplex } from "./duplex";
-import { MllpClientError, MllpErrorCode, sendAbortError } from "./errors";
+import { MllpClientError, MllpErrorCode } from "./errors";
 import { readRequestControlId, toWireFrame } from "./hl7v2";
 import type { MllpClientResponse, SendInput } from "./hl7v2";
+import { createSendQueue } from "./queue";
 import type { ReconnectPolicy } from "./reconnect";
 import { connectionMachine } from "./state";
 import type { ConnectionPhase } from "./state";
@@ -37,9 +38,7 @@ import type { ConnectionPhase } from "./state";
 export type MllpClientState = ConnectionPhase;
 
 export interface MllpSendOptions {
-  /** Caller-provided cancellation signal. */
-  readonly signal?: AbortSignal;
-  /** Override the client's default send timeout for this call. */
+  /** Override the client's default ACK-wait deadline for this call. */
   readonly timeoutMs?: number;
 }
 
@@ -55,7 +54,7 @@ export interface ManagerOptions {
 }
 
 export interface ConnectionManager {
-  connect(opts?: { signal?: AbortSignal }): Promise<void>;
+  connect(): Promise<void>;
   send(message: SendInput, opts?: MllpSendOptions): Promise<MllpClientResponse>;
   close(): Promise<void>;
   readonly host: string;
@@ -63,29 +62,6 @@ export interface ConnectionManager {
   readonly state: MllpClientState;
   readonly connected: boolean;
   readonly queueDepth: number;
-}
-
-/**
- * A send awaiting its turn on the wire. The manager serializes sends: one runs
- * at a time, the rest wait here in FIFO order. The per-send deadline starts
- * when `send()` is called, so it spans the queue wait as well as the write and
- * the ACK wait — a queued send can time out or be aborted before it is ever
- * written. The wire bytes are framed up front; the queue just transports them.
- */
-interface QueuedSend {
-  readonly framed: Uint8Array;
-  readonly requestControlId: string;
-  readonly timeoutMs: number;
-  /** Combined deadline + caller signal; drives abort both queued and on-wire. */
-  readonly abortSignal: AbortSignal;
-  /** The deadline half; lets a waiter tell timeout from caller-abort. */
-  readonly deadlineSignal: AbortSignal;
-  resolve(response: MllpClientResponse): void;
-  reject(error: Error): void;
-  /** Stop the deadline timer. Idempotent. */
-  clearDeadline(): void;
-  /** Detach the while-queued abort listener (when the send goes on the wire). */
-  detachQueuedAbort(): void;
 }
 
 export function createConnectionManager(
@@ -114,11 +90,11 @@ export function createConnectionManager(
   // teardown — see ./connection.ts. Null when not connected.
   let connection: Connection | null = null;
 
-  // Sends waiting for the wire (FIFO). The one currently on the wire has been
-  // shifted out, so the queue holds only the not-yet-dispatched sends — which
-  // is what queueDepth reports. `draining` guards the drain loop so only one
-  // runs at a time.
-  const queue: QueuedSend[] = [];
+  // Sends waiting for the wire (FIFO) — a pure buffer (see ./queue.ts). The one
+  // currently on the wire has been taken out, so depth reports only the
+  // not-yet-dispatched sends. `draining` guards the drain loop so only one runs
+  // at a time.
+  const queue = createSendQueue();
   let draining = false;
 
   const phase = () => machine.getSnapshot().value;
@@ -131,41 +107,44 @@ export function createConnectionManager(
    * means "ended while awaiting an ACK").
    */
   const failQueue = (message: string): void => {
-    if (queue.length === 0) {
-      return;
-    }
-    const tasks = queue.splice(0);
-    for (const task of tasks) {
-      task.detachQueuedAbort();
-      task.clearDeadline();
-      task.reject(new MllpClientError(MllpErrorCode.CLOSED, message));
-    }
+    queue.failAll(new MllpClientError(MllpErrorCode.CLOSED, message));
   };
 
   /**
    * Process queued sends one at a time while the wire is ready. A drop or close
    * during a send advances state out of "connected" and fails the rest of the
-   * queue, so the loop exits cleanly.
+   * queue, so the loop exits cleanly. The wire-only ACK deadline is built HERE,
+   * at the dispatch instant, scoped to exactly one exchange and cleared in
+   * `finally` — the queue holds no timer. `AbortController` + `setTimeout` (not
+   * `AbortSignal.timeout`) so the timer is cancellable and never lingers.
    */
   const runQueue = async (): Promise<void> => {
     try {
-      while (queue.length > 0 && isConnected()) {
+      while (queue.depth > 0 && isConnected()) {
         const conn = connection;
         if (conn === null) {
           return;
         }
-        const task = queue.shift();
+        const task = queue.take();
         if (task === undefined) {
           return;
         }
-        task.detachQueuedAbort();
+        const deadline = new AbortController();
+        const deadlineTimer = setTimeout(() => {
+          deadline.abort();
+        }, task.timeoutMs);
         try {
-          const result = await conn.exchange(task);
-          task.clearDeadline();
+          const result = await conn.exchange({
+            deadlineSignal: deadline.signal,
+            framed: task.framed,
+            requestControlId: task.requestControlId,
+            timeoutMs: task.timeoutMs,
+          });
           task.resolve(result);
         } catch (error) {
-          task.clearDeadline();
           task.reject(error as Error);
+        } finally {
+          clearTimeout(deadlineTimer);
         }
         // A drop or close during the send advanced the machine out of
         // "connected" (and failed the rest of the queue), so the loop condition
@@ -207,75 +186,7 @@ export function createConnectionManager(
     );
   };
 
-  /**
-   * Wrap a send in a {@link QueuedSend}, start its deadline, and hand it to the
-   * drain loop. The deadline starts here so it covers the time spent waiting in
-   * the queue. `AbortController` + `setTimeout` (not `AbortSignal.timeout`) so
-   * the timer is cancellable on settle and never lingers.
-   */
-  const enqueue = (
-    framed: Uint8Array,
-    requestControlId: string,
-    timeoutMs: number,
-    callerSignal: AbortSignal | undefined
-  ): Promise<MllpClientResponse> =>
-    // oxlint-disable-next-line promise/avoid-new -- queued-send deferred wrapper
-    new Promise<MllpClientResponse>((resolve, reject) => {
-      const deadlineController = new AbortController();
-      const deadlineTimer = setTimeout(() => {
-        deadlineController.abort();
-      }, timeoutMs);
-      const deadlineSignal = deadlineController.signal;
-      const abortSignal = callerSignal
-        ? AbortSignal.any([deadlineSignal, callerSignal])
-        : deadlineSignal;
-
-      // clearTimeout is a no-op on an already-fired or already-cleared timer,
-      // so this is safe to call from any settle path.
-      const clearDeadline = () => {
-        clearTimeout(deadlineTimer);
-      };
-
-      const onQueuedAbort = () => {
-        // Abort while still queued: drop from the queue and reject. Once on the
-        // wire this listener is detached and the connection owns abort.
-        const index = queue.indexOf(task);
-        if (index !== -1) {
-          queue.splice(index, 1);
-        }
-        clearDeadline();
-        reject(sendAbortError(deadlineSignal, timeoutMs));
-      };
-      const detachQueuedAbort = () => {
-        abortSignal.removeEventListener("abort", onQueuedAbort);
-      };
-
-      const task: QueuedSend = {
-        abortSignal,
-        clearDeadline,
-        deadlineSignal,
-        detachQueuedAbort,
-        framed,
-        reject,
-        requestControlId,
-        resolve,
-        timeoutMs,
-      };
-
-      if (abortSignal.aborted) {
-        // Caller signal was already aborted before we could queue.
-        clearDeadline();
-        reject(sendAbortError(deadlineSignal, timeoutMs));
-        return;
-      }
-      abortSignal.addEventListener("abort", onQueuedAbort, { once: true });
-      queue.push(task);
-      drain();
-    });
-
-  const doConnect = async (
-    connectOpts: { signal?: AbortSignal } = {}
-  ): Promise<void> => {
+  const doConnect = async (): Promise<void> => {
     const current = phase();
     if (current === "closed") {
       throw new MllpClientError(
@@ -292,26 +203,16 @@ export function createConnectionManager(
     machine.send({ type: "CONNECT" });
 
     const timeoutSignal = AbortSignal.timeout(connectTimeoutMs);
-    const signal = connectOpts.signal
-      ? AbortSignal.any([connectOpts.signal, timeoutSignal])
-      : timeoutSignal;
 
     let duplex: MllpDuplex;
     try {
-      duplex = await connect({ host, port, signal });
+      duplex = await connect({ host, port, signal: timeoutSignal });
     } catch (error) {
       // Fails fast to "closed" (no reconnect on the initial connect). Guard the
       // send: a concurrent close() may have already taken the machine to
       // "closed", where the event is a no-op.
       if (phase() === "connecting") {
         machine.send({ error, type: "CONNECT_FAILED" });
-      }
-      if (connectOpts.signal?.aborted) {
-        throw new MllpClientError(
-          MllpErrorCode.CONNECT_ABORTED,
-          `Connect to ${host}:${port} was aborted by the caller's abort signal.`,
-          { cause: error }
-        );
       }
       if (timeoutSignal.aborted) {
         throw new MllpClientError(
@@ -387,7 +288,11 @@ export function createConnectionManager(
     const requestControlId = readRequestControlId(message);
     const timeoutMs = sendOpts.timeoutMs ?? sendTimeoutMs;
 
-    return enqueue(framed, requestControlId, timeoutMs, sendOpts.signal);
+    // enqueue returns the caller's real Promise; the manager kicks the drain
+    // loop (the queue is a pure buffer and does not drain itself).
+    const promise = queue.enqueue(framed, requestControlId, timeoutMs);
+    drain();
+    return promise;
   };
 
   const doClose = async (): Promise<void> => {
@@ -429,7 +334,7 @@ export function createConnectionManager(
     host,
     port,
     get queueDepth() {
-      return queue.length;
+      return queue.depth;
     },
     send: doSend,
     get state() {

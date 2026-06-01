@@ -80,7 +80,7 @@ await client.send(message);
 
 ### `client.connect(options?): Promise<void>`
 
-Opens the wire through the runtime adapter and starts the read loop. `options.signal` cancels an in-flight connect. Single-shot: each instance manages one connection lifecycle.
+Opens the wire through the runtime adapter and starts the read loop. A hung dial is bounded by `connectTimeoutMs`; cancel a connecting client with `close()`. Single-shot: each instance manages one connection lifecycle.
 
 **Throws**
 
@@ -90,11 +90,11 @@ All are an `MllpClientError`; branch on `code`:
 - `ALREADY_CONNECTED` — called while `connecting` or `connected` (the connection is live; reuse it).
 - `CONNECT_FAILED` — the adapter rejected (the underlying error is on `cause`).
 - `CONNECT_TIMEOUT` — the adapter exceeded `connectTimeoutMs` (`timeoutMs` is set).
-- `CONNECT_ABORTED` — `options.signal` aborted, or `close()` interrupted the connect.
+- `CONNECT_ABORTED` — `close()` interrupted the connect.
 
 ### `client.send(message, options?): Promise<MllpClientResponse>`
 
-Accepts a `string`, `Uint8Array`, or `Root` (`SendInput`). A `string`/`Uint8Array` is sent on the wire **verbatim** — the caller's exact bytes, never round-tripped through the parser — while the tree is read (best-effort) for the MSH-10 correlation ID. A `Root` has no original bytes, so it is serialized with `@glion/to-hl7v2`. Resolves with the parsed ACK. `options.signal` cancels the wait; `options.timeoutMs` overrides the default deadline (the deadline covers the wait for the ACK).
+Accepts a `string`, `Uint8Array`, or `Root` (`SendInput`). A `string`/`Uint8Array` is sent on the wire **verbatim** — the caller's exact bytes, never round-tripped through the parser — while the tree is read (best-effort) for the MSH-10 correlation ID. A `Root` has no original bytes, so it is serialized with `@glion/to-hl7v2`. Resolves with the parsed ACK. `options.timeoutMs` overrides the default ACK-wait deadline; the deadline starts when the send reaches the wire (a send waiting behind others may wait longer than this before its clock begins). There is no per-send cancellation signal — `close()` rejects an in-flight or queued send.
 
 **Throws**
 
@@ -104,7 +104,6 @@ Accepts a `string`, `Uint8Array`, or `Root` (`SendInput`). A `string`/`Uint8Arra
   - `CORRELATION_MISMATCH` — both the request's MSH-10 and the response's MSA-2 are non-empty and differ (carries `expected` / `actual` / `tree` / `raw`). If either is empty, correlation is skipped.
   - `SEND_TIMEOUT` — no ACK arrived within the deadline (`timeoutMs` is set).
   - `DROPPED` — the connection ended (peer drop, write failure, framing error, frame flood); `reason` discriminates. Terminal.
-  - `SEND_ABORTED` — `options.signal` aborted.
   - `NOT_CONNECTED` / `CLOSED` — the client is not connected, or has been closed (the in-flight send and every queued send reject).
   - `PARSE_FAILED` — the ACK is not parseable HL7v2. (Reading the request's MSH-10 is best-effort and never throws; an unparseable request is still sent verbatim, with correlation skipped.)
   - `UNKNOWN_ACK_CODE` — the ACK carries a non-standard MSA-1.
@@ -140,7 +139,7 @@ Every error the client itself raises **is** an `MllpClientError`, carrying a `co
 
 ## Single-flight and lifecycle
 
-One send is on the wire at a time. Concurrent `send()` calls queue in FIFO order and run one after another; `queueDepth` reports how many are waiting (excluding the one in flight). A per-send timeout starts when `send()` is called, so it spans the queue wait as well as the wire round-trip — a queued send can time out, or be aborted via its `signal`, before it is ever written.
+One send is on the wire at a time. Concurrent `send()` calls queue in FIFO order and run one after another; `queueDepth` reports how many are waiting (excluding the one in flight). A send's `timeoutMs` deadline starts when it reaches the wire, not when it is queued — a send waiting behind others may wait longer than its timeout before the clock begins. A queued send is not independently cancellable; `close()` rejects it (`CLOSED`).
 
 The decoder buffer persists across sends, so a late ACK from a previously-timed-out request lands on the next `send()` and trips the correlation check (`CORRELATION_MISMATCH`) rather than being silently accepted.
 

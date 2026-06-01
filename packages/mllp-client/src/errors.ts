@@ -101,25 +101,15 @@ export class MllpClientError extends Error {
 }
 
 /**
- * The error a send rejects with when its combined abort signal fires:
- * `SEND_TIMEOUT` if the deadline elapsed, `SEND_ABORTED` if the caller's
- * signal aborted. Shared by the while-queued path (in the queue/drain layer)
- * and the on-wire frame waiter (in the connection) so both report the same
- * cause. Internal — not part of the public surface.
+ * The error a send rejects with when its wire deadline elapses. The deadline is
+ * the only thing that aborts an on-wire send now (the client exposes no caller
+ * `AbortSignal`); `close()` rejects in-flight sends separately with `CLOSED`.
+ * Internal — not part of the public surface.
  */
-export function sendAbortError(
-  deadlineSignal: AbortSignal,
-  timeoutMs: number
-): MllpClientError {
-  if (deadlineSignal.aborted) {
-    return new MllpClientError(
-      MllpErrorCode.SEND_TIMEOUT,
-      `Timed out after ${timeoutMs}ms waiting for the peer to acknowledge the message (the deadline spans the queue wait and the wire round-trip).`,
-      { timeoutMs }
-    );
-  }
+export function sendTimeoutError(timeoutMs: number): MllpClientError {
   return new MllpClientError(
-    MllpErrorCode.SEND_ABORTED,
-    "Send aborted by the caller's abort signal before the ACK was received."
+    MllpErrorCode.SEND_TIMEOUT,
+    `Timed out after ${timeoutMs}ms waiting for the peer to acknowledge the message.`,
+    { timeoutMs }
   );
 }

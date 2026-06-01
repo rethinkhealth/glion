@@ -89,38 +89,39 @@ export class MllpClient {
 
   /**
    * Open the wire through the runtime adapter and start the read loop.
-   * Single-shot: each instance manages one connection lifecycle.
+   * Single-shot: each instance manages one connection lifecycle. A hung dial is
+   * bounded by `connectTimeoutMs`; cancel a connecting client with `close()`.
    *
-   * @param opts.signal - Cancels an in-flight connect.
-   * @throws {MllpClientError} `CLOSED` when the instance is already
-   *   `closed`/`closing` (construct a new instance); `ALREADY_CONNECTED` when
-   *   called while `connecting`/`ready`/`sending`; `CONNECT_ABORTED` when
-   *   `opts.signal` aborts or `close()` interrupts the connect.
-   *   `CONNECT_FAILED` when the adapter rejects (underlying error on `cause`);
-   *   `CONNECT_TIMEOUT` when the adapter exceeds `connectTimeoutMs`
-   *   (`timeoutMs` set).
+   * @throws {MllpClientError} `CLOSED` when the instance is already `closed`
+   *   (construct a new instance); `ALREADY_CONNECTED` when called while
+   *   `connecting`/`connected`; `CONNECT_FAILED` when the adapter rejects
+   *   (underlying error on `cause`); `CONNECT_TIMEOUT` when the adapter exceeds
+   *   `connectTimeoutMs` (`timeoutMs` set); `CONNECT_ABORTED` when `close()`
+   *   interrupts an in-flight connect.
    */
-  connect(opts: { signal?: AbortSignal } = {}): Promise<void> {
-    return this.#manager.connect(opts);
+  connect(): Promise<void> {
+    return this.#manager.connect();
   }
 
   /**
    * Frame and enqueue `message`, then resolve with the parsed ACK. Concurrent
-   * sends queue (FIFO) and run one at a time.
+   * sends queue (FIFO) and run one at a time. There is no caller cancellation
+   * signal — a send is bounded by its ACK deadline, and `close()` rejects an
+   * in-flight or queued send.
    *
-   * @param opts.signal - Cancels the send; may abort while it is still queued.
-   * @param opts.timeoutMs - Overrides the default deadline (it spans the queue
-   *   wait as well as the wire round-trip).
+   * @param opts.timeoutMs - Overrides the default ACK-wait deadline. The clock
+   *   starts when the send reaches the wire, so a send waiting behind others
+   *   may wait longer than this before its deadline begins.
    * @throws {AckException} (from `@glion/ack`) The peer returned a NAK — the
    *   subclass encodes the code: `AckApplicationError`/`AckApplicationReject`/
    *   `AckCommitError`/`AckCommitReject` for AE/AR/CE/CR.
-   * @throws {MllpClientError} Otherwise; branch on `code`: `CORRELATION_MISMATCH`
-   *   (request MSH-10 and response MSA-2 both non-empty and differ),
-   *   `SEND_TIMEOUT` (no ACK in time), `DROPPED` (connection ended; `reason`
-   *   discriminates — terminal), `SEND_ABORTED` (`opts.signal` aborted),
-   *   `NOT_CONNECTED`/`CLOSED` (state guard), `PARSE_FAILED`/`UNKNOWN_ACK_CODE`
-   *   (ACK unparseable or non-standard MSA-1). Reading the request's MSH-10 is
-   *   best-effort and never throws.
+   * @throws {MllpClientError} Otherwise; branch on `code`:
+   *   `CORRELATION_MISMATCH` (request MSH-10 and response MSA-2 both non-empty
+   *   and differ), `SEND_TIMEOUT` (no ACK in time), `DROPPED` (connection
+   *   ended; `reason` discriminates — terminal), `NOT_CONNECTED`/`CLOSED`
+   *   (state guard), `PARSE_FAILED`/`UNKNOWN_ACK_CODE` (ACK unparseable or
+   *   non-standard MSA-1). Reading the request's MSH-10 is best-effort and
+   *   never throws.
    * @throws {FramingError} The message carries an embedded MLLP framing byte
    *   (VT or FS) that cannot be framed. CR is allowed (segment terminator).
    */

@@ -29,7 +29,7 @@
 import { createFrameDecoder } from "@glion/mllp-transport";
 
 import type { MllpDuplex } from "./duplex";
-import { MllpClientError, MllpErrorCode, sendAbortError } from "./errors";
+import { MllpClientError, MllpErrorCode, sendTimeoutError } from "./errors";
 import { parseResponse } from "./hl7v2";
 import type { MllpClientResponse } from "./hl7v2";
 
@@ -58,9 +58,11 @@ interface FrameWaiter {
 export interface ExchangeRequest {
   readonly framed: Uint8Array;
   readonly requestControlId: string;
-  /** Combined deadline + caller signal. */
-  readonly abortSignal: AbortSignal;
-  /** The deadline half, so a waiter can tell timeout from caller-abort. */
+  /**
+   * Wire deadline. Aborting it is the only way an on-wire send is cancelled —
+   * the client exposes no caller `AbortSignal`. Built by the manager at the
+   * dispatch instant and scoped to this one exchange.
+   */
   readonly deadlineSignal: AbortSignal;
   readonly timeoutMs: number;
 }
@@ -68,8 +70,8 @@ export interface ExchangeRequest {
 export interface Connection {
   /**
    * Write `req` and resolve with the parsed ACK. Single-flight: the owner must
-   * not call this concurrently. Rejects with `SEND_TIMEOUT`/`SEND_ABORTED` (its
-   * signals), `DROPPED` (write failed), `CORRELATION_MISMATCH`/`PARSE_FAILED`/
+   * not call this concurrently. Rejects with `SEND_TIMEOUT` (deadline elapsed),
+   * `DROPPED` (write failed), `CORRELATION_MISMATCH`/`PARSE_FAILED`/
    * `UNKNOWN_ACK_CODE` (bad ACK), or an `AckException` (NAK).
    */
   exchange(req: ExchangeRequest): Promise<MllpClientResponse>;
@@ -222,34 +224,34 @@ export function createConnection(opts: ConnectionOptions): Connection {
       return Promise.resolve(queued);
     }
 
-    const { abortSignal, deadlineSignal, timeoutMs } = req;
+    const { deadlineSignal, timeoutMs } = req;
 
     // oxlint-disable-next-line promise/avoid-new -- canonical waiter wrapper
     return new Promise<Uint8Array>((resolve, reject) => {
-      const onAbort = () => {
+      const onTimeout = () => {
         if (frameWaiter === waiter) {
           frameWaiter = null;
         }
-        reject(sendAbortError(deadlineSignal, timeoutMs));
+        reject(sendTimeoutError(timeoutMs));
       };
 
       const waiter: FrameWaiter = {
         reject: (error) => {
-          abortSignal.removeEventListener("abort", onAbort);
+          deadlineSignal.removeEventListener("abort", onTimeout);
           reject(error);
         },
         resolve: (bytes) => {
-          abortSignal.removeEventListener("abort", onAbort);
+          deadlineSignal.removeEventListener("abort", onTimeout);
           resolve(bytes);
         },
       };
 
       frameWaiter = waiter;
-      if (abortSignal.aborted) {
-        onAbort();
+      if (deadlineSignal.aborted) {
+        onTimeout();
         return;
       }
-      abortSignal.addEventListener("abort", onAbort, { once: true });
+      deadlineSignal.addEventListener("abort", onTimeout, { once: true });
     });
   }
 
