@@ -162,6 +162,38 @@ describe("connect()", () => {
     });
     expect(client.state).toBe("closed");
   });
+
+  it("throws CONNECT_ABORTED when close() interrupts an in-flight connect", async () => {
+    // A deferred adapter lets close() run while the machine is "connecting".
+    // The adapter then resolves with a duplex the client no longer wants — it
+    // must close that orphaned socket (no leak) and reject with CONNECT_ABORTED.
+    const fake = createFakeDuplex();
+    let release: () => void = noop;
+    // oxlint-disable-next-line promise/avoid-new -- gate the adapter resolution
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const client = new MllpClient({
+      connect: async () => {
+        await gate;
+        return fake.duplex;
+      },
+      host: "x",
+      port: 1,
+    });
+
+    const connecting = client.connect();
+    expect(client.state).toBe("connecting");
+    await client.close();
+    release();
+
+    await expect(connecting).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_ABORTED,
+    });
+    expect(client.state).toBe("closed");
+    // The orphaned duplex the adapter returned after close() was torn down.
+    expect(fake.closeCount()).toBe(1);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -181,6 +213,18 @@ describe("send() — accept codes", () => {
     expect(response.timestamp).toBeInstanceOf(Date);
     expect(response.durationMs).toBeGreaterThanOrEqual(0);
     expect(client.state).toBe("connected");
+  });
+
+  it("accepts a Root (parsed tree) as send input", async () => {
+    // The other half of SendInput: a caller may pass an already-parsed tree.
+    // toTree returns it as-is; prepareSend serializes the same tree.
+    const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
+    const client = makeClient(fake);
+    await client.connect();
+    const tree = parseHL7v2(REQUEST);
+    const response = await client.send(tree);
+    expect(response.code).toBe("AA");
+    expect(response.requestControlId).toBe(REQUEST_CONTROL_ID);
   });
 
   it("returns MllpClientResponse on CA", async () => {
