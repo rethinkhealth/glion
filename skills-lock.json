@@ -107,6 +107,12 @@
       "sourceType": "github",
       "computedHash": "d3ed14599f03ee9f2da86665237d2c05edcec62e09de9e3c807d9b2c9506a4e2"
     },
+    "hunk-review": {
+      "source": "modem-dev/hunk",
+      "sourceType": "github",
+      "skillPath": "skills/hunk-review/SKILL.md",
+      "computedHash": "1ceb9a909ce1b50e0d84cc584e74ba2af7e65717c6394285c2dc7db16019fa62"
+    },
     "orchestrating-swarms": {
       "source": "everyinc/compound-engineering-plugin",
       "sourceType": "github",
