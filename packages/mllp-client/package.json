@@ -1,6 +1,6 @@
 {
   "name": "@glion/mllp-client",
-  "version": "0.0.0",
+  "version": "0.17.0",
   "description": "Persistent, single-flight MLLP client for HL7v2",
   "keywords": [
     "health",

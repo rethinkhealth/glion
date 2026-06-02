@@ -1,6 +1,6 @@
 {
   "name": "@glion/preset-annotate-profile-recommended",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Preset bundling all HL7v2 profile annotation plugins",
   "keywords": [
     "annotate",
