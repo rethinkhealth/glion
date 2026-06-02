@@ -11,6 +11,7 @@
  */
 
 import { frame, FrameDecoderStream } from "@glion/mllp-transport";
+import { decodeBytes } from "@glion/util-charset";
 
 import type { AdapterSocket } from "../server/adapter";
 import type { MessageInfo, Mllp } from "../server/mllp";
@@ -21,9 +22,6 @@ import { nodeAdapter } from "./adapter";
 /** Monotonically-increasing connection ID counter. */
 // oxlint-disable-next-line prefer-const
 let nextConnectionId = 1;
-
-/** Decodes a de-framed payload's bytes to its HL7v2 text for the handler. */
-const TEXT_DECODER = new TextDecoder();
 
 /**
  * Lifecycle callback invoked for connection events.
@@ -315,21 +313,23 @@ function handleConnection(
             break;
           }
 
-          // FrameDecoderStream emits the de-framed payload bytes; the handler
-          // takes the HL7v2 text plus the raw bytes.
-          const text = TEXT_DECODER.decode(payload);
-
-          // Inner try/catch separates handler errors from stream errors.
-          // Only handler errors route to onError; stream errors (connection
-          // reset, decode failure) flow to the outer catch for cleanup.
+          // Inner try/catch separates per-message errors from stream errors.
+          // Decode failures and handler errors both route to onError and the
+          // connection survives; stream errors (connection reset) flow to the
+          // outer catch for cleanup.
           let response: Awaited<ReturnType<Mllp["handle"]>>;
           try {
+            // FrameDecoderStream emits the de-framed payload bytes; decode them
+            // to text (UTF-8) for the handler, which also receives the raw bytes.
+            // A non-UTF-8 feed throws here rather than being silently corrupted,
+            // surfacing through onError below.
+            const text = decodeBytes(payload);
             response = await app.handle(text, payload, connection);
-          } catch (handlerError) {
+          } catch (messageError) {
             const err =
-              handlerError instanceof Error
-                ? handlerError
-                : new Error(String(handlerError));
+              messageError instanceof Error
+                ? messageError
+                : new Error(String(messageError));
             await reportError(err, connection, lifecycle, getMessageInfo(err));
             // Continue processing — connection stays alive
             continue;

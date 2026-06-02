@@ -3,6 +3,7 @@ import net from "node:net";
 
 import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-transport";
+import { IncompatibleCharsetError } from "@glion/util-charset";
 
 import { serve } from "../../src/node/serve.js";
 import type { Server } from "../../src/node/serve.js";
@@ -11,16 +12,15 @@ import { Mllp } from "../../src/server/mllp.js";
 /**
  * Regression for https://github.com/rethinkhealth/glion/issues/659.
  *
- * The server ignores the HL7v2 character set declared in MSH-18 and decodes
- * every inbound payload as UTF-8 with a NON-fatal `TextDecoder`
- * (`serve.ts` — `new TextDecoder()`, then `TEXT_DECODER.decode(payload)`).
- * A legacy single-byte feed (ISO 8859/1 / Windows-1252) is therefore silently
- * corrupted: a non-UTF-8 byte is replaced with U+FFFD and the mangled message
- * is parsed and routed with no error raised.
+ * The server decodes each inbound payload as UTF-8 via `decodeBytes(payload)`
+ * (from `@glion/util-charset`), fatally. A non-UTF-8 feed (e.g. ISO 8859/1)
+ * therefore fails LOUDLY — surfaced through `onError`, with no response —
+ * rather than being silently corrupted to U+FFFD and ACKed as if valid, which
+ * was the #659 bug.
  *
- * This test PINS that buggy behavior. When MSH-18 handling lands (#659), the
- * assertions below must flip — the accented name should survive intact and the
- * `U+FFFD` substitution should disappear.
+ * Honouring the charset a message declares in MSH-18 (so such a feed decodes
+ * intact instead of erroring) is deferred to
+ * https://github.com/rethinkhealth/glion/issues/662.
  */
 
 /** Wait until the server accepts a TCP connection. */
@@ -85,7 +85,7 @@ function sendBytes(
   });
 }
 
-describe("MSH-18 character set is ignored — server silently corrupts a non-UTF-8 feed (regression for #659)", () => {
+describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression for #659)", () => {
   let server: Server | undefined;
 
   afterEach(async () => {
@@ -95,44 +95,43 @@ describe("MSH-18 character set is ignored — server silently corrupts a non-UTF
     }
   });
 
-  it("replaces a Latin-1 byte with U+FFFD instead of honoring MSH-18", async () => {
-    let decoded: string | undefined;
+  it("surfaces IncompatibleCharsetError via onError and never ACKs a corrupted body", async () => {
+    let handlerRan = false;
+    const errors: Error[] = [];
 
     const app = new Mllp().parser(parseHL7v2);
     app.on("*", (ctx) => {
-      // ctx.req.raw is exactly the string serve.ts produced from
-      // TEXT_DECODER.decode(payload) — the locus of the bug.
-      decoded = ctx.req.raw;
+      handlerRan = true;
       return {
         raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
       };
     });
 
-    server = serve(app, { port: 0 });
+    server = serve(app, {
+      onError: (error) => {
+        errors.push(error);
+      },
+      port: 0,
+    });
     await waitForReady(server.port);
 
-    // A message whose PID-5 family name is "José" and that DECLARES 8859/1 in
-    // MSH-18. The "é" is the single byte 0xE9 (Latin-1), not the two-byte UTF-8
-    // sequence 0xC3 0xA9.
+    // PID-5 family name "José" with "é" as the single Latin-1 byte 0xE9 (invalid
+    // UTF-8), and MSH-18 declaring 8859/1 — which we do not yet honour (see
+    // https://github.com/rethinkhealth/glion/issues/662).
     const message = [
       "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1||||||8859/1",
       "PID|1||12345^^^MRN||José^John",
     ].join("\r");
-    // Latin-1 encode: code points 0x00–0xFF map directly to one byte each, so
-    // "é" (U+00E9) becomes 0xE9.
     const latin1 = Uint8Array.from(message, (ch) => ch.codePointAt(0));
 
-    const response = await sendBytes(server.port, latin1);
+    const response = await sendBytes(server.port, latin1, 1000);
 
-    // The corruption is silent — the server still answers AA, never signalling
-    // that it mangled the body.
-    expect(response).toBeDefined();
-    expect(response?.toString("utf8")).toContain("MSA|AA|MSG001");
-
-    // The decoded body proves the data loss: the accented name is gone,
-    // replaced by the Unicode replacement character.
-    expect(decoded).toBeDefined();
-    expect(decoded).not.toContain("José");
-    expect(decoded).toContain("Jos�^John");
+    // No silent corruption: the handler never sees a mangled body, no AA is
+    // returned, and the decode failure surfaces through onError as an
+    // IncompatibleCharsetError (the charset package's own error type).
+    expect(handlerRan).toBe(false);
+    expect(response).toBeUndefined();
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0]).toBeInstanceOf(IncompatibleCharsetError);
   });
 });
