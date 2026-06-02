@@ -42,12 +42,7 @@ const ENCODER = new TextEncoder();
  *   otherwise not valid UTF-8.
  */
 export function decodeBytes(bytes: Uint8Array): string {
-  const bom = nonUtf8Bom(bytes);
-  if (bom) {
-    throw new IncompatibleCharsetError(
-      `The HL7v2 payload begins with a ${bom} byte-order mark; only UTF-8 is supported.`
-    );
-  }
+  rejectNonUtf8Bom(bytes);
 
   try {
     return DECODER.decode(bytes);
@@ -70,6 +65,20 @@ export function decodeBytes(bytes: Uint8Array): string {
  */
 export function encodeBytes(text: string): Uint8Array {
   return ENCODER.encode(text);
+}
+
+/**
+ * Guard: reject a payload that opens with a non-UTF-8 byte-order mark
+ * (UTF-16/32) — it cannot be UTF-8. A UTF-8 BOM is compatible and left for the
+ * decoder to strip.
+ */
+function rejectNonUtf8Bom(bytes: Uint8Array): void {
+  const mark = nonUtf8Bom(bytes);
+  if (mark) {
+    throw new IncompatibleCharsetError(
+      `The HL7v2 payload begins with a ${mark} byte-order mark; only UTF-8 is supported.`
+    );
+  }
 }
 
 /**

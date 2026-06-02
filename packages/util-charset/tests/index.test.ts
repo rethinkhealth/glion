@@ -29,11 +29,19 @@ describe("decodeBytes", () => {
     }
   });
 
-  it("names a non-UTF-8 BOM in the error", () => {
-    const utf16le = Uint8Array.of(0xff, 0xfe, 0x4d, 0x00, 0x53, 0x00);
-    expect(() => decodeBytes(utf16le)).toThrow(/UTF-16LE/);
-    const utf32be = Uint8Array.of(0x00, 0x00, 0xfe, 0xff, 0x00);
-    expect(() => decodeBytes(utf32be)).toThrow(/UTF-32BE/);
+  it("names each non-UTF-8 BOM in the error", () => {
+    expect(() => decodeBytes(Uint8Array.of(0xff, 0xfe, 0x4d, 0x00))).toThrow(
+      /UTF-16LE/
+    );
+    expect(() => decodeBytes(Uint8Array.of(0xfe, 0xff, 0x00, 0x4d))).toThrow(
+      /UTF-16BE/
+    );
+    expect(() => decodeBytes(Uint8Array.of(0xff, 0xfe, 0x00, 0x00))).toThrow(
+      /UTF-32LE/
+    );
+    expect(() => decodeBytes(Uint8Array.of(0x00, 0x00, 0xfe, 0xff))).toThrow(
+      /UTF-32BE/
+    );
   });
 });
 

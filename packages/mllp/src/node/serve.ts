@@ -326,12 +326,15 @@ function handleConnection(
             const text = decodeBytes(payload);
             response = await app.handle(text, payload, connection);
           } catch (messageError) {
-            const err =
-              messageError instanceof Error
-                ? messageError
-                : new Error(String(messageError));
-            await reportError(err, connection, lifecycle, getMessageInfo(err));
-            // Continue processing — connection stays alive
+            // reportError normalizes a non-Error throw; getMessageInfo returns
+            // routing fields only for handler errors (decode and other throws
+            // carry none). Continue processing — the connection stays alive.
+            await reportError(
+              messageError,
+              connection,
+              lifecycle,
+              getMessageInfo(messageError)
+            );
             continue;
           }
 
