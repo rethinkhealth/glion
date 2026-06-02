@@ -757,8 +757,8 @@ describe("send() — peer sends unframed garbage", () => {
   });
 });
 
-describe("send() — parseHL7v2 throws on the ACK bytes", () => {
-  it("rejects with PARSE_FAILED carrying the underlying cause", async () => {
+describe("send() — unparseable ACK (no MSA-1)", () => {
+  it("rejects with PARSE_FAILED when the ACK has no acknowledgment code", async () => {
     const fake = createFakeDuplex({
       onWrite: (_chunk, peer) => {
         peer.injectPeerBytes(frame("GARBAGE WITHOUT MSH SEGMENT"));

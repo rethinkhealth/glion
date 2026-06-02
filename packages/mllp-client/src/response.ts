@@ -78,16 +78,9 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
     );
   }
 
-  let tree: Root;
-  try {
-    tree = parseHL7v2(text);
-  } catch (error) {
-    throw new MllpClientError(
-      MllpErrorCode.PARSE_FAILED,
-      "Could not parse the peer's ACK as an HL7v2 message (see the error's cause).",
-      { cause: error }
-    );
-  }
+  // The parser is lenient — it never throws on message text — so a tree is
+  // always produced; a malformed ACK falls through to the no-MSA-1 check below.
+  const tree = parseHL7v2(text);
 
   const codeRaw = readValue(tree, "MSA-1[1].1.1");
   if (codeRaw === null || codeRaw === "") {

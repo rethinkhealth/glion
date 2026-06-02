@@ -242,8 +242,12 @@ describe("MllpDuplex contract — close() is idempotent and always resolves", ()
       port: server.port,
       signal: new AbortController().signal,
     });
-    await Promise.all([duplex.close(), duplex.close(), duplex.close()]);
-    expect(true).toBe(true);
+    const results = await Promise.all([
+      duplex.close(),
+      duplex.close(),
+      duplex.close(),
+    ]);
+    expect(results).toEqual([undefined, undefined, undefined]);
   });
 
   it("close() resolves even after the peer has already dropped", async () => {
