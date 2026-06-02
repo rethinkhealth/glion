@@ -46,6 +46,21 @@ const ack = await client.send(message);
 await client.close();
 ```
 
+A peer NAK (`AE` / `AR` / `CE` / `CR`) is thrown as an `@glion/ack` `AckException`, imported from `@glion/ack` (not this package) — the same typed exception the server raises:
+
+```ts
+import { AckException } from "@glion/ack";
+
+try {
+  const ack = await client.send(message);
+  // ack.code is "AA" or "CA".
+} catch (error) {
+  if (error instanceof AckException) {
+    // Peer rejected the message — error.code is AE / AR / CE / CR.
+  }
+}
+```
+
 `MllpClient` implements `Symbol.asyncDispose`, so an `await using` binding closes the connection on scope exit:
 
 ```ts
@@ -78,7 +93,7 @@ await client.send(message);
 | `client.connected`  | `boolean`         | `true` while the wire is up (state is `connected`).                                                                              |
 | `client.queueDepth` | `number`          | Sends waiting in the queue, excluding the one in flight.                                                                         |
 
-### `client.connect(options?): Promise<void>`
+### `client.connect(): Promise<void>`
 
 Opens the wire through the runtime adapter and starts the read loop. A hung dial is bounded by `connectTimeoutMs`; cancel a connecting client with `close()`. Single-shot: each instance manages one connection lifecycle.
 
@@ -99,11 +114,11 @@ Accepts a `string` or a `Root` (`SendInput`) — raw bytes are not accepted; dec
 **Throws**
 
 - `AckException` (from `@glion/ack`) — the peer returned a NAK (`AE`/`AR`/`CE`/`CR`). The concrete subclass encodes the code (`AckApplicationError` = AE, `AckApplicationReject` = AR, `AckCommitError` = CE, `AckCommitReject` = CR); it carries `code`, `errorCode` / `severity` (ERR-3 / ERR-4), `controlId`, `raw`, and the parsed `tree`.
-- `FramingError` (from `@glion/mllp-transport`) — the message contains an embedded MLLP control character (VT / FS / CR) that cannot be framed (thrown before any state change).
+- `FramingError` (from `@glion/mllp-transport`) — the message contains an embedded MLLP framing byte (VT or FS) that cannot be framed (thrown before any state change). CR is allowed — it is the HL7v2 segment terminator.
 - otherwise an `MllpClientError`; branch on `code`:
   - `CORRELATION_MISMATCH` — both the request's MSH-10 and the response's MSA-2 are non-empty and differ (carries `expected` / `actual` / `tree` / `raw`). If either is empty, correlation is skipped.
   - `SEND_TIMEOUT` — no ACK arrived within the deadline (`timeoutMs` is set).
-  - `DROPPED` — the connection ended (peer drop, write failure, framing error, frame flood); `reason` discriminates. Terminal.
+  - `DROPPED` — the connection ended; `reason` is one of `peer-drop`, `write-failed`, `framing-error`, `frame-queue-overflow`. Terminal.
   - `NOT_CONNECTED` / `CLOSED` — the client is not connected, or has been closed (the in-flight send and every queued send reject).
   - `PARSE_FAILED` — the peer's ACK is not parseable HL7v2, or is not valid UTF-8 (a Latin-1 / Windows-1252 peer ACK trips this; the client decodes ACKs as strict UTF-8).
   - `UNKNOWN_ACK_CODE` — the ACK carries a non-standard MSA-1.
