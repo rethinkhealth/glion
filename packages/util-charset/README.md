@@ -36,7 +36,7 @@ Decodes UTF-8 payload bytes (after MLLP de-framing) to text. A leading UTF-8 BOM
 
 - `bytes` (`Uint8Array`) — The de-framed payload bytes.
 - Returns `string` — The decoded HL7v2 text.
-- Throws `IncompatibleCharsetError` (`code: "INCOMPATIBLE_CHARSET"`) — When the bytes carry a non-UTF-8 byte-order mark or are otherwise not valid UTF-8.
+- Throws `CharsetError` (`code: "INCOMPATIBLE_CHARSET"`) — When the bytes carry a non-UTF-8 byte-order mark or are otherwise not valid UTF-8.
 
 ### `encodeBytes(text)`
 

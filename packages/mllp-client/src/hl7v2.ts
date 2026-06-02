@@ -125,7 +125,7 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
     // it must surface as MllpClientError(PARSE_FAILED), not a raw TypeError, so
     // the contract "every failure is an MllpClientError you can branch on by
     // `code`" holds on the ACK path too. The specific reason — decodeBytes'
-    // `IncompatibleCharsetError` — rides on `cause`.
+    // `CharsetError` — rides on `cause`.
     throw new MllpClientError(
       MllpErrorCode.PARSE_FAILED,
       "The peer's ACK is not valid UTF-8; only UTF-8 is supported. See the error's cause.",

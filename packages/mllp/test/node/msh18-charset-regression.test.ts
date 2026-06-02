@@ -3,7 +3,7 @@ import net from "node:net";
 
 import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-transport";
-import { IncompatibleCharsetError } from "@glion/util-charset";
+import { CharsetError } from "@glion/util-charset";
 
 import { serve } from "../../src/node/serve.js";
 import type { Server } from "../../src/node/serve.js";
@@ -95,7 +95,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     }
   });
 
-  it("surfaces IncompatibleCharsetError via onError and never ACKs a corrupted body", async () => {
+  it("surfaces CharsetError via onError and never ACKs a corrupted body", async () => {
     let handlerRan = false;
     const errors: Error[] = [];
 
@@ -128,10 +128,10 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
 
     // No silent corruption: the handler never sees a mangled body, no AA is
     // returned, and the decode failure surfaces through onError as an
-    // IncompatibleCharsetError (the charset package's own error type).
+    // CharsetError (the charset package's own error type).
     expect(handlerRan).toBe(false);
     expect(response).toBeUndefined();
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0]).toBeInstanceOf(IncompatibleCharsetError);
+    expect(errors[0]).toBeInstanceOf(CharsetError);
   });
 });
