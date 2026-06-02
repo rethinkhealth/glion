@@ -23,16 +23,10 @@ import type { Root } from "@glion/ast";
 import { frame } from "@glion/mllp-transport";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
+import { decodeBytes } from "@glion/util-charset";
 import { value } from "@glion/util-query";
 
 import { MllpClientError, MllpErrorCode } from "./errors";
-
-/**
- * Strict UTF-8 decoder — throws on invalid bytes. HL7v2 messages SHOULD
- * be ASCII / UTF-8 in 2.x and later. Latin-1 / Windows-1252 peers will
- * fail PARSE_FAILED rather than silently substitute U+FFFD.
- */
-const TEXT_DECODER = new TextDecoder("utf-8", { fatal: true });
 
 /**
  * What `MllpClient.send()` accepts. `string` / `Uint8Array` are transmitted
@@ -98,7 +92,7 @@ function readableTree(input: SendInput): Root | null {
   }
   let text: string;
   try {
-    text = typeof input === "string" ? input : TEXT_DECODER.decode(input);
+    text = typeof input === "string" ? input : decodeBytes(input);
   } catch {
     // Undecodable bytes: the wire still gets them verbatim, but we can't read
     // MSH-10, so correlation is skipped.
@@ -125,15 +119,16 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
 
   let text: string;
   try {
-    text = TEXT_DECODER.decode(raw);
+    text = decodeBytes(raw);
   } catch (error) {
-    // Strict UTF-8 decode (fatal): a Latin-1 / Windows-1252 peer must surface
-    // as PARSE_FAILED, not a raw TypeError, so the contract "every failure is
-    // an MllpClientError you can branch on by `code`" holds on the ACK path
-    // just as the request side (readableTree) already guards it.
+    // A non-UTF-8 ACK (e.g. a Latin-1 / Windows-1252 peer) surfaces as
+    // MllpClientError(PARSE_FAILED), not a raw TypeError, so the contract "every
+    // failure is an MllpClientError you branch on by `code`" holds on the ACK
+    // path. The codec's CharsetError is kept on `cause` for diagnostics —
+    // consumers branch on `code` and never need to import @glion/util-charset.
     throw new MllpClientError(
       MllpErrorCode.PARSE_FAILED,
-      "The peer's ACK is not valid UTF-8; HL7v2 messages must be ASCII/UTF-8 (a Latin-1 / Windows-1252 peer trips this). See the error's cause.",
+      "The peer's ACK is not valid UTF-8; only UTF-8 is supported. See the error's cause.",
       { cause: error }
     );
   }

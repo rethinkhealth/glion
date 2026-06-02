@@ -1,13 +1,12 @@
 {
-  "name": "@glion/mllp-client",
-  "version": "0.17.0",
-  "description": "Persistent, single-flight MLLP client for HL7v2",
+  "name": "@glion/util-charset",
+  "version": "0.16.0",
+  "description": "Encode and decode HL7v2 wire bytes as UTF-8 (fatal, no silent corruption)",
   "keywords": [
     "health",
     "healthcare",
     "hl7",
     "hl7v2",
-    "mllp",
     "nodejs",
     "typescript"
   ],
@@ -20,7 +19,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rethinkhealth/glion.git",
-    "directory": "packages/mllp-client"
+    "directory": "packages/util-charset"
   },
   "files": [
     "dist"
@@ -28,29 +27,19 @@
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./node": "./dist/runtime/node.js"
+    ".": "./dist/index.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly",
-    "check-types": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
+    "check-types": "tsc --noEmit",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "publint": "publint --strict"
-  },
-  "dependencies": {
-    "@glion/ack": "workspace:*",
-    "@glion/ast": "workspace:*",
-    "@glion/mllp-transport": "workspace:*",
-    "@glion/parser": "workspace:*",
-    "@glion/to-hl7v2": "workspace:*",
-    "@glion/util-charset": "workspace:*",
-    "@glion/util-query": "workspace:*"
   },
   "devDependencies": {
     "@glion/check-readme": "workspace:*",
@@ -58,6 +47,7 @@
     "@glion/tsconfig": "workspace:*",
     "@types/node": "25.6.0",
     "@vitest/coverage-v8": "4.1.5",
+    "iconv-lite": "0.7.2",
     "publint": "0.3.18",
     "tsdown": "0.21.10",
     "typescript": "6.0.3",

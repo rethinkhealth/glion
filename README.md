@@ -130,6 +130,7 @@ Linting rules and presets for HL7v2 message quality and conformance.
 - **[@glion/utils][glion-utils]** — shared helpers for delimiter detection, normalization, and other HL7v2-specific operations.
 - **[@glion/util-visit][glion-util-visit]** — a visitor pattern for traversing HL7v2 ASTs with full path context, metadata extraction, and control flow actions.
 - **[@glion/util-query][glion-util-query]** — canonical path querying with syntax like `MSH-9.3` or `ORDER-ORC-1` for `select`, `selectAll`, `value`, `set`, and `matches`.
+- **[@glion/util-charset][glion-util-charset]** — encode and decode HL7v2 wire bytes as UTF-8 (fatal — a non-UTF-8 feed fails loudly instead of being silently corrupted).
 - **[@glion/util-semver][glion-util-semver]** — tiny, fast HL7v2 version and range comparators.
 - **[@glion/util-timestamp][glion-util-timestamp]** — HL7v2 timestamp parsing, formatting, and conversion with precision tracking.
 - **[@glion/profiles][glion-profiles]** — HL7v2 version-specific profile definitions (fields, data types, tables, segments) with LRU-cached loading, used by the profile-based lint rules.
@@ -214,6 +215,7 @@ This program is licensed to you under the terms of the [MIT License](https://ope
 [glion-preset-lint-recommended]: https://github.com/rethinkhealth/glion/tree/main/packages/preset-lint-recommended#readme
 [glion-profiles]: https://github.com/rethinkhealth/glion/tree/main/packages/profiles#readme
 [glion-to-hl7v2]: https://github.com/rethinkhealth/glion/tree/main/packages/to-hl7v2#readme
+[glion-util-charset]: https://github.com/rethinkhealth/glion/tree/main/packages/util-charset#readme
 [glion-util-query]: https://github.com/rethinkhealth/glion/tree/main/packages/util-query#readme
 [glion-util-semver]: https://github.com/rethinkhealth/glion/tree/main/packages/util-semver#readme
 [glion-util-timestamp]: https://github.com/rethinkhealth/glion/tree/main/packages/util-timestamp#readme
