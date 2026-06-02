@@ -121,11 +121,11 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
   try {
     text = decodeBytes(raw);
   } catch (error) {
-    // A non-UTF-8 ACK (e.g. a Latin-1 / Windows-1252 peer) is a parse failure:
-    // it must surface as MllpClientError(PARSE_FAILED), not a raw TypeError, so
-    // the contract "every failure is an MllpClientError you can branch on by
-    // `code`" holds on the ACK path too. The specific reason — decodeBytes'
-    // `CharsetError` — rides on `cause`.
+    // A non-UTF-8 ACK (e.g. a Latin-1 / Windows-1252 peer) surfaces as
+    // MllpClientError(PARSE_FAILED), not a raw TypeError, so the contract "every
+    // failure is an MllpClientError you branch on by `code`" holds on the ACK
+    // path. The codec's CharsetError is kept on `cause` for diagnostics —
+    // consumers branch on `code` and never need to import @glion/util-charset.
     throw new MllpClientError(
       MllpErrorCode.PARSE_FAILED,
       "The peer's ACK is not valid UTF-8; only UTF-8 is supported. See the error's cause.",

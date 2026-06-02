@@ -11,6 +11,13 @@
 
 export const MllpServerErrorCode = {
   /**
+   * An inbound message could not be decoded as UTF-8 — the only character set
+   * supported for now. The underlying `@glion/util-charset` `CharsetError` is
+   * kept on `cause`; callers branch on this code without importing that
+   * package.
+   */
+  INCOMPATIBLE_CHARSET: "INCOMPATIBLE_CHARSET",
+  /**
    * `app.handle()` was called before a parser was registered via
    * `app.parser()`.
    */

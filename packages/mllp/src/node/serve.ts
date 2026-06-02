@@ -11,8 +11,9 @@
  */
 
 import { frame, FrameDecoderStream } from "@glion/mllp-transport";
-import { decodeBytes } from "@glion/util-charset";
+import { CharsetError, decodeBytes } from "@glion/util-charset";
 
+import { MllpServerError, MllpServerErrorCode } from "../errors";
 import type { AdapterSocket } from "../server/adapter";
 import type { MessageInfo, Mllp } from "../server/mllp";
 import { getMessageInfo } from "../server/mllp";
@@ -40,10 +41,12 @@ export type ConnectionCallback = (
  * For lifecycle callback errors (onConnect/onDisconnect), `messageInfo`
  * is `undefined`.
  *
- * This fires only for application-level errors (handler/middleware throws
- * with no app-level error handler, or app-level error handler itself throws).
- * Transport-level errors (connection reset, decode failures) do not trigger
- * this callback.
+ * This fires for application-level errors (handler/middleware throws with no
+ * app-level error handler, or the app-level error handler itself throws) and
+ * for a server-level failure decoding an inbound message — surfaced as an
+ * {@link MllpServerError} (`code` `INCOMPATIBLE_CHARSET`), never the codec's
+ * own error. Stream-level errors (connection reset) do not trigger this
+ * callback.
  */
 export type ErrorCallback = (
   error: Error,
@@ -321,19 +324,28 @@ function handleConnection(
           try {
             // FrameDecoderStream emits the de-framed payload bytes; decode them
             // to text (UTF-8) for the handler, which also receives the raw bytes.
-            // A non-UTF-8 feed throws here rather than being silently corrupted,
-            // surfacing through onError below.
+            // A non-UTF-8 feed throws here rather than being silently corrupted.
             const text = decodeBytes(payload);
             response = await app.handle(text, payload, connection);
           } catch (messageError) {
-            // reportError normalizes a non-Error throw; getMessageInfo returns
-            // routing fields only for handler errors (decode and other throws
-            // carry none). Continue processing — the connection stays alive.
+            // A decode failure is the server's own error — translated into an
+            // MllpServerError so we never leak the codec's CharsetError to
+            // onError (the CharsetError is kept on `cause`). A handler/middleware
+            // throw is the consumer's own error and passes through unchanged.
+            // The connection survives either way.
+            const error =
+              messageError instanceof CharsetError
+                ? new MllpServerError(
+                    MllpServerErrorCode.INCOMPATIBLE_CHARSET,
+                    "The inbound message is not valid UTF-8; only UTF-8 is supported.",
+                    { cause: messageError }
+                  )
+                : messageError;
             await reportError(
-              messageError,
+              error,
               connection,
               lifecycle,
-              getMessageInfo(messageError)
+              getMessageInfo(error)
             );
             continue;
           }

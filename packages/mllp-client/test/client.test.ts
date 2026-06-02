@@ -408,11 +408,11 @@ describe("send() — malformed ACK responses", () => {
     });
   });
 
-  it("throws PARSE_FAILED with an CharsetError cause when the ACK bytes are not valid UTF-8", async () => {
+  it("throws PARSE_FAILED with a CharsetError cause when the ACK bytes are not valid UTF-8", async () => {
     // A Latin-1 / Windows-1252 peer emits a lone 0xE9. The strict (fatal) UTF-8
-    // decoder must surface this as MllpClientError(PARSE_FAILED), not leak a raw
+    // decoder must surface this as MllpClientError(PARSE_FAILED), not a raw
     // TypeError — the error contract is "branch on code" — with the charset
-    // package's CharsetError preserved on `cause`.
+    // package's CharsetError preserved on `cause` (diagnostic, not contract).
     const invalid = new Uint8Array([0x4d, 0x53, 0x48, 0xe9]); // "MSH" + 0xE9
     const fake = createFakeDuplex({
       onWrite: (_chunk, peer) => peer.injectPeerBytes(frame(invalid)),

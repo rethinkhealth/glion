@@ -5,6 +5,7 @@ import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-transport";
 import { CharsetError } from "@glion/util-charset";
 
+import { MllpServerError, MllpServerErrorCode } from "../../src/errors.js";
 import { serve } from "../../src/node/serve.js";
 import type { Server } from "../../src/node/serve.js";
 import { Mllp } from "../../src/server/mllp.js";
@@ -14,9 +15,10 @@ import { Mllp } from "../../src/server/mllp.js";
  *
  * The server decodes each inbound payload as UTF-8 via `decodeBytes(payload)`
  * (from `@glion/util-charset`), fatally. A non-UTF-8 feed (e.g. ISO 8859/1)
- * therefore fails LOUDLY — surfaced through `onError`, with no response —
- * rather than being silently corrupted to U+FFFD and ACKed as if valid, which
- * was the #659 bug.
+ * therefore fails LOUDLY — surfaced through `onError` as an `MllpServerError`
+ * (`INCOMPATIBLE_CHARSET`), with no response — rather than being silently
+ * corrupted to U+FFFD and ACKed as if valid, which was the #659 bug. The
+ * codec's `CharsetError` is not leaked; it rides on `cause`.
  *
  * Honouring the charset a message declares in MSH-18 (so such a feed decodes
  * intact instead of erroring) is deferred to
@@ -95,7 +97,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     }
   });
 
-  it("surfaces CharsetError via onError and never ACKs a corrupted body", async () => {
+  it("surfaces MllpServerError via onError (not the codec's CharsetError) and never ACKs a corrupted body", async () => {
     let handlerRan = false;
     const errors: Error[] = [];
 
@@ -127,11 +129,17 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     const response = await sendBytes(server.port, latin1, 1000);
 
     // No silent corruption: the handler never sees a mangled body, no AA is
-    // returned, and the decode failure surfaces through onError as an
-    // CharsetError (the charset package's own error type).
+    // returned, and the decode failure surfaces through onError as the server's
+    // own MllpServerError(INCOMPATIBLE_CHARSET) — not the codec's CharsetError,
+    // which is kept on `cause` for diagnostics.
     expect(handlerRan).toBe(false);
     expect(response).toBeUndefined();
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0]).toBeInstanceOf(CharsetError);
+    const [error] = errors;
+    expect(error).toBeInstanceOf(MllpServerError);
+    expect((error as MllpServerError).code).toBe(
+      MllpServerErrorCode.INCOMPATIBLE_CHARSET
+    );
+    expect((error as MllpServerError).cause).toBeInstanceOf(CharsetError);
   });
 });
