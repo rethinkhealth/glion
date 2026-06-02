@@ -161,6 +161,13 @@ class MllpClient {
 
 ## 6. Module structure
 
+> **Superseded — kept for rationale only.** The shipped layout is the source tree
+> (see §2b for the send/response split): `hl7v2.ts` became `send.ts` + `response.ts`,
+> `queue.ts` exists as a standalone FIFO, the in-flight waiter rejects `DROPPED`
+> (not the unbuilt `DELIVERY_UNKNOWN`), and `events.ts` / end-to-end reconnect are
+> deferred (reconnect ships as machine-level scaffolding). The table below is the
+> original design sketch.
+
 Driven by **lifetime boundaries** (instance-scoped vs connection-scoped), not line count. Honest framing: most files already exist and are _kept_; the genuinely new extractions are **`connection.ts`** and **`manager.ts`** (and a small **`events.ts`**).
 
 | File                | Status                             | Responsibility                                                                                                                                                                                                                           | Lifetime           |

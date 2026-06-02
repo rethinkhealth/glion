@@ -2,9 +2,8 @@
  * Tests for `MllpClient`.
  *
  * All tests use the in-memory fake duplex from `./fake-duplex.ts` —
- * no real sockets, no timing dependence on real I/O. The Node adapter
- * is verified separately (in `node.test.ts` if/when we add live-socket
- * tests; for v0 the fake duplex is sufficient to enforce the contract).
+ * no real sockets, no timing dependence on real I/O. Live-socket behaviour
+ * of the Node adapter is verified separately in `node.test.ts`.
  */
 
 import {
@@ -96,7 +95,7 @@ function abortableConnect(signal: AbortSignal): Promise<MllpDuplex> {
 // ---------------------------------------------------------------------------
 
 describe("connect()", () => {
-  it("transitions idle → connecting → ready on success", async () => {
+  it("transitions idle → connecting → connected on success", async () => {
     const fake = createFakeDuplex();
     const client = makeClient(fake);
     expect(client.state).toBe("idle");
@@ -517,6 +516,18 @@ describe("send() — state guards", () => {
     });
   });
 
+  it("throws FramingError on an embedded FS byte", async () => {
+    const fake = createFakeDuplex();
+    const client = makeClient(fake);
+    await client.connect();
+    // FS (0x1C) is the other framing byte validate() rejects (CR is allowed).
+    const bad = `MSH|^~\\&|${String.fromCodePoint(0x1c)}bad`;
+    await expect(client.send(bad)).rejects.toMatchObject({
+      name: "FramingError",
+    });
+    expect(client.state).toBe("connected");
+  });
+
   it("throws EMBEDDED_CONTROL_CHAR via mllp-transport on invalid bytes", async () => {
     const fake = createFakeDuplex();
     const client = makeClient(fake);
@@ -579,7 +590,7 @@ describe("send() — timeout / abort / drop", () => {
 // ---------------------------------------------------------------------------
 
 describe("close()", () => {
-  it("transitions ready → closed", async () => {
+  it("transitions connected → closed", async () => {
     const fake = createFakeDuplex();
     const client = makeClient(fake);
     await client.connect();
@@ -656,7 +667,7 @@ describe("close()", () => {
 // ---------------------------------------------------------------------------
 
 describe("peer drop detection", () => {
-  it("transitions ready → closed when the peer drops idle", async () => {
+  it("transitions connected → closed when the peer drops idle", async () => {
     const fake = createFakeDuplex();
     const client = makeClient(fake);
     await client.connect();
@@ -768,7 +779,7 @@ describe("send() — write failure", () => {
     expect(captured).toBeInstanceOf(MllpClientError);
     expect((captured as MllpClientError).reason).toBe("write-failed");
     expect((captured as MllpClientError).cause).toBeDefined();
-    // Write failure is terminal — connection is closed, not "ready".
+    // Write failure is terminal — connection is closed, not "connected".
     expect(client.state).toBe("closed");
   });
 });
@@ -996,9 +1007,9 @@ describe("MllpClient — observability getters", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 4 — send queue. Concurrent sends queue (FIFO) instead of throwing
-// CONCURRENT_SEND. queueDepth counts waiting sends; the per-send timeout spans
-// the queue wait; a queued send can be aborted; a drop fails the whole queue.
+// Send queue. Concurrent sends queue (FIFO) and run one at a time. queueDepth
+// counts waiting sends; the per-send timeout starts when the send reaches the
+// wire; close() rejects queued sends and a drop fails the whole queue.
 // ---------------------------------------------------------------------------
 
 /**
@@ -1116,7 +1127,7 @@ describe("send() — queue (Phase 4)", () => {
     expect(client.state).toBe("closed");
   });
 
-  it("runs a second send after the first completes (no CONCURRENT_SEND)", async () => {
+  it("runs a second send after the first completes", async () => {
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
