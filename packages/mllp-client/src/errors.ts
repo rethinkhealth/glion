@@ -66,8 +66,8 @@ export interface MllpClientErrorDetails {
   actual?: string;
   /** `CORRELATION_MISMATCH`: parsed AST of the offending ACK. */
   tree?: Root;
-  /** `CORRELATION_MISMATCH`: de-framed bytes of the offending ACK. */
-  raw?: Uint8Array;
+  /** `CORRELATION_MISMATCH`: de-framed text of the offending ACK. */
+  raw?: string;
 }
 
 /**
@@ -81,7 +81,7 @@ export class MllpClientError extends Error {
   readonly expected: string | undefined;
   readonly actual: string | undefined;
   readonly tree: Root | undefined;
-  readonly raw: Uint8Array | undefined;
+  readonly raw: string | undefined;
 
   constructor(
     code: MllpErrorCode,

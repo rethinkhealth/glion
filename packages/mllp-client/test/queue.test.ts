@@ -11,8 +11,8 @@
 import { describe, expect, it } from "vitest";
 
 import { MllpClientError, MllpErrorCode } from "../src/errors";
-import type { MllpClientResponse } from "../src/hl7v2";
 import { createSendQueue } from "../src/queue";
+import type { MllpClientResponse } from "../src/response";
 
 const BYTES = new Uint8Array([0x0b, 0x4d, 0x53, 0x48, 0x1c, 0x0d]);
 

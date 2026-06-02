@@ -41,7 +41,9 @@ Why Effect still loses _even under the new framing_:
 
 ## 2b. Send currency — AST-first cleaning client
 
-**Decision (maintainer): the client is an _originating / cleaning_ client.** The AST is the first-class send currency: `send(string | Uint8Array | Root)` parses every input to a tree and re-serializes to **canonical** HL7v2 for the wire. Byte-faithful relay is explicitly NOT a goal; emitting clean, canonical HL7v2 IS the goal, so the round-trip's normalization is the feature, not a regression.
+**Decision (maintainer): the client is an _originating / cleaning_ client.** The AST is the first-class send currency: `send(string | Root)` parses every input to a tree and re-serializes to **canonical** HL7v2 for the wire. Byte-faithful relay is explicitly NOT a goal; emitting clean, canonical HL7v2 IS the goal, so the round-trip's normalization is the feature, not a regression.
+
+**Refinement (4-reviewer panel, unanimous): drop `Uint8Array` entirely — `SendInput = string | Root`, and `MllpClientResponse.raw` is `string`.** `Uint8Array` is the only input whose _name_ promises "send these exact bytes" — a byte-fidelity contract the cleaning round-trip provably cannot keep — while it was merely decoded-then-parsed identically to a `string`. Removing it makes the contract honest (CLAUDE.md §7) and is net-subtractive (one branch + one failure mode deleted). Byte→text decoding (incl. MSH-18 charset) is a caller / I-O-boundary concern, matching HAPI (`CharSetUtil`) and Mirth. The public API now speaks `string` + `Root` only — no `Uint8Array` in either direction, so the receive-then-forward path stays symmetric. The challenger's other conditions (an in-library decode on-ramp, serializer-idempotency fix, `Root` symmetric warnings) were considered and deferred — not blockers for this narrowing.
 
 A study first leaned the other way (keep bytes-verbatim, because parse→toHl7v2 isn't byte-identical and a relay needs fidelity). The maintainer overruled it with a different framing — "the client should also clean the message" — which is coherent: once cleaning is the job, byte-alteration is intended. The relay/fidelity argument only applies to a faithful-pipe client, which this is not.
 
@@ -50,13 +52,13 @@ A study first leaned the other way (keep bytes-verbatim, because parse→toHl7v2
 - _Altered (intended cleaning, semantics preserved):_ line endings → CR; trailing empty fields/segments trimmed.
 - _Preserved verbatim:_ escape sequences (`\F\`, `\X0D\`), Z-segments, repetitions (`~`), components/subcomponents (`^`/`&`), standard MSH-2.
 
-**Known limitations (accepted, documented in `hl7v2.ts` module JSDoc):**
+**Known limitations (accepted, documented in the `send.ts` / `response.ts` module JSDoc):**
 
 1. **Not idempotent** — trailing-empty trimming drops one field per pass (`PID|1|||||` → `PID|1||||` → … → `PID|1`). Semantically faithful, syntactically non-convergent. Accepted as a documented limitation (likely a `@glion/parser` quirk to revisit).
 2. **Decode-implies-encode** — the client parses with the base `@glion/parser`, which does NOT decode escapes, so `\F\` round-trips intact and no re-encode is needed. A `Root` that was escape-_decoded_ upstream (e.g. `hl7v2DecodeEscapes`) must NOT be passed to `send()` — `toHl7v2` has no re-encode step and would emit the decoded literal. Documented + tested (escape-preservation test).
-3. **UTF-8 only** — clean-everything must decode bytes to parse them; a non-UTF-8 `Uint8Array` (Latin-1/Windows-1252) is rejected with `PARSE_FAILED`. This inherits a glion-wide UTF-8 assumption whose correctness is **out of scope for the client** and tracked separately (GH issue + regression test demonstrating the ecosystem bug).
+3. **UTF-8 only (inbound)** — the send path no longer decodes bytes (input is `string | Root`), but inbound ACKs are decoded as strict UTF-8: a non-UTF-8 peer ACK (Latin-1/Windows-1252) is rejected with `PARSE_FAILED` rather than silently substituted. This inherits a glion-wide UTF-8 assumption whose correctness is **out of scope for the client** and tracked separately (GH issue + regression test demonstrating the ecosystem bug).
 
-**Implementation:** `toWireFrame` + `readRequestControlId` collapsed into one `prepareSend(input): { framed, requestControlId }` — a single parse drives both the canonical wire bytes (`frame(toHl7v2(tree))`) and MSH-10. A `sendRaw()`/`send()` split was rejected (§1/§5). Tests assert the cleaning behavior (trailing-field drop, CRLF→CR, escape preservation, non-UTF-8 rejection).
+**Implementation:** the message codec lives in two files split along the send/response seam — `send.ts` (`SendInput`, `PreparedSend`, `prepareSend(input): { framed, requestControlId }` — one parse drives both the canonical wire bytes `frame(toHl7v2(tree))` and MSH-10) and `response.ts` (`MllpClientResponse`, `parseResponse`). The old format-named `hl7v2.ts` (meaningless in the client) was retired. A `sendRaw()`/`send()` split was rejected (§1/§5). Tests assert the cleaning behavior (trailing-field drop, CRLF→CR, escape preservation), a type-level guard that raw bytes are rejected, and the inbound non-UTF-8 ACK rejection.
 
 ## 2a. Queue location — stays native (machine does NOT own the send queue)
 

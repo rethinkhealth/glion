@@ -23,7 +23,7 @@
  * @module
  */
 
-import type { MllpClientResponse } from "./hl7v2";
+import type { MllpClientResponse } from "./response";
 
 /**
  * One send waiting its turn on the wire. Carries the wire bytes, the

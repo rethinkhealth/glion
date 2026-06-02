@@ -12,7 +12,6 @@
  */
 
 import type { MllpConnector } from "./duplex";
-import type { MllpClientResponse, SendInput } from "./hl7v2";
 import { createConnectionManager } from "./manager";
 import type {
   ConnectionManager,
@@ -20,6 +19,8 @@ import type {
   MllpSendOptions,
 } from "./manager";
 import { NO_RECONNECT } from "./reconnect";
+import type { MllpClientResponse } from "./response";
+import type { SendInput } from "./send";
 
 export type { MllpClientState, MllpSendOptions } from "./manager";
 

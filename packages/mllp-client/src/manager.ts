@@ -19,10 +19,11 @@ import { createConnection } from "./connection";
 import type { Connection } from "./connection";
 import type { MllpConnector, MllpDuplex } from "./duplex";
 import { MllpClientError, MllpErrorCode } from "./errors";
-import { prepareSend } from "./hl7v2";
-import type { MllpClientResponse, SendInput } from "./hl7v2";
 import { createSendQueue } from "./queue";
 import type { ReconnectPolicy } from "./reconnect";
+import type { MllpClientResponse } from "./response";
+import { prepareSend } from "./send";
+import type { SendInput } from "./send";
 import { createConnectionState } from "./state";
 import type { ConnectionPhase } from "./state";
 

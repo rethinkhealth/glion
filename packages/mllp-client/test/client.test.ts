@@ -20,7 +20,11 @@ import { value } from "@glion/util-query";
 import { describe, expect, it } from "vitest";
 
 import { MllpClient, MllpClientError, MllpErrorCode } from "../src/index";
-import type { MllpClient as MllpClientType, MllpDuplex } from "../src/index";
+import type {
+  MllpClient as MllpClientType,
+  MllpDuplex,
+  SendInput,
+} from "../src/index";
 import { createFakeDuplex } from "./fake-duplex";
 import type { FakeDuplex } from "./fake-duplex";
 import {
@@ -173,7 +177,7 @@ describe("send() — accept codes", () => {
     expect(response.code).toBe("AA");
     expect(response.controlId).toBe(REQUEST_CONTROL_ID);
     expect(response.tree).toBeDefined();
-    expect(response.raw).toBeInstanceOf(Uint8Array);
+    expect(typeof response.raw).toBe("string");
     expect(response.timestamp).toBeInstanceOf(Date);
     expect(response.durationMs).toBeGreaterThanOrEqual(0);
     expect(client.state).toBe("connected");
@@ -239,36 +243,22 @@ describe("send() — accept codes", () => {
     expect(onWire).toContain("a\\F\\b");
   });
 
-  it("rejects non-UTF-8 bytes with PARSE_FAILED", async () => {
-    // Clean-everything must decode bytes to parse them; a Latin-1 / Windows-1252
-    // feed (0xE9 = 'é') is not valid UTF-8 and is rejected. (Ecosystem-wide
-    // UTF-8 assumption — tracked separately.)
-    const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
-    const client = makeClient(fake);
-    await client.connect();
-    const latin1 = new Uint8Array([0x4d, 0x53, 0x48, 0xe9]); // "MSH" + 0xE9
-    await expect(client.send(latin1)).rejects.toMatchObject({
-      code: MllpErrorCode.PARSE_FAILED,
-    });
-    expect(client.state).toBe("connected");
-  });
-
-  it("accepts Uint8Array message input", async () => {
-    const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
-    const client = makeClient(fake);
-    await client.connect();
+  it("does not accept raw bytes as a send input (type-level)", () => {
+    // SendInput is `string | Root`. A caller holding wire bytes decodes them to
+    // text at its own I/O boundary (where charset / MSH-18 knowledge lives) and
+    // passes the string. This is a compile-time guarantee — no runtime path.
     const bytes = new TextEncoder().encode(REQUEST);
-    const response = await client.send(bytes);
-    expect(response.code).toBe("AA");
+    // @ts-expect-error — Uint8Array is not assignable to SendInput.
+    const rejected: SendInput = bytes;
+    expect(rejected).toBeInstanceOf(Uint8Array);
   });
 
-  it("populates response.raw with the de-framed ACK bytes", async () => {
+  it("populates response.raw with the de-framed ACK text", async () => {
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
     const response = await client.send(REQUEST);
-    const text = new TextDecoder().decode(response.raw);
-    expect(text).toBe(ACK_AA);
+    expect(response.raw).toBe(ACK_AA);
   });
 
   it("accepts an empty MSA-2 (peer doesn't echo controlId)", async () => {

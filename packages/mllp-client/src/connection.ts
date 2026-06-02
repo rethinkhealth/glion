@@ -30,8 +30,8 @@ import { createFrameDecoder } from "@glion/mllp-transport";
 
 import type { MllpDuplex } from "./duplex";
 import { MllpClientError, MllpErrorCode, sendTimeoutError } from "./errors";
-import { parseResponse } from "./hl7v2";
-import type { MllpClientResponse } from "./hl7v2";
+import { parseResponse } from "./response";
+import type { MllpClientResponse } from "./response";
 
 /**
  * Maximum unsolicited frames buffered between sends. A well-behaved peer sends
