@@ -2216,6 +2216,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 4.1.5
         version: 4.1.5(vitest@4.1.5)
+      iconv-lite:
+        specifier: 0.7.2
+        version: 0.7.2
       publint:
         specifier: 0.3.18
         version: 0.3.18

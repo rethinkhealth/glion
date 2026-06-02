@@ -85,6 +85,12 @@ function rejectNonUtf8Bom(bytes: Uint8Array): void {
  * Detect a leading byte-order mark that declares a non-UTF-8 encoding,
  * returning its name. A UTF-8 BOM is compatible (the decoder strips it) and so
  * is ignored.
+ *
+ * Byte sequences are U+FEFF serialized in each form, per the Unicode FAQ
+ * (https://www.unicode.org/faq/utf_bom.html): UTF-32BE `00 00 FE FF`, UTF-32LE
+ * `FF FE 00 00`, UTF-16BE `FE FF`, UTF-16LE `FF FE`. UTF-32LE is tested before
+ * UTF-16LE because `FF FE` is a prefix of `FF FE 00 00` — checking the 2-byte
+ * mark first would misread a UTF-32LE BOM as UTF-16LE.
  */
 function nonUtf8Bom(bytes: Uint8Array): string | undefined {
   const [b0, b1, b2, b3] = bytes;
