@@ -15,6 +15,8 @@
  * @module
  */
 
+import type { Root } from "@glion/ast";
+
 import { createConnection } from "./connection";
 import type { Connection } from "./connection";
 import type { MllpConnector, MllpDuplex } from "./duplex";
@@ -23,7 +25,6 @@ import { createSendQueue } from "./queue";
 import type { ReconnectPolicy } from "./reconnect";
 import type { MllpClientResponse } from "./response";
 import { prepareSend } from "./send";
-import type { SendInput } from "./send";
 import { createConnectionState } from "./state";
 import type { ConnectionPhase } from "./state";
 
@@ -54,7 +55,7 @@ export interface ManagerOptions {
 
 export interface ConnectionManager {
   connect(): Promise<void>;
-  send(message: SendInput, opts?: MllpSendOptions): Promise<MllpClientResponse>;
+  send(tree: Root, opts?: MllpSendOptions): Promise<MllpClientResponse>;
   close(): Promise<void>;
   readonly host: string;
   readonly port: number;
@@ -270,7 +271,7 @@ export function createConnectionManager(
   // what callers (and the tests) rely on. No `await` is needed in the body.
   // oxlint-disable-next-line eslint/require-await
   const doSend = async (
-    message: SendInput,
+    tree: Root,
     sendOpts: MllpSendOptions = {}
   ): Promise<MllpClientResponse> => {
     if (phase() === "closed") {
@@ -286,10 +287,11 @@ export function createConnectionManager(
       );
     }
 
-    // Normalize the message to canonical wire bytes and read MSH-10 from the
-    // same parse, before enqueuing. A non-UTF-8 / unframable payload rejects
-    // here, before it occupies a queue slot.
-    const { framed, requestControlId } = prepareSend(message);
+    // Serialize the tree to canonical wire bytes and read MSH-10 from it,
+    // before enqueuing. An unframable payload rejects here, before it occupies
+    // a queue slot. The string→tree parse already happened at the client
+    // boundary (client.send); the manager only ever sees a Root.
+    const { framed, requestControlId } = prepareSend(tree);
     const timeoutMs = sendOpts.timeoutMs ?? sendTimeoutMs;
 
     // enqueue returns the caller's real Promise; the manager kicks the drain

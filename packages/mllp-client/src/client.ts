@@ -20,6 +20,7 @@ import type {
 } from "./manager";
 import { NO_RECONNECT } from "./reconnect";
 import type { MllpClientResponse } from "./response";
+import { toTree } from "./send";
 import type { SendInput } from "./send";
 
 export type { MllpClientState, MllpSendOptions } from "./manager";
@@ -130,7 +131,9 @@ export class MllpClient {
     message: SendInput,
     opts: MllpSendOptions = {}
   ): Promise<MllpClientResponse> {
-    return this.#manager.send(message, opts);
+    // The client boundary: a `string` is parsed to a tree here, once. Past this
+    // point the manager and everything internal work on a `Root`.
+    return this.#manager.send(toTree(message), opts);
   }
 
   /**

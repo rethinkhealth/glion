@@ -54,29 +54,36 @@ export interface PreparedSend {
 }
 
 /**
- * Normalize a send input to its canonical wire form and read its control ID —
- * from ONE parse. A `string` is parsed to a tree; a `Root` is used directly.
- * The tree is then serialized with `@glion/to-hl7v2` and MLLP-framed, and
- * MSH-10 is read from the same tree. The wire bytes are therefore the *cleaned*
- * canonical form, not a byte-exact echo of the input — see the module JSDoc.
- *
- * @throws {FramingError} When the serialized message carries an embedded MLLP
- *   framing byte (VT or FS) that cannot be framed. CR is allowed — it is the
- *   HL7v2 segment terminator.
+ * Parse a send input into a tree at the client boundary. A `string` is parsed
+ * (it is serialized HL7v2 text); a `Root` is returned as-is. This is the ONLY
+ * place a `string` enters the client — `client.send()` calls it once, and
+ * everything past the boundary (the manager, the queue, {@link prepareSend})
+ * works on a `Root`.
  */
-export function prepareSend(input: SendInput): PreparedSend {
-  const tree = toTree(input);
-  return {
-    framed: frame(toHl7v2(tree)),
-    requestControlId: value(tree, "MSH-10[1].1.1")?.value ?? "",
-  };
-}
-
-function toTree(input: SendInput): Root {
+export function toTree(input: SendInput): Root {
   if (typeof input !== "string") {
     return input;
   }
   // The parser is lenient — it never throws — so a tree is always produced,
   // even for non-HL7v2 text (MSH-10 then reads as "").
   return parseHL7v2(input);
+}
+
+/**
+ * Serialize a parsed message to its canonical wire form and read its control ID
+ * — from the SAME tree. The tree is serialized with `@glion/to-hl7v2` and
+ * MLLP-framed, and MSH-10 is read off it. The wire bytes are therefore the
+ * *cleaned* canonical form, not a byte-exact echo of any prior wire form — see
+ * the module JSDoc. The input is always a `Root`: a `string` is parsed at the
+ * boundary ({@link toTree}), never here.
+ *
+ * @throws {FramingError} When the serialized message carries an embedded MLLP
+ *   framing byte (VT or FS) that cannot be framed. CR is allowed — it is the
+ *   HL7v2 segment terminator.
+ */
+export function prepareSend(tree: Root): PreparedSend {
+  return {
+    framed: frame(toHl7v2(tree)),
+    requestControlId: value(tree, "MSH-10[1].1.1")?.value ?? "",
+  };
 }
