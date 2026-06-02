@@ -76,14 +76,14 @@ export class MllpClient {
     return this.#manager.state;
   }
 
-  /** True when ready or sending — i.e., the wire is up. */
+  /** True while the wire is up (state is `connected`). */
   get connected(): boolean {
     return this.#manager.connected;
   }
 
   /**
    * Number of sends waiting in the queue, excluding the one currently on the
-   * wire. Fire three concurrent sends on a ready client and this reads `2`.
+   * wire. Fire three concurrent sends on a connected client and this reads `2`.
    */
   get queueDepth(): number {
     return this.#manager.queueDepth;

@@ -14,9 +14,8 @@
  * queue. When the peer ends the connection (drop, framing error, unsolicited
  * frame flood, or a failed write), the connection settles its own in-flight
  * send and calls {@link ConnectionOptions.onDrop} exactly once so the owner can
- * advance the machine and dispose of the queue. This is the split of the old
- * monolithic `dispatchError`: the connection owns its own teardown; the owner
- * owns the machine + queue.
+ * advance the machine and dispose of the queue: the connection owns its own
+ * teardown; the owner owns the machine + queue.
  *
  * Making this a fresh object per dial turns "reset connection-scoped state on
  * reconnect" from a discipline into a structural guarantee — a new connection
@@ -119,8 +118,8 @@ export function createConnection(opts: ConnectionOptions): Connection {
 
   /**
    * The peer ended the connection. Settle the in-flight send, tear down our
-   * resources, and notify the owner — once. Mirrors the old dispatchError,
-   * minus the machine/queue work, which the owner does in onDrop.
+   * resources, and notify the owner — once. The machine transition and queue
+   * disposition are the owner's job, done in onDrop.
    */
   function dispatchError(error: MllpClientError): void {
     if (dead) {
@@ -132,8 +131,9 @@ export function createConnection(opts: ConnectionOptions): Connection {
     pendingFrames = [];
     // Fire-and-forget — the adapter contract guarantees close() resolves.
     void duplex.close();
-    // Owner first (machine transition + queue disposition), mirroring the old
-    // order where the queue was failed before the on-wire waiter was rejected.
+    // onDrop first (machine transition + queue disposition), then the on-wire
+    // waiter — so the queue is failed before the in-flight send rejects, and a
+    // caller observing one sees consistent state.
     onDrop(error);
     if (waiter) {
       waiter.reject(error);

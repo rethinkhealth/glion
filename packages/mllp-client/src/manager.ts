@@ -97,7 +97,6 @@ export function createConnectionManager(
   // resolve/reject and the framed bytes), which cannot go into a serializable
   // statechart context without forfeiting XState's inspector/persistence value.
   // The machine owns the connection LIFECYCLE; the manager owns the send queue.
-  // (Evaluated directly — see REDESIGN.md "Queue location".)
   const queue = createSendQueue();
   let draining = false;
 
@@ -115,23 +114,19 @@ export function createConnectionManager(
   };
 
   /**
-   * Process queued sends one at a time while the wire is ready. A drop or close
-   * during a send advances state out of "connected" and fails the rest of the
-   * queue, so the loop exits cleanly. The ACK-wait deadline is owned by
+   * Process queued sends one at a time while connected. A drop or close during
+   * a send advances state out of "connected" and fails the rest of the queue,
+   * so the loop exits cleanly. The ACK-wait deadline is owned by
    * `conn.exchange` (built and cleared there, scoped to one exchange); the loop
    * only hands over the wire bytes and the timeout budget.
    */
   const runQueue = async (): Promise<void> => {
     try {
       while (queue.depth > 0 && isConnected()) {
-        // Defensive type-narrowing, not a real branch: the loop guard already
-        // asserts isConnected(), and `connection` is non-null whenever the
-        // machine is "connected" (it is assigned before CONNECTED is sent and
-        // cleared only as the machine leaves "connected"). If that invariant
-        // ever broke we stop draining rather than throw — the queued sends stay
-        // buffered and a later drain (or close → failAll) settles them. Same for
-        // the `take()` undefined case below: depth > 0 means a record is there,
-        // so undefined would likewise be an impossible-state bail-out.
+        // Both guards are impossible while connected (the loop asserts
+        // isConnected(), so `connection` is non-null and a queued record
+        // exists). We bail rather than throw so a broken invariant leaves the
+        // sends buffered for a later drain/close instead of crashing the loop.
         const conn = connection;
         if (conn === null) {
           return;
@@ -162,11 +157,11 @@ export function createConnectionManager(
     }
   };
 
-  /** Kick the drain loop if it isn't already running and the wire is ready. */
+  /** Kick the drain loop if it isn't already running and we're connected. */
   const drain = (): void => {
-    // Only one drain loop runs at a time; it runs only while the wire is up and
-    // idle (connected with no send on the wire — when a send is on the wire the
-    // loop is already active, so `draining` is set).
+    // Only one drain loop runs at a time; it runs only while connected with no
+    // send on the wire — when a send is on the wire the loop is already active,
+    // so `draining` is set.
     if (draining || !isConnected()) {
       return;
     }
