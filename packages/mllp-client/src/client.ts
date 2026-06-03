@@ -27,7 +27,7 @@ import {
 import type { MllpClientResponse, SendInput } from "./message";
 import { createConnectionState } from "./state";
 import type { ConnectionPhase } from "./state";
-import { NO_RECONNECT } from "./util/reconnect";
+import { NO_RETRY } from "./util/backoff";
 
 export type { MllpClientResponse, SendInput } from "./message";
 
@@ -371,7 +371,7 @@ export class MllpClient {
   readonly #maxBufferedBytes: number | undefined;
 
   /** The connection lifecycle — the single source of truth for `state`. */
-  readonly #machine = createConnectionState(NO_RECONNECT);
+  readonly #machine = createConnectionState(NO_RETRY);
   /** The live wire while `connected`; `null` otherwise. */
   #connection: Connection | null = null;
   /** Single-flight guard until the FIFO queue is wired. */
@@ -454,10 +454,11 @@ export class MllpClient {
         signal: timeoutSignal,
       });
     } catch (error) {
-      // Report the failure and trust the machine: it fails fast "connecting" →
-      // "closed" (no reconnect on the initial connect) and ignores the event if
-      // a concurrent close() already closed it.
-      this.#machine.send({ type: "CONNECT_FAILED" });
+      // Report the failed dial and trust the machine: with NO_RETRY it routes
+      // "connecting" → "closed" (so connect() throws below); with a retry policy
+      // it would back off and re-dial. It ignores the event if a concurrent
+      // close() already closed.
+      this.#machine.send({ type: "FAILED" });
       if (timeoutSignal.aborted) {
         throw new MllpClientError(
           MllpErrorCode.CONNECT_TIMEOUT,

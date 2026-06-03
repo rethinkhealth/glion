@@ -85,12 +85,12 @@ await client.send(message);
 
 ### Getters
 
-| Getter             | Type              | Description                                                                                                                      |
-| ------------------ | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `client.host`      | `string`          | Configured target host.                                                                                                          |
-| `client.port`      | `number`          | Configured target port.                                                                                                          |
-| `client.state`     | `MllpClientState` | The connection phase: `idle`, `connecting`, `connected`, `closed` (plus `backingOff`, `reconnecting` once reconnect is enabled). |
-| `client.connected` | `boolean`         | `true` while the wire is up (state is `connected`).                                                                              |
+| Getter             | Type              | Description                                                                                                  |
+| ------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| `client.host`      | `string`          | Configured target host.                                                                                      |
+| `client.port`      | `number`          | Configured target port.                                                                                      |
+| `client.state`     | `MllpClientState` | The connection phase: `idle`, `connecting`, `connected`, `closed` (plus `backingOff` once retry is enabled). |
+| `client.connected` | `boolean`         | `true` while the wire is up (state is `connected`).                                                          |
 
 ### `client.connect(): Promise<void>`
 
