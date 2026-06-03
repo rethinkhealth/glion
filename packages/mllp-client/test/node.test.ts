@@ -18,7 +18,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { MllpClient } from "../src/index";
 import type { MllpDuplex } from "../src/index";
-import { connectNode } from "../src/node";
+import { connectNode } from "../src/runtime/node";
 
 interface ServerHandle {
   readonly host: string;

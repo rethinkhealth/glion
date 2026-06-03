@@ -5,7 +5,7 @@ export default defineConfig({
   dts: false,
   entry: {
     index: "src/index.ts",
-    node: "src/node.ts",
+    "runtime/node": "src/runtime/node.ts",
   },
   fixedExtension: false,
   format: "esm",

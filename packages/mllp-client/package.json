@@ -29,7 +29,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./node": "./dist/node.js"
+    "./node": "./dist/runtime/node.js"
   },
   "publishConfig": {
     "access": "public"
