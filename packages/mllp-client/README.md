@@ -133,15 +133,14 @@ Calls `close()`. Enables `await using`.
 
 ### `MllpClientResponse`
 
-| Field              | Type             | Description                                                               |
-| ------------------ | ---------------- | ------------------------------------------------------------------------- |
-| `code`             | `AckSuccessCode` | MSA-1; always `AA` or `CA` (a NAK throws an `@glion/ack` `AckException`). |
-| `controlId`        | `string`         | MSA-2 echoed by the peer; `""` when the peer omits it.                    |
-| `requestControlId` | `string`         | MSH-10 of the request this ACK answers.                                   |
-| `tree`             | `Root`           | Parsed AST of the ACK, for arbitrary field access via `value()`.          |
-| `raw`              | `string`         | De-framed ACK payload as decoded text (UTF-8).                            |
-| `timestamp`        | `Date`           | Wall-clock instant the ACK finished arriving.                             |
-| `durationMs`       | `number`         | Wire-level round-trip, measured monotonically.                            |
+| Field        | Type             | Description                                                               |
+| ------------ | ---------------- | ------------------------------------------------------------------------- |
+| `code`       | `AckSuccessCode` | MSA-1; always `AA` or `CA` (a NAK throws an `@glion/ack` `AckException`). |
+| `controlId`  | `string`         | MSA-2 echoed by the peer; `""` when the peer omits it.                    |
+| `tree`       | `Root`           | Parsed AST of the ACK, for arbitrary field access via `value()`.          |
+| `raw`        | `string`         | De-framed ACK payload as decoded text (UTF-8).                            |
+| `timestamp`  | `Date`           | Wall-clock instant the ACK finished arriving.                             |
+| `durationMs` | `number`         | Wire-level round-trip, measured monotonically.                            |
 
 ### Errors
 

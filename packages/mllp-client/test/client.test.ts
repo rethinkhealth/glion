@@ -216,14 +216,14 @@ describe("send() — accept codes", () => {
 
   it("accepts a Root (parsed tree) as send input", async () => {
     // The other half of SendInput: a caller may pass an already-parsed tree.
-    // toTree returns it as-is; prepareSend serializes the same tree.
+    // toTree returns it as-is; toWireBytes serializes the same tree.
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
     const tree = parseHL7v2(REQUEST);
     const response = await client.send(tree);
     expect(response.code).toBe("AA");
-    expect(response.requestControlId).toBe(REQUEST_CONTROL_ID);
+    expect(response.controlId).toBe(REQUEST_CONTROL_ID);
   });
 
   it("returns MllpClientResponse on CA", async () => {
@@ -416,7 +416,6 @@ describe("send() — correlation verification", () => {
     await client.connect();
     const response = await client.send(request);
     expect(response.code).toBe("AA");
-    expect(response.requestControlId).toBe("MSGID");
     expect(response.controlId).toBe("MSGID");
   });
 

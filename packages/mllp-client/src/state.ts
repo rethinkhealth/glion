@@ -33,6 +33,7 @@
 import { assign, createActor, setup } from "xstate";
 import type { Actor, SnapshotFrom } from "xstate";
 
+import { MllpClientError, MllpErrorCode } from "./errors";
 import { backoffDelay } from "./util/backoff";
 import type { RetryOptions } from "./util/backoff";
 
@@ -169,4 +170,29 @@ export function createConnectionState(options: RetryOptions): ConnectionState {
   const actor = createActor(connectionMachine, { input: { options } });
   actor.start();
   return actor;
+}
+
+/**
+ * The error a `connect()` should reject with from the current phase, or `null`
+ * if `CONNECT` is legal. The state owns this — the caller asks the machine
+ * rather than reading the phase itself to decide which error to raise. Legality
+ * comes from the machine's transition table (only `idle` accepts `CONNECT`);
+ * the phase only phrases the message.
+ */
+export function connectRejection(
+  actor: ConnectionState
+): MllpClientError | null {
+  const snapshot = actor.getSnapshot();
+  if (snapshot.can({ type: "CONNECT" })) {
+    return null;
+  }
+  return snapshot.value === "closed"
+    ? new MllpClientError(
+        MllpErrorCode.CLOSED,
+        "Cannot connect: this client has been closed. Construct a new MllpClient to open a fresh connection."
+      )
+    : new MllpClientError(
+        MllpErrorCode.ALREADY_CONNECTED,
+        `Cannot connect while ${snapshot.value}: an MllpClient opens one connection in its lifetime. Await the in-flight connect, or use a separate client for a concurrent connection.`
+      );
 }

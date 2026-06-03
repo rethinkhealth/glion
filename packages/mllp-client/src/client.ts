@@ -25,7 +25,7 @@ import {
   toWireBytes,
 } from "./message";
 import type { MllpClientResponse, SendInput } from "./message";
-import { createConnectionState } from "./state";
+import { connectRejection, createConnectionState } from "./state";
 import type { ConnectionPhase } from "./state";
 import { NO_RETRY } from "./util/backoff";
 
@@ -310,12 +310,9 @@ function createConnection(opts: ConnectionOptions): Connection {
       const ackBytes = await waitForFrame(deadline.signal, req.timeoutMs);
       const timestamp = new Date();
       const durationMs = performance.now() - sentMonotonic;
-      return parseResponse({
-        durationMs,
-        raw: ackBytes,
-        requestControlId: req.requestControlId,
-        timestamp,
-      });
+      // parseResponse is the codec; the exchange owns the wire timing.
+      const ack = parseResponse(ackBytes, req.requestControlId);
+      return { ...ack, durationMs, timestamp };
     } catch (error) {
       // Slowloris recovery: on a send timeout with a mid-frame decoder buffer,
       // reset it so the next send isn't corrupted by the partial.
@@ -428,20 +425,11 @@ export class MllpClient {
    *   interrupts an in-flight connect.
    */
   async connect(): Promise<void> {
-    // Ask the machine whether CONNECT is legal — its transition table is the
-    // authority (only `idle` accepts CONNECT). The phase is read only to phrase
-    // the error, never to make the decision.
-    const snapshot = this.#machine.getSnapshot();
-    if (!snapshot.can({ type: "CONNECT" })) {
-      throw snapshot.value === "closed"
-        ? new MllpClientError(
-            MllpErrorCode.CLOSED,
-            "Cannot connect: this client has been closed. Construct a new MllpClient to open a fresh connection."
-          )
-        : new MllpClientError(
-            MllpErrorCode.ALREADY_CONNECTED,
-            `Cannot connect while ${snapshot.value}: an MllpClient opens one connection in its lifetime. Await the in-flight connect, or use a separate client for a concurrent connection.`
-          );
+    // The state owns whether CONNECT is legal and which error to raise; the
+    // client just surfaces it.
+    const rejection = connectRejection(this.#machine);
+    if (rejection) {
+      throw rejection;
     }
     this.#machine.send({ type: "CONNECT" });
 

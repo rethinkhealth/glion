@@ -11,6 +11,7 @@ export type {
 export {
   AckApplicationError,
   AckApplicationReject,
+  ackExceptionFor,
   AckCommitError,
   AckCommitReject,
   AckException,

@@ -30,13 +30,7 @@
  * @module
  */
 
-import {
-  AckApplicationError,
-  AckApplicationReject,
-  AckCommitError,
-  AckCommitReject,
-  isAckCode,
-} from "@glion/ack";
+import { ackExceptionFor, isAckCode } from "@glion/ack";
 import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { frame } from "@glion/mllp-transport";
@@ -100,49 +94,65 @@ export function requestControlId(tree: Root): string {
 
 // ── Inbound ──────────────────────────────────────────────────────────────────
 
-export interface MllpClientResponse {
+/**
+ * The codec's result of parsing an ACK — the message-level fields. Wire timing
+ * (`timestamp`, `durationMs`) is NOT here: the connection measures the exchange
+ * and adds it (see {@link MllpClientResponse}).
+ */
+export interface ParsedAck {
   /**
    * MSA-1 — always an accept ({@link AckSuccessCode}). A NAK (AE/AR/CE/CR)
-   * throws the matching `@glion/ack` `AckException` instead of resolving.
+   * throws the matching `@glion/ack` `AckException` instead of returning.
    */
   readonly code: AckSuccessCode;
   /**
-   * MSA-2 — correlation ID echoed by the peer. Empty if the peer omitted it
+   * MSA-2 — the control ID echoed by the peer. Empty if the peer omitted it
    * (some early-HL7 peers don't).
    */
   readonly controlId: string;
-  /** MSH-10 of the request that this ACK responds to. */
-  readonly requestControlId: string;
   /** Parsed AST of the ACK message. */
   readonly tree: Root;
   /** De-framed ACK payload as decoded text (UTF-8). */
   readonly raw: string;
+}
+
+/**
+ * A {@link ParsedAck} plus the wire timing the connection measured for the
+ * exchange.
+ */
+export interface MllpClientResponse extends ParsedAck {
   /** Wall-clock instant the ACK frame finished arriving. */
   readonly timestamp: Date;
   /** Wire-level round-trip duration (monotonic), milliseconds. */
   readonly durationMs: number;
 }
 
-interface ParseInput {
-  readonly raw: Uint8Array;
-  readonly timestamp: Date;
-  readonly durationMs: number;
-  readonly requestControlId: string;
-}
-
-export function parseResponse(input: ParseInput): MllpClientResponse {
-  const { raw, timestamp, durationMs, requestControlId: reqControlId } = input;
-
+/**
+ * Parse and correlate the peer's ACK. Decodes `rawAck` as strict UTF-8, parses
+ * it, checks MSA-1, and correlates the response's MSA-2 against
+ * `expectedControlId` (the MSH-10 of the message we sent). An accept (AA/CA)
+ * returns a {@link ParsedAck}; a NAK throws the matching `@glion/ack`
+ * `AckException`. The wire timing is the caller's to attach.
+ *
+ * @throws {MllpClientError} `PARSE_FAILED` (undecodable/unparseable ACK, or no
+ *   MSA-1), `UNKNOWN_ACK_CODE` (non-standard MSA-1), `CORRELATION_MISMATCH`.
+ * @throws {AckException} (from `@glion/ack`) when MSA-1 is a NAK (AE/AR/CE/CR).
+ */
+export function parseResponse(
+  rawAck: Uint8Array,
+  expectedControlId: string
+): ParsedAck {
   let text: string;
   try {
-    text = TEXT_DECODER.decode(raw);
+    text = TEXT_DECODER.decode(rawAck);
   } catch (error) {
-    // Strict UTF-8 decode (fatal): a Latin-1 / Windows-1252 peer must surface as
-    // PARSE_FAILED, not a raw TypeError, so the contract "every failure is an
-    // MllpClientError you can branch on by `code`" holds on the ACK path.
+    // The fatal UTF-8 decoder rejected the bytes; surface PARSE_FAILED (not a
+    // raw TypeError) so "every failure is an MllpClientError you can branch on
+    // by code" holds on the ACK path. (The client assumes UTF-8 — see the
+    // encoding GH issue — so a non-UTF-8 peer trips this.)
     throw new MllpClientError(
       MllpErrorCode.PARSE_FAILED,
-      "The peer's ACK is not valid UTF-8; HL7v2 messages must be ASCII/UTF-8 (a Latin-1 / Windows-1252 peer trips this). See the error's cause.",
+      "Could not decode the peer's ACK bytes as UTF-8 (see the error's cause).",
       { cause: error }
     );
   }
@@ -170,11 +180,15 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
   // Correlation: only reject if both sides have non-empty IDs and they disagree.
   // An empty response-side controlId is real-world compat (some older peers
   // don't echo MSA-2).
-  if (reqControlId !== "" && controlId !== "" && reqControlId !== controlId) {
+  if (
+    expectedControlId !== "" &&
+    controlId !== "" &&
+    expectedControlId !== controlId
+  ) {
     throw new MllpClientError(
       MllpErrorCode.CORRELATION_MISMATCH,
-      `ACK control-ID mismatch: the response's MSA-2 ("${controlId}") does not match the request's MSH-10 ("${reqControlId}"). This usually means a late ACK from a previously-timed-out request arrived on this connection.`,
-      { actual: controlId, expected: reqControlId, raw: text, tree }
+      `ACK control-ID mismatch: the response's MSA-2 ("${controlId}") does not match the request's MSH-10 ("${expectedControlId}"). This usually means a late ACK from a previously-timed-out request arrived on this connection.`,
+      { actual: controlId, expected: expectedControlId, raw: text, tree }
     );
   }
 
@@ -184,44 +198,20 @@ export function parseResponse(input: ParseInput): MllpClientResponse {
     codeRaw === "CE" ||
     codeRaw === "CR"
   ) {
-    // A NAK is an ACK-level rejection — the same domain @glion/ack models for
-    // the server side — so the client throws that package's typed exceptions
-    // (caught via `instanceof AckException`) rather than a parallel hierarchy.
-    // ERR-3 / ERR-4 come straight from the peer and may be absent or
+    // A NAK is an ACK-level rejection — @glion/ack owns the code→exception
+    // mapping (ackExceptionFor); the client just supplies the fields it read off
+    // the ACK. ERR-3 / ERR-4 come straight from the peer and may be absent or
     // non-standard, so they pass through verbatim.
-    const message = `Peer rejected message with acknowledgment code ${codeRaw}`;
-    const options = {
+    throw ackExceptionFor(codeRaw, {
       controlId,
       errorCode: readValue(tree, "ERR-3[1].1.1") ?? undefined,
       raw: text,
       severity: readValue(tree, "ERR-4[1].1.1") ?? undefined,
       tree,
-    };
-    switch (codeRaw) {
-      case "AE": {
-        throw new AckApplicationError(message, options);
-      }
-      case "AR": {
-        throw new AckApplicationReject(message, options);
-      }
-      case "CE": {
-        throw new AckCommitError(message, options);
-      }
-      default: {
-        throw new AckCommitReject(message, options);
-      }
-    }
+    });
   }
 
-  return {
-    code: codeRaw,
-    controlId,
-    durationMs,
-    raw: text,
-    requestControlId: reqControlId,
-    timestamp,
-    tree,
-  };
+  return { code: codeRaw, controlId, raw: text, tree };
 }
 
 function readValue(tree: Root, path: string): string | null {
