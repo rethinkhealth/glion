@@ -70,13 +70,14 @@ async function handle(message: string) {
 }
 
 describe("charsetMiddleware", () => {
-  it("rejects a non-UTF-8 MSH-18 with an AR NAK and a data-type error code", async () => {
+  it("rejects a non-UTF-8 MSH-18 with an AR NAK and a located ERR segment", async () => {
     const response = await handle(adt("8859/1"));
 
     expect(response).toBeDefined();
     expect(response!.raw).toContain("MSA|AR|MSG001");
-    // ERR-3 carries the HL7 Table 0357 condition code 102 (data type error).
-    expect(response!.raw).toContain("102");
+    // ERR-2 locates the error at MSH-18; ERR-3 carries Table 0357 code 102.
+    expect(response!.raw).toContain("ERR||MSH^1^18|102|E");
+    // ERR-7 diagnostic echoes the offending value.
     expect(response!.raw).toContain("8859/1");
   });
 

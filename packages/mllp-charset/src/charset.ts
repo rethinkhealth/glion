@@ -2,6 +2,13 @@ import { AckApplicationReject, Hl7ErrorCode, Severity } from "@glion/ack";
 import { CHARSET_RULE_ID, HL7V2_LINT_SOURCE } from "@glion/lint-charset";
 import type { Middleware } from "@glion/mllp";
 
+/** ERR-2 location for every charset reject — the rule only ever checks MSH-18. */
+const MSH18_LOCATION = {
+  fieldPosition: 18,
+  segmentId: "MSH",
+  segmentSequence: 1,
+} as const;
+
 /**
  * MLLP middleware that rejects inbound messages whose declared `MSH-18`
  * character set is not allowed — the server-side strict mode for
@@ -14,8 +21,9 @@ import type { Middleware } from "@glion/mllp";
  *
  * On a violation it throws {@link AckApplicationReject} (MSA-1 `AR`; ERR-3
  * `102` data-type error, the closest Table 0357 condition for an undecodable
- * encoding). Register it **inside** an acknowledgment middleware so the throw
- * becomes a NAK:
+ * encoding) with the error located at `MSH^1^18` (ERR-2) and the reason as
+ * diagnostic information (ERR-7). Register it **inside** an acknowledgment
+ * middleware so the throw becomes a NAK:
  *
  * ```ts
  * app.use(ackMiddleware());
@@ -44,7 +52,9 @@ export function charsetMiddleware(): Middleware {
     if (violation) {
       throw new AckApplicationReject(violation.reason, {
         cause: violation,
+        diagnosticInformation: violation.reason,
         errorCode: Hl7ErrorCode.DataTypeError,
+        errorLocation: MSH18_LOCATION,
         severity: Severity.Error,
       });
     }

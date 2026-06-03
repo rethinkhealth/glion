@@ -1,8 +1,29 @@
-import type { Root, Segment } from "@glion/ast";
-import { f, s } from "@glion/builder";
+import type { Field, Root, Segment } from "@glion/ast";
+import { c, f, s } from "@glion/builder";
 
 import { AckCode, Severity } from "./constants";
 import type { AckCodeValue } from "./constants";
+
+/**
+ * ERR-2 error location (HL7v2 `ERL` data type) — points a receiver at the exact
+ * field that triggered the error, e.g. `{ segmentId: "MSH", segmentSequence: 1,
+ * fieldPosition: 18 }` serializes to `MSH^1^18`. Only `segmentId` is required;
+ * trailing components are omitted when absent.
+ */
+export interface ErrorLocation {
+  /** ERR-2.1 — segment ID (e.g. `"MSH"`). */
+  segmentId: string;
+  /** ERR-2.2 — 1-based occurrence of the segment within the message. */
+  segmentSequence?: number;
+  /** ERR-2.3 — 1-based field position within the segment. */
+  fieldPosition?: number;
+  /** ERR-2.4 — 1-based field repetition. */
+  fieldRepetition?: number;
+  /** ERR-2.5 — 1-based component number. */
+  componentNumber?: number;
+  /** ERR-2.6 — 1-based subcomponent number. */
+  subcomponentNumber?: number;
+}
 
 export interface AckExceptionOptions extends ErrorOptions {
   /**
@@ -37,6 +58,21 @@ export interface AckExceptionOptions extends ErrorOptions {
    * acknowledgment.
    */
   tree?: Root;
+  /**
+   * ERR-2 error location — points the receiver at the offending field. Omitted
+   * from the ERR segment when absent.
+   */
+  errorLocation?: ErrorLocation;
+  /**
+   * ERR-7 diagnostic information — a detailed, machine-oriented description of
+   * the problem. Omitted from the ERR segment when absent.
+   */
+  diagnosticInformation?: string;
+  /**
+   * ERR-8 user message — a human-readable message suitable for display.
+   * Omitted from the ERR segment when absent.
+   */
+  userMessage?: string;
 }
 
 /**
@@ -69,6 +105,12 @@ export abstract class AckException extends Error {
    * walk ERR repetitions or other segments without re-parsing `raw`.
    */
   readonly tree: Root | undefined;
+  /** ERR-2 error location pointing at the offending field, when known. */
+  readonly errorLocation: ErrorLocation | undefined;
+  /** ERR-7 diagnostic information, when provided. */
+  readonly diagnosticInformation: string | undefined;
+  /** ERR-8 user message, when provided. */
+  readonly userMessage: string | undefined;
 
   constructor(message: string, options: AckExceptionOptions) {
     super(message, { cause: options.cause });
@@ -77,21 +119,66 @@ export abstract class AckException extends Error {
     this.raw = options.raw;
     this.controlId = options.controlId;
     this.tree = options.tree;
+    this.errorLocation = options.errorLocation;
+    this.diagnosticInformation = options.diagnosticInformation;
+    this.userMessage = options.userMessage;
   }
 
   /**
-   * Build an ERR segment AST node from this exception's error code and
-   * severity.
+   * Build an ERR segment AST node from this exception. ERR-1 (deprecated),
+   * ERR-3 (code) and ERR-4 (severity) are always present; ERR-2 (location),
+   * ERR-7 (diagnostic) and ERR-8 (user message) are populated only when the
+   * corresponding option was supplied, so the segment stays minimal by default.
    */
   toErrSegment(): Segment {
-    return s(
-      "ERR",
-      f(""),
-      f(""),
-      f(this.errorCode ?? ""),
-      f(this.severity ?? Severity.Error)
-    );
+    const fields: Field[] = [
+      f(""), // ERR-1 (deprecated)
+      this.errorLocation ? errorLocationField(this.errorLocation) : f(""), // ERR-2
+      f(this.errorCode ?? ""), // ERR-3
+      f(this.severity ?? Severity.Error), // ERR-4
+    ];
+
+    // ERR-5/ERR-6 are left empty; only emit them when a later field is set.
+    if (
+      this.diagnosticInformation !== undefined ||
+      this.userMessage !== undefined
+    ) {
+      fields.push(
+        f(""), // ERR-5
+        f(""), // ERR-6
+        f(this.diagnosticInformation ?? ""), // ERR-7
+        f(this.userMessage ?? "") // ERR-8
+      );
+    }
+
+    return s("ERR", ...fields);
   }
+}
+
+/**
+ * Build the ERR-2 `ERL` field from an {@link ErrorLocation}, dropping trailing
+ * absent components so `{ segmentId: "MSH" }` is just `MSH`, not `MSH^^^^^`.
+ */
+function errorLocationField(location: ErrorLocation): Field {
+  const components: Array<string | number | undefined> = [
+    location.segmentId,
+    location.segmentSequence,
+    location.fieldPosition,
+    location.fieldRepetition,
+    location.componentNumber,
+    location.subcomponentNumber,
+  ];
+
+  let lastIndex = components.length - 1;
+  while (lastIndex >= 0 && components[lastIndex] === undefined) {
+    lastIndex -= 1;
+  }
+
+  return f(
+    ...components
+      .slice(0, lastIndex + 1)
+      .map((part) => c(part === undefined ? "" : String(part)))
+  );
 }
 
 /**

@@ -15,7 +15,7 @@ export {
   AckCommitReject,
   AckException,
 } from "./exception";
-export type { AckExceptionOptions } from "./exception";
+export type { AckExceptionOptions, ErrorLocation } from "./exception";
 export {
   ApplicationInternalError,
   CommitInternalError,

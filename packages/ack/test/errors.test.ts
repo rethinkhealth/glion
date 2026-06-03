@@ -312,4 +312,50 @@ describe("toErrSegment", () => {
       expect(segment.name).toBe("ERR");
     }
   });
+
+  it("locates the error in ERR-2 from errorLocation", () => {
+    const error = new AckApplicationReject("bad charset", {
+      errorCode: Hl7ErrorCode.DataTypeError,
+      errorLocation: {
+        fieldPosition: 18,
+        segmentId: "MSH",
+        segmentSequence: 1,
+      },
+      severity: Severity.Error,
+    });
+
+    expect(toHl7v2(error.toErrSegment())).toBe("ERR||MSH^1^18|102|E");
+  });
+
+  it("emits only the segment id when later location parts are absent", () => {
+    const error = new AckApplicationReject("bad", {
+      errorCode: Hl7ErrorCode.DataTypeError,
+      errorLocation: { segmentId: "MSH" },
+      severity: Severity.Error,
+    });
+
+    expect(toHl7v2(error.toErrSegment())).toBe("ERR||MSH|102|E");
+  });
+
+  it("adds diagnostic information (ERR-7) and user message (ERR-8)", () => {
+    const error = new AckApplicationError("fail", {
+      diagnosticInformation: "value '8859/1' is not allowed",
+      errorCode: Hl7ErrorCode.DataTypeError,
+      severity: Severity.Error,
+      userMessage: "Unsupported character set",
+    });
+
+    expect(toHl7v2(error.toErrSegment())).toBe(
+      "ERR|||102|E|||value '8859/1' is not allowed|Unsupported character set"
+    );
+  });
+
+  it("leaves ERR-2/7/8 empty by default (output unchanged)", () => {
+    const error = new AckApplicationError("fail", {
+      errorCode: Hl7ErrorCode.ApplicationInternalError,
+      severity: Severity.Error,
+    });
+
+    expect(toHl7v2(error.toErrSegment())).toBe("ERR|||207|E");
+  });
 });
