@@ -1,5 +1,5 @@
 /**
- * Unit tests for the reconnect policy + backoff math (`reconnect.ts`).
+ * Unit tests for the reconnect policy + backoff math (in `state.ts`).
  *
  * `backoffDelay` is pure, so these assert the arithmetic directly — the
  * exponential growth, the cap, and the jitter bounds — without the state
@@ -13,8 +13,8 @@ import {
   backoffDelay,
   DEFAULT_RECONNECT_POLICY,
   NO_RECONNECT,
-} from "../src/reconnect";
-import type { ReconnectPolicy } from "../src/reconnect";
+} from "../src/state";
+import type { ReconnectPolicy } from "../src/state";
 
 /** A deterministic policy (no jitter) for asserting exact delays. */
 function policy(overrides: Partial<ReconnectPolicy> = {}): ReconnectPolicy {

@@ -21,12 +21,11 @@ import { createConnection } from "./connection";
 import type { Connection } from "./connection";
 import type { MllpConnector, MllpDuplex } from "./duplex";
 import { MllpClientError, MllpErrorCode } from "./errors";
+import type { MllpClientResponse } from "./message";
+import { requestControlId, toWireBytes } from "./message";
 import { createSendQueue } from "./queue";
-import type { ReconnectPolicy } from "./reconnect";
-import type { MllpClientResponse } from "./response";
-import { requestControlId, toWireBytes } from "./send";
 import { createConnectionState } from "./state";
-import type { ConnectionPhase } from "./state";
+import type { ConnectionPhase, ReconnectPolicy } from "./state";
 
 /**
  * The public connection state reported by {@link ConnectionManager.state}. It
@@ -76,10 +75,12 @@ export function createConnectionManager(
     maxBufferedBytes,
   } = opts;
 
-  // The connection lifecycle is owned by the state machine; its value IS the
-  // public connection state (no separate vocabulary to keep in sync). close()
-  // drives the machine to "closed" synchronously, so every guard below can read
-  // the phase directly rather than tracking a separate "closing" flag.
+  // The connection lifecycle is owned by the state machine; its snapshot value
+  // IS the public connection state. The manager drives the machine with events
+  // (CONNECT / CONNECTED / DROP / CLOSE) and trusts its transition table to
+  // ignore illegal ones — it never reads the phase to decide *whether* to send
+  // an event. Disposition reacts to the machine reaching "closed" (the
+  // subscription below), so the call sites just send their event.
   const machine = createConnectionState(opts.policy);
 
   // The live wire, once connected. The connection owns all per-connection state
@@ -112,6 +113,21 @@ export function createConnectionManager(
   const failQueue = (message: string): void => {
     queue.failAll(new MllpClientError(MllpErrorCode.CLOSED, message));
   };
+
+  // The machine is the single authority on lifecycle: when it reaches "closed"
+  // (a drop with no reconnect, an explicit close, or a failed connect), reject
+  // every still-queued send and release the connection. Disposition reacts to
+  // the transition here instead of being decided at each call site. The
+  // in-flight send, if any, is settled by the connection (on a drop) or by
+  // doClose's shutdown (on an explicit close), not here.
+  machine.subscribe((snapshot) => {
+    if (snapshot.value === "closed") {
+      failQueue(
+        "The connection closed before this queued send reached the wire; it was not transmitted."
+      );
+      connection = null;
+    }
+  });
 
   /**
    * Process queued sends one at a time while connected. A drop or close during
@@ -172,35 +188,32 @@ export function createConnectionManager(
   /**
    * The peer ended the live connection (drop, framing error, unsolicited-frame
    * flood, or a failed write). The connection has already settled its own
-   * in-flight send and torn itself down; here we advance the machine and
-   * dispose of the queue. With reconnect disabled the `DROP` drives the machine
-   * to `closed`, so queued sends — which never reached the wire — fail
-   * `CLOSED`.
+   * in-flight send and torn itself down; we just report the drop. The machine
+   * routes `connected` → `closed` (reconnect disabled), whose disposition —
+   * fail the queue, release the connection — runs in the subscription above. A
+   * DROP in any other state is ignored by the machine, so no guard is needed
+   * here.
    */
   const onConnectionDrop = (error: Error): void => {
-    if (!isConnected()) {
-      return;
-    }
     machine.send({ error, type: "DROP" });
-    connection = null;
-    failQueue(
-      "The connection ended before this queued send reached the wire; it was not transmitted."
-    );
   };
 
   const doConnect = async (): Promise<void> => {
-    const current = phase();
-    if (current === "closed") {
-      throw new MllpClientError(
-        MllpErrorCode.CLOSED,
-        `Cannot connect: this client is ${current} — it has been closed. Construct a new MllpClient to open a fresh connection.`
-      );
-    }
-    if (current !== "idle") {
-      throw new MllpClientError(
-        MllpErrorCode.ALREADY_CONNECTED,
-        `Cannot connect while ${current}: an MllpClient opens one connection in its lifetime. Await the in-flight connect, or use a separate client for a concurrent connection.`
-      );
+    // Ask the machine whether CONNECT is legal — its transition table is the
+    // authority (only `idle` accepts CONNECT). The phase is read only to phrase
+    // the error, never to make the decision; throwing before CONNECT leaves a
+    // live connection undisturbed.
+    const snapshot = machine.getSnapshot();
+    if (!snapshot.can({ type: "CONNECT" })) {
+      throw snapshot.value === "closed"
+        ? new MllpClientError(
+            MllpErrorCode.CLOSED,
+            "Cannot connect: this client has been closed. Construct a new MllpClient to open a fresh connection."
+          )
+        : new MllpClientError(
+            MllpErrorCode.ALREADY_CONNECTED,
+            `Cannot connect while ${snapshot.value}: an MllpClient opens one connection in its lifetime. Await the in-flight connect, or use a separate client for a concurrent connection.`
+          );
     }
     machine.send({ type: "CONNECT" });
 
@@ -210,12 +223,10 @@ export function createConnectionManager(
     try {
       duplex = await connect({ host, port, signal: timeoutSignal });
     } catch (error) {
-      // Fails fast to "closed" (no reconnect on the initial connect). Guard the
-      // send: a concurrent close() may have already taken the machine to
-      // "closed", where the event is a no-op.
-      if (phase() === "connecting") {
-        machine.send({ error, type: "CONNECT_FAILED" });
-      }
+      // Report the failure and trust the machine: it fails fast "connecting" →
+      // "closed" (no reconnect on the initial connect) and ignores the event if
+      // a concurrent close() already closed it.
+      machine.send({ error, type: "CONNECT_FAILED" });
       if (timeoutSignal.aborted) {
         throw new MllpClientError(
           MllpErrorCode.CONNECT_TIMEOUT,
@@ -230,16 +241,15 @@ export function createConnectionManager(
       );
     }
 
-    // Close-during-connect race. We sent CONNECT (→ "connecting") before the
-    // `await` above; an `await` is a yield point, so a concurrent close() can
-    // run while we are suspended. Re-check that invariant rather than test for
-    // one specific state: anything other than "connecting" means we were
-    // superseded (close() sends CLOSE → "closed"). Because close() ran while
-    // `connection` was still null (it is assigned just below — the commit
-    // point), it could not have torn down the socket the adapter just returned.
-    // We now own that orphaned, open duplex: close it to avoid a leak, then
-    // surface CONNECT_ABORTED.
-    if (phase() !== "connecting") {
+    // The dial succeeded — try to commit. The `await` above is a yield point, so
+    // a concurrent close() may have run (CLOSE → "closed") while we were
+    // suspended. Send CONNECTED and let the machine arbitrate: if it accepts
+    // (→ "connected") we own the wire; if close() already closed it, CONNECTED is
+    // ignored and we own an orphaned, open duplex (close() ran while `connection`
+    // was still null, so it could not have torn it down) — close it to avoid a
+    // leak, then surface CONNECT_ABORTED.
+    machine.send({ type: "CONNECTED" });
+    if (machine.getSnapshot().value !== "connected") {
       await duplex.close();
       throw new MllpClientError(
         MllpErrorCode.CONNECT_ABORTED,
@@ -247,11 +257,8 @@ export function createConnectionManager(
       );
     }
 
-    // Advance the machine to "connected" BEFORE creating the connection, so a
-    // drop reported by the connection's read loop lands while the machine can
-    // handle DROP. (The loops are async and yield before acting, so `connection`
-    // is assigned and the machine is connected before either can fire.)
-    machine.send({ type: "CONNECTED" });
+    // Bind the connection only after the machine is "connected", so a drop
+    // reported by the read loop lands while the machine can handle DROP.
     connection = createConnection({
       duplex,
       host,
@@ -300,25 +307,17 @@ export function createConnectionManager(
   };
 
   const doClose = async (): Promise<void> => {
-    if (phase() === "closed") {
-      return;
-    }
-    if (phase() === "idle") {
-      machine.send({ type: "CLOSE" });
-      return;
-    }
-
-    // CLOSE drives the machine to "closed" synchronously, so `state` reports
-    // "closed" immediately while the duplex teardown below is still awaited.
+    // Capture the live connection before CLOSE: reaching "closed" runs the
+    // disposition subscription synchronously, which releases the reference.
+    // CLOSE is idempotent — the machine ignores it once closed, and a null
+    // `conn` (idle / connecting / already closed) means there is no wire to tear
+    // down (a drop-initiated close already tore its own down).
+    const conn = connection;
     machine.send({ type: "CLOSE" });
 
-    // Reject every queued send — none of them will reach the wire.
-    failQueue("Client closed before this queued send was dispatched");
-
-    // Hand teardown of the live wire to the connection: it settles the in-flight
-    // send with CLOSED (the caller initiated this) and closes the duplex.
-    const conn = connection;
-    connection = null;
+    // Tear down the live wire: the connection settles the in-flight send with
+    // CLOSED (the caller initiated this) and closes the duplex. close() resolves
+    // once teardown is done.
     if (conn) {
       await conn.shutdown(
         new MllpClientError(
