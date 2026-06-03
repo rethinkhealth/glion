@@ -1815,6 +1815,9 @@ importers:
         specifier: workspace:*
         version: link:../mllp
     devDependencies:
+      '@glion/ast':
+        specifier: workspace:*
+        version: link:../ast
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme

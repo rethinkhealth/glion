@@ -1,12 +1,6 @@
 import { AckApplicationReject, Hl7ErrorCode, Severity } from "@glion/ack";
+import type { Nodes } from "@glion/ast";
 import type { Middleware } from "@glion/mllp";
-
-/** ERR-2 location for every charset reject — the rule only ever checks MSH-18. */
-const MSH18_LOCATION = {
-  fieldPosition: 18,
-  segmentId: "MSH",
-  segmentSequence: 1,
-} as const;
 
 /**
  * MLLP middleware that rejects inbound messages whose declared `MSH-18`
@@ -20,7 +14,7 @@ const MSH18_LOCATION = {
  *
  * On a violation it throws {@link AckApplicationReject} (MSA-1 `AR`; ERR-3
  * `102` data-type error, the closest Table 0357 condition for an undecodable
- * encoding) with the error located at `MSH^1^18` (ERR-2) and the reason as
+ * encoding), located at the offending MSH-18 node (ERR-2) with the reason as
  * diagnostic information (ERR-7). Register it **inside** an acknowledgment
  * middleware so the throw becomes a NAK:
  *
@@ -40,8 +34,8 @@ export function charsetMiddleware(): Middleware {
     await ctx.tree();
 
     // Diagnostics from @glion/lint-charset (origin "hl7v2-lint:charset"). The
-    // parser always yields a `root`, so the rule's only fatal message here is a
-    // genuine MSH-18 violation — not its non-root developer guard.
+    // parser always yields a `root`, so the only fatal message here is a
+    // genuine MSH-18 violation.
     const violation = ctx.file.messages.find(
       (message) =>
         message.fatal === true &&
@@ -50,11 +44,15 @@ export function charsetMiddleware(): Middleware {
     );
 
     if (violation) {
+      // The rule appends the offending node last in `ancestors`; hand the node
+      // and its chain to the reject so ERR-2 is derived from its position.
+      const chain = (violation.ancestors ?? []) as Nodes[];
       throw new AckApplicationReject(violation.reason, {
+        ancestors: chain.slice(0, -1),
         cause: violation,
         diagnosticInformation: violation.reason,
         errorCode: Hl7ErrorCode.DataTypeError,
-        errorLocation: MSH18_LOCATION,
+        node: chain.at(-1),
         severity: Severity.Error,
       });
     }

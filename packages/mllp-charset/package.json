@@ -50,6 +50,7 @@
     "@glion/mllp": "workspace:*"
   },
   "devDependencies": {
+    "@glion/ast": "workspace:*",
     "@glion/check-readme": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/mllp-ack": "workspace:*",

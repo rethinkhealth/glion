@@ -41,10 +41,10 @@ A message declaring `MSH-18 = 8859/1` is answered with:
 ```
 MSH|...|ACK^A01|...
 MSA|AR|MSG001|MSH-18 (character set) value '8859/1' is not allowed ...
-ERR||MSH^1^18|102|E|||MSH-18 (character set) value '8859/1' is not allowed ...
+ERR||MSH-18[1]|102|E|||MSH-18 (character set) value '8859/1' is not allowed ...
 ```
 
-ERR-2 locates the error at `MSH-18`, ERR-3 carries Table 0357 code `102`, and ERR-7 repeats the reason as diagnostic information.
+ERR-2 locates the error at the offending `MSH-18` node (derived from its position in the message), ERR-3 carries Table 0357 code `102`, and ERR-7 repeats the reason as diagnostic information.
 
 A message declaring `UNICODE UTF-8`, or omitting `MSH-18` entirely, is accepted (`MSA|AA`).
 
@@ -52,7 +52,7 @@ A message declaring `UNICODE UTF-8`, or omitting `MSH-18` entirely, is accepted 
 
 ### `charsetMiddleware(): Middleware`
 
-Returns an MLLP `Middleware`. It awaits `ctx.tree()` (running the configured lint rules), then scans `ctx.file.messages` for a fatal message from `@glion/lint-charset` (`source: "hl7v2-lint"`, `ruleId: "charset"`). When found, it throws `AckApplicationReject` (`@glion/ack`) with `errorCode: Hl7ErrorCode.DataTypeError`, `severity: Severity.Error`, `errorLocation` pointing at `MSH-18` (ERR-2), and the reason as `diagnosticInformation` (ERR-7).
+Returns an MLLP `Middleware`. It awaits `ctx.tree()` (running the configured lint rules), then scans `ctx.file.messages` for a fatal message from `@glion/lint-charset` (`source: "hl7v2-lint"`, `ruleId: "charset"`). When found, it throws `AckApplicationReject` (`@glion/ack`) with `errorCode: Hl7ErrorCode.DataTypeError`, `severity: Severity.Error`, the responsible `node` (so ERR-2 locates the error at the offending `MSH-18`), and the reason as `diagnosticInformation` (ERR-7).
 
 It takes no options: the set of accepted character sets is the rule's concern. To accept additional encodings, reconfigure `@glion/lint-charset` in your processor.
 

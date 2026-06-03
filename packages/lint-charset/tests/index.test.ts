@@ -3,7 +3,7 @@ import { c, f, m, r, s } from "@glion/builder";
 import { unified } from "unified";
 import { VFile } from "vfile";
 
-import hl7v2LintCharset, { DEFAULT_ALLOWED_CHARSETS } from "../src";
+import hl7v2LintCharset from "../src";
 
 const messageToJson = (message: VFile["messages"][number] | undefined) =>
   // oxlint-disable-next-line unicorn/prefer-structured-clone
@@ -39,7 +39,10 @@ function messageWithCharsetField(charsetField: Field): Root {
 const messageWithCharset = (charset: string) =>
   messageWithCharsetField(f(charset));
 
-async function run(tree: Root, options?: { allow: readonly string[] }) {
+async function run(
+  tree: Root,
+  options?: { allow?: readonly string[]; required?: boolean }
+) {
   const file = new VFile();
   await unified()
     .use(options ? [[hl7v2LintCharset, options]] : [hl7v2LintCharset])
@@ -48,10 +51,6 @@ async function run(tree: Root, options?: { allow: readonly string[] }) {
 }
 
 describe("hl7v2-lint:charset", () => {
-  it("exposes the default allow-list", () => {
-    expect(DEFAULT_ALLOWED_CHARSETS).toContain("UNICODE UTF-8");
-  });
-
   it("has no issues for the default UTF-8 charset", async () => {
     const file = await run(messageWithCharset("UNICODE UTF-8"));
     expect(file.messages).toHaveLength(0);
@@ -152,16 +151,32 @@ describe("hl7v2-lint:charset", () => {
     expect(failing.messages).toHaveLength(1);
   });
 
-  it("errors when the node is not a root message", async () => {
+  it("ignores a non-root node without reporting", async () => {
     const notRoot = s("MSH", f("|"), f("^~\\&"));
     const file = new VFile();
     await unified().use([hl7v2LintCharset]).run(notRoot, file);
-    expect(file.messages).toHaveLength(1);
-    expect(messageToJson(file.messages[0])).toMatchObject({
-      reason: "Root node type must be 'root' — received 'segment' instead",
-      ruleId: "charset",
-      source: "hl7v2-lint",
+    expect(file.messages).toHaveLength(0);
+  });
+
+  it("flags a missing MSH-18 when required", async () => {
+    const file = await run(m(s("MSH", f("|"), f("^~\\&"))), {
+      required: true,
     });
+    expect(file.messages).toHaveLength(1);
+    expect(file.messages[0]?.reason).toContain("required");
+  });
+
+  it("flags an empty MSH-18 when required", async () => {
+    const file = await run(messageWithCharsetField(f("")), { required: true });
+    expect(file.messages).toHaveLength(1);
+    expect(file.messages[0]?.reason).toContain("required");
+  });
+
+  it("accepts a declared charset when required", async () => {
+    const file = await run(messageWithCharset("UNICODE UTF-8"), {
+      required: true,
+    });
+    expect(file.messages).toHaveLength(0);
   });
 
   // The strict-mode middleware filters on `fatal === true`, which is the

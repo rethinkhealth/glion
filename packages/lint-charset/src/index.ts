@@ -1,5 +1,5 @@
-import type { Nodes, Root } from "@glion/ast";
-import { select, value } from "@glion/util-query";
+import type { Nodes } from "@glion/ast";
+import { select } from "@glion/util-query";
 import { lintRule } from "unified-lint-rule";
 
 /**
@@ -10,20 +10,21 @@ import { lintRule } from "unified-lint-rule";
  * defaults to ASCII), is always safe for the UTF-8 pipeline. Matched
  * case-insensitively after trimming.
  */
-export const DEFAULT_ALLOWED_CHARSETS = [
-  "UNICODE UTF-8",
-  "ASCII",
-  "ISO IR6",
-] as const;
+const DEFAULT_ALLOWED_CHARSETS = ["UNICODE UTF-8", "ASCII", "ISO IR6"] as const;
 
 export interface CharsetLintOptions {
   /**
    * MSH-18 character-set identifiers (HL7 table 0211) to accept, matched
-   * case-insensitively after trimming. An empty list falls back to
-   * {@link DEFAULT_ALLOWED_CHARSETS}. Default:
-   * {@link DEFAULT_ALLOWED_CHARSETS}.
+   * case-insensitively after trimming. An empty list falls back to the default
+   * (`UNICODE UTF-8`, `ASCII`, `ISO IR6`).
    */
   allow?: readonly string[];
+  /**
+   * Require MSH-18 to declare a character set. When `true`, a message that
+   * omits MSH-18 (or leaves it empty) is reported instead of being allowed to
+   * fall back to the ASCII default. Default: `false`.
+   */
+  required?: boolean;
 }
 
 const normalize = (charset: string) => charset.trim().toUpperCase();
@@ -34,14 +35,8 @@ const hl7v2LintCharset = lintRule<Nodes, CharsetLintOptions>(
     url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-charset#readme",
   },
   (tree, file, options) => {
+    // Only a full message has an MSH-18 to check; ignore anything else.
     if (tree.type !== "root") {
-      file.message(
-        `Root node type must be 'root' — received '${tree.type}' instead`,
-        {
-          ancestors: [tree],
-          place: tree.position,
-        }
-      );
       return;
     }
 
@@ -51,40 +46,40 @@ const hl7v2LintCharset = lintRule<Nodes, CharsetLintOptions>(
         : DEFAULT_ALLOWED_CHARSETS;
     const allowed = new Set(allowList.map(normalize));
 
-    const rootTree = tree as Root;
-    const field = select(rootTree, "MSH-18");
-
-    // MSH-18 is optional; an absent character set implies the ASCII default,
-    // which is UTF-8-compatible, so there is nothing to check.
-    if (!field) {
-      return;
-    }
+    const field = select(tree, "MSH-18");
+    let declared = false;
 
     // MSH-18 is a repeating field (`UNICODE UTF-8~8859/1`): a single
     // incompatible repetition makes the payload non-UTF-8, so every repetition
-    // is checked and each offending one is reported separately.
-    const repetitions = field.node.children;
-    for (const [index] of repetitions.entries()) {
-      const result = value(rootTree, `MSH-18[${index + 1}]`);
-      const declared = result?.value;
+    // is checked and each offending one is reported against its own node.
+    if (field) {
+      for (const repetition of field.node.children) {
+        const charset = repetition.children?.[0]?.children?.[0]?.value;
 
-      // An empty repetition implies the default character set — skip it.
-      if (!declared) {
-        continue;
-      }
+        // An empty repetition implies the default character set — skip it.
+        if (!charset) {
+          continue;
+        }
 
-      if (!allowed.has(normalize(declared))) {
-        file.message(
-          `MSH-18 (character set) value '${declared}' is not allowed (allowed: ${allowList.join(", ")})`,
-          {
-            ancestors: result ? [...result.ancestors, result.node] : [rootTree],
-            place:
-              result?.node?.position ||
-              result?.ancestors.at(-1)?.position ||
-              rootTree.position,
-          }
-        );
+        declared = true;
+        if (!allowed.has(normalize(charset))) {
+          file.message(
+            `MSH-18 (character set) value '${charset}' is not allowed (allowed: ${allowList.join(", ")})`,
+            {
+              ancestors: [...field.ancestors, field.node, repetition],
+              place: repetition.position ?? field.node.position,
+            }
+          );
+        }
       }
+    }
+
+    if (options?.required && !declared) {
+      const segment = select(tree, "MSH");
+      file.message("MSH-18 (character set) is required but not declared", {
+        ancestors: segment ? [...segment.ancestors, segment.node] : [tree],
+        place: segment?.node.position ?? tree.position,
+      });
     }
   }
 );

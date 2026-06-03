@@ -52,14 +52,19 @@ export interface CharsetLintOptions {
    * default. Default: `["UNICODE UTF-8", "ASCII", "ISO IR6"]`.
    */
   allow?: readonly string[];
+  /**
+   * Require MSH-18 to declare a character set. When `true`, a message that
+   * omits MSH-18 (or leaves it empty) is reported instead of falling back to
+   * the ASCII default. Default: `false`.
+   */
+  required?: boolean;
 }
 
 declare const hl7v2LintCharset: Plugin<[CharsetLintOptions?], Root>;
 export default hl7v2LintCharset;
 ```
 
-Emitted messages carry `source: "hl7v2-lint"` and `ruleId: "charset"`. The
-package also exports `DEFAULT_ALLOWED_CHARSETS`, the default allow-list.
+Emitted messages carry `source: "hl7v2-lint"` and `ruleId: "charset"`.
 
 ## What it checks
 

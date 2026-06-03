@@ -1,29 +1,9 @@
-import type { Field, Root, Segment } from "@glion/ast";
-import { c, f, s } from "@glion/builder";
+import type { Field, Nodes, Root, Segment } from "@glion/ast";
+import { f, s } from "@glion/builder";
+import { format } from "@glion/util-query";
 
 import { AckCode, Severity } from "./constants";
 import type { AckCodeValue } from "./constants";
-
-/**
- * ERR-2 error location (HL7v2 `ERL` data type) — points a receiver at the exact
- * field that triggered the error, e.g. `{ segmentId: "MSH", segmentSequence: 1,
- * fieldPosition: 18 }` serializes to `MSH^1^18`. Only `segmentId` is required;
- * trailing components are omitted when absent.
- */
-export interface ErrorLocation {
-  /** ERR-2.1 — segment ID (e.g. `"MSH"`). */
-  segmentId: string;
-  /** ERR-2.2 — 1-based occurrence of the segment within the message. */
-  segmentSequence?: number;
-  /** ERR-2.3 — 1-based field position within the segment. */
-  fieldPosition?: number;
-  /** ERR-2.4 — 1-based field repetition. */
-  fieldRepetition?: number;
-  /** ERR-2.5 — 1-based component number. */
-  componentNumber?: number;
-  /** ERR-2.6 — 1-based subcomponent number. */
-  subcomponentNumber?: number;
-}
 
 export interface AckExceptionOptions extends ErrorOptions {
   /**
@@ -59,20 +39,22 @@ export interface AckExceptionOptions extends ErrorOptions {
    */
   tree?: Root;
   /**
-   * ERR-2 error location — points the receiver at the offending field. Omitted
-   * from the ERR segment when absent.
+   * AST node responsible for the error. When set (with
+   * {@link AckExceptionOptions.ancestors}), ERR-2 is derived from the node's
+   * position in the message via `@glion/util-query`'s `format` — e.g. an MSH-18
+   * repetition serializes to `MSH-18[1]`.
    */
-  errorLocation?: ErrorLocation;
+  node?: Nodes;
   /**
-   * ERR-7 diagnostic information — a detailed, machine-oriented description of
-   * the problem. Omitted from the ERR segment when absent.
+   * Ancestor chain of {@link AckExceptionOptions.node} (root → parent), as
+   * returned by `select`/`value`/`visit`. Used to derive ERR-2.
    */
-  diagnosticInformation?: string;
+  ancestors?: Nodes[];
   /**
-   * ERR-8 user message — a human-readable message suitable for display.
+   * ERR-7 diagnostic information — a detailed description of the problem.
    * Omitted from the ERR segment when absent.
    */
-  userMessage?: string;
+  diagnosticInformation?: string;
 }
 
 /**
@@ -105,12 +87,12 @@ export abstract class AckException extends Error {
    * walk ERR repetitions or other segments without re-parsing `raw`.
    */
   readonly tree: Root | undefined;
-  /** ERR-2 error location pointing at the offending field, when known. */
-  readonly errorLocation: ErrorLocation | undefined;
+  /** AST node responsible for the error, used to derive ERR-2. */
+  readonly node: Nodes | undefined;
+  /** Ancestor chain of {@link AckException.node}, used to derive ERR-2. */
+  readonly ancestors: Nodes[] | undefined;
   /** ERR-7 diagnostic information, when provided. */
   readonly diagnosticInformation: string | undefined;
-  /** ERR-8 user message, when provided. */
-  readonly userMessage: string | undefined;
 
   constructor(message: string, options: AckExceptionOptions) {
     super(message, { cause: options.cause });
@@ -119,66 +101,37 @@ export abstract class AckException extends Error {
     this.raw = options.raw;
     this.controlId = options.controlId;
     this.tree = options.tree;
-    this.errorLocation = options.errorLocation;
+    this.node = options.node;
+    this.ancestors = options.ancestors;
     this.diagnosticInformation = options.diagnosticInformation;
-    this.userMessage = options.userMessage;
   }
 
   /**
    * Build an ERR segment AST node from this exception. ERR-1 (deprecated),
-   * ERR-3 (code) and ERR-4 (severity) are always present; ERR-2 (location),
-   * ERR-7 (diagnostic) and ERR-8 (user message) are populated only when the
-   * corresponding option was supplied, so the segment stays minimal by default.
+   * ERR-3 (code) and ERR-4 (severity) are always present; ERR-2 (location,
+   * derived from {@link AckException.node}) and ERR-7 (diagnostic) are populated
+   * only when supplied, so the segment stays minimal by default.
    */
   toErrSegment(): Segment {
+    const location = this.node ? format(this.node, this.ancestors ?? []) : null;
     const fields: Field[] = [
       f(""), // ERR-1 (deprecated)
-      this.errorLocation ? errorLocationField(this.errorLocation) : f(""), // ERR-2
+      f(location ?? ""), // ERR-2 error location
       f(this.errorCode ?? ""), // ERR-3
       f(this.severity ?? Severity.Error), // ERR-4
     ];
 
-    // ERR-5/ERR-6 are left empty; only emit them when a later field is set.
-    if (
-      this.diagnosticInformation !== undefined ||
-      this.userMessage !== undefined
-    ) {
+    // ERR-5/ERR-6 are left empty; only emit them when ERR-7 is set.
+    if (this.diagnosticInformation !== undefined) {
       fields.push(
         f(""), // ERR-5
         f(""), // ERR-6
-        f(this.diagnosticInformation ?? ""), // ERR-7
-        f(this.userMessage ?? "") // ERR-8
+        f(this.diagnosticInformation) // ERR-7
       );
     }
 
     return s("ERR", ...fields);
   }
-}
-
-/**
- * Build the ERR-2 `ERL` field from an {@link ErrorLocation}, dropping trailing
- * absent components so `{ segmentId: "MSH" }` is just `MSH`, not `MSH^^^^^`.
- */
-function errorLocationField(location: ErrorLocation): Field {
-  const components: Array<string | number | undefined> = [
-    location.segmentId,
-    location.segmentSequence,
-    location.fieldPosition,
-    location.fieldRepetition,
-    location.componentNumber,
-    location.subcomponentNumber,
-  ];
-
-  let lastIndex = components.length - 1;
-  while (lastIndex >= 0 && components[lastIndex] === undefined) {
-    lastIndex -= 1;
-  }
-
-  return f(
-    ...components
-      .slice(0, lastIndex + 1)
-      .map((part) => c(part === undefined ? "" : String(part)))
-  );
 }
 
 /**

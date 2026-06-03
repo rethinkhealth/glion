@@ -75,8 +75,8 @@ describe("charsetMiddleware", () => {
 
     expect(response).toBeDefined();
     expect(response!.raw).toContain("MSA|AR|MSG001");
-    // ERR-2 locates the error at MSH-18; ERR-3 carries Table 0357 code 102.
-    expect(response!.raw).toContain("ERR||MSH^1^18|102|E");
+    // ERR-2 locates the error at the MSH-18 node; ERR-3 carries code 102.
+    expect(response!.raw).toContain("ERR||MSH-18[1]|102|E");
     // ERR-7 diagnostic echoes the offending value.
     expect(response!.raw).toContain("8859/1");
   });
