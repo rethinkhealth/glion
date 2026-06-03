@@ -13,8 +13,8 @@ import {
   backoffDelay,
   DEFAULT_RECONNECT_POLICY,
   NO_RECONNECT,
-} from "../src/state";
-import type { ReconnectPolicy } from "../src/state";
+} from "../src/util/reconnect";
+import type { ReconnectPolicy } from "../src/util/reconnect";
 
 /** A deterministic policy (no jitter) for asserting exact delays. */
 function policy(overrides: Partial<ReconnectPolicy> = {}): ReconnectPolicy {

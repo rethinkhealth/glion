@@ -10,12 +10,10 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  createConnectionState,
-  DEFAULT_RECONNECT_POLICY,
-  NO_RECONNECT,
-} from "../src/state";
-import type { ConnectionState, ReconnectPolicy } from "../src/state";
+import { createConnectionState } from "../src/state";
+import type { ConnectionState } from "../src/state";
+import { DEFAULT_RECONNECT_POLICY, NO_RECONNECT } from "../src/util/reconnect";
+import type { ReconnectPolicy } from "../src/util/reconnect";
 
 function startMachine(policy: ReconnectPolicy): ConnectionState {
   return createConnectionState(policy);

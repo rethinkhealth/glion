@@ -25,8 +25,9 @@ import {
   toWireBytes,
 } from "./message";
 import type { MllpClientResponse, SendInput } from "./message";
-import { createConnectionState, NO_RECONNECT } from "./state";
+import { createConnectionState } from "./state";
 import type { ConnectionPhase } from "./state";
+import { NO_RECONNECT } from "./util/reconnect";
 
 export type { MllpClientResponse, SendInput } from "./message";
 
@@ -456,7 +457,7 @@ export class MllpClient {
       // Report the failure and trust the machine: it fails fast "connecting" →
       // "closed" (no reconnect on the initial connect) and ignores the event if
       // a concurrent close() already closed it.
-      this.#machine.send({ error, type: "CONNECT_FAILED" });
+      this.#machine.send({ type: "CONNECT_FAILED" });
       if (timeoutSignal.aborted) {
         throw new MllpClientError(
           MllpErrorCode.CONNECT_TIMEOUT,
@@ -489,8 +490,8 @@ export class MllpClient {
       duplex,
       host: this.#host,
       maxBufferedBytes: this.#maxBufferedBytes,
-      onDrop: (error) => {
-        this.#machine.send({ error, type: "DROP" });
+      onDrop: () => {
+        this.#machine.send({ type: "DROP" });
       },
       port: this.#port,
     });

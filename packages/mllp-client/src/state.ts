@@ -24,7 +24,7 @@
  * `backingOff` → `reconnecting`, retrying per the {@link ReconnectPolicy}. With
  * `NO_RECONNECT` (the current client default) a drop routes straight to
  * `closed` — the behaviour the client has today. The policy and its backoff
- * maths are defined below.
+ * maths live in `./util/reconnect`.
  *
  * @module
  */
@@ -32,63 +32,8 @@
 import { assign, createActor, setup } from "xstate";
 import type { Actor, SnapshotFrom } from "xstate";
 
-/**
- * How the reconnect delay is randomised. `"full"` applies AWS-style full jitter
- * — a uniform pick in `[0, computed]` — to avoid reconnect stampedes when many
- * clients drop at once. `"none"` uses the exact computed delay (deterministic;
- * useful in tests).
- */
-export type JitterStrategy = "full" | "none";
-
-/** Reconnect/backoff policy. All times in milliseconds. */
-export interface ReconnectPolicy {
-  /** Max reconnect attempts after a drop before going to `closed`. */
-  readonly maxReconnectAttempts: number;
-  /**
-   * First reconnect delay; doubles each attempt up to
-   * {@link ReconnectPolicy.maxDelayMs}.
-   */
-  readonly baseDelayMs: number;
-  /** Ceiling on the exponential delay. */
-  readonly maxDelayMs: number;
-  /** Delay randomisation. */
-  readonly jitter: JitterStrategy;
-}
-
-/**
- * Reconnect disabled: a drop goes straight to `closed`. The client's current
- * default, so integrating the machine preserves today's behaviour.
- */
-export const NO_RECONNECT: ReconnectPolicy = {
-  baseDelayMs: 250,
-  jitter: "full",
-  maxDelayMs: 30_000,
-  maxReconnectAttempts: 0,
-};
-
-/**
- * Sensible reconnect defaults once enabled: 5 attempts, 250 ms → 30 s, full
- * jitter.
- */
-export const DEFAULT_RECONNECT_POLICY: ReconnectPolicy = {
-  baseDelayMs: 250,
-  jitter: "full",
-  maxDelayMs: 30_000,
-  maxReconnectAttempts: 5,
-};
-
-/**
- * Capped exponential backoff for the nth reconnect attempt (1-based):
- * `min(maxDelayMs, baseDelayMs · 2^(attempt-1))`, with full jitter applied when
- * the policy asks for it. Call once per attempt so the jitter is fresh.
- */
-export function backoffDelay(policy: ReconnectPolicy, attempt: number): number {
-  const exponential = Math.min(
-    policy.maxDelayMs,
-    policy.baseDelayMs * 2 ** (attempt - 1)
-  );
-  return policy.jitter === "full" ? Math.random() * exponential : exponential;
-}
+import { backoffDelay } from "./util/reconnect";
+import type { ReconnectPolicy } from "./util/reconnect";
 
 /** Input passed to the connection machine when its actor is created. */
 export interface ConnectionInput {
@@ -99,22 +44,23 @@ interface ConnectionContext {
   readonly policy: ReconnectPolicy;
   /** Reconnect attempts since the last successful connect. Reset on connect. */
   attempt: number;
-  /** Last dial/drop error, for diagnostics. */
-  lastError: unknown;
 }
 
 /**
  * Events the client feeds the machine. `CONNECT` starts the initial dial;
  * `CONNECTED`/`CONNECT_FAILED` report its outcome. `DROP` is sent when the read
  * loop or drop watcher observes the peer ending an established connection.
- * `RECONNECT_FAILED` reports a failed redial. `CLOSE` is explicit teardown.
+ * `RECONNECT_FAILED` reports a failed redial. `CLOSE` is explicit teardown. The
+ * machine tracks only the lifecycle phase, not the failure detail — the client
+ * surfaces the actual error to the caller (the connect throw, the in-flight
+ * send rejection), so no error rides on these events.
  */
 export type ConnectionEvent =
   | { type: "CONNECT" }
   | { type: "CONNECTED" }
-  | { type: "CONNECT_FAILED"; error?: unknown }
-  | { type: "DROP"; error?: unknown }
-  | { type: "RECONNECT_FAILED"; error?: unknown }
+  | { type: "CONNECT_FAILED" }
+  | { type: "DROP" }
+  | { type: "RECONNECT_FAILED" }
   | { type: "CLOSE" };
 
 /**
@@ -126,9 +72,6 @@ const connectionMachine = setup({
   actions: {
     incrementAttempt: assign({
       attempt: ({ context }) => context.attempt + 1,
-    }),
-    recordError: assign({
-      lastError: ({ event }) => ("error" in event ? event.error : null),
     }),
     resetAttempt: assign({ attempt: 0 }),
   },
@@ -150,7 +93,6 @@ const connectionMachine = setup({
 }).createMachine({
   context: ({ input }) => ({
     attempt: 0,
-    lastError: null,
     policy: input.policy,
   }),
   id: "mllp-connection",
@@ -177,12 +119,8 @@ const connectionMachine = setup({
       on: {
         CLOSE: "closed",
         DROP: [
-          {
-            actions: "recordError",
-            guard: "canReconnect",
-            target: "backingOff",
-          },
-          { actions: "recordError", target: "closed" },
+          { guard: "canReconnect", target: "backingOff" },
+          { target: "closed" },
         ],
       },
     },
@@ -193,7 +131,7 @@ const connectionMachine = setup({
       on: {
         CLOSE: "closed",
         CONNECTED: "connected",
-        CONNECT_FAILED: { actions: "recordError", target: "closed" },
+        CONNECT_FAILED: "closed",
       },
     },
 
@@ -209,12 +147,8 @@ const connectionMachine = setup({
         CLOSE: "closed",
         CONNECTED: "connected",
         RECONNECT_FAILED: [
-          {
-            actions: "recordError",
-            guard: "canReconnect",
-            target: "backingOff",
-          },
-          { actions: "recordError", target: "closed" },
+          { guard: "canReconnect", target: "backingOff" },
+          { target: "closed" },
         ],
       },
     },
