@@ -24,7 +24,7 @@ import { MllpClientError, MllpErrorCode } from "./errors";
 import { createSendQueue } from "./queue";
 import type { ReconnectPolicy } from "./reconnect";
 import type { MllpClientResponse } from "./response";
-import { prepareSend } from "./send";
+import { requestControlId, toWireBytes } from "./send";
 import { createConnectionState } from "./state";
 import type { ConnectionPhase } from "./state";
 
@@ -286,12 +286,15 @@ export function createConnectionManager(
     // before enqueuing. An unframable payload rejects here, before it occupies
     // a queue slot. The string→tree parse already happened at the client
     // boundary (client.send); the manager only ever sees a Root.
-    const { framed, requestControlId } = prepareSend(tree);
     const timeoutMs = sendOpts.timeoutMs ?? sendTimeoutMs;
 
     // enqueue returns the caller's real Promise; the manager kicks the drain
     // loop (the queue is a pure buffer and does not drain itself).
-    const promise = queue.enqueue(framed, requestControlId, timeoutMs);
+    const promise = queue.enqueue(
+      toWireBytes(tree),
+      requestControlId(tree),
+      timeoutMs
+    );
     drain();
     return promise;
   };

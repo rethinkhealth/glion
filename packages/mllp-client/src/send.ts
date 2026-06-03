@@ -45,14 +45,6 @@ import { value } from "@glion/util-query";
  */
 export type SendInput = string | Root;
 
-/** What a send needs on the wire, derived from a single parse of the input. */
-export interface PreparedSend {
-  /** Canonical HL7v2 wire bytes, MLLP-framed. */
-  readonly framed: Uint8Array;
-  /** MSH-10 of the (cleaned) message, for ACK correlation. `""` if absent. */
-  readonly requestControlId: string;
-}
-
 /**
  * Parse a send input into a tree at the client boundary. A `string` is parsed
  * (it is serialized HL7v2 text); a `Root` is returned as-is. This is the ONLY
@@ -70,20 +62,26 @@ export function toTree(input: SendInput): Root {
 }
 
 /**
- * Serialize a parsed message to its canonical wire form and read its control ID
- * — from the SAME tree. The tree is serialized with `@glion/to-hl7v2` and
- * MLLP-framed, and MSH-10 is read off it. The wire bytes are therefore the
- * *cleaned* canonical form, not a byte-exact echo of any prior wire form — see
- * the module JSDoc. The input is always a `Root`: a `string` is parsed at the
+ * Serialize a parsed message to its canonical MLLP wire bytes. The tree is
+ * serialized with `@glion/to-hl7v2` and MLLP-framed — the bytes are the
+ * *cleaned* canonical form, not a byte-exact echo of any prior wire form (see
+ * the module JSDoc). The input is always a `Root`: a `string` is parsed at the
  * boundary ({@link toTree}), never here.
  *
  * @throws {FramingError} When the serialized message carries an embedded MLLP
  *   framing byte (VT or FS) that cannot be framed. CR is allowed — it is the
  *   HL7v2 segment terminator.
  */
-export function prepareSend(tree: Root): PreparedSend {
-  return {
-    framed: frame(toHl7v2(tree)),
-    requestControlId: value(tree, "MSH-10[1].1.1")?.value ?? "",
-  };
+export function toWireBytes(tree: Root): Uint8Array {
+  return frame(toHl7v2(tree));
+}
+
+/**
+ * The request's HL7v2 control ID (MSH-10), used to correlate the eventual ACK
+ * (matched against the response's MSA-2). `""` when absent — the lenient parser
+ * never throws, so non-HL7v2 input simply has no MSH-10. Read from the SAME
+ * tree that {@link toWireBytes} serializes.
+ */
+export function requestControlId(tree: Root): string {
+  return value(tree, "MSH-10[1].1.1")?.value ?? "";
 }
