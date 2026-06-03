@@ -130,21 +130,21 @@ Available in every middleware and handler. The pipeline is lazy: only the parse 
 
 ### Sync properties
 
-| Property               | Description                                             |
-| ---------------------- | ------------------------------------------------------- |
-| `ctx.req.raw`          | Original HL7v2 message string.                          |
-| `ctx.req.bytes`        | Raw bytes from the MLLP frame.                          |
-| `ctx.connection`       | `{ remoteAddress, remotePort, localPort, secure }`.     |
-| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                 |
-| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                 |
-| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                             |
-| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                |
-| `ctx.controlId`        | MSH-10 message control ID.                              |
-| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire. |
-| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).          |
-| `ctx.set(key, value)`  | Store a variable.                                       |
-| `ctx.get(key)`         | Retrieve a variable.                                    |
-| `ctx.var`              | Read-only snapshot of all variables.                    |
+| Property               | Description                                                     |
+| ---------------------- | --------------------------------------------------------------- |
+| `ctx.req.raw`          | Decoded HL7v2 message text (`""` if the payload was not UTF-8). |
+| `ctx.error`            | The decode/parse failure, if any (otherwise `undefined`).       |
+| `ctx.connection`       | `{ remoteAddress, remotePort, localPort, secure }`.             |
+| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                         |
+| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                         |
+| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                     |
+| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                        |
+| `ctx.controlId`        | MSH-10 message control ID.                                      |
+| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire.         |
+| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).                  |
+| `ctx.set(key, value)`  | Store a variable.                                               |
+| `ctx.get(key)`         | Retrieve a variable.                                            |
+| `ctx.var`              | Read-only snapshot of all variables.                            |
 
 ### Async methods
 
@@ -232,7 +232,9 @@ app.onError(async (err, ctx) => {
 });
 ```
 
-Without an error handler, errors are absorbed and no response is sent. The sending system will time out and retry per standard MLLP behaviour. See the [design notes](#design-notes) below for the rationale.
+Decode (non-UTF-8) and parse failures don't throw out of band — they are surfaced as `ctx.error` and re-thrown _through_ the pipeline, so an acknowledgment middleware turns them into a NAK and `onError`/error handlers see them just like a handler throw.
+
+Without an error handler (and no acknowledgment middleware), errors are absorbed and no response is sent. The sending system will time out and retry per standard MLLP behaviour. See the [design notes](#design-notes) below for the rationale.
 
 ## TLS
 

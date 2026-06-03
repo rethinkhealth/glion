@@ -545,3 +545,11 @@ await client.close();
 - [Bun TCP API](https://bun.sh/docs/api/tcp) — `Bun.listen`, shared handler model
 - [Node.js net module](https://nodejs.org/api/net.html) — `net.createServer`
 - [Web Streams API](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API) — `TransformStream`, `ReadableStream`
+
+## Update — UTF-8 decode and parse moved into the core; errors propagate through the pipeline
+
+The implemented design refines the context/error flow described above:
+
+- **`Mllp.handle(payload, connection)` takes bytes, not text.** The UTF-8 decode (`@glion/util-charset` `decodeBytes`) happens inside the core `handle()` — not in the Node `serve.ts` adapter — so every runtime adapter behaves identically and only forwards the de-framed payload.
+- **`ctx.req` no longer carries `bytes`.** It exposes only `req.raw` (the decoded text, `""` when the payload is not UTF-8); nothing read `req.bytes`, so it was dropped. A new `ctx.error` carries the decode/parse failure.
+- **Decode/parse failures never throw out of band.** `createContext` is total: on a decode failure (or a custom parser throw) it yields an empty `Root` and sets `ctx.error`. `handle()` re-throws that failure from _inside_ the middleware chain, so an acknowledgment middleware turns it into a NAK and `onError` fires only when none is registered — the same path as a handler throw. This supersedes the earlier behavior where a non-UTF-8 frame bypassed the pipeline and surfaced only through `onError` (see #659/#660).

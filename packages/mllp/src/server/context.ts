@@ -13,14 +13,21 @@ import type {
  * Options for creating a Context instance.
  */
 export interface CreateContextOptions {
-  /** Raw HL7 message string */
+  /**
+   * Decoded HL7 message text. Empty (`""`) when
+   * {@link CreateContextOptions.error} is set.
+   */
   raw: string;
-  /** Raw bytes from the MLLP frame payload */
-  bytes: Uint8Array;
   /** Connection metadata */
   connection: ConnectionInfo;
   /** HL7v2 unified processor */
   processor: Hl7v2Processor;
+  /**
+   * A decode failure that already occurred (the payload was not UTF-8). When
+   * set, parsing is skipped, `ctx.ast` is an empty `Root`, and this becomes
+   * `ctx.error`.
+   */
+  error?: Error;
 }
 
 /**
@@ -41,14 +48,28 @@ export interface CreateContextOptions {
  * the tree, the transform and compile steps never execute.
  */
 export function createContext(options: CreateContextOptions): Context {
-  const { raw, bytes, connection, processor } = options;
+  const { raw, connection, processor, error: decodeError } = options;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
 
   // ── Eager: parse (sync, fast) ──────────────────────────────────────
   // VFile carries the input through the pipeline and collects diagnostics.
+  // Parsing never throws out of band: a decode failure (passed in) or a
+  // parser throw yields an empty Root and is surfaced as `ctx.error`, so the
+  // failure flows through the middleware pipeline instead of escaping it.
   const file = new VFile(raw);
-  const parsed = processor.parse(file);
+  let parsed: Root = { children: [], type: "root" };
+  let error = decodeError;
+  if (!error) {
+    try {
+      parsed = processor.parse(file);
+    } catch (parseError) {
+      error =
+        parseError instanceof Error
+          ? parseError
+          : new Error(String(parseError));
+    }
+  }
 
   // Extract routing fields as strings from the parsed tree.
   // These are cached immediately and always reflect the original
@@ -100,13 +121,14 @@ export function createContext(options: CreateContextOptions): Context {
     ast: parsed,
     connection: Object.freeze(connection),
     controlId,
+    error,
     file,
     get<K extends string>(key: K): unknown {
       return variables.get(key);
     },
     messageStructure,
     messageType,
-    req: Object.freeze({ bytes, raw }),
+    req: Object.freeze({ raw }),
     res: undefined as Response | undefined,
     result: getResult,
     set<K extends string>(key: K, value: unknown): void {

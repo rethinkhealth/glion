@@ -1,3 +1,5 @@
+import { decodeBytes } from "@glion/util-charset";
+
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { compose } from "./compose";
 import { createContext } from "./context";
@@ -148,22 +150,25 @@ export class Mllp {
   }
 
   /**
-   * Process a raw HL7v2 message through the middleware chain and router.
-   * This is the integration point — analogous to Hono's `fetch()`.
+   * Process de-framed MLLP payload bytes through the middleware chain and
+   * router. This is the integration point — analogous to Hono's `fetch()` —
+   * and is runtime-agnostic: every transport adapter passes the raw payload
+   * here, so decode + parse happen once, in the core.
    *
    * The pipeline is lazy (see ADR-0013):
    *
-   * 1. Parse (sync, fast) — always runs, extracts routing fields
+   * 1. Decode (UTF-8) + parse (sync, fast) — always runs, extracts routing fields.
+   *    Neither throws out of band: a non-UTF-8 or unparseable payload becomes
+   *    `ctx.error` and is re-thrown from inside the chain, so the ack
+   *    middleware can NAK it (and `onError` fires when none is registered).
    * 2. Route match — uses pre-transform routing fields
-   * 3. If no match → return undefined (no transform/compile cost)
-   * 4. Transform/compile — only when handlers access ctx.tree()/ctx.result()
+   * 3. Transform/compile — only when handlers access ctx.tree()/ctx.result()
    *
    * Throws `MllpServerError` (`NO_PARSER`) if no processor has been registered
    * via `app.parser()`.
    */
   async handle(
-    raw: string,
-    bytes: Uint8Array,
+    payload: Uint8Array,
     connection: ConnectionInfo
     // oxlint-disable-next-line typescript/no-invalid-void-type
   ): Promise<Response | undefined | void> {
@@ -174,27 +179,49 @@ export class Mllp {
       );
     }
 
-    // Context creation is sync — only parse() runs here.
-    // Transform and compile are deferred to ctx.tree() / ctx.result().
+    // Decode here (not in the transport adapter) so every runtime gets the
+    // same behavior. A non-UTF-8 payload does not throw — it is captured as the
+    // server's own MllpServerError (the codec's CharsetError rides on `cause`,
+    // never leaked) and surfaced as ctx.error so it flows through the pipeline.
+    let raw = "";
+    let decodeError: MllpServerError | undefined;
+    try {
+      raw = decodeBytes(payload);
+    } catch (error) {
+      decodeError = new MllpServerError(
+        MllpServerErrorCode.INCOMPATIBLE_CHARSET,
+        "The inbound message is not valid UTF-8; only UTF-8 is supported.",
+        { cause: error }
+      );
+    }
+
+    // Context creation is sync and never throws; parse failures (and the
+    // decode failure above) become ctx.error with an empty Root.
     const ctx = createContext({
-      bytes,
       connection,
+      error: decodeError,
       processor: this.#processor,
       raw,
     });
 
     try {
-      // Match route and collect middleware
       const match = this.#router.match(ctx);
       const middlewares = [...match.middlewares];
 
-      // Add the handler as the terminal middleware
-      if (match.handler) {
+      if (ctx.error) {
+        // Decode/parse failed: re-throw from inside the chain so the ack
+        // middleware turns it into a NAK (and onError fires if none is
+        // registered). The route handler is skipped — there is no usable
+        // message to route to.
+        const failure = ctx.error;
+        middlewares.push(() => {
+          throw failure;
+        });
+      } else if (match.handler) {
         const handler = match.handler;
         middlewares.push((handlerCtx: Context) => handler(handlerCtx));
       }
 
-      // Compose and execute
       await compose(middlewares)(ctx);
 
       return ctx.res;

@@ -74,15 +74,15 @@ describe("handle() — routing", () => {
   appMulti.on("*", () => RESPONSE_OK);
 
   bench("single route, small message", async () => {
-    await appSingle.handle(SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await appSingle.handle(smallBytes, MOCK_CONNECTION);
   });
 
   bench("8 routes (match 5th), small message", async () => {
-    await appMulti.handle(SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await appMulti.handle(smallBytes, MOCK_CONNECTION);
   });
 
   bench("single route, large message (200+ segments)", async () => {
-    await appSingle.handle(LARGE_MESSAGE, largeBytes, MOCK_CONNECTION);
+    await appSingle.handle(largeBytes, MOCK_CONNECTION);
   });
 });
 
@@ -107,15 +107,15 @@ describe("handle() — middleware", () => {
   app10.on("ADT^A01", () => RESPONSE_OK);
 
   bench("1 middleware", async () => {
-    await app1.handle(SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await app1.handle(smallBytes, MOCK_CONNECTION);
   });
 
   bench("5 middleware", async () => {
-    await app5.handle(SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await app5.handle(smallBytes, MOCK_CONNECTION);
   });
 
   bench("10 middleware", async () => {
-    await app10.handle(SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await app10.handle(smallBytes, MOCK_CONNECTION);
   });
 });
 
@@ -139,15 +139,15 @@ describe("handle() — handler awaits tree()", () => {
   });
 
   bench("tree(), small message", async () => {
-    await appTree.handle(SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await appTree.handle(smallBytes, MOCK_CONNECTION);
   });
 
   bench("tree(), large message (200+ segments)", async () => {
-    await appTreeLarge.handle(LARGE_MESSAGE, largeBytes, MOCK_CONNECTION);
+    await appTreeLarge.handle(largeBytes, MOCK_CONNECTION);
   });
 
   bench("result(), small message (tree + compile)", async () => {
-    await appResult.handle(SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await appResult.handle(smallBytes, MOCK_CONNECTION);
   });
 });
 
@@ -156,7 +156,7 @@ describe("handle() — no match", () => {
   app.on("ORM^O01", () => RESPONSE_OK);
 
   bench("no matching route", async () => {
-    await app.handle(SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await app.handle(smallBytes, MOCK_CONNECTION);
   });
 });
 
@@ -168,6 +168,6 @@ describe("handle() — error path", () => {
   app.onError(() => RESPONSE_OK);
 
   bench("handler throws, onError recovers", async () => {
-    await app.handle(SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await app.handle(smallBytes, MOCK_CONNECTION);
   });
 });

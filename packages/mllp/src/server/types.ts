@@ -37,11 +37,22 @@ export interface Response {
 export interface Context {
   /** Incoming message data */
   readonly req: {
-    /** Original HL7 message string (without MLLP framing) */
+    /**
+     * Decoded HL7v2 message text (UTF-8, without MLLP framing). Empty (`""`)
+     * when the payload could not be decoded as UTF-8 — see
+     * {@link Context.error}.
+     */
     readonly raw: string;
-    /** Raw bytes from MLLP frame payload */
-    readonly bytes: Uint8Array;
   };
+
+  /**
+   * The decode or parse failure for this message, when one occurred; otherwise
+   * `undefined`. The server never throws decode/parse errors out of band — it
+   * surfaces them here and through the middleware pipeline (the default ack
+   * middleware turns the failure into a NAK; `onError` fires when no ack
+   * middleware is registered). When set, {@link Context.ast} is an empty `Root`.
+   */
+  readonly error: Error | undefined;
 
   /** TCP connection metadata */
   readonly connection: ConnectionInfo;

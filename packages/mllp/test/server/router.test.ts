@@ -16,7 +16,6 @@ const CONNECTION = {
 
 function makeCtx(raw: string): Context {
   return createContext({
-    bytes: new TextEncoder().encode(raw),
     connection: CONNECTION,
     processor: parseHL7v2,
     raw,
