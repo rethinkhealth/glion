@@ -21,7 +21,7 @@ export type {
   MllpClientState,
   MllpSendOptions,
 } from "./client";
-export type { MllpConnector, MllpDuplex } from "./duplex";
+export type { MllpConnector, MllpDuplex } from "./client";
 export { MllpClientError, MllpErrorCode } from "./errors";
 export type { MllpClientErrorDetails, MllpDropReason } from "./errors";
 export type { MllpClientResponse, SendInput } from "./message";
