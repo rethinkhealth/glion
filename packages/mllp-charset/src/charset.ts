@@ -1,5 +1,4 @@
 import { AckApplicationReject, Hl7ErrorCode, Severity } from "@glion/ack";
-import { CHARSET_RULE_ID, HL7V2_LINT_SOURCE } from "@glion/lint-charset";
 import type { Middleware } from "@glion/mllp";
 
 /** ERR-2 location for every charset reject — the rule only ever checks MSH-18. */
@@ -40,13 +39,14 @@ export function charsetMiddleware(): Middleware {
     // Trigger the transformers so the charset rule populates ctx.file.messages.
     await ctx.tree();
 
-    // The parser always yields a `root`, so the rule's only fatal message on
-    // this path is a genuine MSH-18 violation — not its non-root developer guard.
+    // Diagnostics from @glion/lint-charset (origin "hl7v2-lint:charset"). The
+    // parser always yields a `root`, so the rule's only fatal message here is a
+    // genuine MSH-18 violation — not its non-root developer guard.
     const violation = ctx.file.messages.find(
       (message) =>
         message.fatal === true &&
-        message.source === HL7V2_LINT_SOURCE &&
-        message.ruleId === CHARSET_RULE_ID
+        message.source === "hl7v2-lint" &&
+        message.ruleId === "charset"
     );
 
     if (violation) {

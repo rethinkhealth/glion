@@ -3,21 +3,6 @@ import { select, value } from "@glion/util-query";
 import { lintRule } from "unified-lint-rule";
 
 /**
- * Source stamped on every message this rule emits (`hl7v2-lint`).
- * `unified-lint-rule` derives it from the part of the origin before the colon.
- * Exported so a consumer — e.g. a server strict-mode gate — can match this
- * rule's diagnostics without hard-coding the literal.
- */
-export const HL7V2_LINT_SOURCE = "hl7v2-lint";
-
-/**
- * Rule id stamped on every message this rule emits (`charset`) — the part of
- * the origin after the colon. Exported alongside {@link HL7V2_LINT_SOURCE} so a
- * consumer can identify this rule's diagnostics by `source` + `ruleId`.
- */
-export const CHARSET_RULE_ID = "charset";
-
-/**
  * MSH-18 values accepted by default: UTF-8 and its strict 7-bit subsets.
  * `ASCII` (HL7 table 0211 `ascii`, all versions) and `ISO IR6` (table 0211 from
  * v2.7) both name the 7-bit ASCII graphic set — every byte decodes identically
@@ -45,7 +30,7 @@ const normalize = (charset: string) => charset.trim().toUpperCase();
 
 const hl7v2LintCharset = lintRule<Nodes, CharsetLintOptions>(
   {
-    origin: `${HL7V2_LINT_SOURCE}:${CHARSET_RULE_ID}`,
+    origin: "hl7v2-lint:charset",
     url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-charset#readme",
   },
   (tree, file, options) => {

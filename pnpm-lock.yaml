@@ -1811,9 +1811,6 @@ importers:
       '@glion/ack':
         specifier: workspace:*
         version: link:../ack
-      '@glion/lint-charset':
-        specifier: workspace:*
-        version: link:../lint-charset
       '@glion/mllp':
         specifier: workspace:*
         version: link:../mllp

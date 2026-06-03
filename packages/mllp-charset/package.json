@@ -47,7 +47,6 @@
   },
   "dependencies": {
     "@glion/ack": "workspace:*",
-    "@glion/lint-charset": "workspace:*",
     "@glion/mllp": "workspace:*"
   },
   "devDependencies": {

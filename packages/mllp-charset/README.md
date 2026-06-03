@@ -52,7 +52,7 @@ A message declaring `UNICODE UTF-8`, or omitting `MSH-18` entirely, is accepted 
 
 ### `charsetMiddleware(): Middleware`
 
-Returns an MLLP `Middleware`. It awaits `ctx.tree()` (running the configured lint rules), then scans `ctx.file.messages` for a fatal message with `source: "hl7v2-lint"` and `ruleId: "charset"` — the constants exported by `@glion/lint-charset` as `HL7V2_LINT_SOURCE` and `CHARSET_RULE_ID`. When found, it throws `AckApplicationReject` (`@glion/ack`) with `errorCode: Hl7ErrorCode.DataTypeError`, `severity: Severity.Error`, `errorLocation` pointing at `MSH-18` (ERR-2), and the reason as `diagnosticInformation` (ERR-7).
+Returns an MLLP `Middleware`. It awaits `ctx.tree()` (running the configured lint rules), then scans `ctx.file.messages` for a fatal message from `@glion/lint-charset` (`source: "hl7v2-lint"`, `ruleId: "charset"`). When found, it throws `AckApplicationReject` (`@glion/ack`) with `errorCode: Hl7ErrorCode.DataTypeError`, `severity: Severity.Error`, `errorLocation` pointing at `MSH-18` (ERR-2), and the reason as `diagnosticInformation` (ERR-7).
 
 It takes no options: the set of accepted character sets is the rule's concern. To accept additional encodings, reconfigure `@glion/lint-charset` in your processor.
 

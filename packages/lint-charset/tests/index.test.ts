@@ -3,11 +3,7 @@ import { c, f, m, r, s } from "@glion/builder";
 import { unified } from "unified";
 import { VFile } from "vfile";
 
-import hl7v2LintCharset, {
-  CHARSET_RULE_ID,
-  DEFAULT_ALLOWED_CHARSETS,
-  HL7V2_LINT_SOURCE,
-} from "../src";
+import hl7v2LintCharset, { DEFAULT_ALLOWED_CHARSETS } from "../src";
 
 const messageToJson = (message: VFile["messages"][number] | undefined) =>
   // oxlint-disable-next-line unicorn/prefer-structured-clone
@@ -52,9 +48,7 @@ async function run(tree: Root, options?: { allow: readonly string[] }) {
 }
 
 describe("hl7v2-lint:charset", () => {
-  it("exposes source and rule id constants matching the origin", () => {
-    expect(HL7V2_LINT_SOURCE).toBe("hl7v2-lint");
-    expect(CHARSET_RULE_ID).toBe("charset");
+  it("exposes the default allow-list", () => {
     expect(DEFAULT_ALLOWED_CHARSETS).toContain("UNICODE UTF-8");
   });
 
@@ -99,8 +93,8 @@ describe("hl7v2-lint:charset", () => {
     expect(messageToJson(file.messages[0])).toMatchObject({
       reason:
         "MSH-18 (character set) value '8859/1' is not allowed (allowed: UNICODE UTF-8, ASCII, ISO IR6)",
-      ruleId: CHARSET_RULE_ID,
-      source: HL7V2_LINT_SOURCE,
+      ruleId: "charset",
+      source: "hl7v2-lint",
     });
   });
 
@@ -165,8 +159,8 @@ describe("hl7v2-lint:charset", () => {
     expect(file.messages).toHaveLength(1);
     expect(messageToJson(file.messages[0])).toMatchObject({
       reason: "Root node type must be 'root' — received 'segment' instead",
-      ruleId: CHARSET_RULE_ID,
-      source: HL7V2_LINT_SOURCE,
+      ruleId: "charset",
+      source: "hl7v2-lint",
     });
   });
 

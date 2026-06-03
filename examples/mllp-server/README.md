@@ -67,7 +67,7 @@ glion send samples/oru-r01.hl7 --local     # → AE · Patient not available · 
 The `adt-a01-8859` sample declares `MSH-18` as `8859/1` (ISO-8859-1), which the server only supports as UTF-8, so `charsetMiddleware()` rejects it with an `AR` NAK before the route runs:
 
 ```bash
-pnpm send:charset     # → AR · MSH-18 (character set) value '8859/1' is not allowed · exit 1
+glion send samples/adt-a01-8859.hl7 --local     # → AR · MSH-18 (character set) value '8859/1' is not allowed · exit 1
 ```
 
 For the programmatic client API — streaming, commit-level acks, mutual TLS — see the [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) package.

@@ -58,12 +58,8 @@ declare const hl7v2LintCharset: Plugin<[CharsetLintOptions?], Root>;
 export default hl7v2LintCharset;
 ```
 
-The package also exports the constants a consumer needs to match this rule's
-diagnostics without coupling to the origin string:
-
-- `CHARSET_RULE_ID` (`"charset"`) — the emitted `ruleId`.
-- `HL7V2_LINT_SOURCE` (`"hl7v2-lint"`) — the emitted `source`.
-- `DEFAULT_ALLOWED_CHARSETS` — the default allow-list.
+Emitted messages carry `source: "hl7v2-lint"` and `ruleId: "charset"`. The
+package also exports `DEFAULT_ALLOWED_CHARSETS`, the default allow-list.
 
 ## What it checks
 
