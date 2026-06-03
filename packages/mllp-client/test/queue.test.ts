@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest";
 
 import { MllpClientError, MllpErrorCode } from "../src/errors";
 import type { MllpClientResponse } from "../src/message";
-import { createSendQueue } from "../src/queue";
+import { createSendQueue } from "../src/util/queue";
 
 const BYTES = new Uint8Array([0x0b, 0x4d, 0x53, 0x48, 0x1c, 0x0d]);
 
