@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "glion dev",
     "start": "glion start",
-    "send": "glion send samples/adt-a01.hl7 --local"
+    "send": "glion send samples/adt-a01.hl7 --local",
+    "send:charset": "glion send samples/adt-a01-8859.hl7 --local"
   },
   "dependencies": {
     "@glion/ack": "latest",
@@ -12,6 +13,7 @@
     "@glion/hl7v2": "latest",
     "@glion/mllp": "latest",
     "@glion/mllp-ack": "latest",
+    "@glion/mllp-charset": "latest",
     "consola": "3.4.2"
   },
   "devDependencies": {

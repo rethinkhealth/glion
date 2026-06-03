@@ -9,6 +9,7 @@ import {
 import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
 import { ackMiddleware } from "@glion/mllp-ack";
+import { charsetMiddleware } from "@glion/mllp-charset";
 import { consola } from "consola";
 
 const app = new Mllp();
@@ -38,6 +39,12 @@ app.use(async (ctx, next) => {
     throw error;
   }
 });
+
+// Strict mode: reject inbound messages whose MSH-18 character set is not
+// UTF-8-compatible with an AR NAK, before any route runs. The allow-list lives
+// with the `@glion/lint-charset` rule (error severity in the recommended
+// preset, which `parseHL7v2` uses).
+app.use(charsetMiddleware());
 
 // Routes
 app.on("ADT^A01", (ctx) => {

@@ -1,3 +1,4 @@
+import hl7v2LintCharset from "@glion/lint-charset";
 import hl7v2LintMessageVersion from "@glion/lint-message-version";
 import hl7v2LintNoTrailingEmptyField from "@glion/lint-no-trailing-empty-field";
 import hl7v2LintRequiredMessageHeader from "@glion/lint-required-message-header";
@@ -31,6 +32,7 @@ const hl7v2PresetLintRecommended: Preset = {
     [hl7v2LintSegmentHeaderLength, ["error"]],
     [hl7v2LintRequiredMessageHeader, ["error"]],
     [hl7v2LintMessageVersion, ["error"]],
+    [hl7v2LintCharset, ["error"]],
     hl7v2LintNoTrailingEmptyField,
   ],
 };

@@ -911,6 +911,58 @@ importers:
         specifier: 4.1.5
         version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
 
+  packages/lint-charset:
+    dependencies:
+      '@glion/util-query':
+        specifier: workspace:*
+        version: link:../util-query
+      unified-lint-rule:
+        specifier: 3.0.1
+        version: 3.0.1
+    devDependencies:
+      '@glion/ast':
+        specifier: workspace:*
+        version: link:../ast
+      '@glion/builder':
+        specifier: workspace:*
+        version: link:../builder
+      '@glion/check-readme':
+        specifier: workspace:*
+        version: link:../../tools/check-readme
+      '@glion/testing':
+        specifier: workspace:*
+        version: link:../../tools/testing
+      '@glion/tsconfig':
+        specifier: workspace:*
+        version: link:../../tools/tsconfig
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
+      '@types/unist':
+        specifier: ^3.0.3
+        version: 3.0.3
+      '@vitest/coverage-v8':
+        specifier: 4.1.5
+        version: 4.1.5(vitest@4.1.5)
+      publint:
+        specifier: 0.3.18
+        version: 0.3.18
+      tsdown:
+        specifier: 0.21.10
+        version: 0.21.10(publint@0.3.18)(typescript@6.0.3)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
+      vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.5
+        version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
+
   packages/lint-max-message-size:
     dependencies:
       pluralize:
@@ -1754,6 +1806,52 @@ importers:
         specifier: 4.1.5
         version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
 
+  packages/mllp-charset:
+    dependencies:
+      '@glion/ack':
+        specifier: workspace:*
+        version: link:../ack
+      '@glion/lint-charset':
+        specifier: workspace:*
+        version: link:../lint-charset
+      '@glion/mllp':
+        specifier: workspace:*
+        version: link:../mllp
+    devDependencies:
+      '@glion/check-readme':
+        specifier: workspace:*
+        version: link:../../tools/check-readme
+      '@glion/hl7v2':
+        specifier: workspace:*
+        version: link:../hl7v2
+      '@glion/mllp-ack':
+        specifier: workspace:*
+        version: link:../mllp-ack
+      '@glion/testing':
+        specifier: workspace:*
+        version: link:../../tools/testing
+      '@glion/tsconfig':
+        specifier: workspace:*
+        version: link:../../tools/tsconfig
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
+      '@vitest/coverage-v8':
+        specifier: 4.1.5
+        version: 4.1.5(vitest@4.1.5)
+      publint:
+        specifier: 0.3.18
+        version: 0.3.18
+      tsdown:
+        specifier: 0.21.10
+        version: 0.21.10(publint@0.3.18)(typescript@6.0.3)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.5
+        version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
+
   packages/mllp-client:
     dependencies:
       '@glion/ack':
@@ -2018,6 +2116,9 @@ importers:
 
   packages/preset-lint-recommended:
     dependencies:
+      '@glion/lint-charset':
+        specifier: workspace:*
+        version: link:../lint-charset
       '@glion/lint-message-version':
         specifier: workspace:*
         version: link:../lint-message-version

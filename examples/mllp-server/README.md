@@ -25,12 +25,13 @@ The server listens on `127.0.0.1:2575` by default.
 
 - `glion.config.ts` — entry path, port (`2575`), optional TLS / watch.
 - `src/app.ts` — the `Mllp` instance, exported as the default. The CLI picks it up automatically.
-- `samples/` — sample HL7v2 messages for `glion send` (`adt-a01` accepts, `oru-r01` is rejected).
+- `samples/` — sample HL7v2 messages for `glion send` (`adt-a01` accepts, `oru-r01` is rejected, `adt-a01-8859` is rejected for its non-UTF-8 character set).
 
 The app:
 
 - Registers routes for `ADT^A01`, `ORM^O01`, and `ORU^R01`, plus a catch-all (`*`) that rejects unknown message types.
 - Uses `ackMiddleware()` from `@glion/mllp-ack` to turn handler return values into `AA` ACKs and handler throws into the matching NAK (`AE`/`AR`/`CE`/`CR`).
+- Uses `charsetMiddleware()` from `@glion/mllp-charset` to reject any message whose `MSH-18` character set is not UTF-8-compatible with an `AR` NAK, before routing.
 - Adds a small logging middleware to show the onion model: log on entry, `await next()`, log the result.
 - Throws `AckApplicationError` from the `ORU^R01` route to demonstrate a typed NAK end-to-end.
 
@@ -63,6 +64,12 @@ glion send samples/adt-a01.hl7 --local --json
 glion send samples/oru-r01.hl7 --local     # → AE · Patient not available · exit 1
 ```
 
+The `adt-a01-8859` sample declares `MSH-18` as `8859/1` (ISO-8859-1), which the server only supports as UTF-8, so `charsetMiddleware()` rejects it with an `AR` NAK before the route runs:
+
+```bash
+pnpm send:charset     # → AR · MSH-18 (character set) value '8859/1' is not allowed · exit 1
+```
+
 For the programmatic client API — streaming, commit-level acks, mutual TLS — see the [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) package.
 
 ## Notes
@@ -70,6 +77,7 @@ For the programmatic client API — streaming, commit-level acks, mutual TLS —
 - Requires Node.js ≥ 20.
 - [`@glion/mllp`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp) — server API and routing reference.
 - [`@glion/mllp-ack`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-ack) — ACK middleware.
+- [`@glion/mllp-charset`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-charset) — strict-charset middleware.
 - [`@glion/ack`](https://github.com/rethinkhealth/glion/tree/main/packages/ack) — `AckException` hierarchy.
 - [`mllp-server-bun`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server-bun) — same app under Bun.
 - [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) — programmatic MLLP client (streaming, modes, TLS).
