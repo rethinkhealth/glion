@@ -179,45 +179,45 @@ export class Mllp {
       );
     }
 
-    // Decode here (not in the transport adapter) so every runtime gets the
-    // same behavior. A non-UTF-8 payload does not throw — it is captured as the
-    // server's own MllpServerError (the codec's CharsetError rides on `cause`,
-    // never leaked) and surfaced as ctx.error so it flows through the pipeline.
+    // Decode here (not in the transport adapter) so every runtime behaves the
+    // same. A non-UTF-8 payload does not throw out of band — it is captured as
+    // the server's own MllpServerError (the codec's CharsetError rides on
+    // `cause`, never leaked).
     let raw = "";
-    let decodeError: MllpServerError | undefined;
+    let failure: Error | undefined;
     try {
       raw = decodeBytes(payload);
     } catch (error) {
-      decodeError = new MllpServerError(
+      failure = new MllpServerError(
         MllpServerErrorCode.INCOMPATIBLE_CHARSET,
         "The inbound message is not valid UTF-8; only UTF-8 is supported.",
         { cause: error }
       );
     }
 
-    // Context creation is sync and never throws; parse failures (and the
-    // decode failure above) become ctx.error with an empty Root.
+    // Context creation is total: a parser failure is recorded on ctx.error
+    // (with an empty Root) rather than thrown.
     const ctx = createContext({
       connection,
-      error: decodeError,
       processor: this.#processor,
       raw,
     });
+    failure ??= ctx.error;
+
+    // A payload we couldn't decode or parse has nothing to route. Hand the
+    // failure to the error path — exactly where a thrown handler error ends up
+    // (`#handleError` → the app's `onError`, else re-thrown to `serve()`). This
+    // mirrors Hono/Koa: a pre-dispatch failure goes straight to the error
+    // handler, not through a synthetic step in the middleware chain.
+    if (failure) {
+      return this.#handleError(failure, ctx);
+    }
 
     try {
       const match = this.#router.match(ctx);
       const middlewares = [...match.middlewares];
 
-      if (ctx.error) {
-        // Decode/parse failed: re-throw from inside the chain so the ack
-        // middleware turns it into a NAK (and onError fires if none is
-        // registered). The route handler is skipped — there is no usable
-        // message to route to.
-        const failure = ctx.error;
-        middlewares.push(() => {
-          throw failure;
-        });
-      } else if (match.handler) {
+      if (match.handler) {
         const handler = match.handler;
         middlewares.push((handlerCtx: Context) => handler(handlerCtx));
       }

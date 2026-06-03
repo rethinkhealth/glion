@@ -232,9 +232,9 @@ app.onError(async (err, ctx) => {
 });
 ```
 
-Decode (non-UTF-8) and parse failures don't throw out of band — they are surfaced as `ctx.error` and re-thrown _through_ the pipeline, so an acknowledgment middleware turns them into a NAK and `onError`/error handlers see them just like a handler throw.
+Decode (non-UTF-8) and parse failures don't throw out of band. The core never lets them escape `handle()` — it routes them to the **same error path as a thrown handler error**: your `onError` handler is invoked (and can build a NAK), exactly like Hono's `app.onError` or Koa's top-level error middleware. A message that can't be decoded or parsed has nothing to route, so it skips the middleware chain entirely.
 
-Without an error handler (and no acknowledgment middleware), errors are absorbed and no response is sent. The sending system will time out and retry per standard MLLP behaviour. See the [design notes](#design-notes) below for the rationale.
+Without an error handler, errors are absorbed and no response is sent. The sending system will time out and retry per standard MLLP behaviour. See the [design notes](#design-notes) below for the rationale.
 
 ## TLS
 

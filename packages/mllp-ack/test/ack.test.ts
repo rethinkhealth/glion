@@ -362,30 +362,4 @@ describe("ack middleware", () => {
       expect(order).toEqual(["before", "handler", "after"]);
     });
   });
-
-  describe("decode/parse failures propagate through the pipeline", () => {
-    it("NAKs a non-UTF-8 payload instead of failing silently", async () => {
-      const app = new Mllp().parser(parseHL7v2);
-      app.use(ackMiddleware());
-      let handlerRan = false;
-      app.on("*", () => {
-        handlerRan = true;
-      });
-
-      // "José" with é as the Latin-1 byte 0xE9 — invalid UTF-8.
-      const message =
-        "MSH|^~\\&|S|F|R|F|20240101120000||ADT^A01|MSG001|P|2.5.1\rPID|1||1||José^John";
-      const latin1 = Uint8Array.from(message, (ch) => ch.codePointAt(0) ?? 0);
-
-      const response = await app.handle(latin1, MOCK_CONNECTION);
-
-      // The handler never runs; the decode failure flows through the pipeline
-      // and the ack middleware turns it into an application-error NAK that
-      // names the reason — instead of silence or a corrupted body.
-      expect(handlerRan).toBe(false);
-      expect(response).toBeDefined();
-      expect(response!.raw).toContain("MSA|AE");
-      expect(response!.raw).toContain("not valid UTF-8");
-    });
-  });
 });

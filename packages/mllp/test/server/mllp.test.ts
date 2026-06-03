@@ -290,6 +290,39 @@ describe("Mllp", () => {
     ).rejects.toThrow("crash");
   });
 
+  // "é" as the single Latin-1 byte 0xE9 makes the payload invalid UTF-8.
+  const NON_UTF8 = Uint8Array.from(
+    "MSH|^~\\&|S|F|R|F|20240101120000||ADT^A01|MSG001|P|2.5.1\rPID|1||1||José",
+    (ch) => ch.codePointAt(0) ?? 0
+  );
+
+  it("routes a non-UTF-8 payload to the error handler, not the route handler", async () => {
+    const app = createApp();
+    let handlerRan = false;
+    app.on("*", () => {
+      handlerRan = true;
+    });
+    // The error handler builds the response (the error itself — a non-UTF-8
+    // MllpServerError — is asserted by the re-throw test below).
+    app.onError(async () => ({ raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|" }));
+
+    const response = await app.handle(NON_UTF8, MOCK_CONNECTION);
+
+    expect(handlerRan).toBe(false);
+    expect(response?.raw).toContain("MSA|AR");
+  });
+
+  it("re-throws a non-UTF-8 payload when no error handler is registered", async () => {
+    const app = createApp();
+    app.on("*", () => {
+      // never reached
+    });
+
+    await expect(app.handle(NON_UTF8, MOCK_CONNECTION)).rejects.toThrow(
+      "not valid UTF-8"
+    );
+  });
+
   it("re-throws error handler's error when error handler itself throws", async () => {
     const app = createApp();
     app.on("*", async () => {

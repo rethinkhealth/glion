@@ -546,10 +546,10 @@ await client.close();
 - [Node.js net module](https://nodejs.org/api/net.html) — `net.createServer`
 - [Web Streams API](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API) — `TransformStream`, `ReadableStream`
 
-## Update — UTF-8 decode and parse moved into the core; errors propagate through the pipeline
+## Update — UTF-8 decode and parse moved into the core; failures routed to the error handler
 
 The implemented design refines the context/error flow described above:
 
 - **`Mllp.handle(payload, connection)` takes bytes, not text.** The UTF-8 decode (`@glion/util-charset` `decodeBytes`) happens inside the core `handle()` — not in the Node `serve.ts` adapter — so every runtime adapter behaves identically and only forwards the de-framed payload.
-- **`ctx.req` no longer carries `bytes`.** It exposes only `req.raw` (the decoded text, `""` when the payload is not UTF-8); nothing read `req.bytes`, so it was dropped. A new `ctx.error` carries the decode/parse failure.
-- **Decode/parse failures never throw out of band.** `createContext` is total: on a decode failure (or a custom parser throw) it yields an empty `Root` and sets `ctx.error`. `handle()` re-throws that failure from _inside_ the middleware chain, so an acknowledgment middleware turns it into a NAK and `onError` fires only when none is registered — the same path as a handler throw. This supersedes the earlier behavior where a non-UTF-8 frame bypassed the pipeline and surfaced only through `onError` (see #659/#660).
+- **`ctx.req` no longer carries `bytes`.** It exposes only `req.raw` (the decoded text, `""` when the payload is not UTF-8); nothing read `req.bytes`, so it was dropped. `ctx.error` records a parser failure (when the processor's parser throws).
+- **Decode/parse failures never throw out of band.** `decodeBytes` runs in `handle()` and `createContext` is total (a parser throw yields an empty `Root` recorded on `ctx.error`). A payload that can't be decoded or parsed has nothing to route, so `handle()` hands the failure straight to `#handleError` — the **same destination as a thrown handler error** — which invokes the app's `onError` (it can build a NAK) or re-throws to `serve()`. This mirrors Hono's `dispatch` (`catch (err) → #handleError → errorHandler`) and Koa's top-level try/catch, rather than injecting a synthetic throwing step into the middleware chain. The ack **middleware** handles only in-chain (post-parse, application-level) throws; a non-UTF-8 frame reaches `onError` as before (#659/#660), now from the runtime-agnostic core.

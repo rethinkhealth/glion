@@ -46,11 +46,12 @@ export interface Context {
   };
 
   /**
-   * The decode or parse failure for this message, when one occurred; otherwise
-   * `undefined`. The server never throws decode/parse errors out of band — it
-   * surfaces them here and through the middleware pipeline (the default ack
-   * middleware turns the failure into a NAK; `onError` fires when no ack
-   * middleware is registered). When set, {@link Context.ast} is an empty `Root`.
+   * The eager-parse failure for this message, when the processor's parser
+   * threw; otherwise `undefined`. Parsing never throws out of band — the
+   * failure is recorded here (and {@link Context.ast} is an empty `Root`) so
+   * `handle()` can route it to the error path (`onError`) like a thrown handler
+   * error. A decode failure (non-UTF-8 payload) is handled the same way but is
+   * surfaced as the `Error` passed to `onError`, not on this field.
    */
   readonly error: Error | undefined;
 

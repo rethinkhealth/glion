@@ -13,21 +13,12 @@ import type {
  * Options for creating a Context instance.
  */
 export interface CreateContextOptions {
-  /**
-   * Decoded HL7 message text. Empty (`""`) when
-   * {@link CreateContextOptions.error} is set.
-   */
+  /** Decoded HL7 message text (`""` for an undecodable payload). */
   raw: string;
   /** Connection metadata */
   connection: ConnectionInfo;
   /** HL7v2 unified processor */
   processor: Hl7v2Processor;
-  /**
-   * A decode failure that already occurred (the payload was not UTF-8). When
-   * set, parsing is skipped, `ctx.ast` is an empty `Root`, and this becomes
-   * `ctx.error`.
-   */
-  error?: Error;
 }
 
 /**
@@ -48,27 +39,23 @@ export interface CreateContextOptions {
  * the tree, the transform and compile steps never execute.
  */
 export function createContext(options: CreateContextOptions): Context {
-  const { raw, connection, processor, error: decodeError } = options;
+  const { raw, connection, processor } = options;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
 
   // ── Eager: parse (sync, fast) ──────────────────────────────────────
   // VFile carries the input through the pipeline and collects diagnostics.
-  // Parsing never throws out of band: a decode failure (passed in) or a
-  // parser throw yields an empty Root and is surfaced as `ctx.error`, so the
-  // failure flows through the middleware pipeline instead of escaping it.
+  // Parsing never throws out of band: a parser failure yields an empty Root
+  // and is recorded on `ctx.error` so the caller can route it to the error
+  // path instead of it escaping context creation.
   const file = new VFile(raw);
   let parsed: Root = { children: [], type: "root" };
-  let error = decodeError;
-  if (!error) {
-    try {
-      parsed = processor.parse(file);
-    } catch (parseError) {
-      error =
-        parseError instanceof Error
-          ? parseError
-          : new Error(String(parseError));
-    }
+  let error: Error | undefined;
+  try {
+    parsed = processor.parse(file);
+  } catch (parseError) {
+    error =
+      parseError instanceof Error ? parseError : new Error(String(parseError));
   }
 
   // Extract routing fields as strings from the parsed tree.
