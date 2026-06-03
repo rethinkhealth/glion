@@ -1007,9 +1007,10 @@ describe("MllpClient — observability getters", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Send queue. Concurrent sends queue (FIFO) and run one at a time. queueDepth
-// counts waiting sends; the per-send timeout starts when the send reaches the
-// wire; close() rejects queued sends and a drop fails the whole queue.
+// Single-flight. One send is on the wire at a time. The FIFO queue is NOT wired
+// yet (./queue.ts is kept but unused), so a concurrent send while one is in
+// flight rejects with SEND_IN_PROGRESS. After a send settles (ACK, NAK, or
+// timeout), the next send proceeds; close()/drop reject the in-flight send.
 // ---------------------------------------------------------------------------
 
 /**
@@ -1023,111 +1024,8 @@ function controlIdOfFrame(chunk: Uint8Array): string {
   return value(tree, "MSH-10[1].1.1")?.value ?? "";
 }
 
-describe("send() — queue (Phase 4)", () => {
-  it("queues concurrent sends and resolves them in FIFO order", async () => {
-    const fake = createFakeDuplex({
-      onWrite: (chunk, peer) => {
-        // Echo an ACK correlating to whichever request was just written.
-        peer.injectPeerBytes(frame(requestAck("AA", controlIdOfFrame(chunk))));
-      },
-    });
-    const client = makeClient(fake);
-    await client.connect();
-
-    const settled: string[] = [];
-    const record = (r: { requestControlId: string }) => {
-      settled.push(r.requestControlId);
-    };
-    const p1 = client.send(requestWithControlId("FIRST")).then(record);
-    const p2 = client.send(requestWithControlId("SECOND")).then(record);
-    const p3 = client.send(requestWithControlId("THIRD")).then(record);
-
-    await Promise.all([p1, p2, p3]);
-    expect(settled).toEqual(["FIRST", "SECOND", "THIRD"]);
-    expect(client.state).toBe("connected");
-    expect(client.queueDepth).toBe(0);
-  });
-
-  it("reports queueDepth excluding the in-flight send", async () => {
-    const fake = createFakeDuplex({ onWrite: () => {} }); // peer silent
-    const client = makeClient(fake);
-    await client.connect();
-    expect(client.queueDepth).toBe(0);
-
-    const p1 = client.send(REQUEST); // goes on the wire immediately
-    const p2 = client.send(REQUEST); // queued
-    const p3 = client.send(REQUEST); // queued
-    expect(client.queueDepth).toBe(2);
-
-    await client.close();
-    await Promise.allSettled([p1, p2, p3]);
-    expect(client.queueDepth).toBe(0);
-  });
-
-  it("does not start a queued send's deadline until it reaches the wire", async () => {
-    // The timeout is wire-only: a send waiting behind another does NOT burn its
-    // deadline while queued. p1 occupies the wire indefinitely; p2's 20ms
-    // deadline must NOT fire while it is stuck in the queue (the clock only
-    // starts once p2 is dispatched).
-    const fake = createFakeDuplex({ onWrite: () => {} }); // peer never responds
-    const client = makeClient(fake);
-    await client.connect();
-
-    const p1 = client.send(REQUEST); // occupies the wire indefinitely
-    const p2 = client.send(REQUEST, { timeoutMs: 20 });
-    // Keep both rejections observed so neither is an unhandled rejection.
-    const p1Settled = p1.then(noop, noop);
-    const p2Settled = p2.then(noop, noop);
-    expect(client.queueDepth).toBe(1);
-
-    // Well past p2's 20ms deadline — but p2 is still queued behind p1, so its
-    // clock has not started. Race it against a sentinel: it must still be
-    // pending (the sentinel wins), not timed out.
-    const sentinel = Symbol("pending");
-    const winner = await Promise.race([
-      p2Settled.then(() => "settled" as const),
-      sleep(60).then(() => sentinel),
-    ]);
-    expect(winner).toBe(sentinel);
-    expect(client.queueDepth).toBe(1);
-    // p2 never reached the wire: exactly one VT (p1's) was written.
-    const vtCount = [...fake.capturedWrites()].filter((b) => b === 0x0b).length;
-    expect(vtCount).toBe(1);
-
-    // On close, the still-queued p2 fails CLOSED (never reached the wire) —
-    // NOT SEND_TIMEOUT.
-    await client.close();
-    await expect(p2).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
-    await p1Settled;
-  });
-
-  it("rejects queued sends with CLOSED when the connection drops", async () => {
-    const fake = createFakeDuplex({ onWrite: () => {} }); // peer silent
-    const client = makeClient(fake);
-    await client.connect();
-
-    const p1 = client.send(REQUEST); // on the wire
-    const p2 = client.send(REQUEST); // queued
-    const p3 = client.send(REQUEST); // queued
-    expect(client.queueDepth).toBe(2);
-
-    fake.closePeer();
-
-    // The in-flight send was awaiting an ACK → DROPPED with the peer-drop reason.
-    await expect(p1).rejects.toMatchObject({
-      code: MllpErrorCode.DROPPED,
-      reason: "peer-drop",
-    });
-    // The queued sends never reached the wire → CLOSED, not DROPPED.
-    await expect(p2).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
-    await expect(p2).rejects.toBeInstanceOf(MllpClientError);
-    await expect(p2).rejects.not.toMatchObject({ code: MllpErrorCode.DROPPED });
-    await expect(p3).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
-    expect(client.queueDepth).toBe(0);
-    expect(client.state).toBe("closed");
-  });
-
-  it("runs a second send after the first completes", async () => {
+describe("send() — single-flight", () => {
+  it("runs sequential sends one after another", async () => {
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
@@ -1135,12 +1033,28 @@ describe("send() — queue (Phase 4)", () => {
     const r2 = await client.send(REQUEST);
     expect(r1.code).toBe("AA");
     expect(r2.code).toBe("AA");
-    expect(client.queueDepth).toBe(0);
+    expect(client.state).toBe("connected");
   });
 
-  it("keeps draining after the in-flight send draws a NAK", async () => {
-    // Peer NAKs the first request (AR) and accepts the second (AA). An
-    // application-level rejection must not wedge the queue.
+  it("rejects a concurrent send with SEND_IN_PROGRESS while one is in flight", async () => {
+    const fake = createFakeDuplex({ onWrite: () => {} }); // peer silent — p1 stays in flight
+    const client = makeClient(fake);
+    await client.connect();
+
+    const p1 = client.send(REQUEST); // occupies the wire
+    const p1Settled = p1.then(noop, noop);
+    await expect(client.send(REQUEST)).rejects.toMatchObject({
+      code: MllpErrorCode.SEND_IN_PROGRESS,
+    });
+
+    // close() releases the in-flight send so it isn't an unhandled rejection.
+    await client.close();
+    await expect(p1).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
+    await p1Settled;
+  });
+
+  it("lets the next send proceed after the in-flight send draws a NAK", async () => {
+    // An application-level rejection must not wedge the client.
     let writes = 0;
     const fake = createFakeDuplex({
       onWrite: (chunk, peer) => {
@@ -1152,20 +1066,17 @@ describe("send() — queue (Phase 4)", () => {
     const client = makeClient(fake);
     await client.connect();
 
-    const p1 = client.send(requestWithControlId("FIRST"));
-    const p2 = client.send(requestWithControlId("SECOND"));
-
-    await expect(p1).rejects.toBeInstanceOf(AckApplicationReject);
-    const r2 = await p2;
+    await expect(
+      client.send(requestWithControlId("FIRST"))
+    ).rejects.toBeInstanceOf(AckApplicationReject);
+    const r2 = await client.send(requestWithControlId("SECOND"));
     expect(r2.code).toBe("AA");
     expect(client.state).toBe("connected");
-    expect(client.queueDepth).toBe(0);
   });
 
-  it("times out the in-flight send and lets the next queued send proceed", async () => {
+  it("lets the next send proceed after the in-flight send times out", async () => {
     // The peer answers only the second send; the first hangs until its deadline
-    // fires. After the in-flight send settles (SEND_TIMEOUT), the drain loop
-    // must dispatch the queued one — a send timeout does not wedge the queue.
+    // fires. A send timeout must not wedge the client.
     let writes = 0;
     const fake = createFakeDuplex({
       onWrite: (chunk, peer) => {
@@ -1180,39 +1091,24 @@ describe("send() — queue (Phase 4)", () => {
     const client = makeClient(fake);
     await client.connect();
 
-    const p1 = client.send(requestWithControlId("FIRST"), { timeoutMs: 20 }); // on the wire, hangs then times out
-    const p2 = client.send(requestWithControlId("SECOND")); // queued
-    expect(client.queueDepth).toBe(1);
-
-    await expect(p1).rejects.toMatchObject({
-      code: MllpErrorCode.SEND_TIMEOUT,
-    });
-    const r2 = await p2;
+    await expect(
+      client.send(requestWithControlId("FIRST"), { timeoutMs: 20 })
+    ).rejects.toMatchObject({ code: MllpErrorCode.SEND_TIMEOUT });
+    const r2 = await client.send(requestWithControlId("SECOND"));
     expect(r2.code).toBe("AA");
     expect(client.state).toBe("connected");
-    expect(client.queueDepth).toBe(0);
   });
 
-  it("rejects queued sends with CLOSED (not DROPPED) on close()", async () => {
+  it("rejects the in-flight send with CLOSED on close()", async () => {
     const fake = createFakeDuplex({ onWrite: () => {} }); // peer silent
     const client = makeClient(fake);
     await client.connect();
 
-    const p1 = client.send(REQUEST); // on the wire
-    const p2 = client.send(REQUEST); // queued
-    const p3 = client.send(REQUEST); // queued
-    expect(client.queueDepth).toBe(2);
-
+    const p1 = client.send(REQUEST);
     await client.close();
-
-    for (const p of [p1, p2, p3]) {
-      await expect(p).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
-      await expect(p).rejects.toBeInstanceOf(MllpClientError);
-      await expect(p).rejects.not.toMatchObject({
-        code: MllpErrorCode.DROPPED,
-      });
-    }
-    expect(client.queueDepth).toBe(0);
+    await expect(p1).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
+    await expect(p1).rejects.toBeInstanceOf(MllpClientError);
+    expect(client.state).toBe("closed");
   });
 });
 
