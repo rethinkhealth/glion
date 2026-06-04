@@ -1,6 +1,6 @@
 {
   "name": "@glion/profiles",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "HL7v2 version-specific profile definitions (fields, data types, tables, segments) with LRU-cached loading",
   "keywords": [
     "health",

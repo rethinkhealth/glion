@@ -21,11 +21,10 @@
  *
  * **Inbound** ({@link parseResponse}, {@link MllpClientResponse}): the peer's
  * de-framed ACK bytes become a structured response, or throw. The ACK is
- * decoded as strict UTF-8 (a non-UTF-8 peer is rejected with `PARSE_FAILED`
- * rather than silently substituted — this inherits the glion ecosystem's UTF-8
- * assumption, tracked separately), parsed, and correlated against the request's
- * MSH-10. Accept codes (`AA`/`CA`) resolve; a NAK (`AE`/`AR`/`CE`/`CR`) throws
- * the matching `@glion/ack` `AckException`.
+ * decoded as strict UTF-8 via `@glion/util-charset` (a non-UTF-8 peer is
+ * rejected with `PARSE_FAILED` rather than silently substituted), parsed, and
+ * correlated against the request's MSH-10. Accept codes (`AA`/`CA`) resolve; a
+ * NAK (`AE`/`AR`/`CE`/`CR`) throws the matching `@glion/ack` `AckException`.
  *
  * @module
  */
@@ -36,16 +35,10 @@ import type { Root } from "@glion/ast";
 import { frame } from "@glion/mllp-transport";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
+import { decodeBytes } from "@glion/util-charset";
 import { value } from "@glion/util-query";
 
 import { MllpClientError, MllpErrorCode } from "./errors";
-
-/**
- * Strict UTF-8 decoder — throws on invalid bytes. HL7v2 messages SHOULD be
- * ASCII / UTF-8 in 2.x and later. Latin-1 / Windows-1252 peers fail
- * `PARSE_FAILED` rather than silently substitute U+FFFD.
- */
-const TEXT_DECODER = new TextDecoder("utf-8", { fatal: true });
 
 // ── Outbound ───────────────────────────────────────────────────────────────
 
@@ -144,12 +137,12 @@ export function parseResponse(
 ): ParsedAck {
   let text: string;
   try {
-    text = TEXT_DECODER.decode(rawAck);
+    text = decodeBytes(rawAck);
   } catch (error) {
-    // The fatal UTF-8 decoder rejected the bytes; surface PARSE_FAILED (not a
-    // raw TypeError) so "every failure is an MllpClientError you can branch on
-    // by code" holds on the ACK path. (The client assumes UTF-8 — see the
-    // encoding GH issue — so a non-UTF-8 peer trips this.)
+    // decodeBytes (strict UTF-8) rejected the bytes; surface PARSE_FAILED, not
+    // the raw CharsetError, so "every failure is an MllpClientError you can
+    // branch on by code" holds on the ACK path. The CharsetError stays on
+    // `cause` for diagnostics — consumers never import @glion/util-charset.
     throw new MllpClientError(
       MllpErrorCode.PARSE_FAILED,
       "Could not decode the peer's ACK bytes as UTF-8 (see the error's cause).",

@@ -1,5 +1,14 @@
 # @rethinkhealth/hl7v2-annotate-profile-context
 
+## 0.17.0
+
+### Patch Changes
+
+- @glion/ast@0.17.0
+- @glion/profiles@0.17.0
+- @glion/util-query@0.17.0
+- @glion/util-visit@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes

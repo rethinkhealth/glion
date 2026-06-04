@@ -37,8 +37,9 @@ const errorMessageInfo = new WeakMap<Error, MessageInfo>();
  * by `Mllp.handle()`. Returns `undefined` for errors that did not
  * originate from message processing (e.g., lifecycle callback errors).
  */
-export function getMessageInfo(error: Error): MessageInfo | undefined {
-  return errorMessageInfo.get(error);
+export function getMessageInfo(error: unknown): MessageInfo | undefined {
+  // A WeakMap lookup; a non-error key simply misses and yields undefined.
+  return errorMessageInfo.get(error as Error);
 }
 
 /**

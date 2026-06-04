@@ -1,6 +1,6 @@
 {
   "name": "@glion/ast",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "HL7v2 is a specification for representing HL7v2 messages as an abstract syntax tree. It implements the unist spec.",
   "keywords": [
     "bin",

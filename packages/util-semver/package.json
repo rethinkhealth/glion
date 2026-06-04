@@ -1,6 +1,6 @@
 {
   "name": "@glion/util-semver",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Tiny, fast HL7v2 version and range utilities (basic comparators only)",
   "keywords": [
     "health",

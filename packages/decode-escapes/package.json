@@ -1,6 +1,6 @@
 {
   "name": "@glion/decode-escapes",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "hl7v2 plugin to decode hl7v2 escape sequences",
   "keywords": [
     "health",

@@ -11,7 +11,9 @@
  */
 
 import { frame, FrameDecoderStream } from "@glion/mllp-transport";
+import { CharsetError, decodeBytes } from "@glion/util-charset";
 
+import { MllpServerError, MllpServerErrorCode } from "../errors";
 import type { AdapterSocket } from "../server/adapter";
 import type { MessageInfo, Mllp } from "../server/mllp";
 import { getMessageInfo } from "../server/mllp";
@@ -21,9 +23,6 @@ import { nodeAdapter } from "./adapter";
 /** Monotonically-increasing connection ID counter. */
 // oxlint-disable-next-line prefer-const
 let nextConnectionId = 1;
-
-/** Decodes a de-framed payload's bytes to its HL7v2 text for the handler. */
-const TEXT_DECODER = new TextDecoder();
 
 /**
  * Lifecycle callback invoked for connection events.
@@ -42,10 +41,12 @@ export type ConnectionCallback = (
  * For lifecycle callback errors (onConnect/onDisconnect), `messageInfo`
  * is `undefined`.
  *
- * This fires only for application-level errors (handler/middleware throws
- * with no app-level error handler, or app-level error handler itself throws).
- * Transport-level errors (connection reset, decode failures) do not trigger
- * this callback.
+ * This fires for application-level errors (handler/middleware throws with no
+ * app-level error handler, or the app-level error handler itself throws) and
+ * for a server-level failure decoding an inbound message — surfaced as an
+ * {@link MllpServerError} (`code` `INCOMPATIBLE_CHARSET`), never the codec's
+ * own error. Stream-level errors (connection reset) do not trigger this
+ * callback.
  */
 export type ErrorCallback = (
   error: Error,
@@ -315,23 +316,37 @@ function handleConnection(
             break;
           }
 
-          // FrameDecoderStream emits the de-framed payload bytes; the handler
-          // takes the HL7v2 text plus the raw bytes.
-          const text = TEXT_DECODER.decode(payload);
-
-          // Inner try/catch separates handler errors from stream errors.
-          // Only handler errors route to onError; stream errors (connection
-          // reset, decode failure) flow to the outer catch for cleanup.
+          // Inner try/catch separates per-message errors from stream errors.
+          // Decode failures and handler errors both route to onError and the
+          // connection survives; stream errors (connection reset) flow to the
+          // outer catch for cleanup.
           let response: Awaited<ReturnType<Mllp["handle"]>>;
           try {
+            // FrameDecoderStream emits the de-framed payload bytes; decode them
+            // to text (UTF-8) for the handler, which also receives the raw bytes.
+            // A non-UTF-8 feed throws here rather than being silently corrupted.
+            const text = decodeBytes(payload);
             response = await app.handle(text, payload, connection);
-          } catch (handlerError) {
-            const err =
-              handlerError instanceof Error
-                ? handlerError
-                : new Error(String(handlerError));
-            await reportError(err, connection, lifecycle, getMessageInfo(err));
-            // Continue processing — connection stays alive
+          } catch (messageError) {
+            // A decode failure is the server's own error — translated into an
+            // MllpServerError so we never leak the codec's CharsetError to
+            // onError (the CharsetError is kept on `cause`). A handler/middleware
+            // throw is the consumer's own error and passes through unchanged.
+            // The connection survives either way.
+            const error =
+              messageError instanceof CharsetError
+                ? new MllpServerError(
+                    MllpServerErrorCode.INCOMPATIBLE_CHARSET,
+                    "The inbound message is not valid UTF-8; only UTF-8 is supported.",
+                    { cause: messageError }
+                  )
+                : messageError;
+            await reportError(
+              error,
+              connection,
+              lifecycle,
+              getMessageInfo(error)
+            );
             continue;
           }
 
