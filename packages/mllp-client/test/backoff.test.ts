@@ -9,8 +9,8 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { backoffDelay, DEFAULT_RETRY, NO_RETRY } from "../src/util/backoff";
-import type { RetryOptions } from "../src/util/backoff";
+import { backoffDelay, DEFAULT_RETRY, NO_RETRY } from "../src/backoff";
+import type { RetryOptions } from "../src/backoff";
 
 /** Deterministic options (no jitter) for asserting exact delays. */
 function options(overrides: Partial<RetryOptions> = {}): RetryOptions {
