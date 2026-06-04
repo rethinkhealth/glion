@@ -5,12 +5,12 @@
  * machine (./state.ts); the client drives it with events (CONNECT / CONNECTED /
  * DROP / CLOSE) and trusts its transition table — it never reads the phase to
  * decide *whether* to send an event. The per-connection wire (read loop, ACK
- * exchange, teardown) is a {@link Connection} (./connection.ts); the HL7v2
- * codec is ./message.ts.
+ * exchange, teardown) is a {@link Connection} — an inline factory in this file;
+ * the HL7v2 codec is ./message.ts.
  *
  * Single-flight: one send is on the wire at a time. A FIFO send queue is NOT
- * wired yet (./queue.ts is kept but unused) — a concurrent `send()` while one
- * is in flight rejects with `SEND_IN_PROGRESS` until the queue is restored.
+ * wired yet (./util/queue.ts is kept but unused) — a concurrent `send()` while
+ * one is in flight rejects with `SEND_IN_PROGRESS` until the queue is restored.
  *
  * @module
  */
@@ -345,11 +345,10 @@ function createConnection(opts: ConnectionOptions): Connection {
       pendingError = reason;
     }
     pendingFrames = [];
-    try {
-      reader.releaseLock();
-    } catch {
-      // The read loop may have already released or rejected — fine.
-    }
+    // Releasing the lock rejects the read parked in runReadLoop with a
+    // TypeError ("Invalid state: Releasing reader"), which that loop's catch
+    // absorbs. releaseLock() itself never throws here, so it needs no guard.
+    reader.releaseLock();
     await duplex.close();
   }
 
