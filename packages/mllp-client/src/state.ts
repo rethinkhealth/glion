@@ -1,68 +1,88 @@
 /**
  * The connection-lifecycle state machine for {@link MllpClient}.
  *
- * This machine owns ONLY the connection lifecycle — which lifecycle phase the
- * client is in, and the retry/backoff timing between a failed dial and the
- * next. It is a PURE state machine: it performs no I/O. The client drives every
- * transition by sending events at the points where it dials, observes a drop,
- * or closes, and it reads the machine's state to answer `client.state`. All I/O
- * — dialling, the read loop, the per-send wire exchange, teardown — stays
- * native in `client.ts`. The per-send exchange in particular (write a frame,
- * await the ACK, correlate MSH-10 ↔ MSA-2) is deliberately NOT modelled here:
- * XState events are fire-and-forget, so the exchange's `Promise<Response>`
- * cannot live in the machine without smuggling resolve/reject through events.
+ * The machine OWNS connection establishment. Opening the connection is an
+ * **invoked actor** (`fromPromise`), so its success, failure, the connect
+ * timeout, and cancellation are all modelled as XState transitions rather than
+ * driven from the client and read back. Every connection error the machine can
+ * produce is stamped into `context.error` — `CONNECT_FAILED` (the connector
+ * rejected), `CONNECT_TIMEOUT` (`connectTimeoutMs` elapsed, a declarative
+ * `after`), `CONNECT_ABORTED` (`close()` left `connecting` before it finished),
+ * and `DROPPED` (the read loop saw the peer end an established connection,
+ * carried on `DROP`). The error is the machine's record of WHY it closed; the
+ * client throws it at the edge when it reads the settled result — it is never
+ * read back as recoverable state.
  *
- * What the machine buys over a hand-rolled status field: legal transitions are
- * enforced by construction (an event a state does not handle is ignored, not a
- * silent illegal mutation), and the backoff is a declarative `after` timer that
- * cancels for free when `CLOSE` leaves the `backingOff` state — no manual
- * `clearTimeout`.
+ * The machine does NOT know host/port/connector — it is handed a single `open`
+ * operation (a closure the client supplies that opens one connection given an
+ * abort signal). So the machine never mirrors the client's configuration, and a
+ * re-attempt re-invokes the closure rather than a frozen target.
  *
- * A dial is a dial: there is no fail-fast special case for the initial connect.
- * Any failed dial — the first `connect()` or a redial after a drop — routes the
- * same way: `connecting` → (`FAILED`) → `backingOff` → `connecting`,
- * retrying per the {@link RetryOptions} until attempts are exhausted (→
- * `closed`). The first retry is immediate; backoff grows from the second. With
- * `NO_RETRY` (the current client default) a failed dial or a drop routes
- * straight to `closed` — the behaviour the client has today. The options and
- * the backoff maths live in `./util/backoff`.
+ * What stays OUT: the per-send exchange (write a frame, await the ACK,
+ * correlate MSH-10 ↔ MSA-2). It is a request/response `Promise` per call, and
+ * XState events are fire-and-forget, so modelling it would mean smuggling
+ * resolve/reject through events. Opening fits an actor (one-shot,
+ * connection-scoped); a send does not. The read loop stays in `client.ts` and
+ * reports a peer drop with `DROP`.
+ *
+ * Connect and reconnect are one path: the initial attempt and a re-attempt
+ * after a drop route the same way — `connecting` → (fail) → `backingOff` →
+ * `connecting`, retrying per the {@link RetryOptions} until attempts are
+ * exhausted (→ `closed`). The first retry is immediate; backoff grows from the
+ * second. With `NO_RETRY` (the current client default) a failed connection
+ * attempt or a drop routes straight to `closed`.
  *
  * @module
  */
 
-import { assign, createActor, setup } from "xstate";
+import { assign, createActor, fromPromise, setup } from "xstate";
 import type { Actor, SnapshotFrom } from "xstate";
 
-import { MllpClientError, MllpErrorCode } from "./errors";
-import { backoffDelay } from "./util/backoff";
-import type { RetryOptions } from "./util/backoff";
+import { backoffDelay } from "./backoff";
+import type { RetryOptions } from "./backoff";
+import type { MllpDuplex } from "./client";
+import { MllpClientError } from "./errors";
 
-/** Input passed to the connection machine when its actor is created. */
-interface ConnectionInput {
+/** Opens one connection, honouring the abort signal. Supplied by the client. */
+export type OpenConnection = (signal: AbortSignal) => Promise<MllpDuplex>;
+
+/** What the connection machine needs to open the connection, time out, retry. */
+export interface ConnectionStateInput {
   readonly options: RetryOptions;
+  /** Deadline for a single connection attempt; the `connecting` timeout. */
+  readonly connectTimeoutMs: number;
+  /** The operation the machine invokes to open a connection. */
+  readonly open: OpenConnection;
 }
 
-interface ConnectionContext {
+interface ConnectionStateContext {
   readonly options: RetryOptions;
-  /** Failed-dial attempts since the last successful connect. Reset on connect. */
+  readonly connectTimeoutMs: number;
+  readonly open: OpenConnection;
+  /**
+   * Failed connection attempts since the last successful connect. Reset on
+   * connect.
+   */
   attempt: number;
+  /** The live duplex once the connection opens; `null` otherwise. */
+  duplex: MllpDuplex | null;
+  /**
+   * Why the machine closed — stamped on the failing transition; the client
+   * throws it at the edge when it reads the settled result.
+   */
+  error: MllpClientError | null;
 }
 
 /**
- * Events the client feeds the machine. `CONNECT` starts a dial; `CONNECTED` /
- * `FAILED` report its outcome (initial connect AND redials use the same
- * pair — the state, not the event, decides the routing). `DROP` is sent when
- * the read loop or drop watcher observes the peer ending an established
- * connection. `CLOSE` is explicit teardown. The machine tracks only the
- * lifecycle phase, not the failure detail — the client surfaces the actual
- * error to the caller (the connect throw, the in-flight send rejection), so no
- * error rides on these events.
+ * Events the client sends the machine. `CONNECT` starts the connection attempt
+ * (the machine invokes `open`); `DROP` reports that the read loop saw the peer
+ * end an established connection, carrying the error to surface; `CLOSE` is
+ * explicit teardown. Open success/failure/timeout are NOT events — the invoked
+ * `open` actor's `onDone` / `onError` and the `connecting` timeout drive those.
  */
-type ConnectionEvent =
+type ConnectionStateEvent =
   | { type: "CONNECT" }
-  | { type: "CONNECTED" }
-  | { type: "FAILED" }
-  | { type: "DROP" }
+  | { type: "DROP"; error: MllpClientError }
   | { type: "CLOSE" };
 
 /**
@@ -77,23 +97,44 @@ const connectionMachine = setup({
     }),
     resetAttempt: assign({ attempt: 0 }),
   },
+  actors: {
+    // Open one connection. The `signal` aborts when `connecting` is exited
+    // (timeout, CLOSE, or settlement), so the connector cancels for free. The
+    // post-resolution race — the connection opens just after CLOSE/timeout left
+    // the state — is handled here, the layer that owns the duplex: close the
+    // orphan so it can never leak. The throw is ignored (the actor is stopped).
+    open: fromPromise<MllpDuplex, { open: OpenConnection }>(
+      async ({ input, signal }) => {
+        const duplex = await input.open(signal);
+        if (signal.aborted) {
+          await duplex.close();
+          throw MllpClientError.connectionAborted();
+        }
+        return duplex;
+      }
+    ),
+  },
   delays: {
-    // Recomputed on each entry to `backingOff` (so jitter is fresh per attempt).
-    // `attempt` was just incremented on entry, so it is 1-based here — the first
-    // retry (attempt 1) is immediate.
+    connectTimeout: ({ context }) => context.connectTimeoutMs,
+    // Recomputed per `backingOff` entry (fresh jitter). `attempt` was just
+    // incremented on entry, so it is 1-based — the first retry is immediate.
     retryDelay: ({ context }) => backoffDelay(context.options, context.attempt),
   },
   guards: {
     canRetry: ({ context }) => context.attempt < context.options.maxRetries,
   },
   types: {
-    context: {} as ConnectionContext,
-    events: {} as ConnectionEvent,
-    input: {} as ConnectionInput,
+    context: {} as ConnectionStateContext,
+    events: {} as ConnectionStateEvent,
+    input: {} as ConnectionStateInput,
   },
 }).createMachine({
   context: ({ input }) => ({
     attempt: 0,
+    connectTimeoutMs: input.connectTimeoutMs,
+    duplex: null,
+    error: null,
+    open: input.open,
     options: input.options,
   }),
   id: "mllp-connection",
@@ -102,40 +143,96 @@ const connectionMachine = setup({
   // idle → connecting → connected → backingOff → connecting → … → closed,
   // documented in the module JSDoc.
   states: {
-    // Waiting out the backoff delay before the next dial. Entering increments
-    // the attempt counter (so the first retry, attempt 1, is immediate); the
-    // `after` timer is cancelled for free if CLOSE arrives meanwhile.
+    // Waiting out the backoff before the next attempt. The `after` timer cancels
+    // for free if CLOSE arrives meanwhile.
     backingOff: {
       after: { retryDelay: "connecting" },
       entry: "incrementAttempt",
-      on: { CLOSE: "closed" },
+      on: {
+        CLOSE: {
+          actions: assign({ error: () => MllpClientError.connectionAborted() }),
+          target: "closed",
+        },
+      },
     },
 
     closed: { type: "final" },
 
-    // The wire is up. The client binds its duplex/read-loop while here. Entering
-    // resets the attempt counter. A drop retries if attempts remain, else closes.
+    // The wire is up; the client binds its read loop here. A drop (carrying its
+    // error) retries if attempts remain, else closes.
     connected: {
       entry: "resetAttempt",
       on: {
         CLOSE: "closed",
         DROP: [
-          { guard: "canRetry", target: "backingOff" },
-          { target: "closed" },
+          {
+            actions: assign({ error: ({ event }) => event.error }),
+            guard: "canRetry",
+            target: "backingOff",
+          },
+          {
+            actions: assign({ error: ({ event }) => event.error }),
+            target: "closed",
+          },
         ],
       },
     },
 
-    // Dialling — the client dials and reports the outcome. Covers the initial
-    // connect AND every redial: a failed dial retries until attempts run out.
+    // Opening — the machine invokes `open`. onDone → connected (store the
+    // duplex); onError → retry/close (carry the error the closure threw); the
+    // `after` timeout → retry/close (stamp CONNECT_TIMEOUT); CLOSE → close
+    // (stamp CONNECT_ABORTED). Every exit stops the `open` actor, aborting its
+    // signal.
     connecting: {
-      on: {
-        CLOSE: "closed",
-        CONNECTED: "connected",
-        FAILED: [
-          { guard: "canRetry", target: "backingOff" },
-          { target: "closed" },
+      after: {
+        connectTimeout: [
+          {
+            actions: assign({
+              error: ({ context }) =>
+                MllpClientError.connectionTimeout(context.connectTimeoutMs),
+            }),
+            guard: "canRetry",
+            target: "backingOff",
+          },
+          {
+            actions: assign({
+              error: ({ context }) =>
+                MllpClientError.connectionTimeout(context.connectTimeoutMs),
+            }),
+            target: "closed",
+          },
         ],
+      },
+      invoke: {
+        input: ({ context }) => ({ open: context.open }),
+        onDone: {
+          actions: assign({ duplex: ({ event }) => event.output, error: null }),
+          target: "connected",
+        },
+        onError: [
+          {
+            actions: assign({
+              error: ({ event }) =>
+                MllpClientError.connectionFailure(event.error),
+            }),
+            guard: "canRetry",
+            target: "backingOff",
+          },
+          {
+            actions: assign({
+              error: ({ event }) =>
+                MllpClientError.connectionFailure(event.error),
+            }),
+            target: "closed",
+          },
+        ],
+        src: "open",
+      },
+      on: {
+        CLOSE: {
+          actions: assign({ error: () => MllpClientError.connectionAborted() }),
+          target: "closed",
+        },
       },
     },
 
@@ -153,67 +250,22 @@ const connectionMachine = setup({
 export type ConnectionPhase = SnapshotFrom<typeof connectionMachine>["value"];
 
 /**
- * A started connection-lifecycle state instance: send it events
- * (`CONNECT`/`CONNECTED`/`DROP`/`CLOSE`/…) and read `getSnapshot().value` for
- * the current {@link ConnectionPhase}. The concrete XState actor type is an
- * implementation detail behind {@link createConnectionState}.
+ * A started connection-lifecycle state instance. Send it `CONNECT` / `DROP` /
+ * `CLOSE`; the machine drives the connection attempt and stamps any error into
+ * context. The concrete XState actor type is an implementation detail behind
+ * {@link createConnectionState}.
  */
 export type ConnectionState = Actor<typeof connectionMachine>;
 
 /**
- * Create and start a connection-lifecycle state instance for the given retry
- * options. The XState wiring (`createActor`, `start`, input) lives here so the
- * rest of the client treats connection state as an opaque event-driven object —
- * keeping the state machine swappable.
+ * Create and start a connection-lifecycle state instance. The XState wiring
+ * (`createActor`, `start`, input) lives here so the rest of the client treats
+ * connection state as an opaque event-driven object.
  */
-export function createConnectionState(options: RetryOptions): ConnectionState {
-  const actor = createActor(connectionMachine, { input: { options } });
+export function createConnectionState(
+  input: ConnectionStateInput
+): ConnectionState {
+  const actor = createActor(connectionMachine, { input });
   actor.start();
   return actor;
-}
-
-/**
- * The error a `connect()` should reject with from the current phase, or `null`
- * if `CONNECT` is legal. The state owns this — the caller asks the machine
- * rather than reading the phase itself to decide which error to raise. Legality
- * comes from the machine's transition table (only `idle` accepts `CONNECT`);
- * the phase only phrases the message.
- */
-export function connectRejection(
-  actor: ConnectionState
-): MllpClientError | null {
-  const snapshot = actor.getSnapshot();
-  if (snapshot.can({ type: "CONNECT" })) {
-    return null;
-  }
-  return snapshot.value === "closed"
-    ? new MllpClientError(
-        MllpErrorCode.CLOSED,
-        "Cannot connect: this client has been closed. Construct a new MllpClient to open a fresh connection."
-      )
-    : new MllpClientError(
-        MllpErrorCode.ALREADY_CONNECTED,
-        `Cannot connect while ${snapshot.value}: an MllpClient opens one connection in its lifetime. Await the in-flight connect, or use a separate client for a concurrent connection.`
-      );
-}
-
-/**
- * Commit a successful dial. Sends `CONNECTED` and reports whether the machine
- * accepted it: `null` when the machine is now `connected` (the caller owns the
- * wire), or a `CONNECT_ABORTED` error when a racing `close()` already closed it
- * (CONNECTED was ignored and the caller owns an orphaned duplex to tear down).
- * The state owns the arbitration — the caller acts on the result rather than
- * reading the phase itself.
- */
-export function commitConnected(
-  actor: ConnectionState
-): MllpClientError | null {
-  actor.send({ type: "CONNECTED" });
-  if (actor.getSnapshot().value === "connected") {
-    return null;
-  }
-  return new MllpClientError(
-    MllpErrorCode.CONNECT_ABORTED,
-    "Connect was interrupted: close() was called while the connection was still being established."
-  );
 }

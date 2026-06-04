@@ -113,14 +113,10 @@ export class MllpClientError extends Error {
     );
   }
 
-  static connectionFailure(
-    host: string,
-    port: number,
-    cause: unknown
-  ): MllpClientError {
+  static connectionFailure(cause: unknown): MllpClientError {
     return new MllpClientError(
-      MllpErrorCode.DROPPED,
-      `The connection to ${host}:${port} failed.`,
+      MllpErrorCode.CONNECT_FAILED,
+      "The connection could not be opened. See the error's cause for details.",
       { cause }
     );
   }
@@ -129,6 +125,13 @@ export class MllpClientError extends Error {
     return new MllpClientError(
       MllpErrorCode.CONNECT_ABORTED,
       "Connect was interrupted while the connection was still being established."
+    );
+  }
+
+  static connectionTimeout(timeoutMs: number): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.CONNECT_TIMEOUT,
+      `Connect timed out after ${timeoutMs}ms.`
     );
   }
 }
