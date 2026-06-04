@@ -30,7 +30,7 @@
  * @module
  */
 
-import { ackExceptionFor, isAckCode } from "@glion/ack";
+import { ackExceptionFor, isAckCode, isAckNakCode } from "@glion/ack";
 import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { frame } from "@glion/mllp-transport";
@@ -192,16 +192,12 @@ export function parseResponse(
     );
   }
 
-  if (
-    codeRaw === "AE" ||
-    codeRaw === "AR" ||
-    codeRaw === "CE" ||
-    codeRaw === "CR"
-  ) {
-    // A NAK is an ACK-level rejection — @glion/ack owns the code→exception
-    // mapping (ackExceptionFor); the client just supplies the fields it read off
-    // the ACK. ERR-3 / ERR-4 come straight from the peer and may be absent or
-    // non-standard, so they pass through verbatim.
+  if (isAckNakCode(codeRaw)) {
+    // A NAK is an ACK-level rejection — @glion/ack owns both the partition
+    // (isAckNakCode) and the code→exception mapping (ackExceptionFor); the
+    // client just supplies the fields it read off the ACK. ERR-3 / ERR-4 come
+    // straight from the peer and may be absent or non-standard, so they pass
+    // through verbatim.
     throw ackExceptionFor(codeRaw, {
       controlId,
       errorCode: readValue(tree, "ERR-3[1].1.1") ?? undefined,
