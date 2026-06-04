@@ -38,7 +38,7 @@ import { backoffDelay } from "./util/backoff";
 import type { RetryOptions } from "./util/backoff";
 
 /** Input passed to the connection machine when its actor is created. */
-export interface ConnectionInput {
+interface ConnectionInput {
   readonly options: RetryOptions;
 }
 
@@ -58,7 +58,7 @@ interface ConnectionContext {
  * error to the caller (the connect throw, the in-flight send rejection), so no
  * error rides on these events.
  */
-export type ConnectionEvent =
+type ConnectionEvent =
   | { type: "CONNECT" }
   | { type: "CONNECTED" }
   | { type: "FAILED" }

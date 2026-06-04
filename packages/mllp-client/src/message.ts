@@ -99,7 +99,7 @@ export function requestControlId(tree: Root): string {
  * (`timestamp`, `durationMs`) is NOT here: the connection measures the exchange
  * and adds it (see {@link MllpClientResponse}).
  */
-export interface ParsedAck {
+interface ParsedAck {
   /**
    * MSA-1 — always an accept ({@link AckSuccessCode}). A NAK (AE/AR/CE/CR)
    * throws the matching `@glion/ack` `AckException` instead of returning.
