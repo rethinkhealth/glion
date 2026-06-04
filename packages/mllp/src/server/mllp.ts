@@ -42,6 +42,32 @@ export function getMessageInfo(error: unknown): MessageInfo | undefined {
   return errorMessageInfo.get(error as Error);
 }
 
+/** Characters that would break MLLP framing or HL7 field structure. */
+const UNSAFE_NAK_CHARS = /[\r\n|^~\\&]/g;
+const MAX_NAK_REASON = 250;
+
+/**
+ * Last-resort error NAK, returned when no `onError` handler is registered so an
+ * errored message never gets silence on the wire — the HTTP-500 equivalent.
+ *
+ * Deliberately minimal: a bare `MSA|AE` acknowledgment that echoes the control
+ * id when the message was readable. Rich, fully-echoed ACK/NAK construction
+ * (correct `MSH` echoing, `ERR` segments, code selection) is
+ * `@glion/mllp-ack`'s job — register it (or `onError`) to replace this floor.
+ */
+function buildDefaultNak(err: Error, ctx: Context): Response {
+  const { controlId } = ctx;
+  const reason =
+    err.message
+      .replace(UNSAFE_NAK_CHARS, " ")
+      .trim()
+      .slice(0, MAX_NAK_REASON) || "Message could not be processed";
+  const version = ctx.version || "2.5.1";
+  return {
+    raw: `MSH|^~\\&|||||||ACK|${controlId}|P|${version}\rMSA|AE|${controlId}|${reason}`,
+  };
+}
+
 /**
  * MLLP application for HL7v2 messaging.
  *
@@ -136,11 +162,12 @@ export class Mllp {
   /**
    * Register a global error handler.
    *
-   * Called when middleware or a handler throws. Without an error handler,
-   * the error is re-thrown to the caller (e.g. `serve()`).
+   * Called when middleware or a handler throws. Without an error handler, a
+   * minimal default NAK is returned so the sender is never left hanging (the
+   * HTTP-500 equivalent); see {@link buildDefaultNak}.
    *
-   * If the error handler returns a response, it is used as the reply.
-   * If the error handler itself throws, the new error is re-thrown.
+   * If the error handler returns a response, it is used as the reply. If the
+   * error handler itself throws, the new error is re-thrown to `serve()`.
    */
   onError(handler: ErrorHandler): this {
     this.#errorHandler = handler;
@@ -158,7 +185,8 @@ export class Mllp {
    * 1. Decode (UTF-8) + parse (sync, fast) — always runs, extracts routing fields.
    *    Neither throws out of band: a non-UTF-8 or unparseable payload becomes
    *    `ctx.error` and is re-thrown from inside the chain, so the ack
-   *    middleware can NAK it (and `onError` fires when none is registered).
+   *    middleware can NAK it (and `onError`, else the default NAK floor,
+   *    handles it when no ack middleware is registered).
    * 2. Route match — uses pre-transform routing fields
    * 3. Transform/compile — only when handlers access ctx.tree()/ctx.result()
    *
@@ -186,18 +214,20 @@ export class Mllp {
     });
 
     try {
-      // A payload we couldn't decode or parse has nothing to route — surface
-      // it through the one error path, exactly where a thrown handler error
-      // ends up (#handleError → the app's onError, else re-thrown to serve()).
-      // This mirrors Hono/Koa, which route every failure to one top-level
-      // catch rather than into the middleware chain.
-      if (ctx.error) {
-        throw ctx.error;
-      }
-
       const match = this.#router.match(ctx);
       const middlewares = [...match.middlewares];
-      if (match.handler) {
+
+      if (ctx.error) {
+        // A payload we couldn't decode or parse has nothing to route. Surface
+        // the failure as the innermost step of the chain so wrapping middleware
+        // (e.g. the ack middleware) can turn it into a NAK — the same path a
+        // thrown handler error takes. If nothing in the chain catches it, it
+        // propagates to #handleError (the app's onError, else re-thrown).
+        const failure = ctx.error;
+        middlewares.push(() => {
+          throw failure;
+        });
+      } else if (match.handler) {
         const handler = match.handler;
         middlewares.push((handlerCtx: Context) => handler(handlerCtx));
       }
@@ -216,16 +246,14 @@ export class Mllp {
   /**
    * Handle an error during message processing.
    *
-   * If a custom error handler is registered, delegates to it.
-   * If the error handler itself throws, re-throws the error handler's error.
-   * If no error handler is registered, re-throws the original error.
+   * If a custom error handler is registered, delegates to it. If that handler
+   * itself throws, the new error is re-thrown (with routing fields attached via
+   * {@link getMessageInfo}) for `serve()` to report at the transport level.
    *
-   * In both re-throw cases, message routing fields are attached to the
-   * error via {@link getMessageInfo} so callers can include message
-   * context in error reporting.
-   *
-   * Callers (e.g. `serve()`) are responsible for catching these errors
-   * and deciding how to handle them at the transport level.
+   * If no error handler is registered, returns a minimal default NAK so the
+   * sender is never left hanging — the HTTP-500 equivalent. See
+   * {@link buildDefaultNak}; register `onError` or `@glion/mllp-ack` to replace
+   * it.
    */
   async #handleError(
     err: Error,
@@ -253,7 +281,9 @@ export class Mllp {
       }
     }
 
-    errorMessageInfo.set(err, info);
-    throw err;
+    // No custom error handler: never leave the sender hanging. Return a minimal
+    // last-resort NAK (the HTTP-500 equivalent); @glion/mllp-ack or onError
+    // replaces it with a richer response.
+    return buildDefaultNak(err, ctx);
   }
 }

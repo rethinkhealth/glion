@@ -33,18 +33,20 @@ export type ConnectionCallback = (
  * Error callback invoked when a message handler error is unhandled.
  * Receives the error and the connection it occurred on.
  *
- * For handler errors, `messageInfo` contains the routing fields
- * (messageType, triggerEvent, controlId, version) of the message that
- * caused the error — useful for audit logging in healthcare contexts.
- * For lifecycle callback errors (onConnect/onDisconnect), `messageInfo`
- * is `undefined`.
+ * This is a **transport/lifecycle** hook, not the application error channel.
+ * Semantic errors — a handler/middleware throw, or a decode/parse failure —
+ * are handled inside the core: they become a NAK (the default floor, an ack
+ * middleware, or `app.onError`) and never reach here. This callback fires only
+ * for errors that escape the core back to the transport:
  *
- * This fires for application-level errors that the pipeline did not handle:
- * a handler/middleware throw (or a decode/parse failure, which the core
- * re-throws through the chain) when no app-level error handler is registered.
- * With an acknowledgment middleware registered, such failures become a NAK and
- * never reach here. Stream-level errors (connection reset) do not trigger this
- * callback.
+ * - A lifecycle callback (`onConnect`/`onDisconnect`) threw, or
+ * - The app's `onError` handler itself threw, or
+ * - The server has no parser registered (`NO_PARSER`).
+ *
+ * `messageInfo` carries the routing fields (messageType, triggerEvent,
+ * controlId, version) when the escaping error came from message processing;
+ * it is `undefined` for lifecycle callback errors. Stream-level errors
+ * (connection reset) do not trigger this callback.
  */
 export type ErrorCallback = (
   error: Error,
@@ -94,10 +96,10 @@ export interface ServeOptions {
   onDisconnect?: ConnectionCallback;
 
   /**
-   * Called when a message handler error is unhandled — either no app-level
-   * error handler is registered, or the app-level error handler itself
-   * threw. Also called when lifecycle callbacks (`onConnect`,
-   * `onDisconnect`) throw.
+   * Called for **transport/lifecycle** errors that escape the core — a
+   * throwing `onConnect`/`onDisconnect`, a throwing `app.onError`, or a
+   * missing parser. Semantic errors (handler/decode/parse) are NAK'd by the
+   * core and do not reach here; observe those with a logger middleware.
    *
    * Only logs `error.message` and connection ID to avoid leaking PHI
    * in the `console.error` fallback. Production deployments should
@@ -271,7 +273,9 @@ async function reportError(
  *
  * - `onConnect` after the connection is established
  * - `onDisconnect` when the connection closes (always fires)
- * - `onError` when a handler error is unhandled (not for transport errors)
+ * - `onError` for errors that escape the core (a throwing lifecycle callback or
+ *   `app.onError`, or a missing parser) — not semantic handler/decode errors,
+ *   which the core turns into a NAK
  *
  * @param app - The MLLP application to dispatch messages to.
  * @param socket - The adapter socket wrapping the underlying TCP connection.
@@ -315,20 +319,20 @@ function handleConnection(
           }
 
           // Inner try/catch separates per-message errors from stream errors.
-          // Decode failures and handler errors both route to onError and the
-          // connection survives; stream errors (connection reset) flow to the
-          // outer catch for cleanup.
+          // Semantic errors (decode/parse/handler) never reach this catch —
+          // the core turns them into a (default or middleware) NAK returned
+          // below. Only errors that escape the core (a throwing app.onError,
+          // or NO_PARSER) land here; the connection survives. Stream errors
+          // (connection reset) flow to the outer catch for cleanup.
           let response: Awaited<ReturnType<Mllp["handle"]>>;
           try {
             // Pass the de-framed payload bytes straight to the core. handle()
             // owns decode + parse (runtime-agnostic) and never throws on a
-            // bad-charset/unparseable payload — those flow through the pipeline
-            // as a NAK. Only an unhandled handler/middleware error (no app-level
-            // error handler registered) reaches this catch.
+            // bad-charset/unparseable payload — those return a NAK.
             response = await app.handle(payload, connection);
           } catch (messageError) {
-            // A consumer error with no app-level handler: report it; the
-            // connection survives.
+            // An error that escaped the core (throwing onError, or NO_PARSER):
+            // report it to the transport hook; the connection survives.
             const error =
               messageError instanceof Error
                 ? messageError
@@ -349,7 +353,7 @@ function handleConnection(
           }
         }
       } catch {
-        // Transport-level: connection closed, stream errored, decode failure.
+        // Transport-level: connection closed or the stream errored.
         // Not routed to onError — these are infrastructure, not application errors.
       }
     } finally {

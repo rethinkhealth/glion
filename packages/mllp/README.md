@@ -232,9 +232,9 @@ app.onError(async (err, ctx) => {
 });
 ```
 
-Decode (non-UTF-8) and parse failures don't throw out of band. The core never lets them escape `handle()` — it routes them to the **same error path as a thrown handler error**: your `onError` handler is invoked (and can build a NAK), exactly like Hono's `app.onError` or Koa's top-level error middleware. A message that can't be decoded or parsed has nothing to route, so it skips the middleware chain entirely.
+Decode (non-UTF-8) and parse failures don't throw out of band. The core records them on `ctx.error` and surfaces them as the **innermost step of the middleware chain** — the same place a route handler runs — so a wrapping middleware (e.g. `@glion/mllp-ack`) can NAK them, exactly like a thrown handler error. If the chain doesn't handle it, it reaches `app.onError` (which can build a NAK), like Hono's `app.onError` or Koa's top-level error middleware.
 
-Without an error handler, errors are absorbed and no response is sent. The sending system will time out and retry per standard MLLP behaviour. See the [design notes](#design-notes) below for the rationale.
+**Every errored message gets a reply.** Without an `onError` handler and without an ack middleware, the core returns a **minimal default NAK** (`MSA|AE`) — the HTTP-500 equivalent — so the sender is never left hanging. This is a deliberately minimal floor; register `@glion/mllp-ack` (rich, fully-echoed NAKs) or `app.onError` (custom responses) to replace it. See the [design notes](#design-notes) below.
 
 ## TLS
 
@@ -290,16 +290,16 @@ tcpSocket.readable.pipeThrough(decoder).pipeTo(
 
 ## Design notes
 
-### Why no default error response?
+### The default error response (and why it's minimal)
 
-HL7v2 has no universal error-response format. An ACK/NAK is version-dependent, varies by message type, and requires access to the inbound MSH segment to construct correctly. Building that into the core would couple the routing engine to HL7v2 message construction — the wrong layer of abstraction.
+A rich HL7v2 ACK/NAK is version-dependent, varies by message type, and needs the inbound MSH segment to construct correctly. Building _that_ into the core would couple the routing engine to HL7v2 message construction — the wrong layer. But going _silent_ on an errored message is a worse footgun: every onion framework (Hono, Koa, Express) returns a default response rather than nothing.
 
-Instead, the `Mllp` engine is middleware-first:
+So the `Mllp` engine splits the two: it guarantees a **minimal** floor and leaves the **rich** response to middleware.
 
-- **Default behaviour** — no response is sent; the sending system times out and retries, which is valid MLLP behaviour.
-- **Logging** — add a logger middleware to make errors observable.
-- **ACK/NAK** — add an acknowledgment middleware to translate errors into proper NAK responses. `@glion/mllp-ack` provides this out of the box.
-- **Custom error responses** — use `app.onError()` for application-specific handling.
+- **Default floor** — when nothing else replies, the core returns a minimal `MSA|AE` NAK (the HTTP-500 equivalent), echoing the control id when the message was readable. Never silence.
+- **Rich ACK/NAK** — add an acknowledgment middleware for proper, fully-echoed responses with `ERR` segments and correct codes. `@glion/mllp-ack` provides this out of the box and replaces the floor.
+- **Custom error responses** — use `app.onError()` for application-specific handling; it replaces the floor too.
+- **Observability** — semantic errors (handler throws, decode/parse) are the application's concern, not the transport's: add a logger middleware to observe them. `serve()`'s `onError` callback is for transport/lifecycle errors only (see below).
 
 ```ts
 const app = new Mllp().parser(parseHL7v2);

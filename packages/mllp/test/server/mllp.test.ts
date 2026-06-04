@@ -279,15 +279,17 @@ describe("Mllp", () => {
     expect(response?.raw).toContain("Custom error handling");
   });
 
-  it("re-throws when handler throws without error handler", async () => {
+  it("returns a default NAK when a handler throws without an error handler", async () => {
     const app = createApp();
     app.on("*", async () => {
       throw new Error("crash");
     });
 
-    await expect(
-      app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION)
-    ).rejects.toThrow("crash");
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+
+    // No onError, no ack middleware: the floor returns a minimal AE NAK that
+    // echoes the control id and the reason, instead of re-throwing.
+    expect(response?.raw).toContain("MSA|AE|MSG001|crash");
   });
 
   // "é" as the single Latin-1 byte 0xE9 makes the payload invalid UTF-8.
@@ -312,15 +314,44 @@ describe("Mllp", () => {
     expect(response?.raw).toContain("MSA|AR");
   });
 
-  it("re-throws a non-UTF-8 payload when no error handler is registered", async () => {
+  it("returns a default NAK for a non-UTF-8 payload when no error handler is registered", async () => {
     const app = createApp();
     app.on("*", () => {
       // never reached
     });
 
-    await expect(app.handle(NON_UTF8, MOCK_CONNECTION)).rejects.toThrow(
-      "not valid UTF-8"
-    );
+    const response = await app.handle(NON_UTF8, MOCK_CONNECTION);
+
+    // The floor turns the decode failure into a minimal AE NAK carrying the
+    // reason, instead of re-throwing to serve().
+    expect(response?.raw).toContain("MSA|AE|");
+    expect(response?.raw).toContain("not valid UTF-8");
+  });
+
+  // The decode/parse failure is surfaced as the innermost step of the chain,
+  // so a wrapping (global) middleware — e.g. the ack middleware — can catch it
+  // and build a NAK, exactly like a thrown handler error.
+  it("routes a non-UTF-8 payload into the chain so wrapping middleware can NAK it", async () => {
+    const app = createApp();
+    let handlerRan = false;
+    app.use(async (ctx, next) => {
+      try {
+        await next();
+      } catch (error) {
+        ctx.res = {
+          raw: `MSH|^~\\&||||||||||2.5.1\rMSA|AE||${(error as Error).message}`,
+        };
+      }
+    });
+    app.on("*", () => {
+      handlerRan = true;
+    });
+
+    const response = await app.handle(NON_UTF8, MOCK_CONNECTION);
+
+    expect(handlerRan).toBe(false);
+    expect(response?.raw).toContain("MSA|AE|");
+    expect(response?.raw).toContain("not valid UTF-8");
   });
 
   it("re-throws error handler's error when error handler itself throws", async () => {

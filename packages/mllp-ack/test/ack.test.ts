@@ -177,6 +177,31 @@ describe("ack middleware", () => {
     });
   });
 
+  describe("decode/parse failures (ctx.error)", () => {
+    // "é" as the single Latin-1 byte 0xE9 makes the payload invalid UTF-8.
+    const NON_UTF8 = Uint8Array.from(
+      "MSH|^~\\&|S|F|R|F|20240101120000||ADT^A01|MSG001|P|2.5.1\rPID|1||1||José",
+      (ch) => ch.codePointAt(0) ?? 0
+    );
+
+    it("NAKs a non-UTF-8 payload that never reaches a handler", async () => {
+      const app = new Mllp().parser(parseHL7v2);
+      app.use(ackMiddleware({ sending: { application: "S", facility: "F" } }));
+      let handlerRan = false;
+      app.on("*", () => {
+        handlerRan = true;
+      });
+
+      const response = await app.handle(NON_UTF8, MOCK_CONNECTION);
+
+      expect(handlerRan).toBe(false);
+      expect(response).toBeDefined();
+      // Undecodable input → empty AST → NAK with a blank MSA-2, AE code.
+      expect(response!.raw).toContain("MSA|AE|");
+      expect(response!.raw).toContain("|207|E");
+    });
+  });
+
   describe("passthrough", () => {
     it("does not override existing response when no error is thrown", async () => {
       const app = new Mllp().parser(parseHL7v2);
