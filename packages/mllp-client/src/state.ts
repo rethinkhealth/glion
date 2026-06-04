@@ -196,3 +196,24 @@ export function connectRejection(
         `Cannot connect while ${snapshot.value}: an MllpClient opens one connection in its lifetime. Await the in-flight connect, or use a separate client for a concurrent connection.`
       );
 }
+
+/**
+ * Commit a successful dial. Sends `CONNECTED` and reports whether the machine
+ * accepted it: `null` when the machine is now `connected` (the caller owns the
+ * wire), or a `CONNECT_ABORTED` error when a racing `close()` already closed it
+ * (CONNECTED was ignored and the caller owns an orphaned duplex to tear down).
+ * The state owns the arbitration — the caller acts on the result rather than
+ * reading the phase itself.
+ */
+export function commitConnected(
+  actor: ConnectionState
+): MllpClientError | null {
+  actor.send({ type: "CONNECTED" });
+  if (actor.getSnapshot().value === "connected") {
+    return null;
+  }
+  return new MllpClientError(
+    MllpErrorCode.CONNECT_ABORTED,
+    "Connect was interrupted: close() was called while the connection was still being established."
+  );
+}

@@ -25,7 +25,11 @@ import {
   toWireBytes,
 } from "./message";
 import type { MllpClientResponse, SendInput } from "./message";
-import { connectRejection, createConnectionState } from "./state";
+import {
+  commitConnected,
+  connectRejection,
+  createConnectionState,
+} from "./state";
 import type { ConnectionPhase } from "./state";
 import { NO_RETRY } from "./util/backoff";
 
@@ -460,18 +464,14 @@ export class MllpClient {
       );
     }
 
-    // The dial succeeded — try to commit. The `await` above is a yield point, so
-    // a concurrent close() may have run (CLOSE → "closed"). Send CONNECTED and
-    // let the machine arbitrate: if it accepts (→ "connected") we own the wire;
-    // if close() already closed it, CONNECTED is ignored and we own an orphaned,
-    // open duplex — close it to avoid a leak, then surface CONNECT_ABORTED.
-    this.#machine.send({ type: "CONNECTED" });
-    if (this.#machine.getSnapshot().value !== "connected") {
+    // The dial succeeded, but the `await` above is a yield point — a concurrent
+    // close() may have closed the machine. commitConnected sends CONNECTED and
+    // reports whether we own the wire; if close() won the race we own an
+    // orphaned, open duplex and must close it before surfacing the error.
+    const aborted = commitConnected(this.#machine);
+    if (aborted) {
       await duplex.close();
-      throw new MllpClientError(
-        MllpErrorCode.CONNECT_ABORTED,
-        `Connect to ${this.#host}:${this.#port} was interrupted: close() was called while the connection was still being established.`
-      );
+      throw aborted;
     }
 
     this.#connection = createConnection({
