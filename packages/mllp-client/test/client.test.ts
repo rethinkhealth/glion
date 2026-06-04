@@ -1007,7 +1007,7 @@ describe("MllpClient — observability getters", () => {
 
 // ---------------------------------------------------------------------------
 // Single-flight. One send is on the wire at a time. The FIFO queue is NOT wired
-// yet (./queue.ts is kept but unused), so a concurrent send while one is in
+// yet (./util/queue.ts is kept but unused), so a concurrent send while one is in
 // flight rejects with SEND_IN_PROGRESS. After a send settles (ACK, NAK, or
 // timeout), the next send proceeds; close()/drop reject the in-flight send.
 // ---------------------------------------------------------------------------
