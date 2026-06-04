@@ -1,7 +1,9 @@
 import type { Root } from "@glion/ast";
+import { decodeBytes } from "@glion/util-charset";
 import { value as queryValue } from "@glion/util-query";
 import { VFile } from "vfile";
 
+import { MllpServerError, MllpServerErrorCode } from "../errors";
 import type {
   ConnectionInfo,
   Context,
@@ -13,8 +15,8 @@ import type {
  * Options for creating a Context instance.
  */
 export interface CreateContextOptions {
-  /** Decoded HL7 message text (`""` for an undecodable payload). */
-  raw: string;
+  /** De-framed MLLP payload bytes. Decoded as UTF-8 by `createContext`. */
+  payload: Uint8Array;
   /** Connection metadata */
   connection: ConnectionInfo;
   /** HL7v2 unified processor */
@@ -39,23 +41,39 @@ export interface CreateContextOptions {
  * the tree, the transform and compile steps never execute.
  */
 export function createContext(options: CreateContextOptions): Context {
-  const { raw, connection, processor } = options;
+  const { payload, connection, processor } = options;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
 
-  // ── Eager: parse (sync, fast) ──────────────────────────────────────
-  // VFile carries the input through the pipeline and collects diagnostics.
-  // Parsing never throws out of band: a parser failure yields an empty Root
-  // and is recorded on `ctx.error` so the caller can route it to the error
-  // path instead of it escaping context creation.
-  const file = new VFile(raw);
+  // ── Eager: decode + parse (sync, fast) ─────────────────────────────
+  // createContext is total — neither step throws out of band. A non-UTF-8
+  // payload or a parser throw yields an empty Root and is recorded on
+  // `ctx.error`, so the caller routes it to the error path. The codec's
+  // CharsetError is wrapped as the server's own error (never leaked, #659).
+  let raw = "";
   let parsed: Root = { children: [], type: "root" };
   let error: Error | undefined;
   try {
-    parsed = processor.parse(file);
-  } catch (parseError) {
-    error =
-      parseError instanceof Error ? parseError : new Error(String(parseError));
+    raw = decodeBytes(payload);
+  } catch (decodeError) {
+    error = new MllpServerError(
+      MllpServerErrorCode.INCOMPATIBLE_CHARSET,
+      "The inbound message is not valid UTF-8; only UTF-8 is supported.",
+      { cause: decodeError }
+    );
+  }
+
+  // VFile carries the input through the pipeline and collects diagnostics.
+  const file = new VFile(raw);
+  if (!error) {
+    try {
+      parsed = processor.parse(file);
+    } catch (parseError) {
+      error =
+        parseError instanceof Error
+          ? parseError
+          : new Error(String(parseError));
+    }
   }
 
   // Extract routing fields as strings from the parsed tree.

@@ -1,5 +1,3 @@
-import { decodeBytes } from "@glion/util-charset";
-
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { compose } from "./compose";
 import { createContext } from "./context";
@@ -179,44 +177,26 @@ export class Mllp {
       );
     }
 
-    // Decode here (not in the transport adapter) so every runtime behaves the
-    // same. A non-UTF-8 payload does not throw out of band — it is captured as
-    // the server's own MllpServerError (the codec's CharsetError rides on
-    // `cause`, never leaked).
-    let raw = "";
-    let failure: Error | undefined;
-    try {
-      raw = decodeBytes(payload);
-    } catch (error) {
-      failure = new MllpServerError(
-        MllpServerErrorCode.INCOMPATIBLE_CHARSET,
-        "The inbound message is not valid UTF-8; only UTF-8 is supported.",
-        { cause: error }
-      );
-    }
-
-    // Context creation is total: a parser failure is recorded on ctx.error
-    // (with an empty Root) rather than thrown.
+    // createContext decodes (UTF-8) and parses, and is total: a non-UTF-8 or
+    // unparseable payload never throws — it is recorded on ctx.error.
     const ctx = createContext({
       connection,
+      payload,
       processor: this.#processor,
-      raw,
     });
-    failure ??= ctx.error;
-
-    // A payload we couldn't decode or parse has nothing to route. Hand the
-    // failure to the error path — exactly where a thrown handler error ends up
-    // (`#handleError` → the app's `onError`, else re-thrown to `serve()`). This
-    // mirrors Hono/Koa: a pre-dispatch failure goes straight to the error
-    // handler, not through a synthetic step in the middleware chain.
-    if (failure) {
-      return this.#handleError(failure, ctx);
-    }
 
     try {
+      // A payload we couldn't decode or parse has nothing to route — surface
+      // it through the one error path, exactly where a thrown handler error
+      // ends up (#handleError → the app's onError, else re-thrown to serve()).
+      // This mirrors Hono/Koa, which route every failure to one top-level
+      // catch rather than into the middleware chain.
+      if (ctx.error) {
+        throw ctx.error;
+      }
+
       const match = this.#router.match(ctx);
       const middlewares = [...match.middlewares];
-
       if (match.handler) {
         const handler = match.handler;
         middlewares.push((handlerCtx: Context) => handler(handlerCtx));

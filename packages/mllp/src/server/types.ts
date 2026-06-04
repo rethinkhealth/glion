@@ -46,12 +46,11 @@ export interface Context {
   };
 
   /**
-   * The eager-parse failure for this message, when the processor's parser
-   * threw; otherwise `undefined`. Parsing never throws out of band — the
-   * failure is recorded here (and {@link Context.ast} is an empty `Root`) so
-   * `handle()` can route it to the error path (`onError`) like a thrown handler
-   * error. A decode failure (non-UTF-8 payload) is handled the same way but is
-   * surfaced as the `Error` passed to `onError`, not on this field.
+   * The decode or parse failure for this message, when one occurred; otherwise
+   * `undefined`. Context creation never throws out of band — a non-UTF-8
+   * payload or a parser throw is recorded here (and {@link Context.ast} is an
+   * empty `Root`) so `handle()` can route it to the error path (`onError`) like
+   * a thrown handler error.
    */
   readonly error: Error | undefined;
 

@@ -22,8 +22,8 @@ function makeCtx(raw = SAMPLE_MESSAGE) {
       secure: false,
       state: new Map(),
     },
+    payload: new TextEncoder().encode(raw),
     processor: parseHL7v2,
-    raw,
   });
 }
 
@@ -55,8 +55,8 @@ describe("createContext", () => {
         secure: false,
         state: new Map(),
       },
+      payload: new TextEncoder().encode("not really hl7"),
       processor: throwingProcessor,
-      raw: "not really hl7",
     });
 
     expect(ctx.error).toBe(boom);
@@ -142,8 +142,8 @@ describe("createContext", () => {
           secure: false,
           state: new Map(),
         },
+        payload: new TextEncoder().encode(SAMPLE_MESSAGE),
         processor: parseOnly,
-        raw: SAMPLE_MESSAGE,
       });
 
       // Tree is parsed correctly
@@ -174,8 +174,8 @@ describe("createContext", () => {
           secure: false,
           state: new Map(),
         },
+        payload: new TextEncoder().encode(SAMPLE_MESSAGE),
         processor: parseHL7v2,
-        raw: SAMPLE_MESSAGE,
       });
 
       // Tree, file, and result all populated

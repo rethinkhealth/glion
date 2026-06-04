@@ -17,8 +17,8 @@ function makeCtx(): Context {
       secure: false,
       state: new Map(),
     },
+    payload: new TextEncoder().encode(SAMPLE_MESSAGE),
     processor: parseHL7v2,
-    raw: SAMPLE_MESSAGE,
   });
 }
 
