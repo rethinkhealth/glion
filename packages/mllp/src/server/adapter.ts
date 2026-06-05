@@ -26,13 +26,14 @@ export interface ListenOptions {
   tls?: TlsOptions;
   backlog?: number;
   /**
-   * Called for a **server-scoped** error that fires *after* the server is
-   * listening (a startup/bind error rejects the `listening` promise instead).
-   * Post-listen server errors do not tear the server down — it keeps serving —
-   * so this is purely an observability hook. Without it, the adapter must still
-   * register an error listener (an unhandled `'error'` event is process-fatal).
+   * Called for a server error that fires *after* the server is listening (a
+   * startup/bind error rejects the `listening` promise instead). The adapter's
+   * only error kind is server-scoped, so this is simply `onError`. Post-listen
+   * server errors do not tear the server down — it keeps serving — so this is
+   * purely an observability hook. The adapter must still register an error
+   * listener regardless (an unhandled `'error'` event is process-fatal).
    */
-  onServerError?: (error: Error) => void;
+  onError?: (error: Error) => void;
 }
 
 /**

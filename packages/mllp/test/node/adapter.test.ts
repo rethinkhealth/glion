@@ -250,18 +250,18 @@ describe("nodeAdapter", () => {
   });
 
   // ── G1: post-listen server errors are observed, not dropped ──────────
-  it("routes a post-listen server error to onServerError without closing the server", () => {
-    const onServerError = vi.fn();
+  it("routes a post-listen server error to onError without closing the server", () => {
+    const onError = vi.fn();
     const adapter = nodeAdapter();
     // The mock fires "listening" synchronously, so the server is already
     // listening when we fire the error → it is a post-listen error.
-    adapter.listen({ onServerError, port: 2575 }, noop);
+    adapter.listen({ onError, port: 2575 }, noop);
 
     expect(serverErrorHandler).toBeDefined();
     const boom = new Error("post-listen boom");
     serverErrorHandler?.(boom);
 
-    expect(onServerError).toHaveBeenCalledWith(boom);
+    expect(onError).toHaveBeenCalledWith(boom);
     // A post-listen error does not tear the server down — it keeps serving.
     expect(mockServer.close).not.toHaveBeenCalled();
   });
@@ -271,16 +271,16 @@ describe("nodeAdapter", () => {
     mockServer.once.mockImplementation(() => {
       /* never fire listening */
     });
-    const onServerError = vi.fn();
+    const onError = vi.fn();
     const adapter = nodeAdapter();
-    const handle = adapter.listen({ onServerError, port: 2575 }, noop);
+    const handle = adapter.listen({ onError, port: 2575 }, noop);
 
     serverErrorHandler?.(new Error("EADDRINUSE"));
 
     await expect(handle.listening).rejects.toThrow("EADDRINUSE");
     expect(mockServer.close).toHaveBeenCalled();
     // Pre-listen failure is a startup error, not the post-listen channel.
-    expect(onServerError).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
   });
 
   // ── G3: AdapterSocket.close() is idempotent and never throws ─────────
@@ -316,14 +316,14 @@ describe("nodeAdapter", () => {
     expect(socket.resume).not.toHaveBeenCalled();
   });
 
-  // ── G4: a stalled write is bounded by writeTimeout ───────────────────
+  // ── G4: a stalled write is bounded by socketTimeout ──────────────────
   it("destroys the socket and rejects the write when the drain deadline expires", async () => {
     const socket = createMockSocket();
     // Backpressure (write returns false) and the peer never drains.
     socket.write.mockImplementationOnce(() => false);
 
     let writable: WritableStream<Uint8Array> | undefined;
-    const adapter = nodeAdapter({ writeTimeout: 20 });
+    const adapter = nodeAdapter({ socketTimeout: 20 });
     adapter.listen({ port: 2575 }, (s) => {
       writable = s.writable;
     });

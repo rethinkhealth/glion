@@ -63,20 +63,7 @@ export interface NodeAdapterOptions {
    * @default 60000
    */
   keepAliveInitialDelay?: number;
-
-  /**
-   * Deadline in milliseconds for a single write to flush (drain) when the
-   * socket's send buffer is full. A stalled peer that never drains would
-   * otherwise hang the connection's message loop forever on a peer-controlled
-   * event — the same DoS class as an unterminated frame. On expiry the socket
-   * is destroyed and the write rejects. Set to `0` to wait indefinitely.
-   *
-   * @default 30000
-   */
-  writeTimeout?: number;
 }
-
-const DEFAULT_WRITE_TIMEOUT_MS = 30_000;
 
 /**
  * Write a chunk to a Node.js socket, waiting for backpressure to clear.
@@ -94,22 +81,26 @@ const DEFAULT_WRITE_TIMEOUT_MS = 30_000;
 async function writeToSocket(
   socket: Socket,
   chunk: Uint8Array,
-  writeTimeout: number
+  socketTimeout: number
 ): Promise<void> {
   const ok = socket.write(chunk);
   if (ok) {
     return;
   }
-  if (writeTimeout <= 0) {
+  if (socketTimeout <= 0) {
     await once(socket, "drain");
     return;
   }
   try {
-    await once(socket, "drain", { signal: AbortSignal.timeout(writeTimeout) });
+    // Bound the drain wait by the same idle deadline: a stalled peer that never
+    // drains would otherwise hang the message loop forever on a peer-controlled
+    // event — the DoS class the socket timeout exists to prevent.
+    await once(socket, "drain", {
+      signal: AbortSignal.timeout(socketTimeout),
+    });
   } catch (error) {
-    // The peer never drained within the deadline (stalled/slow-loris on the
-    // write side). Force teardown so the message loop doesn't hang forever on
-    // a peer-controlled event; the rejection flows to serve()'s outer catch.
+    // Force teardown so the loop doesn't hang; the rejection flows to serve()'s
+    // outer catch.
     socket.destroy();
     throw error;
   }
@@ -132,7 +123,7 @@ async function writeToSocket(
 function wrapNodeSocket(
   socket: Socket,
   secure: boolean,
-  writeTimeout: number
+  socketTimeout: number
 ): AdapterSocket {
   const readable = Readable.toWeb(socket) as ReadableStream<Uint8Array>;
 
@@ -144,7 +135,7 @@ function wrapNodeSocket(
       socket.end();
     },
     async write(chunk) {
-      await writeToSocket(socket, chunk, writeTimeout);
+      await writeToSocket(socket, chunk, socketTimeout);
     },
   });
 
@@ -207,7 +198,6 @@ export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
     socketTimeout = 0,
     keepAlive = true,
     keepAliveInitialDelay = 60_000,
-    writeTimeout = DEFAULT_WRITE_TIMEOUT_MS,
   } = options ?? {};
 
   /**
@@ -240,7 +230,7 @@ export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
       const onConnection = (socket: Socket) => {
         configureSocket(socket);
         const secure = !!listenOpts.tls;
-        handler(wrapNodeSocket(socket, secure, writeTimeout));
+        handler(wrapNodeSocket(socket, secure, socketTimeout));
       };
 
       const server: Server = listenOpts.tls
@@ -278,7 +268,7 @@ export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
       // serving (operator decides policy) — never silently dropped.
       server.on("error", (err) => {
         if (isListening) {
-          listenOpts.onServerError?.(err);
+          listenOpts.onError?.(err);
         } else {
           rejectListening(err);
           server.close();

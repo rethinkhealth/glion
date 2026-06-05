@@ -259,35 +259,36 @@ const server = serve(app, {
 
 ## Transport errors & timeouts
 
-`serve()` separates errors by layer, mirroring Node's `server`/`socket`/`clientError` model. Each layer has its own callback so nothing is silently dropped:
+`serve()` has a single transport error channel, `onError`, that receives a discriminated **event** — `event.kind` tells you which layer failed (and narrows the payload). Branch on it to react per layer, or just log `event.error`. Nothing is silently dropped:
 
 ```ts
 const server = serve(app, {
   port: 2575,
-  // Server-scoped errors after the server is listening (a bind error rejects
-  // `server.listening` instead). The server keeps serving.
-  onServerError: (err) => log.error({ err }, "mllp server error"),
-  // Malformed/oversized MLLP envelope. Can't be NAK'd (no message boundary),
-  // so the connection is torn down — but FRAME_TOO_LARGE is a DoS signal you
-  // want to see. PHI-safe: only the typed `code`, never the bytes.
-  onFramingError: (err, conn) => log.warn({ code: err.code, conn: conn.id }),
-  // Errors that escape the core: a throwing onConnect/onDisconnect/app.onError,
-  // or a missing parser. Semantic handler/decode errors become a NAK and do
-  // NOT reach here — observe those with a logger middleware.
-  onError: (err, conn, messageInfo) => log.error({ err, messageInfo }),
+  onError: (event) => {
+    switch (event.kind) {
+      case "server": // post-listen server error; the server keeps serving
+        return log.error({ err: event.error }, "mllp server error");
+      case "framing": // malformed/oversized envelope — FRAME_TOO_LARGE is a DoS
+        // signal. PHI-safe: typed code only, never the bytes. Torn down, no NAK.
+        return log.warn({ code: event.error.code, conn: event.connection.id });
+      default: // "connection": a throwing onConnect/onDisconnect/app.onError, or
+        // NO_PARSER. Semantic handler/decode errors become a NAK, not this.
+        return log.error({ err: event.error, info: event.messageInfo });
+    }
+  },
 });
 ```
 
-| Layer                        | Callback                   | Behaviour                                        |
-| ---------------------------- | -------------------------- | ------------------------------------------------ |
-| Startup / bind               | `server.listening` rejects | port in use, bad TLS config                      |
-| Server-scoped (post-listen)  | `onServerError`            | observed; server keeps serving                   |
-| Protocol / framing           | `onFramingError`           | connection torn down, **no NAK** (spec-mandated) |
-| Connection / socket          | _(silent)_                 | ECONNRESET / timeout — routine teardown          |
-| Escaped core                 | `onError`                  | throwing callback / `NO_PARSER`                  |
-| Application (handler/decode) | _(NAK)_                    | default `MSA\|AE` floor or ack middleware        |
+| Layer                        | `onError` kind                 | Behaviour                                        |
+| ---------------------------- | ------------------------------ | ------------------------------------------------ |
+| Startup / bind               | _(rejects `server.listening`)_ | port in use, bad TLS config                      |
+| Server-scoped (post-listen)  | `"server"`                     | observed; server keeps serving                   |
+| Protocol / framing           | `"framing"`                    | connection torn down, **no NAK** (spec-mandated) |
+| Connection / socket          | _(silent)_                     | ECONNRESET / timeout — routine teardown          |
+| Escaped core                 | `"connection"`                 | throwing callback / `NO_PARSER`                  |
+| Application (handler/decode) | _(NAK)_                        | default `MSA\|AE` floor or ack middleware        |
 
-Two timeouts bound peer-controlled waits: `socketTimeout` (idle inactivity, default `0` = off) and `writeTimeout` (a single write's drain deadline, default `30000` ms; on expiry the socket is destroyed).
+A single timeout, `socketTimeout` (default `0` = off), bounds every peer-controlled wait: idle inactivity **and** a write whose buffer never drains (a stalled receiver). On expiry the socket is destroyed.
 
 ## Primitives
 

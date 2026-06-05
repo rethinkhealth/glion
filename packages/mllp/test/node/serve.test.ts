@@ -191,7 +191,7 @@ describe("serve() integration", () => {
     }
   });
 
-  it("surfaces a framing error to onFramingError and tears down the connection (no NAK)", async () => {
+  it("surfaces a framing error via onError(kind:framing) and tears down the connection (no NAK)", async () => {
     const framingErrors: { code: string; connId: number }[] = [];
     let handlerRan = false;
     const app = createApp().on("*", () => {
@@ -199,8 +199,13 @@ describe("serve() integration", () => {
       return { raw: "MSH|^~\\&|||||||ACK|X|P|2.5.1\rMSA|AA|X" };
     });
     server = serve(app, {
-      onFramingError: (err, conn) => {
-        framingErrors.push({ code: err.code, connId: conn.id });
+      onError: (event) => {
+        if (event.kind === "framing") {
+          framingErrors.push({
+            code: event.error.code,
+            connId: event.connection.id,
+          });
+        }
       },
       port: 0,
     });
@@ -403,11 +408,11 @@ describe("serve() integration", () => {
         throw new Error("handler boom");
       });
 
-      const errors: { message: string; connId: number }[] = [];
+      let onErrorFired = false;
 
       server = serve(app, {
-        onError: (err, conn) => {
-          errors.push({ connId: conn.id, message: err.message });
+        onError: () => {
+          onErrorFired = true;
         },
         port: 0,
       });
@@ -417,7 +422,7 @@ describe("serve() integration", () => {
       const resp = await sendMessage(server.port, SAMPLE_ADT);
 
       expect(resp).toContain("MSA|AE|MSG001|handler boom");
-      expect(errors).toHaveLength(0);
+      expect(onErrorFired).toBe(false);
     });
 
     it("onError receives messageInfo with routing fields when the app error handler throws", async () => {
@@ -434,8 +439,10 @@ describe("serve() integration", () => {
       let capturedInfo: unknown;
 
       server = serve(app, {
-        onError: (_err, _conn, messageInfo) => {
-          capturedInfo = messageInfo;
+        onError: (event) => {
+          if (event.kind === "connection") {
+            capturedInfo = event.messageInfo;
+          }
         },
         port: 0,
       });
@@ -463,8 +470,10 @@ describe("serve() integration", () => {
         onConnect: () => {
           throw new Error("connect failed");
         },
-        onError: (_err, _conn, messageInfo) => {
-          capturedInfo = messageInfo;
+        onError: (event) => {
+          if (event.kind === "connection") {
+            capturedInfo = event.messageInfo;
+          }
         },
         port: 0,
       });
@@ -486,8 +495,8 @@ describe("serve() integration", () => {
       const errors: string[] = [];
 
       server = serve(app, {
-        onError: (err) => {
-          errors.push(err.message);
+        onError: (event) => {
+          errors.push(event.error.message);
         },
         port: 0,
       });
@@ -509,8 +518,8 @@ describe("serve() integration", () => {
       const errors: string[] = [];
 
       server = serve(app, {
-        onError: (err) => {
-          errors.push(err.message);
+        onError: (event) => {
+          errors.push(event.error.message);
         },
         port: 0,
       });
@@ -606,8 +615,8 @@ describe("serve() integration", () => {
         onDisconnect: () => {
           disconnectCount++;
         },
-        onError: (err) => {
-          errors.push(err.message);
+        onError: (event) => {
+          errors.push(event.error.message);
         },
         port: 0,
       });
@@ -632,8 +641,8 @@ describe("serve() integration", () => {
         onDisconnect: () => {
           throw new Error("onDisconnect failed");
         },
-        onError: (err) => {
-          errors.push(err.message);
+        onError: (event) => {
+          errors.push(event.error.message);
         },
         port: 0,
       });
