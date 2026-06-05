@@ -164,6 +164,23 @@ function createApp() {
   return new Mllp().parser(parseHL7v2);
 }
 
+/** Send raw (unframed) bytes and resolve once the server closes the socket. */
+function sendRaw(port: number, bytes: Buffer): Promise<void> {
+  return new Promise((resolve) => {
+    const client = net.connect({ host: "127.0.0.1", port }, () => {
+      client.write(bytes);
+    });
+    client.on("error", () => {
+      /* connection reset on teardown — expected */
+    });
+    client.on("close", () => resolve());
+    setTimeout(() => {
+      client.destroy();
+      resolve();
+    }, 1000);
+  });
+}
+
 describe("serve() integration", () => {
   let server: Server | undefined;
 
@@ -172,6 +189,32 @@ describe("serve() integration", () => {
       await server.close();
       server = undefined;
     }
+  });
+
+  it("surfaces a framing error to onFramingError and tears down the connection (no NAK)", async () => {
+    const framingErrors: { code: string; connId: number }[] = [];
+    let handlerRan = false;
+    const app = createApp().on("*", () => {
+      handlerRan = true;
+      return { raw: "MSH|^~\\&|||||||ACK|X|P|2.5.1\rMSA|AA|X" };
+    });
+    server = serve(app, {
+      onFramingError: (err, conn) => {
+        framingErrors.push({ code: err.code, connId: conn.id });
+      },
+      port: 0,
+    });
+    await server.listening;
+
+    // No leading VT start block → MISSING_START_BLOCK; never reaches a handler.
+    await sendRaw(server.port, Buffer.from("not a framed mllp message\r"));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(handlerRan).toBe(false);
+    expect(framingErrors).toHaveLength(1);
+    expect(framingErrors[0].code).toBe("MISSING_START_BLOCK");
   });
 
   it("starts and listens on an OS-assigned port", async () => {

@@ -25,6 +25,14 @@ export interface ListenOptions {
   hostname?: string;
   tls?: TlsOptions;
   backlog?: number;
+  /**
+   * Called for a **server-scoped** error that fires *after* the server is
+   * listening (a startup/bind error rejects the `listening` promise instead).
+   * Post-listen server errors do not tear the server down — it keeps serving —
+   * so this is purely an observability hook. Without it, the adapter must still
+   * register an error listener (an unhandled `'error'` event is process-fatal).
+   */
+  onServerError?: (error: Error) => void;
 }
 
 /**
@@ -49,6 +57,12 @@ export interface AdapterSocket {
   readonly secure: boolean;
   readonly readable: ReadableStream<Uint8Array>;
   readonly writable: WritableStream<Uint8Array>;
+  /**
+   * Tear down the connection. **MUST NOT throw** and **MUST be idempotent** —
+   * the core calls it unguarded in a `finally` block, possibly on an
+   * already-destroyed or half-open socket. Adapters own honouring this
+   * contract.
+   */
   close(): void;
 }
 

@@ -10,7 +10,7 @@
  * @module
  */
 
-import { frame, FrameDecoderStream } from "@glion/mllp-transport";
+import { FramingError, frame, FrameDecoderStream } from "@glion/mllp-transport";
 
 import type { AdapterSocket } from "../server/adapter";
 import type { MessageInfo, Mllp } from "../server/mllp";
@@ -53,6 +53,30 @@ export type ErrorCallback = (
   connection: ConnectionInfo,
   messageInfo: MessageInfo | undefined
 ) => void | Promise<void>;
+
+/**
+ * Callback for a **protocol/framing** error — a malformed or oversized MLLP
+ * envelope (missing start/end block, or `FRAME_TOO_LARGE`). Per the MLLP spec a
+ * framing error cannot be NAK'd (there is no reliable message boundary or
+ * control id to echo), so the connection is torn down — but it MUST be
+ * observable, so it is surfaced here with the typed `code` and the connection.
+ *
+ * Only the error `code` and connection metadata are exposed, never the
+ * offending bytes — a malformed frame may still contain PHI. `FRAME_TOO_LARGE`
+ * in particular is a denial-of-service signal an operator should monitor.
+ */
+export type FramingErrorCallback = (
+  error: FramingError,
+  connection: ConnectionInfo
+) => void | Promise<void>;
+
+/**
+ * Callback for a **server-scoped** error that fires after the server is
+ * listening (a startup/bind error rejects the `listening` promise instead).
+ * The server keeps serving; this is an observability hook. Distinct from the
+ * per-connection {@link ErrorCallback}.
+ */
+export type ServerErrorCallback = (error: Error) => void | Promise<void>;
 
 /**
  * Options for starting an MLLP server with {@link serve}.
@@ -108,6 +132,23 @@ export interface ServeOptions {
   onError?: ErrorCallback;
 
   /**
+   * Called for a **protocol/framing** error (malformed or oversized MLLP
+   * envelope). The connection is torn down without a NAK (spec-mandated — no
+   * message boundary to acknowledge), but the error is surfaced here so framing
+   * faults and `FRAME_TOO_LARGE` flood attempts are not silently dropped.
+   * Without a callback, a PHI-safe one-line `console.warn` is emitted.
+   */
+  onFramingError?: FramingErrorCallback;
+
+  /**
+   * Called for a **server-scoped** error after the server is listening (a
+   * startup/bind error rejects the `listening` promise instead). The server
+   * keeps serving. Without a callback, a PHI-safe one-line `console.error`
+   * is emitted.
+   */
+  onServerError?: ServerErrorCallback;
+
+  /**
    * The TCP port number to listen on.
    */
   port: number;
@@ -118,6 +159,16 @@ export interface ServeOptions {
    * to disable the timeout.
    */
   socketTimeout?: number;
+
+  /**
+   * Deadline in milliseconds for a single write to flush when the socket send
+   * buffer is full. A stalled peer that never drains would otherwise hang the
+   * connection's message loop indefinitely. On expiry the socket is destroyed.
+   * Set to `0` to wait indefinitely.
+   *
+   * @default 30000
+   */
+  writeTimeout?: number;
 
   /**
    * TLS configuration. When provided the server will create a TLS socket
@@ -186,17 +237,26 @@ export function serve(app: Mllp, options: ServeOptions): Server {
     keepAlive: options.keepAlive,
     keepAliveInitialDelay: options.keepAliveInitialDelay,
     socketTimeout: options.socketTimeout,
+    writeTimeout: options.writeTimeout,
   });
 
   const lifecycle: LifecycleOptions = {
     onConnect: options.onConnect,
     onDisconnect: options.onDisconnect,
     onError: options.onError,
+    onFramingError: options.onFramingError,
   };
 
   const handle = adapter.listen(
     {
       hostname: options.hostname,
+      onServerError: (err) => {
+        // reportServerError is async (it may await a user callback) but the
+        // adapter calls this synchronously; it is self-handling and never
+        // rejects, so fire-and-forget.
+        // oxlint-disable-next-line no-void
+        void reportServerError(err, options.onServerError);
+      },
       port: options.port,
       tls: options.tls,
     },
@@ -219,6 +279,7 @@ interface LifecycleOptions {
   onConnect?: ConnectionCallback;
   onDisconnect?: ConnectionCallback;
   onError?: ErrorCallback;
+  onFramingError?: FramingErrorCallback;
 }
 
 /**
@@ -247,6 +308,51 @@ async function reportError(
     console.error(
       `[mllp] Unhandled error on connection ${connection.id}: ${err.message}`
     );
+  }
+}
+
+/**
+ * Surface a protocol/framing error. PHI-safe: only the typed `code` and
+ * connection ID are exposed, never the offending bytes. Falls back to a
+ * one-line `console.warn` so framing faults are never silently dropped.
+ */
+async function reportFramingError(
+  error: FramingError,
+  connection: ConnectionInfo,
+  lifecycle: LifecycleOptions
+): Promise<void> {
+  try {
+    if (lifecycle.onFramingError) {
+      await lifecycle.onFramingError(error, connection);
+    } else {
+      console.warn(
+        `[mllp] Framing error (${error.code}) on connection ${connection.id}`
+      );
+    }
+  } catch {
+    console.warn(
+      `[mllp] Framing error (${error.code}) on connection ${connection.id}`
+    );
+  }
+}
+
+/**
+ * Surface a server-scoped (post-listen) error. PHI-safe: server-level errors
+ * carry no message content. Falls back to a one-line `console.error`.
+ */
+async function reportServerError(
+  error: Error,
+  onServerError: ServerErrorCallback | undefined
+): Promise<void> {
+  try {
+    if (onServerError) {
+      await onServerError(error);
+    } else {
+      console.error(`[mllp] Server error: ${error.message}`);
+    }
+  } catch {
+    // onServerError itself threw — last resort
+    console.error(`[mllp] Server error: ${error.message}`);
   }
 }
 
@@ -352,9 +458,15 @@ function handleConnection(
             await writer.write(frame(response.raw));
           }
         }
-      } catch {
-        // Transport-level: connection closed or the stream errored.
-        // Not routed to onError — these are infrastructure, not application errors.
+      } catch (streamError) {
+        // Transport-level — the connection is torn down either way. A
+        // FramingError (malformed/oversized MLLP envelope) can't be NAK'd
+        // (no message boundary), but it MUST be observable, so surface it.
+        // Routine drops (ECONNRESET, socket teardown) stay silent — not
+        // application errors, and not actionable.
+        if (streamError instanceof FramingError) {
+          await reportFramingError(streamError, connection, lifecycle);
+        }
       }
     } finally {
       // ── Cleanup & onDisconnect ─────────────────────────────────────

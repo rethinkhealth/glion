@@ -257,6 +257,38 @@ const server = serve(app, {
 });
 ```
 
+## Transport errors & timeouts
+
+`serve()` separates errors by layer, mirroring Node's `server`/`socket`/`clientError` model. Each layer has its own callback so nothing is silently dropped:
+
+```ts
+const server = serve(app, {
+  port: 2575,
+  // Server-scoped errors after the server is listening (a bind error rejects
+  // `server.listening` instead). The server keeps serving.
+  onServerError: (err) => log.error({ err }, "mllp server error"),
+  // Malformed/oversized MLLP envelope. Can't be NAK'd (no message boundary),
+  // so the connection is torn down — but FRAME_TOO_LARGE is a DoS signal you
+  // want to see. PHI-safe: only the typed `code`, never the bytes.
+  onFramingError: (err, conn) => log.warn({ code: err.code, conn: conn.id }),
+  // Errors that escape the core: a throwing onConnect/onDisconnect/app.onError,
+  // or a missing parser. Semantic handler/decode errors become a NAK and do
+  // NOT reach here — observe those with a logger middleware.
+  onError: (err, conn, messageInfo) => log.error({ err, messageInfo }),
+});
+```
+
+| Layer                        | Callback                   | Behaviour                                        |
+| ---------------------------- | -------------------------- | ------------------------------------------------ |
+| Startup / bind               | `server.listening` rejects | port in use, bad TLS config                      |
+| Server-scoped (post-listen)  | `onServerError`            | observed; server keeps serving                   |
+| Protocol / framing           | `onFramingError`           | connection torn down, **no NAK** (spec-mandated) |
+| Connection / socket          | _(silent)_                 | ECONNRESET / timeout — routine teardown          |
+| Escaped core                 | `onError`                  | throwing callback / `NO_PARSER`                  |
+| Application (handler/decode) | _(NAK)_                    | default `MSA\|AE` floor or ack middleware        |
+
+Two timeouts bound peer-controlled waits: `socketTimeout` (idle inactivity, default `0` = off) and `writeTimeout` (a single write's drain deadline, default `30000` ms; on expiry the socket is destroyed).
+
 ## Primitives
 
 ### Simple API
