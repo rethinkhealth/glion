@@ -259,34 +259,36 @@ const server = serve(app, {
 
 ## Transport errors & timeouts
 
-`serve()` has a single transport error channel, `onError`, that receives a discriminated **event** — `event.kind` tells you which layer failed (and narrows the payload). Branch on it to react per layer, or just log `event.error`. Nothing is silently dropped:
+`serve()` has a single transport error channel, `onError(error, connection?, messageInfo?)`. Most handlers just log `error`; the extra arguments let you tell the layers apart when you care. Nothing is silently dropped:
 
 ```ts
 const server = serve(app, {
   port: 2575,
-  onError: (event) => {
-    switch (event.kind) {
-      case "server": // post-listen server error; the server keeps serving
-        return log.error({ err: event.error }, "mllp server error");
-      case "framing": // malformed/oversized envelope — FRAME_TOO_LARGE is a DoS
-        // signal. PHI-safe: typed code only, never the bytes. Torn down, no NAK.
-        return log.warn({ code: event.error.code, conn: event.connection.id });
-      default: // "connection": a throwing onConnect/onDisconnect/app.onError, or
-        // NO_PARSER. Semantic handler/decode errors become a NAK, not this.
-        return log.error({ err: event.error, info: event.messageInfo });
+  onError: (error, connection, messageInfo) => {
+    if (!connection) {
+      // server-scoped (post-listen); the server keeps serving
+      return log.error({ err: error }, "mllp server error");
     }
+    if (error instanceof FramingError) {
+      // malformed/oversized envelope — FRAME_TOO_LARGE is a DoS signal.
+      // PHI-safe: typed code only, never the bytes. Torn down, no NAK.
+      return log.warn({ code: error.code, conn: connection.id });
+    }
+    // escaped core: a throwing onConnect/onDisconnect/app.onError, or NO_PARSER.
+    // Semantic handler/decode errors become a NAK, not this.
+    return log.error({ err: error, info: messageInfo });
   },
 });
 ```
 
-| Layer                        | `onError` kind                 | Behaviour                                        |
-| ---------------------------- | ------------------------------ | ------------------------------------------------ |
-| Startup / bind               | _(rejects `server.listening`)_ | port in use, bad TLS config                      |
-| Server-scoped (post-listen)  | `"server"`                     | observed; server keeps serving                   |
-| Protocol / framing           | `"framing"`                    | connection torn down, **no NAK** (spec-mandated) |
-| Connection / socket          | _(silent)_                     | ECONNRESET / timeout — routine teardown          |
-| Escaped core                 | `"connection"`                 | throwing callback / `NO_PARSER`                  |
-| Application (handler/decode) | _(NAK)_                        | default `MSA\|AE` floor or ack middleware        |
+| Layer                        | Reaches `onError` as            | Behaviour                                        |
+| ---------------------------- | ------------------------------- | ------------------------------------------------ |
+| Startup / bind               | _(rejects `server.listening`)_  | port in use, bad TLS config                      |
+| Server-scoped (post-listen)  | `connection === undefined`      | observed; server keeps serving                   |
+| Protocol / framing           | `error instanceof FramingError` | connection torn down, **no NAK** (spec-mandated) |
+| Connection / socket          | _(silent)_                      | ECONNRESET / timeout — routine teardown          |
+| Escaped core                 | `error` + `connection`          | throwing callback / `NO_PARSER`                  |
+| Application (handler/decode) | _(NAK)_                         | default `MSA\|AE` floor or ack middleware        |
 
 A single timeout, `socketTimeout` (default `0` = off), bounds every peer-controlled wait: idle inactivity **and** a write whose buffer never drains (a stalled receiver). On expiry the socket is destroyed.
 

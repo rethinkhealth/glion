@@ -4,7 +4,7 @@
 import net from "node:net";
 
 import { parseHL7v2 } from "@glion/hl7v2";
-import { CR, frame, FS } from "@glion/mllp-transport";
+import { CR, FramingError, frame, FS } from "@glion/mllp-transport";
 
 import { serve } from "../../src/node/serve.js";
 import type { Server } from "../../src/node/serve.js";
@@ -191,20 +191,17 @@ describe("serve() integration", () => {
     }
   });
 
-  it("surfaces a framing error via onError(kind:framing) and tears down the connection (no NAK)", async () => {
-    const framingErrors: { code: string; connId: number }[] = [];
+  it("surfaces a framing error via onError (instanceof FramingError) and tears down the connection (no NAK)", async () => {
+    const framingErrors: { code: string; connId: number | undefined }[] = [];
     let handlerRan = false;
     const app = createApp().on("*", () => {
       handlerRan = true;
       return { raw: "MSH|^~\\&|||||||ACK|X|P|2.5.1\rMSA|AA|X" };
     });
     server = serve(app, {
-      onError: (event) => {
-        if (event.kind === "framing") {
-          framingErrors.push({
-            code: event.error.code,
-            connId: event.connection.id,
-          });
+      onError: (error, connection) => {
+        if (error instanceof FramingError) {
+          framingErrors.push({ code: error.code, connId: connection?.id });
         }
       },
       port: 0,
@@ -439,10 +436,8 @@ describe("serve() integration", () => {
       let capturedInfo: unknown;
 
       server = serve(app, {
-        onError: (event) => {
-          if (event.kind === "connection") {
-            capturedInfo = event.messageInfo;
-          }
+        onError: (_error, _connection, messageInfo) => {
+          capturedInfo = messageInfo;
         },
         port: 0,
       });
@@ -470,10 +465,8 @@ describe("serve() integration", () => {
         onConnect: () => {
           throw new Error("connect failed");
         },
-        onError: (event) => {
-          if (event.kind === "connection") {
-            capturedInfo = event.messageInfo;
-          }
+        onError: (_error, _connection, messageInfo) => {
+          capturedInfo = messageInfo;
         },
         port: 0,
       });
@@ -495,8 +488,8 @@ describe("serve() integration", () => {
       const errors: string[] = [];
 
       server = serve(app, {
-        onError: (event) => {
-          errors.push(event.error.message);
+        onError: (error) => {
+          errors.push(error.message);
         },
         port: 0,
       });
@@ -518,8 +511,8 @@ describe("serve() integration", () => {
       const errors: string[] = [];
 
       server = serve(app, {
-        onError: (event) => {
-          errors.push(event.error.message);
+        onError: (error) => {
+          errors.push(error.message);
         },
         port: 0,
       });
@@ -615,8 +608,8 @@ describe("serve() integration", () => {
         onDisconnect: () => {
           disconnectCount++;
         },
-        onError: (event) => {
-          errors.push(event.error.message);
+        onError: (error) => {
+          errors.push(error.message);
         },
         port: 0,
       });
@@ -641,8 +634,8 @@ describe("serve() integration", () => {
         onDisconnect: () => {
           throw new Error("onDisconnect failed");
         },
-        onError: (event) => {
-          errors.push(event.error.message);
+        onError: (error) => {
+          errors.push(error.message);
         },
         port: 0,
       });

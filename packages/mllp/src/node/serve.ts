@@ -30,56 +30,30 @@ export type ConnectionCallback = (
 ) => void | Promise<void>;
 
 /**
- * A transport-layer error surfaced to {@link ServeOptions.onError}. A
- * discriminated union — `kind` tells you which layer failed and narrows the
- * payload. Semantic errors (handler/middleware throws, decode/parse failures)
- * are **not** here: the core turns them into a NAK. Routine connection drops
- * (ECONNRESET, idle timeout) are also not surfaced — they are not actionable.
+ * The single transport error channel for {@link serve}. Most handlers just log
+ * `error`; the extra arguments let you tell the layers apart when you care:
  *
- * The server's behaviour per layer stays distinct (a framing error tears the
- * connection down with no NAK; a server error keeps the server running); `kind`
- * lets the operator react distinctly too.
+ * - **Server-scoped** error (post-listen; a bind error rejects `server.listening`
+ *   instead) → `connection` is `undefined`. The server keeps serving.
+ * - **Protocol/framing** error (malformed/oversized envelope) → `error instanceof
+ *   FramingError` (read `error.code`); the connection is torn down with **no
+ *   NAK** (no message boundary to acknowledge). `FRAME_TOO_LARGE` is a
+ *   denial-of-service signal.
+ * - **Escaped-core** error on a connection (a throwing
+ *   `onConnect`/`onDisconnect`/`app.onError`, or `NO_PARSER`) → `connection` is
+ *   set and `messageInfo` carries the routing fields when available.
+ *
+ * Semantic errors (handler/middleware throws, decode/parse failures) are
+ * **not** here — the core turns them into a NAK. Routine connection drops
+ * (ECONNRESET, idle timeout) are not surfaced either; they are not actionable.
+ * The fallback (no callback) logs a PHI-safe one-liner: the message or typed
+ * framing code and the connection ID, never message content.
  */
-export type MllpErrorEvent =
-  | {
-      /**
-       * A **server-scoped** error after the server started listening (a
-       * startup/bind error rejects `server.listening` instead). The server
-       * keeps serving — this is purely observability.
-       */
-      readonly kind: "server";
-      readonly error: Error;
-    }
-  | {
-      /**
-       * A **protocol/framing** error — a malformed or oversized MLLP envelope.
-       * Cannot be NAK'd (no message boundary or control id to echo), so the
-       * connection is torn down. PHI-safe: the typed `code` is exposed, never
-       * the offending bytes. `FRAME_TOO_LARGE` is a denial-of-service signal.
-       */
-      readonly kind: "framing";
-      readonly error: FramingError;
-      readonly connection: ConnectionInfo;
-    }
-  | {
-      /**
-       * An error that **escaped the core** on a connection: a throwing
-       * `onConnect`/`onDisconnect`/`app.onError`, or a missing parser
-       * (`NO_PARSER`). The connection survives. `messageInfo` carries the
-       * routing fields when the error came from message processing.
-       */
-      readonly kind: "connection";
-      readonly error: Error;
-      readonly connection: ConnectionInfo;
-      readonly messageInfo?: MessageInfo;
-    };
-
-/**
- * The single transport error channel for {@link serve}. Receives a
- * {@link MllpErrorEvent}; branch on `event.kind` to handle a layer distinctly,
- * or just log `event.error` for all of them.
- */
-export type ErrorCallback = (event: MllpErrorEvent) => void | Promise<void>;
+export type ErrorCallback = (
+  error: Error,
+  connection?: ConnectionInfo,
+  messageInfo?: MessageInfo
+) => void | Promise<void>;
 
 /**
  * Options for starting an MLLP server with {@link serve}.
@@ -123,14 +97,13 @@ export interface ServeOptions {
   onDisconnect?: ConnectionCallback;
 
   /**
-   * The single **transport error** channel. Receives a {@link MllpErrorEvent}
-   * — branch on `event.kind` (`"server"` | `"framing"` | `"connection"`) to
-   * handle a layer distinctly, or just log `event.error`. Semantic errors
-   * (handler/decode/parse) are NAK'd by the core and do not reach here; observe
-   * those with a logger middleware. Without a callback, a PHI-safe one-line
-   * `console` fallback is emitted (only the error message / typed code and the
-   * connection ID — never message content). Production deployments should
-   * always provide this callback.
+   * The single **transport error** channel — see {@link ErrorCallback}. Just
+   * log `error`, or tell the layers apart: `connection` is `undefined` for a
+   * server-scoped error, `error instanceof FramingError` for a malformed
+   * envelope, otherwise it is an escaped-core error (with `messageInfo` when
+   * available). Semantic errors (handler/decode/parse) are NAK'd by the core
+   * and do not reach here; observe those with a logger middleware. Production
+   * deployments should always provide this callback.
    */
   onError?: ErrorCallback;
 
@@ -228,12 +201,12 @@ export function serve(app: Mllp, options: ServeOptions): Server {
   const handle = adapter.listen(
     {
       hostname: options.hostname,
-      // The adapter's only error kind is server-scoped; report it through the
-      // unified channel. reportError is self-handling and never rejects, so
+      // A server-scoped error has no connection — reportError treats an absent
+      // connection as server-scoped. It is self-handling and never rejects, so
       // fire-and-forget from the adapter's synchronous handler.
       onError: (err) => {
         // oxlint-disable-next-line no-void
-        void reportError({ error: err, kind: "server" }, options.onError);
+        void reportError(err, options.onError);
       },
       port: options.port,
       tls: options.tls,
@@ -265,44 +238,41 @@ function toError(value: unknown): Error {
 }
 
 /** PHI-safe one-line fallback when no `onError` is registered (or it threw). */
-function logErrorFallback(event: MllpErrorEvent): void {
-  switch (event.kind) {
-    case "server": {
-      console.error(`[mllp] Server error: ${event.error.message}`);
-      break;
-    }
-    case "framing": {
-      console.warn(
-        `[mllp] Framing error (${event.error.code}) on connection ${event.connection.id}`
-      );
-      break;
-    }
-    default: {
-      console.error(
-        `[mllp] Unhandled error on connection ${event.connection.id}: ${event.error.message}`
-      );
-    }
+function logErrorFallback(error: Error, connection?: ConnectionInfo): void {
+  if (error instanceof FramingError) {
+    console.warn(
+      `[mllp] Framing error (${error.code}) on connection ${connection?.id}`
+    );
+  } else if (connection) {
+    console.error(
+      `[mllp] Unhandled error on connection ${connection.id}: ${error.message}`
+    );
+  } else {
+    console.error(`[mllp] Server error: ${error.message}`);
   }
 }
 
 /**
  * Route a transport error to the single `onError` callback, falling back to a
  * PHI-safe one-line `console` log (only the message / typed code and the
- * connection ID — never HL7v2 message content).
+ * connection ID — never HL7v2 message content). A `connection` of `undefined`
+ * marks a server-scoped error.
  */
 async function reportError(
-  event: MllpErrorEvent,
-  onError: ErrorCallback | undefined
+  error: Error,
+  onError: ErrorCallback | undefined,
+  connection?: ConnectionInfo,
+  messageInfo?: MessageInfo
 ): Promise<void> {
   if (onError) {
     try {
-      await onError(event);
+      await onError(error, connection, messageInfo);
       return;
     } catch {
       // onError itself threw — fall through to the console fallback.
     }
   }
-  logErrorFallback(event);
+  logErrorFallback(error, connection);
 }
 
 /**
@@ -360,10 +330,7 @@ function handleConnection(
       try {
         await lifecycle.onConnect?.(connection);
       } catch (connectError) {
-        await reportError(
-          { connection, error: toError(connectError), kind: "connection" },
-          lifecycle.onError
-        );
+        await reportError(toError(connectError), lifecycle.onError, connection);
         // Tear down — onDisconnect still fires in the outer finally
         return;
       }
@@ -393,13 +360,10 @@ function handleConnection(
             // report it to the transport hook; the connection survives.
             const error = toError(messageError);
             await reportError(
-              {
-                connection,
-                error,
-                kind: "connection",
-                messageInfo: getMessageInfo(error),
-              },
-              lifecycle.onError
+              error,
+              lifecycle.onError,
+              connection,
+              getMessageInfo(error)
             );
             continue;
           }
@@ -417,10 +381,7 @@ function handleConnection(
         // Routine drops (ECONNRESET, socket teardown) stay silent — not
         // application errors, and not actionable.
         if (streamError instanceof FramingError) {
-          await reportError(
-            { connection, error: streamError, kind: "framing" },
-            lifecycle.onError
-          );
+          await reportError(streamError, lifecycle.onError, connection);
         }
       }
     } finally {
@@ -441,8 +402,9 @@ function handleConnection(
         await lifecycle.onDisconnect?.(connection);
       } catch (disconnectError) {
         await reportError(
-          { connection, error: toError(disconnectError), kind: "connection" },
-          lifecycle.onError
+          toError(disconnectError),
+          lifecycle.onError,
+          connection
         );
       }
 
