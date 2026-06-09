@@ -115,13 +115,11 @@ Accepts a `string` or a `Root` (`SendInput`) — raw bytes are not accepted; dec
 - `AckException` (from `@glion/ack`) — the peer returned a NAK (`AE`/`AR`/`CE`/`CR`). The concrete subclass encodes the code (`AckApplicationError` = AE, `AckApplicationReject` = AR, `AckCommitError` = CE, `AckCommitReject` = CR); it carries `code`, `errorCode` / `severity` (ERR-3 / ERR-4), `controlId`, `raw`, and the parsed `tree`.
 - `FramingError` (from `@glion/mllp-transport`) — the message contains an embedded MLLP framing byte (VT or FS) that cannot be framed (thrown before any state change). CR is allowed — it is the HL7v2 segment terminator.
 - otherwise an `MllpClientError`; branch on `code`:
-  - `CORRELATION_MISMATCH` — both the request's MSH-10 and the response's MSA-2 are non-empty and differ (carries `expected` / `actual` / `tree` / `raw`). If either is empty, correlation is skipped.
-  - `SEND_TIMEOUT` — no ACK arrived within the deadline (`timeoutMs` is set).
+  - `SEND_TIMEOUT` — no ACK arrived within the deadline.
   - `SEND_IN_PROGRESS` — another send is already on the wire (the client is single-flight and does not queue concurrent sends yet; await the in-flight send first).
-  - `DROPPED` — the connection ended; `reason` is one of `peer-drop`, `write-failed`, `framing-error`, `frame-queue-overflow`. Terminal.
+  - `DROPPED` — the connection ended (peer drop, write failure, decoder framing error, or unsolicited-frame flood). Terminal.
   - `NOT_CONNECTED` / `CLOSED` — the client is not connected, or has been closed (the in-flight send rejects).
-  - `PARSE_FAILED` — the peer's ACK is not parseable HL7v2, or is not valid UTF-8 (a Latin-1 / Windows-1252 peer ACK trips this; the client decodes ACKs as strict UTF-8).
-  - `UNKNOWN_ACK_CODE` — the ACK carries a non-standard MSA-1.
+  - `INVALID_RESPONSE` — the peer replied, but the reply was not a usable acknowledgment of the message sent: undecodable bytes (non-UTF-8 — a Latin-1 / Windows-1252 peer ACK trips this, with the charset error on `cause`), no / a non-standard MSA-1 acknowledgment code, or an MSA-2 that doesn't match the request's MSH-10 (typically a late ACK from a previously-timed-out send). The specific reason is in `message`.
 
 ### `client.close(): Promise<void>`
 
@@ -144,18 +142,18 @@ Calls `close()`. Enables `await using`.
 
 ### Errors
 
-Every error the client itself raises **is** an `MllpClientError`, carrying a `code` from `MllpErrorCode` — branch on `code`; a `switch` on it never needs to inspect client state. Code-specific detail rides on optional fields (`reason` for `DROPPED`, `timeoutMs` for the timeouts, `expected`/`actual`/`tree`/`raw` for `CORRELATION_MISMATCH`) with `cause` for any wrapped error. A NAK is the exception: `send()` throws an `@glion/ack` `AckException` — the same typed exception the server builds — imported from `@glion/ack`, not from this package.
+Every error the client itself raises **is** an `MllpClientError`, carrying a `code` from `MllpErrorCode` — branch on `code`; a `switch` on it never needs to inspect client state. The human-readable detail is in `message`, and any wrapped underlying failure (e.g. the charset error behind an `INVALID_RESPONSE`) is on the standard `cause`. A NAK is the exception: `send()` throws an `@glion/ack` `AckException` — the same typed exception the server builds — imported from `@glion/ack`, not from this package.
 
-| Class                         | Code(s) / notes                                                                                                                                                                                                   |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MllpClientError`             | `ALREADY_CONNECTED`, `CLOSED`, `CONNECT_ABORTED`, `CONNECT_FAILED`, `CONNECT_TIMEOUT`, `CORRELATION_MISMATCH`, `DROPPED`, `NOT_CONNECTED`, `PARSE_FAILED`, `SEND_IN_PROGRESS`, `SEND_TIMEOUT`, `UNKNOWN_ACK_CODE` |
-| `AckException` (`@glion/ack`) | NAK — `AckApplicationError` (AE) / `AckApplicationReject` (AR) / `AckCommitError` (CE) / `AckCommitReject` (CR)                                                                                                   |
+| Class                         | Code(s) / notes                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MllpClientError`             | `ALREADY_CONNECTED`, `CLOSED`, `CONNECT_ABORTED`, `CONNECT_FAILED`, `CONNECT_TIMEOUT`, `DROPPED`, `INVALID_RESPONSE`, `NOT_CONNECTED`, `SEND_IN_PROGRESS`, `SEND_TIMEOUT` |
+| `AckException` (`@glion/ack`) | NAK — `AckApplicationError` (AE) / `AckApplicationReject` (AR) / `AckCommitError` (CE) / `AckCommitReject` (CR)                                                           |
 
 ## Single-flight and lifecycle
 
 One send is on the wire at a time. A concurrent `send()` while one is in flight rejects with `SEND_IN_PROGRESS` — a FIFO send queue that would let concurrent calls run one after another is deferred to a later version. Each send's `timeoutMs` deadline is the ACK-wait clock; there is no caller cancellation signal.
 
-The decoder buffer persists across sends, so a late ACK from a previously-timed-out request lands on the next `send()` and trips the correlation check (`CORRELATION_MISMATCH`) rather than being silently accepted.
+The decoder buffer persists across sends, so a late ACK from a previously-timed-out request lands on the next `send()` and trips the correlation check (`INVALID_RESPONSE`) rather than being silently accepted.
 
 A stream-level failure is terminal. A peer drop, a write failure, a decoder framing error, or a flood of unsolicited frames moves the client to `closed`; the in-flight send rejects (`DROPPED`), and once closed both `send()` and `connect()` throw `CLOSED`. Recovery is a new instance — automatic reconnect is configured at construction in a later version, never as a `connect()` behaviour.
 

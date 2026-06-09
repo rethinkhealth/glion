@@ -134,4 +134,32 @@ export class MllpClientError extends Error {
       `Connect timed out after ${timeoutMs}ms.`
     );
   }
+
+  static closed(): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.CLOSED,
+      "This client has been closed. Construct a new MllpClient to talk to the peer again."
+    );
+  }
+
+  static alreadyConnected(): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.ALREADY_CONNECTED,
+      "This MllpClient already has a connection in progress or established. It opens one connection in its lifetime — await the in-flight connect, or use a separate client for a concurrent connection."
+    );
+  }
+
+  static notConnected(): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.NOT_CONNECTED,
+      "Cannot send: the client is not connected. Call connect() and await it before send()."
+    );
+  }
+
+  static sendInProgress(): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.SEND_IN_PROGRESS,
+      "Cannot send: another send is already on the wire. This client is single-flight; await the in-flight send first."
+    );
+  }
 }

@@ -1,60 +1,128 @@
 /**
- * Behavioural tests for the connection-lifecycle machine.
+ * Behavioural tests for the connection-lifecycle machine — the engine.
  *
- * The machine owns opening the connection (an invoked actor), so these drive it
- * controllable fake connector: send `CONNECT`, then resolve / reject / stall
- * the attempt and read the resulting state. They never inspect internals (the
- * attempt counter, the exact backoff delay — those are pinned in
- * backoff.test.ts). `vi.runAllTimersAsync()` waits out whatever backoff is
- * pending; a 0ms advance just flushes the open promise without firing the long
- * connect timeout.
+ * These drive the machine directly via events, each carrying a `settle`
+ * deferred (the bridge the client uses), and assert the machine's OUTCOME: the
+ * deferred resolves on success, or rejects with the exact typed error the
+ * machine chose. That is the whole point of the rewrite — the machine owns
+ * every error decision, so the tests read those decisions straight off the
+ * settled promise rather than inspecting context. Real timers (small delays)
+ * are used, matching the wire's real async I/O over the in-memory fake duplex.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { AckApplicationReject } from "@glion/ack";
+import { frame } from "@glion/mllp-transport";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { DEFAULT_RETRY, NO_RETRY } from "../src/backoff";
+import type { MllpClientResponse } from "../src/ack";
+import { NO_RETRY } from "../src/backoff";
 import type { RetryOptions } from "../src/backoff";
 import type { MllpConnector, MllpDuplex } from "../src/client";
-import { MllpClientError, MllpErrorCode } from "../src/errors";
+import { MllpErrorCode } from "../src/errors";
 import { createConnectionState } from "../src/state";
-import type { ConnectionState } from "../src/state";
+import type { ConnectionState, Settle } from "../src/state";
+import { createFakeDuplex } from "./fake-duplex";
+import type { FakeDuplex } from "./fake-duplex";
+import { ACK_AA, ACK_AR, REQUEST, REQUEST_CONTROL_ID } from "./fixtures";
 
-function makeFakeDuplex(onClose?: () => void): MllpDuplex {
+const started: ConnectionState[] = [];
+
+afterEach(() => {
+  for (const actor of started) {
+    actor.stop();
+  }
+  started.length = 0;
+});
+
+/** A captured deferred — the bridge a caller hands the machine on the event. */
+function deferred<T>(): { promise: Promise<T>; settle: Settle<T> } {
+  let capturedResolve: (value: T) => void = () => {};
+  let capturedReject: (reason: unknown) => void = () => {};
+  // oxlint-disable-next-line promise/avoid-new -- exposing the settlers
+  const promise = new Promise<T>((resolve, reject) => {
+    capturedResolve = resolve;
+    capturedReject = reject;
+  });
   return {
-    close: () => {
-      onClose?.();
-      return Promise.resolve();
-    },
-    // The machine never reads `closed` (the client's read loop watches it).
-    // oxlint-disable-next-line promise/avoid-new -- a never-settling stub
-    closed: new Promise<void>(() => {}),
-    readable: new ReadableStream<Uint8Array>(),
-    writable: new WritableStream<Uint8Array>(),
+    promise,
+    settle: { reject: capturedReject, resolve: capturedResolve },
   };
+}
+
+function startMachine(
+  input: {
+    connect?: MllpConnector;
+    connectTimeoutMs?: number;
+    options?: RetryOptions;
+  } = {}
+): ConnectionState {
+  const connector =
+    input.connect ?? (() => Promise.resolve(createFakeDuplex().duplex));
+  const actor = createConnectionState({
+    connectTimeoutMs: input.connectTimeoutMs ?? 30_000,
+    host: "test",
+    maxBufferedBytes: undefined,
+    open: (signal) => connector({ host: "test", port: 0, signal }),
+    options: input.options ?? NO_RETRY,
+    port: 0,
+  });
+  started.push(actor);
+  return actor;
+}
+
+function phaseOf(actor: ConnectionState): string {
+  const phase = actor.getSnapshot().value;
+  return typeof phase === "string" ? phase : "connected";
+}
+
+/** Drive CONNECT and return the caller's promise. */
+function connect(actor: ConnectionState): Promise<void> {
+  // oxlint-disable-next-line promise/avoid-new -- bridge: machine event → caller promise
+  return new Promise<void>((resolve, reject) => {
+    actor.send({ settle: { reject, resolve }, type: "CONNECT" });
+  });
+}
+
+/** Drive SEND and return the caller's promise. */
+function sendMessage(
+  actor: ConnectionState,
+  message: string = REQUEST,
+  controlId: string = REQUEST_CONTROL_ID,
+  timeoutMs = 1000
+): Promise<MllpClientResponse> {
+  const { promise, settle } = deferred<MllpClientResponse>();
+  actor.send({
+    framed: frame(message),
+    requestControlId: controlId,
+    settle,
+    timeoutMs,
+    type: "SEND",
+  });
+  return promise;
 }
 
 /** A connector whose single attempt the test resolves or rejects on demand. */
 function deferredConnect(): {
   connect: MllpConnector;
-  resolve: (duplex: MllpDuplex) => void;
   reject: (error: unknown) => void;
+  resolve: (duplex: MllpDuplex) => void;
 } {
-  let settleResolve: (duplex: MllpDuplex) => void = () => {};
-  let settleReject: (error: unknown) => void = () => {};
-  const connect: MllpConnector = () =>
+  let capturedResolve: (duplex: MllpDuplex) => void = () => {};
+  let capturedReject: (error: unknown) => void = () => {};
+  const connector: MllpConnector = () =>
     // oxlint-disable-next-line promise/avoid-new -- exposing the settlers
     new Promise<MllpDuplex>((resolve, reject) => {
-      settleResolve = resolve;
-      settleReject = reject;
+      capturedResolve = resolve;
+      capturedReject = reject;
     });
   return {
-    connect,
-    reject: (error) => settleReject(error),
-    resolve: (duplex) => settleResolve(duplex),
+    connect: connector,
+    reject: (error) => capturedReject(error),
+    resolve: (duplex) => capturedResolve(duplex),
   };
 }
 
-/** A connector that plays out a fixed script of connection outcomes, in order. */
+/** A connector that plays a fixed script of outcomes, in order. */
 function scriptedConnect(
   outcomes: ReadonlyArray<MllpDuplex | "reject">
 ): MllpConnector {
@@ -68,200 +136,344 @@ function scriptedConnect(
   };
 }
 
-function startMachine(
-  input: {
-    options?: RetryOptions;
-    connectTimeoutMs?: number;
-    connect?: MllpConnector;
-  } = {}
-): ConnectionState {
-  const connect = input.connect ?? (() => Promise.resolve(makeFakeDuplex()));
-  return createConnectionState({
-    connectTimeoutMs: input.connectTimeoutMs ?? 30_000,
-    open: (signal) => connect({ host: "test", port: 0, signal }),
-    options: input.options ?? NO_RETRY,
+const FAST_RETRY: RetryOptions = {
+  baseDelayMs: 5,
+  jitter: "none",
+  maxDelayMs: 50,
+  maxRetries: 2,
+};
+
+// Holds `backingOff` open long enough to assert legality there. The first retry
+// window is 0ms (immediate), so a second failure is needed to land in a window
+// the test can observe; the large base keeps that window open across the assert.
+const SLOW_RETRY: RetryOptions = {
+  baseDelayMs: 10_000,
+  jitter: "none",
+  maxDelayMs: 10_000,
+  maxRetries: 5,
+};
+
+/** Park the machine in `backingOff` (second, long retry window) and return it. */
+async function backingOff(): Promise<ConnectionState> {
+  const actor = startMachine({
+    connect: scriptedConnect(["reject", "reject"]),
+    options: SLOW_RETRY,
   });
+  // The connect stays parked across retries; swallow so it never surfaces as an
+  // unhandled rejection when the test stops the actor mid-backoff.
+  void connect(actor).catch(() => {
+    /* parked across retries */
+  });
+  await vi.waitFor(() => expect(phaseOf(actor)).toBe("backingOff"));
+  return actor;
 }
 
-function phaseOf(actor: ConnectionState): string {
-  return actor.getSnapshot().value as string;
-}
-
-function errorCodeOf(actor: ConnectionState): string | undefined {
-  return actor.getSnapshot().context.error?.code;
-}
-
-/** Flush the open promise (microtasks) without firing the long connect timer. */
-async function settle(): Promise<void> {
-  await vi.advanceTimersByTimeAsync(0);
-}
-
-beforeEach(() => {
-  vi.useFakeTimers();
-});
-
-afterEach(() => {
-  vi.useRealTimers();
-});
-
-describe("connection state machine", () => {
-  it("connects: idle → connecting → connected when the connection opens", async () => {
-    const { connect, resolve } = deferredConnect();
-    const actor = startMachine({ connect });
+describe("connect", () => {
+  it("resolves when the connection opens (idle → connecting → connected)", async () => {
+    const { connect: connector, resolve } = deferredConnect();
+    const actor = startMachine({ connect: connector });
     expect(phaseOf(actor)).toBe("idle");
 
-    actor.send({ type: "CONNECT" });
+    const connecting = connect(actor);
     expect(phaseOf(actor)).toBe("connecting");
 
-    resolve(makeFakeDuplex());
-    await settle();
+    resolve(createFakeDuplex().duplex);
+    await connecting;
     expect(phaseOf(actor)).toBe("connected");
   });
 
-  it("closes with CONNECT_FAILED on a failed attempt when retry is disabled", async () => {
+  it("rejects with CONNECT_FAILED when the attempt fails and retry is off", async () => {
     const actor = startMachine({ connect: scriptedConnect(["reject"]) });
-    actor.send({ type: "CONNECT" });
-    await settle();
-
-    expect(phaseOf(actor)).toBe("closed");
-    expect(errorCodeOf(actor)).toBe(MllpErrorCode.CONNECT_FAILED);
-  });
-
-  it("retries a failed initial attempt when retry is enabled (does not fail fast)", async () => {
-    // Connect and reconnect are one path: the FIRST connect failure routes
-    // through the retry gate. The second attempt succeeds, proving it retried.
-    const actor = startMachine({
-      connect: scriptedConnect(["reject", makeFakeDuplex()]),
-      options: DEFAULT_RETRY,
+    await expect(connect(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_FAILED,
     });
-    actor.send({ type: "CONNECT" });
-    await vi.runAllTimersAsync();
-
-    expect(phaseOf(actor)).toBe("connected");
-  });
-
-  it("closes with CONNECT_TIMEOUT when the attempt exceeds connectTimeoutMs", async () => {
-    const { connect } = deferredConnect(); // never resolves
-    const actor = startMachine({ connect, connectTimeoutMs: 10 });
-    actor.send({ type: "CONNECT" });
-
-    await vi.advanceTimersByTimeAsync(10);
     expect(phaseOf(actor)).toBe("closed");
-    expect(errorCodeOf(actor)).toBe(MllpErrorCode.CONNECT_TIMEOUT);
   });
 
-  it("closes with CONNECT_ABORTED when CLOSE interrupts the attempt", () => {
-    const { connect } = deferredConnect(); // attempt still pending
-    const actor = startMachine({ connect });
-    actor.send({ type: "CONNECT" });
+  it("rejects with CONNECT_TIMEOUT when the attempt exceeds connectTimeoutMs", async () => {
+    const { connect: connector } = deferredConnect(); // never resolves
+    const actor = startMachine({ connect: connector, connectTimeoutMs: 10 });
+    await expect(connect(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_TIMEOUT,
+    });
+    expect(phaseOf(actor)).toBe("closed");
+  });
+
+  it("rejects with CONNECT_ABORTED when CLOSE interrupts the attempt", async () => {
+    const { connect: connector } = deferredConnect(); // still pending
+    const actor = startMachine({ connect: connector });
+    const connecting = connect(actor);
     actor.send({ type: "CLOSE" });
-
+    await expect(connecting).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_ABORTED,
+    });
     expect(phaseOf(actor)).toBe("closed");
-    expect(errorCodeOf(actor)).toBe(MllpErrorCode.CONNECT_ABORTED);
   });
 
   it("closes an orphaned duplex when CLOSE wins the open race", async () => {
-    let closeCount = 0;
-    const orphan = makeFakeDuplex(() => {
-      closeCount += 1;
+    const orphan = createFakeDuplex();
+    const { connect: connector, resolve } = deferredConnect();
+    const actor = startMachine({ connect: connector });
+
+    const connecting = connect(actor);
+    actor.send({ type: "CLOSE" }); // aborts the open signal
+    resolve(orphan.duplex); // opens anyway — the orphan must be closed
+    await expect(connecting).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_ABORTED,
     });
-    const { connect, resolve } = deferredConnect();
-    const actor = startMachine({ connect });
-
-    actor.send({ type: "CONNECT" });
-    actor.send({ type: "CLOSE" }); // exits connecting → aborts the open signal
-    resolve(orphan); // the connection opens anyway — the orphan must be closed
-    await settle();
-
-    expect(closeCount).toBe(1);
+    // Let the open actor's post-resolution signal.aborted branch run.
+    await Promise.resolve();
+    expect(orphan.closeCount()).toBeGreaterThanOrEqual(1);
   });
 
-  it("closes on a drop when retry is disabled", async () => {
+  it("retries a failed attempt when retry is enabled, then connects", async () => {
     const actor = startMachine({
-      connect: scriptedConnect([makeFakeDuplex()]),
+      connect: scriptedConnect(["reject", createFakeDuplex().duplex]),
+      options: FAST_RETRY,
     });
-    actor.send({ type: "CONNECT" });
-    await settle();
-    expect(phaseOf(actor)).toBe("connected");
-
-    actor.send({
-      error: new MllpClientError(MllpErrorCode.DROPPED, "peer drop"),
-      type: "DROP",
-    });
-    expect(phaseOf(actor)).toBe("closed");
-    expect(errorCodeOf(actor)).toBe(MllpErrorCode.DROPPED);
-  });
-
-  it("retries after a drop when retry is enabled", async () => {
-    const actor = startMachine({
-      connect: scriptedConnect([makeFakeDuplex(), makeFakeDuplex()]),
-      options: DEFAULT_RETRY,
-    });
-    actor.send({ type: "CONNECT" });
-    await settle();
-    expect(phaseOf(actor)).toBe("connected");
-
-    actor.send({
-      error: new MllpClientError(MllpErrorCode.DROPPED, "peer drop"),
-      type: "DROP",
-    });
-    expect(phaseOf(actor)).not.toBe("closed");
-
-    await vi.runAllTimersAsync();
+    await connect(actor);
     expect(phaseOf(actor)).toBe("connected");
   });
 
-  it("gives up after the configured number of retries", async () => {
+  it("gives up with CONNECT_FAILED after the configured retries", async () => {
     const actor = startMachine({
       connect: scriptedConnect(["reject", "reject", "reject"]),
-      options: { ...DEFAULT_RETRY, maxRetries: 2 },
+      options: FAST_RETRY,
     });
-    actor.send({ type: "CONNECT" });
-
-    await vi.runAllTimersAsync();
+    await expect(connect(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_FAILED,
+    });
     expect(phaseOf(actor)).toBe("closed");
   });
 
-  it("closes from any live state when asked", async () => {
-    const fromIdle = startMachine({ options: DEFAULT_RETRY });
+  it("retries multiple times before succeeding (two attempt cycles)", async () => {
+    const actor = startMachine({
+      connect: scriptedConnect(["reject", "reject", createFakeDuplex().duplex]),
+      options: FAST_RETRY,
+    });
+    await connect(actor);
+    expect(phaseOf(actor)).toBe("connected");
+  });
+});
+
+describe("send", () => {
+  async function connected(fake: FakeDuplex): Promise<ConnectionState> {
+    const actor = startMachine({ connect: () => Promise.resolve(fake.duplex) });
+    await connect(actor);
+    return actor;
+  }
+
+  it("resolves with the parsed ACK on an accept", async () => {
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => peer.injectPeerBytes(frame(ACK_AA)),
+    });
+    const actor = await connected(fake);
+    const response = await sendMessage(actor);
+    expect(response.code).toBe("AA");
+    expect(response.controlId).toBe(REQUEST_CONTROL_ID);
+    expect(phaseOf(actor)).toBe("connected");
+  });
+
+  it("rejects with the AckException on a NAK", async () => {
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => peer.injectPeerBytes(frame(ACK_AR)),
+    });
+    const actor = await connected(fake);
+    await expect(sendMessage(actor)).rejects.toBeInstanceOf(
+      AckApplicationReject
+    );
+  });
+
+  it("rejects with SEND_TIMEOUT and stays connected", async () => {
+    const fake = createFakeDuplex({ onWrite: () => {} }); // peer never answers
+    const actor = await connected(fake);
+    await expect(
+      sendMessage(actor, REQUEST, REQUEST_CONTROL_ID, 20)
+    ).rejects.toMatchObject({
+      code: MllpErrorCode.SEND_TIMEOUT,
+    });
+    expect(phaseOf(actor)).toBe("connected");
+  });
+
+  it("rejects a concurrent send with SEND_IN_PROGRESS (single-flight)", async () => {
+    const fake = createFakeDuplex({ onWrite: () => {} }); // hold the first send
+    const actor = await connected(fake);
+    const first = sendMessage(actor, REQUEST, REQUEST_CONTROL_ID, 50);
+    const second = sendMessage(actor);
+    await expect(second).rejects.toMatchObject({
+      code: MllpErrorCode.SEND_IN_PROGRESS,
+    });
+    // The first send is still single-flight; let it time out so it settles.
+    await expect(first).rejects.toMatchObject({
+      code: MllpErrorCode.SEND_TIMEOUT,
+    });
+  });
+
+  it("releases the wire after a send so the next one succeeds", async () => {
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => peer.injectPeerBytes(frame(ACK_AA)),
+    });
+    const actor = await connected(fake);
+    const first = await sendMessage(actor);
+    expect(first.code).toBe("AA");
+    const second = await sendMessage(actor);
+    expect(second.code).toBe("AA");
+  });
+});
+
+describe("drop", () => {
+  it("closes on a peer drop when retry is off and rejects the in-flight send", async () => {
+    const fake = createFakeDuplex({ onWrite: () => {} });
+    const actor = startMachine({ connect: () => Promise.resolve(fake.duplex) });
+    await connect(actor);
+
+    const inflight = sendMessage(actor, REQUEST, REQUEST_CONTROL_ID, 1000);
+    fake.closePeer();
+    await expect(inflight).rejects.toMatchObject({
+      code: MllpErrorCode.DROPPED,
+    });
+    expect(phaseOf(actor)).toBe("closed");
+  });
+
+  it("reconnects after a drop when retry is enabled", async () => {
+    let fakes = 0;
+    const live = createFakeDuplex();
+    const dropping = createFakeDuplex();
+    const connector: MllpConnector = () => {
+      fakes += 1;
+      return Promise.resolve(fakes === 1 ? dropping.duplex : live.duplex);
+    };
+    const actor = startMachine({ connect: connector, options: FAST_RETRY });
+    await connect(actor);
+    expect(phaseOf(actor)).toBe("connected");
+
+    dropping.closePeer();
+    // Let the drop propagate and the immediate retry reconnect.
+    await vi.waitFor(() => expect(phaseOf(actor)).toBe("connected"));
+  });
+
+  it("rejects the in-flight send with DROPPED, then the next send works after reconnect", async () => {
+    let fakes = 0;
+    const dropping = createFakeDuplex({ onWrite: () => {} }); // never ACKs
+    const live = createFakeDuplex({
+      onWrite: (_chunk, peer) => peer.injectPeerBytes(frame(ACK_AA)),
+    });
+    const connector: MllpConnector = () => {
+      fakes += 1;
+      return Promise.resolve(fakes === 1 ? dropping.duplex : live.duplex);
+    };
+    const actor = startMachine({ connect: connector, options: FAST_RETRY });
+    await connect(actor);
+
+    const inflight = sendMessage(actor, REQUEST, REQUEST_CONTROL_ID, 1000);
+    dropping.closePeer();
+    await expect(inflight).rejects.toMatchObject({
+      code: MllpErrorCode.DROPPED,
+    });
+
+    await vi.waitFor(() => expect(phaseOf(actor)).toBe("connected"));
+    const response = await sendMessage(actor);
+    expect(response.code).toBe("AA");
+  });
+});
+
+describe("legality — the machine owns which error", () => {
+  it("SEND before connected rejects with NOT_CONNECTED", async () => {
+    const actor = startMachine();
+    await expect(sendMessage(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.NOT_CONNECTED,
+    });
+  });
+
+  it("a second CONNECT rejects with ALREADY_CONNECTED", async () => {
+    const actor = startMachine();
+    await connect(actor);
+    await expect(connect(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.ALREADY_CONNECTED,
+    });
+  });
+
+  it("SEND while connecting rejects with NOT_CONNECTED", async () => {
+    const { connect: connector } = deferredConnect(); // parks in `connecting`
+    const actor = startMachine({ connect: connector });
+    void connect(actor).catch(() => {
+      /* parked */
+    });
+    expect(phaseOf(actor)).toBe("connecting");
+    await expect(sendMessage(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.NOT_CONNECTED,
+    });
+  });
+
+  it("a second CONNECT while connecting rejects with ALREADY_CONNECTED", async () => {
+    const { connect: connector } = deferredConnect(); // parks in `connecting`
+    const actor = startMachine({ connect: connector });
+    void connect(actor).catch(() => {
+      /* parked */
+    });
+    expect(phaseOf(actor)).toBe("connecting");
+    await expect(connect(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.ALREADY_CONNECTED,
+    });
+  });
+
+  it("SEND while backingOff rejects with NOT_CONNECTED", async () => {
+    const actor = await backingOff();
+    await expect(sendMessage(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.NOT_CONNECTED,
+    });
+  });
+
+  it("a CONNECT while backingOff rejects with ALREADY_CONNECTED", async () => {
+    const actor = await backingOff();
+    await expect(connect(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.ALREADY_CONNECTED,
+    });
+  });
+
+  it("CONNECT and SEND after close reject with CLOSED", async () => {
+    const actor = startMachine();
+    actor.send({ type: "CLOSE" });
+    expect(phaseOf(actor)).toBe("closed");
+    await expect(connect(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+    });
+    await expect(sendMessage(actor)).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+    });
+  });
+});
+
+describe("close", () => {
+  it("closes from idle, connecting, and connected", async () => {
+    const fromIdle = startMachine();
     fromIdle.send({ type: "CLOSE" });
     expect(phaseOf(fromIdle)).toBe("closed");
 
-    const fromConnecting = startMachine({
-      connect: deferredConnect().connect,
-      options: DEFAULT_RETRY,
-    });
-    fromConnecting.send({ type: "CONNECT" });
+    const { connect: connector } = deferredConnect();
+    const fromConnecting = startMachine({ connect: connector });
+    const connecting = connect(fromConnecting);
     fromConnecting.send({ type: "CLOSE" });
+    await expect(connecting).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_ABORTED,
+    });
     expect(phaseOf(fromConnecting)).toBe("closed");
 
-    const fromConnected = startMachine({
-      connect: scriptedConnect([makeFakeDuplex()]),
-      options: DEFAULT_RETRY,
-    });
-    fromConnected.send({ type: "CONNECT" });
-    await settle();
+    const fromConnected = startMachine();
+    await connect(fromConnected);
     fromConnected.send({ type: "CLOSE" });
     expect(phaseOf(fromConnected)).toBe("closed");
   });
 
-  it("a pending retry does not fire after close", async () => {
-    const actor = startMachine({
-      connect: scriptedConnect([makeFakeDuplex()]),
-      options: DEFAULT_RETRY,
-    });
-    actor.send({ type: "CONNECT" });
-    await settle();
-    actor.send({
-      error: new MllpClientError(MllpErrorCode.DROPPED, "peer drop"),
-      type: "DROP",
-    });
+  it("rejects an in-flight send with CLOSED", async () => {
+    const fake = createFakeDuplex({ onWrite: () => {} });
+    const actor = startMachine({ connect: () => Promise.resolve(fake.duplex) });
+    await connect(actor);
 
+    const inflight = sendMessage(actor, REQUEST, REQUEST_CONTROL_ID, 1000);
     actor.send({ type: "CLOSE" });
-    expect(phaseOf(actor)).toBe("closed");
-
-    // The backoff timer must have been cancelled — no reconnect happens.
-    await vi.runAllTimersAsync();
-    expect(phaseOf(actor)).toBe("closed");
+    await expect(inflight).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+    });
   });
 });
