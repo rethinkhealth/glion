@@ -4,9 +4,8 @@
  * Every failure the client itself raises is an {@link MllpClientError}
  * carrying a {@link MllpErrorCode}. **Branch on `code`** — it is the stable,
  * exhaustive discriminant; a `switch` on it never needs to inspect client
- * state. Code-specific detail rides on optional fields (only the fields
- * relevant to a given `code` are populated); a wrapped underlying failure is
- * on `cause`.
+ * state. The human-readable detail is in `message`; a wrapped underlying
+ * failure is on the standard `cause`.
  *
  * A NAK is deliberately *not* an `MllpClientError`: `send()` throws an
  * `@glion/ack` `AckException` when the peer understood the message and
@@ -17,85 +16,150 @@
  * @module
  */
 
-import type { Root } from "@glion/ast";
-
 export const MllpErrorCode = {
+  /**
+   * Connecting was attempted on a client that is already connecting or
+   * connected. A client holds one connection for its lifetime — it should be
+   * reused for every message, with a second client opened only when a parallel
+   * connection is genuinely needed.
+   */
   ALREADY_CONNECTED: "ALREADY_CONNECTED",
+  /**
+   * The client has already been closed. A closed client is done for good and
+   * will not reconnect — a new one must be created to reach the peer again.
+   */
   CLOSED: "CLOSED",
+  /**
+   * The client was closed while it was still connecting, so the connection
+   * never finished opening. Expected when closing mid-connect; otherwise it
+   * means something shut the client down before it was ready.
+   */
   CONNECT_ABORTED: "CONNECT_ABORTED",
+  /**
+   * The connection could not be opened — the host was unreachable, refused the
+   * connection, failed DNS, or rejected the TLS handshake. The address and
+   * whether the peer is listening are worth checking; the underlying network
+   * error is on `cause`.
+   */
   CONNECT_FAILED: "CONNECT_FAILED",
+  /**
+   * The peer did not accept the connection in time. The host may be slow,
+   * overloaded, or silently dropping connections; retrying may help, as may
+   * raising `connectTimeoutMs` when the peer is simply slow to accept.
+   */
   CONNECT_TIMEOUT: "CONNECT_TIMEOUT",
-  CORRELATION_MISMATCH: "CORRELATION_MISMATCH",
+  /**
+   * The connection was lost and can no longer be used — the peer hung up, the
+   * network broke mid-send, or the peer sent malformed or unexpected data. The
+   * in-flight message did not complete; a new connection must be opened, and
+   * the message resent only when it is safe to repeat. The specifics are in
+   * `message`, with any underlying error on `cause`.
+   */
   DROPPED: "DROPPED",
+  /**
+   * The peer replied, but the reply was not a usable acknowledgment of the
+   * sent message: it was garbled (not UTF-8), missing or carrying an
+   * unrecognized acknowledgment code, or it answered a different message (a
+   * late reply to an earlier send that had already timed out). Whether the
+   * peer accepted the message is unknowable — its fate should be treated as
+   * unknown. The specifics are in `message`, with any decoding error on
+   * `cause`.
+   */
+  INVALID_RESPONSE: "INVALID_RESPONSE",
+  /**
+   * Sending was attempted before the client was connected. The client must
+   * connect, and the connection must succeed, before a message can be sent.
+   */
   NOT_CONNECTED: "NOT_CONNECTED",
-  PARSE_FAILED: "PARSE_FAILED",
-  SEND_ABORTED: "SEND_ABORTED",
+  /**
+   * A send was started while another was still waiting for its acknowledgment.
+   * The client handles one message at a time — the in-flight send must resolve
+   * before the next one starts.
+   */
+  SEND_IN_PROGRESS: "SEND_IN_PROGRESS",
+  /**
+   * The peer did not acknowledge the message in time. The connection stays
+   * open and remains usable for further sends, but whether the peer received
+   * this message is unknown — it should be resent only when it is safe to
+   * repeat. The timeout is configurable per send via `opts.timeoutMs`, or for
+   * the whole client via `sendTimeoutMs`.
+   */
   SEND_TIMEOUT: "SEND_TIMEOUT",
-  UNKNOWN_ACK_CODE: "UNKNOWN_ACK_CODE",
 } as const;
+
 export type MllpErrorCode = (typeof MllpErrorCode)[keyof typeof MllpErrorCode];
 
 /**
- * Why a connection ended — set on {@link MllpClientError.reason} when `code`
- * is `DROPPED`. Lets the caller branch on cause (e.g. a retry policy) without
- * parsing the message string.
- */
-export type MllpDropReason =
-  | "peer-drop"
-  | "framing-error"
-  | "frame-queue-overflow"
-  | "write-failed";
-
-/**
- * Optional, code-specific detail for an {@link MllpClientError}. Only the
- * fields relevant to a given `code` are set.
- */
-export interface MllpClientErrorDetails {
-  /**
-   * Underlying error being wrapped (e.g. the socket error behind
-   * `CONNECT_FAILED`).
-   */
-  cause?: unknown;
-  /** `DROPPED`: why the wire ended. */
-  reason?: MllpDropReason;
-  /** `CONNECT_TIMEOUT` / `SEND_TIMEOUT`: the deadline that elapsed, in ms. */
-  timeoutMs?: number;
-  /** `CORRELATION_MISMATCH`: the request's MSH-10 (the expected MSA-2). */
-  expected?: string;
-  /** `CORRELATION_MISMATCH`: the response's actual MSA-2. */
-  actual?: string;
-  /** `CORRELATION_MISMATCH`: parsed AST of the offending ACK. */
-  tree?: Root;
-  /** `CORRELATION_MISMATCH`: de-framed bytes of the offending ACK. */
-  raw?: Uint8Array;
-}
-
-/**
  * The one error class `@glion/mllp-client` raises. Discriminate with `code`;
- * read the optional detail fields only for the codes that populate them.
+ * read `message` for the detail and `cause` for any wrapped underlying error.
  */
 export class MllpClientError extends Error {
   readonly code: MllpErrorCode;
-  readonly reason: MllpDropReason | undefined;
-  readonly timeoutMs: number | undefined;
-  readonly expected: string | undefined;
-  readonly actual: string | undefined;
-  readonly tree: Root | undefined;
-  readonly raw: Uint8Array | undefined;
 
   constructor(
     code: MllpErrorCode,
     message: string,
-    details: MllpClientErrorDetails = {}
+    options?: { cause?: unknown }
   ) {
-    super(message, { cause: details.cause });
+    super(message, options);
     this.name = "MllpClientError";
     this.code = code;
-    this.reason = details.reason;
-    this.timeoutMs = details.timeoutMs;
-    this.expected = details.expected;
-    this.actual = details.actual;
-    this.tree = details.tree;
-    this.raw = details.raw;
+  }
+
+  static timeout(timeoutMs: number): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.SEND_TIMEOUT,
+      `The request timed out after ${timeoutMs}ms.`
+    );
+  }
+
+  static connectionFailure(cause: unknown): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.CONNECT_FAILED,
+      "The connection could not be opened. See the error's cause for details.",
+      { cause }
+    );
+  }
+
+  static connectionAborted(): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.CONNECT_ABORTED,
+      "Connect was interrupted while the connection was still being established."
+    );
+  }
+
+  static connectionTimeout(timeoutMs: number): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.CONNECT_TIMEOUT,
+      `Connect timed out after ${timeoutMs}ms.`
+    );
+  }
+
+  static closed(): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.CLOSED,
+      "This client has been closed. Construct a new MllpClient to talk to the peer again."
+    );
+  }
+
+  static alreadyConnected(): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.ALREADY_CONNECTED,
+      "This MllpClient already has a connection in progress or established. It opens one connection in its lifetime — await the in-flight connect, or use a separate client for a concurrent connection."
+    );
+  }
+
+  static notConnected(): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.NOT_CONNECTED,
+      "Cannot send: the client is not connected. Call connect() and await it before send()."
+    );
+  }
+
+  static sendInProgress(): MllpClientError {
+    return new MllpClientError(
+      MllpErrorCode.SEND_IN_PROGRESS,
+      "Cannot send: another send is already on the wire. This client is single-flight; await the in-flight send first."
+    );
   }
 }

@@ -2,7 +2,7 @@ import type { Root, Segment } from "@glion/ast";
 import { f, s } from "@glion/builder";
 
 import { AckCode, Severity } from "./constants";
-import type { AckCodeValue } from "./constants";
+import type { AckCodeValue, AckNakCode } from "./constants";
 
 export interface AckExceptionOptions extends ErrorOptions {
   /**
@@ -152,4 +152,33 @@ export class AckCommitReject extends AckException {
     super(message, options);
     this.name = "AckCommitReject";
   }
+}
+
+/** Maps each Table 0008 reject code to its exception class. */
+const NAK_EXCEPTIONS: Record<
+  AckNakCode,
+  new (message: string, options: AckExceptionOptions) => AckException
+> = {
+  [AckCode.ApplicationError]: AckApplicationError,
+  [AckCode.ApplicationReject]: AckApplicationReject,
+  [AckCode.CommitError]: AckCommitError,
+  [AckCode.CommitReject]: AckCommitReject,
+};
+
+/**
+ * Build the {@link AckException} for a NAK code (`AE`/`AR`/`CE`/`CR`) — the
+ * single place that maps a Table 0008 reject code to its exception class, so a
+ * consumer parsing an inbound ACK doesn't re-implement the switch. Pass the
+ * `errorCode` (ERR-3), `severity` (ERR-4), `controlId` (MSA-2), `raw`, and
+ * `tree` read off the ACK via {@link AckExceptionOptions}.
+ */
+export function ackExceptionFor(
+  code: AckNakCode,
+  options: AckExceptionOptions
+): AckException {
+  const Exception = NAK_EXCEPTIONS[code];
+  return new Exception(
+    `The message was rejected with acknowledgment code ${code}.`,
+    options
+  );
 }

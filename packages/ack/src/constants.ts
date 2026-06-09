@@ -34,6 +34,16 @@ export function isAckCode(value: string): value is AckCodeValue {
   );
 }
 
+/** Narrow an arbitrary string to a NAK code — the reject half of Table 0008. */
+export function isAckNakCode(value: string): value is AckNakCode {
+  return (
+    value === AckCode.ApplicationError ||
+    value === AckCode.ApplicationReject ||
+    value === AckCode.CommitError ||
+    value === AckCode.CommitReject
+  );
+}
+
 /**
  * HL7v2 Table 0357 — Message error condition codes used in ERR-3. Stable across
  * all versions (v2.1–v2.9).
