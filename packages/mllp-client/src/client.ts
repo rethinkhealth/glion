@@ -23,6 +23,7 @@ import { value } from "@glion/util-query";
 
 import type { MllpClientResponse } from "./ack";
 import { NO_RETRY } from "./backoff";
+import { MllpClientError } from "./errors";
 import { createConnectionState } from "./state";
 import type { ConnectionPhase, ConnectionState } from "./state";
 
@@ -114,8 +115,21 @@ export class MllpClient {
       connectTimeoutMs: opts.connectTimeoutMs ?? DEFAULT_CONNECT_TIMEOUT_MS,
       host: this.#host,
       maxBufferedBytes: opts.maxBufferedBytes,
-      open: (signal) =>
-        opts.connect({ host: this.#host, port: this.#port, signal }),
+      // This closure implements the OpenConnection contract: honour the abort
+      // signal, including the race where the connection opens just after the
+      // attempt is aborted — close that orphan rather than leaking it.
+      open: async (signal) => {
+        const duplex = await opts.connect({
+          host: this.#host,
+          port: this.#port,
+          signal,
+        });
+        if (signal.aborted) {
+          await duplex.close();
+          throw MllpClientError.connectionAborted();
+        }
+        return duplex;
+      },
       options: NO_RETRY,
       port: this.#port,
     });

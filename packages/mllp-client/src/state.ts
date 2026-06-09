@@ -12,7 +12,7 @@
  * `actor.send()` returns void and `emit` is a fire-and-forget observer channel
  * with no request/response correlation (verified against xstate@5.32.0). So the
  * caller's deferred travels WITH the request: `CONNECT`/`SEND` carry a `settle`
- * ({@link Settle}), and the machine settles it — directly for an illegal or
+ * ({@link Deferred}), and the machine settles it — directly for an illegal or
  * failed operation (the machine constructs the typed {@link MllpClientError}),
  * or via the `wire` for a send's ACK/NAK/timeout/drop. Nothing is parked in
  * `context` as an "error to read back"; there are no
@@ -56,7 +56,17 @@ import type { MllpDuplex } from "./client";
 import { createConnection } from "./connection";
 import { MllpClientError, MllpErrorCode } from "./errors";
 
-/** Opens one connection, honouring the abort signal. Supplied by the client. */
+/**
+ * Opens one connection. Supplied by the client.
+ *
+ * **Contract — honour the `signal`.** The implementer owns cancellation
+ * entirely: if `signal` aborts, it MUST reject and leave nothing live —
+ * including the race where the connection opens _just after_ the abort (close
+ * that orphan rather than returning it). The machine passes its own abort
+ * signal (fired when `connecting` is exited) straight through and trusts this
+ * contract, so the abort ↔ close ↔ reject wiring lives at the layer that owns
+ * the socket, not in the state machine.
+ */
 export type OpenConnection = (signal: AbortSignal) => Promise<MllpDuplex>;
 
 /**
@@ -65,7 +75,7 @@ export type OpenConnection = (signal: AbortSignal) => Promise<MllpDuplex>;
  * `Promise`. {@link reject} carries the machine's typed error (or a NAK
  * `AckException`); {@link resolve} the success value.
  */
-export interface Settle<T> {
+export interface Deferred<T> {
   reject(reason: unknown): void;
   resolve(value: T): void;
 }
@@ -98,26 +108,27 @@ interface ConnectionStateContext {
   /** Failed attempts since the last successful connect; reset on connect. */
   attempt: number;
   /** The in-flight connect's deferred, held across retries until settled. */
-  connectSettle: Settle<void> | null;
+  connectDeferred: Deferred<void> | null;
   /** The live duplex once the connection opens; `null` otherwise. */
   duplex: MllpDuplex | null;
 }
 
 /**
  * Events the machine processes. `CONNECT`/`SEND` come from the client carrying
- * the caller's `settle`; `SETTLED`/`DROP` come from the `wire` via `sendBack`
- * (a send finished / the peer ended the connection); `CLOSE` is teardown.
+ * the caller's `settle`; `EXCHANGE_COMPLETE`/`DROP` come from the `wire` via
+ * `sendBack` (a send finished / the peer ended the connection); `CLOSE` is
+ * teardown.
  */
 type ConnectionStateEvent =
-  | { type: "CONNECT"; settle: Settle<void> }
+  | { type: "CONNECT"; settle: Deferred<void> }
   | {
       type: "SEND";
       framed: Uint8Array;
       requestControlId: string;
       timeoutMs: number;
-      settle: Settle<MllpClientResponse>;
+      settle: Deferred<MllpClientResponse>;
     }
-  | { type: "SETTLED" }
+  | { type: "EXCHANGE_COMPLETE" }
   | { type: "DROP"; error: MllpClientError }
   | { type: "CLOSE" };
 
@@ -135,24 +146,17 @@ interface WireEvent {
   framed: Uint8Array;
   requestControlId: string;
   timeoutMs: number;
-  settle: Settle<MllpClientResponse>;
+  settle: Deferred<MllpClientResponse>;
 }
 
 /**
- * Open one connection. The `signal` aborts when `connecting` is exited
- * (timeout, CLOSE, settlement), so the connector cancels for free. The
- * post-resolution race — the connection opens just after the state was left —
- * is handled here: close the orphan so it can never leak.
+ * Open one connection. A thin actor: it forwards the abort `signal` to the
+ * {@link OpenConnection} and trusts that contract (reject + no orphan on abort).
+ * Cancellation — including closing a connection that opened just after the
+ * abort — is the connector's concern, not this machine's.
  */
 const open = fromPromise<MllpDuplex, { open: OpenConnection }>(
-  async ({ input, signal }) => {
-    const duplex = await input.open(signal);
-    if (signal.aborted) {
-      await duplex.close();
-      throw MllpClientError.connectionAborted();
-    }
-    return duplex;
-  }
+  ({ input, signal }) => input.open(signal)
 );
 
 /**
@@ -174,10 +178,10 @@ const wire = fromCallback<WireEvent, WireInput>(
     });
 
     // Run one exchange and pipe its outcome to the caller's `settle`. Single-flight
-    // is released (`SETTLED`) BEFORE the caller is settled: `sendBack` is processed
+    // is released (`EXCHANGE_COMPLETE`) BEFORE the caller is settled: `sendBack` is processed
     // synchronously, so `connected.sending → ready` completes before the caller's
     // promise resolves — `await send()` then a fresh `send()` cannot race into
-    // SEND_IN_PROGRESS. On a drop the wire is already stopped, so this SETTLED is
+    // SEND_IN_PROGRESS. On a drop the wire is already stopped, so this EXCHANGE_COMPLETE is
     // harmlessly dropped and the DROP routing wins.
     const runExchange = async (request: WireEvent): Promise<void> => {
       try {
@@ -186,10 +190,10 @@ const wire = fromCallback<WireEvent, WireInput>(
           requestControlId: request.requestControlId,
           timeoutMs: request.timeoutMs,
         });
-        sendBack({ type: "SETTLED" });
+        sendBack({ type: "EXCHANGE_COMPLETE" });
         request.settle.resolve(response);
       } catch (error) {
-        sendBack({ type: "SETTLED" });
+        sendBack({ type: "EXCHANGE_COMPLETE" });
         request.settle.reject(error);
       }
     };
@@ -199,13 +203,13 @@ const wire = fromCallback<WireEvent, WireInput>(
     });
 
     // Cleanup is synchronous (XState stops the actor when `connected` is exited).
-    // It rejects an in-flight send and closes the duplex; on a peer drop the
-    // connection is already dead, so its `dead` latch makes this a no-op.
+    // It rejects an in-flight send and closes the duplex; if the connection was
+    // already dropped, its `dead` latch makes this a no-op.
     return () => {
       void connection.shutdown(
         new MllpClientError(
           MllpErrorCode.CLOSED,
-          "close() was called while this message was still being sent, so the send did not complete. The message may or may not have reached the peer; if it is not safe to resend blindly, confirm receipt before retrying."
+          "close() was called while this message was still being sent, so the send did not complete. The message may or may not have been received; if it is not safe to resend blindly, confirm receipt before retrying."
         )
       );
     };
@@ -235,7 +239,7 @@ const connectionMachine = setup({
 }).createMachine({
   context: ({ input }) => ({
     attempt: 0,
-    connectSettle: null,
+    connectDeferred: null,
     connectTimeoutMs: input.connectTimeoutMs,
     duplex: null,
     host: input.host,
@@ -246,30 +250,39 @@ const connectionMachine = setup({
   }),
   id: "mllp-connection",
   initial: "idle",
-  // Keys are alphabetical for sort-keys; the lifecycle order is
+  // Illegal SEND/CONNECT have ONE home. These machine-root transitions are the
+  // DEFAULT answer (reject with the typed error), and a state overrides them only
+  // where its answer differs: `idle` allows CONNECT, `connected.ready` allows SEND,
+  // `connected.sending` answers SEND_IN_PROGRESS, and `closed` answers CLOSED.
+  // XState's "deepest matching transition wins" makes the table read as
+  // "the default, plus the exceptions" instead of one handler per state.
+  on: {
+    CONNECT: {
+      actions: ({ event }) =>
+        event.settle.reject(MllpClientError.alreadyConnected()),
+    },
+    SEND: {
+      actions: ({ event }) =>
+        event.settle.reject(MllpClientError.notConnected()),
+    },
+  },
+  // States below are alphabetical for sort-keys; the lifecycle order is
   // idle → connecting → connected → backingOff → connecting → … → closed.
   states: {
     backingOff: {
       after: { retryDelay: "connecting" },
       entry: "incrementAttempt",
+      // SEND → NOT_CONNECTED and CONNECT → ALREADY_CONNECTED come from the root.
       on: {
         CLOSE: {
           actions: [
             ({ context }) =>
-              context.connectSettle?.reject(
+              context.connectDeferred?.reject(
                 MllpClientError.connectionAborted()
               ),
-            assign({ connectSettle: null }),
+            assign({ connectDeferred: null }),
           ],
           target: "closed",
-        },
-        CONNECT: {
-          actions: ({ event }) =>
-            event.settle.reject(MllpClientError.alreadyConnected()),
-        },
-        SEND: {
-          actions: ({ event }) =>
-            event.settle.reject(MllpClientError.notConnected()),
         },
       },
     },
@@ -288,8 +301,8 @@ const connectionMachine = setup({
     connected: {
       entry: [
         "resetAttempt",
-        ({ context }) => context.connectSettle?.resolve(),
-        assign({ connectSettle: null }),
+        ({ context }) => context.connectDeferred?.resolve(),
+        assign({ connectDeferred: null }),
       ],
       initial: "ready",
       invoke: {
@@ -309,12 +322,9 @@ const connectionMachine = setup({
         },
         src: "wire",
       },
+      // CONNECT → ALREADY_CONNECTED comes from the root.
       on: {
         CLOSE: "closed",
-        CONNECT: {
-          actions: ({ event }) =>
-            event.settle.reject(MllpClientError.alreadyConnected()),
-        },
         DROP: [
           { guard: "canRetry", target: "backingOff" },
           { target: "closed" },
@@ -337,11 +347,11 @@ const connectionMachine = setup({
         },
         sending: {
           on: {
+            EXCHANGE_COMPLETE: "ready",
             SEND: {
               actions: ({ event }) =>
                 event.settle.reject(MllpClientError.sendInProgress()),
             },
-            SETTLED: "ready",
           },
         },
       },
@@ -354,10 +364,10 @@ const connectionMachine = setup({
           {
             actions: [
               ({ context }) =>
-                context.connectSettle?.reject(
+                context.connectDeferred?.reject(
                   MllpClientError.connectionTimeout(context.connectTimeoutMs)
                 ),
-              assign({ connectSettle: null }),
+              assign({ connectDeferred: null }),
             ],
             target: "closed",
           },
@@ -374,48 +384,38 @@ const connectionMachine = setup({
           {
             actions: [
               ({ context, event }) =>
-                context.connectSettle?.reject(
+                context.connectDeferred?.reject(
                   MllpClientError.connectionFailure(event.error)
                 ),
-              assign({ connectSettle: null }),
+              assign({ connectDeferred: null }),
             ],
             target: "closed",
           },
         ],
         src: "open",
       },
+      // SEND → NOT_CONNECTED and CONNECT → ALREADY_CONNECTED come from the root.
       on: {
         CLOSE: {
           actions: [
             ({ context }) =>
-              context.connectSettle?.reject(
+              context.connectDeferred?.reject(
                 MllpClientError.connectionAborted()
               ),
-            assign({ connectSettle: null }),
+            assign({ connectDeferred: null }),
           ],
           target: "closed",
-        },
-        CONNECT: {
-          actions: ({ event }) =>
-            event.settle.reject(MllpClientError.alreadyConnected()),
-        },
-        SEND: {
-          actions: ({ event }) =>
-            event.settle.reject(MllpClientError.notConnected()),
         },
       },
     },
 
     idle: {
+      // SEND → NOT_CONNECTED comes from the root.
       on: {
         CLOSE: "closed",
         CONNECT: {
-          actions: assign({ connectSettle: ({ event }) => event.settle }),
+          actions: assign({ connectDeferred: ({ event }) => event.settle }),
           target: "connecting",
-        },
-        SEND: {
-          actions: ({ event }) =>
-            event.settle.reject(MllpClientError.notConnected()),
         },
       },
     },

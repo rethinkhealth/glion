@@ -178,7 +178,7 @@ export function ackExceptionFor(
 ): AckException {
   const Exception = NAK_EXCEPTIONS[code];
   return new Exception(
-    `Peer rejected the message with acknowledgment code ${code}.`,
+    `The message was rejected with acknowledgment code ${code}.`,
     options
   );
 }

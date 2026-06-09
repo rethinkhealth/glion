@@ -36,7 +36,7 @@ stateDiagram-v2
   state connected {
     [*] --> ready
     ready --> sending : SEND / wire ! WRITE(settle)
-    sending --> ready : SETTLED
+    sending --> ready : EXCHANGE_COMPLETE
   }
   connected --> backingOff : DROP [canRetry]
   connected --> closed : DROP [else] · CLOSE
@@ -74,7 +74,7 @@ sequenceDiagram
   Wire->>Peer: write framed
   Peer-->>Wire: ACK frame (read loop)
   Wire->>Wire: parseResponse + correlate MSA-2 == controlId
-  Wire-->>Machine: sendBack SETTLED  %% sending → ready (synchronous)
+  Wire-->>Machine: sendBack EXCHANGE_COMPLETE  %% sending → ready (synchronous)
   Wire-->>Client: settle.resolve(response)  %% send() resolves
 
   Note over App,Peer: close()

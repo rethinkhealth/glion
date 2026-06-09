@@ -138,6 +138,15 @@ export function createConnection(opts: ConnectionOptions): Connection {
     }
   }
 
+  /**
+   * Route one fully-decoded inbound frame. If an exchange is parked waiting for
+   * its ACK (`pendingAck`), the frame is its response — deliver it and clear
+   * the slot. Otherwise the frame is unsolicited (a late ACK for a send that
+   * already timed out, or a server-initiated message): buffer it so the NEXT
+   * {@link waitForFrame} drains it (where the correlation check rejects a stale
+   * id). The buffer is capped at {@link MAX_PENDING_FRAMES} — a flood past that
+   * cannot grow memory without bound, so it is treated as a terminal drop.
+   */
   function dispatchFrame(bytes: Uint8Array): void {
     const pending = pendingAck;
     if (pending) {
@@ -149,7 +158,7 @@ export function createConnection(opts: ConnectionOptions): Connection {
       dispatchError(
         new MllpClientError(
           MllpErrorCode.DROPPED,
-          `The peer sent more than ${MAX_PENDING_FRAMES} unsolicited frames with no matching request; closing the connection to avoid unbounded buffering.`
+          `Received more than ${MAX_PENDING_FRAMES} unsolicited frames with no matching request; closing the connection to avoid unbounded buffering.`
         )
       );
       return;
@@ -168,7 +177,7 @@ export function createConnection(opts: ConnectionOptions): Connection {
           return;
         }
         if (done) {
-          // The peer half-closed; watchForDrop reports the drop. Just exit.
+          // EOF — the connection half-closed; watchForDrop reports the drop.
           return;
         }
         const error = decoder.push(chunk, (decoded) => dispatchFrame(decoded));
@@ -199,7 +208,7 @@ export function createConnection(opts: ConnectionOptions): Connection {
     dispatchError(
       new MllpClientError(
         MllpErrorCode.DROPPED,
-        `The peer at ${host}:${port} closed the connection.`
+        `The connection to ${host}:${port} was closed.`
       )
     );
   }
@@ -264,7 +273,12 @@ export function createConnection(opts: ConnectionOptions): Connection {
     try {
       await writer.write(req.framed);
     } catch (error) {
-      // Write failure is terminal — the socket half is dead.
+      // A write failure is terminal. Two distinct concerns, hence two calls:
+      // dispatchError tears the CONNECTION down (latch dead, close the duplex,
+      // fire onDrop so the owner leaves `connected`); `throw` fails THIS exchange.
+      // The throw is not redundant with dispatchError — the write failed before
+      // waitForFrame registered a pendingAck, so dispatchError has no parked ACK
+      // to reject. Throwing is what rejects this in-flight send.
       const dropped = new MllpClientError(
         MllpErrorCode.DROPPED,
         `Failed to write the framed message to ${host}:${port}; the connection is no longer usable (see the error's cause).`,
@@ -291,14 +305,19 @@ export function createConnection(opts: ConnectionOptions): Connection {
       const ack = parseResponse(ackBytes, req.requestControlId);
       return { ...ack, durationMs, timestamp };
     } catch (error) {
-      // Slowloris recovery: on a send timeout with a mid-frame decoder buffer,
-      // reset it so the next send isn't corrupted by the partial.
-      if (
+      // A send timeout can leave a half-decoded frame in the connection-scoped
+      // decoder buffer (a slow / slowloris peer trickled a partial ACK). That
+      // partial is now stale: discard it so the NEXT send's ACK is not appended
+      // to it and corrupted. Only the exchange knows its ACK timed out — the
+      // decoder buffer is connection-scoped and otherwise survives across sends
+      // (for coalesced / late frames) — so the reset is triggered here. Any other
+      // failure leaves the buffer untouched.
+      const stalePartialFromTimeout =
         error instanceof MllpClientError &&
         error.code === MllpErrorCode.SEND_TIMEOUT &&
         !dead &&
-        decoder.buffered > 0
-      ) {
+        decoder.buffered > 0;
+      if (stalePartialFromTimeout) {
         decoder.reset();
       }
       throw error;

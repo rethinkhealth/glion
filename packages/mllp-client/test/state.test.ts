@@ -20,7 +20,7 @@ import type { RetryOptions } from "../src/backoff";
 import type { MllpConnector, MllpDuplex } from "../src/client";
 import { MllpErrorCode } from "../src/errors";
 import { createConnectionState } from "../src/state";
-import type { ConnectionState, Settle } from "../src/state";
+import type { ConnectionState, Deferred } from "../src/state";
 import { createFakeDuplex } from "./fake-duplex";
 import type { FakeDuplex } from "./fake-duplex";
 import { ACK_AA, ACK_AR, REQUEST, REQUEST_CONTROL_ID } from "./fixtures";
@@ -35,7 +35,7 @@ afterEach(() => {
 });
 
 /** A captured deferred — the bridge a caller hands the machine on the event. */
-function deferred<T>(): { promise: Promise<T>; settle: Settle<T> } {
+function deferred<T>(): { promise: Promise<T>; settle: Deferred<T> } {
   let capturedResolve: (value: T) => void = () => {};
   let capturedReject: (reason: unknown) => void = () => {};
   // oxlint-disable-next-line promise/avoid-new -- exposing the settlers
@@ -210,21 +210,9 @@ describe("connect", () => {
     expect(phaseOf(actor)).toBe("closed");
   });
 
-  it("closes an orphaned duplex when CLOSE wins the open race", async () => {
-    const orphan = createFakeDuplex();
-    const { connect: connector, resolve } = deferredConnect();
-    const actor = startMachine({ connect: connector });
-
-    const connecting = connect(actor);
-    actor.send({ type: "CLOSE" }); // aborts the open signal
-    resolve(orphan.duplex); // opens anyway — the orphan must be closed
-    await expect(connecting).rejects.toMatchObject({
-      code: MllpErrorCode.CONNECT_ABORTED,
-    });
-    // Let the open actor's post-resolution signal.aborted branch run.
-    await Promise.resolve();
-    expect(orphan.closeCount()).toBeGreaterThanOrEqual(1);
-  });
+  // The orphan-close on a post-abort open race is now the OpenConnection
+  // contract's job (the client's open closure), so it is tested at the client
+  // layer in client.test.ts, not here — the machine just forwards the signal.
 
   it("retries a failed attempt when retry is enabled, then connects", async () => {
     const actor = startMachine({
