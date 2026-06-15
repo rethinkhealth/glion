@@ -97,7 +97,16 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     }
   });
 
-  it("surfaces MllpServerError via onError (not the codec's CharsetError) and never ACKs a corrupted body", async () => {
+  // PID-5 family name "José" with "é" as the single Latin-1 byte 0xE9 (invalid
+  // UTF-8), and MSH-18 declaring 8859/1 — which we do not yet honour (see
+  // https://github.com/rethinkhealth/glion/issues/662).
+  const message = [
+    "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1||||||8859/1",
+    "PID|1||12345^^^MRN||José^John",
+  ].join("\r");
+  const latin1 = Uint8Array.from(message, (ch) => ch.codePointAt(0) ?? 0);
+
+  it("surfaces the decode failure to the app error handler as MllpServerError (codec error on cause)", async () => {
     let handlerRan = false;
     const errors: Error[] = [];
 
@@ -108,29 +117,20 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
         raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
       };
     });
-
-    server = serve(app, {
-      onError: (error) => {
-        errors.push(error);
-      },
-      port: 0,
+    // The app's error handler captures the typed failure and returns nothing,
+    // so no reply is sent — proving the body is never ACKed.
+    app.onError((caught) => {
+      errors.push(caught);
     });
-    await waitForReady(server.port);
 
-    // PID-5 family name "José" with "é" as the single Latin-1 byte 0xE9 (invalid
-    // UTF-8), and MSH-18 declaring 8859/1 — which we do not yet honour (see
-    // https://github.com/rethinkhealth/glion/issues/662).
-    const message = [
-      "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1||||||8859/1",
-      "PID|1||12345^^^MRN||José^John",
-    ].join("\r");
-    const latin1 = Uint8Array.from(message, (ch) => ch.codePointAt(0));
+    server = serve(app, { port: 0 });
+    await waitForReady(server.port);
 
     const response = await sendBytes(server.port, latin1, 1000);
 
     // No silent corruption: the handler never sees a mangled body, no AA is
-    // returned, and the decode failure surfaces through onError as the server's
-    // own MllpServerError(INCOMPATIBLE_CHARSET) — not the codec's CharsetError,
+    // returned, and the decode failure surfaces as the server's own
+    // MllpServerError(INCOMPATIBLE_CHARSET) — not the codec's CharsetError,
     // which is kept on `cause` for diagnostics.
     expect(handlerRan).toBe(false);
     expect(response).toBeUndefined();
@@ -141,5 +141,29 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
       MllpServerErrorCode.INCOMPATIBLE_CHARSET
     );
     expect((error as MllpServerError).cause).toBeInstanceOf(CharsetError);
+  });
+
+  it("returns a default AE NAK when no error handler is registered (loud rejection, not silence)", async () => {
+    let handlerRan = false;
+
+    const app = new Mllp().parser(parseHL7v2);
+    app.on("*", (ctx) => {
+      handlerRan = true;
+      return {
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+      };
+    });
+
+    server = serve(app, { port: 0 });
+    await waitForReady(server.port);
+
+    const response = await sendBytes(server.port, latin1, 1000);
+    const text = response?.toString("utf8") ?? "";
+
+    // The core floor rejects loudly with a NAK rather than going silent; the
+    // body is never ACKed (no AA) and the handler never runs.
+    expect(handlerRan).toBe(false);
+    expect(text).toContain("MSA|AE|");
+    expect(text).not.toContain("MSA|AA");
   });
 });

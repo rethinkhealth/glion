@@ -4,7 +4,7 @@
 import net from "node:net";
 
 import { parseHL7v2 } from "@glion/hl7v2";
-import { CR, frame, FS } from "@glion/mllp-transport";
+import { CR, FramingError, frame, FS } from "@glion/mllp-transport";
 
 import { serve } from "../../src/node/serve.js";
 import type { Server } from "../../src/node/serve.js";
@@ -164,6 +164,23 @@ function createApp() {
   return new Mllp().parser(parseHL7v2);
 }
 
+/** Send raw (unframed) bytes and resolve once the server closes the socket. */
+function sendRaw(port: number, bytes: Buffer): Promise<void> {
+  return new Promise((resolve) => {
+    const client = net.connect({ host: "127.0.0.1", port }, () => {
+      client.write(bytes);
+    });
+    client.on("error", () => {
+      /* connection reset on teardown — expected */
+    });
+    client.on("close", () => resolve());
+    setTimeout(() => {
+      client.destroy();
+      resolve();
+    }, 1000);
+  });
+}
+
 describe("serve() integration", () => {
   let server: Server | undefined;
 
@@ -172,6 +189,34 @@ describe("serve() integration", () => {
       await server.close();
       server = undefined;
     }
+  });
+
+  it("surfaces a framing error via onError (instanceof FramingError) and tears down the connection (no NAK)", async () => {
+    const framingErrors: { code: string; connId: number | undefined }[] = [];
+    let handlerRan = false;
+    const app = createApp().on("*", () => {
+      handlerRan = true;
+      return { raw: "MSH|^~\\&|||||||ACK|X|P|2.5.1\rMSA|AA|X" };
+    });
+    server = serve(app, {
+      onError: (error, connection) => {
+        if (error instanceof FramingError) {
+          framingErrors.push({ code: error.code, connId: connection?.id });
+        }
+      },
+      port: 0,
+    });
+    await server.listening;
+
+    // No leading VT start block → MISSING_START_BLOCK; never reaches a handler.
+    await sendRaw(server.port, Buffer.from("not a framed mllp message\r"));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(handlerRan).toBe(false);
+    expect(framingErrors).toHaveLength(1);
+    expect(framingErrors[0].code).toBe("MISSING_START_BLOCK");
   });
 
   it("starts and listens on an OS-assigned port", async () => {
@@ -276,10 +321,11 @@ describe("serve() integration", () => {
     expect(resp2).toContain("MSA|AA|MSG002");
   });
 
-  it("unhandled error sends no response, connection stays alive", async () => {
+  it("unhandled error sends a default NAK, connection stays alive", async () => {
     let callCount = 0;
     const app = createApp();
-    // No onError — unhandled errors produce no response (sender retries)
+    // No onError, no ack middleware — the core floor returns a default AE NAK
+    // rather than going silent.
     app.on("*", (ctx) => {
       callCount++;
       if (callCount === 1) {
@@ -295,9 +341,9 @@ describe("serve() integration", () => {
 
     const client = createPersistentClient(server.port);
     try {
-      // First message — no onError, no response sent
-      const resp1 = await client.send(SAMPLE_ADT, 500);
-      expect(resp1).toBeUndefined();
+      // First message — handler throws, floor returns an AE NAK
+      const resp1 = await client.send(SAMPLE_ADT);
+      expect(resp1).toContain("MSA|AE|MSG001|unhandled test error");
 
       // Second message on SAME connection — still works
       const resp2 = await client.send(SAMPLE_ORU);
@@ -353,38 +399,44 @@ describe("serve() integration", () => {
       expectTypeOf(disconnectedId).toBeNumber();
     });
 
-    it("onError fires when handler throws without app-level error handler", async () => {
+    it("does NOT fire serve.onError when a handler throws — the core NAKs it instead", async () => {
       const app = createApp();
       app.on("*", () => {
         throw new Error("handler boom");
       });
 
-      const errors: { message: string; connId: number }[] = [];
+      let onErrorFired = false;
 
       server = serve(app, {
-        onError: (err, conn) => {
-          errors.push({ connId: conn.id, message: err.message });
+        onError: () => {
+          onErrorFired = true;
         },
         port: 0,
       });
 
-      // No response expected (handler threw, no error handler to produce one)
-      await sendMessage(server.port, SAMPLE_ADT, 500);
+      // A handler throw is a semantic error: the core returns a default AE NAK
+      // and serve.onError (a transport/lifecycle hook) is NOT invoked.
+      const resp = await sendMessage(server.port, SAMPLE_ADT);
 
-      expect(errors).toHaveLength(1);
-      expect(errors[0].message).toBe("handler boom");
+      expect(resp).toContain("MSA|AE|MSG001|handler boom");
+      expect(onErrorFired).toBe(false);
     });
 
-    it("onError receives messageInfo with routing fields for handler errors", async () => {
+    it("onError receives messageInfo with routing fields when the app error handler throws", async () => {
       const app = createApp();
       app.on("ADT^A01", () => {
         throw new Error("handler failed");
+      });
+      // A throwing app error handler escapes to serve() — carrying the routing
+      // fields of the message it was handling.
+      app.onError(() => {
+        throw new Error("error handler boom");
       });
 
       let capturedInfo: unknown;
 
       server = serve(app, {
-        onError: (_err, _conn, messageInfo) => {
+        onError: (_error, _connection, messageInfo) => {
           capturedInfo = messageInfo;
         },
         port: 0,
@@ -413,7 +465,7 @@ describe("serve() integration", () => {
         onConnect: () => {
           throw new Error("connect failed");
         },
-        onError: (_err, _conn, messageInfo) => {
+        onError: (_error, _connection, messageInfo) => {
           capturedInfo = messageInfo;
         },
         port: 0,
@@ -436,8 +488,8 @@ describe("serve() integration", () => {
       const errors: string[] = [];
 
       server = serve(app, {
-        onError: (err) => {
-          errors.push(err.message);
+        onError: (error) => {
+          errors.push(error.message);
         },
         port: 0,
       });
@@ -459,8 +511,8 @@ describe("serve() integration", () => {
       const errors: string[] = [];
 
       server = serve(app, {
-        onError: (err) => {
-          errors.push(err.message);
+        onError: (error) => {
+          errors.push(error.message);
         },
         port: 0,
       });
@@ -556,8 +608,8 @@ describe("serve() integration", () => {
         onDisconnect: () => {
           disconnectCount++;
         },
-        onError: (err) => {
-          errors.push(err.message);
+        onError: (error) => {
+          errors.push(error.message);
         },
         port: 0,
       });
@@ -582,8 +634,8 @@ describe("serve() integration", () => {
         onDisconnect: () => {
           throw new Error("onDisconnect failed");
         },
-        onError: (err) => {
-          errors.push(err.message);
+        onError: (error) => {
+          errors.push(error.message);
         },
         port: 0,
       });
@@ -597,10 +649,15 @@ describe("serve() integration", () => {
       expect(errors[0]).toBe("onDisconnect failed");
     });
 
-    it("console.error fallback when no onError is provided", async () => {
+    it("console.error fallback when an escaping error has no serve.onError", async () => {
       const app = createApp();
       app.on("*", () => {
-        throw new Error("unhandled boom");
+        throw new Error("handler failed");
+      });
+      // A throwing app error handler escapes to serve(); with no serve.onError,
+      // the safe console fallback reports it.
+      app.onError(() => {
+        throw new Error("error handler boom");
       });
 
       const consoleSpy = vi
@@ -613,7 +670,7 @@ describe("serve() integration", () => {
 
         expect(consoleSpy).toHaveBeenCalledOnce();
         const msg = consoleSpy.mock.calls[0][0] as string;
-        expect(msg).toContain("unhandled boom");
+        expect(msg).toContain("error handler boom");
         expect(msg).toContain("[mllp]");
       } finally {
         consoleSpy.mockRestore();

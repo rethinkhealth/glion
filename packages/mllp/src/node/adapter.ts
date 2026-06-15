@@ -78,10 +78,31 @@ export interface NodeAdapterOptions {
  * @returns A promise that resolves once the chunk has been flushed or the
  *   socket's internal buffer has drained.
  */
-async function writeToSocket(socket: Socket, chunk: Uint8Array): Promise<void> {
+async function writeToSocket(
+  socket: Socket,
+  chunk: Uint8Array,
+  socketTimeout: number
+): Promise<void> {
   const ok = socket.write(chunk);
-  if (!ok) {
+  if (ok) {
+    return;
+  }
+  if (socketTimeout <= 0) {
     await once(socket, "drain");
+    return;
+  }
+  try {
+    // Bound the drain wait by the same idle deadline: a stalled peer that never
+    // drains would otherwise hang the message loop forever on a peer-controlled
+    // event — the DoS class the socket timeout exists to prevent.
+    await once(socket, "drain", {
+      signal: AbortSignal.timeout(socketTimeout),
+    });
+  } catch (error) {
+    // Force teardown so the loop doesn't hang; the rejection flows to serve()'s
+    // outer catch.
+    socket.destroy();
+    throw error;
   }
 }
 
@@ -99,7 +120,11 @@ async function writeToSocket(socket: Socket, chunk: Uint8Array): Promise<void> {
  * @returns An {@link AdapterSocket} exposing Web Streams and connection
  *   metadata.
  */
-function wrapNodeSocket(socket: Socket, secure: boolean): AdapterSocket {
+function wrapNodeSocket(
+  socket: Socket,
+  secure: boolean,
+  socketTimeout: number
+): AdapterSocket {
   const readable = Readable.toWeb(socket) as ReadableStream<Uint8Array>;
 
   const writable = new WritableStream<Uint8Array>({
@@ -110,12 +135,17 @@ function wrapNodeSocket(socket: Socket, secure: boolean): AdapterSocket {
       socket.end();
     },
     async write(chunk) {
-      await writeToSocket(socket, chunk);
+      await writeToSocket(socket, chunk, socketTimeout);
     },
   });
 
   return {
     close() {
+      // Contract: MUST NOT throw, MUST be idempotent (the core calls this
+      // unguarded in a finally, possibly on an already-torn-down socket).
+      if (socket.destroyed) {
+        return;
+      }
       // Graceful teardown: `resume()` drains any unread inbound bytes so the
       // following `end()` can send a clean FIN. A bare `destroy()` while data
       // sits unread in the RX buffer (e.g. tearing down after `onConnect`
@@ -200,7 +230,7 @@ export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
       const onConnection = (socket: Socket) => {
         configureSocket(socket);
         const secure = !!listenOpts.tls;
-        handler(wrapNodeSocket(socket, secure));
+        handler(wrapNodeSocket(socket, secure, socketTimeout));
       };
 
       const server: Server = listenOpts.tls
@@ -226,20 +256,21 @@ export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
       // implementation detail never observed by consumers.
       const listening = listeningInternal as Promise<unknown> as Promise<void>;
 
+      let isListening = false;
       server.once("listening", () => {
+        isListening = true;
         resolveListening(true);
       });
-      // Persistent error listener: server errors that fire before
-      // `listening` reject the startup promise; later errors (TLS,
-      // shutdown) propagate via the already-returned handle's lifecycle
-      // rather than crashing the process via an unhandled emitter error.
-      let listenFailed = false;
+      // A persistent error listener is mandatory: an unhandled `'error'` event
+      // is process-fatal by the EventEmitter contract. A pre-listen error is a
+      // startup failure → reject `listening` and release the descriptor. A
+      // post-listen error is observed via `onServerError` and the server keeps
+      // serving (operator decides policy) — never silently dropped.
       server.on("error", (err) => {
-        if (!listenFailed) {
-          listenFailed = true;
+        if (isListening) {
+          listenOpts.onError?.(err);
+        } else {
           rejectListening(err);
-          // Close the server handle so the OS descriptor is released
-          // even if the caller never awaits `listening` again.
           server.close();
         }
       });

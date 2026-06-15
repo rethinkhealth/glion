@@ -45,11 +45,7 @@ describe("ack middleware", () => {
         // no return, no throw — success
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AA|MSG001");
@@ -62,11 +58,7 @@ describe("ack middleware", () => {
       app.use(ackMiddleware({ sending: { application: "S", facility: "F" } }));
       app.on("ADT^A01", () => {});
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AA|MSG001");
@@ -77,11 +69,7 @@ describe("ack middleware", () => {
       app.use(ackMiddleware());
       app.on("ADT^A01", () => {});
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       // MSH-3/4 should be RecvApp/RecvFac (from original MSH-5/6)
@@ -101,11 +89,7 @@ describe("ack middleware", () => {
         });
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001|Validation failed");
@@ -123,11 +107,7 @@ describe("ack middleware", () => {
         });
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001");
@@ -146,11 +126,7 @@ describe("ack middleware", () => {
         });
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AR|MSG001|Not supported");
@@ -164,11 +140,7 @@ describe("ack middleware", () => {
         throw new UnsupportedMessageTypeReject("ADT^A01 not handled");
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AR|MSG001");
@@ -184,11 +156,7 @@ describe("ack middleware", () => {
         throw new Error("Database connection failed");
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001");
@@ -202,14 +170,35 @@ describe("ack middleware", () => {
         throw "string error";
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001");
+    });
+  });
+
+  describe("decode/parse failures (ctx.error)", () => {
+    // "é" as the single Latin-1 byte 0xE9 makes the payload invalid UTF-8.
+    const NON_UTF8 = Uint8Array.from(
+      "MSH|^~\\&|S|F|R|F|20240101120000||ADT^A01|MSG001|P|2.5.1\rPID|1||1||José",
+      (ch) => ch.codePointAt(0) ?? 0
+    );
+
+    it("NAKs a non-UTF-8 payload that never reaches a handler", async () => {
+      const app = new Mllp().parser(parseHL7v2);
+      app.use(ackMiddleware({ sending: { application: "S", facility: "F" } }));
+      let handlerRan = false;
+      app.on("*", () => {
+        handlerRan = true;
+      });
+
+      const response = await app.handle(NON_UTF8, MOCK_CONNECTION);
+
+      expect(handlerRan).toBe(false);
+      expect(response).toBeDefined();
+      // Undecodable input → empty AST → NAK with a blank MSA-2, AE code.
+      expect(response!.raw).toContain("MSA|AE|");
+      expect(response!.raw).toContain("|207|E");
     });
   });
 
@@ -221,11 +210,7 @@ describe("ack middleware", () => {
         raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001|Custom",
       }));
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toBe(
@@ -248,11 +233,7 @@ describe("ack middleware", () => {
         });
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001|Validation failed");
@@ -271,11 +252,7 @@ describe("ack middleware", () => {
       );
       app.on("ADT^A01", () => {});
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("|CUSTOM-001|");
@@ -291,16 +268,8 @@ describe("ack middleware", () => {
       );
       app.on("ADT^A01", () => {});
 
-      const res1 = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
-      const res2 = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const res1 = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      const res2 = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(res1!.raw).toContain("|ID-001|");
       expect(res2!.raw).toContain("|ID-002|");
@@ -313,11 +282,7 @@ describe("ack middleware", () => {
       app.use(ackMiddleware({ successCode: AckCode.CommitAccept }));
       app.on("ADT^A01", () => {});
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|CA|MSG001");
@@ -335,11 +300,7 @@ describe("ack middleware", () => {
         });
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|CE|MSG001|Commit failed");
@@ -359,11 +320,7 @@ describe("ack middleware", () => {
         });
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|CR|MSG001|Rejected at commit");
@@ -380,11 +337,7 @@ describe("ack middleware", () => {
         throw new Error("Something broke");
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001");
@@ -404,11 +357,7 @@ describe("ack middleware", () => {
         });
       });
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(response).toBeDefined();
       // The pipe in the error message must be encoded as \F\
@@ -433,7 +382,7 @@ describe("ack middleware", () => {
         order.push("handler");
       });
 
-      await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(order).toEqual(["before", "handler", "after"]);
     });

@@ -44,7 +44,7 @@ describe("Mllp.use({ prepend })", () => {
       order.push("handler");
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(order).toEqual(["first", "second", "handler"]);
   });
 
@@ -67,7 +67,7 @@ describe("Mllp.use({ prepend })", () => {
       order.push("handler");
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(order).toEqual(["prepended", "first", "handler"]);
   });
 
@@ -94,7 +94,7 @@ describe("Mllp.use({ prepend })", () => {
       // handler does nothing
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(capturedRes).toContain("MSA|AA");
   });
 
@@ -119,7 +119,7 @@ describe("Mllp.use({ prepend })", () => {
       // handler does nothing
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     // Inner middleware finishes before outer sets ctx.res → undefined
     expect(capturedRes).toBeUndefined();
   });
@@ -147,7 +147,7 @@ describe("Mllp.use({ prepend })", () => {
       order.push("handler");
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(order).toEqual(["prepended", "global", "scoped", "handler"]);
   });
 

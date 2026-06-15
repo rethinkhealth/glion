@@ -37,11 +37,22 @@ export interface Response {
 export interface Context {
   /** Incoming message data */
   readonly req: {
-    /** Original HL7 message string (without MLLP framing) */
+    /**
+     * Decoded HL7v2 message text (UTF-8, without MLLP framing). Empty (`""`)
+     * when the payload could not be decoded as UTF-8 — see
+     * {@link Context.error}.
+     */
     readonly raw: string;
-    /** Raw bytes from MLLP frame payload */
-    readonly bytes: Uint8Array;
   };
+
+  /**
+   * The decode or parse failure for this message, when one occurred; otherwise
+   * `undefined`. Context creation never throws out of band — a non-UTF-8
+   * payload or a parser throw is recorded here (and {@link Context.ast} is an
+   * empty `Root`) so `handle()` can route it to the error path (`onError`) like
+   * a thrown handler error.
+   */
+  readonly error: Error | undefined;
 
   /** TCP connection metadata */
   readonly connection: ConnectionInfo;

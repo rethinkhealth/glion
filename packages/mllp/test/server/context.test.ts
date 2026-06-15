@@ -12,11 +12,8 @@ const SAMPLE_MESSAGE = [
   "PID|1||12345^^^MRN||Doe^John",
 ].join("\r");
 
-const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
-
-function makeCtx(raw = SAMPLE_MESSAGE, bytes = SAMPLE_BYTES) {
+function makeCtx(raw = SAMPLE_MESSAGE) {
   return createContext({
-    bytes,
     connection: {
       id: 1,
       localPort: 2575,
@@ -25,16 +22,46 @@ function makeCtx(raw = SAMPLE_MESSAGE, bytes = SAMPLE_BYTES) {
       secure: false,
       state: new Map(),
     },
+    payload: new TextEncoder().encode(raw),
     processor: parseHL7v2,
-    raw,
   });
 }
 
 describe("createContext", () => {
-  it("exposes req.raw and req.bytes", () => {
+  it("exposes req.raw", () => {
     const ctx = makeCtx();
     expect(ctx.req.raw).toBe(SAMPLE_MESSAGE);
-    expect(ctx.req.bytes).toBe(SAMPLE_BYTES);
+  });
+
+  it("has no error for a valid message", () => {
+    const ctx = makeCtx();
+    expect(ctx.error).toBeUndefined();
+  });
+
+  it("never throws when the parser throws; surfaces ctx.error with an empty Root", () => {
+    const boom = new Error("parser exploded");
+    const throwingProcessor = {
+      parse: () => {
+        throw boom;
+      },
+    } as unknown as Hl7v2Processor;
+
+    const ctx = createContext({
+      connection: {
+        id: 1,
+        localPort: 2575,
+        remoteAddress: "127.0.0.1",
+        remotePort: 1,
+        secure: false,
+        state: new Map(),
+      },
+      payload: new TextEncoder().encode("not really hl7"),
+      processor: throwingProcessor,
+    });
+
+    expect(ctx.error).toBe(boom);
+    expect(ctx.ast).toEqual({ children: [], type: "root" });
+    expect(ctx.req.raw).toBe("not really hl7");
   });
 
   it("exposes connection metadata", () => {
@@ -107,7 +134,6 @@ describe("createContext", () => {
       const parseOnly = unified().use(hl7v2Parser).freeze() as Hl7v2Processor;
 
       const ctx = createContext({
-        bytes: SAMPLE_BYTES,
         connection: {
           id: 1,
           localPort: 2575,
@@ -116,8 +142,8 @@ describe("createContext", () => {
           secure: false,
           state: new Map(),
         },
+        payload: new TextEncoder().encode(SAMPLE_MESSAGE),
         processor: parseOnly,
-        raw: SAMPLE_MESSAGE,
       });
 
       // Tree is parsed correctly
@@ -140,7 +166,6 @@ describe("createContext", () => {
 
     it("works with full pipeline processor (parse + transform + compile)", async () => {
       const ctx = createContext({
-        bytes: SAMPLE_BYTES,
         connection: {
           id: 1,
           localPort: 2575,
@@ -149,8 +174,8 @@ describe("createContext", () => {
           secure: false,
           state: new Map(),
         },
+        payload: new TextEncoder().encode(SAMPLE_MESSAGE),
         processor: parseHL7v2,
-        raw: SAMPLE_MESSAGE,
       });
 
       // Tree, file, and result all populated
@@ -258,9 +283,8 @@ describe("createContext", () => {
       "EVN|A01|20240101120000",
       "PID|1||12345^^^MRN||Doe^John",
     ].join("\r");
-    const vidBytes = new TextEncoder().encode(vidMessage);
 
-    const ctx = makeCtx(vidMessage, vidBytes);
+    const ctx = makeCtx(vidMessage);
 
     expect(ctx.version).toBe("2.5.1");
   });

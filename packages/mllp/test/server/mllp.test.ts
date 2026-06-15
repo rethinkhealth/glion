@@ -68,18 +68,18 @@ describe("Mllp", () => {
       app.on("*", async () => RESPONSE_OK);
 
       await expect(
-        app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION)
+        app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION)
       ).rejects.toThrow(MllpServerError);
 
       await expect(
-        app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION)
+        app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION)
       ).rejects.toThrow("No parser registered");
     });
 
     it("missing-parser error has NO_PARSER code", async () => {
       const app = new Mllp();
       try {
-        await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+        await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
         expect.unreachable("should have thrown");
       } catch (error) {
         expect(error).toBeInstanceOf(MllpServerError);
@@ -96,7 +96,7 @@ describe("Mllp", () => {
       });
 
       await expect(
-        app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION)
+        app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION)
       ).rejects.toThrow(MllpServerError);
       expect(errorHandlerCalled.value).toBe(false);
     });
@@ -110,7 +110,7 @@ describe("Mllp", () => {
       const app = new Mllp().parser(parseHL7v2).parser(second);
       app.on("*", async () => RESPONSE_OK);
 
-      await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(firstSpy).not.toHaveBeenCalled();
       expect(secondSpy).toHaveBeenCalledOnce();
 
@@ -129,7 +129,7 @@ describe("Mllp", () => {
         return RESPONSE_OK;
       });
 
-      await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(astType).toBe("root");
       expect(childrenCount).toBeGreaterThan(0);
     });
@@ -144,7 +144,7 @@ describe("Mllp", () => {
         return RESPONSE_OK;
       });
 
-      await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(treeType).toBe("root");
     });
 
@@ -157,7 +157,7 @@ describe("Mllp", () => {
         return RESPONSE_OK;
       });
 
-      await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(fileExists).toBe(true);
     });
 
@@ -170,7 +170,7 @@ describe("Mllp", () => {
         return RESPONSE_OK;
       });
 
-      await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(resultExists).toBe(true);
     });
   });
@@ -180,11 +180,7 @@ describe("Mllp", () => {
     app.on("ADT^A01", async () => RESPONSE_OK);
     app.on("*", async () => RESPONSE_REJECT);
 
-    const response = await app.handle(
-      SAMPLE_ADT,
-      toBytes(SAMPLE_ADT),
-      MOCK_CONNECTION
-    );
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(response).toEqual(RESPONSE_OK);
   });
 
@@ -193,21 +189,13 @@ describe("Mllp", () => {
     app.on("ADT^A01", async () => RESPONSE_OK);
     app.on("*", async () => RESPONSE_REJECT);
 
-    const response = await app.handle(
-      SAMPLE_ORU,
-      toBytes(SAMPLE_ORU),
-      MOCK_CONNECTION
-    );
+    const response = await app.handle(toBytes(SAMPLE_ORU), MOCK_CONNECTION);
     expect(response).toEqual(RESPONSE_REJECT);
   });
 
   it("returns undefined when no handler matches - no router", async () => {
     const app = createApp();
-    const response = await app.handle(
-      SAMPLE_ADT,
-      toBytes(SAMPLE_ADT),
-      MOCK_CONNECTION
-    );
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(response).toBeUndefined();
   });
 
@@ -216,11 +204,7 @@ describe("Mllp", () => {
 
     app.on("ORU^O12", async () => RESPONSE_OK);
 
-    const response = await app.handle(
-      SAMPLE_ADT,
-      toBytes(SAMPLE_ADT),
-      MOCK_CONNECTION
-    );
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(response).toBeUndefined();
   });
 
@@ -239,7 +223,7 @@ describe("Mllp", () => {
       return RESPONSE_OK;
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(middlewareRan).toBe(true);
     expect(handlerSawEnriched).toBe(true);
   });
@@ -254,14 +238,14 @@ describe("Mllp", () => {
     });
     app.on("*", async () => RESPONSE_OK);
 
-    await app.handle(SAMPLE_ORU, toBytes(SAMPLE_ORU), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ORU), MOCK_CONNECTION);
     expect(adtMiddlewareRan.value).toBe(false);
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(adtMiddlewareRan.value).toBe(true);
 
     adtMiddlewareRan.value = false;
-    await app.handle(SAMPLE_ORU, toBytes(SAMPLE_ORU), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ORU), MOCK_CONNECTION);
     expect(adtMiddlewareRan.value).toBe(false);
   });
 
@@ -277,11 +261,7 @@ describe("Mllp", () => {
       return RESPONSE_OK;
     });
 
-    const response = await app.handle(
-      SAMPLE_ADT,
-      toBytes(SAMPLE_ADT),
-      MOCK_CONNECTION
-    );
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(response?.raw).toContain("Blocked by middleware");
     expect(handlerRan.value).toBe(false);
   });
@@ -295,23 +275,83 @@ describe("Mllp", () => {
       raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|MSG001|Custom error handling",
     }));
 
-    const response = await app.handle(
-      SAMPLE_ADT,
-      toBytes(SAMPLE_ADT),
-      MOCK_CONNECTION
-    );
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(response?.raw).toContain("Custom error handling");
   });
 
-  it("re-throws when handler throws without error handler", async () => {
+  it("returns a default NAK when a handler throws without an error handler", async () => {
     const app = createApp();
     app.on("*", async () => {
       throw new Error("crash");
     });
 
-    await expect(
-      app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION)
-    ).rejects.toThrow("crash");
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+
+    // No onError, no ack middleware: the floor returns a minimal AE NAK that
+    // echoes the control id and the reason, instead of re-throwing.
+    expect(response?.raw).toContain("MSA|AE|MSG001|crash");
+  });
+
+  // "é" as the single Latin-1 byte 0xE9 makes the payload invalid UTF-8.
+  const NON_UTF8 = Uint8Array.from(
+    "MSH|^~\\&|S|F|R|F|20240101120000||ADT^A01|MSG001|P|2.5.1\rPID|1||1||José",
+    (ch) => ch.codePointAt(0) ?? 0
+  );
+
+  it("routes a non-UTF-8 payload to the error handler, not the route handler", async () => {
+    const app = createApp();
+    let handlerRan = false;
+    app.on("*", () => {
+      handlerRan = true;
+    });
+    // The error handler builds the response (the error itself — a non-UTF-8
+    // MllpServerError — is asserted by the re-throw test below).
+    app.onError(async () => ({ raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|" }));
+
+    const response = await app.handle(NON_UTF8, MOCK_CONNECTION);
+
+    expect(handlerRan).toBe(false);
+    expect(response?.raw).toContain("MSA|AR");
+  });
+
+  it("returns a default NAK for a non-UTF-8 payload when no error handler is registered", async () => {
+    const app = createApp();
+    app.on("*", () => {
+      // never reached
+    });
+
+    const response = await app.handle(NON_UTF8, MOCK_CONNECTION);
+
+    // The floor turns the decode failure into a minimal AE NAK carrying the
+    // reason, instead of re-throwing to serve().
+    expect(response?.raw).toContain("MSA|AE|");
+    expect(response?.raw).toContain("not valid UTF-8");
+  });
+
+  // The decode/parse failure is surfaced as the innermost step of the chain,
+  // so a wrapping (global) middleware — e.g. the ack middleware — can catch it
+  // and build a NAK, exactly like a thrown handler error.
+  it("routes a non-UTF-8 payload into the chain so wrapping middleware can NAK it", async () => {
+    const app = createApp();
+    let handlerRan = false;
+    app.use(async (ctx, next) => {
+      try {
+        await next();
+      } catch (error) {
+        ctx.res = {
+          raw: `MSH|^~\\&||||||||||2.5.1\rMSA|AE||${(error as Error).message}`,
+        };
+      }
+    });
+    app.on("*", () => {
+      handlerRan = true;
+    });
+
+    const response = await app.handle(NON_UTF8, MOCK_CONNECTION);
+
+    expect(handlerRan).toBe(false);
+    expect(response?.raw).toContain("MSA|AE|");
+    expect(response?.raw).toContain("not valid UTF-8");
   });
 
   it("re-throws error handler's error when error handler itself throws", async () => {
@@ -324,7 +364,7 @@ describe("Mllp", () => {
     });
 
     await expect(
-      app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION)
+      app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION)
     ).rejects.toThrow("error handler also failed");
   });
 
@@ -336,11 +376,7 @@ describe("Mllp", () => {
         async () => RESPONSE_OK
       );
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(response?.raw).toContain("MSA|AA");
     });
 
@@ -351,11 +387,7 @@ describe("Mllp", () => {
         async () => RESPONSE_OK
       );
 
-      const response = await app.handle(
-        SAMPLE_ORU,
-        toBytes(SAMPLE_ORU),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ORU), MOCK_CONNECTION);
       expect(response).toBeUndefined();
     });
 
@@ -366,11 +398,7 @@ describe("Mllp", () => {
         async () => RESPONSE_OK
       );
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(response?.raw).toContain("MSA|AA");
     });
 
@@ -382,14 +410,12 @@ describe("Mllp", () => {
       );
 
       const v23Response = await app.handle(
-        SAMPLE_ADT_V23,
         toBytes(SAMPLE_ADT_V23),
         MOCK_CONNECTION
       );
       expect(v23Response?.raw).toContain("MSA|AA");
 
       const v251Response = await app.handle(
-        SAMPLE_ADT,
         toBytes(SAMPLE_ADT),
         MOCK_CONNECTION
       );
@@ -403,18 +429,10 @@ describe("Mllp", () => {
         async () => RESPONSE_OK
       );
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(response?.raw).toContain("MSA|AA");
 
-      const noMatch = await app.handle(
-        SAMPLE_ORU,
-        toBytes(SAMPLE_ORU),
-        MOCK_CONNECTION
-      );
+      const noMatch = await app.handle(toBytes(SAMPLE_ORU), MOCK_CONNECTION);
       expect(noMatch).toBeUndefined();
     });
 
@@ -425,11 +443,7 @@ describe("Mllp", () => {
         async () => RESPONSE_OK
       );
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(response?.raw).toContain("MSA|AA");
     });
 
@@ -441,11 +455,7 @@ describe("Mllp", () => {
         async () => RESPONSE_REJECT
       );
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(response?.raw).toContain("MSA|AA");
     });
 
@@ -457,11 +467,7 @@ describe("Mllp", () => {
       );
       app.on("ADT^A01", async () => RESPONSE_REJECT);
 
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(response?.raw).toContain("MSA|AA");
     });
 
@@ -478,15 +484,11 @@ describe("Mllp", () => {
       );
       app.on("*", async () => RESPONSE_OK);
 
-      await app.handle(
-        SAMPLE_ADT_V23,
-        toBytes(SAMPLE_ADT_V23),
-        MOCK_CONNECTION
-      );
+      await app.handle(toBytes(SAMPLE_ADT_V23), MOCK_CONNECTION);
       expect(middlewareRan.value).toBe(true);
 
       middlewareRan.value = false;
-      await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(middlewareRan.value).toBe(false);
     });
 
@@ -498,16 +500,11 @@ describe("Mllp", () => {
       );
 
       // SAMPLE_ADT has 3 segments (MSH, EVN, PID)
-      const response = await app.handle(
-        SAMPLE_ADT,
-        toBytes(SAMPLE_ADT),
-        MOCK_CONNECTION
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
       expect(response?.raw).toContain("MSA|AA");
 
       // SAMPLE_ADT_V23 has 2 segments (MSH, PID) — should not match
       const noMatch = await app.handle(
-        SAMPLE_ADT_V23,
         toBytes(SAMPLE_ADT_V23),
         MOCK_CONNECTION
       );
