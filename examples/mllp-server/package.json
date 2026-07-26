@@ -12,6 +12,7 @@
     "@glion/hl7v2": "latest",
     "@glion/mllp": "latest",
     "@glion/mllp-ack": "latest",
+    "@glion/mllp-charset": "latest",
     "consola": "3.4.2"
   },
   "devDependencies": {

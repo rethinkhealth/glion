@@ -1,5 +1,6 @@
-import type { Root, Segment } from "@glion/ast";
+import type { Field, Nodes, Root, Segment } from "@glion/ast";
 import { f, s } from "@glion/builder";
+import { format } from "@glion/util-query";
 
 import { AckCode, Severity } from "./constants";
 import type { AckCodeValue, AckNakCode } from "./constants";
@@ -37,6 +38,23 @@ export interface AckExceptionOptions extends ErrorOptions {
    * acknowledgment.
    */
   tree?: Root;
+  /**
+   * AST node responsible for the error. When set (with
+   * {@link AckExceptionOptions.ancestors}), ERR-2 is derived from the node's
+   * position in the message via `@glion/util-query`'s `format` — e.g. an MSH-18
+   * repetition serializes to `MSH-18[1]`.
+   */
+  node?: Nodes;
+  /**
+   * Ancestor chain of {@link AckExceptionOptions.node} (root → parent), as
+   * returned by `select`/`value`/`visit`. Used to derive ERR-2.
+   */
+  ancestors?: Nodes[];
+  /**
+   * ERR-7 diagnostic information — a detailed description of the problem.
+   * Omitted from the ERR segment when absent.
+   */
+  diagnosticInformation?: string;
 }
 
 /**
@@ -69,6 +87,12 @@ export abstract class AckException extends Error {
    * walk ERR repetitions or other segments without re-parsing `raw`.
    */
   readonly tree: Root | undefined;
+  /** AST node responsible for the error, used to derive ERR-2. */
+  readonly node: Nodes | undefined;
+  /** Ancestor chain of {@link AckException.node}, used to derive ERR-2. */
+  readonly ancestors: Nodes[] | undefined;
+  /** ERR-7 diagnostic information, when provided. */
+  readonly diagnosticInformation: string | undefined;
 
   constructor(message: string, options: AckExceptionOptions) {
     super(message, { cause: options.cause });
@@ -77,20 +101,36 @@ export abstract class AckException extends Error {
     this.raw = options.raw;
     this.controlId = options.controlId;
     this.tree = options.tree;
+    this.node = options.node;
+    this.ancestors = options.ancestors;
+    this.diagnosticInformation = options.diagnosticInformation;
   }
 
   /**
-   * Build an ERR segment AST node from this exception's error code and
-   * severity.
+   * Build an ERR segment AST node from this exception. ERR-1 (deprecated),
+   * ERR-3 (code) and ERR-4 (severity) are always present; ERR-2 (location,
+   * derived from {@link AckException.node}) and ERR-7 (diagnostic) are populated
+   * only when supplied, so the segment stays minimal by default.
    */
   toErrSegment(): Segment {
-    return s(
-      "ERR",
-      f(""),
-      f(""),
-      f(this.errorCode ?? ""),
-      f(this.severity ?? Severity.Error)
-    );
+    const location = this.node ? format(this.node, this.ancestors ?? []) : null;
+    const fields: Field[] = [
+      f(""), // ERR-1 (deprecated)
+      f(location ?? ""), // ERR-2 error location
+      f(this.errorCode ?? ""), // ERR-3
+      f(this.severity ?? Severity.Error), // ERR-4
+    ];
+
+    // ERR-5/ERR-6 are left empty; only emit them when ERR-7 is set.
+    if (this.diagnosticInformation !== undefined) {
+      fields.push(
+        f(""), // ERR-5
+        f(""), // ERR-6
+        f(this.diagnosticInformation) // ERR-7
+      );
+    }
+
+    return s("ERR", ...fields);
   }
 }
 

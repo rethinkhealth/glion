@@ -1,4 +1,6 @@
+import { f, m, s } from "@glion/builder";
 import { toHl7v2 } from "@glion/to-hl7v2";
+import { select } from "@glion/util-query";
 import { describe, expect, it } from "vitest";
 
 import { AckCode, Hl7ErrorCode, Severity } from "../src/constants";
@@ -311,5 +313,52 @@ describe("toErrSegment", () => {
       const segment = error.toErrSegment();
       expect(segment.name).toBe("ERR");
     }
+  });
+
+  it("derives ERR-2 from the responsible node", () => {
+    const root = m(s("PID", f("1"), f("2"), f("3"), f("4"), f("Doe^John")));
+    const found = select(root, "PID-5");
+    const error = new AckApplicationReject("bad", {
+      ancestors: found?.ancestors,
+      errorCode: Hl7ErrorCode.DataTypeError,
+      node: found?.node,
+      severity: Severity.Error,
+    });
+
+    expect(toHl7v2(error.toErrSegment())).toBe("ERR||PID-5|102|E");
+  });
+
+  it("derives ERR-2 at the segment when the node is a segment", () => {
+    const root = m(s("PID", f("1"), f("2")));
+    const found = select(root, "PID");
+    const error = new AckApplicationReject("bad", {
+      ancestors: found?.ancestors,
+      errorCode: Hl7ErrorCode.DataTypeError,
+      node: found?.node,
+      severity: Severity.Error,
+    });
+
+    expect(toHl7v2(error.toErrSegment())).toBe("ERR||PID|102|E");
+  });
+
+  it("adds diagnostic information (ERR-7)", () => {
+    const error = new AckApplicationError("fail", {
+      diagnosticInformation: "value '8859/1' is not allowed",
+      errorCode: Hl7ErrorCode.DataTypeError,
+      severity: Severity.Error,
+    });
+
+    expect(toHl7v2(error.toErrSegment())).toBe(
+      "ERR|||102|E|||value '8859/1' is not allowed"
+    );
+  });
+
+  it("leaves ERR-2 and ERR-7 empty by default (output unchanged)", () => {
+    const error = new AckApplicationError("fail", {
+      errorCode: Hl7ErrorCode.ApplicationInternalError,
+      severity: Severity.Error,
+    });
+
+    expect(toHl7v2(error.toErrSegment())).toBe("ERR|||207|E");
   });
 });
