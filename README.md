@@ -67,7 +67,7 @@ The server and tooling that run Glion applications.
 
 #### Acknowledgments
 
-- **[@glion/ack][glion-ack]** — build standards-compliant HL7v2 acknowledgment messages (AA, AE, AR) with typed error classes.
+- **[@glion/ack][glion-ack]** — typed HL7v2 acknowledgment codes and exceptions (Tables 0008/0357/0516); response construction lives in `@glion/mllp-ack`.
 - **[@glion/mllp-ack][glion-mllp-ack]** — MLLP middleware that automatically generates ACK/NAK responses and maps handler exceptions to the right acknowledgment code.
 
 ### Unified

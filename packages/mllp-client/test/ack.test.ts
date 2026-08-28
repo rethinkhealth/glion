@@ -1,5 +1,5 @@
 /**
- * Unit tests for the inbound ACK codec (`src/util/ack.ts`). These drive
+ * Unit tests for the inbound ACK codec (`src/ack.ts`). These drive
  * `parseResponse` directly — no client, no wire — so each branch of the
  * decode → parse → MSA-1 → correlate → accept/NAK pipeline is exercised in
  * isolation, including the precedence between failure modes that the full
@@ -13,6 +13,7 @@ import {
   AckCommitReject,
   AckException,
 } from "@glion/ack";
+import { parseHL7v2 } from "@glion/parser";
 
 import { parseResponse } from "../src/ack";
 import { MllpClientError, MllpErrorCode } from "../src/errors";
@@ -56,7 +57,7 @@ describe("parseResponse — decode", () => {
     // be silently substituted with U+FFFD (issue #659).
     const garbage = new Uint8Array([0x4d, 0x53, 0x48, 0xff]);
     try {
-      parseResponse(garbage, REQUEST_CONTROL_ID);
+      parseResponse(garbage, REQUEST_CONTROL_ID, parseHL7v2);
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect(error).toBeInstanceOf(MllpClientError);
@@ -73,7 +74,7 @@ describe("parseResponse — decode", () => {
     // EF BB BF is a UTF-8 BOM. decodeBytes drops it, so the MSH segment is not
     // corrupted and MSA-1 is still found.
     const withBom = new Uint8Array([0xef, 0xbb, 0xbf, ...encode(ACK_AA)]);
-    const result = parseResponse(withBom, REQUEST_CONTROL_ID);
+    const result = parseResponse(withBom, REQUEST_CONTROL_ID, parseHL7v2);
     expect(result.code).toBe("AA");
   });
 });
@@ -84,11 +85,11 @@ describe("parseResponse — decode", () => {
 
 describe("parseResponse — missing MSA-1", () => {
   it("throws INVALID_RESPONSE for empty payload bytes", () => {
-    expect(() => parseResponse(new Uint8Array(), REQUEST_CONTROL_ID)).toThrow(
-      MllpClientError
-    );
+    expect(() =>
+      parseResponse(new Uint8Array(), REQUEST_CONTROL_ID, parseHL7v2)
+    ).toThrow(MllpClientError);
     try {
-      parseResponse(new Uint8Array(), REQUEST_CONTROL_ID);
+      parseResponse(new Uint8Array(), REQUEST_CONTROL_ID, parseHL7v2);
     } catch (error) {
       expect((error as MllpClientError).code).toBe(
         MllpErrorCode.INVALID_RESPONSE
@@ -98,7 +99,7 @@ describe("parseResponse — missing MSA-1", () => {
 
   it("throws INVALID_RESPONSE when there is no MSA segment", () => {
     try {
-      parseResponse(encode(ACK_NO_MSA), REQUEST_CONTROL_ID);
+      parseResponse(encode(ACK_NO_MSA), REQUEST_CONTROL_ID, parseHL7v2);
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect((error as MllpClientError).code).toBe(
@@ -109,7 +110,7 @@ describe("parseResponse — missing MSA-1", () => {
 
   it("throws INVALID_RESPONSE when MSA-1 is present but empty", () => {
     try {
-      parseResponse(encode(ACK_EMPTY_CODE), REQUEST_CONTROL_ID);
+      parseResponse(encode(ACK_EMPTY_CODE), REQUEST_CONTROL_ID, parseHL7v2);
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect((error as MllpClientError).code).toBe(
@@ -122,7 +123,11 @@ describe("parseResponse — missing MSA-1", () => {
     // The parser is lenient and never throws; the failure surfaces as the
     // no-MSA-1 check, not as a parser exception.
     try {
-      parseResponse(encode("this is not an HL7 message"), REQUEST_CONTROL_ID);
+      parseResponse(
+        encode("this is not an HL7 message"),
+        REQUEST_CONTROL_ID,
+        parseHL7v2
+      );
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect(error).toBeInstanceOf(MllpClientError);
@@ -140,7 +145,7 @@ describe("parseResponse — missing MSA-1", () => {
 describe("parseResponse — unknown code", () => {
   it("throws INVALID_RESPONSE for a code outside the standard six", () => {
     try {
-      parseResponse(encode(ACK_UNKNOWN_CODE), REQUEST_CONTROL_ID);
+      parseResponse(encode(ACK_UNKNOWN_CODE), REQUEST_CONTROL_ID, parseHL7v2);
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect((error as MllpClientError).code).toBe(
@@ -153,7 +158,7 @@ describe("parseResponse — unknown code", () => {
     // HL7v2 acknowledgment codes are uppercase; the codec does not normalise
     // case, so a non-conformant lowercase code is rejected rather than coerced.
     try {
-      parseResponse(encode(buildAck("aa")), REQUEST_CONTROL_ID);
+      parseResponse(encode(buildAck("aa")), REQUEST_CONTROL_ID, parseHL7v2);
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect((error as MllpClientError).code).toBe(
@@ -165,7 +170,7 @@ describe("parseResponse — unknown code", () => {
   it("does not trim surrounding whitespace in MSA-1", () => {
     // No trimming: " AA " is not the literal code "AA".
     try {
-      parseResponse(encode(buildAck(" AA ")), REQUEST_CONTROL_ID);
+      parseResponse(encode(buildAck(" AA ")), REQUEST_CONTROL_ID, parseHL7v2);
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect((error as MllpClientError).code).toBe(
@@ -181,7 +186,11 @@ describe("parseResponse — unknown code", () => {
 
 describe("parseResponse — accepts", () => {
   it("returns the parsed accept for AA", () => {
-    const result = parseResponse(encode(ACK_AA), REQUEST_CONTROL_ID);
+    const result = parseResponse(
+      encode(ACK_AA),
+      REQUEST_CONTROL_ID,
+      parseHL7v2
+    );
     expect(result.code).toBe("AA");
     expect(result.controlId).toBe(REQUEST_CONTROL_ID);
     expect(result.raw).toBe(ACK_AA);
@@ -189,14 +198,22 @@ describe("parseResponse — accepts", () => {
   });
 
   it("returns the parsed accept for CA", () => {
-    const result = parseResponse(encode(ACK_CA), REQUEST_CONTROL_ID);
+    const result = parseResponse(
+      encode(ACK_CA),
+      REQUEST_CONTROL_ID,
+      parseHL7v2
+    );
     expect(result.code).toBe("CA");
   });
 
   it("returns no wire timing — that is the connection's to attach", () => {
     // ParsedAck deliberately omits timestamp/durationMs; the exchange measures
     // and adds them when it builds the MllpClientResponse.
-    const result = parseResponse(encode(ACK_AA), REQUEST_CONTROL_ID);
+    const result = parseResponse(
+      encode(ACK_AA),
+      REQUEST_CONTROL_ID,
+      parseHL7v2
+    );
     expect("timestamp" in result).toBe(false);
     expect("durationMs" in result).toBe(false);
   });
@@ -205,7 +222,7 @@ describe("parseResponse — accepts", () => {
     // A peer that echoes "MSG001^extra" correlates to "MSG001"; the codec reads
     // the first component, never the raw field.
     const ack = buildAck("AA", `${REQUEST_CONTROL_ID}^extra`);
-    const result = parseResponse(encode(ack), REQUEST_CONTROL_ID);
+    const result = parseResponse(encode(ack), REQUEST_CONTROL_ID, parseHL7v2);
     expect(result.code).toBe("AA");
     expect(result.controlId).toBe(REQUEST_CONTROL_ID);
   });
@@ -227,7 +244,7 @@ describe("parseResponse — NAKs", () => {
     "throws the $code AckException subclass",
     ({ ack, code, errorClass }) => {
       try {
-        parseResponse(encode(ack), REQUEST_CONTROL_ID);
+        parseResponse(encode(ack), REQUEST_CONTROL_ID, parseHL7v2);
         expect.fail("parseResponse should have thrown");
       } catch (error) {
         expect(error).toBeInstanceOf(AckException);
@@ -235,15 +252,22 @@ describe("parseResponse — NAKs", () => {
         const nak = error as AckException;
         expect(nak.code).toBe(code);
         expect(nak.controlId).toBe(REQUEST_CONTROL_ID);
-        expect(typeof nak.raw).toBe("string");
-        expect(nak.tree).toBeDefined();
       }
     }
   );
 
+  it("carries MSA-3 as text — the remote system's own diagnostic", () => {
+    try {
+      parseResponse(encode(ACK_AE), REQUEST_CONTROL_ID, parseHL7v2);
+      expect.fail("parseResponse should have thrown");
+    } catch (error) {
+      expect((error as AckException).text).toBe("Validation failed");
+    }
+  });
+
   it("carries ERR-3 errorCode and ERR-4 severity when an ERR segment is present", () => {
     try {
-      parseResponse(encode(ACK_AE_WITH_ERR), REQUEST_CONTROL_ID);
+      parseResponse(encode(ACK_AE_WITH_ERR), REQUEST_CONTROL_ID, parseHL7v2);
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect(error).toBeInstanceOf(AckApplicationError);
@@ -256,7 +280,7 @@ describe("parseResponse — NAKs", () => {
   it("leaves errorCode/severity undefined when the NAK has no ERR segment", () => {
     // ACK_AR is MSA|AR|MSG001 with no ERR; readValue → null → undefined.
     try {
-      parseResponse(encode(ACK_AR), REQUEST_CONTROL_ID);
+      parseResponse(encode(ACK_AR), REQUEST_CONTROL_ID, parseHL7v2);
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       const nak = error as AckException;
@@ -272,13 +296,21 @@ describe("parseResponse — NAKs", () => {
 
 describe("parseResponse — correlation", () => {
   it("resolves when both control ids match", () => {
-    const result = parseResponse(encode(ACK_AA), REQUEST_CONTROL_ID);
+    const result = parseResponse(
+      encode(ACK_AA),
+      REQUEST_CONTROL_ID,
+      parseHL7v2
+    );
     expect(result.controlId).toBe(REQUEST_CONTROL_ID);
   });
 
   it("throws INVALID_RESPONSE when both ids are present and disagree", () => {
     try {
-      parseResponse(encode(ACK_AA_WRONG_CONTROL), REQUEST_CONTROL_ID);
+      parseResponse(
+        encode(ACK_AA_WRONG_CONTROL),
+        REQUEST_CONTROL_ID,
+        parseHL7v2
+      );
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect(error).toBeInstanceOf(MllpClientError);
@@ -294,7 +326,8 @@ describe("parseResponse — correlation", () => {
     // Real-world compat: some older peers don't echo the control id.
     const result = parseResponse(
       encode(ACK_AA_EMPTY_CONTROL),
-      REQUEST_CONTROL_ID
+      REQUEST_CONTROL_ID,
+      parseHL7v2
     );
     expect(result.code).toBe("AA");
     expect(result.controlId).toBe("");
@@ -302,13 +335,13 @@ describe("parseResponse — correlation", () => {
 
   it("resolves when we sent no MSH-10 (empty expected id)", () => {
     // The request carried no control id, so there is nothing to disagree with.
-    const result = parseResponse(encode(ACK_AA), "");
+    const result = parseResponse(encode(ACK_AA), "", parseHL7v2);
     expect(result.code).toBe("AA");
     expect(result.controlId).toBe(REQUEST_CONTROL_ID);
   });
 
   it("resolves when neither side has a control id", () => {
-    const result = parseResponse(encode(ACK_AA_EMPTY_CONTROL), "");
+    const result = parseResponse(encode(ACK_AA_EMPTY_CONTROL), "", parseHL7v2);
     expect(result.code).toBe("AA");
     expect(result.controlId).toBe("");
   });
@@ -324,12 +357,13 @@ describe("parseResponse — correlation", () => {
 // fault is present at once.
 describe("parseResponse — precedence between failures", () => {
   it("reports the control-id mismatch, not the NAK, for a mismatched NAK", () => {
-    // A NAK whose MSA-2 doesn't match our MSH-10 is almost certainly a late ACK
-    // from a previously-timed-out request — it must NOT surface as a rejection
-    // of the message we just sent. Correlation is checked before NAK dispatch.
+    // A NAK whose MSA-2 doesn't match our MSH-10 is almost certainly an
+    // unsolicited or duplicate frame consumed as this send's acknowledgment —
+    // it must NOT surface as a rejection of the message we just sent.
+    // Correlation is checked before NAK dispatch.
     const mismatchedNak = buildAck("AE", "OTHER");
     try {
-      parseResponse(encode(mismatchedNak), REQUEST_CONTROL_ID);
+      parseResponse(encode(mismatchedNak), REQUEST_CONTROL_ID, parseHL7v2);
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       expect(error).toBeInstanceOf(MllpClientError);
@@ -344,7 +378,11 @@ describe("parseResponse — precedence between failures", () => {
     // The code is validated before the control id is even read.
     const unknownAndMismatched = buildAck("OK", "OTHER");
     try {
-      parseResponse(encode(unknownAndMismatched), REQUEST_CONTROL_ID);
+      parseResponse(
+        encode(unknownAndMismatched),
+        REQUEST_CONTROL_ID,
+        parseHL7v2
+      );
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       const e = error as MllpClientError;
@@ -356,7 +394,11 @@ describe("parseResponse — precedence between failures", () => {
   it("reports the missing MSA-1 before the control-id mismatch", () => {
     const emptyCodeMismatched = buildAck("", "OTHER");
     try {
-      parseResponse(encode(emptyCodeMismatched), REQUEST_CONTROL_ID);
+      parseResponse(
+        encode(emptyCodeMismatched),
+        REQUEST_CONTROL_ID,
+        parseHL7v2
+      );
       expect.fail("parseResponse should have thrown");
     } catch (error) {
       const e = error as MllpClientError;
@@ -378,7 +420,7 @@ describe("parseResponse — segment terminators", () => {
     // The parser normalises \n and \r\n to the segment delimiter, so a peer
     // that doesn't use a bare CR still correlates.
     const ack = buildAck("AA", REQUEST_CONTROL_ID, terminator);
-    const result = parseResponse(encode(ack), REQUEST_CONTROL_ID);
+    const result = parseResponse(encode(ack), REQUEST_CONTROL_ID, parseHL7v2);
     expect(result.code).toBe("AA");
     expect(result.controlId).toBe(REQUEST_CONTROL_ID);
   });
@@ -406,7 +448,11 @@ describe("parseResponse — no conformance validation (known limitation)", () =>
       "MSH|^~\\&|R|F|S|SF|20240101||ADT^A01^ADT_A01|X1|P|2.5",
       `MSA|AA|${REQUEST_CONTROL_ID}`,
     ].join("\r");
-    const result = parseResponse(encode(notAnAck), REQUEST_CONTROL_ID);
+    const result = parseResponse(
+      encode(notAnAck),
+      REQUEST_CONTROL_ID,
+      parseHL7v2
+    );
     expect(result.code).toBe("AA");
     expect(result.controlId).toBe(REQUEST_CONTROL_ID);
   });
@@ -415,13 +461,17 @@ describe("parseResponse — no conformance validation (known limitation)", () =>
     // No MSH means no declared delimiters and no message header — a structurally
     // invalid HL7v2 message. The parser falls back to default delimiters and the
     // codec still finds MSA-1, so it resolves.
-    const result = parseResponse(encode("MSA|AA|MSG001"), "MSG001");
+    const result = parseResponse(encode("MSA|AA|MSG001"), "MSG001", parseHL7v2);
     expect(result.code).toBe("AA");
     expect(result.controlId).toBe("MSG001");
   });
 
   it("accepts an MSA buried after unrelated segments", () => {
-    const result = parseResponse(encode("PID|1||x\rMSA|AA|MSG001"), "MSG001");
+    const result = parseResponse(
+      encode("PID|1||x\rMSA|AA|MSG001"),
+      "MSG001",
+      parseHL7v2
+    );
     expect(result.code).toBe("AA");
   });
 
@@ -433,7 +483,7 @@ describe("parseResponse — no conformance validation (known limitation)", () =>
       "MSA|AA|MSG001",
       "MSA|AE|MSG001",
     ].join("\r");
-    const result = parseResponse(encode(conflicting), "MSG001");
+    const result = parseResponse(encode(conflicting), "MSG001", parseHL7v2);
     expect(result.code).toBe("AA");
   });
 });

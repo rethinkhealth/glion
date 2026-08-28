@@ -344,14 +344,12 @@ describe("send() — NAK codes", () => {
         const rej = error as AckException;
         expect(rej.code).toBe(code);
         expect(rej.controlId).toBe(REQUEST_CONTROL_ID);
-        expect(rej.tree).toBeDefined();
-        expect(typeof rej.raw).toBe("string");
       }
       expect(client.state).toBe("connected");
     }
   );
 
-  it("reads errorCode/severity and the AST from the ERR segment", async () => {
+  it("reads errorCode/severity from the ERR segment", async () => {
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AE_WITH_ERR) });
     const client = makeClient(fake);
     await client.connect();
@@ -363,7 +361,6 @@ describe("send() — NAK codes", () => {
       const rej = error as AckException;
       expect(rej.errorCode).toBe("204");
       expect(rej.severity).toBe("E");
-      expect(rej.tree?.children.length).toBeGreaterThan(1);
     }
   });
 });

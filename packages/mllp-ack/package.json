@@ -46,14 +46,17 @@
   },
   "dependencies": {
     "@glion/ack": "workspace:*",
+    "@glion/ast": "workspace:*",
+    "@glion/builder": "workspace:*",
     "@glion/encode-escapes": "workspace:*",
     "@glion/mllp": "workspace:*",
     "@glion/to-hl7v2": "workspace:*",
+    "@glion/util-query": "workspace:*",
+    "@glion/util-timestamp": "workspace:*",
+    "@glion/util-uid": "workspace:*",
     "unified": "11.0.5"
   },
   "devDependencies": {
-    "@glion/ast": "workspace:*",
-    "@glion/builder": "workspace:*",
     "@glion/check-readme": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/testing": "workspace:*",

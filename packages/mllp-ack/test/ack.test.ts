@@ -11,6 +11,7 @@ import {
   Severity,
   UnsupportedMessageTypeReject,
 } from "@glion/ack";
+import { f, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
 import type { ConnectionInfo } from "@glion/mllp";
@@ -109,8 +110,8 @@ describe("ack middleware", () => {
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001|Validation failed");
-      expect(response!.raw).toContain("ERR|");
-      expect(response!.raw).toContain("|207|E");
+      expect(response!.raw).not.toContain("ERR|");
+      expect(response!.raw).not.toContain("|207|E");
     });
 
     it("sends AE with UnknownKeyIdentifier error code", async () => {
@@ -131,7 +132,7 @@ describe("ack middleware", () => {
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001");
-      expect(response!.raw).toContain("|204|E");
+      expect(response!.raw).not.toContain("|204|E");
     });
   });
 
@@ -154,7 +155,7 @@ describe("ack middleware", () => {
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AR|MSG001|Not supported");
-      expect(response!.raw).toContain("ERR|");
+      expect(response!.raw).not.toContain("ERR|");
     });
 
     it("sends AR when handler throws UnsupportedMessageTypeReject", async () => {
@@ -172,7 +173,7 @@ describe("ack middleware", () => {
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AR|MSG001");
-      expect(response!.raw).toContain("|200|E");
+      expect(response!.raw).not.toContain("|200|E");
     });
   });
 
@@ -192,7 +193,7 @@ describe("ack middleware", () => {
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001");
-      expect(response!.raw).toContain("|207|E");
+      expect(response!.raw).not.toContain("|207|E");
     });
 
     it("wraps non-Error throws as ApplicationInternalError", async () => {
@@ -343,8 +344,8 @@ describe("ack middleware", () => {
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|CE|MSG001|Commit failed");
-      expect(response!.raw).toContain("ERR|");
-      expect(response!.raw).toContain("|207|E");
+      expect(response!.raw).not.toContain("ERR|");
+      expect(response!.raw).not.toContain("|207|E");
     });
   });
 
@@ -367,8 +368,8 @@ describe("ack middleware", () => {
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|CR|MSG001|Rejected at commit");
-      expect(response!.raw).toContain("ERR|");
-      expect(response!.raw).toContain("|200|E");
+      expect(response!.raw).not.toContain("ERR|");
+      expect(response!.raw).not.toContain("|200|E");
     });
   });
 
@@ -388,7 +389,7 @@ describe("ack middleware", () => {
 
       expect(response).toBeDefined();
       expect(response!.raw).toContain("MSA|AE|MSG001");
-      expect(response!.raw).toContain("|207|E");
+      expect(response!.raw).not.toContain("|207|E");
     });
   });
 
@@ -436,6 +437,54 @@ describe("ack middleware", () => {
       await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
 
       expect(order).toEqual(["before", "handler", "after"]);
+    });
+  });
+
+  describe("errSegment hook", () => {
+    it("appends the app-supplied ERR segment to NAKs", async () => {
+      const app = new Mllp().parser(parseHL7v2);
+      app.use(
+        ackMiddleware({
+          errSegment: (error) =>
+            s(
+              "ERR",
+              f(""),
+              f(""),
+              f(error.errorCode ?? ""),
+              f(error.severity ?? "")
+            ),
+        })
+      );
+      app.on("*", () => {
+        throw new AckApplicationError("Validation failed", {
+          errorCode: Hl7ErrorCode.ApplicationInternalError,
+          severity: Severity.Error,
+        });
+      });
+
+      const response = await app.handle(SAMPLE_ADT, undefined, MOCK_CONNECTION);
+      expect(response).toBeDefined();
+      expect(response!.raw).toContain("MSA|AE|MSG001");
+      expect(response!.raw).toContain("ERR|||207|E");
+    });
+
+    it("does not invoke the hook for accept ACKs", async () => {
+      const app = new Mllp().parser(parseHL7v2);
+      let calls = 0;
+      app.use(
+        ackMiddleware({
+          errSegment: () => {
+            calls += 1;
+            return s("ERR", f(""));
+          },
+        })
+      );
+      app.on("*", () => {});
+
+      const response = await app.handle(SAMPLE_ADT, undefined, MOCK_CONNECTION);
+      expect(response!.raw).toContain("MSA|AA|MSG001");
+      expect(response!.raw).not.toContain("ERR");
+      expect(calls).toBe(0);
     });
   });
 });

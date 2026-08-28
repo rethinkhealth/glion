@@ -18,7 +18,7 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
 import { renderHuman, renderJson } from "./send-render";
-import type { SendNakOutcome, SendOutcome } from "./send-render";
+import type { SendOutcome } from "./send-render";
 import { resolveTarget } from "./send-target";
 
 /** Connect + ACK-wait deadline used when `--timeout` is omitted. */
@@ -352,15 +352,14 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     if (error instanceof AckException) {
       return emit({
         ackControlId: error.controlId ?? "",
-        // AckException is thrown only for NAKs, so the code is AE/AR/CE/CR.
-        code: error.code as SendNakOutcome["code"],
+        code: error.code,
         durationMs: performance.now() - startedAt,
         errorCode: error.errorCode,
         kind: "nak",
         request,
         severity: error.severity,
         target,
-        text: ackText(error.tree),
+        text: error.text,
       });
     }
     if (error instanceof MllpClientError) {
