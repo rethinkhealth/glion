@@ -96,18 +96,6 @@ importers:
       '@glion/ast':
         specifier: workspace:*
         version: link:../ast
-      '@glion/builder':
-        specifier: workspace:*
-        version: link:../builder
-      '@glion/util-query':
-        specifier: workspace:*
-        version: link:../util-query
-      '@glion/util-timestamp':
-        specifier: workspace:*
-        version: link:../util-timestamp
-      nanoid:
-        specifier: 5.1.7
-        version: 5.1.7
     devDependencies:
       '@glion/check-readme':
         specifier: workspace:*
@@ -1704,6 +1692,12 @@ importers:
       '@glion/ack':
         specifier: workspace:*
         version: link:../ack
+      '@glion/ast':
+        specifier: workspace:*
+        version: link:../ast
+      '@glion/builder':
+        specifier: workspace:*
+        version: link:../builder
       '@glion/encode-escapes':
         specifier: workspace:*
         version: link:../encode-escapes
@@ -1713,16 +1707,19 @@ importers:
       '@glion/to-hl7v2':
         specifier: workspace:*
         version: link:../to-hl7v2
+      '@glion/util-query':
+        specifier: workspace:*
+        version: link:../util-query
+      '@glion/util-timestamp':
+        specifier: workspace:*
+        version: link:../util-timestamp
+      '@glion/util-uid':
+        specifier: workspace:*
+        version: link:../util-uid
       unified:
         specifier: 11.0.5
         version: 11.0.5
     devDependencies:
-      '@glion/ast':
-        specifier: workspace:*
-        version: link:../ast
-      '@glion/builder':
-        specifier: workspace:*
-        version: link:../builder
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
@@ -4323,11 +4320,6 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.1.7:
-    resolution: {integrity: sha512-ua3NDgISf6jdwezAheMOk4mbE1LXjm1DfMUDMuJf4AqxLFK3ccGpgWizwa5YV7Yz9EpXwEaWoRXSb/BnV0t5dQ==}
-    engines: {node: ^18 || >=20}
-    hasBin: true
-
   node-fetch-native@1.6.7:
     resolution: {integrity: sha512-g9yhqoedzIUm0nTnTqAQvueMPVOuIY16bqgAJJC8XOOubYFNwz6IER9qs0Gq2Xd0+CecCKFjtdDTMA4u4xG06Q==}
 
@@ -6705,8 +6697,6 @@ snapshots:
   mri@1.2.0: {}
 
   nanoid@3.3.11: {}
-
-  nanoid@5.1.7: {}
 
   node-fetch-native@1.6.7: {}
 

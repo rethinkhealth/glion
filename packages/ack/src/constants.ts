@@ -8,7 +8,7 @@ export const AckCode = {
   CommitReject: "CR",
 } as const;
 
-export type AckCodeValue = (typeof AckCode)[keyof typeof AckCode];
+export type AckCode = (typeof AckCode)[keyof typeof AckCode];
 
 /** Accept codes used as `successCode` in `acknowledge()`. */
 export type AckSuccessCode =
@@ -21,28 +21,6 @@ export type AckNakCode =
   | typeof AckCode.ApplicationReject
   | typeof AckCode.CommitError
   | typeof AckCode.CommitReject;
-
-/** Narrow an arbitrary string to a Table 0008 acknowledgment code. */
-export function isAckCode(value: string): value is AckCodeValue {
-  return (
-    value === AckCode.ApplicationAccept ||
-    value === AckCode.ApplicationError ||
-    value === AckCode.ApplicationReject ||
-    value === AckCode.CommitAccept ||
-    value === AckCode.CommitError ||
-    value === AckCode.CommitReject
-  );
-}
-
-/** Narrow an arbitrary string to a NAK code — the reject half of Table 0008. */
-export function isAckNakCode(value: string): value is AckNakCode {
-  return (
-    value === AckCode.ApplicationError ||
-    value === AckCode.ApplicationReject ||
-    value === AckCode.CommitError ||
-    value === AckCode.CommitReject
-  );
-}
 
 /**
  * HL7v2 Table 0357 — Message error condition codes used in ERR-3. Stable across
@@ -64,8 +42,7 @@ export const Hl7ErrorCode = {
   UnsupportedVersionId: "203",
 } as const;
 
-export type Hl7ErrorCodeValue =
-  (typeof Hl7ErrorCode)[keyof typeof Hl7ErrorCode];
+export type Hl7ErrorCode = (typeof Hl7ErrorCode)[keyof typeof Hl7ErrorCode];
 
 /** HL7v2 Table 0516 — Error severity codes used in ERR-4. */
 export const Severity = {
@@ -74,4 +51,4 @@ export const Severity = {
   Warning: "W",
 } as const;
 
-export type SeverityValue = (typeof Severity)[keyof typeof Severity];
+export type Severity = (typeof Severity)[keyof typeof Severity];

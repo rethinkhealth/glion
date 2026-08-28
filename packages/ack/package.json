@@ -35,7 +35,7 @@
   },
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -43,11 +43,7 @@
     "publint": "publint --strict"
   },
   "dependencies": {
-    "@glion/ast": "workspace:*",
-    "@glion/builder": "workspace:*",
-    "@glion/util-query": "workspace:*",
-    "@glion/util-timestamp": "workspace:*",
-    "nanoid": "5.1.7"
+    "@glion/ast": "workspace:*"
   },
   "devDependencies": {
     "@glion/check-readme": "workspace:*",

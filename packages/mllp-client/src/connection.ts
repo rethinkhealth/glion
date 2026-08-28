@@ -14,6 +14,7 @@
  */
 
 import { createFrameDecoder } from "@glion/mllp-transport";
+import { parseHL7v2 } from "@glion/parser";
 
 import { parseResponse } from "./ack";
 import type { MllpClientResponse } from "./ack";
@@ -302,7 +303,7 @@ export function createConnection(opts: ConnectionOptions): Connection {
       const timestamp = new Date();
       const durationMs = performance.now() - sentMonotonic;
       // parseResponse is the codec; the exchange owns the wire timing.
-      const ack = parseResponse(ackBytes, req.requestControlId);
+      const ack = parseResponse(ackBytes, req.requestControlId, parseHL7v2);
       return { ...ack, durationMs, timestamp };
     } catch (error) {
       // A send timeout can leave a half-decoded frame in the connection-scoped

@@ -1,16 +1,18 @@
+import {
+  AckApplicationError,
+  AckApplicationReject,
+  AckCode,
+  AckCommitError,
+  AckCommitReject,
+  Hl7ErrorCode,
+  Severity,
+} from "@glion/ack";
 import type { Segment } from "@glion/ast";
 import { m, s, f, c } from "@glion/builder";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
 import { acknowledge } from "../src/acknowledge";
-import { AckCode, Hl7ErrorCode, Severity } from "../src/constants";
-import {
-  AckApplicationError,
-  AckApplicationReject,
-  AckCommitError,
-  AckCommitReject,
-} from "../src/exception";
 
 /**
  * Helper: build a minimal ADT^A01 message AST.
@@ -120,7 +122,7 @@ describe("acknowledge", () => {
   });
 
   describe("AE (error)", () => {
-    it("builds an ACK with AE code and ERR segment from AckApplicationError", () => {
+    it("builds an ACK with AE code from AckApplicationError", () => {
       const tree = buildSampleAdt();
       const error = new AckApplicationError("Validation failed", {
         errorCode: Hl7ErrorCode.ApplicationInternalError,
@@ -134,7 +136,7 @@ describe("acknowledge", () => {
       const ack_hl7v2 = toHl7v2(ack);
       const segments = ack_hl7v2.split("\r");
 
-      expect(ack.children).toHaveLength(3);
+      expect(ack.children).toHaveLength(2);
       expect(value(ack, "MSA-1")?.value).toEqual(AckCode.ApplicationError);
       expect(value(ack, "MSA-2")?.value).toEqual("MSG001");
       expect(value(ack, "MSA-3")?.value).toEqual("Validation failed");
@@ -142,26 +144,37 @@ describe("acknowledge", () => {
       expect(segments).toEqual([
         "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK-ERR-001|P|2.5.1",
         "MSA|AE|MSG001|Validation failed",
-        "ERR|||207|E",
       ]);
     });
 
-    it("omits ERR segment when includeErrSegment is false", () => {
+    it("never emits ERR - building one is the implementation job", () => {
       const tree = buildSampleAdt();
       const error = new AckApplicationError("Something failed", {
         errorCode: Hl7ErrorCode.ApplicationInternalError,
+        severity: Severity.Error,
       });
 
-      const ack = acknowledge(tree, { error, includeErrSegment: false });
-      const segments = toHl7v2(ack).split("\r");
+      const ack = acknowledge(tree, { error });
+      expect(toHl7v2(ack)).not.toContain("ERR");
 
-      expect(segments).toHaveLength(2);
-      expect(segments[1]).toEqual("MSA|AE|MSG001|Something failed");
+      // The composition idiom: the caller owns the version-appropriate ERR
+      // shape and appends it to the returned tree (v2.5+ form shown).
+      ack.children.push(
+        s(
+          "ERR",
+          f(""),
+          f(""),
+          f(error.errorCode ?? ""),
+          f(error.severity ?? "")
+        )
+      );
+      const segments = toHl7v2(ack).split("\r");
+      expect(segments[2]).toEqual("ERR|||207|E");
     });
   });
 
   describe("AR (reject)", () => {
-    it("builds an ACK with AR code and ERR segment from AckApplicationReject", () => {
+    it("builds an ACK with AR code from AckApplicationReject", () => {
       const tree = buildSampleAdt();
       const error = new AckApplicationReject("Unsupported", {
         errorCode: Hl7ErrorCode.UnsupportedMessageType,
@@ -174,11 +187,10 @@ describe("acknowledge", () => {
       });
       const segments = toHl7v2(ack).split("\r");
 
-      expect(ack.children).toHaveLength(3);
+      expect(ack.children).toHaveLength(2);
       expect(segments).toEqual([
         "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK-REJ-001|P|2.5.1",
         "MSA|AR|MSG001|Unsupported",
-        "ERR|||200|E",
       ]);
     });
   });
@@ -286,7 +298,6 @@ describe("acknowledge", () => {
       expect(segments).toEqual([
         "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK-CE-001|P|2.5.1",
         "MSA|CE|MSG001|Commit failed",
-        "ERR|||207|E",
       ]);
     });
   });
@@ -305,7 +316,6 @@ describe("acknowledge", () => {
       expect(segments).toEqual([
         "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK-CR-001|P|2.5.1",
         "MSA|CR|MSG001|Message rejected at commit",
-        "ERR|||200|E",
       ]);
     });
   });

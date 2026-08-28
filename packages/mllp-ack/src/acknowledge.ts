@@ -1,12 +1,10 @@
+import { AckCode } from "@glion/ack";
+import type { AckException, AckSuccessCode } from "@glion/ack";
 import type { Root, Segment } from "@glion/ast";
 import { c, f, m, s } from "@glion/builder";
 import { value } from "@glion/util-query";
 import { Timestamp } from "@glion/util-timestamp";
-
-import { AckCode } from "./constants";
-import type { AckSuccessCode } from "./constants";
-import type { AckException } from "./exception";
-import { uid } from "./uid";
+import { uid } from "@glion/util-uid";
 
 export interface SendingInfo {
   application: string;
@@ -27,13 +25,10 @@ export type AcknowledgeOptions = {
        * message.
        */
       error: AckException;
-      /** Include ERR segment when an error is provided. Defaults to `true`. */
-      includeErrSegment?: boolean;
       successCode?: never;
     }
   | {
       error?: never;
-      includeErrSegment?: never;
       /**
        * MSA-1 code when no error is present. Defaults to
        * `AckCode.ApplicationAccept`.
@@ -114,7 +109,6 @@ export function acknowledge(
     processingId,
     sending,
     error,
-    includeErrSegment = true,
     successCode = AckCode.ApplicationAccept,
   }: AcknowledgeOptions = {}
 ): Root {
@@ -129,10 +123,6 @@ export function acknowledge(
     }),
     buildMsa(code, fields.controlId, error?.message),
   ];
-
-  if (error && includeErrSegment) {
-    segments.push(error.toErrSegment());
-  }
 
   return m(...segments);
 }

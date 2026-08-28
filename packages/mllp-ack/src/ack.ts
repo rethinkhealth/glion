@@ -1,13 +1,13 @@
-import {
-  AckException,
-  ApplicationInternalError,
-  acknowledge,
-} from "@glion/ack";
-import type { AckSuccessCode, SendingInfo } from "@glion/ack";
+import { AckException, ApplicationInternalError } from "@glion/ack";
+import type { AckSuccessCode } from "@glion/ack";
+import type { Segment } from "@glion/ast";
 import { hl7v2EncodeEscapes } from "@glion/encode-escapes";
 import type { Middleware } from "@glion/mllp";
 import { hl7v2ToHl7v2 } from "@glion/to-hl7v2";
 import { unified } from "unified";
+
+import { acknowledge } from "./acknowledge";
+import type { SendingInfo } from "./acknowledge";
 
 const ackSerializer = unified().use(hl7v2EncodeEscapes).use(hl7v2ToHl7v2);
 
@@ -21,6 +21,13 @@ export interface AckMiddlewareOptions {
    * `AckCode.ApplicationAccept`.
    */
   successCode?: AckSuccessCode;
+  /**
+   * Render an ERR segment for a NAK. The ERR layout is HL7v2-version
+   * dependent (ELD in ERR-1 before v2.5, ERR-3/ERR-4 after), so the
+   * application supplies the shape its version requires; when omitted,
+   * NAKs carry MSH and MSA only.
+   */
+  errSegment?: (error: AckException) => Segment;
 }
 
 /**
@@ -28,7 +35,8 @@ export interface AckMiddlewareOptions {
  *
  * On success, builds an accept ACK (AA or CA via `successCode`).
  * On error, converts the thrown exception into an error/reject ACK
- * with the appropriate code and ERR segment. Unknown errors are
+ * with the appropriate code (plus an ERR segment when `errSegment` is
+ * supplied). Unknown errors are
  * wrapped as {@link ApplicationInternalError}.
  *
  * If the handler already set `ctx.res` and did not throw an error,
@@ -36,7 +44,7 @@ export interface AckMiddlewareOptions {
  * the error propagates to `Mllp`'s `onError` handler.
  */
 export function ackMiddleware(options: AckMiddlewareOptions = {}): Middleware {
-  const { sending, generateId, successCode } = options;
+  const { sending, generateId, successCode, errSegment } = options;
 
   return async (ctx, next) => {
     // Catch handler errors — normalize to AckException
@@ -64,6 +72,10 @@ export function ackMiddleware(options: AckMiddlewareOptions = {}): Middleware {
     const ackTree = ackError
       ? acknowledge(ctx.ast, { error: ackError, id: generateId?.(), sending })
       : acknowledge(ctx.ast, { id: generateId?.(), sending, successCode });
+
+    if (ackError && errSegment) {
+      ackTree.children.push(errSegment(ackError));
+    }
 
     const encoded = await ackSerializer.run(ackTree);
     ctx.res = { raw: ackSerializer.stringify(encoded) as string };

@@ -4,7 +4,7 @@ MLLP middleware that generates HL7v2 acknowledgments automatically from handler 
 
 ## What it does
 
-`@glion/mllp-ack` exports `ackMiddleware()`, a middleware for `@glion/mllp` that wraps your route handlers and produces an ACK/NAK response for every accepted message. When a handler returns without throwing, the middleware emits an AA (or a configurable success code such as CA for commit-level acknowledgments). When a handler throws an `AckException` from `@glion/ack`, the middleware translates it into the matching AE/AR/CE/CR response with an ERR segment. Plain `Error` values become `ApplicationInternalError` (AE, error code 207), so routes that forget to handle a failure still produce a valid NAK instead of silence.
+`@glion/mllp-ack` exports `ackMiddleware()`, a middleware for `@glion/mllp` that wraps your route handlers and produces an ACK/NAK response for every accepted message. When a handler returns without throwing, the middleware emits an AA (or a configurable success code such as CA for commit-level acknowledgments). When a handler throws an `AckException` from `@glion/ack`, the middleware translates it into the matching AE/AR/CE/CR response (plus an app-supplied ERR segment via the `errSegment` option — the ERR layout is HL7v2-version dependent, so the package never renders one on its own). The package also exports `acknowledge()`, the MSH+MSA response builder, for building ACK trees without the middleware. Plain `Error` values become `ApplicationInternalError` (AE, error code 207), so routes that forget to handle a failure still produce a valid NAK instead of silence.
 
 ## Install
 
@@ -86,11 +86,28 @@ app.on("ADT^A01", async (ctx) => {
 
 Returns a `Middleware` function for use with `Mllp.use()`.
 
-| Option        | Type             | Description                                                          |
-| ------------- | ---------------- | -------------------------------------------------------------------- |
-| `sending`     | `SendingInfo`    | MSH-3/MSH-4 of the ACK. Defaults to original message's MSH-5/MSH-6   |
-| `generateId`  | `() => string`   | Custom ID generator for MSH-10. Uses `uid()` from `@glion/ack`       |
-| `successCode` | `AckSuccessCode` | MSA-1 code for success. Defaults to `AckCode.ApplicationAccept` (AA) |
+| Option        | Type                               | Description                                                                                                                                                                                                              |
+| ------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sending`     | `SendingInfo`                      | MSH-3/MSH-4 of the ACK. Defaults to original message's MSH-5/MSH-6                                                                                                                                                       |
+| `generateId`  | `() => string`                     | Custom ID generator for MSH-10. Uses `uid()` from `@glion/util-uid`                                                                                                                                                      |
+| `successCode` | `AckSuccessCode`                   | MSA-1 code for success. Defaults to `AckCode.ApplicationAccept` (AA)                                                                                                                                                     |
+| `errSegment`  | `(error: AckException) => Segment` | Renders the ERR segment for NAKs. The ERR layout is HL7v2-version dependent (ELD in ERR-1 before v2.5, ERR-3/ERR-4 after), so the app supplies the shape its version requires. When omitted, NAKs carry MSH and MSA only |
+
+For example, a v2.5+ shape: `errSegment: (error) => s("ERR", f(""), f(""), f(error.errorCode ?? ""), f(error.severity ?? ""))` with `s`/`f` from `@glion/builder`.
+
+### `acknowledge(origin, options?)`
+
+Builds an ACK/NAK `Root` AST from the original message tree — the builder behind the middleware, exported for building responses without it.
+
+| Parameter              | Type           | Description                                                        |
+| ---------------------- | -------------- | ------------------------------------------------------------------ |
+| `origin`               | `Root`         | Parsed AST of the original HL7v2 message                           |
+| `options.id`           | `string`       | Custom MSH-10 control ID. Auto-generated via `uid()` when omitted  |
+| `options.sending`      | `SendingInfo`  | MSH-3/MSH-4 of the ACK. Defaults to original message's MSH-5/MSH-6 |
+| `options.processingId` | `string`       | MSH-11 processing ID. Defaults to original message's MSH-11        |
+| `options.error`        | `AckException` | Sets the MSA-1 code and populates MSA-3 with the error message     |
+
+Returns a `Root` node containing MSH and MSA segments. The ACK sender (MSH-3/MSH-4) is derived from the original message's MSH-5/MSH-6 by default. It never emits ERR — append your own version-appropriate segment to the returned tree.
 
 ### Exception classes
 
@@ -110,15 +127,15 @@ All exception classes are re-exported from `@glion/ack`.
 
 ### Handler outcome to MSA-1 mapping
 
-| Handler outcome                         | MSA-1          | ERR segment |
-| --------------------------------------- | -------------- | ----------- |
-| returns (no throw)                      | `successCode`  | no          |
-| throws `AckApplicationError`            | AE             | yes         |
-| throws `AckApplicationReject`           | AR             | yes         |
-| throws `AckCommitError`                 | CE             | yes         |
-| throws `AckCommitReject`                | CR             | yes         |
-| throws a plain `Error` or non-`Error`   | AE (code 207)  | yes         |
-| handler set `ctx.res` and did not throw | passed through | —           |
+| Handler outcome                         | MSA-1          | ERR segment             |
+| --------------------------------------- | -------------- | ----------------------- |
+| returns (no throw)                      | `successCode`  | no                      |
+| throws `AckApplicationError`            | AE             | via `errSegment` option |
+| throws `AckApplicationReject`           | AR             | via `errSegment` option |
+| throws `AckCommitError`                 | CE             | via `errSegment` option |
+| throws `AckCommitReject`                | CR             | via `errSegment` option |
+| throws a plain `Error` or non-`Error`   | AE (code 207)  | via `errSegment` option |
+| handler set `ctx.res` and did not throw | passed through | —                       |
 
 If `ctx.res` was already set by a handler and nothing threw, the middleware leaves it untouched.
 

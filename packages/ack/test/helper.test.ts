@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-import { AckCode, isAckNakCode } from "../src/constants";
+import { AckCode } from "../src/constants";
+import { isAckCode, isAckNakCode } from "../src/helper";
+
+describe("isAckCode", () => {
+  it("is true for every Table 0008 code", () => {
+    for (const code of Object.values(AckCode)) {
+      expect(isAckCode(code)).toBe(true);
+    }
+  });
+
+  it("is false for arbitrary strings", () => {
+    expect(isAckCode("")).toBe(false);
+    expect(isAckCode("XX")).toBe(false);
+    expect(isAckCode("aa")).toBe(false);
+  });
+});
 
 describe("isAckNakCode", () => {
   it("is true for every Table 0008 reject code", () => {

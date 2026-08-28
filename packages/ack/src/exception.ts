@@ -1,8 +1,5 @@
-import type { Root, Segment } from "@glion/ast";
-import { f, s } from "@glion/builder";
-
-import { AckCode, Severity } from "./constants";
-import type { AckCodeValue, AckNakCode } from "./constants";
+import { AckCode } from "./constants";
+import type { AckNakCode } from "./constants";
 
 export interface AckExceptionOptions extends ErrorOptions {
   /**
@@ -13,16 +10,17 @@ export interface AckExceptionOptions extends ErrorOptions {
    */
   errorCode?: string;
   /**
-   * ERR-4 severity (Table 0516 — see {@link Severity}); optional for inbound
+   * ERR-4 severity (Table 0516 — see `Severity`); optional for inbound
    * ACKs.
    */
   severity?: string;
   /**
-   * The raw HL7v2 ACK message associated with this exception, when one
-   * exists. Set when the exception is derived from an existing ACK;
-   * left undefined when no ACK has been produced yet.
+   * MSA-3 text message — the remote system's own diagnostic sentence, when
+   * the NAK carried one. Exceptions deliberately do not carry the full ACK
+   * payload (raw text or AST): message content on an exception ends up in
+   * logs and error trackers, and full HL7v2 payloads carry PHI.
    */
-  raw?: string;
+  text?: string;
   /**
    * MSA-2 message control ID echoed from the original MSH-10 of the
    * message the receiver is rejecting. Present when the exception is
@@ -30,13 +28,6 @@ export interface AckExceptionOptions extends ErrorOptions {
    * acknowledgment exists.
    */
   controlId?: string;
-  /**
-   * Parsed AST of the ACK this exception was derived from, when one exists.
-   * Lets a consumer walk ERR repetitions or other segments without
-   * re-parsing `raw`. Absent when the exception is synthesised before any
-   * acknowledgment.
-   */
-  tree?: Root;
 }
 
 /**
@@ -44,53 +35,31 @@ export interface AckExceptionOptions extends ErrorOptions {
  *
  * Subclasses map to specific MSA-1 acknowledgment codes (Table 0008).
  * Each exception carries an error code (Table 0357), optional severity
- * (Table 0516), and can build its own ERR segment AST via {@link toErrSegment}.
+ * (Table 0516). Building an ERR segment is deliberately left to the
+ * implementation: its layout changed across HL7v2 versions (ELD in ERR-1
+ * before v2.5, ERR-3/ERR-4 after), so a version-agnostic package carries
+ * the data instead of rendering the segment.
  *
  * Use `instanceof AckException` to detect any ACK-level error in middleware.
  */
 export abstract class AckException extends Error {
-  abstract readonly code: AckCodeValue;
+  abstract readonly code: AckNakCode;
   readonly errorCode: string | undefined;
   readonly severity: string | undefined;
-  /**
-   * The raw HL7v2 ACK message associated with this exception, when one
-   * exists. Set when the exception is derived from an existing ACK;
-   * left undefined when no ACK has been produced yet.
-   */
-  readonly raw: string | undefined;
+  /** MSA-3 text message from the remote NAK, when present. */
+  readonly text: string | undefined;
   /**
    * MSA-2 control ID echoed from the original MSH-10. Present when the
    * exception is derived from an inbound ACK; absent otherwise.
    */
   readonly controlId: string | undefined;
-  /**
-   * Parsed AST of the ACK this exception was derived from. Present when
-   * derived from an inbound ACK; absent when synthesised. Lets a consumer
-   * walk ERR repetitions or other segments without re-parsing `raw`.
-   */
-  readonly tree: Root | undefined;
 
   constructor(message: string, options: AckExceptionOptions) {
     super(message, { cause: options.cause });
     this.errorCode = options.errorCode;
     this.severity = options.severity;
-    this.raw = options.raw;
+    this.text = options.text;
     this.controlId = options.controlId;
-    this.tree = options.tree;
-  }
-
-  /**
-   * Build an ERR segment AST node from this exception's error code and
-   * severity.
-   */
-  toErrSegment(): Segment {
-    return s(
-      "ERR",
-      f(""),
-      f(""),
-      f(this.errorCode ?? ""),
-      f(this.severity ?? Severity.Error)
-    );
   }
 }
 
@@ -152,33 +121,4 @@ export class AckCommitReject extends AckException {
     super(message, options);
     this.name = "AckCommitReject";
   }
-}
-
-/** Maps each Table 0008 reject code to its exception class. */
-const NAK_EXCEPTIONS: Record<
-  AckNakCode,
-  new (message: string, options: AckExceptionOptions) => AckException
-> = {
-  [AckCode.ApplicationError]: AckApplicationError,
-  [AckCode.ApplicationReject]: AckApplicationReject,
-  [AckCode.CommitError]: AckCommitError,
-  [AckCode.CommitReject]: AckCommitReject,
-};
-
-/**
- * Build the {@link AckException} for a NAK code (`AE`/`AR`/`CE`/`CR`) — the
- * single place that maps a Table 0008 reject code to its exception class, so a
- * consumer parsing an inbound ACK doesn't re-implement the switch. Pass the
- * `errorCode` (ERR-3), `severity` (ERR-4), `controlId` (MSA-2), `raw`, and
- * `tree` read off the ACK via {@link AckExceptionOptions}.
- */
-export function ackExceptionFor(
-  code: AckNakCode,
-  options: AckExceptionOptions
-): AckException {
-  const Exception = NAK_EXCEPTIONS[code];
-  return new Exception(
-    `The message was rejected with acknowledgment code ${code}.`,
-    options
-  );
 }
