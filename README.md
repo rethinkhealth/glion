@@ -133,6 +133,7 @@ Linting rules and presets for HL7v2 message quality and conformance.
 - **[@glion/util-charset][glion-util-charset]** — encode and decode HL7v2 wire bytes as UTF-8 (fatal — a non-UTF-8 feed fails loudly instead of being silently corrupted).
 - **[@glion/util-semver][glion-util-semver]** — tiny, fast HL7v2 version and range comparators.
 - **[@glion/util-timestamp][glion-util-timestamp]** — HL7v2 timestamp parsing, formatting, and conversion with precision tracking.
+- **[@glion/util-uid][glion-util-uid]** — time-ordered unique IDs for HL7v2 identifier fields, e.g. MSH-10 control IDs (the ULID idea resized to a 20-character default).
 - **[@glion/profiles][glion-profiles]** — HL7v2 version-specific profile definitions (fields, data types, tables, segments) with LRU-cached loading, used by the profile-based lint rules.
 - **[@glion/config][glion-config]** — configuration schema and loader for HL7v2 processing (`.hl7v2rc.json`).
 
@@ -219,5 +220,6 @@ This program is licensed to you under the terms of the [MIT License](https://ope
 [glion-util-query]: https://github.com/rethinkhealth/glion/tree/main/packages/util-query#readme
 [glion-util-semver]: https://github.com/rethinkhealth/glion/tree/main/packages/util-semver#readme
 [glion-util-timestamp]: https://github.com/rethinkhealth/glion/tree/main/packages/util-timestamp#readme
+[glion-util-uid]: https://github.com/rethinkhealth/glion/tree/main/packages/util-uid#readme
 [glion-util-visit]: https://github.com/rethinkhealth/glion/tree/main/packages/util-visit#readme
 [glion-utils]: https://github.com/rethinkhealth/glion/tree/main/packages/utils#readme
