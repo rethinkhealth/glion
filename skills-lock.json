@@ -86,6 +86,12 @@
       "sourceType": "github",
       "computedHash": "74cd07a31632a72d763b96257a8c86b5c80384770ef67e600f73ffa75b69a1e2"
     },
+    "gh-stack": {
+      "source": "github/gh-stack",
+      "sourceType": "github",
+      "skillPath": "skills/gh-stack/SKILL.md",
+      "computedHash": "11acbd01ba1c789706bfc8b8a23033eaead8d2cf92d574d8f9b5a77824634418"
+    },
     "git-clean-gone-branches": {
       "source": "everyinc/compound-engineering-plugin",
       "sourceType": "github",
@@ -100,6 +106,12 @@
       "source": "everyinc/compound-engineering-plugin",
       "sourceType": "github",
       "computedHash": "d3ed14599f03ee9f2da86665237d2c05edcec62e09de9e3c807d9b2c9506a4e2"
+    },
+    "hunk-review": {
+      "source": "modem-dev/hunk",
+      "sourceType": "github",
+      "skillPath": "skills/hunk-review/SKILL.md",
+      "computedHash": "1ceb9a909ce1b50e0d84cc584e74ba2af7e65717c6394285c2dc7db16019fa62"
     },
     "orchestrating-swarms": {
       "source": "everyinc/compound-engineering-plugin",

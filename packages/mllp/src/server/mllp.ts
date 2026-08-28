@@ -1,5 +1,4 @@
-import { MllpError } from "@glion/mllp-transport";
-
+import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { compose } from "./compose";
 import { createContext } from "./context";
 import { Router } from "./router";
@@ -38,8 +37,9 @@ const errorMessageInfo = new WeakMap<Error, MessageInfo>();
  * by `Mllp.handle()`. Returns `undefined` for errors that did not
  * originate from message processing (e.g., lifecycle callback errors).
  */
-export function getMessageInfo(error: Error): MessageInfo | undefined {
-  return errorMessageInfo.get(error);
+export function getMessageInfo(error: unknown): MessageInfo | undefined {
+  // A WeakMap lookup; a non-error key simply misses and yields undefined.
+  return errorMessageInfo.get(error as Error);
 }
 
 /**
@@ -152,12 +152,14 @@ export class Mllp {
    * This is the integration point — analogous to Hono's `fetch()`.
    *
    * The pipeline is lazy (see ADR-0013):
+   *
    * 1. Parse (sync, fast) — always runs, extracts routing fields
    * 2. Route match — uses pre-transform routing fields
    * 3. If no match → return undefined (no transform/compile cost)
    * 4. Transform/compile — only when handlers access ctx.tree()/ctx.result()
    *
-   * Throws `MllpError` if no processor has been registered via `app.parser()`.
+   * Throws `MllpServerError` (`NO_PARSER`) if no processor has been registered
+   * via `app.parser()`.
    */
   async handle(
     raw: string,
@@ -166,8 +168,8 @@ export class Mllp {
     // oxlint-disable-next-line typescript/no-invalid-void-type
   ): Promise<Response | undefined | void> {
     if (!this.#processor) {
-      throw new MllpError(
-        "ERR_NO_PARSER",
+      throw new MllpServerError(
+        MllpServerErrorCode.NO_PARSER,
         "No parser registered. Call app.parser() before handling messages."
       );
     }

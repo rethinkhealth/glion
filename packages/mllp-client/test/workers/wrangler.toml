@@ -1,8 +1,0 @@
-# Test-only Worker config used by `wrangler.unstable_dev` from
-# `test/workers/adapter.test.ts`. The integration tests spawn this
-# Worker as a sibling process (Hono pattern), exercise it via HTTP,
-# and assert on the response. The Worker is never deployed.
-
-name = "mllp-client-test-harness"
-compatibility_date = "2025-09-23"
-main = "./harness.ts"

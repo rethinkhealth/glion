@@ -15,6 +15,35 @@ export type AckSuccessCode =
   | typeof AckCode.ApplicationAccept
   | typeof AckCode.CommitAccept;
 
+/** Reject/error codes — the NAK half of Table 0008. */
+export type AckNakCode =
+  | typeof AckCode.ApplicationError
+  | typeof AckCode.ApplicationReject
+  | typeof AckCode.CommitError
+  | typeof AckCode.CommitReject;
+
+/** Narrow an arbitrary string to a Table 0008 acknowledgment code. */
+export function isAckCode(value: string): value is AckCodeValue {
+  return (
+    value === AckCode.ApplicationAccept ||
+    value === AckCode.ApplicationError ||
+    value === AckCode.ApplicationReject ||
+    value === AckCode.CommitAccept ||
+    value === AckCode.CommitError ||
+    value === AckCode.CommitReject
+  );
+}
+
+/** Narrow an arbitrary string to a NAK code — the reject half of Table 0008. */
+export function isAckNakCode(value: string): value is AckNakCode {
+  return (
+    value === AckCode.ApplicationError ||
+    value === AckCode.ApplicationReject ||
+    value === AckCode.CommitError ||
+    value === AckCode.CommitReject
+  );
+}
+
 /**
  * HL7v2 Table 0357 — Message error condition codes used in ERR-3. Stable across
  * all versions (v2.1–v2.9).

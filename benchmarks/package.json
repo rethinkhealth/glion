@@ -1,6 +1,6 @@
 {
   "name": "@glion/benchmarks",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "private": true,
   "description": "Centralized CodSpeed benchmarks for HL7v2",
   "type": "module",
@@ -12,6 +12,7 @@
     "@glion/builder": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/mllp": "workspace:*",
+    "@glion/mllp-ack": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/preset-lint-profile-recommended": "workspace:*",
     "@glion/profiles": "workspace:*",

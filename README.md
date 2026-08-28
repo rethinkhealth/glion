@@ -19,7 +19,7 @@ Glion is an open-source application framework for building HL7v2 integrations. I
 
 ### Features
 
-- 🚀 **Zero-config CLI.** `glion dev` runs your app with live reload during development. `glion start` runs it in production with graceful shutdown and structured logs.
+- 🚀 **Zero-config CLI.** `glion dev` runs your app with live reload during development. `glion start` runs it in production with graceful shutdown and structured logs. `glion send` fires an HL7v2 message over MLLP and prints the ACK.
 - 🌍 **MLLP server.** A standards-compliant HL7v2 server with pattern-based routing (`ADT^A01`, `ADT^*`, wildcards), middleware composition, and first-class ACK/NAK responses. Streaming TCP with back-pressure. Runs on Node, Bun, and Deno.
 - 🧰 **Parser and plugin ecosystem.** A [`unified`][github-unified]-based parser that produces typed ASTs with lossless round-tripping, plus 25+ plugins for annotation, linting, encoding, and transformation.
 - ⛑️ **Profile validation.** Validate against HL7-published profiles for fields, data types, table values, and segment order — automatically selected by the version in `MSH-12`.
@@ -63,7 +63,7 @@ The server and tooling that run Glion applications.
 #### Server & transport
 
 - **[@glion/mllp][glion-mllp]** — a transport-agnostic MLLP (Minimal Lower Layer Protocol) engine with pattern-based routing, middleware, and `unified` processor integration.
-- **[@glion/cli][glion-cli]** — the `glion` command for running Glion applications: `glion dev` for live reload during development, `glion start` for production with graceful shutdown and structured logs.
+- **[@glion/cli][glion-cli]** — the `glion` command for running Glion applications: `glion dev` for live reload during development, `glion start` for production with graceful shutdown and structured logs, and `glion send` for sending an HL7v2 message over MLLP and printing the ACK.
 
 #### Acknowledgments
 
@@ -130,15 +130,17 @@ Linting rules and presets for HL7v2 message quality and conformance.
 - **[@glion/utils][glion-utils]** — shared helpers for delimiter detection, normalization, and other HL7v2-specific operations.
 - **[@glion/util-visit][glion-util-visit]** — a visitor pattern for traversing HL7v2 ASTs with full path context, metadata extraction, and control flow actions.
 - **[@glion/util-query][glion-util-query]** — canonical path querying with syntax like `MSH-9.3` or `ORDER-ORC-1` for `select`, `selectAll`, `value`, `set`, and `matches`.
+- **[@glion/util-charset][glion-util-charset]** — encode and decode HL7v2 wire bytes as UTF-8 (fatal — a non-UTF-8 feed fails loudly instead of being silently corrupted).
 - **[@glion/util-semver][glion-util-semver]** — tiny, fast HL7v2 version and range comparators.
 - **[@glion/util-timestamp][glion-util-timestamp]** — HL7v2 timestamp parsing, formatting, and conversion with precision tracking.
+- **[@glion/util-uid][glion-util-uid]** — time-ordered unique IDs for HL7v2 identifier fields, e.g. MSH-10 control IDs (the ULID idea resized to a 20-character default).
 - **[@glion/profiles][glion-profiles]** — HL7v2 version-specific profile definitions (fields, data types, tables, segments) with LRU-cached loading, used by the profile-based lint rules.
 - **[@glion/config][glion-config]** — configuration schema and loader for HL7v2 processing (`.hl7v2rc.json`).
 
 ## Documentation
 
 - Full documentation at [glion.dev](https://glion.dev).
-- Runnable examples in [`examples/`](./examples) covering zero-config, explicit-config, and low-level transport usage.
+- Runnable examples in [`examples/`](./examples) covering the server (Node and Bun), the `glion` CLI workflow, and sending test messages with `glion send`.
 - API reference and detailed usage in each package's README, linked from the Packages section above.
 
 ## Status
@@ -214,8 +216,10 @@ This program is licensed to you under the terms of the [MIT License](https://ope
 [glion-preset-lint-recommended]: https://github.com/rethinkhealth/glion/tree/main/packages/preset-lint-recommended#readme
 [glion-profiles]: https://github.com/rethinkhealth/glion/tree/main/packages/profiles#readme
 [glion-to-hl7v2]: https://github.com/rethinkhealth/glion/tree/main/packages/to-hl7v2#readme
+[glion-util-charset]: https://github.com/rethinkhealth/glion/tree/main/packages/util-charset#readme
 [glion-util-query]: https://github.com/rethinkhealth/glion/tree/main/packages/util-query#readme
 [glion-util-semver]: https://github.com/rethinkhealth/glion/tree/main/packages/util-semver#readme
 [glion-util-timestamp]: https://github.com/rethinkhealth/glion/tree/main/packages/util-timestamp#readme
+[glion-util-uid]: https://github.com/rethinkhealth/glion/tree/main/packages/util-uid#readme
 [glion-util-visit]: https://github.com/rethinkhealth/glion/tree/main/packages/util-visit#readme
 [glion-utils]: https://github.com/rethinkhealth/glion/tree/main/packages/utils#readme

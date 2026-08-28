@@ -1,6 +1,6 @@
 {
   "name": "@glion/annotate-profile-segments",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Unified plugin to annotate HL7v2 segment nodes with profile metadata",
   "keywords": [
     "annotate",

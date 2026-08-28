@@ -7,6 +7,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createWatcher } from "../../src/parent/watcher.js";
 
+/**
+ * Time to wait after starting a watcher before exercising it. macOS fsevents
+ * replays paths changed shortly before the watch began; draining that startup
+ * burst keeps these tests deterministic across inotify and fsevents.
+ */
+const SETTLE_MS = 300;
+
 let dir: string;
 
 beforeEach(async () => {
@@ -23,15 +30,20 @@ describe("createWatcher", () => {
     await writeFile(file, "initial");
 
     const onChange = vi.fn();
-    const watcher = await createWatcher([dir], { debounceMs: 50 });
+    const watcher = await createWatcher([dir], { debounceMs: 200 });
+
+    // Subscribe only after the watcher has settled. macOS fsevents replays
+    // recently-changed paths shortly after watch start, which would otherwise
+    // leak a stray event into the burst under test. The debounce window is
+    // kept wider than fsevents' inter-event latency so the two writes below
+    // collapse into a single batch on both inotify and fsevents.
+    await delay(SETTLE_MS);
     watcher.onChange(onChange);
 
-    await delay(100); // let chokidar finish its initial scan
-
     await writeFile(file, "one");
-    await delay(10);
+    await delay(20);
     await writeFile(file, "two");
-    await delay(150);
+    await delay(500);
 
     expect(onChange).toHaveBeenCalledOnce();
     expect(onChange.mock.calls[0]?.[0].files).toContain(file);
@@ -79,13 +91,16 @@ describe("createWatcher", () => {
     const file = join(dir, "c.ts");
     await writeFile(file, "x");
     const watcher = await createWatcher([dir], { debounceMs: 40 });
+
+    // Settle before subscribing so fsevents' startup replay of the write above
+    // is not counted against the unsubscribe assertion below.
+    await delay(SETTLE_MS);
     const onChange = vi.fn();
     const unsub = watcher.onChange(onChange);
-    await delay(100);
 
     unsub();
     await writeFile(file, "y");
-    await delay(120);
+    await delay(150);
     expect(onChange).not.toHaveBeenCalled();
 
     await watcher.close();

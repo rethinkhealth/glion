@@ -1,18 +1,14 @@
 {
   "name": "@glion/mllp-transport",
-  "version": "0.16.0",
-  "description": "MLLP wire protocol primitives — framing, encoding, decoding, and base error types",
+  "version": "0.17.0",
+  "description": "MLLP byte-level framing codec for HL7v2 (encode/decode VT/FS/CR)",
   "keywords": [
-    "decoder",
-    "encoder",
-    "framing",
     "health",
     "healthcare",
     "hl7",
     "hl7v2",
     "mllp",
-    "protocol",
-    "transport",
+    "nodejs",
     "typescript"
   ],
   "homepage": "https://glion.dev",
@@ -32,22 +28,20 @@
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+    ".": "./dist/index.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
     "check:readme": "glion-check-readme",
-    "publint": "publint --strict",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "bench": "vitest bench --run",
+    "publint": "publint --strict"
   },
   "devDependencies": {
     "@glion/check-readme": "workspace:*",

@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-max-message-size",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "hl7v2-lint rule to warn when message size exceeds the maximum allowed size",
   "keywords": [
     "definition",

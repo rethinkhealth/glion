@@ -1,6 +1,6 @@
 {
   "name": "@glion/mllp",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Transport-agnostic MLLP (Minimal Lower Layer Protocol) engine for HL7v2 messaging",
   "keywords": [
     "health",
@@ -55,6 +55,7 @@
     "@glion/ast": "workspace:*",
     "@glion/mllp-transport": "workspace:*",
     "@glion/parser": "workspace:*",
+    "@glion/util-charset": "workspace:*",
     "@glion/util-query": "workspace:*",
     "unified": "11.0.5",
     "vfile": "6.0.3"

@@ -1,6 +1,6 @@
 {
   "name": "@glion/parser",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "hl7v2 plugin to parse hl7v2 messages",
   "keywords": [
     "health",

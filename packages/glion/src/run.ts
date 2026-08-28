@@ -1,4 +1,5 @@
 import { runDev } from "./commands/dev.js";
+import { runSend } from "./commands/send.js";
 import { runStart } from "./commands/start.js";
 
 /** Inlined by tsdown via `define` at build time. */
@@ -24,6 +25,7 @@ const HELP_TEXT = `glion — MLLP server dev tool
 Usage:
   glion dev   [--config <path>]   Start dev server with live TUI and file watcher
   glion start [--config <path>]   Start production server (no TUI, JSON-line stdout)
+  glion send  [<file>] [flags]    Send one HL7v2 message over MLLP and print the ACK
   glion --help                    Show this help
   glion --version                 Show version
 
@@ -50,8 +52,9 @@ Network binding:
 `;
 
 interface ParsedArgs {
-  command: "dev" | "start" | "help" | "version";
+  command: "dev" | "start" | "send" | "help" | "version";
   configPath?: string;
+  sendArgv?: readonly string[];
 }
 
 type ParseResult =
@@ -81,6 +84,14 @@ function parseArgs(argv: readonly string[]): ParseResult {
     }
     if (arg.startsWith("-")) {
       return { error: `unknown flag: ${arg}`, ok: false };
+    }
+    // The `send` subcommand owns the remaining argv — its flags are parsed
+    // separately, so hand everything after it through untouched.
+    if (arg === "send") {
+      return {
+        args: { command: "send", sendArgv: argv.slice(i + 1) },
+        ok: true,
+      };
     }
     positional.push(arg);
   }
@@ -128,6 +139,14 @@ export function runGlion(opts: RunGlionOptions): Promise<number> {
     case "dev": {
       return runDev({
         configPath: parsed.args.configPath,
+        cwd: opts.cwd,
+        stderr,
+        stdout,
+      });
+    }
+    case "send": {
+      return runSend({
+        argv: parsed.args.sendArgv ?? [],
         cwd: opts.cwd,
         stderr,
         stdout,

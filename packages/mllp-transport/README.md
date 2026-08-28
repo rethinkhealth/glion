@@ -1,10 +1,12 @@
 # @glion/mllp-transport
 
-MLLP wire protocol primitives — framing, encoding, decoding, and base error types.
+MLLP byte-level framing codec for HL7v2 (encode/decode VT/FS/CR).
 
 ## What it does
 
-`@glion/mllp-transport` implements the Minimal Lower Layer Protocol (MLLP) framing rules used to carry HL7v2 messages over a byte stream. It exports an `encode()` function that wraps a message in MLLP framing (`<VT> message <FS><CR>`), a `decode()` function for single-frame inputs, and a `createDecoderStream()` `TransformStream` that turns a chunked TCP byte stream into one decoded HL7v2 message per emitted value. It also exports the base `MllpError` class shared across the MLLP package family and the framing-specific `TransportError` subclass. This package has no transport implementation of its own — bring your own TCP, TLS, or WebSocket. `@glion/mllp` (server) and `@glion/mllp-client` build on top of it.
+`@glion/mllp-transport` handles the wire framing that wraps every HL7v2 message sent over MLLP. The Minimal Lower Layer Protocol envelopes each payload as `<VT> payload <FS><CR>` (`0x0B … 0x1C 0x0D`). This package encodes payloads into that envelope, decodes framed bytes back into payloads, and streams-decodes a TCP byte stream where frames arrive split or batched across chunks.
+
+It is transport-agnostic: it operates on `Uint8Array` bytes and Web Streams, with no socket, runtime, or AST dependency. Framing problems surface as a single typed `FramingError` discriminated by `FramingErrorCode`.
 
 ## Install
 
@@ -14,126 +16,50 @@ npm install @glion/mllp-transport
 
 ## Use
 
-Encode a single HL7v2 message and write it to any byte sink:
+Frame a payload for sending, and decode a single complete frame:
 
 ```ts
-import { encode } from "@glion/mllp-transport";
+import { frame, decode } from "@glion/mllp-transport";
 
-const message =
-  "MSH|^~\\&|App|Fac|Recv|Fac|20240101120000||ADT^A01|MSG001|P|2.5.1\rPID|1||12345";
-
-const frame = encode(message); // Uint8Array with VT prefix and FS CR suffix
-socket.write(frame);
+const wire = frame("MSH|^~\\&|...\r"); // Uint8Array: <VT> payload <FS><CR>
+const payload = decode(wire); // Uint8Array of the inner payload bytes
 ```
 
-Decode a framed byte stream from a TCP socket:
+Decode a TCP stream where frames span arbitrary chunk boundaries:
 
 ```ts
-import { Readable } from "node:stream";
-import { createDecoderStream } from "@glion/mllp-transport";
+import { FrameDecoderStream } from "@glion/mllp-transport";
 
-const decoder = createDecoderStream({ maxMessageSize: 1_000_000 });
-const reader = (Readable.toWeb(socket) as ReadableStream<Uint8Array>)
-  .pipeThrough(decoder)
-  .getReader();
-
-while (true) {
-  const { done, value: message } = await reader.read();
-  if (done) {
-    break;
-  }
-  console.log(message.text);
+for await (const payload of socket.readable.pipeThrough(
+  new FrameDecoderStream()
+)) {
+  handle(payload); // one Uint8Array per complete MLLP frame
 }
 ```
 
-Catch transport-level framing errors:
+For incremental decoding without Web Streams, drive the decoder directly:
 
 ```ts
-import { ErrorCode, MllpError, TransportError } from "@glion/mllp-transport";
+import { createFrameDecoder } from "@glion/mllp-transport";
 
-try {
-  // ...
-} catch (error) {
-  if (error instanceof TransportError) {
-    if (error.code === ErrorCode.MESSAGE_TOO_LARGE) {
-      // Inbound frame exceeded maxMessageSize.
-    }
-  } else if (error instanceof MllpError) {
-    // Some other MLLP-family error.
-  }
+const decoder = createFrameDecoder();
+const err = decoder.push(chunk, (payload) => handle(payload));
+if (err) {
+  // err is a FramingError; the stream is corrupt past this point
 }
 ```
 
-## API
+### Exports
 
-### `encode(message, options?)`
-
-Encode a `string` or `Uint8Array` into an MLLP frame. Returns a `Uint8Array` with the start byte (`0x0B`) prefix and end sequence (`0x1C 0x0D`) suffix.
-
-### `encodeMultiple(messages, options?)`
-
-Encode an array of messages into a single concatenated `Uint8Array` of frames.
-
-### `decode(frame, options?)`
-
-Decode a single complete MLLP frame into a `DecodedMessage`. For chunked stream input, use `createDecoderStream()` instead.
-
-### `createDecoderStream(options?)`
-
-Create a `TransformStream<Uint8Array, DecodedMessage>` that extracts complete MLLP frames from an arbitrarily-chunked byte stream.
-
-The decoder offers two error modes, selected by what the `onError` callback does:
-
-- **Lenient** (default) — the callback returns; the decoder logs the error and keeps scanning for the next valid frame. Right for receivers that process many frames over a long-lived connection.
-- **Fatal** — the callback throws; the throw propagates out of `transform()` and errors the readable side of the `TransformStream`. Downstream `for await ... of` consumers reject with the thrown value. Right for one-shot exchanges (e.g. `@glion/mllp-client`) where any frame error invalidates the whole exchange.
-
-```ts
-// Lenient: log and keep going.
-const lenient = createDecoderStream({
-  maxMessageSize: 1_048_576,
-  onError: (err) => log.warn(err),
-});
-
-// Fatal: error the stream on any frame error.
-const fatal = createDecoderStream({
-  maxMessageSize: 1_048_576,
-  onError: (err) => {
-    throw new Error(`framing failed: ${err.message}`, { cause: err });
-  },
-});
-```
-
-### `MLLPDecoderStream`
-
-Class-based variant of `createDecoderStream`, useful when a reusable instance is preferred over the factory.
-
-### Constants
-
-| Symbol            | Value  | Description                            |
-| ----------------- | ------ | -------------------------------------- |
-| `MLLP_START_BYTE` | `0x0B` | VT — frame start                       |
-| `MLLP_END_BYTE_1` | `0x1C` | FS — first byte of frame end sequence  |
-| `MLLP_END_BYTE_2` | `0x0D` | CR — second byte of frame end sequence |
-| `MLLP_HEADER`     | —      | Header byte sequence as `Uint8Array`   |
-| `MLLP_TRAILER`    | —      | Trailer byte sequence as `Uint8Array`  |
-
-### Types
-
-| Type             | Description                                                       |
-| ---------------- | ----------------------------------------------------------------- |
-| `DecodedMessage` | Result of decoding a frame: `{ data, text, byteLength }`.         |
-| `DecoderOptions` | Options for the decoder: `maxMessageSize`, `encoding`, `onError`. |
-| `EncoderInput`   | `string \| Uint8Array` — accepted input types for `encode`.       |
-| `EncoderOptions` | Options for the encoder: `encoding`.                              |
-
-### Errors
-
-| Symbol             | Description                                                                   |
-| ------------------ | ----------------------------------------------------------------------------- |
-| `MllpError`        | Base class for all MLLP errors. Carries a string `code`.                      |
-| `MllpErrorOptions` | Options accepted by `MllpError` (extends `ErrorOptions`).                     |
-| `TransportError`   | `MllpError` subclass for framing failures. Carries `code` + `position`.       |
-| `ErrorCode`        | Enum of transport error codes (`INVALID_START_BYTE`, `MESSAGE_TOO_LARGE`, …). |
+| Export                             | Description                                                             |
+| ---------------------------------- | ----------------------------------------------------------------------- |
+| `VT`, `FS`, `CR`                   | The MLLP framing byte constants (`0x0B`, `0x1C`, `0x0D`)                |
+| `frame(payload)`                   | Wrap a payload (`Uint8Array` or `string`) in the MLLP envelope          |
+| `decode(input)`                    | Strip the envelope from one complete frame, returning the payload bytes |
+| `validate(payload)`                | Throw `FramingError` if a payload contains reserved framing bytes       |
+| `createFrameDecoder(opts?)`        | Stateful incremental decoder for streamed/chunked input                 |
+| `FrameDecoderStream`               | `TransformStream<Uint8Array, Uint8Array>` wrapper over the decoder      |
+| `FramingError`, `FramingErrorCode` | Typed framing error and its discriminant codes                          |
 
 ## Part of Glion
 
