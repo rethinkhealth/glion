@@ -6,8 +6,9 @@
  *
  * 1. **Parse** — a `string` becomes a tree via the injected parse function (the
  *    client passes `parseHL7v2`; the parameter is a unit-test seam, not a
- *    public option); a `Root` is used as-is. The tree is the wire currency:
- *    this is an originating / cleaning client, not a byte-exact relay.
+ *    public option — re-examined in issue #685); a `Root` is used as-is. The
+ *    tree is the wire currency: this is an originating / cleaning client, not a
+ *    byte-exact relay.
  * 2. **Correlate** (`@glion/util-query`) — MSH-10 is read off the tree; a missing
  *    control ID throws `INVALID_MESSAGE`, because without it the acknowledgment
  *    could never be matched to this message.
@@ -53,6 +54,9 @@ export function prepareOutbound(
   message: SendInput,
   parser: (input: string) => Root
 ): OutboundMessage {
+  // FIXME(https://github.com/rethinkhealth/glion/issues/685): parseHL7v2 is
+  // baked in by the caller — the parser should be injectable by the
+  // application, not enforced by the client.
   const tree = typeof message === "string" ? parser(message) : message;
 
   // Correlate before the serialize/encode/frame passes: a message that can

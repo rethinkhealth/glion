@@ -257,6 +257,9 @@ export class MllpClient {
         host: this.#host,
         maxBufferedBytes: this.#maxBufferedBytes,
         onDrop: (error) => this.#handleDrop(error),
+        // FIXME(https://github.com/rethinkhealth/glion/issues/685): the client
+        // hard-wires @glion/parser for inbound ACK parsing; the parser should
+        // be an application choice, as on the server (`Mllp.parser()`).
         parser: parseHL7v2,
         port: this.#port,
       });
