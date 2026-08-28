@@ -1,9 +1,9 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 
-import { compose } from "../../src/server/compose.js";
-import { createContext } from "../../src/server/context.js";
-import type { Context, Middleware } from "../../src/server/types.js";
+import { compose } from "../../src/server/compose";
+import { createContext } from "../../src/server/context";
+import type { Context, Middleware } from "../../src/server/types";
 
 const SAMPLE_MESSAGE = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|CTL1|P|2.5.1";
 

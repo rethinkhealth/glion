@@ -1,4 +1,4 @@
-import type { UiStatus } from "./store.js";
+import type { UiStatus } from "./store";
 
 /**
  * Design tokens for the glion dev TUI.

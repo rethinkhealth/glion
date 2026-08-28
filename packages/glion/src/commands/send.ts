@@ -17,9 +17,9 @@ import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
-import { renderHuman, renderJson } from "./send-render.js";
-import type { SendNakOutcome, SendOutcome } from "./send-render.js";
-import { resolveTarget } from "./send-target.js";
+import { renderHuman, renderJson } from "./send-render";
+import type { SendNakOutcome, SendOutcome } from "./send-render";
+import { resolveTarget } from "./send-target";
 
 /** Connect + ACK-wait deadline used when `--timeout` is omitted. */
 export const DEFAULT_SEND_TIMEOUT_MS = 30_000;

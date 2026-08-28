@@ -1,8 +1,8 @@
 import { Box, Text } from "ink";
 import type { ReactElement } from "react";
 
-import type { StoreState } from "./store.js";
-import { statusMeta, theme } from "./theme.js";
+import type { StoreState } from "./store";
+import { statusMeta, theme } from "./theme";
 
 export interface HeaderProps {
   state: StoreState;

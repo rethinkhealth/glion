@@ -1,11 +1,11 @@
-import { loadConfig } from "../config/load.js";
-import { GlionError } from "../errors.js";
-import type { Event } from "../events.js";
-import { encode, fatalEvent } from "../events.js";
-import type { FileLogger } from "../file-logger.js";
-import { createFileLogger } from "../file-logger.js";
-import { GlionSupervisor } from "../parent/supervisor.js";
-import { ensureCacheDir, prepareChild } from "../prebuild.js";
+import { loadConfig } from "../config/load";
+import { GlionError } from "../errors";
+import type { Event } from "../events";
+import { encode, fatalEvent } from "../events";
+import type { FileLogger } from "../file-logger";
+import { createFileLogger } from "../file-logger";
+import { GlionSupervisor } from "../parent/supervisor";
+import { ensureCacheDir, prepareChild } from "../prebuild";
 
 export interface RunStartOptions {
   cwd: string;

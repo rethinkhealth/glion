@@ -2,7 +2,7 @@ import { Writable } from "node:stream";
 
 import { describe, expect, it } from "vitest";
 
-import { createEmitter } from "../../src/child/emitter.js";
+import { createEmitter } from "../../src/child/emitter";
 
 /**
  * A Writable subclass that captures chunks and lets tests toggle

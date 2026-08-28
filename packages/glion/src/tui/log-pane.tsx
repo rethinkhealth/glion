@@ -1,10 +1,10 @@
 import { Static, Text } from "ink";
 import type { ReactElement, ReactNode } from "react";
 
-import type { LogLevel } from "../config/logging.js";
-import type { Event } from "../events.js";
-import type { LogEntry } from "./store.js";
-import { theme } from "./theme.js";
+import type { LogLevel } from "../config/logging";
+import type { Event } from "../events";
+import type { LogEntry } from "./store";
+import { theme } from "./theme";
 
 export interface LogPaneProps {
   entries: LogEntry[];

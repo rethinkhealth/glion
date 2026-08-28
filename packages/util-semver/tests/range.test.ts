@@ -3,7 +3,7 @@ import {
   RangeParseError,
   satisfies,
   VersionParseError,
-} from "../src/index.js";
+} from "../src/index";
 
 describe(satisfies, () => {
   it("matches with AND conditions", () => {

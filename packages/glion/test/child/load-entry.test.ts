@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { Mllp } from "@glion/mllp";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { loadEntry } from "../../src/child/load-entry.js";
+import { loadEntry } from "../../src/child/load-entry";
 
 let dir: string;
 

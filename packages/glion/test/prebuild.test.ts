@@ -5,8 +5,8 @@ import { pathToFileURL } from "node:url";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import type { ResolvedConfig } from "../src/config/schema.js";
-import { buildFile, ensureCacheDir, prepareChild } from "../src/prebuild.js";
+import type { ResolvedConfig } from "../src/config/schema";
+import { buildFile, ensureCacheDir, prepareChild } from "../src/prebuild";
 
 let dir: string;
 let cacheDir: string;
@@ -29,7 +29,7 @@ describe("buildFile", () => {
     );
     await writeFile(
       join(dir, "src", "app.ts"),
-      `import { PORT } from "./helper.js";\nexport default { port: PORT };`
+      `import { PORT } from "./helper";\nexport default { port: PORT };`
     );
 
     const outPath = await buildFile(join(dir, "src", "app.ts"), cacheDir);

@@ -1,9 +1,9 @@
 import { render } from "ink-testing-library";
 import { describe, expect, it } from "vitest";
 
-import type { Event } from "../../src/events.js";
-import { LogPane } from "../../src/tui/log-pane.js";
-import type { LogEntry } from "../../src/tui/store.js";
+import type { Event } from "../../src/events";
+import { LogPane } from "../../src/tui/log-pane";
+import type { LogEntry } from "../../src/tui/store";
 
 function toEntries(events: Event[]): LogEntry[] {
   return events.map((event, i) => ({ event, id: i + 1 }));

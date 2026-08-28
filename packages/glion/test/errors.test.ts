@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { GlionError } from "../src/errors.js";
+import { GlionError } from "../src/errors";
 
 describe("GlionError", () => {
   it("carries kind, message, context, and hint", () => {

@@ -11,9 +11,9 @@
  * from the config IO ({@link resolveTarget}) so it can be tested directly.
  */
 
-import { loadConfig } from "../config/load.js";
-import { ensureCacheDir } from "../prebuild.js";
-import type { SendArgs } from "./send.js";
+import { loadConfig } from "../config/load";
+import { ensureCacheDir } from "../prebuild";
+import type { SendArgs } from "./send";
 
 const LOOPBACK_V4 = "127.0.0.1";
 const LOOPBACK_V6 = "::1";

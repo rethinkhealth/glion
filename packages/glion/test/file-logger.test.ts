@@ -13,10 +13,10 @@ import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { GlionError } from "../src/errors.js";
-import type { Event } from "../src/events.js";
-import type { FileLoggerOptions } from "../src/file-logger.js";
-import { createFileLogger } from "../src/file-logger.js";
+import { GlionError } from "../src/errors";
+import type { Event } from "../src/events";
+import type { FileLoggerOptions } from "../src/file-logger";
+import { createFileLogger } from "../src/file-logger";
 
 let dir: string;
 

@@ -13,7 +13,7 @@ import { pathToFileURL } from "node:url";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { compileConfig } from "../../src/config/compile.js";
+import { compileConfig } from "../../src/config/compile";
 
 let dir: string;
 let cacheDir: string;

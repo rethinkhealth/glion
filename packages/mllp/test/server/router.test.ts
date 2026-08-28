@@ -1,9 +1,9 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 
-import { createContext } from "../../src/server/context.js";
-import { Router } from "../../src/server/router.js";
-import type { Context, Middleware } from "../../src/server/types.js";
+import { createContext } from "../../src/server/context";
+import { Router } from "../../src/server/router";
+import type { Context, Middleware } from "../../src/server/types";
 
 const RESPONSE_OK = { raw: "MSA|AA|OK" };
 

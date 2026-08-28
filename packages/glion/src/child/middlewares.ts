@@ -29,7 +29,7 @@ import { performance } from "node:perf_hooks";
 
 import type { Context, Middleware, Response } from "@glion/mllp";
 
-import type { PartialEvent } from "../events.js";
+import type { PartialEvent } from "../events";
 
 /**
  * Creates the telemetry middleware. The `emit` function is injected

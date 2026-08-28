@@ -13,7 +13,7 @@
  * `runGlion()` directly without spawning a subprocess.
  */
 // Dynamic import so tsdown doesn't merge index and run into a shared chunk.
-const { runGlion } = await import("./run.js");
+const { runGlion } = await import("./run");
 
 try {
   // runGlion() owns the full program lifecycle — it only resolves once

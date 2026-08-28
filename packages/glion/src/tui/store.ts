@@ -1,6 +1,6 @@
 import { setImmediate as nodeSetImmediate } from "node:timers";
 
-import type { Event } from "../events.js";
+import type { Event } from "../events";
 
 /** An event tagged with a monotonic id so React can use stable keys. */
 export interface LogEntry {

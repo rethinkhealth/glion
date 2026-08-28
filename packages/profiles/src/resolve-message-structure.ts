@@ -1,4 +1,4 @@
-import { eventMaps } from "./profiles/event-map-manifest.js";
+import { eventMaps } from "./profiles/event-map-manifest";
 
 /**
  * Resolve the canonical message structure ID from version, message code,

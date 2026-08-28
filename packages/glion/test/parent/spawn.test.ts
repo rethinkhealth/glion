@@ -4,7 +4,7 @@ import { scheduler } from "node:timers/promises";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { spawnChild } from "../../src/parent/spawn.js";
+import { spawnChild } from "../../src/parent/spawn";
 
 interface MinimalChild {
   stdout: Readable;

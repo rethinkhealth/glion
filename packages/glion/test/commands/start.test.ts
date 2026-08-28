@@ -5,7 +5,7 @@ import { PassThrough } from "node:stream";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type * as SupervisorModule from "../../src/parent/supervisor.js";
+import type * as SupervisorModule from "../../src/parent/supervisor";
 
 type ExitListener = (code: number | null, signal: string | null) => void;
 
@@ -20,7 +20,7 @@ type ExitListener = (code: number | null, signal: string | null) => void;
 // The cast is needed because the fake intentionally implements only the
 // handful of methods runStart touches; the real class has many private
 // fields we don't care about for this test.
-vi.mock(import("../../src/parent/supervisor.js"), () => {
+vi.mock(import("../../src/parent/supervisor"), () => {
   // Closure-based fake (not a class) so linter rules about unused
   // `this` in methods don't apply. Each invocation gets its own
   // exitListeners array via the factory closure.
@@ -53,7 +53,7 @@ vi.mock(import("../../src/parent/supervisor.js"), () => {
 });
 
 // Import AFTER vi.mock — ESM hoisting makes the mock visible.
-const { runStart } = await import("../../src/commands/start.js");
+const { runStart } = await import("../../src/commands/start");
 
 let dir: string;
 

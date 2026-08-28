@@ -1,17 +1,17 @@
-import { runDev } from "./commands/dev.js";
-import { runSend } from "./commands/send.js";
-import { runStart } from "./commands/start.js";
+import { runDev } from "./commands/dev";
+import { runSend } from "./commands/send";
+import { runStart } from "./commands/start";
 
 /** Inlined by tsdown via `define` at build time. */
 declare const __GLION_VERSION__: string;
 
 // Re-exports for the stable `glion` public surface.
-export { defineConfig } from "./config/index.js";
-export type { GlionConfig } from "./config/index.js";
-export { GlionError } from "./errors.js";
-export type { GlionErrorKind } from "./errors.js";
-export { encode, parseLine } from "./events.js";
-export type { DistributiveOmit, Event, PartialEvent } from "./events.js";
+export { defineConfig } from "./config/index";
+export type { GlionConfig } from "./config/index";
+export { GlionError } from "./errors";
+export type { GlionErrorKind } from "./errors";
+export { encode, parseLine } from "./events";
+export type { DistributiveOmit, Event, PartialEvent } from "./events";
 
 export interface RunGlionOptions {
   argv: string[];

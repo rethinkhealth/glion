@@ -2,8 +2,8 @@
 import type { Context, Middleware } from "@glion/mllp";
 import { describe, expect, it } from "vitest";
 
-import { createMsgTelemetry } from "../../src/child/middlewares.js";
-import type { PartialEvent } from "../../src/events.js";
+import { createMsgTelemetry } from "../../src/child/middlewares";
+import type { PartialEvent } from "../../src/events";
 
 /**
  * Minimal context stub for middleware tests.
