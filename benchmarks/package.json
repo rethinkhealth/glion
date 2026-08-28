@@ -12,7 +12,6 @@
     "@glion/builder": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/mllp": "workspace:*",
-    "@glion/mllp-ack": "workspace:*",
     "@glion/mllp-codec": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/preset-lint-profile-recommended": "workspace:*",

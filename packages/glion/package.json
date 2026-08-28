@@ -66,7 +66,6 @@
   "devDependencies": {
     "@glion/check-readme": "workspace:*",
     "@glion/hl7v2": "workspace:*",
-    "@glion/mllp-ack": "workspace:*",
     "@glion/mllp-codec": "workspace:*",
     "@glion/testing": "workspace:*",
     "@glion/tsconfig": "workspace:*",

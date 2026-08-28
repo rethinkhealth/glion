@@ -279,14 +279,13 @@ Instead, the `Mllp` engine is middleware-first:
 
 - **Default behaviour** — no response is sent; the sending system times out and retries, which is valid MLLP behaviour.
 - **Logging** — add a logger middleware to make errors observable.
-- **ACK/NAK** — add an acknowledgment middleware to translate errors into proper NAK responses. `@glion/mllp-ack` provides this out of the box.
+- **ACK/NAK** — register your own acknowledgment middleware to translate outcomes into ACK/NAK responses. Built-in acknowledgment translation at the framework's error boundary is landing next (see ADR-0019).
 - **Custom error responses** — use `app.onError()` for application-specific handling.
 
 ```ts
 const app = new Mllp().parser(parseHL7v2);
 
 app.use(logger()); // observability — provided by middleware
-app.use(ackMiddleware()); // error → NAK translation — @glion/mllp-ack
 
 app.on("ADT^A01", handler);
 ```

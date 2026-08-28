@@ -63,9 +63,6 @@ importers:
       '@glion/mllp':
         specifier: workspace:*
         version: link:../packages/mllp
-      '@glion/mllp-ack':
-        specifier: workspace:*
-        version: link:../packages/mllp-ack
       '@glion/mllp-codec':
         specifier: workspace:*
         version: link:../packages/mllp-codec
@@ -745,9 +742,6 @@ importers:
       '@glion/hl7v2':
         specifier: workspace:*
         version: link:../hl7v2
-      '@glion/mllp-ack':
-        specifier: workspace:*
-        version: link:../mllp-ack
       '@glion/mllp-codec':
         specifier: workspace:*
         version: link:../mllp-codec
@@ -1658,70 +1652,6 @@ importers:
       vfile:
         specifier: 6.0.3
         version: 6.0.3
-    devDependencies:
-      '@glion/check-readme':
-        specifier: workspace:*
-        version: link:../../tools/check-readme
-      '@glion/hl7v2':
-        specifier: workspace:*
-        version: link:../hl7v2
-      '@glion/testing':
-        specifier: workspace:*
-        version: link:../../tools/testing
-      '@glion/tsconfig':
-        specifier: workspace:*
-        version: link:../../tools/tsconfig
-      '@types/node':
-        specifier: 25.6.0
-        version: 25.6.0
-      '@vitest/coverage-v8':
-        specifier: 4.1.5
-        version: 4.1.5(vitest@4.1.5)
-      publint:
-        specifier: 0.3.18
-        version: 0.3.18
-      tsdown:
-        specifier: 0.21.10
-        version: 0.21.10(publint@0.3.18)(typescript@6.0.3)
-      typescript:
-        specifier: 6.0.3
-        version: 6.0.3
-      vitest:
-        specifier: 4.1.5
-        version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
-
-  packages/mllp-ack:
-    dependencies:
-      '@glion/ack':
-        specifier: workspace:*
-        version: link:../ack
-      '@glion/ast':
-        specifier: workspace:*
-        version: link:../ast
-      '@glion/builder':
-        specifier: workspace:*
-        version: link:../builder
-      '@glion/encode-escapes':
-        specifier: workspace:*
-        version: link:../encode-escapes
-      '@glion/mllp':
-        specifier: workspace:*
-        version: link:../mllp
-      '@glion/to-hl7v2':
-        specifier: workspace:*
-        version: link:../to-hl7v2
-      '@glion/util-query':
-        specifier: workspace:*
-        version: link:../util-query
-      '@glion/util-timestamp':
-        specifier: workspace:*
-        version: link:../util-timestamp
-      '@glion/util-uid':
-        specifier: workspace:*
-        version: link:../util-uid
-      unified:
-        specifier: 11.0.5
-        version: 11.0.5
     devDependencies:
       '@glion/check-readme':
         specifier: workspace:*

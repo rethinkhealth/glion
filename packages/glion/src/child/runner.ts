@@ -128,7 +128,7 @@ async function main(): Promise<void> {
   // This wraps every MLLP message handler to emit a "msg" event
   // with timing, trigger, control ID, and ACK code. Prepended so it
   // sits outermost — its `await next()` completes after all user
-  // middleware (including ackMiddleware) have run, ensuring any
+  // middleware (including any acknowledgment middleware) have run, ensuring any
   // other middleware is injected before.
   app.use(createMsgTelemetry(emit), { prepend: true });
 
