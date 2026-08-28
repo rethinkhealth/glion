@@ -1,5 +1,4 @@
 import type { Root } from "@glion/ast";
-import type { Processor } from "unified";
 import type { VFile } from "vfile";
 
 /**
@@ -102,14 +101,9 @@ export interface Context {
   readonly var: Readonly<Record<string, unknown>>;
 }
 
-/**
- * A unified `Processor` that parses HL7v2 messages into `Root` trees.
- *
- * Only `ParseTree` is constrained — the remaining type params are left
- * loose so that any processor built with `unified().use(hl7v2Parser)`
- * is assignable regardless of which transformer/compiler plugins are added.
- */
-export type Hl7v2Processor = Processor<Root, Root, Root>;
+// Re-exported from @glion/parser — the ecosystem home of "a unified
+// processor over HL7v2 trees"; the client's `parser` option shares it.
+export type { Hl7v2Processor } from "@glion/parser";
 
 /**
  * Middleware function signature (Hono/Koa onion model).
