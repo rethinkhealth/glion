@@ -4,7 +4,8 @@
 import net from "node:net";
 
 import { parseHL7v2 } from "@glion/hl7v2";
-import { CR, frame, FS } from "@glion/mllp-transport";
+import { CR, frame, FS } from "@glion/mllp-codec";
+import { encodeBytes } from "@glion/util-charset";
 
 import { serve } from "../../src/node/serve";
 import type { Server } from "../../src/node/serve";
@@ -44,7 +45,7 @@ function sendMessage(
 ): Promise<string | undefined> {
   return new Promise((resolve, reject) => {
     const client = net.connect({ host: "127.0.0.1", port }, () => {
-      client.write(frame(message));
+      client.write(frame(encodeBytes(message)));
     });
 
     const chunks: Buffer[] = [];
@@ -136,7 +137,7 @@ function createPersistentClient(port: number): {
       client.on("data", onData);
       client.once("error", onError);
 
-      client.write(frame(message));
+      client.write(frame(encodeBytes(message)));
     });
 
   return {
@@ -328,7 +329,7 @@ describe("serve() integration", () => {
 
       expect(connections).toHaveLength(2);
       // IDs are sequential — test relative ordering, not absolute values
-      expect(connections[1]).toBeGreaterThan(connections[0]);
+      expect(connections[1]).toBeGreaterThan(connections[0] as number);
     });
 
     it("onDisconnect fires when client disconnects", async () => {
@@ -350,7 +351,7 @@ describe("serve() integration", () => {
       });
 
       expect(disconnectedId).toBeDefined();
-      expectTypeOf(disconnectedId).toBeNumber();
+      expect(disconnectedId).toBeTypeOf("number");
     });
 
     it("onError fires when handler throws without app-level error handler", async () => {
@@ -372,7 +373,69 @@ describe("serve() integration", () => {
       await sendMessage(server.port, SAMPLE_ADT, 500);
 
       expect(errors).toHaveLength(1);
-      expect(errors[0].message).toBe("handler boom");
+      expect(errors[0]?.message).toBe("handler boom");
+    });
+
+    it("onError fires with PROTOCOL_VIOLATION when the inbound byte stream violates MLLP framing", async () => {
+      const app = createApp();
+      app.on("*", (ctx) => ({
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+      }));
+
+      const errors: { code?: string; causeName?: string }[] = [];
+      server = serve(app, {
+        onError: (err) => {
+          const e = err as Error & { code?: string; cause?: Error };
+          errors.push({ causeName: e.cause?.name, code: e.code });
+        },
+        port: 0,
+      });
+      const port = server.port;
+      await waitForReady(port);
+
+      // Bytes outside any MLLP message: no VT start block. The codec errors,
+      // the server reports it, and the connection closes.
+      await new Promise<void>((resolve, reject) => {
+        const client = net.connect({ host: "127.0.0.1", port }, () => {
+          client.write(Buffer.from("garbage outside a frame"));
+        });
+        const timer = setTimeout(() => {
+          client.destroy();
+          reject(new Error("server did not close the violating connection"));
+        }, 2000);
+        client.on("close", () => {
+          clearTimeout(timer);
+          resolve();
+        });
+        client.on("error", () => {
+          /* reset by server is fine — close still fires */
+        });
+      });
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0]?.code).toBe("PROTOCOL_VIOLATION");
+      expect(errors[0]?.causeName).toBe("MllpCodecError");
+    });
+
+    it("onError fires with PROTOCOL_VIOLATION when a handler response contains a reserved byte", async () => {
+      const app = createApp();
+      // The response carries a VT (0x0B): it cannot be framed for the wire.
+      app.on("*", () => ({
+        raw: "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|\u000Bbad",
+      }));
+
+      const errors: { code?: string }[] = [];
+      server = serve(app, {
+        onError: (err) => {
+          errors.push({ code: (err as Error & { code?: string }).code });
+        },
+        port: 0,
+      });
+
+      const response = await sendMessage(server.port, SAMPLE_ADT, 500);
+      expect(response).toBeUndefined();
+      expect(errors).toHaveLength(1);
+      expect(errors[0]?.code).toBe("PROTOCOL_VIOLATION");
     });
 
     it("onError receives messageInfo with routing fields for handler errors", async () => {
@@ -612,7 +675,7 @@ describe("serve() integration", () => {
         await sendMessage(server.port, SAMPLE_ADT, 500);
 
         expect(consoleSpy).toHaveBeenCalledOnce();
-        const msg = consoleSpy.mock.calls[0][0] as string;
+        const msg = consoleSpy.mock.calls[0]?.[0] as string;
         expect(msg).toContain("unhandled boom");
         expect(msg).toContain("[mllp]");
       } finally {

@@ -12,13 +12,13 @@
 import net from "node:net";
 
 import { parseHL7v2 } from "@glion/hl7v2";
+import { CR, frame, FS } from "@glion/mllp-codec";
+import { encodeBytes } from "@glion/util-charset";
 import { afterAll, bench, beforeAll, describe } from "vitest";
 
 import { serve } from "../src/node/serve";
 import type { Server } from "../src/node/serve";
 import { Mllp } from "../src/server/mllp";
-import { MLLP_END_BYTE_1, MLLP_END_BYTE_2 } from "../src/transport/constants";
-import { encode } from "../src/transport/encoder";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -44,17 +44,14 @@ const LARGE_MESSAGE = [
 
 const RESPONSE_OK = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
 
-const smallFrame = encode(SMALL_MESSAGE);
-const largeFrame = encode(LARGE_MESSAGE);
+const smallFrame = frame(encodeBytes(SMALL_MESSAGE));
+const largeFrame = frame(encodeBytes(LARGE_MESSAGE));
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function sendAndReceive(
-  client: net.Socket,
-  frame: Uint8Array
-): Promise<Buffer> {
+function sendAndReceive(client: net.Socket, wire: Uint8Array): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
 
@@ -63,8 +60,8 @@ function sendAndReceive(
       const combined = Buffer.concat(chunks);
       if (
         combined.length >= 3 &&
-        combined.at(-2) === MLLP_END_BYTE_1 &&
-        combined.at(-1) === MLLP_END_BYTE_2
+        combined.at(-2) === FS &&
+        combined.at(-1) === CR
       ) {
         client.removeListener("data", onData);
         client.removeListener("error", onError);
@@ -80,7 +77,7 @@ function sendAndReceive(
 
     client.on("data", onData);
     client.on("error", onError);
-    client.write(frame);
+    client.write(wire);
   });
 }
 

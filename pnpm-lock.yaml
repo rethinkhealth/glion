@@ -1640,9 +1640,9 @@ importers:
       '@glion/ast':
         specifier: workspace:*
         version: link:../ast
-      '@glion/mllp-transport':
+      '@glion/mllp-codec':
         specifier: workspace:*
-        version: link:../mllp-transport
+        version: link:../mllp-codec
       '@glion/parser':
         specifier: workspace:*
         version: link:../parser

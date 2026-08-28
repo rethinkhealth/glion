@@ -10,8 +10,8 @@
  * @module
  */
 
-import { frame, FrameDecoderStream } from "@glion/mllp-transport";
-import { CharsetError, decodeBytes } from "@glion/util-charset";
+import { frame, MllpCodecError, unframe } from "@glion/mllp-codec";
+import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import type { AdapterSocket } from "../server/adapter";
@@ -284,8 +284,7 @@ function handleConnection(
   socket: AdapterSocket,
   lifecycle: LifecycleOptions
 ): void {
-  const decoder = new FrameDecoderStream();
-  const reader = socket.readable.pipeThrough(decoder).getReader();
+  const reader = socket.readable.pipeThrough(unframe()).getReader();
   const writer = socket.writable.getWriter();
 
   const connection: ConnectionInfo = {
@@ -322,8 +321,8 @@ function handleConnection(
           // outer catch for cleanup.
           let response: Awaited<ReturnType<Mllp["handle"]>>;
           try {
-            // FrameDecoderStream emits the de-framed payload bytes; decode them
-            // to text (UTF-8) for the handler, which also receives the raw bytes.
+            // unframe() emits the de-framed payload bytes; decode them to
+            // text (UTF-8) for the handler, which also receives the raw bytes.
             // A non-UTF-8 feed throws here rather than being silently corrupted.
             const text = decodeBytes(payload);
             response = await app.handle(text, payload, connection);
@@ -353,12 +352,29 @@ function handleConnection(
           // Write is outside the handler error catch — write failures
           // are transport errors and flow to the outer catch.
           if (response) {
-            await writer.write(frame(response.raw));
+            await writer.write(frame(encodeBytes(response.raw)));
           }
         }
-      } catch {
-        // Transport-level: connection closed, stream errored, decode failure.
-        // Not routed to onError — these are infrastructure, not application errors.
+      } catch (streamError) {
+        // A codec error is a protocol violation, not plumbing — the remote
+        // system broke MLLP framing, or a handler's response carried a
+        // reserved VT/FS byte and could not be framed. The server is never
+        // silent about it: translate (never leak the codec's own type) and
+        // route to onError; the connection still closes below — framing
+        // violations are terminal. Everything else here is transport-level
+        // (connection reset, stream teardown) and stays unrouted: that is
+        // infrastructure, not an application error.
+        if (streamError instanceof MllpCodecError) {
+          await reportError(
+            new MllpServerError(
+              MllpServerErrorCode.PROTOCOL_VIOLATION,
+              "The MLLP byte stream was violated and the connection is closing (see the error's cause).",
+              { cause: streamError }
+            ),
+            connection,
+            lifecycle
+          );
+        }
       }
     } finally {
       // ── Cleanup & onDisconnect ─────────────────────────────────────

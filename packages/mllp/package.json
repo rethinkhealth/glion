@@ -43,7 +43,7 @@
   },
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
     "check:readme": "glion-check-readme",
     "bench": "vitest bench --run",
     "test": "vitest run",
@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "@glion/ast": "workspace:*",
-    "@glion/mllp-transport": "workspace:*",
+    "@glion/mllp-codec": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/util-charset": "workspace:*",
     "@glion/util-query": "workspace:*",
