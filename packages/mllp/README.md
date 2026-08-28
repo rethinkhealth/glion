@@ -57,32 +57,46 @@ The server class. Built with a fluent chainable API:
 
 Start a Node.js or Bun TCP server that dispatches incoming MLLP frames through the `Mllp` instance.
 
-- `port` (`number`) — TCP port to listen on.
-- `hostname` (`string`, optional) — interface to bind. Defaults to all interfaces.
-- `tls` (`{ cert, key }`, optional) — enable MLLP over TLS.
+| Option                  | Type                                        | Description                                                                                    |
+| ----------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `port`                  | `number`                                    | TCP port to listen on.                                                                         |
+| `hostname`              | `string`, optional                          | Interface to bind. Defaults to all interfaces.                                                 |
+| `tls`                   | `{ cert, key, ca?, passphrase? }`, optional | Enable MLLP over TLS.                                                                          |
+| `keepAlive`             | `boolean`, optional                         | Enable TCP keep-alive on accepted sockets. Defaults to `true`.                                 |
+| `keepAliveInitialDelay` | `number`, optional                          | Delay in ms before the first keep-alive probe on an idle socket. Defaults to `60000`.          |
+| `socketTimeout`         | `number`, optional                          | Socket inactivity timeout in ms — an idle socket past it is destroyed. `0` (default) disables. |
+| `onConnect`             | `ConnectionCallback`, optional              | Called when a new TCP connection is accepted.                                                  |
+| `onDisconnect`          | `ConnectionCallback`, optional              | Called when a connection closes — always fires, even if `onConnect` threw.                     |
+| `onError`               | `ErrorCallback`, optional                   | Called when a handler error goes unhandled or a lifecycle callback throws.                     |
 
-### Primitives
+### Wire framing
 
-| Function                        | Description                                            |
-| ------------------------------- | ------------------------------------------------------ |
-| `encode(message)`               | Encode a message string into an MLLP frame.            |
-| `decode(frame)`                 | Decode a single MLLP frame to its message.             |
-| `createDecoderStream(options?)` | TransformStream for streaming decode from chunked TCP. |
+MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-codec) — `frame()` wraps outbound messages, `unframe()` streams inbound bytes back into them. `@glion/mllp` consumes it internally and re-exports nothing from it; import it directly when you need the codec.
 
 ### Types
 
-| Type               | Description                                                         |
-| ------------------ | ------------------------------------------------------------------- |
-| `Context`          | Request context with message data and routing fields.               |
-| `Response`         | Response object `{ raw: string }`.                                  |
-| `Hl7v2Processor`   | Unified `Processor` type for HL7v2 (`Processor<Root, Root, Root>`). |
-| `Middleware`       | Middleware function `(ctx, next) => ...`.                           |
-| `Handler`          | Terminal route handler `(ctx) => Response`.                         |
-| `ErrorHandler`     | Error handler `(err, ctx) => Response`.                             |
-| `RouteFilter`      | Filter function `(ctx) => boolean` used for routing.                |
-| `MiddlewareReturn` | Return type of middleware functions.                                |
-| `ConnectionInfo`   | Connection metadata (remote/local address, TLS flag).               |
-| `RoutePattern`     | Parsed route pattern.                                               |
+| Type               | Description                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Context`          | Request context with message data and routing fields.                                                                                                                                       |
+| `Response`         | Response object `{ raw: string }`.                                                                                                                                                          |
+| `Hl7v2Processor`   | Unified `Processor` type for HL7v2 (`Processor<Root, Root \| undefined, Root \| undefined>` — head/tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable). |
+| `Middleware`       | Middleware function `(ctx, next) => ...`.                                                                                                                                                   |
+| `Handler`          | Terminal route handler `(ctx) => Response`.                                                                                                                                                 |
+| `ErrorHandler`     | Error handler `(err, ctx) => Response`.                                                                                                                                                     |
+| `RouteFilter`      | Filter function `(ctx) => boolean` used for routing.                                                                                                                                        |
+| `MiddlewareReturn` | Return type of middleware functions.                                                                                                                                                        |
+| `ConnectionInfo`   | Connection metadata (remote/local address, TLS flag).                                                                                                                                       |
+| `RoutePattern`     | Parsed route pattern.                                                                                                                                                                       |
+
+### Errors
+
+Server-side failures are raised (or passed to `onError`) as `MllpServerError` — branch on its stable `code`; the underlying codec or charset error rides on `cause`:
+
+| Code                   | Meaning                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------- |
+| `NO_PARSER`            | `app.handle()` ran before a parser was registered via `app.parser()`.                             |
+| `INCOMPATIBLE_CHARSET` | An inbound message could not be decoded as UTF-8 (the `CharsetError` is on `cause`).              |
+| `PROTOCOL_VIOLATION`   | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). |
 
 ## Routing
 
@@ -253,37 +267,6 @@ const server = serve(app, {
     key: fs.readFileSync("key.pem"),
   },
 });
-```
-
-## Primitives
-
-### Simple API
-
-```ts
-import { encode, decode } from "@glion/mllp";
-
-const mllpFrame = encode(hl7Message);
-const decoded = decode(mllpFrame);
-console.log(decoded.text);
-```
-
-### Streaming API
-
-```ts
-import { createDecoderStream } from "@glion/mllp";
-
-const decoder = createDecoderStream({
-  maxMessageSize: 1024 * 1024,
-  onError: (error) => console.warn(`[${error.code}] ${error.message}`),
-});
-
-tcpSocket.readable.pipeThrough(decoder).pipeTo(
-  new WritableStream({
-    write(message) {
-      console.log("Received:", message.text);
-    },
-  })
-);
 ```
 
 ## Design notes
