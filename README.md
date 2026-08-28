@@ -63,6 +63,8 @@ The server and tooling that run Glion applications.
 #### Server & transport
 
 - **[@glion/mllp][glion-mllp]** — a transport-agnostic MLLP (Minimal Lower Layer Protocol) engine with pattern-based routing, middleware, and `unified` processor integration.
+- **[@glion/mllp-client][glion-mllp-client]** — a persistent, single-flight MLLP client: sends HL7v2 messages over one long-lived connection and resolves each with its correlated ACK.
+- **[@glion/mllp-codec][glion-mllp-codec]** — the MLLP frame/unframe pair: `frame()` envelopes outbound bytes and `unframe()` is a stream transform that reassembles inbound frames across reads.
 - **[@glion/cli][glion-cli]** — the `glion` command for running Glion applications: `glion dev` for live reload during development, `glion start` for production with graceful shutdown and structured logs, and `glion send` for sending an HL7v2 message over MLLP and printing the ACK.
 
 #### Acknowledgments
@@ -210,6 +212,8 @@ This program is licensed to you under the terms of the [MIT License](https://ope
 [glion-lint-segment-header-length]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-segment-header-length#readme
 [glion-mllp]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp#readme
 [glion-mllp-ack]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-ack#readme
+[glion-mllp-client]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client#readme
+[glion-mllp-codec]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-codec#readme
 [glion-parser]: https://github.com/rethinkhealth/glion/tree/main/packages/parser#readme
 [glion-preset-annotate-profile-recommended]: https://github.com/rethinkhealth/glion/tree/main/packages/preset-annotate-profile-recommended#readme
 [glion-preset-lint-profile-recommended]: https://github.com/rethinkhealth/glion/tree/main/packages/preset-lint-profile-recommended#readme
