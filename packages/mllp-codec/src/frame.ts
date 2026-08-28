@@ -36,11 +36,20 @@ export function frame(payload: Uint8Array): Uint8Array {
   // either kind, exactly as a left-to-right scan would find it.
   const vtAt = payload.indexOf(VT);
   const fsAt = payload.indexOf(FS);
+  // Reduce the two hits to the earliest offense. `indexOf` answers -1 for
+  // "absent", so: start from the VT hit, then switch to the FS hit either
+  // when there was no VT at all (`at === -1`) or when FS occurs earlier.
+  // `at` ends up -1 exactly when the payload contains neither reserved
+  // byte — the valid-message case that falls through to framing below.
   let at = vtAt;
   if (at === -1 || (fsAt !== -1 && fsAt < at)) {
     at = fsAt;
   }
   if (at !== -1) {
+    // `at` came from indexOf, so it is definitionally in range — the cast
+    // only silences noUncheckedIndexedAccess. The error names the exact
+    // byte and offset so the offense can be located in the source message
+    // without a hex dump.
     const b = payload[at] as number;
     throw new MllpCodecError(
       MllpCodecErrorCode.RESERVED_CHARACTER,
