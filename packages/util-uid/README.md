@@ -6,9 +6,9 @@ Time-ordered, HL7v2-safe unique IDs.
 
 `@glion/util-uid` generates short, sortable, HL7v2-safe unique IDs. Use them for MSH-10 message control IDs, order numbers, or any field that needs a unique identifier.
 
-An ID is 20 characters: a 10-character millisecond timestamp followed by 10 random characters, both in Crockford base32. This is the ULID design, shortened to fit MSH-10's 20-character limit — a real ULID is 26 characters and does not fit. IDs from different milliseconds sort in creation order as plain strings. IDs from the same millisecond are unique but not ordered, because every call draws fresh randomness, like the standard `ulid()`.
-
-The alphabet is digits and uppercase letters, minus I, L, O, and U. Nothing in it can be confused with an HL7 delimiter, misread over the phone, or mangled by a legacy interface engine.
+- **Fits MSH-10.** IDs are 20 characters — a standard ULID is 26 and does not fit.
+- **Sorts by time.** IDs start with a timestamp, so sorting IDs sorts by creation time.
+- **Safe characters only.** Digits and uppercase letters, minus I, L, O, and U: no HL7 delimiters, easy to read aloud, hard to mistype.
 
 ## Install
 
