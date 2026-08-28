@@ -1835,22 +1835,25 @@ importers:
 
   packages/parser:
     dependencies:
+      '@glion/ast':
+        specifier: workspace:*
+        version: link:../ast
+      '@glion/config':
+        specifier: workspace:*
+        version: link:../config
       '@glion/utils':
         specifier: workspace:*
         version: link:../utils
+      '@types/unist':
+        specifier: 3.0.3
+        version: 3.0.3
       unified:
         specifier: 11.0.5
         version: 11.0.5
     devDependencies:
-      '@glion/ast':
-        specifier: workspace:*
-        version: link:../ast
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
-      '@glion/config':
-        specifier: workspace:*
-        version: link:../config
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
@@ -1860,9 +1863,6 @@ importers:
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
-      '@types/unist':
-        specifier: ^3.0.3
-        version: 3.0.3
       '@vitest/coverage-v8':
         specifier: 4.1.5
         version: 4.1.5(vitest@4.1.5)
@@ -1875,9 +1875,6 @@ importers:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
-      unist:
-        specifier: ^0.0.1
-        version: 0.0.1
       vitest:
         specifier: 4.1.5
         version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))

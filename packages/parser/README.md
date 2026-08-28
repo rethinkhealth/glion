@@ -60,6 +60,16 @@ const customTree = unified()
 
 Options accept a partial `Delimiters` object, so only the characters you want to override need to be provided.
 
+### `Hl7v2Processor`
+
+The `unified` `Processor<Root, Root | undefined, Root | undefined>` type every HL7v2 pipeline satisfies — head and tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable. Use it to type a processor built with `unified().use(hl7v2Parser)` regardless of which transformer or compiler plugins are added. `@glion/mllp` re-exports it unchanged.
+
+```ts
+import type { Hl7v2Processor } from "@glion/parser";
+
+const processor: Hl7v2Processor = unified().use(hl7v2Parser).freeze();
+```
+
 ## Parsing model
 
 - **Pull-based tokenizer.** Single pass, minimal object allocations — suitable for high-throughput ingestion.
