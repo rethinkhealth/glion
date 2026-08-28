@@ -3,7 +3,7 @@ import {
   RangeParseError,
   satisfies,
   VersionParseError,
-} from "../src/index.js";
+} from "../src/index";
 
 describe("reDoS protection", () => {
   it("rejects version strings that are too long", () => {

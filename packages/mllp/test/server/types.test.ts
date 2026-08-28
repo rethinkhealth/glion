@@ -1,4 +1,4 @@
-import { matchPattern, parsePattern } from "../../src/server/types.js";
+import { matchPattern, parsePattern } from "../../src/server/types";
 
 describe("parsePattern", () => {
   it("parses wildcard pattern", () => {

@@ -1,9 +1,9 @@
 import { spawn as defaultSpawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 
-import type { Event } from "../events.js";
-import { parseLine } from "../events.js";
-import { readLines } from "./line-reader.js";
+import type { Event } from "../events";
+import { parseLine } from "../events";
+import { readLines } from "./line-reader";
 
 // ─── Public types ──────────────────────────────────────────────────
 

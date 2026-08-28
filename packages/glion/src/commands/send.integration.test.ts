@@ -7,7 +7,7 @@ import type { MllpConnector, MllpDuplex } from "@glion/mllp-client";
 import { frame } from "@glion/mllp-transport";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { runSend } from "./send.js";
+import { runSend } from "./send";
 
 const ADT = [
   "MSH|^~\\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5",

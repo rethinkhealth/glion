@@ -1,8 +1,8 @@
-import type { Definition } from "../automata/types.js";
-import { eventMaps } from "../profiles/event-map-manifest.js";
-import type { ProfileModule } from "../profiles/profile-manifest.js";
-import { profileImports } from "../profiles/profile-manifest.js";
-import type { ProfileStoreConfig } from "../store.js";
+import type { Definition } from "../automata/types";
+import { eventMaps } from "../profiles/event-map-manifest";
+import type { ProfileModule } from "../profiles/profile-manifest";
+import { profileImports } from "../profiles/profile-manifest";
+import type { ProfileStoreConfig } from "../store";
 
 /** Store configuration for event (message structure) profiles. */
 export const eventsConfig: ProfileStoreConfig<ProfileModule, Definition> = {

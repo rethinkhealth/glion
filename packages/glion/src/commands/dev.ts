@@ -1,13 +1,13 @@
-import { loadConfig } from "../config/load.js";
-import { GlionError } from "../errors.js";
-import { encode } from "../events.js";
-import type { FileLogger } from "../file-logger.js";
-import { createFileLogger } from "../file-logger.js";
-import { GlionSupervisor } from "../parent/supervisor.js";
-import type { Watcher } from "../parent/watcher.js";
-import { createWatcher } from "../parent/watcher.js";
-import { ensureCacheDir, prepareChild } from "../prebuild.js";
-import { createStore } from "../tui/store.js";
+import { loadConfig } from "../config/load";
+import { GlionError } from "../errors";
+import { encode } from "../events";
+import type { FileLogger } from "../file-logger";
+import { createFileLogger } from "../file-logger";
+import { GlionSupervisor } from "../parent/supervisor";
+import type { Watcher } from "../parent/watcher";
+import { createWatcher } from "../parent/watcher";
+import { ensureCacheDir, prepareChild } from "../prebuild";
+import { createStore } from "../tui/store";
 
 export interface RunDevOptions {
   cwd: string;
@@ -188,7 +188,7 @@ async function runInteractive(
 
   // Dynamic import: Ink + React are heavy and optional. Users who
   // only pipe output (non-TTY) never load these modules.
-  const { renderTui } = await import("../tui/app.js");
+  const { renderTui } = await import("../tui/app");
   const ui = renderTui({
     hotkeys: {
       // Quit: tear down supervisor → watcher → unmount Ink. The

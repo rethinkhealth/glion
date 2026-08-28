@@ -1,8 +1,8 @@
 import { render } from "ink-testing-library";
 import { describe, expect, it } from "vitest";
 
-import { App } from "../../src/tui/app.js";
-import { createStore } from "../../src/tui/store.js";
+import { App } from "../../src/tui/app";
+import { createStore } from "../../src/tui/store";
 
 describe("App", () => {
   it("renders the brand, port, status, and shortcut hints", () => {

@@ -2,7 +2,7 @@ import { pathToFileURL } from "node:url";
 
 import { Mllp } from "@glion/mllp";
 
-import { GlionError } from "../errors.js";
+import { GlionError } from "../errors";
 
 /**
  * Imports the pre-built entry module and validates it exports an

@@ -1,9 +1,9 @@
 import { clearTimeout, setTimeout as nodeSetTimeout } from "node:timers";
 import { fileURLToPath } from "node:url";
 
-import type { Event, PartialEvent } from "../events.js";
-import type { ChildHandle, ExitInfo } from "./spawn.js";
-import { spawnChild as defaultSpawnChild } from "./spawn.js";
+import type { Event, PartialEvent } from "../events";
+import type { ChildHandle, ExitInfo } from "./spawn";
+import { spawnChild as defaultSpawnChild } from "./spawn";
 
 /**
  * Absolute path to the compiled child runner script.

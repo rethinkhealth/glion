@@ -5,10 +5,10 @@ import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-transport";
 import { CharsetError } from "@glion/util-charset";
 
-import { MllpServerError, MllpServerErrorCode } from "../../src/errors.js";
-import { serve } from "../../src/node/serve.js";
-import type { Server } from "../../src/node/serve.js";
-import { Mllp } from "../../src/server/mllp.js";
+import { MllpServerError, MllpServerErrorCode } from "../../src/errors";
+import { serve } from "../../src/node/serve";
+import type { Server } from "../../src/node/serve";
+import { Mllp } from "../../src/server/mllp";
 
 /**
  * Regression for https://github.com/rethinkhealth/glion/issues/659.

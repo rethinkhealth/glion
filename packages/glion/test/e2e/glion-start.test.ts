@@ -7,7 +7,7 @@ import { execa } from "execa";
 import type { ResultPromise } from "execa";
 import { afterEach, describe, expect, it } from "vitest";
 
-import type { Event } from "../../src/events.js";
+import type { Event } from "../../src/events";
 
 const fixturesDir = resolve(fileURLToPath(import.meta.url), "..", "fixtures");
 

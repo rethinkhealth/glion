@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { handleKey } from "../../src/tui/hotkeys.js";
+import { handleKey } from "../../src/tui/hotkeys";
 
 function makeHandlers() {
   return {

@@ -1,6 +1,6 @@
-import { tableImports } from "../profiles/table-manifest.js";
-import type { ProfileStoreConfig } from "../store.js";
-import type { TableCodeEntry, TableDefinition, TableModule } from "./types.js";
+import { tableImports } from "../profiles/table-manifest";
+import type { ProfileStoreConfig } from "../store";
+import type { TableCodeEntry, TableDefinition, TableModule } from "./types";
 
 /** Compile raw table module into indexed definition. */
 const compileTables = (raw: TableModule): TableDefinition => {

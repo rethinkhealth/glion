@@ -32,8 +32,8 @@
 
 import { format } from "node:util";
 
-import type { LogLevel } from "../config/logging.js";
-import type { PartialEvent } from "../events.js";
+import type { LogLevel } from "../config/logging";
+import type { PartialEvent } from "../events";
 
 /**
  * `console.log` and `console.info` are both everyday informational

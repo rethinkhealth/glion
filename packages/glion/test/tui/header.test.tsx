@@ -1,8 +1,8 @@
 import { render } from "ink-testing-library";
 import { describe, expect, it } from "vitest";
 
-import { Header } from "../../src/tui/header.js";
-import type { StoreState } from "../../src/tui/store.js";
+import { Header } from "../../src/tui/header";
+import type { StoreState } from "../../src/tui/store";
 
 function baseState(overrides: Partial<StoreState> = {}): StoreState {
   return {

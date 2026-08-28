@@ -7,7 +7,7 @@ import {
   lt,
   lte,
   VersionParseError,
-} from "../src/index.js";
+} from "../src/index";
 
 describe(compare, () => {
   it("orders correctly", () => {

@@ -4,7 +4,7 @@ import {
   RangeParseError,
   sort,
   VersionParseError,
-} from "../src/index.js";
+} from "../src/index";
 
 describe(sort, () => {
   it("sorts versions in ascending order", () => {

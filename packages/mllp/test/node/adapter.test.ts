@@ -3,7 +3,7 @@
 import type { Server } from "node:net";
 import { Readable } from "node:stream";
 
-import { nodeAdapter } from "../../src/node/adapter.js";
+import { nodeAdapter } from "../../src/node/adapter";
 
 // oxlint-disable-next-line prefer-await-to-callbacks
 type CloseCallback = (err?: Error) => void;

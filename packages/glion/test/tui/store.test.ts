@@ -4,7 +4,7 @@ import {
   createStore,
   LOG_COMPACT_THRESHOLD,
   LOG_RECENT_CAP,
-} from "../../src/tui/store.js";
+} from "../../src/tui/store";
 
 describe("createStore", () => {
   it("handles ready events", () => {

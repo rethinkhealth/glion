@@ -10,9 +10,9 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import type { Event } from "../../src/events.js";
-import { spawnChild } from "../../src/parent/spawn.js";
-import { GlionSupervisor } from "../../src/parent/supervisor.js";
+import type { Event } from "../../src/events";
+import { spawnChild } from "../../src/parent/spawn";
+import { GlionSupervisor } from "../../src/parent/supervisor";
 const fixturesDir = resolve(fileURLToPath(import.meta.url), "..", "fixtures");
 
 function waitForEvent(

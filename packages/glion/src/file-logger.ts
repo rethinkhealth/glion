@@ -3,11 +3,11 @@ import { lstat, mkdir, readdir, unlink } from "node:fs/promises";
 import { resolve } from "node:path";
 import { finished } from "node:stream/promises";
 
-import type { LogLevel } from "./config/logging.js";
-import { LEVEL_RANK } from "./config/logging.js";
-import { GlionError } from "./errors.js";
-import type { Event } from "./events.js";
-import { encode, eventLevel } from "./events.js";
+import type { LogLevel } from "./config/logging";
+import { LEVEL_RANK } from "./config/logging";
+import { GlionError } from "./errors";
+import type { Event } from "./events";
+import { encode, eventLevel } from "./events";
 
 /**
  * Self-contained options for `createFileLogger`. Deliberately flat —

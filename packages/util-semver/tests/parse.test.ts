@@ -4,7 +4,7 @@ import {
   parse,
   VersionParseError,
   valid,
-} from "../src/index.js";
+} from "../src/index";
 
 describe(parse, () => {
   it("parses versions with defaults", () => {

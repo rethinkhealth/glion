@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { CONFIG_FILENAMES, discoverConfig } from "../../src/config/discover.js";
+import { CONFIG_FILENAMES, discoverConfig } from "../../src/config/discover";
 
 let dir: string;
 

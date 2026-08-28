@@ -7,7 +7,7 @@ import {
   DEFAULT_LOG_LEVEL,
   DEFAULT_MAX_LOG_FILES,
   LOG_LEVELS,
-} from "./logging.js";
+} from "./logging";
 
 /**
  * Context the schema needs to apply runtime-dependent transforms:

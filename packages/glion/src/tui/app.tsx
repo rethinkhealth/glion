@@ -7,12 +7,12 @@ import { Box, render, useInput } from "ink";
 import type { ReactElement } from "react";
 import { useEffect, useState } from "react";
 
-import { Header } from "./header.js";
-import { handleKey } from "./hotkeys.js";
-import type { HotkeyHandlers } from "./hotkeys.js";
-import { LogPane } from "./log-pane.js";
-import type { Store } from "./store.js";
-import { theme } from "./theme.js";
+import { Header } from "./header";
+import { handleKey } from "./hotkeys";
+import type { HotkeyHandlers } from "./hotkeys";
+import { LogPane } from "./log-pane";
+import type { Store } from "./store";
+import { theme } from "./theme";
 
 export interface AppProps {
   store: Store;

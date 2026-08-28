@@ -13,8 +13,8 @@ import { PassThrough } from "node:stream";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Event } from "../../src/events.js";
-import type * as SupervisorModule from "../../src/parent/supervisor.js";
+import type { Event } from "../../src/events";
+import type * as SupervisorModule from "../../src/parent/supervisor";
 
 type EventListener = (event: Event) => void;
 type ExitListener = (code: number | null, signal: string | null) => void;
@@ -27,7 +27,7 @@ type ExitListener = (code: number | null, signal: string | null) => void;
 const eventsToEmit: Event[] = [];
 let throwOnStart = false;
 
-vi.mock(import("../../src/parent/supervisor.js"), () => {
+vi.mock(import("../../src/parent/supervisor"), () => {
   const FakeSupervisor = function FakeSupervisor(
     this: Record<string, unknown>
   ) {
@@ -71,7 +71,7 @@ vi.mock(import("../../src/parent/supervisor.js"), () => {
   return { GlionSupervisor: FakeSupervisor };
 });
 
-const { runStart } = await import("../../src/commands/start.js");
+const { runStart } = await import("../../src/commands/start");
 
 let dir: string;
 

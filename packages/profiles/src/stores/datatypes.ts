@@ -1,10 +1,10 @@
-import { datatypeImports } from "../profiles/datatype-manifest.js";
-import type { ProfileStoreConfig } from "../store.js";
+import { datatypeImports } from "../profiles/datatype-manifest";
+import type { ProfileStoreConfig } from "../store";
 import type {
   ComponentProfile,
   DatatypeDefinition,
   DatatypeModule,
-} from "./types.js";
+} from "./types";
 
 /** Compile raw datatype module into indexed definition. */
 const compileDatatypes = (raw: DatatypeModule): DatatypeDefinition => {

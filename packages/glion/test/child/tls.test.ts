@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { readTlsFile } from "../../src/child/tls.js";
+import { readTlsFile } from "../../src/child/tls";
 
 let dir: string;
 

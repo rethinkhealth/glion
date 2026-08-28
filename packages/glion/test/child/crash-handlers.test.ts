@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { installCrashHandlers } from "../../src/child/crash-handlers.js";
-import type { PartialEvent } from "../../src/events.js";
+import { installCrashHandlers } from "../../src/child/crash-handlers";
+import type { PartialEvent } from "../../src/events";
 
 // We have to take over the process-level handlers for the duration of
 // each test, because emitting `unhandledRejection` / `uncaughtException`

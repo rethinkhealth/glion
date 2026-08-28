@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { renderHuman, renderJson } from "./send-render.js";
+import { renderHuman, renderJson } from "./send-render";
 import type {
   SendAcceptOutcome,
   SendInvalidOutcome,
   SendNakOutcome,
   SendTransportOutcome,
-} from "./send-render.js";
+} from "./send-render";
 
 const TARGET = { host: "127.0.0.1", port: 2575 } as const;
 const REQUEST = {

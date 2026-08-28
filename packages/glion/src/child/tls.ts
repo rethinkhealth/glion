@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 
-import { GlionError } from "../errors.js";
+import { GlionError } from "../errors";
 
 /**
  * Reads a TLS certificate / key / ca file or throws a descriptive

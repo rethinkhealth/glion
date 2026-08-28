@@ -1,8 +1,8 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 
-import { Mllp } from "../../src/server/mllp.js";
-import type { ConnectionInfo } from "../../src/server/types.js";
+import { Mllp } from "../../src/server/mllp";
+import type { ConnectionInfo } from "../../src/server/types";
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",

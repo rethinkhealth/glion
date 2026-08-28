@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { makeGlionConfigSchema } from "../../src/config/schema.js";
+import { makeGlionConfigSchema } from "../../src/config/schema";
 
 // Minimal context; the values themselves don't matter for these
 // validation-only tests — they're only used by the schema's transforms

@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type * as ConsoleModule from "../../src/child/console.js";
-import type * as CrashHandlersModule from "../../src/child/crash-handlers.js";
-import type * as EmitterModule from "../../src/child/emitter.js";
+import type * as ConsoleModule from "../../src/child/console";
+import type * as CrashHandlersModule from "../../src/child/crash-handlers";
+import type * as EmitterModule from "../../src/child/emitter";
 
 // Spy + no-op the three module-load side effects that would otherwise
 // be unsafe to run inside the test process. The whole point of this
@@ -13,15 +13,15 @@ const installConsoleCaptureSpy = vi.fn();
 const fakeEmit = vi.fn();
 const createEmitterSpy = vi.fn(() => fakeEmit);
 
-vi.mock(import("../../src/child/crash-handlers.js"), () => ({
+vi.mock(import("../../src/child/crash-handlers"), () => ({
   installCrashHandlers:
     installCrashHandlersSpy as unknown as typeof CrashHandlersModule.installCrashHandlers,
 }));
-vi.mock(import("../../src/child/console.js"), () => ({
+vi.mock(import("../../src/child/console"), () => ({
   installConsoleCapture:
     installConsoleCaptureSpy as unknown as typeof ConsoleModule.installConsoleCapture,
 }));
-vi.mock(import("../../src/child/emitter.js"), () => ({
+vi.mock(import("../../src/child/emitter"), () => ({
   createEmitter:
     createEmitterSpy as unknown as typeof EmitterModule.createEmitter,
 }));
@@ -71,7 +71,7 @@ describe("runner module wiring", () => {
     // runner.ts, this assertion fails — the helper would still exist
     // and its own tests would still pass, but the child would silently
     // lose its crash-to-fatal-event pipeline.
-    await import("../../src/child/runner.js");
+    await import("../../src/child/runner");
 
     expect(createEmitterSpy).toHaveBeenCalledOnce();
     expect(installCrashHandlersSpy).toHaveBeenCalledOnce();
@@ -91,7 +91,7 @@ describe("runner module wiring", () => {
     // across all spies, so we can assert the install call strictly
     // preceded the exit call instead of just "was called at some
     // point".
-    await import("../../src/child/runner.js");
+    await import("../../src/child/runner");
 
     // `invocationCallOrder` elements are typed as `number | undefined`
     // because the array might be empty. Assert each was actually
@@ -121,7 +121,7 @@ describe("runner module wiring", () => {
     // yet (pre-server orphan during startup), Node's default SIGTERM
     // behavior terminates the child, same net effect as the old
     // process.exit(1) but with proper signal semantics.
-    await import("../../src/child/runner.js");
+    await import("../../src/child/runner");
 
     // main() in this test setup throws and calls process.exit(1)
     // via the bottom-of-file catch. Clear that invocation so we can

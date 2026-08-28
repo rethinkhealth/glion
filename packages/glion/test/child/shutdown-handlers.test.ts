@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { installShutdownHandlers } from "../../src/child/shutdown-handlers.js";
-import type { PartialEvent } from "../../src/events.js";
+import { installShutdownHandlers } from "../../src/child/shutdown-handlers";
+import type { PartialEvent } from "../../src/events";
 
 // Same snapshot/restore pattern as crash-handlers.test.ts: we remove
 // existing SIGTERM/SIGINT listeners for the duration of each test so

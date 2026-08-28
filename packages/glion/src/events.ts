@@ -1,6 +1,6 @@
-import type { LogLevel } from "./config/logging.js";
-import { GlionError } from "./errors.js";
-import type { GlionErrorKind } from "./errors.js";
+import type { LogLevel } from "./config/logging";
+import { GlionError } from "./errors";
+import type { GlionErrorKind } from "./errors";
 
 /**
  * Events emitted by the child process on stdout, one per JSON line.

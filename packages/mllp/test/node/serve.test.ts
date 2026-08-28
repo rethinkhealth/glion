@@ -6,9 +6,9 @@ import net from "node:net";
 import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-transport";
 
-import { serve } from "../../src/node/serve.js";
-import type { Server } from "../../src/node/serve.js";
-import { Mllp } from "../../src/server/mllp.js";
+import { serve } from "../../src/node/serve";
+import type { Server } from "../../src/node/serve";
+import { Mllp } from "../../src/server/mllp";
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
