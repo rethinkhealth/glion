@@ -1,6 +1,7 @@
 /**
- * Time-ordered unique IDs for MSH-10 control IDs — the ULID idea resized to
- * HL7v2's 20-character ST limit (a standard 26-character ULID cannot fit).
+ * Time-ordered unique IDs for HL7v2 identifier fields — the ULID idea
+ * resized to a 20-character default that fits MSH-10, the tightest common
+ * ST field (a standard 26-character ULID cannot fit).
  * Stateless: fresh randomness every call, the same semantics as the ULID
  * reference implementation's default `ulid()`.
  *
@@ -9,7 +10,8 @@
 
 import { invariant } from "./invariant";
 
-// MSH-10 is ST(20) — the whole ID budget.
+// Default budget: 20 characters — MSH-10's ST limit, the tightest common
+// HL7v2 identifier field.
 const MAX_LENGTH = 20;
 
 // Characters the millisecond timestamp occupies. One base32 character is
@@ -80,8 +82,8 @@ export interface UidOptions {
 }
 
 /**
- * Generate an MSH-10-safe control ID: timestamp + randomness, `size`
- * characters total (default 20 — MSH-10's ST limit). IDs sort
+ * Generate a time-ordered unique ID: timestamp + randomness, `size`
+ * characters total (default 20 — fits MSH-10's ST limit). IDs sort
  * lexicographically by millisecond; same-millisecond IDs are unique but
  * unordered. Keep `size >= 11`: the timestamp needs 10 characters, and
  * per-millisecond uniqueness rests on what remains. Need a branded ID?

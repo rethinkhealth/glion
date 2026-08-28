@@ -1,10 +1,10 @@
 # @glion/util-uid
 
-Time-ordered unique IDs sized for HL7v2 MSH-10.
+Time-ordered, HL7v2-safe unique IDs.
 
 ## What it does
 
-`@glion/util-uid` generates time-ordered unique identifiers that fit HL7v2's MSH-10 control ID — the ULID idea resized to the field's 20-character ST limit (a standard 26-character ULID cannot fit). The default 20-character ID is 10 characters of Crockford-base32 millisecond timestamp followed by 10 characters of randomness (50 bits per millisecond), so IDs sort lexicographically by millisecond; calls within the same millisecond are unique but carry no defined order (the same semantics as the ULID reference implementation's default `ulid()` — stateless, fresh randomness every call). The alphabet is uppercase alphanumerics without I, L, O, U — no HL7 delimiters, nothing legacy engines or verbal readback confuse.
+`@glion/util-uid` generates time-ordered unique identifiers for HL7v2 identifier fields — the flagship use case is minting MSH-10 message control IDs, but the IDs work anywhere a sortable, delimiter-free identifier is needed (placer/filler order numbers, correlation IDs in logs). The scheme is the ULID idea resized to a 20-character default, chosen to fit the tightest common constraint: MSH-10's ST limit (a standard 26-character ULID cannot fit). The default 20-character ID is 10 characters of Crockford-base32 millisecond timestamp followed by 10 characters of randomness (50 bits per millisecond), so IDs sort lexicographically by millisecond; calls within the same millisecond are unique but carry no defined order (the same semantics as the ULID reference implementation's default `ulid()` — stateless, fresh randomness every call). The alphabet is uppercase alphanumerics without I, L, O, U — no HL7 delimiters, nothing legacy engines or verbal readback confuse.
 
 ## Install
 
@@ -17,8 +17,8 @@ npm install @glion/util-uid
 ```ts
 import { uid } from "@glion/util-uid";
 
-const controlId = uid();
-// e.g. "01J9Z6M8QKT5W3XA9C0D" — 20 characters, sorts by generation time
+const controlId = uid(); // e.g. for MSH-10
+// "01J9Z6M8QKT5W3XA9C0D" — 20 characters, sorts by generation time
 ```
 
 Need a branded ID? Compose it: `"MKE" + uid({ size: 17 })`.
