@@ -38,6 +38,12 @@ export const connectInMemory: MllpConnector = (opts) => {
   const writable = new WritableStream<Uint8Array>({
     write(chunk) {
       pending.push(chunk);
+      // End-of-chunk check only — no cross-chunk trailer scan. Safe here
+      // because the client hands the whole framed request to a single
+      // writer.write() (connection.ts) and this duplex is in-memory: chunks
+      // arrive exactly as written, never split by a socket. If that contract
+      // ever changed, no ACK would be enqueued and the canary would hang
+      // loudly rather than pass on garbage.
       const trailerComplete =
         chunk.length >= 2 && chunk.at(-2) === FS && chunk.at(-1) === CR;
       if (!trailerComplete) {
