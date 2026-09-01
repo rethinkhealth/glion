@@ -1,5 +1,10 @@
 codecov:
   require_ci_to_pass: true
 
+# Benchmark harness code (suites, lab sweeps, fixtures) is not product
+# code — its "coverage" is whatever the canary happens to execute.
+ignore:
+  - "benchmarks/**"
+
 comment:
   layout: "reach, diff, flags, files"
