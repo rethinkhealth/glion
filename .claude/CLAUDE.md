@@ -54,7 +54,7 @@ pnpm ci:publish               # Publish to npm
 
 Public package families:
 
-1. **Runtime** — `@glion/mllp`, `@glion/mllp-client`, `@glion/mllp-transport`, `@glion/mllp-ack`, `@glion/ack`, `@glion/cli` (in `packages/glion/`)
+1. **Runtime** — `@glion/mllp`, `@glion/mllp-client`, `@glion/mllp-codec`, `@glion/ack`, `@glion/cli` (in `packages/glion/`)
 2. **Core** — `@glion/hl7v2`, `@glion/parser`, `@glion/ast`, `@glion/builder`, `@glion/to-hl7v2`, `@glion/jsonify`
 3. **Plugins** — `@glion/annotate-delimiters`, `@glion/annotate-profile-*`, `@glion/decode-escapes`, `@glion/encode-escapes`
 4. **Linting** — `@glion/lint-*` plus `@glion/preset-lint-recommended`, `@glion/preset-lint-profile-recommended`, `@glion/preset-annotate-profile-recommended`

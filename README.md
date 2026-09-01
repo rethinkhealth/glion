@@ -29,7 +29,7 @@ Glion is an open-source application framework for building HL7v2 integrations. I
 Install Glion and its runtime packages:
 
 ```bash
-npm install @glion/mllp @glion/hl7v2 @glion/mllp-ack @glion/cli
+npm install @glion/mllp @glion/hl7v2 @glion/cli
 ```
 
 Define your app in a single file:
@@ -38,14 +38,11 @@ Define your app in a single file:
 // glion.app.ts
 import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
-import { ackMiddleware } from "@glion/mllp-ack";
 
-export default new Mllp()
-  .parser(parseHL7v2)
-  .use(ackMiddleware())
-  .on("ADT^A01", () => {
-    // Handle admit — ackMiddleware sends the AA automatically.
-  });
+export default new Mllp().parser(parseHL7v2).on("ADT^A01", (ctx) => {
+  // Handle admit. Reply by returning a Response ({ raw: string }).
+  // Built-in ACK/NAK generation is landing in @glion/mllp — see ADR 0019.
+});
 ```
 
 Run `npm dev` to start the app with live reload during development. Run `npm start` to run it in production with graceful shutdown and structured logs.
@@ -63,12 +60,13 @@ The server and tooling that run Glion applications.
 #### Server & transport
 
 - **[@glion/mllp][glion-mllp]** — a transport-agnostic MLLP (Minimal Lower Layer Protocol) engine with pattern-based routing, middleware, and `unified` processor integration.
+- **[@glion/mllp-client][glion-mllp-client]** — a persistent, single-flight MLLP client: sends HL7v2 messages over one long-lived connection and resolves each with its correlated ACK.
+- **[@glion/mllp-codec][glion-mllp-codec]** — the MLLP frame/unframe pair: `frame()` envelopes outbound bytes and `unframe()` is a stream transform that reassembles inbound frames across reads.
 - **[@glion/cli][glion-cli]** — the `glion` command for running Glion applications: `glion dev` for live reload during development, `glion start` for production with graceful shutdown and structured logs, and `glion send` for sending an HL7v2 message over MLLP and printing the ACK.
 
 #### Acknowledgments
 
-- **[@glion/ack][glion-ack]** — typed HL7v2 acknowledgment codes and exceptions (Tables 0008/0357/0516); response construction lives in `@glion/mllp-ack`.
-- **[@glion/mllp-ack][glion-mllp-ack]** — MLLP middleware that automatically generates ACK/NAK responses and maps handler exceptions to the right acknowledgment code.
+- **[@glion/ack][glion-ack]** — typed HL7v2 acknowledgment codes and exceptions (Tables 0008/0357/0516); server-side response construction is moving into `@glion/mllp` (ADR 0019).
 
 ### Unified
 
@@ -209,7 +207,8 @@ This program is licensed to you under the terms of the [MIT License](https://ope
 [glion-lint-required-message-header]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-required-message-header#readme
 [glion-lint-segment-header-length]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-segment-header-length#readme
 [glion-mllp]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp#readme
-[glion-mllp-ack]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-ack#readme
+[glion-mllp-client]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client#readme
+[glion-mllp-codec]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-codec#readme
 [glion-parser]: https://github.com/rethinkhealth/glion/tree/main/packages/parser#readme
 [glion-preset-annotate-profile-recommended]: https://github.com/rethinkhealth/glion/tree/main/packages/preset-annotate-profile-recommended#readme
 [glion-preset-lint-profile-recommended]: https://github.com/rethinkhealth/glion/tree/main/packages/preset-lint-profile-recommended#readme

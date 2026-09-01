@@ -8,12 +8,12 @@
  *
  * ## Middleware positioning
  *
- * This middleware must be PREPENDED via `app.use(mw, { prepend: true })`
- * so it sits at the outermost position in the middleware chain. Its
- * `await next()` then completes after all user middleware (including
- * `ackMiddleware`) have run, ensuring `ctx.res` is populated with the
- * ACK response before telemetry reads it. `performance.now()` measures
- * the full middleware + handler time.
+ * This middleware must be PREPENDED via `app.use(mw, { prepend: true })` so it
+ * sits at the outermost position in the middleware chain. Its `await next()`
+ * then completes after all user middleware (including any acknowledgment
+ * middleware) have run, ensuring `ctx.res` is populated with the ACK response
+ * before telemetry reads it. `performance.now()` measures the full middleware +
+ * handler time.
  *
  * ## ACK parsing
  *

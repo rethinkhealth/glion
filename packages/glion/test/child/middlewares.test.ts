@@ -135,11 +135,11 @@ describe("createMsgTelemetry", () => {
      * the inner telemetry has already captured the response.
      *
      * Onion model:
-     * ackMiddleware (outer)
+     * ack middleware (outer)
      * → telemetry (inner)
      * → handler
      * ← telemetry reads ctx.res → undefined → ack=null → "?"
-     * ← ackMiddleware sets ctx.res (too late)
+     * ← ack middleware sets ctx.res (too late)
      */
     it("inner telemetry misses ctx.res set by outer ack middleware (the bug)", async () => {
       const events: PartialEvent[] = [];
@@ -175,9 +175,9 @@ describe("createMsgTelemetry", () => {
      *
      * Onion model:
      * telemetry (outer)
-     * → ackMiddleware (inner)
+     * → ack middleware (inner)
      * → handler
-     * ← ackMiddleware sets ctx.res
+     * ← ack middleware sets ctx.res
      * ← telemetry reads ctx.res → "MSA|AA|..." → ack="AA"
      */
     it("outer telemetry captures ctx.res set by inner ack middleware (the fix)", async () => {

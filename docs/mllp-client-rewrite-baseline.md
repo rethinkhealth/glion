@@ -26,7 +26,7 @@ branch unchanged:
 - **`backoff.ts`** — `RetryOptions`, `backoffDelay` (capped exponential + full
   jitter, immediate first retry), `NO_RETRY` / `DEFAULT_RETRY`.
 - **`ack.ts`** — `parseResponse` (inbound codec + correlation) + `MllpClientResponse`.
-- **`@glion/ack`** — `ackExceptionFor`, `isAckNakCode`, the `AckException` family.
+- **`@glion/ack`** — `isAckNakCode`, the `AckException` family.
 - **`runtime/node.ts`** — the Node `MllpConnector`/`MllpDuplex` adapter.
 - **The entire test suite** — `connection.test.ts`, `client.test.ts`,
   `ack.test.ts`, `backoff.test.ts`, `node.test.ts`. These pin the behaviors in §3

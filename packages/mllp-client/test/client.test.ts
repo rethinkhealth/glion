@@ -13,18 +13,14 @@ import {
   AckCommitReject,
   AckException,
 } from "@glion/ack";
-import { decode, frame } from "@glion/mllp-transport";
+import { frame } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
-import { CharsetError } from "@glion/util-charset";
+import { CharsetError, encodeBytes } from "@glion/util-charset";
 import { value } from "@glion/util-query";
 import { describe, expect, it } from "vitest";
 
 import { MllpClient, MllpClientError, MllpErrorCode } from "../src/index";
-import type {
-  MllpClient as MllpClientType,
-  MllpDuplex,
-  SendInput,
-} from "../src/index";
+import type { MllpDuplex, SendInput } from "../src/index";
 import { createFakeDuplex } from "./fake-duplex";
 import type { FakeDuplex } from "./fake-duplex";
 import {
@@ -48,10 +44,15 @@ import {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/** UTF-8 encode + frame — the wire form of a text fixture. */
+function frameText(text: string): Uint8Array {
+  return frame(encodeBytes(text));
+}
+
 function makeClient(
   fake: FakeDuplex,
   overrides: { connectTimeoutMs?: number; sendTimeoutMs?: number } = {}
-): MllpClientType {
+): MllpClient {
   return new MllpClient({
     connect: () => Promise.resolve(fake.duplex),
     host: "test",
@@ -64,7 +65,7 @@ function respondWith(
   message: string
 ): (_chunk: Uint8Array, fake: FakeDuplex) => void {
   return (_chunk, fake) => {
-    fake.injectPeerBytes(frame(message));
+    fake.injectPeerBytes(frameText(message));
   };
 }
 
@@ -106,13 +107,68 @@ describe("connect()", () => {
     expect(client.state).toBe("connected");
   });
 
-  it("throws ALREADY_CONNECTED on a second connect()", async () => {
+  it("is idempotent: connect() on a connected client resolves without a second adapter call", async () => {
     const fake = createFakeDuplex();
-    const client = makeClient(fake);
-    await client.connect();
-    await expect(client.connect()).rejects.toMatchObject({
-      code: MllpErrorCode.ALREADY_CONNECTED,
+    let adapterCalls = 0;
+    const client = new MllpClient({
+      connect: () => {
+        adapterCalls += 1;
+        return Promise.resolve(fake.duplex);
+      },
+      host: "test",
+      port: 0,
     });
+    await client.connect();
+    await client.connect();
+    expect(adapterCalls).toBe(1);
+    expect(client.state).toBe("connected");
+  });
+
+  it("concurrent connect() calls join the one in-flight attempt", async () => {
+    const fake = createFakeDuplex();
+    let adapterCalls = 0;
+    let release: () => void = noop;
+    // oxlint-disable-next-line promise/avoid-new -- gate the adapter resolution
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const client = new MllpClient({
+      connect: async () => {
+        adapterCalls += 1;
+        await gate;
+        return fake.duplex;
+      },
+      host: "test",
+      port: 0,
+    });
+
+    const first = client.connect();
+    const second = client.connect();
+    expect(client.state).toBe("connecting");
+    release();
+    await Promise.all([first, second]);
+
+    expect(adapterCalls).toBe(1);
+    expect(client.state).toBe("connected");
+  });
+
+  it("joined connect() callers share the failure when close() interrupts", async () => {
+    const client = new MllpClient({
+      connect: ({ signal }) => abortableConnect(signal),
+      host: "x",
+      port: 1,
+    });
+    const first = client.connect();
+    const second = client.connect();
+    await client.close();
+
+    await expect(first).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_ABORTED,
+    });
+    await expect(second).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECT_ABORTED,
+    });
+    expect(client.state).toBe("closed");
   });
 
   it("throws CLOSED on connect() after close()", async () => {
@@ -125,7 +181,7 @@ describe("connect()", () => {
     });
   });
 
-  it("throws CLOSED on connect() after peer drop", async () => {
+  it("throws CLOSED on connect() after peer drop, carrying the drop reason on cause", async () => {
     const fake = createFakeDuplex();
     const client = makeClient(fake);
     await client.connect();
@@ -133,6 +189,7 @@ describe("connect()", () => {
     // Wait for the drop watcher to transition the client to "closed".
     await sleep(5);
     await expect(client.connect()).rejects.toMatchObject({
+      cause: expect.objectContaining({ code: MllpErrorCode.DROPPED }),
       code: MllpErrorCode.CLOSED,
     });
   });
@@ -148,6 +205,19 @@ describe("connect()", () => {
       code: MllpErrorCode.CONNECT_FAILED,
     });
     expect(client.state).toBe("closed");
+  });
+
+  it("carries the connect failure on later CLOSED errors", async () => {
+    const client = new MllpClient({
+      connect: () => Promise.reject(new Error("ECONNREFUSED")),
+      host: "x",
+      port: 1,
+    });
+    await client.connect().catch(noop);
+    await expect(client.send(REQUEST)).rejects.toMatchObject({
+      cause: expect.objectContaining({ code: MllpErrorCode.CONNECT_FAILED }),
+      code: MllpErrorCode.CLOSED,
+    });
   });
 
   it("throws CONNECT_TIMEOUT when the adapter exceeds connectTimeoutMs", async () => {
@@ -235,7 +305,7 @@ describe("send() — accept codes", () => {
     expect(response.code).toBe("CA");
   });
 
-  it("frames the outgoing message via mllp-transport", async () => {
+  it("frames the outgoing message via mllp-codec", async () => {
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
@@ -250,28 +320,30 @@ describe("send() — accept codes", () => {
     // The client is a cleaning client: the message is parsed and re-serialized
     // to canonical HL7v2, so the trailing field delimiter in "PID|1|" is trimmed
     // to "PID|1". (Semantically faithful — the field is absent either way.)
-    const request = ["MSH|^~\\&|S|F|R|RF|20240101||ADT^A01", "PID|1|"].join(
-      "\r"
-    );
-    const cleaned = ["MSH|^~\\&|S|F|R|RF|20240101||ADT^A01", "PID|1"].join(
-      "\r"
-    );
+    const request = [
+      "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|MSG001",
+      "PID|1|",
+    ].join("\r");
+    const cleaned = [
+      "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|MSG001",
+      "PID|1",
+    ].join("\r");
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
     await client.send(request);
-    expect(fake.capturedWrites()).toEqual(frame(cleaned));
+    expect(fake.capturedWrites()).toEqual(frameText(cleaned));
   });
 
   it("normalizes line endings on the wire (CRLF → CR)", async () => {
     // A CRLF-terminated message is cleaned to canonical CR-delimited HL7v2.
-    const request = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01\r\nPID|1||x";
-    const cleaned = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01\rPID|1||x";
+    const request = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|MSG001\r\nPID|1||x";
+    const cleaned = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|MSG001\rPID|1||x";
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
     await client.send(request);
-    expect(fake.capturedWrites()).toEqual(frame(cleaned));
+    expect(fake.capturedWrites()).toEqual(frameText(cleaned));
   });
 
   it("preserves escape sequences on the wire (no decode without re-encode)", async () => {
@@ -283,7 +355,7 @@ describe("send() — accept codes", () => {
     const client = makeClient(fake);
     await client.connect();
     await client.send(request);
-    const onWire = new TextDecoder().decode(decode(fake.capturedWrites()));
+    const onWire = new TextDecoder().decode(unwrapFrame(fake.capturedWrites()));
     expect(onWire).toContain("a\\F\\b");
   });
 
@@ -388,15 +460,25 @@ describe("send() — correlation verification", () => {
       expect(corr.message).toContain(REQUEST_CONTROL_ID);
       expect(corr.message).toContain("OTHER");
     }
+    // An uninterpretable reply is connection-terminal: correlation on this
+    // wire can no longer be trusted, so the client closes.
+    expect(client.state).toBe("closed");
   });
 
-  it("does not check correlation when the request has no MSH-10", async () => {
+  it("rejects a request without MSH-10 with INVALID_MESSAGE before writing", async () => {
+    // HL7v2 requires MSH-10, and without it the ACK cannot be correlated.
     const fake = createFakeDuplex({ onWrite: respondWith(ACK_AA) });
     const client = makeClient(fake);
     await client.connect();
-    // Request without MSH-10 — a valid HL7v2-ish line with no VT/FS bytes.
     const noControl = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|";
-    const response = await client.send(noControl);
+    await expect(client.send(noControl)).rejects.toMatchObject({
+      code: MllpErrorCode.INVALID_MESSAGE,
+    });
+    // Nothing reached the wire, and the client stays usable — the
+    // single-flight latch released, so the next send actually proceeds.
+    expect(fake.capturedWrites().length).toBe(0);
+    expect(client.state).toBe("connected");
+    const response = await client.send(REQUEST);
     expect(response.code).toBe("AA");
   });
 
@@ -517,27 +599,31 @@ describe("send() — state guards", () => {
     });
   });
 
-  it("throws FramingError on an embedded FS byte", async () => {
+  it("throws INVALID_MESSAGE with the MllpCodecError on cause for an embedded FS byte", async () => {
     const fake = createFakeDuplex();
     const client = makeClient(fake);
     await client.connect();
-    // FS (0x1C) is the other framing byte validate() rejects (CR is allowed).
-    const bad = `MSH|^~\\&|${String.fromCodePoint(0x1c)}bad`;
+    // FS (0x1C) is a reserved framing byte (CR is allowed). MSH-10 is present,
+    // so the reserved-character path — not the missing-control-ID path — trips.
+    const bad = `MSH|^~\\&|A|B|C|D|20240101||ADT^A01|MSG1|P|2.5\rPID|1|${String.fromCodePoint(0x1c)}bad`;
     await expect(client.send(bad)).rejects.toMatchObject({
-      name: "FramingError",
+      cause: expect.objectContaining({ name: "MllpCodecError" }),
+      code: MllpErrorCode.INVALID_MESSAGE,
     });
     expect(client.state).toBe("connected");
   });
 
-  it("throws EMBEDDED_CONTROL_CHAR via mllp-transport on invalid bytes", async () => {
+  it("throws INVALID_MESSAGE for an embedded VT byte, before anything is written", async () => {
     const fake = createFakeDuplex();
     const client = makeClient(fake);
     await client.connect();
-    // VT in the payload — validate() should reject before we touch state
-    const bad = "MSH|^~\\&|\u000Bbad";
+    const bad =
+      "MSH|^~\\&|A|B|C|D|20240101||ADT^A01|MSG1|P|2.5\rPID|1|\u000Bbad";
     await expect(client.send(bad)).rejects.toMatchObject({
-      name: "FramingError",
+      cause: expect.objectContaining({ name: "MllpCodecError" }),
+      code: MllpErrorCode.INVALID_MESSAGE,
     });
+    expect(fake.capturedWrites()).toHaveLength(0);
     expect(client.state).toBe("connected");
   });
 });
@@ -559,7 +645,24 @@ describe("send() — timeout / abort / drop", () => {
       expect((error as MllpClientError).code).toBe(MllpErrorCode.SEND_TIMEOUT);
       expect((error as MllpClientError).message).toContain("20ms");
     }
-    expect(client.state).toBe("connected");
+    // A timeout is connection-terminal.
+    expect(client.state).toBe("closed");
+  });
+
+  it("SEND_TIMEOUT fires even when the remote system never finishes reading the write", async () => {
+    // The wedged-interface-engine case: the peer accepts the connection but
+    // stops draining it, so the write itself parks. The send deadline covers
+    // the write phase, so the send still settles.
+    const fake = createFakeDuplex({
+      // oxlint-disable-next-line promise/avoid-new -- a write that never settles
+      onWrite: () => new Promise(() => {}),
+    });
+    const client = makeClient(fake, { sendTimeoutMs: 20 });
+    await client.connect();
+    await expect(client.send(REQUEST)).rejects.toMatchObject({
+      code: MllpErrorCode.SEND_TIMEOUT,
+    });
+    expect(client.state).toBe("closed");
   });
 
   it("rejects pending send with DROPPED when peer drops", async () => {
@@ -684,9 +787,9 @@ describe("peer drop detection", () => {
     await client.connect();
     expect(client.state).toBe("connected");
     fake.closePeer();
-    // Wait for the watcher microtask
-    await Promise.resolve();
-    await Promise.resolve();
+    // The drop watcher defers one macrotask so in-flight deliveries win the
+    // race against the closed signal; sleep past it.
+    await sleep(5);
     expect(client.state).toBe("closed");
   });
 
@@ -695,8 +798,7 @@ describe("peer drop detection", () => {
     const client = makeClient(fake);
     await client.connect();
     fake.closePeer();
-    await Promise.resolve();
-    await Promise.resolve();
+    await sleep(5);
     await expect(client.send(REQUEST)).rejects.toMatchObject({
       code: MllpErrorCode.CLOSED,
     });
@@ -709,7 +811,8 @@ describe("peer drop detection", () => {
 
 describe("send() — write failure", () => {
   it("rejects with DROPPED(write-failed) when the duplex write fails", async () => {
-    const fake = createFakeDuplex({ writeError: new Error("EPIPE") });
+    const writeError = new Error("EPIPE");
+    const fake = createFakeDuplex({ writeError });
     const client = makeClient(fake);
     await client.connect();
     let captured: unknown;
@@ -720,7 +823,7 @@ describe("send() — write failure", () => {
     }
     expect(captured).toBeInstanceOf(MllpClientError);
     expect((captured as MllpClientError).code).toBe(MllpErrorCode.DROPPED);
-    expect((captured as MllpClientError).cause).toBeDefined();
+    expect((captured as MllpClientError).cause).toBe(writeError);
     // Write failure is terminal — connection is closed, not "connected".
     expect(client.state).toBe("closed");
   });
@@ -734,7 +837,7 @@ describe("send() — peer sends unframed garbage", () => {
   it("rejects with DROPPED(framing-error) and transitions to closed", async () => {
     const fake = createFakeDuplex({
       onWrite: (_chunk, peer) => {
-        // No VT prefix — decoder will report MISSING_START_BLOCK.
+        // No VT prefix — decoder will report UNEXPECTED_DATA.
         peer.injectPeerBytes(new Uint8Array([0x41, 0x42, 0x43]));
       },
     });
@@ -748,7 +851,10 @@ describe("send() — peer sends unframed garbage", () => {
     }
     expect(captured).toBeInstanceOf(MllpClientError);
     expect((captured as MllpClientError).code).toBe(MllpErrorCode.DROPPED);
-    expect((captured as MllpClientError).cause).toBeDefined();
+    expect((captured as MllpClientError).cause).toMatchObject({
+      code: "UNEXPECTED_DATA",
+      name: "MllpCodecError",
+    });
     // Stream-level error is terminal — subsequent sends fail fast.
     expect(client.state).toBe("closed");
   });
@@ -758,7 +864,7 @@ describe("send() — unparseable ACK (no MSA-1)", () => {
   it("rejects with INVALID_RESPONSE when the ACK has no acknowledgment code", async () => {
     const fake = createFakeDuplex({
       onWrite: (_chunk, peer) => {
-        peer.injectPeerBytes(frame("GARBAGE WITHOUT MSH SEGMENT"));
+        peer.injectPeerBytes(frameText("GARBAGE WITHOUT MSH SEGMENT"));
       },
     });
     const client = makeClient(fake);
@@ -814,30 +920,29 @@ describe("send() — stream errors are terminal", () => {
 
 describe("frame-queue overflow protection", () => {
   it("closes the connection when the peer floods unsolicited frames", async () => {
-    // Don't emit a useful first ACK — the first send times out, then
-    // we inject the overflow flood as a discrete event. This avoids
-    // the race where the flood + the legit ACK arrive in one decoder
-    // pass and the overflow's pendingError races the legit send's
-    // resolution.
+    // Answer the first send normally (it also captures the peer handle),
+    // then inject the overflow flood as a discrete event with no send
+    // pending. This avoids the race where the flood + the legit ACK arrive
+    // in one decoder pass and the overflow's pendingError races the legit
+    // send's resolution.
     let peerRef: FakeDuplex | null = null;
     const fake = createFakeDuplex({
-      onWrite: (_chunk, peer) => {
+      onWrite: (chunk, peer) => {
         peerRef = peer;
+        peer.injectPeerBytes(
+          frameText(requestAck("AA", controlIdOfFrame(chunk)))
+        );
       },
     });
     const client = makeClient(fake);
     await client.connect();
     // Flood the peer with frames the client never asked for.
-    const single = frame(ACK_AA);
+    const single = frameText(ACK_AA);
     const coalesced = new Uint8Array(single.length * 32);
     for (let i = 0; i < 32; i++) {
       coalesced.set(single, i * single.length);
     }
-    // Without a send pending, inject the flood. The read loop processes
-    // it, queue overflows, state → closed.
-    await client.send(REQUEST, { timeoutMs: 30 }).catch(() => {
-      // First send times out (peer didn't respond).
-    });
+    await client.send(REQUEST);
     expect(client.state).toBe("connected");
     peerRef!.injectPeerBytes(coalesced);
     // Yield for the read loop to drain the chunk.
@@ -846,19 +951,44 @@ describe("frame-queue overflow protection", () => {
   });
 });
 
-describe("decoder reset on SEND_TIMEOUT (slowloris recovery)", () => {
-  it("clears mid-frame buffer so a subsequent send is not corrupted", async () => {
-    // First call: trickle in just VT — partial frame, will time out.
-    // Second call: peer responds correctly with a full ACK.
+describe("inbound buffering bound", () => {
+  it("maxBufferedBytes is enforced end-to-end: an unterminated flood drops the connection", async () => {
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => {
+        // VT then an unterminated body well past the cap — never an FS+CR.
+        const flood = new Uint8Array(257).fill(0x41);
+        flood[0] = 0x0b;
+        peer.injectPeerBytes(flood);
+      },
+    });
+    const client = new MllpClient({
+      connect: () => Promise.resolve(fake.duplex),
+      host: "test",
+      maxBufferedBytes: 128,
+      port: 0,
+    });
+    await client.connect();
+    await expect(client.send(REQUEST)).rejects.toMatchObject({
+      cause: expect.objectContaining({ code: "MESSAGE_TOO_LARGE" }),
+      code: MllpErrorCode.DROPPED,
+    });
+    expect(client.state).toBe("closed");
+  });
+});
+
+describe("stalled partial response (slowloris)", () => {
+  it("drops the connection when the next response glues into the unterminated frame", async () => {
+    // First call: trickle in just VT — a partial frame that stalls; the send
+    // times out and closes the client (timeouts are terminal). The stalled
+    // partial can never glue with a later response because the wire is gone.
     let callCount = 0;
     const fake = createFakeDuplex({
       onWrite: (_chunk, peer) => {
         callCount += 1;
         if (callCount === 1) {
-          // Trickle VT only — leaves the decoder with a partial frame.
           peer.injectPeerBytes(new Uint8Array([0x0b]));
         } else {
-          peer.injectPeerBytes(frame(ACK_AA));
+          peer.injectPeerBytes(frameText(ACK_AA));
         }
       },
     });
@@ -867,12 +997,12 @@ describe("decoder reset on SEND_TIMEOUT (slowloris recovery)", () => {
     await expect(client.send(REQUEST, { timeoutMs: 20 })).rejects.toMatchObject(
       { code: MllpErrorCode.SEND_TIMEOUT }
     );
-    // If the decoder retained the dangling VT, the next send's ACK
-    // would land into the corrupted buffer and the test would fail
-    // (likely with FramingError). With the reset, the second send
-    // gets a clean response.
-    const response = await client.send(REQUEST);
-    expect(response.code).toBe("AA");
+    // The timeout already tore the connection down.
+    expect(client.state).toBe("closed");
+
+    await expect(client.send(REQUEST)).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+    });
   });
 });
 
@@ -894,11 +1024,19 @@ describe("MllpClient — observability getters", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Single-flight. One send is on the wire at a time. The FIFO queue is NOT wired
-// yet (./util/queue.ts is kept but unused), so a concurrent send while one is in
-// flight rejects with SEND_IN_PROGRESS. After a send settles (ACK, NAK, or
+// Single-flight. One send is on the wire at a time. A FIFO send queue is
+// deferred to a later version, so a concurrent send while one is in
+// flight rejects with ALREADY_SENDING. After a send settles (ACK, NAK, or
 // timeout), the next send proceeds; close()/drop reject the in-flight send.
 // ---------------------------------------------------------------------------
+
+/**
+ * Strip the MLLP envelope (`<VT> payload <FS><CR>`) from one frame this
+ * client produced. Test-local: production reads the wire through unframe().
+ */
+function unwrapFrame(wire: Uint8Array): Uint8Array {
+  return wire.subarray(1, -2);
+}
 
 /**
  * Read MSH-10 (control id) out of a written MLLP frame using the glion
@@ -906,7 +1044,7 @@ describe("MllpClient — observability getters", () => {
  * rather than a hand-rolled split.
  */
 function controlIdOfFrame(chunk: Uint8Array): string {
-  const text = new TextDecoder().decode(decode(chunk));
+  const text = new TextDecoder().decode(unwrapFrame(chunk));
   const tree = parseHL7v2(text);
   return value(tree, "MSH-10[1].1.1")?.value ?? "";
 }
@@ -923,7 +1061,7 @@ describe("send() — single-flight", () => {
     expect(client.state).toBe("connected");
   });
 
-  it("rejects a concurrent send with SEND_IN_PROGRESS while one is in flight", async () => {
+  it("rejects a concurrent send with ALREADY_SENDING while one is in flight", async () => {
     const fake = createFakeDuplex({ onWrite: () => {} }); // peer silent — p1 stays in flight
     const client = makeClient(fake);
     await client.connect();
@@ -931,7 +1069,7 @@ describe("send() — single-flight", () => {
     const p1 = client.send(REQUEST); // occupies the wire
     const p1Settled = p1.then(noop, noop);
     await expect(client.send(REQUEST)).rejects.toMatchObject({
-      code: MllpErrorCode.SEND_IN_PROGRESS,
+      code: MllpErrorCode.ALREADY_SENDING,
     });
 
     // close() releases the in-flight send so it isn't an unhandled rejection.
@@ -947,7 +1085,9 @@ describe("send() — single-flight", () => {
       onWrite: (chunk, peer) => {
         writes += 1;
         const code = writes === 1 ? "AR" : "AA";
-        peer.injectPeerBytes(frame(requestAck(code, controlIdOfFrame(chunk))));
+        peer.injectPeerBytes(
+          frameText(requestAck(code, controlIdOfFrame(chunk)))
+        );
       },
     });
     const client = makeClient(fake);
@@ -961,29 +1101,21 @@ describe("send() — single-flight", () => {
     expect(client.state).toBe("connected");
   });
 
-  it("lets the next send proceed after the in-flight send times out", async () => {
-    // The peer answers only the second send; the first hangs until its deadline
-    // fires. A send timeout must not wedge the client.
-    let writes = 0;
-    const fake = createFakeDuplex({
-      onWrite: (chunk, peer) => {
-        writes += 1;
-        if (writes >= 2) {
-          peer.injectPeerBytes(
-            frame(requestAck("AA", controlIdOfFrame(chunk)))
-          );
-        }
-      },
-    });
+  it("a send timeout closes the client; the next send needs a new client", async () => {
+    // The peer never answers. The timed-out send rejects with SEND_TIMEOUT
+    // and the connection is recycled — a late ACK could never be matched
+    // safely, so the wire is not reused.
+    const fake = createFakeDuplex({ onWrite: () => {} });
     const client = makeClient(fake);
     await client.connect();
 
     await expect(
       client.send(requestWithControlId("FIRST"), { timeoutMs: 20 })
     ).rejects.toMatchObject({ code: MllpErrorCode.SEND_TIMEOUT });
-    const r2 = await client.send(requestWithControlId("SECOND"));
-    expect(r2.code).toBe("AA");
-    expect(client.state).toBe("connected");
+    expect(client.state).toBe("closed");
+    await expect(
+      client.send(requestWithControlId("SECOND"))
+    ).rejects.toMatchObject({ code: MllpErrorCode.CLOSED });
   });
 
   it("rejects the in-flight send with CLOSED on close()", async () => {

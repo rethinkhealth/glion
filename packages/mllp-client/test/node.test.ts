@@ -13,7 +13,8 @@
 import { createServer } from "node:net";
 import type { AddressInfo, Server, Socket } from "node:net";
 
-import { frame } from "@glion/mllp-transport";
+import { frame } from "@glion/mllp-codec";
+import { encodeBytes } from "@glion/util-charset";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { MllpClient } from "../src/index";
@@ -35,6 +36,11 @@ interface ServerOptions {
    * whenever the client sends a complete frame.
    */
   onConnection?: (socket: Socket) => void;
+  /**
+   * Keep the server's side open after receiving the client's FIN (Node
+   * otherwise auto-ends). Used to exercise the adapter's grace destroy.
+   */
+  allowHalfOpen?: boolean;
 }
 
 const ACK_AA = [
@@ -51,18 +57,21 @@ async function startEchoAckServer(
   opts: ServerOptions = {}
 ): Promise<ServerHandle> {
   const sockets = new Set<Socket>();
-  const server: Server = createServer((socket) => {
-    sockets.add(socket);
-    socket.on("close", () => sockets.delete(socket));
-    if (opts.onConnection) {
-      opts.onConnection(socket);
-      return;
+  const server: Server = createServer(
+    { allowHalfOpen: opts.allowHalfOpen ?? false },
+    (socket) => {
+      sockets.add(socket);
+      socket.on("close", () => sockets.delete(socket));
+      if (opts.onConnection) {
+        opts.onConnection(socket);
+        return;
+      }
+      // Default: respond with ACK_AA to any inbound MLLP frame.
+      socket.on("data", () => {
+        socket.write(frame(encodeBytes(ACK_AA)));
+      });
     }
-    // Default: respond with ACK_AA to any inbound MLLP frame.
-    socket.on("data", () => {
-      socket.write(frame(ACK_AA));
-    });
-  });
+  );
 
   // oxlint-disable-next-line promise/avoid-new -- wrapping Node event
   await new Promise<void>((resolve, reject) => {
@@ -108,7 +117,7 @@ async function startEchoAckServer(
  */
 async function engageReadPump(duplex: MllpDuplex): Promise<void> {
   const writer = duplex.writable.getWriter();
-  await writer.write(frame(REQUEST));
+  await writer.write(frame(encodeBytes(REQUEST)));
   writer.releaseLock();
   const reader = duplex.readable.getReader();
   await reader.read();
@@ -160,6 +169,38 @@ describe("connectNode — happy path", () => {
     expect(response.code).toBe("AA");
     expect(response.controlId).toBe("MSG001");
     await client.close();
+  });
+});
+
+describe("connectNode — close contract", () => {
+  it("close() resolves via the grace destroy when the remote system never FINs back", async () => {
+    // The adapter contract the whole client trusts: close() MUST resolve.
+    // A peer that holds its side open after our FIN (allowHalfOpen, no
+    // end()) would park a bare socket.end() forever — the 1 s grace window
+    // must destroy and resolve.
+    const server = await startEchoAckServer({
+      allowHalfOpen: true,
+      onConnection: () => {
+        // accept and hold: never respond, never end, never FIN back
+      },
+    });
+    try {
+      const ac = new AbortController();
+      const duplex = await connectNode({
+        host: server.host,
+        port: server.port,
+        signal: ac.signal,
+      });
+      const started = performance.now();
+      await duplex.close();
+      const elapsed = performance.now() - started;
+      // The grace window ran (the peer withheld its FIN)…
+      expect(elapsed).toBeGreaterThanOrEqual(900);
+      // …and the destroy fired rather than parking forever.
+      expect(elapsed).toBeLessThan(3000);
+    } finally {
+      await server.close();
+    }
   });
 });
 

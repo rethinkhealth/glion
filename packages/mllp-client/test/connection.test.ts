@@ -14,7 +14,9 @@
  */
 
 import { AckApplicationReject } from "@glion/ack";
-import { frame } from "@glion/mllp-transport";
+import { frame } from "@glion/mllp-codec";
+import { parseHL7v2 } from "@glion/parser";
+import { encodeBytes } from "@glion/util-charset";
 import { describe, expect, it } from "vitest";
 
 import { createConnection } from "../src/connection";
@@ -30,6 +32,11 @@ import {
   REQUEST_CONTROL_ID,
 } from "./fixtures";
 
+/** UTF-8 encode + frame — the wire form of a text fixture. */
+function frameText(text: string): Uint8Array {
+  return frame(encodeBytes(text));
+}
+
 const HOST = "test";
 const PORT = 0;
 
@@ -43,6 +50,7 @@ function setup(
     host: HOST,
     maxBufferedBytes: opts.maxBufferedBytes,
     onDrop: (error) => drops.push(error),
+    parser: parseHL7v2,
     port: PORT,
   });
   return { conn, drops };
@@ -54,13 +62,13 @@ function exchangeRequest(
   controlId: string = REQUEST_CONTROL_ID,
   timeoutMs = 1000
 ): ExchangeRequest {
-  return { framed: frame(message), requestControlId: controlId, timeoutMs };
+  return { framed: frameText(message), requestControlId: controlId, timeoutMs };
 }
 
 function respondWith(
   message: string
 ): (_chunk: Uint8Array, fake: FakeDuplex) => void {
-  return (_chunk, fake) => fake.injectPeerBytes(frame(message));
+  return (_chunk, fake) => fake.injectPeerBytes(frameText(message));
 }
 
 /** Await a rejection and return the error for multi-field assertions. */
@@ -68,7 +76,12 @@ async function rejection(promise: Promise<unknown>): Promise<MllpClientError> {
   try {
     await promise;
   } catch (error) {
-    return error as MllpClientError;
+    if (!(error instanceof MllpClientError)) {
+      throw new Error(`expected MllpClientError, got ${String(error)}`, {
+        cause: error,
+      });
+    }
+    return error;
   }
   throw new Error("expected the exchange to reject, but it resolved");
 }
@@ -151,7 +164,7 @@ describe("exchange() — decoding across the read loop", () => {
   it("decodes an ACK delivered as multiple peer chunks", async () => {
     const fake = createFakeDuplex({
       onWrite: (_chunk, peer) => {
-        const framed = frame(ACK_AA);
+        const framed = frameText(ACK_AA);
         const mid = Math.floor(framed.length / 2);
         peer.injectPeerBytes(framed.subarray(0, mid));
         peer.injectPeerBytes(framed.subarray(mid));
@@ -170,8 +183,8 @@ describe("exchange() — decoding across the read loop", () => {
       onWrite: (_chunk, peer) => {
         writes += 1;
         if (writes === 1) {
-          const a = frame(ACK_AA);
-          const b = frame(ACK_AA);
+          const a = frameText(ACK_AA);
+          const b = frameText(ACK_AA);
           const coalesced = new Uint8Array(a.length + b.length);
           coalesced.set(a, 0);
           coalesced.set(b, a.length);
@@ -207,94 +220,134 @@ describe("exchange() — decoding across the read loop", () => {
 // ---------------------------------------------------------------------------
 
 describe("exchange() — send deadline", () => {
-  it("rejects with SEND_TIMEOUT when no ACK arrives in time", async () => {
+  it("rejects with SEND_TIMEOUT when no ACK arrives in time, and drops the connection", async () => {
     const fake = createFakeDuplex({ onWrite: () => {} });
-    const { conn } = setup(fake);
+    const { conn, drops } = setup(fake);
     const error = await rejection(
       conn.exchange(exchangeRequest(REQUEST, REQUEST_CONTROL_ID, 20))
     );
     expect(error.code).toBe(MllpErrorCode.SEND_TIMEOUT);
     expect(error.message).toContain("20ms");
+    // A timeout is connection-terminal: a late ACK could never be matched
+    // safely on this wire again.
+    expect(drops).toHaveLength(1);
+    expect(drops[0]?.code).toBe(MllpErrorCode.DROPPED);
   });
 
-  it("stays usable for the next exchange after a timeout (not a drop)", async () => {
-    let writes = 0;
+  it("the deadline covers the write: a remote system that stops reading cannot park the exchange", async () => {
     const fake = createFakeDuplex({
-      onWrite: (_chunk, peer) => {
-        writes += 1;
-        if (writes >= 2) {
-          peer.injectPeerBytes(frame(ACK_AA));
-        }
-      },
+      // oxlint-disable-next-line promise/avoid-new -- a write that never settles
+      onWrite: () => new Promise(() => {}),
     });
+    const { conn, drops } = setup(fake);
+    const error = await rejection(
+      conn.exchange(exchangeRequest(REQUEST, REQUEST_CONTROL_ID, 20))
+    );
+    expect(error.code).toBe(MllpErrorCode.SEND_TIMEOUT);
+    expect(drops).toHaveLength(1);
+  });
+
+  it("a timeout is terminal: the next exchange on the dropped connection fails", async () => {
+    const fake = createFakeDuplex({ onWrite: () => {} });
     const { conn, drops } = setup(fake);
     await expect(
       conn.exchange(exchangeRequest(REQUEST, REQUEST_CONTROL_ID, 20))
     ).rejects.toMatchObject({ code: MllpErrorCode.SEND_TIMEOUT });
-    const response = await conn.exchange(exchangeRequest());
-    expect(response.code).toBe("AA");
-    // A send timeout leaves the wire live — it never fires onDrop.
-    expect(drops).toHaveLength(0);
+    expect(drops).toHaveLength(1);
+    const error = await rejection(conn.exchange(exchangeRequest()));
+    expect(error.code).toBe(MllpErrorCode.DROPPED);
   });
 
-  it("resets a mid-frame decoder buffer on timeout (slowloris recovery)", async () => {
-    // First exchange: trickle only the VT start byte — a partial frame that
-    // times out. If the dangling byte survived, the next ACK would land into a
-    // corrupted buffer and fail to decode.
-    let calls = 0;
+  it("a stalled partial response cannot poison later sends: the timeout drops the connection", async () => {
+    // The remote trickles only the start of MSG_FIRST's ACK and the send
+    // times out. The timeout is terminal — the connection drops, so when the
+    // rest of that ACK would arrive it lands on a dead wire instead of
+    // queueing up to desynchronize the next send's correlation.
+    const lateAck = frameText(requestAck("AA", "MSG_FIRST"));
+    let writes = 0;
     const fake = createFakeDuplex({
       onWrite: (_chunk, peer) => {
-        calls += 1;
-        if (calls === 1) {
-          peer.injectPeerBytes(new Uint8Array([0x0b]));
-        } else {
-          peer.injectPeerBytes(frame(ACK_AA));
+        writes += 1;
+        if (writes === 1) {
+          peer.injectPeerBytes(lateAck.subarray(0, 5));
         }
       },
     });
-    const { conn } = setup(fake);
-    await expect(
-      conn.exchange(exchangeRequest(REQUEST, REQUEST_CONTROL_ID, 20))
-    ).rejects.toMatchObject({ code: MllpErrorCode.SEND_TIMEOUT });
-    const response = await conn.exchange(exchangeRequest());
-    expect(response.code).toBe("AA");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Late ACK — a frame for a timed-out exchange arrives with nothing waiting. It
-// is buffered and the next exchange drains it, where the correlation check
-// catches the stale control id.
-// ---------------------------------------------------------------------------
-
-describe("exchange() — late ACK buffering", () => {
-  it("buffers a late ACK and trips correlation on the next exchange", async () => {
-    // The peer never answers either exchange; the first times out and the
-    // second drains the late frame we inject between them.
-    const fake = createFakeDuplex({ onWrite: () => {} });
-    const { conn } = setup(fake);
-
+    const { conn, drops } = setup(fake);
     await expect(
       conn.exchange(
         exchangeRequest(requestWithControlId("MSG_FIRST"), "MSG_FIRST", 20)
       )
     ).rejects.toMatchObject({ code: MllpErrorCode.SEND_TIMEOUT });
 
-    // The late ACK for the timed-out request lands between exchanges.
-    fake.injectPeerBytes(frame(requestAck("AA", "MSG_FIRST")));
-    // Yield so the late frame reaches the buffer before the next exchange
-    // registers its pending ACK.
-    await Promise.resolve();
-    await Promise.resolve();
+    expect(drops).toHaveLength(1);
+
+    fake.injectPeerBytes(lateAck.subarray(5)); // the stalled tail arrives on a dead wire
+    await sleep(5);
 
     const error = await rejection(
       conn.exchange(
         exchangeRequest(requestWithControlId("MSG_SECOND"), "MSG_SECOND")
       )
     );
-    expect(error.code).toBe(MllpErrorCode.INVALID_RESPONSE);
-    expect(error.message).toContain("MSG_SECOND");
-    expect(error.message).toContain("MSG_FIRST");
+    expect(error.code).toBe(MllpErrorCode.DROPPED);
+    expect(drops).toHaveLength(1);
+  });
+
+  it("drops the connection when a new response starts inside an unterminated one", async () => {
+    // The remote trickles a partial frame and stalls, then starts its NEXT
+    // message: the fresh VT inside the unterminated frame is a framing
+    // violation — frames can never glue — and the connection is torn down
+    // with DROPPED while the exchange is still waiting.
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, peer) => {
+        peer.injectPeerBytes(new Uint8Array([0x0b, 0x4d])); // VT + stalled partial
+        setTimeout(() => {
+          peer.injectPeerBytes(frameText(ACK_AA)); // a new frame begins mid-frame
+        }, 5);
+      },
+    });
+    const { conn, drops } = setup(fake);
+    const error = await rejection(
+      conn.exchange(exchangeRequest(REQUEST, REQUEST_CONTROL_ID, 1000))
+    );
+    expect(error.code).toBe(MllpErrorCode.DROPPED);
+    expect(drops).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Late ACK — after a timeout the connection is dropped, so an ACK arriving
+// late lands on a dead wire and can never be misattributed to a later send.
+// ---------------------------------------------------------------------------
+
+describe("exchange() — late ACK after a timeout", () => {
+  it("a late ACK lands on the dropped connection, never on the next exchange", async () => {
+    const fake = createFakeDuplex({ onWrite: () => {} });
+    const { conn, drops } = setup(fake);
+
+    await expect(
+      conn.exchange(
+        exchangeRequest(requestWithControlId("MSG_FIRST"), "MSG_FIRST", 20)
+      )
+    ).rejects.toMatchObject({ code: MllpErrorCode.SEND_TIMEOUT });
+    expect(drops).toHaveLength(1);
+    expect(drops[0]?.cause).toMatchObject({
+      code: MllpErrorCode.SEND_TIMEOUT,
+    });
+
+    // The late ACK for the timed-out request arrives after the drop: the
+    // wire is closed, so it is discarded rather than queued for the next
+    // send.
+    fake.injectPeerBytes(frameText(requestAck("AA", "MSG_FIRST")));
+    await sleep(5);
+
+    const error = await rejection(
+      conn.exchange(
+        exchangeRequest(requestWithControlId("MSG_SECOND"), "MSG_SECOND")
+      )
+    );
+    expect(error.code).toBe(MllpErrorCode.DROPPED);
   });
 });
 
@@ -324,6 +377,55 @@ describe("peer drop", () => {
     expect(drops).toHaveLength(1);
     expect(drops[0]?.code).toBe(MllpErrorCode.DROPPED);
   });
+
+  it("a one-shot remote that ACKs and closes in the same instant still resolves the exchange", async () => {
+    // The closed signal must not outrun the ACK through the wire pipeline's
+    // microtask hops — the drop watcher defers one macrotask for exactly this.
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, f) => {
+        f.injectPeerBytes(frameText(ACK_AA));
+        f.closePeer();
+      },
+    });
+    const { conn } = setup(fake);
+    const response = await conn.exchange(exchangeRequest());
+    expect(response.code).toBe("AA");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Uninterpretable replies are terminal — a stray frame must not be consumed
+// as the NEXT send's ACK and desynchronize correlation forever.
+// ---------------------------------------------------------------------------
+
+describe("exchange() — an uninterpretable reply drops the connection", () => {
+  it("a stray frame queued between sends fails one exchange, then the connection is dropped, never off-by-one", async () => {
+    const fake = createFakeDuplex({
+      onWrite: (_chunk, f) => {
+        f.injectPeerBytes(frameText(ACK_AA));
+      },
+    });
+    const { conn, drops } = setup(fake);
+    // An unsolicited frame arrives while no exchange is in flight; it queues.
+    fake.injectPeerBytes(frameText(requestAck("AA", "STALE")));
+    await sleep(5);
+    // The next exchange takes the stale frame as its ACK: correlation fails
+    // AND the connection drops — the wire can no longer be trusted.
+    const first = await rejection(conn.exchange(exchangeRequest()));
+    expect(first.code).toBe(MllpErrorCode.INVALID_RESPONSE);
+    expect(drops).toHaveLength(1);
+    const second = await rejection(conn.exchange(exchangeRequest()));
+    expect(second.code).toBe(MllpErrorCode.DROPPED);
+  });
+
+  it("a NAK does not drop the connection (the remote system answered properly)", async () => {
+    const fake = createFakeDuplex({ onWrite: respondWith(ACK_AR) });
+    const { conn, drops } = setup(fake);
+    await expect(conn.exchange(exchangeRequest())).rejects.toBeInstanceOf(
+      AckApplicationReject
+    );
+    expect(drops).toHaveLength(0);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -332,11 +434,12 @@ describe("peer drop", () => {
 
 describe("exchange() — write failure", () => {
   it("rejects with DROPPED, preserves the cause, and tears the wire down", async () => {
-    const fake = createFakeDuplex({ writeError: new Error("EPIPE") });
+    const writeError = new Error("EPIPE");
+    const fake = createFakeDuplex({ writeError });
     const { conn, drops } = setup(fake);
     const error = await rejection(conn.exchange(exchangeRequest()));
     expect(error.code).toBe(MllpErrorCode.DROPPED);
-    expect(error.cause).toBeDefined();
+    expect(error.cause).toBe(writeError);
     expect(drops).toHaveLength(1);
     expect(fake.closeCount()).toBeGreaterThanOrEqual(1);
   });
@@ -359,7 +462,10 @@ describe("read loop — framing error", () => {
     const { conn, drops } = setup(fake);
     const error = await rejection(conn.exchange(exchangeRequest()));
     expect(error.code).toBe(MllpErrorCode.DROPPED);
-    expect(error.cause).toBeDefined();
+    expect(error.cause).toMatchObject({
+      code: "UNEXPECTED_DATA",
+      name: "MllpCodecError",
+    });
     // The decoder error closes the duplex; the drop watcher must NOT re-fire.
     await sleep(5);
     expect(drops).toHaveLength(1);
@@ -376,7 +482,7 @@ describe("unsolicited-frame flood", () => {
     const fake = createFakeDuplex();
     const { drops } = setup(fake);
     // 17 unsolicited frames: the buffer holds 16, the 17th overflows.
-    const single = frame(ACK_AA);
+    const single = frameText(ACK_AA);
     const flood = 17;
     const coalesced = new Uint8Array(single.length * flood);
     for (let i = 0; i < flood; i++) {

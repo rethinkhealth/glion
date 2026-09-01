@@ -335,9 +335,10 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     sendTimeoutMs: timeoutMs,
   });
 
-  const startedAt = performance.now();
+  let startedAt = performance.now();
   try {
     await client.connect();
+    startedAt = performance.now();
     const res = await client.send(canonical, { timeoutMs });
     return emit({
       ackControlId: res.controlId,
@@ -363,6 +364,12 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
       });
     }
     if (error instanceof MllpClientError) {
+      // INVALID_MESSAGE is the caller's input (no MSH-10, or a reserved
+      // VT/FS byte) — nothing reached the wire; everything else is the
+      // transport's story.
+      if (error.code === "INVALID_MESSAGE") {
+        return emit({ kind: "invalid", message: error.message, target });
+      }
       return emit({
         code: error.code,
         kind: "transport",

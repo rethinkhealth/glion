@@ -33,7 +33,6 @@ import {
 } from "@glion/ack";
 import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
-import { parseHL7v2 } from "@glion/parser";
 import { decodeBytes } from "@glion/util-charset";
 import { value } from "@glion/util-query";
 
@@ -87,7 +86,8 @@ export interface MllpClientResponse extends ParsedAck {
  */
 export function parseResponse(
   rawAck: Uint8Array,
-  expectedControlId: string
+  expectedControlId: string,
+  parser: (input: string) => Root
 ): ParsedAck {
   let text: string;
   try {
@@ -107,7 +107,7 @@ export function parseResponse(
   // The default parser is lenient — it never throws on message text — so a
   // tree is always produced and a malformed ACK falls through to the
   // no-MSA-1 check below. (A custom parser that throws propagates as-is.)
-  const tree = parseHL7v2(text);
+  const tree = parser(text);
 
   const codeRaw = readValue(tree, "MSA-1[1].1.1");
   if (codeRaw === null || codeRaw === "") {
