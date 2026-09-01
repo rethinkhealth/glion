@@ -30,10 +30,12 @@ const LARGE_MESSAGE = [
 ].join("\r");
 
 const MOCK_CONNECTION: ConnectionInfo = {
+  id: 1,
   localPort: 2575,
   remoteAddress: "127.0.0.1",
   remotePort: 12_345,
   secure: false,
+  state: new Map(),
 };
 
 const RESPONSE_OK = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };

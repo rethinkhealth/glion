@@ -84,6 +84,9 @@ importers:
       '@glion/util-query':
         specifier: workspace:*
         version: link:../packages/util-query
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
       unified:
         specifier: ^11.0.5
         version: 11.0.5

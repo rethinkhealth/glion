@@ -5,7 +5,8 @@
   "description": "Centralized CodSpeed benchmarks for HL7v2",
   "type": "module",
   "scripts": {
-    "bench": "vitest bench --run"
+    "bench": "vitest bench --run",
+    "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@codspeed/vitest-plugin": "^5.4.0",
@@ -19,6 +20,7 @@
     "@glion/profiles": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "@glion/util-query": "workspace:*",
+    "@types/node": "25.6.0",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
     "vitest": "4.1.5"
