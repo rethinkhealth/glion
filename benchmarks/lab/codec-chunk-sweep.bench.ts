@@ -25,8 +25,8 @@
 import { frame, unframe } from "@glion/mllp-codec";
 import { bench, describe } from "vitest";
 
+import { buildOruMessage } from "../fixtures/messages";
 import {
-  buildPayload,
   chunkBytes,
   concatFrames,
   source,
@@ -34,13 +34,14 @@ import {
 } from "../fixtures/streams";
 
 // ---------------------------------------------------------------------------
-// Fixtures — approximate sizes after framing: 200 B, 2 KB, 20 KB, 200 KB,
+// Fixtures — approximate sizes after framing: 300 B, 2 KB, 20 KB, 200 KB,
 // 2 MB. XL and XXL tile the medium payload instead of building segments.
 // ---------------------------------------------------------------------------
 
-const SMALL_PAYLOAD = buildPayload(2);
-const MEDIUM_PAYLOAD = buildPayload(30);
-const LARGE_PAYLOAD = buildPayload(300);
+const TEXT = new TextEncoder();
+const SMALL_PAYLOAD = TEXT.encode(buildOruMessage(0));
+const MEDIUM_PAYLOAD = TEXT.encode(buildOruMessage(30));
+const LARGE_PAYLOAD = TEXT.encode(buildOruMessage(300));
 const XL_PAYLOAD = tilePayload(MEDIUM_PAYLOAD, 200 * 1024);
 const XXL_PAYLOAD = tilePayload(MEDIUM_PAYLOAD, 2 * 1024 * 1024);
 
@@ -83,7 +84,7 @@ async function drain(chunks: Uint8Array[]): Promise<void> {
 // ---------------------------------------------------------------------------
 
 describe("frame() — encode by payload size", () => {
-  bench("small payload (~200 B)", () => {
+  bench("small payload (~300 B)", () => {
     frame(SMALL_PAYLOAD);
   });
 

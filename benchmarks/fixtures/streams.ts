@@ -1,21 +1,8 @@
 /**
  * Byte and stream helpers shared by the MLLP byte-layer suites
- * (codec, transport) and the lab sweeps.
+ * (codec, transport) and the lab sweeps. Message construction lives in
+ * ./messages — this module never builds HL7v2 content.
  */
-
-const TEXT = new TextEncoder();
-
-/** Real-shaped HL7v2 bytes: MSH + PID + N OBX segments. */
-export function buildPayload(obxCount: number): Uint8Array {
-  const segments = [
-    "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ORU^R01|MSG001|P|2.5",
-    "PID|1||12345||Doe^John^Q||19800101|M",
-  ];
-  for (let i = 1; i <= obxCount; i++) {
-    segments.push(`OBX|${i}|NM|8302-2^Height^LN||${170 + i}|cm|150-200||||F`);
-  }
-  return TEXT.encode(segments.join("\r"));
-}
 
 /**
  * Repeat `base` to exactly `targetSize` bytes. The codecs inspect only

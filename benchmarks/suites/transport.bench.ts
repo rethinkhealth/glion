@@ -11,13 +11,14 @@
 import { createFrameDecoder, decode, frame } from "@glion/mllp-transport";
 import { bench, describe } from "vitest";
 
-import { buildPayload, chunkBytes, tilePayload } from "../fixtures/streams";
+import { buildOruMessage } from "../fixtures/messages";
+import { chunkBytes, tilePayload } from "../fixtures/streams";
 
 // ---------------------------------------------------------------------------
 // Fixtures — ~2 KB real-shaped payload, ~2 MB tiled payload
 // ---------------------------------------------------------------------------
 
-const MEDIUM_PAYLOAD = buildPayload(30);
+const MEDIUM_PAYLOAD = new TextEncoder().encode(buildOruMessage(30));
 const XXL_PAYLOAD = tilePayload(MEDIUM_PAYLOAD, 2 * 1024 * 1024);
 
 const MEDIUM_FRAME = frame(MEDIUM_PAYLOAD);
