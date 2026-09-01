@@ -10,7 +10,7 @@ import { MllpClient } from "@glion/mllp-client";
 import { bench, describe } from "vitest";
 
 import { connectInMemory } from "../fixtures/memory-wire";
-import { MLLP_LARGE_MESSAGE, MLLP_SMALL_MESSAGE } from "../fixtures/messages";
+import { ORU_R01_LARGE, ADT_A01_MINIMAL } from "../fixtures/messages";
 
 const client = new MllpClient({
   connect: connectInMemory,
@@ -21,10 +21,10 @@ await client.connect();
 
 describe("mllp-client", () => {
   bench("mllp-client: send small message (round-trip)", async () => {
-    await client.send(MLLP_SMALL_MESSAGE);
+    await client.send(ADT_A01_MINIMAL);
   });
 
   bench("mllp-client: send large message (round-trip)", async () => {
-    await client.send(MLLP_LARGE_MESSAGE);
+    await client.send(ORU_R01_LARGE);
   });
 });

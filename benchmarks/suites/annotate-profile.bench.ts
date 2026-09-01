@@ -38,7 +38,7 @@ const fieldsAndCodeSystems = unified()
 
 const preset = unified().use(hl7v2PresetAnnotateProfileRecommended);
 
-const BASE = hl7File("adt-a01-annotate");
+const BASE = hl7File("adt-a01-coded");
 
 describe("annotate-profile", () => {
   const medium = parseHL7v2(hl7(BASE, ...repeat(obxCodedLine, 10)));

@@ -11,14 +11,14 @@
 import { frame, unframe } from "@glion/mllp-codec";
 import { bench, describe } from "vitest";
 
-import { MLLP_SMALL_MESSAGE } from "../fixtures/messages";
+import { ADT_A01_MINIMAL } from "../fixtures/messages";
 import { concatFrames, source, tilePayload } from "../fixtures/streams";
 
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const SMALL_MESSAGE_BYTES = new TextEncoder().encode(MLLP_SMALL_MESSAGE);
+const SMALL_MESSAGE_BYTES = new TextEncoder().encode(ADT_A01_MINIMAL);
 const SMALL_FRAME = frame(SMALL_MESSAGE_BYTES);
 const THOUSAND_SMALL_FRAMES = Array.from({ length: 1000 }, () => SMALL_FRAME);
 const TEN_SMALL_FRAMES_COALESCED = [concatFrames(SMALL_FRAME, 10)];

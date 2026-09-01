@@ -12,7 +12,7 @@ import { Mllp } from "@glion/mllp";
 import type { ConnectionInfo, Middleware } from "@glion/mllp";
 import { bench, describe } from "vitest";
 
-import { MLLP_LARGE_MESSAGE, MLLP_SMALL_MESSAGE } from "../fixtures/messages";
+import { ORU_R01_LARGE, ADT_A01_MINIMAL } from "../fixtures/messages";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -30,8 +30,8 @@ const MOCK_CONNECTION: ConnectionInfo = {
 const RESPONSE_OK = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
 
 const textEncoder = new TextEncoder();
-const smallBytes = textEncoder.encode(MLLP_SMALL_MESSAGE);
-const largeBytes = textEncoder.encode(MLLP_LARGE_MESSAGE);
+const smallBytes = textEncoder.encode(ADT_A01_MINIMAL);
+const largeBytes = textEncoder.encode(ORU_R01_LARGE);
 
 // oxlint-disable-next-line require-await
 const noop: Middleware = async (_ctx, next) => next();
@@ -55,11 +55,11 @@ describe("mllp", () => {
   app.on("ORU^R01", () => RESPONSE_OK);
 
   bench("mllp: handle small message (3 segments)", async () => {
-    await app.handle(MLLP_SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await app.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
   });
 
   bench("mllp: handle large message (100+ segments)", async () => {
-    await app.handle(MLLP_LARGE_MESSAGE, largeBytes, MOCK_CONNECTION);
+    await app.handle(ORU_R01_LARGE, largeBytes, MOCK_CONNECTION);
   });
 
   const appMulti = new Mllp().parser(parseHL7v2);
@@ -73,18 +73,18 @@ describe("mllp", () => {
   appMulti.on("*", () => RESPONSE_OK);
 
   bench("mllp: handle 8 routes (match 5th)", async () => {
-    await appMulti.handle(MLLP_SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await appMulti.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
   });
 
   const app5 = withMiddleware(5);
   const app10 = withMiddleware(10);
 
   bench("mllp: handle with 5 middleware", async () => {
-    await app5.handle(MLLP_SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await app5.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
   });
 
   bench("mllp: handle with 10 middleware", async () => {
-    await app10.handle(MLLP_SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await app10.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
   });
 
   const appTree = new Mllp().parser(parseHL7v2);
@@ -94,14 +94,14 @@ describe("mllp", () => {
   });
 
   bench("mllp: handle with handler awaiting tree()", async () => {
-    await appTree.handle(MLLP_SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await appTree.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
   });
 
   const appNoMatch = new Mllp().parser(parseHL7v2);
   appNoMatch.on("ORM^O01", () => RESPONSE_OK);
 
   bench("mllp: handle no matching route", async () => {
-    await appNoMatch.handle(MLLP_SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await appNoMatch.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
   });
 
   const appError = new Mllp().parser(parseHL7v2);
@@ -111,6 +111,6 @@ describe("mllp", () => {
   appError.onError(() => RESPONSE_OK);
 
   bench("mllp: handle handler throws, onError recovers", async () => {
-    await appError.handle(MLLP_SMALL_MESSAGE, smallBytes, MOCK_CONNECTION);
+    await appError.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
   });
 });
