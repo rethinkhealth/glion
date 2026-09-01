@@ -27,7 +27,7 @@ import {
 } from "@glion/mllp-transport";
 import { bench, describe } from "vitest";
 
-import { buildOruMessage } from "../fixtures/messages";
+import { hl7, ORU_R01_HEADER, oruObx, repeat } from "../fixtures/messages";
 import { chunkBytes, concatFrames, tilePayload } from "../fixtures/streams";
 
 // ---------------------------------------------------------------------------
@@ -36,9 +36,13 @@ import { chunkBytes, concatFrames, tilePayload } from "../fixtures/streams";
 // ---------------------------------------------------------------------------
 
 const TEXT = new TextEncoder();
-const SMALL_PAYLOAD = TEXT.encode(buildOruMessage(0));
-const MEDIUM_PAYLOAD = TEXT.encode(buildOruMessage(30));
-const LARGE_PAYLOAD = TEXT.encode(buildOruMessage(300));
+const SMALL_PAYLOAD = TEXT.encode(hl7(...ORU_R01_HEADER));
+const MEDIUM_PAYLOAD = TEXT.encode(
+  hl7(...ORU_R01_HEADER, ...repeat(oruObx, 30))
+);
+const LARGE_PAYLOAD = TEXT.encode(
+  hl7(...ORU_R01_HEADER, ...repeat(oruObx, 300))
+);
 const XL_PAYLOAD = tilePayload(MEDIUM_PAYLOAD, 200 * 1024);
 const XXL_PAYLOAD = tilePayload(MEDIUM_PAYLOAD, 2 * 1024 * 1024);
 

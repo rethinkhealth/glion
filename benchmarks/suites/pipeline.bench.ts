@@ -10,12 +10,15 @@ import { bench, describe } from "vitest";
 
 import {
   ADT_A01_SMALL,
-  buildOruMessage,
+  hl7,
+  ORU_R01_HEADER,
   ORU_R01_MEDIUM,
+  oruObx,
+  repeat,
 } from "../fixtures/messages";
 
-const LARGE_50 = buildOruMessage(50);
-const LARGE_200 = buildOruMessage(200);
+const LARGE_50 = hl7(...ORU_R01_HEADER, ...repeat(oruObx, 50));
+const LARGE_200 = hl7(...ORU_R01_HEADER, ...repeat(oruObx, 200));
 
 describe("pipeline", () => {
   bench("pipeline: process ADT^A01 (3 segments)", async () => {

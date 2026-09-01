@@ -14,12 +14,13 @@ import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileDatatypes } from "@glion/annotate-profile-datatypes";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
 import { hl7v2AnnotateProfileFieldsCodeSystems } from "@glion/annotate-profile-fields-code-systems";
+import { m } from "@glion/builder";
 import hl7v2PresetAnnotateProfileRecommended from "@glion/preset-annotate-profile-recommended";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { bench, describe } from "vitest";
 
-import { annotateAdtTree } from "../fixtures/messages";
+import { msh, obxCoded, pid, repeat } from "../fixtures/messages";
 
 const fields = unified()
   .use(hl7v2AnnotateProfileContext)
@@ -38,8 +39,8 @@ const fieldsAndCodeSystems = unified()
 const preset = unified().use(hl7v2PresetAnnotateProfileRecommended);
 
 describe("annotate-profile", () => {
-  const medium = annotateAdtTree(10);
-  const large = annotateAdtTree(50);
+  const medium = m(msh(), pid(), ...repeat(obxCoded, 10));
+  const large = m(msh(), pid(), ...repeat(obxCoded, 50));
 
   bench("annotate: baseline structuredClone (52 segments)", () => {
     structuredClone(large);
