@@ -35,6 +35,11 @@ pnpm lint                     # Check via Ultracite (Oxlint + Oxfmt)
 pnpm format                   # Auto-fix
 pnpm dlx ultracite fix        # Same as `pnpm format`
 
+# Benchmarks (see benchmarks/README.md before adding or renaming any)
+pnpm bench                    # CodSpeed regression suite (benchmarks/suites/)
+pnpm --filter @glion/benchmarks bench:lab   # Local-only workload sweeps (benchmarks/lab/)
+pnpm --filter @glion/benchmarks test        # Canaries proving suites measure real work
+
 # Dependencies
 pnpm install                  # Install all
 pnpm syncpack                 # Check version alignment across packages
@@ -262,6 +267,10 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 - No `.only` / `.skip` in committed tests.
 - `async/await` over done callbacks.
 - Test contracts at the layer that owns them — adapter behaviour at the adapter level, core behaviour at the core level.
+
+## Benchmarks
+
+All benchmarks live in the `benchmarks/` workspace — never add a `bench/` directory to a package. `benchmarks/README.md` is the contract: regression suites in `suites/` (CodSpeed-tracked; bench names and fixtures are API), deep sweeps in `lab/`, assertion-shaped checks go in the owning package's `tests/`, and every suite needs a canary in `canary.test.ts`.
 
 ## Adding a new package
 
