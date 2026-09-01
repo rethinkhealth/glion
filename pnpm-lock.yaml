@@ -54,6 +54,18 @@ importers:
       '@codspeed/vitest-plugin':
         specifier: ^5.4.0
         version: 5.4.0(tinybench@2.9.0)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))(vitest@4.1.5)
+      '@glion/annotate-profile-context':
+        specifier: workspace:*
+        version: link:../packages/annotate-profile-context
+      '@glion/annotate-profile-datatypes':
+        specifier: workspace:*
+        version: link:../packages/annotate-profile-datatypes
+      '@glion/annotate-profile-fields':
+        specifier: workspace:*
+        version: link:../packages/annotate-profile-fields
+      '@glion/annotate-profile-fields-code-systems':
+        specifier: workspace:*
+        version: link:../packages/annotate-profile-fields-code-systems
       '@glion/builder':
         specifier: workspace:*
         version: link:../packages/builder
@@ -63,24 +75,36 @@ importers:
       '@glion/mllp':
         specifier: workspace:*
         version: link:../packages/mllp
+      '@glion/mllp-client':
+        specifier: workspace:*
+        version: link:../packages/mllp-client
       '@glion/mllp-codec':
         specifier: workspace:*
         version: link:../packages/mllp-codec
       '@glion/parser':
         specifier: workspace:*
         version: link:../packages/parser
+      '@glion/preset-annotate-profile-recommended':
+        specifier: workspace:*
+        version: link:../packages/preset-annotate-profile-recommended
       '@glion/preset-lint-profile-recommended':
         specifier: workspace:*
         version: link:../packages/preset-lint-profile-recommended
       '@glion/profiles':
         specifier: workspace:*
         version: link:../packages/profiles
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../packages/to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../tools/tsconfig
       '@glion/util-query':
         specifier: workspace:*
         version: link:../packages/util-query
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
       unified:
         specifier: ^11.0.5
         version: 11.0.5

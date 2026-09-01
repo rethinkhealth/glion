@@ -41,7 +41,6 @@
     "build": "tsdown && tsc --emitDeclarationOnly",
     "check-types": "tsc --noEmit",
     "check:readme": "glion-check-readme",
-    "bench": "vitest bench --run",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

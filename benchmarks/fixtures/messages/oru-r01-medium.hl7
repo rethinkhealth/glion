@@ -1,0 +1,14 @@
+MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG002|P|2.5.1
+PID|1||12345^^^MRN||Doe^John^Q||19800101|M
+ORC|RE|ORD001|LAB001
+OBR|1|ORD001|LAB001|CBC^Complete Blood Count|||20241201
+OBX|1|NM|WBC-0^White Blood Cell||5.0|10*9/L|4.5-11.0|N|||F
+OBX|2|NM|WBC-1^White Blood Cell||5.3|10*9/L|4.5-11.0|N|||F
+OBX|3|NM|WBC-2^White Blood Cell||5.6|10*9/L|4.5-11.0|N|||F
+OBX|4|NM|WBC-3^White Blood Cell||5.9|10*9/L|4.5-11.0|N|||F
+OBX|5|NM|WBC-4^White Blood Cell||6.2|10*9/L|4.5-11.0|N|||F
+OBX|6|NM|WBC-5^White Blood Cell||6.5|10*9/L|4.5-11.0|N|||F
+OBX|7|NM|WBC-6^White Blood Cell||6.8|10*9/L|4.5-11.0|N|||F
+OBX|8|NM|WBC-7^White Blood Cell||7.1|10*9/L|4.5-11.0|N|||F
+OBX|9|NM|WBC-8^White Blood Cell||7.4|10*9/L|4.5-11.0|N|||F
+OBX|10|NM|WBC-9^White Blood Cell||7.7|10*9/L|4.5-11.0|N|||F
