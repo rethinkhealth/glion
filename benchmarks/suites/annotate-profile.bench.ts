@@ -14,13 +14,13 @@ import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileDatatypes } from "@glion/annotate-profile-datatypes";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
 import { hl7v2AnnotateProfileFieldsCodeSystems } from "@glion/annotate-profile-fields-code-systems";
-import { m } from "@glion/builder";
+import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetAnnotateProfileRecommended from "@glion/preset-annotate-profile-recommended";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { bench, describe } from "vitest";
 
-import { msh, obxCoded, pid, repeat } from "../fixtures/messages";
+import { hl7, hl7File, obxCodedLine, repeat } from "../fixtures/messages";
 
 const fields = unified()
   .use(hl7v2AnnotateProfileContext)
@@ -38,9 +38,11 @@ const fieldsAndCodeSystems = unified()
 
 const preset = unified().use(hl7v2PresetAnnotateProfileRecommended);
 
+const BASE = hl7File("adt-a01-annotate");
+
 describe("annotate-profile", () => {
-  const medium = m(msh(), pid(), ...repeat(obxCoded, 10));
-  const large = m(msh(), pid(), ...repeat(obxCoded, 50));
+  const medium = parseHL7v2(hl7(BASE, ...repeat(obxCodedLine, 10)));
+  const large = parseHL7v2(hl7(BASE, ...repeat(obxCodedLine, 50)));
 
   bench("annotate: baseline structuredClone (52 segments)", () => {
     structuredClone(large);

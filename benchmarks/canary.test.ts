@@ -8,7 +8,6 @@
  */
 import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
-import { m } from "@glion/builder";
 import { MllpClient } from "@glion/mllp-client";
 import { frame, unframe } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
@@ -20,12 +19,10 @@ import { describe, expect, it } from "vitest";
 import { connectInMemory } from "./fixtures/memory-wire";
 import {
   ADT_A01_SMALL,
-  evnInvalid,
+  hl7,
+  hl7File,
   MLLP_SMALL_MESSAGE,
-  msh,
-  obxCoded,
-  pid,
-  pidInvalid,
+  obxCodedLine,
 } from "./fixtures/messages";
 import { source } from "./fixtures/streams";
 
@@ -38,7 +35,7 @@ describe("canary — suites measure real work", () => {
   it("lint-profile: the violations fixture yields messages", async () => {
     const processor = unified().use(hl7v2PresetLintProfileRecommended);
     const file = new VFile();
-    await processor.run(m(msh(), evnInvalid(), pidInvalid()), file);
+    await processor.run(parseHL7v2(hl7File("adt-a01-lint-violations")), file);
     expect(file.messages.length).toBeGreaterThan(0);
   });
 
@@ -46,7 +43,7 @@ describe("canary — suites measure real work", () => {
     const processor = unified()
       .use(hl7v2AnnotateProfileContext)
       .use(hl7v2AnnotateProfileFields);
-    const tree = m(msh(), pid(), obxCoded(1));
+    const tree = parseHL7v2(hl7(hl7File("adt-a01-annotate"), obxCodedLine(1)));
     await processor.run(tree, new VFile());
     const annotated = tree.children.some(
       (segment) =>
