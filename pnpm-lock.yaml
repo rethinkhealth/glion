@@ -99,6 +99,9 @@ importers:
       '@glion/profiles':
         specifier: workspace:*
         version: link:../packages/profiles
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../packages/to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../tools/tsconfig
