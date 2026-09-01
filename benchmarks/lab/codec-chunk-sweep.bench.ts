@@ -1,7 +1,8 @@
 /**
- * Benchmarks for @glion/mllp-codec.
+ * Lab sweep — @glion/mllp-codec frame/unframe under the full workload grid.
  *
- * Tracks performance of the frame/unframe pair:
+ * Not CodSpeed-tracked: run with `pnpm bench:lab` while optimizing the
+ * codec. The curated regression subset lives in suites/codec.bench.ts.
  *
  * - `frame()` — one-shot encoder (includes the reserved-byte scan).
  * - `unframe()` — the streaming decoder, under workload shapes from best-case
@@ -20,60 +21,23 @@
  * also bounded the FS search to live bytes instead of letting `indexOf`
  * walk stale buffer capacity — reached ~1,040 ops/s (0.96 ms mean), ~23×
  * overall. The residual cost is Web Streams per-chunk overhead.
- *
- * Run: pnpm bench
  */
+import { frame, unframe } from "@glion/mllp-codec";
 import { bench, describe } from "vitest";
 
-import { frame, unframe } from "../src/index";
+import {
+  buildPayload,
+  chunkBytes,
+  concatFrames,
+  source,
+  tilePayload,
+} from "../fixtures/streams";
 
 // ---------------------------------------------------------------------------
-// Fixtures — HL7v2 payload sizes representative of real traffic
+// Fixtures — approximate sizes after framing: 200 B, 2 KB, 20 KB, 200 KB,
+// 2 MB. XL and XXL tile the medium payload instead of building segments.
 // ---------------------------------------------------------------------------
 
-const TEXT = new TextEncoder();
-
-function buildPayload(obxCount: number): Uint8Array {
-  const segments = [
-    "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ORU^R01|MSG001|P|2.5",
-    "PID|1||12345||Doe^John^Q||19800101|M",
-  ];
-  for (let i = 1; i <= obxCount; i++) {
-    segments.push(`OBX|${i}|NM|8302-2^Height^LN||${170 + i}|cm|150-200||||F`);
-  }
-  return TEXT.encode(segments.join("\r"));
-}
-
-function tilePayload(base: Uint8Array, targetSize: number): Uint8Array {
-  const out = new Uint8Array(targetSize);
-  for (let off = 0; off < targetSize; off += base.length) {
-    out.set(base.subarray(0, Math.min(base.length, targetSize - off)), off);
-  }
-  return out;
-}
-
-function chunkBytes(bytes: Uint8Array, chunkSize: number): Uint8Array[] {
-  const out: Uint8Array[] = [];
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    out.push(bytes.slice(i, Math.min(i + chunkSize, bytes.length)));
-  }
-  return out;
-}
-
-function concatFrames(f: Uint8Array, count: number): Uint8Array {
-  const out = new Uint8Array(f.length * count);
-  for (let i = 0; i < count; i++) {
-    out.set(f, f.length * i);
-  }
-  return out;
-}
-
-// Approximate sizes after framing: 200 B, 2 KB, 20 KB, 200 KB, 2 MB.
-// The small/medium/large set is generated as real-shaped HL7v2 (MSH + PID
-// + N OBX segments). XL and XXL would take ~10 ms to build segment-by-
-// segment; we tile the medium payload instead. The codec doesn't inspect
-// payload content (only VT/FS bytes), so tiled bytes exercise the same
-// memcpy / indexOf paths as freshly-built ones.
 const SMALL_PAYLOAD = buildPayload(2);
 const MEDIUM_PAYLOAD = buildPayload(30);
 const LARGE_PAYLOAD = buildPayload(300);
@@ -103,17 +67,6 @@ const XL_FRAME_8K_CHUNKS = chunkBytes(XL_FRAME, 8 * 1024);
 const XL_FRAME_1K_CHUNKS = chunkBytes(XL_FRAME, 1024);
 const XXL_FRAME_64K_CHUNKS = chunkBytes(XXL_FRAME, 64 * 1024);
 const XXL_FRAME_8K_CHUNKS = chunkBytes(XXL_FRAME, 8 * 1024);
-
-function source(chunks: Uint8Array[]): ReadableStream<Uint8Array> {
-  return new ReadableStream<Uint8Array>({
-    start(controller) {
-      for (const c of chunks) {
-        controller.enqueue(c);
-      }
-      controller.close();
-    },
-  });
-}
 
 async function drain(chunks: Uint8Array[]): Promise<void> {
   const reader = source(chunks).pipeThrough(unframe()).getReader();

@@ -40,7 +40,6 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "bench": "vitest bench --run",
     "publint": "publint --strict"
   },
   "devDependencies": {

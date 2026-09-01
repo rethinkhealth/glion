@@ -1,13 +1,15 @@
 /**
- * Benchmark: Profile loading strategies — cold vs warm
+ * Lab sweep — profile loading strategies, cold vs warm.
  *
- * Tests the REAL cost of each strategy.
- * Module-level top-level await handles warmup BEFORE any benchmarks run.
+ * Not CodSpeed-tracked: run with `pnpm bench:lab` when touching the
+ * profiles cache layer.
+ *
+ * The module-level warmup below runs before any benchmark, so Node's module
+ * cache already holds the profile chunks: the "cold" benches measure the
+ * profiles cache layer overhead, not disk I/O.
  */
-
+import { createProfiles } from "@glion/profiles";
 import { bench, describe } from "vitest";
-
-import { createProfiles } from "../src/profiles";
 
 const SEGMENTS = [
   "MSH",
@@ -42,11 +44,13 @@ const SEGMENTS = [
   "UB2",
 ];
 
-// ---------------------------------------------------------------------------
-// Scenario 1: Cold start — fresh instance, nothing in our cache
-// Node's module cache still has the modules from warmup above,
-// so this measures our cache layer overhead, not disk I/O.
-// ---------------------------------------------------------------------------
+// Warmup: populate Node's module cache so the first measured iteration
+// doesn't pay one-time dynamic-import cost.
+const warmup = createProfiles();
+await warmup.events.load("2.5", "ADT_A01");
+for (const seg of SEGMENTS) {
+  await warmup.fields.load("2.5", seg);
+}
 
 describe(`cold start — fresh profiles instance (${SEGMENTS.length} segments)`, () => {
   bench("cached instance", async () => {
@@ -63,10 +67,6 @@ describe(`cold start — fresh profiles instance (${SEGMENTS.length} segments)`,
     }
   });
 });
-
-// ---------------------------------------------------------------------------
-// Scenario 2: Cold then warm — two messages back to back
-// ---------------------------------------------------------------------------
 
 describe("transition: cold first message then warm second", () => {
   bench("with cache", async () => {

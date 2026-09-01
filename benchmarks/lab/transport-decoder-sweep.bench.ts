@@ -1,7 +1,8 @@
 /**
- * Benchmarks for @glion/mllp-transport.
+ * Lab sweep — @glion/mllp-transport hot paths under the full workload grid.
  *
- * Tracks performance of the four hot paths exposed by this package:
+ * Not CodSpeed-tracked: run with `pnpm bench:lab` while optimizing the
+ * transport. The curated regression subset lives in suites/transport.bench.ts.
  *
  * - `frame()` — one-shot encoder.
  * - `decode()` — one-shot decoder.
@@ -10,48 +11,34 @@
  *   (best case, MTU-sized chunks, 1-byte worst case, coalesced frames).
  * - `FrameDecoderStream` — Web Streams wrapper overhead.
  *
- * The chunk-size sweep on the streaming decoder is the most useful
- * for regression detection: doubling-growth + O(N) scan should
- * stay amortised O(N) across all chunk shapes. A regression to
- * O(N²) (e.g. accidentally re-scanning from offset 0 of a copy or
- * concatenating buffers per chunk) will show up as a >10x slowdown
- * on the 1-byte case while the others stay constant.
- *
- * Run: pnpm bench
+ * The chunk-size sweep on the streaming decoder is the most useful for
+ * regression detection: doubling-growth + O(N) scan should stay amortised
+ * O(N) across all chunk shapes. A regression to O(N²) (e.g. accidentally
+ * re-scanning from offset 0 of a copy or concatenating buffers per chunk)
+ * will show up as a >10x slowdown on the 1-byte case while the others stay
+ * constant.
  */
-import { bench, describe } from "vitest";
-
 import {
   createFrameDecoder,
   decode,
   frame,
   FrameDecoderStream,
   validate,
-} from "../src/index";
+} from "@glion/mllp-transport";
+import { bench, describe } from "vitest";
+
+import {
+  buildPayload,
+  chunkBytes,
+  concatFrames,
+  tilePayload,
+} from "../fixtures/streams";
 
 // ---------------------------------------------------------------------------
-// Fixtures — HL7v2 payload sizes representative of real traffic
+// Fixtures — approximate sizes after framing: 200 B, 2 KB, 20 KB, 200 KB,
+// 2 MB. XL and XXL tile the medium payload instead of building segments.
 // ---------------------------------------------------------------------------
 
-const TEXT = new TextEncoder();
-
-function buildPayload(obxCount: number): Uint8Array {
-  const segments = [
-    "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ORU^R01|MSG001|P|2.5",
-    "PID|1||12345||Doe^John^Q||19800101|M",
-  ];
-  for (let i = 1; i <= obxCount; i++) {
-    segments.push(`OBX|${i}|NM|8302-2^Height^LN||${170 + i}|cm|150-200||||F`);
-  }
-  return TEXT.encode(segments.join("\r"));
-}
-
-// Approximate sizes after framing: 200 B, 2 KB, 20 KB, 200 KB, 2 MB.
-// The small/medium/large set is generated as real-shaped HL7v2 (MSH + PID
-// + N OBX segments). XL and XXL would take ~10 ms to build segment-by-
-// segment; we tile the medium payload instead. The codec doesn't inspect
-// payload content (only VT/FS bytes), so tiled bytes exercise the same
-// memcpy / indexOf paths as freshly-built ones.
 const SMALL_PAYLOAD = buildPayload(2);
 const MEDIUM_PAYLOAD = buildPayload(30);
 const LARGE_PAYLOAD = buildPayload(300);
@@ -63,30 +50,6 @@ const MEDIUM_FRAME = frame(MEDIUM_PAYLOAD);
 const LARGE_FRAME = frame(LARGE_PAYLOAD);
 const XL_FRAME = frame(XL_PAYLOAD);
 const XXL_FRAME = frame(XXL_PAYLOAD);
-
-function tilePayload(base: Uint8Array, targetSize: number): Uint8Array {
-  const out = new Uint8Array(targetSize);
-  for (let off = 0; off < targetSize; off += base.length) {
-    out.set(base.subarray(0, Math.min(base.length, targetSize - off)), off);
-  }
-  return out;
-}
-
-function chunkBytes(bytes: Uint8Array, chunkSize: number): Uint8Array[] {
-  const out: Uint8Array[] = [];
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    out.push(bytes.slice(i, Math.min(i + chunkSize, bytes.length)));
-  }
-  return out;
-}
-
-function concatFrames(f: Uint8Array, count: number): Uint8Array {
-  const out = new Uint8Array(f.length * count);
-  for (let i = 0; i < count; i++) {
-    out.set(f, f.length * i);
-  }
-  return out;
-}
 
 const MEDIUM_FRAME_64B_CHUNKS = chunkBytes(MEDIUM_FRAME, 64);
 const MEDIUM_FRAME_1B_CHUNKS = chunkBytes(MEDIUM_FRAME, 1);
@@ -265,13 +228,15 @@ describe("createFrameDecoder() — large messages (2 MB)", () => {
 // ---------------------------------------------------------------------------
 
 async function drainStream(input: Uint8Array): Promise<void> {
-  const source = new ReadableStream<Uint8Array>({
+  const streamSource = new ReadableStream<Uint8Array>({
     start(controller) {
       controller.enqueue(input);
       controller.close();
     },
   });
-  for await (const _frame of source.pipeThrough(new FrameDecoderStream())) {
+  for await (const _frame of streamSource.pipeThrough(
+    new FrameDecoderStream()
+  )) {
     // discard
   }
 }
