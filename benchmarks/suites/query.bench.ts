@@ -9,7 +9,7 @@ import { select, value } from "@glion/util-query";
 import { bench, describe } from "vitest";
 
 // ---------------------------------------------------------------------------
-// Fixtures
+// Fixtures — local: shapes specific to path-lookup benches
 // ---------------------------------------------------------------------------
 
 const SMALL_MESSAGE =

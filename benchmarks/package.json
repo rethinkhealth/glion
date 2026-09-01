@@ -6,16 +6,25 @@
   "type": "module",
   "scripts": {
     "bench": "vitest bench --run",
-    "check-types": "tsc --noEmit"
+    "bench:lab": "vitest bench --run --config ./vitest.lab.config.ts",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@codspeed/vitest-plugin": "^5.4.0",
+    "@glion/annotate-profile-context": "workspace:*",
+    "@glion/annotate-profile-datatypes": "workspace:*",
+    "@glion/annotate-profile-fields": "workspace:*",
+    "@glion/annotate-profile-fields-code-systems": "workspace:*",
     "@glion/builder": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/mllp": "workspace:*",
     "@glion/mllp-ack": "workspace:*",
+    "@glion/mllp-client": "workspace:*",
     "@glion/mllp-codec": "workspace:*",
+    "@glion/mllp-transport": "workspace:*",
     "@glion/parser": "workspace:*",
+    "@glion/preset-annotate-profile-recommended": "workspace:*",
     "@glion/preset-lint-profile-recommended": "workspace:*",
     "@glion/profiles": "workspace:*",
     "@glion/tsconfig": "workspace:*",

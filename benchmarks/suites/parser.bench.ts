@@ -7,7 +7,7 @@ import { parseHL7v2 } from "@glion/parser";
 import { bench, describe } from "vitest";
 
 // ---------------------------------------------------------------------------
-// Fixtures
+// Fixtures — local: no other suite parses bare text at these shapes
 // ---------------------------------------------------------------------------
 
 const SIMPLE =
