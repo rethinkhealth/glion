@@ -40,20 +40,19 @@ Local numbers and CI numbers are different instruments; compare local against lo
 
 ## Coverage
 
-| Area                                                                      | Suite                                                                | Notes                                                                        |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `@glion/parser`                                                           | `suites/parser.bench.ts`                                             | text → AST                                                                   |
-| `@glion/hl7v2`                                                            | `suites/pipeline.bench.ts`                                           | full pipeline, the headline numbers                                          |
-| `@glion/util-query`                                                       | `suites/query.bench.ts`                                              | path parsing + traversal                                                     |
-| `@glion/preset-lint-profile-recommended` (+ the 5 profile lint rules)     | `suites/lint-profile.bench.ts`                                       | rules measured through the preset; includes cold-cache describe              |
-| `@glion/annotate-profile-*`, `@glion/preset-annotate-profile-recommended` | `suites/annotate-profile.bench.ts`                                   | processors include the context plugin; clone baseline included               |
-| `@glion/mllp-codec`                                                       | `suites/codec.bench.ts` + `lab/codec-chunk-sweep.bench.ts`           | trickle ratio pair is the O(N) guard                                         |
-| `@glion/mllp-transport`                                                   | `suites/transport.bench.ts` + `lab/transport-decoder-sweep.bench.ts` | ditto for the frame decoder                                                  |
-| `@glion/mllp`                                                             | `suites/mllp-handle.bench.ts`                                        | routing/middleware via `handle()`, no TCP                                    |
-| `@glion/mllp-client`                                                      | `suites/mllp-client.bench.ts`                                        | `send()` round-trip over the in-memory wire (`fixtures/memory-wire.ts`)      |
-| `@glion/profiles`                                                         | `lab/profiles-cache.bench.ts`                                        | cache-layer comparison; cold/warm regression signal comes via the lint suite |
+| Area                                                                      | Suite                                                      | Notes                                                                        |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `@glion/parser`                                                           | `suites/parser.bench.ts`                                   | text → AST                                                                   |
+| `@glion/hl7v2`                                                            | `suites/pipeline.bench.ts`                                 | full pipeline, the headline numbers                                          |
+| `@glion/util-query`                                                       | `suites/query.bench.ts`                                    | path parsing + traversal                                                     |
+| `@glion/preset-lint-profile-recommended` (+ the 5 profile lint rules)     | `suites/lint-profile.bench.ts`                             | rules measured through the preset; includes cold-cache describe              |
+| `@glion/annotate-profile-*`, `@glion/preset-annotate-profile-recommended` | `suites/annotate-profile.bench.ts`                         | processors include the context plugin; clone baseline included               |
+| `@glion/mllp-codec`                                                       | `suites/codec.bench.ts` + `lab/codec-chunk-sweep.bench.ts` | trickle ratio pair is the O(N) guard                                         |
+| `@glion/mllp`                                                             | `suites/mllp-handle.bench.ts`                              | routing/middleware via `handle()`, no TCP                                    |
+| `@glion/mllp-client`                                                      | `suites/mllp-client.bench.ts`                              | `send()` round-trip over the in-memory wire (`fixtures/memory-wire.ts`)      |
+| `@glion/profiles`                                                         | `lab/profiles-cache.bench.ts`                              | cache-layer comparison; cold/warm regression signal comes via the lint suite |
 
-Deliberately unbenchmarked: pure-vocabulary and config packages (`@glion/ack`, `@glion/ast`, `@glion/config`, `@glion/utils`, semver/timestamp/uid utils — no hot path), `@glion/mllp-ack` (thin construction over the parser, covered transitively by the client suite), and the individual escape/delimiter plugins (covered inside the pipeline suite). If one of these grows a hot path, it earns a suite — absence should be a decision, not an accident.
+Deliberately unbenchmarked: pure-vocabulary and config packages (`@glion/ack`, `@glion/ast`, `@glion/config`, `@glion/utils`, semver/timestamp/uid utils — no hot path) and the individual escape/delimiter plugins (covered inside the pipeline suite). If one of these grows a hot path, it earns a suite — absence should be a decision, not an accident.
 
 ## PR norms
 

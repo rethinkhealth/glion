@@ -75,7 +75,7 @@ describe("Mllp.use({ prepend })", () => {
     const app = createApp();
     let capturedRes: string | undefined;
 
-    // Register an inner middleware that sets ctx.res (simulates ackMiddleware)
+    // Register an inner middleware that sets ctx.res (simulates an acknowledgment middleware)
     app.use(async (ctx, next) => {
       await next();
       ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };

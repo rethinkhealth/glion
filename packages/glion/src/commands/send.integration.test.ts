@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { Readable } from "node:stream";
 
 import type { MllpConnector, MllpDuplex } from "@glion/mllp-client";
-import { frame } from "@glion/mllp-transport";
+import { frame } from "@glion/mllp-codec";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { runSend } from "./send";
@@ -24,7 +24,7 @@ function ackFrame(code: string, withErr = false): Uint8Array {
   if (withErr) {
     segments.push("ERR|||207^bad^HL70357|E");
   }
-  return frame(segments.join("\r"));
+  return frame(new TextEncoder().encode(segments.join("\r")));
 }
 
 /**
@@ -234,6 +234,41 @@ describe("runSend (integration, fake connector)", () => {
     const json = JSON.parse(state.out);
     expect(json.kind).toBe("invalid");
     expect(json.message).toContain("Could not read the message");
+  });
+
+  it("reports an invalid outcome (exit 2) when the message has no MSH-10", async () => {
+    const noControlId = ADT.replace("|MSG00001|", "||");
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      connect: fakeConnector(ackFrame("AA")),
+      cwd: "/tmp",
+      stderr,
+      stdin: Readable.from(noControlId),
+      stdout,
+    });
+
+    expect(code).toBe(2);
+    const json = JSON.parse(state.out);
+    expect(json.kind).toBe("invalid");
+    expect(json.message).toContain("MSH-10");
+  });
+
+  it("reports an invalid outcome (exit 2) when the message contains a reserved VT byte", async () => {
+    const withVt = `${ADT}\rNTE|1||free\u000Btext`;
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      connect: fakeConnector(ackFrame("AA")),
+      cwd: "/tmp",
+      stderr,
+      stdin: Readable.from(withVt),
+      stdout,
+    });
+
+    expect(code).toBe(2);
+    const json = JSON.parse(state.out);
+    expect(json.kind).toBe("invalid");
   });
 
   it("renders the human exchange view on a TTY (accept)", async () => {

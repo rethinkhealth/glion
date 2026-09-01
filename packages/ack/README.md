@@ -18,7 +18,7 @@ npm install @glion/ack
 
 ## Use
 
-Reject a message from a server handler — the `@glion/mllp-ack` middleware turns the exception into the matching NAK:
+Reject a message from a server handler — the exception carries the acknowledgment code and error data the server renders into the matching NAK:
 
 ```ts
 import { AckApplicationError, Hl7ErrorCode } from "@glion/ack";
@@ -91,7 +91,7 @@ HL7v2 distinguishes two levels of acknowledgment — **application** and **commi
 | `AckCommitError`       | CE    | Commit error (enhanced mode). Persistence or downstream failure.       |
 | `AckCommitReject`      | CR    | Commit reject (enhanced mode). Refused at the commit layer.            |
 
-When `@glion/mllp-ack` renders the response, the exception's `message` becomes MSA-3 text. `errorCode` and `severity` stay data: the application renders them in whatever ERR shape its HL7v2 version requires.
+When a server renders the response, the exception's `message` becomes MSA-3 text. `errorCode` and `severity` stay data: the application renders them in whatever ERR shape its HL7v2 version requires.
 
 ## Part of Glion
 
