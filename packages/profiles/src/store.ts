@@ -1,5 +1,5 @@
-import type { Cache } from "./cache/types.js";
-import type { EventLoadOptions, ProfileStore } from "./types.js";
+import type { Cache } from "./cache/types";
+import type { EventLoadOptions, ProfileStore } from "./types";
 
 // ---------------------------------------------------------------------------
 // Config

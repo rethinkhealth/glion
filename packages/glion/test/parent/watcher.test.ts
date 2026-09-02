@@ -5,7 +5,7 @@ import { setTimeout as delay } from "node:timers/promises";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createWatcher } from "../../src/parent/watcher.js";
+import { createWatcher } from "../../src/parent/watcher";
 
 /**
  * Time to wait after starting a watcher before exercising it. macOS fsevents

@@ -1,6 +1,6 @@
 import { LRUCache } from "lru-cache";
 
-import type { Cache, CacheOptions } from "./types.js";
+import type { Cache, CacheOptions } from "./types";
 
 /**
  * Create a Cache backed by an LRU eviction policy.

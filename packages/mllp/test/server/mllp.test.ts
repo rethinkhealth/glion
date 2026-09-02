@@ -3,9 +3,9 @@ import { parseHL7v2 } from "@glion/hl7v2";
 import { hl7v2Parser } from "@glion/parser";
 import { unified } from "unified";
 
-import { MllpServerError } from "../../src/errors.js";
-import { Mllp } from "../../src/server/mllp.js";
-import type { ConnectionInfo, Hl7v2Processor } from "../../src/server/types.js";
+import { MllpServerError } from "../../src/errors";
+import { Mllp } from "../../src/server/mllp";
+import type { ConnectionInfo } from "../../src/server/types";
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -103,7 +103,7 @@ describe("Mllp", () => {
 
     it("last-write-wins when parser() called multiple times", async () => {
       // Create a second distinct processor so we can tell them apart
-      const second = unified().use(hl7v2Parser).freeze() as Hl7v2Processor;
+      const second = unified().use(hl7v2Parser).freeze();
       const firstSpy = vi.spyOn(parseHL7v2, "parse");
       const secondSpy = vi.spyOn(second, "parse");
 

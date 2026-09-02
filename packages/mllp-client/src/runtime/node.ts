@@ -103,7 +103,7 @@ function adaptSocket(socket: Socket): MllpDuplex {
         resolve();
         return;
       }
-      // Graceful close: send FIN, then give the peer a brief window
+      // Graceful close: send FIN, then give the remote system a brief window
       // (1 s) to respond with its own FIN before we issue destroy().
       // This avoids the FIN-immediately-followed-by-RST sequence that
       // some integration engines log as a protocol error.

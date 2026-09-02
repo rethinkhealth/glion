@@ -2,12 +2,12 @@ import net from "node:net";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { frame as encodeMLLP } from "@glion/mllp-transport";
+import { frame as encodeMLLP } from "@glion/mllp-codec";
 import { execa } from "execa";
 import type { ResultPromise } from "execa";
 import { afterEach, describe, expect, it } from "vitest";
 
-import type { Event } from "../../src/events.js";
+import type { Event } from "../../src/events";
 
 const fixturesDir = resolve(fileURLToPath(import.meta.url), "..", "fixtures");
 
@@ -112,7 +112,7 @@ describe("glion start e2e", () => {
 
     const sample =
       "MSH|^~\\&|X|X|X|X|202604041200||ADT^A01|MSG00001|P|2.5.1\rPID|||1||Doe^John\r";
-    const framed = encodeMLLP(sample);
+    const framed = encodeMLLP(new TextEncoder().encode(sample));
     const msgPromise = readUntilEvent(currentProc, (e) => e.t === "msg", 8000);
 
     const socket = net.connect(ready.port, "127.0.0.1");

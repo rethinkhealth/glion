@@ -1,65 +1,65 @@
 /**
- * The per-connection wire for {@link MllpClient}.
+ * One live MLLP connection for {@link MllpClient} — the wire an HL7v2
+ * conversation runs over.
  *
- * One {@link MllpDuplex} maps to one {@link Connection}. It owns everything whose
- * correct lifetime is a single connection: the FrameDecoder (whose byte buffer
- * survives across SENDS within this connection — that is what lets a late ACK
- * after a timeout land on the next send — but must NEVER survive across
- * connections), the read loop, peer-drop detection, the single-flight wire
- * exchange, and the unsolicited-frame buffer. A fresh object per connection
- * makes "reset connection-scoped state on reconnect" a structural guarantee
- * rather than a discipline.
+ * One {@link MllpDuplex} maps to one `Connection`, which owns everything whose
+ * correct lifetime is that single connection: the frame decoder (whose byte
+ * buffer survives across sends WITHIN the connection — that is what lets a
+ * coalesced or late ACK land on the next send — and never beyond it; the
+ * client builds a fresh `Connection` each time it connects, so decoder state
+ * can never leak from one connection into the next), the read loop, drop
+ * detection, and the exchange itself — one HL7v2 message out, its
+ * acknowledgment back.
+ *
+ * The inbound path is pull-based: the wire pipeline — `duplex.readable` piped
+ * through `unframe()` — yields one de-framed response per read, and a single
+ * pump _delivers_ them into the connection's response inbox; `exchange()`
+ * _takes_ the next one — its ACK — under the ACK deadline. The inbox's closed
+ * state is THE teardown latch: whichever terminal event comes first — the
+ * remote system dropping the connection, a frame that fails to decode, a write
+ * failure, an unsolicited-message flood, or an owner `shutdown()` — closes the
+ * inbox with its reason, and everything else (a second drop signal, a response
+ * already in flight, the next take) observes that single stored failure. A
+ * remote-initiated teardown fires `onDrop` exactly once; an owner shutdown does
+ * not (the owner already knows it is closing).
  *
  * @module
  */
 
-import { createFrameDecoder } from "@glion/mllp-transport";
+import type { Root } from "@glion/ast";
+import { unframe } from "@glion/mllp-codec";
 
 import { parseResponse } from "./ack";
 import type { MllpClientResponse } from "./ack";
 import type { MllpDuplex } from "./client";
 import { MllpClientError, MllpErrorCode } from "./errors";
+import { createResponseInbox } from "./inbox";
 
 /**
- * Maximum unsolicited frames buffered between sends; a flood beyond this is
- * terminal.
+ * Maximum unsolicited inbound messages queued between sends; a flood beyond
+ * this is terminal.
  */
-const MAX_PENDING_FRAMES = 16;
+const MAX_UNSOLICITED_MESSAGES = 16;
 
-/**
- * A deferred: the captured `resolve` / `reject` of the ONE in-flight exchange's
- * ACK promise. `waitForFrame` creates the promise and parks its settlers here
- * so settlement can come from elsewhere — the read loop hands it the matching
- * frame ({@link dispatchFrame} → `resolve`), or a teardown fails it
- * ({@link
- * dispatchError} / `shutdown` → `reject`). This is the bridge from the
- * event-driven read loop to the per-send `Promise<MllpClientResponse>`; XState
- * gives no request/response primitive, so single-flight makes it a single
- * deferred rather than a correlation map.
- */
-interface PendingAck {
-  /** Deliver the ACK frame to the parked send. */
-  resolve(bytes: Uint8Array): void;
-  /** Fail the parked send — a send timeout, a peer drop, or `close()`. */
-  reject(error: Error): void;
-}
-
+/** One send, ready for the wire: what `exchange()` needs to run it. */
 export interface ExchangeRequest {
+  /** The MLLP-framed HL7v2 message bytes. */
   readonly framed: Uint8Array;
+  /** The message's MSH-10, correlated against the ACK's MSA-2. */
   readonly requestControlId: string;
-  /** ACK-wait deadline (ms); `exchange` owns the timer, scoped to one exchange. */
+  /** ACK deadline (ms); `exchange` owns the timer, scoped to one send. */
   readonly timeoutMs: number;
 }
 
 export interface Connection {
   /**
-   * Write `req` and resolve with the parsed ACK. Single-flight — never call
-   * concurrently.
+   * Send one framed HL7v2 message and resolve with its parsed acknowledgment.
+   * Single-flight — one exchange at a time, never concurrent.
    */
   exchange(req: ExchangeRequest): Promise<MllpClientResponse>;
   /**
-   * Owner-initiated teardown: settle the in-flight send with `reason`, close
-   * the duplex.
+   * The client is closing this connection: reject the send awaiting its ACK
+   * with `reason`, close the duplex.
    */
   shutdown(reason: MllpClientError): Promise<void>;
 }
@@ -69,143 +69,102 @@ export interface ConnectionOptions {
   readonly host: string;
   readonly port: number;
   readonly maxBufferedBytes: number | undefined;
+  /** Parses inbound ACK text to a tree (the client injects this). */
+  readonly parser: (input: string) => Root;
   /**
-   * Fired once when the PEER ends the connection (not on owner-initiated
-   * shutdown).
+   * Fired once when the connection ends for any reason other than an owner
+   * `shutdown()` — the remote system hung up, or the wire failed.
    */
   onDrop(error: MllpClientError): void;
 }
 
 /**
  * Build the live wire over one open `duplex` and start reading immediately.
- * Returns a single-flight {@link Connection}: call {@link Connection.exchange}
- * one at a time, {@link Connection.shutdown} to tear down. Every piece of
- * connection-scoped state — the decoder buffer, the reader, the in-flight
- * pending ACK, the unsolicited-frame buffer — is closed over here, so a fresh
- * call
- * per dial resets all of it by construction; a `Connection` is never reused.
- *
- * Teardown is single-latched (`dead`): the FIRST of a peer drop
- * ({@link dispatchError}) or an owner {@link Connection.shutdown} wins and the
- * rest are no-ops. A peer drop fires `onDrop` once; an owner shutdown does not
- * (the owner already knows it is closing).
+ * Returns a single-flight {@link Connection}: call `exchange()` one at a time,
+ * `shutdown()` to tear down. A `Connection` is never reused — the client
+ * builds a fresh one each time it connects.
  */
 export function createConnection(opts: ConnectionOptions): Connection {
-  const { duplex, host, port, maxBufferedBytes, onDrop } = opts;
+  const { duplex, host, port, maxBufferedBytes, onDrop, parser } = opts;
 
-  const decoder = createFrameDecoder(
-    maxBufferedBytes === undefined ? undefined : { maxBufferedBytes }
-  );
-  const reader = duplex.readable.getReader();
+  // The wire pipeline: raw socket bytes piped through unframe() yield one
+  // de-framed HL7v2 response per read. Framing violations error the pipeline.
+  const reader = duplex.readable
+    .pipeThrough(unframe({ maxBufferedBytes }))
+    .getReader();
+  const inbox = createResponseInbox();
 
-  // Inbound routing is single-flight: at most one exchange waits at a time
-  // (`pendingAck`). A frame that arrives with nothing waiting — a late ACK from
-  // previously timed-out send — is buffered in `pendingFrames` so the NEXT
-  // waitForFrame drains it (and the correlation check rejects a stale id),
-  // capped so an unsolicited-frame flood cannot grow memory without bound.
-  let pendingFrames: Uint8Array[] = [];
-  let pendingAck: PendingAck | null = null;
-  // Race recovery: a drop can land between writer.write() and the exchange
-  // registering its pending ACK. Stash the error so the imminent waitForFrame
-  // it instead of hanging.
-  let pendingError: MllpClientError | null = null;
-  // Terminal latch: set by the first drop OR by shutdown — teardown + onDrop run
-  // at most once.
-  let dead = false;
-  let closingExplicit = false;
-
-  // Peer-initiated teardown (the counterpart to owner `shutdown`): a drop the
-  // connection detected. Latch `dead`, close the duplex, notify the owner once
-  // via onDrop, then reject the in-flight send — or stash the error for the
-  // exchange that is about to register its pending ACK.
-  function dispatchError(error: MllpClientError): void {
-    if (dead) {
+  // Remote-initiated teardown (the counterpart to owner `shutdown`). Once-only:
+  // the first terminal event closes the inbox with its reason (rejecting the
+  // send awaiting its ACK); everything after sees the inbox already closed and
+  // bows out.
+  function dropConnection(error: MllpClientError): void {
+    if (inbox.failure) {
       return;
     }
-    dead = true;
-    const pending = pendingAck;
-    pendingAck = null;
-    pendingFrames = [];
+    inbox.close(error);
     // Fire-and-forget — the adapter contract guarantees close() resolves.
     void duplex.close();
-    // onDrop first (machine transition), then the pending ACK, so a caller
-    // observing the lifecycle and the send rejection sees consistent state.
     onDrop(error);
-    if (pending) {
-      pending.reject(error);
-    } else {
-      pendingError = error;
-    }
   }
 
-  /**
-   * Route one fully-decoded inbound frame. If an exchange is parked waiting for
-   * its ACK (`pendingAck`), the frame is its response — deliver it and clear
-   * the slot. Otherwise the frame is unsolicited (a late ACK for a send that
-   * already timed out, or a server-initiated message): buffer it so the NEXT
-   * {@link waitForFrame} drains it (where the correlation check rejects a stale
-   * id). The buffer is capped at {@link MAX_PENDING_FRAMES} — a flood past that
-   * cannot grow memory without bound, so it is treated as a terminal drop.
-   */
-  function dispatchFrame(bytes: Uint8Array): void {
-    const pending = pendingAck;
-    if (pending) {
-      pendingAck = null;
-      pending.resolve(bytes);
-      return;
-    }
-    if (pendingFrames.length >= MAX_PENDING_FRAMES) {
-      dispatchError(
-        new MllpClientError(
-          MllpErrorCode.DROPPED,
-          `Received more than ${MAX_PENDING_FRAMES} unsolicited frames with no matching request; closing the connection to avoid unbounded buffering.`
-        )
-      );
-      return;
-    }
-    pendingFrames.push(bytes);
-  }
-
-  // The inbound pump: drain the reader, feed bytes to the decoder, route each
-  // decoded frame. Exits quietly on EOF or a released lock; a decoder error is a
-  // terminal drop (the decoder's buffer state is undefined past that point).
+  // The inbound pump: pull de-framed responses off the wire pipeline and
+  // deliver them to the inbox. EOF exits quietly (watchForDrop reports the
+  // drop); a framing violation — bytes between frames, a frame glued into an
+  // unterminated one, an unterminated frame at end-of-stream, the buffer cap —
+  // errors the pipeline and lands in the catch as a terminal drop. More queued
+  // responses than MAX_UNSOLICITED_MESSAGES with no send waiting is an
+  // unsolicited-message flood — also terminal.
   async function runReadLoop(): Promise<void> {
     try {
       while (true) {
-        const { done, value: chunk } = await reader.read();
-        if (dead) {
+        const { done, value: response } = await reader.read();
+        if (done || inbox.failure) {
           return;
         }
-        if (done) {
-          // EOF — the connection half-closed; watchForDrop reports the drop.
-          return;
-        }
-        const error = decoder.push(chunk, (decoded) => dispatchFrame(decoded));
-        if (error) {
-          // Decoder errors are terminal (its buffer state becomes undefined).
-          dispatchError(
-            new MllpClientError(MllpErrorCode.DROPPED, error.message, {
-              cause: error,
-            })
+        if (inbox.size >= MAX_UNSOLICITED_MESSAGES) {
+          dropConnection(
+            new MllpClientError(
+              MllpErrorCode.DROPPED,
+              `Received more than ${MAX_UNSOLICITED_MESSAGES} unsolicited messages with no matching request; closing the connection to avoid unbounded buffering.`
+            )
           );
           return;
         }
+        inbox.deliver(response);
       }
-    } catch {
-      // reader.read() rejected — shutdown released the lock, or the stream
-      // errored. watchForDrop or shutdown owns teardown; nothing to do.
+    } catch (error) {
+      // The pipeline errored — a MllpCodecError from unframe(), or the duplex
+      // readable failing after teardown. dropConnection's once-only latch
+      // makes the post-shutdown case a no-op.
+      dropConnection(
+        new MllpClientError(
+          MllpErrorCode.DROPPED,
+          error instanceof Error
+            ? error.message
+            : `The connection to ${host}:${port} failed while reading.`,
+          { cause: error }
+        )
+      );
     }
   }
 
-  // The second drop signal. runReadLoop only sees a drop as reader EOF/error;
-  // `duplex.closed` resolves on any either-side teardown, so this catches a
-  // close that never surfaces as a read result. Silent when the owner closed.
+  // The second drop signal. runReadLoop only sees the connection end as a
+  // reader EOF/error; `duplex.closed` resolves on any either-side teardown, so
+  // this catches a remote hang-up that never surfaces as a read result. After
+  // an owner shutdown the inbox is already closed, so this is a no-op.
   async function watchForDrop(): Promise<void> {
     await duplex.closed;
-    if (closingExplicit || dead) {
-      return;
-    }
-    dispatchError(
+    // The closed signal can outrun the last inbound frames still inside the
+    // wire pipeline's microtask hops — a one-shot remote system writes the
+    // ACK and closes in the same instant. One macrotask lets those
+    // deliveries (and the read loop) settle first, so the ACK reaches the
+    // waiting exchange before this drop closes the inbox.
+    // oxlint-disable-next-line promise/avoid-new -- one-macrotask deferral
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+    dropConnection(
       new MllpClientError(
         MllpErrorCode.DROPPED,
         `The connection to ${host}:${port} was closed.`
@@ -213,112 +172,111 @@ export function createConnection(opts: ConnectionOptions): Connection {
     );
   }
 
-  // Await the ACK for the in-flight exchange. Registers the single pending ACK —
-  // first drains a drop that raced ahead of registration (`pendingError`) or a
-  // frame already buffered (`pendingFrames`), so an exchange can never park
-  // forever. The deadline signal (owned by `exchange`) bounds the wait.
-  function waitForFrame(
-    deadlineSignal: AbortSignal,
-    timeoutMs: number
-  ): Promise<Uint8Array> {
-    // A drop fired between writer.write() and this registration — surface it.
-    if (pendingError !== null) {
-      const error = pendingError;
-      pendingError = null;
-      // oxlint-disable-next-line eslint/prefer-promise-reject-errors -- error is a narrowed MllpClientError
-      return Promise.reject(error);
-    }
-    // Drain a previously-queued (late) frame first.
-    const queued = pendingFrames.shift();
-    if (queued !== undefined) {
-      return Promise.resolve(queued);
-    }
-
-    // oxlint-disable-next-line promise/avoid-new -- canonical promise wrapper
-    return new Promise<Uint8Array>((resolve, reject) => {
-      const onTimeout = () => {
-        if (pendingAck === pending) {
-          pendingAck = null;
-        }
-        reject(MllpClientError.timeout(timeoutMs));
-      };
-
-      const pending: PendingAck = {
-        reject: (error) => {
-          deadlineSignal.removeEventListener("abort", onTimeout);
-          reject(error);
-        },
-        resolve: (bytes) => {
-          deadlineSignal.removeEventListener("abort", onTimeout);
-          resolve(bytes);
-        },
-      };
-
-      pendingAck = pending;
-      if (deadlineSignal.aborted) {
-        onTimeout();
-        return;
-      }
-      deadlineSignal.addEventListener("abort", onTimeout, { once: true });
-    });
-  }
-
-  // One single-flight round trip: write the framed message, await the next frame
-  // as its ACK under a fresh per-exchange deadline, parse it, and stamp the wire
-  // timing. The caller (client `send()`) guarantees no concurrent exchange.
-  async function exchange(req: ExchangeRequest): Promise<MllpClientResponse> {
-    const sentMonotonic = performance.now();
-
+  // Write one frame under the send deadline. `writer.write` takes no signal,
+  // so the write races the deadline; a deadline that wins mid-write is
+  // handled by the caller (exchange) as terminal — a partial frame may be on
+  // the wire.
+  async function writeFramed(
+    framed: Uint8Array,
+    signal: AbortSignal
+  ): Promise<void> {
     const writer = duplex.writable.getWriter();
+    // oxlint-disable-next-line promise/avoid-new -- adapt the signal to a race
+    const abortedPromise = new Promise<never>((_resolve, reject) => {
+      signal.addEventListener("abort", () => reject(signal.reason), {
+        once: true,
+      });
+    });
+    // The deadline may fire after this race is already decided (during the
+    // ACK wait); the stray rejection of abortedPromise has no consumer then
+    // and must not surface as an unhandled rejection.
+    // oxlint-disable-next-line promise/prefer-await-to-then -- a detached rejection guard; awaiting would defeat the race
+    abortedPromise.catch(() => {
+      // handled by the race when it matters
+    });
+    // Node 20 throws synchronously from write() on a closed/errored stream
+    // (ERR_INTERNAL_ASSERTION; fixed in Node 21+, never backported) where
+    // later Nodes reject the returned promise. The write sits inside the try
+    // so both shapes land in the same catch and wrap as DROPPED.
+    let pendingWrite: Promise<void> | undefined;
     try {
-      await writer.write(req.framed);
+      pendingWrite = writer.write(framed);
+      await Promise.race([pendingWrite, abortedPromise]);
     } catch (error) {
-      // A write failure is terminal. Two distinct concerns, hence two calls:
-      // dispatchError tears the CONNECTION down (latch dead, close the duplex,
-      // fire onDrop so the owner leaves `connected`); `throw` fails THIS exchange.
-      // The throw is not redundant with dispatchError — the write failed before
-      // waitForFrame registered a pendingAck, so dispatchError has no parked ACK
-      // to reject. Throwing is what rejects this in-flight send.
+      if (signal.aborted && error === signal.reason) {
+        // Deadline fired while the write was parked (the remote system
+        // stopped reading). This send already fails with the timeout and the
+        // caller drops the connection; the parked write's eventual
+        // settlement against the closing duplex has no consumer.
+        // oxlint-disable-next-line promise/prefer-await-to-then -- a detached rejection guard; the send already failed
+        pendingWrite?.catch(() => {
+          // non-actionable: the send failed and the connection is dropping
+        });
+        throw error;
+      }
+      // The write itself failed — terminal. dropConnection tears the
+      // CONNECTION down; the throw fails THIS send — the write failed before
+      // the send parked as the pending ACK, so closing the inbox has nothing
+      // to reject.
       const dropped = new MllpClientError(
         MllpErrorCode.DROPPED,
         `Failed to write the framed message to ${host}:${port}; the connection is no longer usable (see the error's cause).`,
         { cause: error }
       );
-      dispatchError(dropped);
+      dropConnection(dropped);
       throw dropped;
     } finally {
       writer.releaseLock();
     }
+  }
 
-    // The ACK-wait deadline is owned here, scoped to this exchange: started now,
-    // cleared in `finally` the moment it settles. AbortController + setTimeout
-    // (not AbortSignal.timeout) so the timer is cancellable and never lingers.
+  // One exchange: write the framed HL7v2 message and take the next response
+  // as its ACK, all under ONE send deadline covering both phases. A deadline
+  // that expires is connection-terminal either way: mid-write a partial frame
+  // may be on the wire, and after a timed-out wait a late ACK could never be
+  // matched safely again — dropping keeps acknowledgment correlation
+  // trustworthy (most MLLP implementations recycle the connection the same
+  // way). The caller (client `send()`) guarantees single-flight.
+  async function exchange(req: ExchangeRequest): Promise<MllpClientResponse> {
+    const sentMonotonic = performance.now();
+
+    // The abort reason IS the timeout error, so both the write race and the
+    // inbox reject the pending work with it directly.
     const deadline = new AbortController();
     const deadlineTimer = setTimeout(() => {
-      deadline.abort();
+      deadline.abort(MllpClientError.timeout(req.timeoutMs));
     }, req.timeoutMs);
+
     try {
-      const ackBytes = await waitForFrame(deadline.signal, req.timeoutMs);
+      await writeFramed(req.framed, deadline.signal);
+      const ackBytes = await inbox.take(deadline.signal);
       const timestamp = new Date();
       const durationMs = performance.now() - sentMonotonic;
       // parseResponse is the codec; the exchange owns the wire timing.
-      const ack = parseResponse(ackBytes, req.requestControlId);
+      const ack = parseResponse(ackBytes, req.requestControlId, parser);
       return { ...ack, durationMs, timestamp };
     } catch (error) {
-      // A send timeout can leave a half-decoded frame in the connection-scoped
-      // decoder buffer (a slow / slowloris peer trickled a partial ACK). That
-      // partial is now stale: discard it so the NEXT send's ACK is not appended
-      // to it and corrupted. Only the exchange knows its ACK timed out — the
-      // decoder buffer is connection-scoped and otherwise survives across sends
-      // (for coalesced / late frames) — so the reset is triggered here. Any other
-      // failure leaves the buffer untouched.
-      const stalePartialFromTimeout =
+      // A timeout and an uninterpretable reply are both connection-terminal:
+      // after either, this wire's acknowledgment correlation can no longer
+      // be trusted — a stray or unmatched frame would be consumed as the
+      // next send's ACK and desynchronize every send after it. The caller
+      // still sees the original error; the connection latches DROPPED with
+      // it as the cause. (A NAK is an AckException — the remote system
+      // answered properly — and does not drop.)
+      if (
         error instanceof MllpClientError &&
-        error.code === MllpErrorCode.SEND_TIMEOUT &&
-        !dead &&
-        decoder.buffered > 0;
-      if (stalePartialFromTimeout) {
-        decoder.reset();
+        (error.code === MllpErrorCode.SEND_TIMEOUT ||
+          error.code === MllpErrorCode.INVALID_RESPONSE)
+      ) {
+        dropConnection(
+          new MllpClientError(
+            MllpErrorCode.DROPPED,
+            error.code === MllpErrorCode.SEND_TIMEOUT
+              ? `The connection to ${host}:${port} was closed after a send timed out; a late acknowledgment could not be matched safely.`
+              : `The connection to ${host}:${port} was closed after an uninterpretable reply; acknowledgment correlation can no longer be trusted.`,
+            { cause: error }
+          )
+        );
       }
       throw error;
     } finally {
@@ -326,29 +284,18 @@ export function createConnection(opts: ConnectionOptions): Connection {
     }
   }
 
-  // Owner-initiated teardown (the counterpart to a peer drop via dispatchError):
-  // settle the in-flight send with `reason`, release the reader, close the
-  // duplex — once, behind the `dead` latch. Does NOT fire onDrop (the owner
-  // asked for this). Resolves; never rejects.
+  // Owner-initiated teardown: reject the send awaiting its ACK with `reason`,
+  // close the duplex — once, via the inbox's closed state. Does NOT fire
+  // onDrop (the owner asked for this). Resolves; never rejects.
   async function shutdown(reason: MllpClientError): Promise<void> {
-    if (dead) {
-      // A peer drop already tore this connection down; nothing left to settle.
+    if (inbox.failure) {
+      // A drop already tore this connection down; nothing left to settle.
       return;
     }
-    closingExplicit = true;
-    dead = true;
-    const pending = pendingAck;
-    if (pending) {
-      pendingAck = null;
-      pending.reject(reason);
-    } else {
-      pendingError = reason;
-    }
-    pendingFrames = [];
-    // Releasing the lock rejects the read parked in runReadLoop with a
-    // TypeError ("Invalid state: Releasing reader"), which that loop's catch
-    // absorbs. releaseLock() itself never throws here, so it needs no guard.
-    reader.releaseLock();
+    inbox.close(reason);
+    // Closing the duplex ends the wire pipeline: the read parked in
+    // runReadLoop resolves done (or rejects into its catch, where the
+    // once-only latch makes it a no-op).
     await duplex.close();
   }
 

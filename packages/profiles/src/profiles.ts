@@ -1,12 +1,12 @@
-import { createLruCache } from "./cache/lru.js";
-import type { Cache, CacheOptions } from "./cache/types.js";
-import { createProfileStore } from "./store.js";
-import { codeSystemsConfig } from "./stores/code-systems.js";
-import { datatypesConfig } from "./stores/datatypes.js";
-import { eventsConfig } from "./stores/events.js";
-import { fieldsConfig } from "./stores/fields.js";
-import { tablesConfig } from "./stores/tables.js";
-import type { CodeSystemStore, Profiles, ProfilesOptions } from "./types.js";
+import { createLruCache } from "./cache/lru";
+import type { Cache, CacheOptions } from "./cache/types";
+import { createProfileStore } from "./store";
+import { codeSystemsConfig } from "./stores/code-systems";
+import { datatypesConfig } from "./stores/datatypes";
+import { eventsConfig } from "./stores/events";
+import { fieldsConfig } from "./stores/fields";
+import { tablesConfig } from "./stores/tables";
+import type { CodeSystemStore, Profiles, ProfilesOptions } from "./types";
 
 // ---------------------------------------------------------------------------
 // Cache resolution

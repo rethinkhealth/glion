@@ -1,4 +1,4 @@
-import type { PartialEvent } from "../events.js";
+import type { PartialEvent } from "../events";
 
 /**
  * Minimum surface installShutdownHandlers needs from the MLLP server.

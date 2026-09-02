@@ -16,6 +16,8 @@
  * without sockets or fixtures.
  */
 
+import type { AckNakCode } from "@glion/ack";
+
 /**
  * The target the message was (or would have been) sent to. Carried on every
  * outcome so both renderers can report where the exchange happened.
@@ -61,7 +63,7 @@ export interface SendNakOutcome {
   target: SendTarget;
   request: SendRequestSummary;
   /** Rejection code: `AE`/`AR` (application) or `CE`/`CR` (commit). */
-  code: "AE" | "AR" | "CE" | "CR";
+  code: AckNakCode;
   ackControlId: string;
   /** MSA-3 free text (the peer's reason), when present. */
   text?: string;
@@ -73,8 +75,9 @@ export interface SendNakOutcome {
 }
 
 /**
- * Transport/protocol failure surfaced as an `MllpClientError`: connect failed,
- * timed out, correlation mismatch, parse failure, etc. Exit 2.
+ * Transport/protocol failure surfaced as an `MllpClientError`: connect failed
+ * or timed out, send timed out, unusable reply (`INVALID_RESPONSE`),
+ * connection dropped, etc. Exit 2.
  */
 export interface SendTransportOutcome {
   kind: "transport";

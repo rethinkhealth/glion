@@ -1,31 +1,31 @@
 // Generated root table manifest
 
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_1 } from "./v2.1/tables/manifest.js";
+import { tableImports as v2_1 } from "./v2.1/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_2 } from "./v2.2/tables/manifest.js";
+import { tableImports as v2_2 } from "./v2.2/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_3_1 } from "./v2.3.1/tables/manifest.js";
+import { tableImports as v2_3_1 } from "./v2.3.1/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_3 } from "./v2.3/tables/manifest.js";
+import { tableImports as v2_3 } from "./v2.3/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_4 } from "./v2.4/tables/manifest.js";
+import { tableImports as v2_4 } from "./v2.4/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_5_1 } from "./v2.5.1/tables/manifest.js";
+import { tableImports as v2_5_1 } from "./v2.5.1/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_5 } from "./v2.5/tables/manifest.js";
+import { tableImports as v2_5 } from "./v2.5/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_6 } from "./v2.6/tables/manifest.js";
+import { tableImports as v2_6 } from "./v2.6/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_7_1 } from "./v2.7.1/tables/manifest.js";
+import { tableImports as v2_7_1 } from "./v2.7.1/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_7 } from "./v2.7/tables/manifest.js";
+import { tableImports as v2_7 } from "./v2.7/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_8_1 } from "./v2.8.1/tables/manifest.js";
+import { tableImports as v2_8_1 } from "./v2.8.1/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_8_2 } from "./v2.8.2/tables/manifest.js";
+import { tableImports as v2_8_2 } from "./v2.8.2/tables/manifest";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { tableImports as v2_8 } from "./v2.8/tables/manifest.js";
+import { tableImports as v2_8 } from "./v2.8/tables/manifest";
 
 export interface TableModule {
   readonly id: string;

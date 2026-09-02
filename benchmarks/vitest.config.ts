@@ -6,7 +6,8 @@ export default defineConfig({
   test: {
     benchmark: {
       exclude: ["node_modules/**"],
-      include: ["**/*.bench.ts"],
+      include: ["suites/**/*.bench.ts"],
     },
+    include: ["*.test.ts"],
   },
 });

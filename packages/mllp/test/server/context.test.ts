@@ -3,8 +3,7 @@ import { parseHL7v2 } from "@glion/hl7v2";
 import { hl7v2Parser } from "@glion/parser";
 import { unified } from "unified";
 
-import { createContext } from "../../src/server/context.js";
-import type { Hl7v2Processor } from "../../src/server/types.js";
+import { createContext } from "../../src/server/context";
 
 const SAMPLE_MESSAGE = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -104,7 +103,7 @@ describe("createContext", () => {
 
   describe("processor configurations", () => {
     it("works with parse-only processor (no transformers, no compiler)", async () => {
-      const parseOnly = unified().use(hl7v2Parser).freeze() as Hl7v2Processor;
+      const parseOnly = unified().use(hl7v2Parser).freeze();
 
       const ctx = createContext({
         bytes: SAMPLE_BYTES,

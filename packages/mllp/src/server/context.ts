@@ -71,7 +71,11 @@ export function createContext(options: CreateContextOptions): Context {
     }
     if (!transformPromise) {
       transformPromise = (async () => {
-        const result = await processor.run(parsed, file);
+        // Hl7v2Processor's tail admits `undefined` (so the bare parser is
+        // assignable), which makes unified type run()'s result as
+        // `Root | Node`; an HL7v2 pipeline always yields the (possibly
+        // transformed) Root.
+        const result = (await processor.run(parsed, file)) as Root;
         transformedTree = result;
         return result;
       })();

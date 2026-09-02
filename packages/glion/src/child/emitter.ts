@@ -1,7 +1,7 @@
 import type { Writable } from "node:stream";
 
-import { encode } from "../events.js";
-import type { Event, PartialEvent } from "../events.js";
+import { encode } from "../events";
+import type { Event, PartialEvent } from "../events";
 
 // ─── Public interface ──────────────────────────────────────────────
 

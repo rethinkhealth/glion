@@ -4,6 +4,8 @@
 
 Proposed
 
+> **Update (2026-08):** `@glion/mllp-transport` was renamed to `@glion/mllp-codec`, and `FramingError` / `FramingErrorCode` became `MllpCodecError` / `MllpCodecErrorCode` (codes renamed: `MISSING_START_BLOCK` → `UNEXPECTED_DATA`, `MISSING_END_BLOCK` → `INCOMPLETE_MESSAGE`, `FRAME_TOO_LARGE` → `MESSAGE_TOO_LARGE`, `EMBEDDED_CONTROL_CHAR` → `RESERVED_CHARACTER`). The client also stopped leaking the codec type: `MllpClient.send()` wraps a reserved-character failure as `MllpClientError` `INVALID_MESSAGE` with the codec error on `cause`, and the server reports byte-stream violations to `onError` as `MllpServerError` `PROTOCOL_VIOLATION`. Package and class names below are otherwise left as written.
+
 ## Context
 
 The `@glion/*` ecosystem surfaces "something went wrong" through **three

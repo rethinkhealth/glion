@@ -2,7 +2,7 @@ import { clearTimeout, setTimeout as nodeSetTimeout } from "node:timers";
 
 import type * as ChokidarModule from "chokidar";
 
-import { GlionError } from "../errors.js";
+import { GlionError } from "../errors";
 
 type Chokidar = typeof ChokidarModule;
 

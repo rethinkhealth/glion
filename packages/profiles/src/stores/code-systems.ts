@@ -1,11 +1,11 @@
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { utgCodeSystemImports } from "../profiles/utg/manifest.js";
-import type { ProfileStoreConfig } from "../store.js";
+import { utgCodeSystemImports } from "../profiles/utg/manifest";
+import type { ProfileStoreConfig } from "../store";
 import type {
   CodeSystemDefinition,
   UtgCodeEntry,
   UtgCodeSystemModule,
-} from "./types.js";
+} from "./types";
 
 /** Compile raw UTG code system module into indexed definition. */
 const compileCodeSystem = (raw: UtgCodeSystemModule): CodeSystemDefinition => {

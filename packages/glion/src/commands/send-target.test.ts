@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { deriveLocalTarget, resolveTarget } from "./send-target.js";
-import type { SendArgs } from "./send.js";
+import type { SendArgs } from "./send";
+import { deriveLocalTarget, resolveTarget } from "./send-target";
 
 function args(overrides: Partial<SendArgs> = {}): SendArgs {
   return { help: false, json: false, local: false, ...overrides };

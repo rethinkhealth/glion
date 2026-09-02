@@ -1,11 +1,11 @@
 import { isAbsolute, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { GlionError } from "../errors.js";
-import { compileConfig } from "./compile.js";
-import { CONFIG_FILENAMES, discoverConfig } from "./discover.js";
-import type { ResolvedConfig } from "./schema.js";
-import { makeGlionConfigSchema } from "./schema.js";
+import { GlionError } from "../errors";
+import { compileConfig } from "./compile";
+import { CONFIG_FILENAMES, discoverConfig } from "./discover";
+import type { ResolvedConfig } from "./schema";
+import { makeGlionConfigSchema } from "./schema";
 
 export interface LoadConfigOptions {
   /** Project root — config files are searched here. */

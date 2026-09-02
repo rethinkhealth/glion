@@ -631,20 +631,20 @@ describe("parser", () => {
       const root = parseHL7v2("|");
       expect(root.type).toBe("root");
       expect(root.children.length).toBeGreaterThanOrEqual(1);
-      expect(root.children[0]?.name).toBe("");
+      expect(root.children[0]).toMatchObject({ name: "" });
     });
 
     it("separates unnamed segment from subsequent named segment", () => {
       const root = parseHL7v2("|value\rPID|123");
       expect(root.children).toHaveLength(2);
-      expect(root.children[0]?.name).toBe("");
-      expect(root.children[1]?.name).toBe("PID");
+      expect(root.children[0]).toMatchObject({ name: "" });
+      expect(root.children[1]).toMatchObject({ name: "PID" });
     });
 
     it("does not affect valid messages", () => {
       const root = parseHL7v2("PID|123|456");
       expect(root.children).toHaveLength(1);
-      expect(root.children[0]?.name).toBe("PID");
+      expect(root.children[0]).toMatchObject({ name: "PID" });
     });
   });
 });

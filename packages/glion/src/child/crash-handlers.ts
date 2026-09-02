@@ -1,5 +1,5 @@
-import { fatalEvent } from "../events.js";
-import type { PartialEvent } from "../events.js";
+import { fatalEvent } from "../events";
+import type { PartialEvent } from "../events";
 
 /**
  * Process-exit signature with the bits we actually use. The real

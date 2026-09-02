@@ -2,7 +2,7 @@ import { PassThrough } from "node:stream";
 
 import { describe, expect, it } from "vitest";
 
-import { readLines } from "../../src/parent/line-reader.js";
+import { readLines } from "../../src/parent/line-reader";
 
 /**
  * Waits one macrotask so any queued `data`/`end` events on a

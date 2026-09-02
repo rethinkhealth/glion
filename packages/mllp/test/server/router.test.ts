@@ -1,17 +1,19 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 
-import { createContext } from "../../src/server/context.js";
-import { Router } from "../../src/server/router.js";
-import type { Context, Middleware } from "../../src/server/types.js";
+import { createContext } from "../../src/server/context";
+import { Router } from "../../src/server/router";
+import type { Context, Middleware } from "../../src/server/types";
 
 const RESPONSE_OK = { raw: "MSA|AA|OK" };
 
 const CONNECTION = {
+  id: 1,
   localPort: 2575,
   remoteAddress: "127.0.0.1",
   remotePort: 12_345,
   secure: false,
+  state: new Map(),
 };
 
 function makeCtx(raw: string): Context {

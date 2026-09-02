@@ -54,6 +54,18 @@ importers:
       '@codspeed/vitest-plugin':
         specifier: ^5.4.0
         version: 5.4.0(tinybench@2.9.0)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))(vitest@4.1.5)
+      '@glion/annotate-profile-context':
+        specifier: workspace:*
+        version: link:../packages/annotate-profile-context
+      '@glion/annotate-profile-datatypes':
+        specifier: workspace:*
+        version: link:../packages/annotate-profile-datatypes
+      '@glion/annotate-profile-fields':
+        specifier: workspace:*
+        version: link:../packages/annotate-profile-fields
+      '@glion/annotate-profile-fields-code-systems':
+        specifier: workspace:*
+        version: link:../packages/annotate-profile-fields-code-systems
       '@glion/builder':
         specifier: workspace:*
         version: link:../packages/builder
@@ -63,24 +75,36 @@ importers:
       '@glion/mllp':
         specifier: workspace:*
         version: link:../packages/mllp
-      '@glion/mllp-ack':
+      '@glion/mllp-client':
         specifier: workspace:*
-        version: link:../packages/mllp-ack
+        version: link:../packages/mllp-client
+      '@glion/mllp-codec':
+        specifier: workspace:*
+        version: link:../packages/mllp-codec
       '@glion/parser':
         specifier: workspace:*
         version: link:../packages/parser
+      '@glion/preset-annotate-profile-recommended':
+        specifier: workspace:*
+        version: link:../packages/preset-annotate-profile-recommended
       '@glion/preset-lint-profile-recommended':
         specifier: workspace:*
         version: link:../packages/preset-lint-profile-recommended
       '@glion/profiles':
         specifier: workspace:*
         version: link:../packages/profiles
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../packages/to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../tools/tsconfig
       '@glion/util-query':
         specifier: workspace:*
         version: link:../packages/util-query
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
       unified:
         specifier: ^11.0.5
         version: 11.0.5
@@ -96,18 +120,6 @@ importers:
       '@glion/ast':
         specifier: workspace:*
         version: link:../ast
-      '@glion/builder':
-        specifier: workspace:*
-        version: link:../builder
-      '@glion/util-query':
-        specifier: workspace:*
-        version: link:../util-query
-      '@glion/util-timestamp':
-        specifier: workspace:*
-        version: link:../util-timestamp
-      nanoid:
-        specifier: 5.1.7
-        version: 5.1.7
     devDependencies:
       '@glion/check-readme':
         specifier: workspace:*
@@ -754,12 +766,9 @@ importers:
       '@glion/hl7v2':
         specifier: workspace:*
         version: link:../hl7v2
-      '@glion/mllp-ack':
+      '@glion/mllp-codec':
         specifier: workspace:*
-        version: link:../mllp-ack
-      '@glion/mllp-transport':
-        specifier: workspace:*
-        version: link:../mllp-transport
+        version: link:../mllp-codec
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
@@ -1649,9 +1658,9 @@ importers:
       '@glion/ast':
         specifier: workspace:*
         version: link:../ast
-      '@glion/mllp-transport':
+      '@glion/mllp-codec':
         specifier: workspace:*
-        version: link:../mllp-transport
+        version: link:../mllp-codec
       '@glion/parser':
         specifier: workspace:*
         version: link:../parser
@@ -1699,61 +1708,6 @@ importers:
         specifier: 4.1.5
         version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
 
-  packages/mllp-ack:
-    dependencies:
-      '@glion/ack':
-        specifier: workspace:*
-        version: link:../ack
-      '@glion/encode-escapes':
-        specifier: workspace:*
-        version: link:../encode-escapes
-      '@glion/mllp':
-        specifier: workspace:*
-        version: link:../mllp
-      '@glion/to-hl7v2':
-        specifier: workspace:*
-        version: link:../to-hl7v2
-      unified:
-        specifier: 11.0.5
-        version: 11.0.5
-    devDependencies:
-      '@glion/ast':
-        specifier: workspace:*
-        version: link:../ast
-      '@glion/builder':
-        specifier: workspace:*
-        version: link:../builder
-      '@glion/check-readme':
-        specifier: workspace:*
-        version: link:../../tools/check-readme
-      '@glion/hl7v2':
-        specifier: workspace:*
-        version: link:../hl7v2
-      '@glion/testing':
-        specifier: workspace:*
-        version: link:../../tools/testing
-      '@glion/tsconfig':
-        specifier: workspace:*
-        version: link:../../tools/tsconfig
-      '@types/node':
-        specifier: 25.6.0
-        version: 25.6.0
-      '@vitest/coverage-v8':
-        specifier: 4.1.5
-        version: 4.1.5(vitest@4.1.5)
-      publint:
-        specifier: 0.3.18
-        version: 0.3.18
-      tsdown:
-        specifier: 0.21.10
-        version: 0.21.10(publint@0.3.18)(typescript@6.0.3)
-      typescript:
-        specifier: 6.0.3
-        version: 6.0.3
-      vitest:
-        specifier: 4.1.5
-        version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
-
   packages/mllp-client:
     dependencies:
       '@glion/ack':
@@ -1762,9 +1716,9 @@ importers:
       '@glion/ast':
         specifier: workspace:*
         version: link:../ast
-      '@glion/mllp-transport':
+      '@glion/mllp-codec':
         specifier: workspace:*
-        version: link:../mllp-transport
+        version: link:../mllp-codec
       '@glion/parser':
         specifier: workspace:*
         version: link:../parser
@@ -1806,7 +1760,7 @@ importers:
         specifier: 4.1.5
         version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
 
-  packages/mllp-transport:
+  packages/mllp-codec:
     devDependencies:
       '@glion/check-readme':
         specifier: workspace:*
@@ -1838,22 +1792,25 @@ importers:
 
   packages/parser:
     dependencies:
+      '@glion/ast':
+        specifier: workspace:*
+        version: link:../ast
+      '@glion/config':
+        specifier: workspace:*
+        version: link:../config
       '@glion/utils':
         specifier: workspace:*
         version: link:../utils
+      '@types/unist':
+        specifier: 3.0.3
+        version: 3.0.3
       unified:
         specifier: 11.0.5
         version: 11.0.5
     devDependencies:
-      '@glion/ast':
-        specifier: workspace:*
-        version: link:../ast
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
-      '@glion/config':
-        specifier: workspace:*
-        version: link:../config
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
@@ -1863,9 +1820,6 @@ importers:
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
-      '@types/unist':
-        specifier: ^3.0.3
-        version: 3.0.3
       '@vitest/coverage-v8':
         specifier: 4.1.5
         version: 4.1.5(vitest@4.1.5)
@@ -1878,9 +1832,6 @@ importers:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
-      unist:
-        specifier: ^0.0.1
-        version: 0.0.1
       vitest:
         specifier: 4.1.5
         version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
@@ -2309,6 +2260,36 @@ importers:
         version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
 
   packages/util-timestamp:
+    devDependencies:
+      '@glion/check-readme':
+        specifier: workspace:*
+        version: link:../../tools/check-readme
+      '@glion/testing':
+        specifier: workspace:*
+        version: link:../../tools/testing
+      '@glion/tsconfig':
+        specifier: workspace:*
+        version: link:../../tools/tsconfig
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
+      '@vitest/coverage-v8':
+        specifier: 4.1.5
+        version: 4.1.5(vitest@4.1.5)
+      publint:
+        specifier: 0.3.18
+        version: 0.3.18
+      tsdown:
+        specifier: 0.21.10
+        version: 0.21.10(publint@0.3.18)(typescript@6.0.3)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.5
+        version: 4.1.5(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))
+
+  packages/util-uid:
     devDependencies:
       '@glion/check-readme':
         specifier: workspace:*
@@ -4291,11 +4272,6 @@ packages:
   nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-
-  nanoid@5.1.7:
-    resolution: {integrity: sha512-ua3NDgISf6jdwezAheMOk4mbE1LXjm1DfMUDMuJf4AqxLFK3ccGpgWizwa5YV7Yz9EpXwEaWoRXSb/BnV0t5dQ==}
-    engines: {node: ^18 || >=20}
     hasBin: true
 
   node-fetch-native@1.6.7:
@@ -6675,8 +6651,6 @@ snapshots:
   mri@1.2.0: {}
 
   nanoid@3.3.11: {}
-
-  nanoid@5.1.7: {}
 
   node-fetch-native@1.6.7: {}
 

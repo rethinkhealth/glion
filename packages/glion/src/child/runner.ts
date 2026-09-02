@@ -52,16 +52,16 @@ import type { ConnectionInfo, MessageInfo } from "@glion/mllp";
 import { serve } from "@glion/mllp/node";
 import type { Server } from "@glion/mllp/node";
 
-import { GlionError } from "../errors.js";
-import { fatalEvent } from "../events.js";
-import type { ChildManifest } from "../types.js";
-import { installConsoleCapture } from "./console.js";
-import { installCrashHandlers } from "./crash-handlers.js";
-import { createEmitter } from "./emitter.js";
-import { loadEntry } from "./load-entry.js";
-import { createMsgTelemetry } from "./middlewares.js";
-import { installShutdownHandlers } from "./shutdown-handlers.js";
-import { readTlsFile } from "./tls.js";
+import { GlionError } from "../errors";
+import { fatalEvent } from "../events";
+import type { ChildManifest } from "../types";
+import { installConsoleCapture } from "./console";
+import { installCrashHandlers } from "./crash-handlers";
+import { createEmitter } from "./emitter";
+import { loadEntry } from "./load-entry";
+import { createMsgTelemetry } from "./middlewares";
+import { installShutdownHandlers } from "./shutdown-handlers";
+import { readTlsFile } from "./tls";
 
 // ── Emitter ──────────────────────────────────────────────────────
 // Created once at module scope. Every function in this file calls
@@ -128,7 +128,7 @@ async function main(): Promise<void> {
   // This wraps every MLLP message handler to emit a "msg" event
   // with timing, trigger, control ID, and ACK code. Prepended so it
   // sits outermost — its `await next()` completes after all user
-  // middleware (including ackMiddleware) have run, ensuring any
+  // middleware (including any acknowledgment middleware) have run, ensuring any
   // other middleware is injected before.
   app.use(createMsgTelemetry(emit), { prepend: true });
 

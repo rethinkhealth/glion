@@ -52,7 +52,7 @@ The README spine is shared across all packages, but the variant sections differ.
 | `@glion/util-*`                                                                        | **Utility**           | API per exported function with a one- or two-line example each                                          |
 | `@glion/parser`, `@glion/hl7v2`, `@glion/builder`, `@glion/to-hl7v2`, `@glion/jsonify` | **Core / pipeline**   | API documents the unified registration form and any options                                             |
 | `@glion/ast`                                                                           | **Types**             | Hierarchy section listing each node type with its shape                                                 |
-| `@glion/mllp`, `@glion/mllp-ack`, `@glion/cli` (`packages/glion/`), `@glion/ack`       | **Runtime**           | Includes a "How it routes" or "How it dispatches" section, and a configuration section where applicable |
+| `@glion/mllp`, `@glion/cli` (`packages/glion/`), `@glion/ack`                          | **Runtime**           | Includes a "How it routes" or "How it dispatches" section, and a configuration section where applicable |
 | `@glion/profiles`, `@glion/config`                                                     | **Data / config**     | Documents the schema and the loader                                                                     |
 
 When the package falls outside these patterns, default to the **standard spine** (below) without a category-specific middle section.

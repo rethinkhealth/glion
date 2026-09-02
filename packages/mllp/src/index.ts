@@ -1,7 +1,7 @@
 // biome-ignore-all lint/performance/noBarrelFile: fine
 
-// Transport framing/encoding/decoding now lives in `@glion/mllp-transport`
-// (new API: `frame` / `decode` / `FrameDecoderStream` / `FramingError`).
+// Transport framing now lives in `@glion/mllp-codec`
+// (new API: `frame` / `unframe` / `MllpCodecError`).
 // Import it directly; `@glion/mllp` no longer re-exports the transport surface.
 
 // -------------

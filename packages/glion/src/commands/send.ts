@@ -17,9 +17,9 @@ import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
-import { renderHuman, renderJson } from "./send-render.js";
-import type { SendNakOutcome, SendOutcome } from "./send-render.js";
-import { resolveTarget } from "./send-target.js";
+import { renderHuman, renderJson } from "./send-render";
+import type { SendOutcome } from "./send-render";
+import { resolveTarget } from "./send-target";
 
 /** Connect + ACK-wait deadline used when `--timeout` is omitted. */
 export const DEFAULT_SEND_TIMEOUT_MS = 30_000;
@@ -335,9 +335,10 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     sendTimeoutMs: timeoutMs,
   });
 
-  const startedAt = performance.now();
+  let startedAt = performance.now();
   try {
     await client.connect();
+    startedAt = performance.now();
     const res = await client.send(canonical, { timeoutMs });
     return emit({
       ackControlId: res.controlId,
@@ -352,18 +353,23 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     if (error instanceof AckException) {
       return emit({
         ackControlId: error.controlId ?? "",
-        // AckException is thrown only for NAKs, so the code is AE/AR/CE/CR.
-        code: error.code as SendNakOutcome["code"],
+        code: error.code,
         durationMs: performance.now() - startedAt,
         errorCode: error.errorCode,
         kind: "nak",
         request,
         severity: error.severity,
         target,
-        text: ackText(error.tree),
+        text: error.text,
       });
     }
     if (error instanceof MllpClientError) {
+      // INVALID_MESSAGE is the caller's input (no MSH-10, or a reserved
+      // VT/FS byte) — nothing reached the wire; everything else is the
+      // transport's story.
+      if (error.code === "INVALID_MESSAGE") {
+        return emit({ kind: "invalid", message: error.message, target });
+      }
       return emit({
         code: error.code,
         kind: "transport",

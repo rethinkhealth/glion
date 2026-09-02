@@ -1,10 +1,14 @@
 # @glion/ack
 
-HL7v2 acknowledgment message builder and typed exception classes.
+Typed HL7v2 acknowledgment codes and exceptions.
 
 ## What it does
 
-`@glion/ack` builds spec-compliant ACK/NAK response ASTs from a parsed HL7v2 message. The `acknowledge()` function accepts an original message `Root` and returns a new `Root` containing an MSH, MSA, and (when an error is supplied) an ERR segment. Typed exception classes (`AckApplicationError`, `AckApplicationReject`, `AckCommitError`, `AckCommitReject`) carry the HL7v2 error code and severity that the response needs, so callers throw semantic errors and the builder renders them as the correct MSA-1 code.
+`@glion/ack` gives you typed exceptions and constants for HL7v2 acknowledgments. Instead of comparing raw strings like `"AE"` or `"207"`, you throw and catch real error classes and use named constants.
+
+- **One class per rejection code.** Throw `AckApplicationError` for AE, `AckApplicationReject` for AR, `AckCommitError` for CE, `AckCommitReject` for CR.
+- **Named constants for the standard tables.** `AckCode`, `Hl7ErrorCode`, and `Severity` replace magic strings, with full TypeScript types.
+- **Works on both sides of a connection.** Throw the exceptions in a server to reject a message. Catch them in a client when a remote system rejects yours.
 
 ## Install
 
@@ -14,83 +18,70 @@ npm install @glion/ack
 
 ## Use
 
-Build a successful acknowledgment (AA):
+Reject a message from a server handler — the exception carries the acknowledgment code and error data the server renders into the matching NAK:
 
 ```ts
-import { acknowledge } from "@glion/ack";
-import { toHl7v2 } from "@glion/to-hl7v2";
+import { AckApplicationError, Hl7ErrorCode } from "@glion/ack";
 
-const ack = acknowledge(originalTree);
-const raw = toHl7v2(ack);
-// MSH|^~\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|<auto-id>|P|2.5.1
-// MSA|AA|MSG001
-```
-
-Build an application error (AE) or reject (AR):
-
-```ts
-import {
-  acknowledge,
-  AckApplicationError,
-  AckApplicationReject,
-} from "@glion/ack";
-
-const error = new AckApplicationError("Validation failed", {
-  errorCode: "207",
-  severity: "E",
+throw new AckApplicationError("Patient 12345 not found", {
+  errorCode: Hl7ErrorCode.UnknownKeyIdentifier,
 });
-
-const ack = acknowledge(originalTree, { error });
-// MSA|AE|MSG001|Validation failed
-// ERR|||207|E
 ```
 
-The ACK sender (MSH-3/MSH-4) is derived from the original message's MSH-5/MSH-6 by default.
+Handle a rejection from the client — `@glion/mllp-client` throws the same classes when the remote system NAKs:
+
+```ts
+import { AckException } from "@glion/ack";
+
+try {
+  await client.send(message);
+} catch (error) {
+  if (error instanceof AckException) {
+    // the remote system said no — error.code is AE, AR, CE, or CR
+  }
+}
+```
 
 ## API
-
-### `acknowledge(origin, options?)`
-
-Builds an ACK/NAK `Root` AST from the original message tree.
-
-| Parameter                   | Type           | Description                                                        |
-| --------------------------- | -------------- | ------------------------------------------------------------------ |
-| `origin`                    | `Root`         | Parsed AST of the original HL7v2 message                           |
-| `options.id`                | `string`       | Custom MSH-10 control ID. Auto-generated via `uid()` when omitted  |
-| `options.sending`           | `SendingInfo`  | MSH-3/MSH-4 of the ACK. Defaults to original message's MSH-5/MSH-6 |
-| `options.processingId`      | `string`       | MSH-11 processing ID. Defaults to original message's MSH-11        |
-| `options.error`             | `AckException` | Sets the MSA-1 code and populates MSA-3 with the error message     |
-| `options.includeErrSegment` | `boolean`      | Include ERR segment when an error is provided. Defaults to `true`  |
-
-Returns a `Root` node containing MSH, MSA, and optionally ERR segments.
 
 ### Exception classes
 
 ```ts
-new AckApplicationError(message, { errorCode, severity?, cause? })
-new AckApplicationReject(message, { errorCode, severity?, cause? })
-new AckCommitError(message, { errorCode, severity?, cause? })
-new AckCommitReject(message, { errorCode, severity?, cause? })
+new AckApplicationError(message, options); // AE
+new AckApplicationReject(message, options); // AR
+new AckCommitError(message, options); // CE
+new AckCommitReject(message, options); // CR
 ```
 
-All four extend `AckException`, which extends `Error`. Pre-configured convenience subclasses are exported for common cases: `ApplicationInternalError` (AE, code 207), `UnsupportedMessageTypeReject` (AR, code 200), `CommitInternalError` (CE, code 207). The standard `cause` option supports error chains.
+All four extend `AckException`, which extends `Error`. The `code` property carries the MSA-1 value (`AckNakCode`); `options` is an `AckExceptionOptions`:
 
-### `uid(options?)`
+| Option      | Type      | Description                                            |
+| ----------- | --------- | ------------------------------------------------------ |
+| `errorCode` | `string`  | ERR-3 condition code (Table 0357 — see `Hl7ErrorCode`) |
+| `severity`  | `string`  | ERR-4 severity (Table 0516 — see `Severity`)           |
+| `text`      | `string`  | MSA-3 text message, when derived from a remote NAK     |
+| `controlId` | `string`  | MSA-2 control ID, when derived from a remote NAK       |
+| `cause`     | `unknown` | Standard error cause                                   |
 
-Generates a unique identifier suitable for MSH-10 control IDs.
+Three pre-configured subclasses cover common cases:
 
-| Parameter        | Type     | Default | Description                      |
-| ---------------- | -------- | ------- | -------------------------------- |
-| `options.prefix` | `string` | —       | Optional prefix for the ID       |
-| `options.size`   | `number` | `20`    | Total length of the generated ID |
+```ts
+new ApplicationInternalError(message, cause?); // AE, code 207
+new UnsupportedMessageTypeReject(message); // AR, code 200
+new CommitInternalError(message, cause?); // CE, code 207
+```
+
+### Type guards
+
+`isAckCode(value)` narrows a string to `AckCode` (any of the six Table 0008 codes). `isAckNakCode(value)` narrows to `AckNakCode` (`AE` / `AR` / `CE` / `CR`); on an `AckCode`, the negative branch narrows to `AckSuccessCode` (`AA` / `CA`).
 
 ### Constants
 
-`AckCode`, `Hl7ErrorCode`, and `Severity` are exported as const objects with the standard HL7v2 enumeration values.
+`AckCode`, `Hl7ErrorCode`, and `Severity` are const objects with the standard HL7v2 enumeration values. Each name is also the union type of its values — `const code: AckCode = AckCode.ApplicationAccept`.
 
 ## Acknowledgment codes
 
-HL7v2 distinguishes two levels of acknowledgment — **application** and **commit** — and each has accept, error, and reject variants. The exception class you throw determines MSA-1 directly.
+HL7v2 distinguishes two levels of acknowledgment — **application** and **commit** — and each has accept, error, and reject variants. The exception class determines MSA-1 directly.
 
 | Class                  | MSA-1 | Meaning                                                                |
 | ---------------------- | ----- | ---------------------------------------------------------------------- |
@@ -100,7 +91,7 @@ HL7v2 distinguishes two levels of acknowledgment — **application** and **commi
 | `AckCommitError`       | CE    | Commit error (enhanced mode). Persistence or downstream failure.       |
 | `AckCommitReject`      | CR    | Commit reject (enhanced mode). Refused at the commit layer.            |
 
-When an exception is passed via `options.error`, its `errorCode` and `severity` populate the ERR segment. The error's `message` populates MSA-3 (text message).
+When a server renders the response, the exception's `message` becomes MSA-3 text. `errorCode` and `severity` stay data: the application renders them in whatever ERR shape its HL7v2 version requires.
 
 ## Part of Glion
 

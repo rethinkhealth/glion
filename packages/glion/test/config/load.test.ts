@@ -5,8 +5,8 @@ import { inspect } from "node:util";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { loadConfig } from "../../src/config/load.js";
-import { GlionError } from "../../src/errors.js";
+import { loadConfig } from "../../src/config/load";
+import { GlionError } from "../../src/errors";
 
 let dir: string;
 let cacheDir: string;

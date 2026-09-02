@@ -1,11 +1,11 @@
-import type { Definition } from "./automata/types.js";
-import type { Cache, CacheOptions } from "./cache/types.js";
+import type { Definition } from "./automata/types";
+import type { Cache, CacheOptions } from "./cache/types";
 import type {
   CodeSystemDefinition,
   DatatypeDefinition,
   FieldDefinition,
   TableDefinition,
-} from "./stores/types.js";
+} from "./stores/types";
 
 // ---------------------------------------------------------------------------
 // Load options

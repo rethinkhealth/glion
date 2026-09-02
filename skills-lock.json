@@ -90,7 +90,7 @@
       "source": "github/gh-stack",
       "sourceType": "github",
       "skillPath": "skills/gh-stack/SKILL.md",
-      "computedHash": "11acbd01ba1c789706bfc8b8a23033eaead8d2cf92d574d8f9b5a77824634418"
+      "computedHash": "28d42250d52f33424b807add6fbdec75736e835f98752311db321ab51733fea6"
     },
     "git-clean-gone-branches": {
       "source": "everyinc/compound-engineering-plugin",

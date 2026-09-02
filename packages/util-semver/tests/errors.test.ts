@@ -3,7 +3,7 @@ import {
   RangeParseError,
   satisfies,
   VersionParseError,
-} from "../src/index.js";
+} from "../src/index";
 
 describe(VersionParseError, () => {
   it("includes structured data", () => {

@@ -2,13 +2,13 @@
 import net from "node:net";
 
 import { parseHL7v2 } from "@glion/hl7v2";
-import { CR, frame, FS } from "@glion/mllp-transport";
+import { CR, frame, FS } from "@glion/mllp-codec";
 import { CharsetError } from "@glion/util-charset";
 
-import { MllpServerError, MllpServerErrorCode } from "../../src/errors.js";
-import { serve } from "../../src/node/serve.js";
-import type { Server } from "../../src/node/serve.js";
-import { Mllp } from "../../src/server/mllp.js";
+import { MllpServerError, MllpServerErrorCode } from "../../src/errors";
+import { serve } from "../../src/node/serve";
+import type { Server } from "../../src/node/serve";
+import { Mllp } from "../../src/server/mllp";
 
 /**
  * Regression for https://github.com/rethinkhealth/glion/issues/659.
@@ -124,7 +124,13 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
       "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1||||||8859/1",
       "PID|1||12345^^^MRN||José^John",
     ].join("\r");
-    const latin1 = Uint8Array.from(message, (ch) => ch.codePointAt(0));
+    // String iteration never yields an empty string, so codePointAt(0) is
+    // always defined — and every character here is Latin-1, so the code
+    // point IS the wire byte.
+    const latin1 = Uint8Array.from(
+      message,
+      (ch) => ch.codePointAt(0) as number
+    );
 
     const response = await sendBytes(server.port, latin1, 1000);
 

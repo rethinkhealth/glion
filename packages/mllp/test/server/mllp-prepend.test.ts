@@ -1,8 +1,8 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 
-import { Mllp } from "../../src/server/mllp.js";
-import type { ConnectionInfo } from "../../src/server/types.js";
+import { Mllp } from "../../src/server/mllp";
+import type { ConnectionInfo } from "../../src/server/types";
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -75,7 +75,7 @@ describe("Mllp.use({ prepend })", () => {
     const app = createApp();
     let capturedRes: string | undefined;
 
-    // Register an inner middleware that sets ctx.res (simulates ackMiddleware)
+    // Register an inner middleware that sets ctx.res (simulates an acknowledgment middleware)
     app.use(async (ctx, next) => {
       await next();
       ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };

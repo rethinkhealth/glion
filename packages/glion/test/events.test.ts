@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { Event } from "../src/events.js";
-import { encode, eventLevel, parseLine } from "../src/events.js";
+import type { Event } from "../src/events";
+import { encode, eventLevel, parseLine } from "../src/events";
 
 describe("events codec", () => {
   it("round-trips a ready event", () => {

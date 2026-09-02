@@ -3,7 +3,7 @@ import type { AddressInfo, Server } from "node:net";
 import { resolve as resolvePath } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { frame } from "@glion/mllp-transport";
+import { frame } from "@glion/mllp-codec";
 import { execa } from "execa";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -58,7 +58,7 @@ function closeServer(server: Server): Promise<void> {
 
 /** A minimal MLLP server: on a complete frame it replies with `ackText`. */
 async function startAckServer(ackText: string): Promise<RunningServer> {
-  const ack = frame(ackText);
+  const ack = frame(new TextEncoder().encode(ackText));
   const server = createServer((socket) => {
     socket.on("data", (chunk: Buffer) => {
       if (chunk.includes(FS_BYTE)) {

@@ -3,9 +3,9 @@ import { resolve } from "node:path";
 
 import { build } from "rolldown";
 
-import type { ResolvedConfig } from "./config/schema.js";
-import { GlionError } from "./errors.js";
-import type { ChildManifest } from "./types.js";
+import type { ResolvedConfig } from "./config/schema";
+import { GlionError } from "./errors";
+import type { ChildManifest } from "./types";
 
 /**
  * Ensures the `.glion/` cache directory exists and returns its path.

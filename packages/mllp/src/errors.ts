@@ -22,6 +22,15 @@ export const MllpServerErrorCode = {
    * `app.parser()`.
    */
   NO_PARSER: "NO_PARSER",
+  /**
+   * The MLLP byte stream itself was violated and the connection closed:
+   * the remote system sent bytes outside a message, glued or unterminated
+   * messages, an over-cap message — or a handler's response contained a
+   * reserved VT/FS byte and could not be framed. The underlying
+   * `@glion/mllp-codec` `MllpCodecError` is kept on `cause`; branch on this
+   * code without importing that package.
+   */
+  PROTOCOL_VIOLATION: "PROTOCOL_VIOLATION",
 } as const;
 export type MllpServerErrorCode =
   (typeof MllpServerErrorCode)[keyof typeof MllpServerErrorCode];

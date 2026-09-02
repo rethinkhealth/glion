@@ -1,6 +1,6 @@
-import { fieldImports } from "../profiles/field-manifest.js";
-import type { ProfileStoreConfig } from "../store.js";
-import type { FieldDefinition, FieldModule } from "./types.js";
+import { fieldImports } from "../profiles/field-manifest";
+import type { ProfileStoreConfig } from "../store";
+import type { FieldDefinition, FieldModule } from "./types";
 
 /** Compile raw field module into indexed definition. */
 const compileFields = (raw: FieldModule): FieldDefinition => {

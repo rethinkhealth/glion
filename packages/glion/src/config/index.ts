@@ -14,9 +14,9 @@
  * `z.input`.
  */
 
-import type { GlionConfig } from "./schema.js";
+import type { GlionConfig } from "./schema";
 
-export type { GlionConfig } from "./schema.js";
+export type { GlionConfig } from "./schema";
 
 /**
  * Identity helper for type inference. Use in your `glion.config.ts`:
