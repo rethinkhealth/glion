@@ -72,6 +72,11 @@ const DELIVERY: Record<MllpErrorCode, MllpDelivery> = {
   SEND_TIMEOUT: "unknown",
 };
 
+/** The text of a lower layer's error, for the message that wraps it. */
+function reasonOf(cause: unknown): string {
+  return cause instanceof Error ? cause.message : String(cause);
+}
+
 export abstract class MllpClientError extends Error {
   abstract readonly code: MllpErrorCode;
 
@@ -143,7 +148,7 @@ export class MllpInvalidMessageError extends MllpClientError {
 
   constructor(cause: unknown) {
     super(
-      `The message could not be prepared for sending; nothing was written — the reason is on cause.`,
+      `The message could not be prepared for sending; nothing was written: ${reasonOf(cause)}`,
       { cause }
     );
   }
@@ -159,7 +164,7 @@ export class MllpConnectFailedError extends MllpClientError {
 
   constructor(cause: unknown) {
     super(
-      `Connecting failed — check that the host is reachable and the port is listening. The reason is on cause.`,
+      `Connecting failed: ${reasonOf(cause)} — check that the host is reachable and the port is listening.`,
       { cause }
     );
   }
@@ -229,7 +234,7 @@ export class MllpDroppedError extends MllpClientError {
 
   constructor(controlId: string, cause?: unknown) {
     super(
-      `The connection was lost while message ${controlId} was waiting for its acknowledgment — the remote system may or may not have received it; resend only if the message is safe to repeat. ${cause === undefined ? "The remote system closed the connection." : "The reason is on cause."}`,
+      `The connection was lost while message ${controlId} was waiting for its acknowledgment — the remote system may or may not have received it; resend only if the message is safe to repeat. ${cause === undefined ? "The remote system closed the connection." : `The connection failed: ${reasonOf(cause)}`}`,
       { cause }
     );
     this.controlId = controlId;
@@ -251,7 +256,7 @@ export class MllpInvalidResponseError extends MllpClientError {
 
   constructor(controlId: string, cause: unknown) {
     super(
-      `The acknowledgment for message ${controlId} cannot be used, so the connection has been closed — the reason is on cause. Construct a new MllpClient to send again.`,
+      `The acknowledgment for message ${controlId} cannot be used: ${reasonOf(cause)} The connection has been closed; construct a new MllpClient to send again.`,
       { cause }
     );
     this.controlId = controlId;
