@@ -1,5 +1,11 @@
 # @rethinkhealth/hl7v2-to-hl7v2
 
+## 0.18.0
+
+### Patch Changes
+
+- @glion/utils@0.18.0
+
 ## 0.17.0
 
 ### Patch Changes

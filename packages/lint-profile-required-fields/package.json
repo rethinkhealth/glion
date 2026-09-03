@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-profile-required-fields",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Lint rule to validate required fields per HL7v2 profile",
   "keywords": [
     "health",

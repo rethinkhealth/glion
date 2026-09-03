@@ -1,6 +1,6 @@
 {
   "name": "@glion/to-hl7v2",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "hl7v2 plugin to transform hl7v2 messages to a hl7v2. Useful for sanitizing messages.",
   "keywords": [
     "health",

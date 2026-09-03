@@ -1,5 +1,12 @@
 # @rethinkhealth/hl7v2-annotate-profile-fields
 
+## 0.18.0
+
+### Patch Changes
+
+- @glion/util-visit@0.18.0
+- @glion/ast@0.18.0
+
 ## 0.17.0
 
 ### Patch Changes

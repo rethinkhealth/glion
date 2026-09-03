@@ -1,6 +1,6 @@
 {
   "name": "@glion/util-charset",
-  "version": "0.16.0",
+  "version": "0.18.0",
   "description": "Encode and decode HL7v2 wire bytes as UTF-8 (fatal, no silent corruption)",
   "keywords": [
     "health",

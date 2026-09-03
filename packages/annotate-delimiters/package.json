@@ -1,6 +1,6 @@
 {
   "name": "@glion/annotate-delimiters",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Unified plugin to annotate file.data with HL7v2 delimiters derived from MSH-1/MSH-2",
   "repository": {
     "type": "git",
