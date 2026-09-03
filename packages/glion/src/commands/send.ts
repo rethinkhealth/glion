@@ -18,11 +18,7 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
 import { renderHuman, renderJson } from "./send-render";
-import type {
-  SendOutcome,
-  SendRequestSummary,
-  SendTarget,
-} from "./send-render";
+import type { SendOutcome } from "./send-render";
 import { resolveTarget } from "./send-target";
 
 /** Connect + ACK-wait deadline used when `--timeout` is omitted. */
@@ -75,9 +71,9 @@ function takeFlagValue(
 }
 
 /**
- * Reads the integer value of a flag at `index`. Folds the missing-value
- * and non-integer checks into one call so the parse loop carries a single
- * guard per integer flag.
+ * Reads the positive integer value of a flag at `index`. Folds the
+ * missing-value, non-integer, and zero checks into one call so the parse loop
+ * carries a single guard per integer flag.
  */
 function takeIntFlagValue(
   argv: readonly string[],
@@ -91,7 +87,11 @@ function takeIntFlagValue(
   if (!/^\d+$/.test(raw)) {
     return { error: `${flag} requires an integer value, got: ${raw}` };
   }
-  return Number.parseInt(raw, 10);
+  const parsed = Number.parseInt(raw, 10);
+  if (parsed === 0) {
+    return { error: `${flag} requires a positive integer, got: 0` };
+  }
+  return parsed;
 }
 
 /**
@@ -226,28 +226,6 @@ export interface RunSendOptions {
   connect?: MllpConnector;
   /** Stdin source used when no file is given; injectable for tests. */
   stdin?: NodeJS.ReadableStream;
-}
-
-/**
- * The outcome for a client failure. INVALID_MESSAGE and INVALID_OPTION are the
- * caller's input (a message without MSH-10, a bad --timeout) and nothing
- * reached the wire; everything else is the transport's story.
- */
-function clientErrorOutcome(
-  error: MllpClientError,
-  request: SendRequestSummary,
-  target: SendTarget
-): SendOutcome {
-  if (error.code === "INVALID_MESSAGE" || error.code === "INVALID_OPTION") {
-    return { kind: "invalid", message: error.message, target };
-  }
-  return {
-    code: error.code,
-    kind: "transport",
-    message: error.message,
-    request,
-    target,
-  };
 }
 
 function exitCodeFor(outcome: SendOutcome): number {
@@ -390,7 +368,13 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
       });
     }
     if (error instanceof MllpClientError) {
-      return emit(clientErrorOutcome(error, request, target));
+      return emit({
+        code: error.code,
+        kind: "transport",
+        message: error.message,
+        request,
+        target,
+      });
     }
     throw error;
   } finally {

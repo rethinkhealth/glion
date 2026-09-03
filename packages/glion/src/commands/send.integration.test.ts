@@ -225,7 +225,7 @@ describe("runSend (integration, fake connector)", () => {
     expect(json.message).toContain("Could not read the message");
   });
 
-  it("reports an invalid outcome (exit 2) when the message has no MSH-10", async () => {
+  it("reports INVALID_MESSAGE (exit 2) when the message has no MSH-10", async () => {
     const noControlId = ADT.replace("|MSG00001|", "||");
     const { state, stderr, stdout } = capture();
     const code = await runSend({
@@ -239,11 +239,12 @@ describe("runSend (integration, fake connector)", () => {
 
     expect(code).toBe(2);
     const json = JSON.parse(state.out);
-    expect(json.kind).toBe("invalid");
+    expect(json.kind).toBe("transport");
+    expect(json.code).toBe("INVALID_MESSAGE");
     expect(json.message).toContain("MSH-10");
   });
 
-  it("reports an invalid outcome (exit 2) when the message contains a reserved VT byte", async () => {
+  it("reports INVALID_MESSAGE (exit 2) when the message contains a reserved VT byte", async () => {
     const withVt = `${ADT}\rNTE|1||free\u000Btext`;
     const { state, stderr, stdout } = capture();
     const code = await runSend({
@@ -257,7 +258,8 @@ describe("runSend (integration, fake connector)", () => {
 
     expect(code).toBe(2);
     const json = JSON.parse(state.out);
-    expect(json.kind).toBe("invalid");
+    expect(json.kind).toBe("transport");
+    expect(json.code).toBe("INVALID_MESSAGE");
   });
 
   it("renders the human exchange view on a TTY (accept)", async () => {
