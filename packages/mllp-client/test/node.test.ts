@@ -10,6 +10,7 @@
 
 import { createServer } from "node:net";
 import type { AddressInfo, Server, Socket } from "node:net";
+import { setTimeout as sleep } from "node:timers/promises";
 
 import { frame } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
@@ -167,6 +168,33 @@ describe("connectNode — happy path", () => {
 });
 
 describe("connectNode — close contract", () => {
+  it("close() after a send ends the socket gracefully, with FIN rather than RST", async () => {
+    const seen: string[] = [];
+    const remote = await remoteSystem({
+      onConnection: (socket) => {
+        socket.on("data", (chunk: Buffer) => {
+          const message = chunk.toString("utf8").slice(1, -2);
+          socket.write(frame(encodeBytes(ack("AA", controlIdOf(message)))));
+        });
+        socket.on("end", () => seen.push("end"));
+        socket.on("error", () => seen.push("error"));
+      },
+    });
+    try {
+      const client = new MllpClient({
+        connect: connectNode,
+        host: remote.host,
+        port: remote.port,
+      });
+      await client.send(adtA01());
+      await client.close();
+      await sleep(50);
+      expect(seen).toEqual(["end"]);
+    } finally {
+      await remote.close();
+    }
+  });
+
   it("close() resolves via the grace destroy when the remote system never FINs back", async () => {
     // The adapter contract the whole client trusts: close() MUST resolve.
     // A peer that holds its side open after our FIN (allowHalfOpen, no

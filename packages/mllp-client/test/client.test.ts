@@ -68,7 +68,11 @@ function fakeConnection() {
     /** The remote system hangs up. */
     drop: () => remote.close(),
     received,
+    /** The remote system stops reading, so the client's next write fails. */
+    refuseWrites: () => inbox.cancel(),
     reply,
+    /** The remote system sends bytes that are not an MLLP frame. */
+    replyBytes: (bytes: Uint8Array) => remote.write(bytes),
   };
 }
 
@@ -247,9 +251,54 @@ describe("MllpClient", () => {
 
       await expect(sending).rejects.toMatchObject({
         code: MllpErrorCode.CLOSED,
+        delivery: "unknown",
       });
       expect(client.state).toBe("closed");
       expect(remote.closeCalls).toBe(1);
+    });
+
+    it("rejects CLOSED as not-sent when close() interrupts the connect it started", async () => {
+      const client = new MllpClient({
+        connect: async ({ signal }) => {
+          await sleep(60_000, undefined, { signal });
+          throw new Error("unreachable");
+        },
+        host: "hl7.example",
+        port: 2575,
+      });
+
+      const sending = client.send(adtA01());
+      await client.close();
+
+      await expect(sending).rejects.toMatchObject({
+        code: MllpErrorCode.CLOSED,
+        delivery: "not-sent",
+      });
+    });
+
+    it("rejects DROPPED as not-sent when the write itself fails", async () => {
+      const { client, remote } = await connectedClient();
+      await remote.refuseWrites();
+
+      await expect(client.send(adtA01())).rejects.toMatchObject({
+        code: MllpErrorCode.DROPPED,
+        delivery: "not-sent",
+      });
+      expect(client.state).toBe("closed");
+    });
+
+    it("rejects INVALID_RESPONSE when the reply is not an MLLP frame", async () => {
+      const { client, remote } = await connectedClient();
+
+      const sending = client.send(adtA01());
+      await remote.received();
+      await remote.replyBytes(encodeBytes("HTTP/1.1 400 Bad Request\r\n"));
+
+      await expect(sending).rejects.toMatchObject({
+        code: MllpErrorCode.INVALID_RESPONSE,
+        delivery: "unknown",
+      });
+      expect(client.state).toBe("closed");
     });
   });
 
@@ -310,6 +359,62 @@ describe("MllpClient", () => {
         code: MllpErrorCode.CONNECT_FAILED,
       });
       expect(client.state).toBe("closed");
+    });
+
+    it("rejects CONNECT_FAILED when the connector throws instead of rejecting", async () => {
+      const boom = new Error("bad options");
+      const client = new MllpClient({
+        connect: () => {
+          throw boom;
+        },
+        host: "hl7.example",
+        port: 2575,
+      });
+
+      await expect(client.connect()).rejects.toMatchObject({
+        cause: boom,
+        code: MllpErrorCode.CONNECT_FAILED,
+      });
+      expect(client.state).toBe("closed");
+    });
+
+    it("rejects CONNECT_TIMEOUT and disposes of a connection that arrives too late", async () => {
+      const remote = fakeConnection();
+      const client = new MllpClient({
+        connect: async () => {
+          await sleep(40);
+          return remote.connect();
+        },
+        connectTimeoutMs: 10,
+        host: "hl7.example",
+        port: 2575,
+      });
+
+      await expect(client.connect()).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECT_TIMEOUT,
+      });
+      await client.close();
+      expect(remote.closeCalls).toBe(1);
+    });
+
+    it("disposes of a connection that arrives after close() cancelled the attempt", async () => {
+      const remote = fakeConnection();
+      const client = new MllpClient({
+        connect: async () => {
+          await sleep(20);
+          return remote.connect();
+        },
+        host: "hl7.example",
+        port: 2575,
+      });
+
+      const connecting = client.connect();
+      await client.close();
+
+      await expect(connecting).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECT_ABORTED,
+      });
+      expect(remote.closeCalls).toBe(1);
     });
 
     it("rejects CONNECT_TIMEOUT when the connector does not answer in time", async () => {

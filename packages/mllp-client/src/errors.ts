@@ -59,19 +59,6 @@ export type MllpErrorCode = (typeof MllpErrorCode)[keyof typeof MllpErrorCode];
  */
 export type MllpDelivery = "not-sent" | "unknown";
 
-const DELIVERY: Record<MllpErrorCode, MllpDelivery> = {
-  ALREADY_SENDING: "not-sent",
-  CLOSED: "not-sent",
-  CONNECT_ABORTED: "not-sent",
-  CONNECT_FAILED: "not-sent",
-  CONNECT_TIMEOUT: "not-sent",
-  DROPPED: "unknown",
-  INVALID_MESSAGE: "not-sent",
-  INVALID_OPTION: "not-sent",
-  INVALID_RESPONSE: "unknown",
-  SEND_TIMEOUT: "unknown",
-};
-
 /** The text of a lower layer's error, for the message that wraps it. */
 function reasonOf(cause: unknown): string {
   return cause instanceof Error ? cause.message : String(cause);
@@ -79,17 +66,15 @@ function reasonOf(cause: unknown): string {
 
 export abstract class MllpClientError extends Error {
   abstract readonly code: MllpErrorCode;
-
   /** Whether the message may have reached the remote system. */
-  get delivery(): MllpDelivery {
-    return DELIVERY[this.code];
-  }
+  abstract readonly delivery: MllpDelivery;
 }
 
 /** An option is out of range. Raised before anything happens. */
 export class MllpInvalidOptionError extends MllpClientError {
   override readonly name = "MllpInvalidOptionError";
   readonly code = MllpErrorCode.INVALID_OPTION;
+  readonly delivery = "not-sent";
   readonly option: string;
 
   constructor(option: string, requirement: string, received: unknown) {
@@ -107,6 +92,7 @@ export class MllpInvalidOptionError extends MllpClientError {
 export class MllpAlreadySendingError extends MllpClientError {
   override readonly name = "MllpAlreadySendingError";
   readonly code = MllpErrorCode.ALREADY_SENDING;
+  readonly delivery = "not-sent";
   /** MSH-10 of the message that is still waiting. */
   readonly controlId: string;
 
@@ -121,20 +107,32 @@ export class MllpAlreadySendingError extends MllpClientError {
 /**
  * The client is closed for good, by `close()` or by a failure that ended the
  * connection. A closed client never reconnects; construct a new one. When a
- * failure closed the client, that error is on `cause`.
+ * failure closed the client, that error is on `cause`. When `close()`
+ * interrupted a message that had already been written, `delivery` is
+ * `unknown`.
  */
 export class MllpClientClosedError extends MllpClientError {
   override readonly name = "MllpClientClosedError";
   readonly code = MllpErrorCode.CLOSED;
+  readonly delivery: MllpDelivery;
 
-  constructor(cause?: MllpClientError) {
-    super(
-      cause
-        ? `The client is closed because its connection was lost (the reason is on cause) — construct a new MllpClient to send again.`
-        : `The client has been closed — construct a new MllpClient to send again.`,
-      { cause }
-    );
+  constructor(cause?: MllpClientError, delivery: MllpDelivery = "not-sent") {
+    super(closedMessage(cause, delivery), { cause });
+    this.delivery = delivery;
   }
+}
+
+function closedMessage(
+  cause: MllpClientError | undefined,
+  delivery: MllpDelivery
+): string {
+  if (delivery === "unknown") {
+    return "The client was closed while a message was waiting for its acknowledgment — the remote system may or may not have received it; resend on a new MllpClient only if the message is safe to repeat.";
+  }
+  if (cause) {
+    return `The client is closed after an earlier failure (${cause.code}) — construct a new MllpClient to send again.`;
+  }
+  return "The client has been closed — construct a new MllpClient to send again.";
 }
 
 /**
@@ -145,6 +143,7 @@ export class MllpClientClosedError extends MllpClientError {
 export class MllpInvalidMessageError extends MllpClientError {
   override readonly name = "MllpInvalidMessageError";
   readonly code = MllpErrorCode.INVALID_MESSAGE;
+  readonly delivery = "not-sent";
 
   constructor(cause: unknown) {
     super(
@@ -161,6 +160,7 @@ export class MllpInvalidMessageError extends MllpClientError {
 export class MllpConnectFailedError extends MllpClientError {
   override readonly name = "MllpConnectFailedError";
   readonly code = MllpErrorCode.CONNECT_FAILED;
+  readonly delivery = "not-sent";
 
   constructor(cause: unknown) {
     super(
@@ -177,6 +177,7 @@ export class MllpConnectFailedError extends MllpClientError {
 export class MllpConnectTimeoutError extends MllpClientError {
   override readonly name = "MllpConnectTimeoutError";
   readonly code = MllpErrorCode.CONNECT_TIMEOUT;
+  readonly delivery = "not-sent";
   readonly timeoutMs: number;
 
   constructor(timeoutMs: number) {
@@ -191,6 +192,7 @@ export class MllpConnectTimeoutError extends MllpClientError {
 export class MllpConnectAbortedError extends MllpClientError {
   override readonly name = "MllpConnectAbortedError";
   readonly code = MllpErrorCode.CONNECT_ABORTED;
+  readonly delivery = "not-sent";
 
   constructor() {
     super(
@@ -207,6 +209,7 @@ export class MllpConnectAbortedError extends MllpClientError {
 export class MllpSendTimeoutError extends MllpClientError {
   override readonly name = "MllpSendTimeoutError";
   readonly code = MllpErrorCode.SEND_TIMEOUT;
+  readonly delivery = "unknown";
   /** MSH-10 of the message that was waiting. */
   readonly controlId: string;
   readonly timeoutMs: number;
@@ -221,24 +224,38 @@ export class MllpSendTimeoutError extends MllpClientError {
 }
 
 /**
- * The connection was lost while a message was waiting for its
- * acknowledgment: the remote system hung up, or the network broke. Whether
- * the remote system received the message is unknown. A stream error, when
- * there was one, is on `cause`.
+ * The connection was lost during a send: the remote system hung up, or the
+ * network broke. `delivery` is `not-sent` when the write itself failed and
+ * `unknown` once the message was written. A stream error, when there was
+ * one, is on `cause`.
  */
 export class MllpDroppedError extends MllpClientError {
   override readonly name = "MllpDroppedError";
   readonly code = MllpErrorCode.DROPPED;
-  /** MSH-10 of the message that was waiting. */
+  readonly delivery: MllpDelivery;
+  /** MSH-10 of the message that was being sent. */
   readonly controlId: string;
 
-  constructor(controlId: string, cause?: unknown) {
-    super(
-      `The connection was lost while message ${controlId} was waiting for its acknowledgment — the remote system may or may not have received it; resend only if the message is safe to repeat. ${cause === undefined ? "The remote system closed the connection." : `The connection failed: ${reasonOf(cause)}`}`,
-      { cause }
-    );
+  constructor(controlId: string, delivery: MllpDelivery, cause?: unknown) {
+    super(droppedMessage(controlId, delivery, cause), { cause });
     this.controlId = controlId;
+    this.delivery = delivery;
   }
+}
+
+function droppedMessage(
+  controlId: string,
+  delivery: MllpDelivery,
+  cause: unknown
+): string {
+  const how =
+    cause === undefined
+      ? "The remote system closed the connection."
+      : `The connection failed: ${reasonOf(cause)}`;
+  if (delivery === "not-sent") {
+    return `The connection was lost before message ${controlId} could be written; nothing reached the wire. ${how}`;
+  }
+  return `The connection was lost while message ${controlId} was waiting for its acknowledgment — the remote system may or may not have received it; resend only if the message is safe to repeat. ${how}`;
 }
 
 /**
@@ -251,6 +268,7 @@ export class MllpDroppedError extends MllpClientError {
 export class MllpInvalidResponseError extends MllpClientError {
   override readonly name = "MllpInvalidResponseError";
   readonly code = MllpErrorCode.INVALID_RESPONSE;
+  readonly delivery = "unknown";
   /** MSH-10 of the message that was waiting. */
   readonly controlId: string;
 

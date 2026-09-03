@@ -30,7 +30,7 @@ import {
   AckCommitReject,
   isAckNakCode,
 } from "@glion/ack";
-import { unframe } from "@glion/mllp-codec";
+import { MllpCodecError, unframe } from "@glion/mllp-codec";
 import type { UnframeOptions } from "@glion/mllp-codec";
 
 import { decode, encode } from "./codec";
@@ -53,7 +53,7 @@ import {
   MllpInvalidResponseError,
   MllpSendTimeoutError,
 } from "./errors";
-import type { MllpClientError } from "./errors";
+import type { MllpClientError, MllpDelivery } from "./errors";
 import type {
   MllpClientOptions,
   MllpClientResponse,
@@ -321,10 +321,16 @@ export class MllpClient {
       abort.signal,
       AbortSignal.timeout(this.#connectTimeoutMs),
     ]);
-    const connectionPromise = this.#connector({
-      ...this.#endpoint,
-      signal: deadline,
-    });
+    let connectionPromise: Promise<MllpConnection>;
+    try {
+      connectionPromise = this.#connector({
+        ...this.#endpoint,
+        signal: deadline,
+      });
+    } catch (error) {
+      // A connector that throws is a connector that rejected.
+      connectionPromise = Promise.reject(error);
+    }
     const connecting: State = {
       abort,
       connection: connectionPromise,
@@ -350,6 +356,21 @@ export class MllpClient {
       throw reason;
     }
 
+    if (deadline.aborted && !abort.signal.aborted) {
+      // The connector resolved after the deadline: too late to use.
+      const reason = new MllpConnectTimeoutError(this.#connectTimeoutMs);
+      const teardown = connection.close();
+      if (
+        this.#transition(connecting, () => ({
+          phase: "closed",
+          reason,
+          teardown,
+        }))
+      ) {
+        throw reason;
+      }
+      throw new MllpConnectAbortedError();
+    }
     const connected = this.#transition(connecting, () => ({
       close: () => connection.close(),
       phase: "connected",
@@ -360,8 +381,7 @@ export class MllpClient {
     }));
     if (!connected) {
       // close() moved the client on in the instant before the connector
-      // resolved. The connection is ours to dispose of.
-      void connection.close();
+      // resolved; its teardown disposes of the connection.
       throw new MllpConnectAbortedError();
     }
   }
@@ -395,7 +415,14 @@ export class MllpClient {
 
     const encoded = encodeMessage(message);
     if (!this.connected) {
-      await this.connect();
+      try {
+        await this.connect();
+      } catch (error) {
+        // For the send, close() cancelling the attempt is the client closing.
+        throw error instanceof MllpConnectAbortedError
+          ? new MllpClientClosedError()
+          : error;
+      }
     }
     // No await from here to the move into `sending`: the state the guard
     // returns is the state the move starts from.
@@ -448,11 +475,22 @@ export class MllpClient {
       }
       case "connecting": {
         state.abort.abort();
+        const { connection } = state;
+        const teardown = (async () => {
+          let late: MllpConnection;
+          try {
+            late = await connection;
+          } catch {
+            return; // the attempt failed; there is nothing to dispose of
+          }
+          await late.close();
+        })();
         this.#transition(state, () => ({
           phase: "closed",
           reason: null,
-          teardown: NOTHING_TO_TEAR_DOWN,
+          teardown,
         }));
+        await teardown;
         break;
       }
       case "connected":
@@ -508,9 +546,11 @@ export class MllpClient {
       case "sending": {
         const { close, reader, writer } = state;
         const teardown = (async () => {
-          // Releasing the streams first wakes a send parked on a read or a
-          // write, and leaves the connection with nothing pending to close.
-          await Promise.allSettled([reader.cancel(), writer.abort()]);
+          // Release the streams, do not cancel them: cancelling would destroy
+          // the socket under the adapter and skip its graceful close. A read
+          // parked on the released reader rejects, which wakes the send.
+          reader.releaseLock();
+          writer.releaseLock();
           await close();
         })();
         this.#transition(state, () => ({ phase: "closed", reason, teardown }));
@@ -600,9 +640,10 @@ export class MllpClient {
   }
 
   /**
-   * One write, then one read, within `timeoutMs`. The deadline fails the
+   * One write, then one read, within `timeoutMs`. The deadline closes the
    * connection, which wakes the parked read; the read then reports the
-   * timeout as the reason the exchange did not complete.
+   * timeout as the reason the exchange did not complete. Whether the write
+   * completed decides the `delivery` of a failure.
    */
   async #exchange(
     sending: Extract<State, { phase: "sending" }>,
@@ -616,31 +657,47 @@ export class MllpClient {
         new MllpSendTimeoutError(message.controlId, timeoutMs)
       );
     }, timeoutMs);
+    let written = false;
     try {
       await sending.writer.write(message.framed);
+      written = true;
       const next = await sending.reader.read();
       if (!next.done) {
         return next.value;
       }
     } catch (error) {
-      this.#connectionLost(message.controlId, error);
+      this.#connectionLost(
+        message.controlId,
+        written ? "unknown" : "not-sent",
+        error
+      );
     } finally {
       clearTimeout(deadline);
     }
-    this.#connectionLost(message.controlId);
+    this.#connectionLost(message.controlId, "unknown");
   }
 
   /**
    * What an interrupted send fails with: whatever already closed the client
-   * (a timeout, or `close()`), or `MllpDroppedError` when this send is the
-   * first to notice the connection is gone.
+   * (a timeout, or `close()`), or, when this send is the first to notice,
+   * `MllpInvalidResponseError` for a frame the codec could not read and
+   * `MllpDroppedError` for a connection that is gone.
    */
-  #connectionLost(controlId: string, cause?: unknown): never {
+  #connectionLost(
+    controlId: string,
+    delivery: MllpDelivery,
+    cause?: unknown
+  ): never {
     if (this.#state.phase === "closed") {
-      throw this.#state.reason ?? new MllpClientClosedError();
+      throw (
+        this.#state.reason ?? new MllpClientClosedError(undefined, delivery)
+      );
     }
-    const dropped = new MllpDroppedError(controlId, cause);
-    void this.#shutdown(dropped);
-    throw dropped;
+    const error =
+      cause instanceof MllpCodecError
+        ? new MllpInvalidResponseError(controlId, cause)
+        : new MllpDroppedError(controlId, delivery, cause);
+    void this.#shutdown(error);
+    throw error;
   }
 }

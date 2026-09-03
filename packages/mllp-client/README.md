@@ -163,18 +163,18 @@ A client closes once. After `close()`, or after a failure that closes the connec
 
 ## Errors
 
-| Class                      | `code`             | `delivery` | When                                                                   |
-| -------------------------- | ------------------ | ---------- | ---------------------------------------------------------------------- |
-| `MllpInvalidOptionError`   | `INVALID_OPTION`   | `not-sent` | A timeout or byte cap is out of range.                                 |
-| `MllpAlreadySendingError`  | `ALREADY_SENDING`  | `not-sent` | A send is already in flight.                                           |
-| `MllpClientClosedError`    | `CLOSED`           | `not-sent` | The client is closed. The failure that closed it is on `cause`.        |
-| `MllpInvalidMessageError`  | `INVALID_MESSAGE`  | `not-sent` | No MSH-10, or the message could not be parsed or framed.               |
-| `MllpConnectFailedError`   | `CONNECT_FAILED`   | `not-sent` | The connection could not be opened. Details on `cause`.                |
-| `MllpConnectTimeoutError`  | `CONNECT_TIMEOUT`  | `not-sent` | The connection did not open in time.                                   |
-| `MllpConnectAbortedError`  | `CONNECT_ABORTED`  | `not-sent` | `close()` was called while connecting.                                 |
-| `MllpSendTimeoutError`     | `SEND_TIMEOUT`     | `unknown`  | No acknowledgment in time. Closes the client.                          |
-| `MllpDroppedError`         | `DROPPED`          | `unknown`  | The connection was lost mid-send. Closes the client.                   |
-| `MllpInvalidResponseError` | `INVALID_RESPONSE` | `unknown`  | The reply was not an acknowledgment of the message. Closes the client. |
+| Class                      | `code`             | `delivery`                                                 | When                                                                   |
+| -------------------------- | ------------------ | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `MllpInvalidOptionError`   | `INVALID_OPTION`   | `not-sent`                                                 | A timeout or byte cap is out of range.                                 |
+| `MllpAlreadySendingError`  | `ALREADY_SENDING`  | `not-sent`                                                 | A send is already in flight.                                           |
+| `MllpClientClosedError`    | `CLOSED`           | `not-sent`, or `unknown` when `close()` interrupted a send | The client is closed. The failure that closed it is on `cause`.        |
+| `MllpInvalidMessageError`  | `INVALID_MESSAGE`  | `not-sent`                                                 | No MSH-10, or the message could not be parsed or framed.               |
+| `MllpConnectFailedError`   | `CONNECT_FAILED`   | `not-sent`                                                 | The connection could not be opened. Details on `cause`.                |
+| `MllpConnectTimeoutError`  | `CONNECT_TIMEOUT`  | `not-sent`                                                 | The connection did not open in time.                                   |
+| `MllpConnectAbortedError`  | `CONNECT_ABORTED`  | `not-sent`                                                 | `close()` was called while connecting.                                 |
+| `MllpSendTimeoutError`     | `SEND_TIMEOUT`     | `unknown`                                                  | No acknowledgment in time. Closes the client.                          |
+| `MllpDroppedError`         | `DROPPED`          | `not-sent` if the write failed, `unknown` after            | The connection was lost mid-send. Closes the client.                   |
+| `MllpInvalidResponseError` | `INVALID_RESPONSE` | `unknown`                                                  | The reply was not an acknowledgment of the message. Closes the client. |
 
 The last three close the client on purpose. MLLP is lockstep: the next frame answers the last message. After a late, lost, or wrong frame, the client can no longer tell which frame answers which message, so it stops rather than guess.
 
