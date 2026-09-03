@@ -1,6 +1,6 @@
 {
   "name": "@glion/mllp-codec",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "MLLP byte-level framing codec for HL7v2 (encode/decode VT/FS/CR)",
   "keywords": [
     "health",

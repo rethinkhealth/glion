@@ -1,6 +1,6 @@
 {
   "name": "@glion/util-uid",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Time-ordered unique IDs for HL7v2 — the ULID idea resized to a 20-character default that fits MSH-10 and other ST identifier fields",
   "keywords": [
     "health",

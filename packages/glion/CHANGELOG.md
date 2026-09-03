@@ -1,5 +1,28 @@
 # @glion/cli
 
+## 0.18.0
+
+### Patch Changes
+
+- 7715edf: `glion send` now reports an unsendable message — one with no MSH-10 control ID, or with a reserved VT/FS byte in its serialized text — as the `invalid` outcome kind (previously `transport`). The exit code stays 2; JSON consumers switching on `kind` should treat `invalid` as a pre-wire input failure: nothing reached the wire.
+- 7715edf: Remove `@glion/mllp-ack` from the ecosystem: `ackMiddleware` and `acknowledge()` are retired ahead of built-in acknowledgment translation at the framework's error boundary in `@glion/mllp` (ADR 0019).
+  - Remove `@glion/mllp-ack` from quick-start snippets and package catalogs; apps reply by returning a `Response` or via `app.onError()` until the built-in translation lands
+  - Remove the `@glion/mllp-ack` workspace dependency from `@glion/cli`
+
+- Updated dependencies [ee6738b]
+- Updated dependencies [7715edf]
+- Updated dependencies [64d78d6]
+- Updated dependencies [e260ee4]
+- Updated dependencies [7715edf]
+- Updated dependencies [5d81ea0]
+  - @glion/ack@0.18.0
+  - @glion/mllp-client@0.18.0
+  - @glion/mllp@0.18.0
+  - @glion/parser@0.18.0
+  - @glion/util-query@0.18.0
+  - @glion/ast@0.18.0
+  - @glion/to-hl7v2@0.18.0
+
 ## 0.17.0
 
 ### Minor Changes
