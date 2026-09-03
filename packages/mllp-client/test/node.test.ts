@@ -2,26 +2,26 @@
  * Integration tests for the Node runtime adapter.
  *
  * Uses a real localhost `net.createServer` so the WHATWG-Streams →
- * Node `Duplex.toWeb` bridge is exercised. These are slower than
- * the in-memory `client.test.ts` suite (each test pays a few ms for
- * socket setup) but they verify the live contract — `close()` is
- * idempotent, `closed` resolves on peer FIN, signal cancellation
- * destroys an in-flight socket — that the fake duplex can only
- * stub.
+ * Node `Duplex.toWeb` bridge is exercised. Each test pays a few ms for
+ * socket setup, in exchange for verifying the live connection contract:
+ * `close()` is idempotent and bounded, a pending read settles when the peer
+ * drops, and signal cancellation destroys an in-flight socket.
  */
 
 import { createServer } from "node:net";
 import type { AddressInfo, Server, Socket } from "node:net";
+import { setTimeout as sleep } from "node:timers/promises";
 
 import { frame } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { MllpClient } from "../src/index";
-import type { MllpDuplex } from "../src/index";
+import type { MllpConnection } from "../src/index";
 import { connectNode } from "../src/runtime/node";
+import { ack, adtA01, controlIdOf } from "./fixtures";
 
-interface ServerHandle {
+interface RemoteSystem {
   readonly host: string;
   readonly port: number;
   /** Stop accepting and destroy any open sockets. */
@@ -30,9 +30,9 @@ interface ServerHandle {
   dropAllSockets(): void;
 }
 
-interface ServerOptions {
+interface RemoteSystemOptions {
   /**
-   * Called for each accepted socket. Default: echo MLLP-framed ACK_AA
+   * Called for each accepted socket. Default: acknowledge every frame
    * whenever the client sends a complete frame.
    */
   onConnection?: (socket: Socket) => void;
@@ -43,19 +43,9 @@ interface ServerOptions {
   allowHalfOpen?: boolean;
 }
 
-const ACK_AA = [
-  "MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|ACK001|P|2.5",
-  "MSA|AA|MSG001",
-].join("\r");
-
-const REQUEST = [
-  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|MSG001|P|2.5",
-  "PID|1||12345^^^MRN||Doe^John",
-].join("\r");
-
-async function startEchoAckServer(
-  opts: ServerOptions = {}
-): Promise<ServerHandle> {
+async function remoteSystem(
+  opts: RemoteSystemOptions = {}
+): Promise<RemoteSystem> {
   const sockets = new Set<Socket>();
   const server: Server = createServer(
     { allowHalfOpen: opts.allowHalfOpen ?? false },
@@ -66,9 +56,11 @@ async function startEchoAckServer(
         opts.onConnection(socket);
         return;
       }
-      // Default: respond with ACK_AA to any inbound MLLP frame.
-      socket.on("data", () => {
-        socket.write(frame(encodeBytes(ACK_AA)));
+      // Default: acknowledge each frame for the message it carries. The tests
+      // write one small frame per chunk, so a chunk is VT, message, FS, CR.
+      socket.on("data", (chunk: Buffer) => {
+        const message = chunk.toString("utf8").slice(1, -2);
+        socket.write(frame(encodeBytes(ack("AA", controlIdOf(message)))));
       });
     }
   );
@@ -104,24 +96,26 @@ async function startEchoAckServer(
 }
 
 /**
- * Engage the duplex's read pump and confirm the socket is flowing before the
- * caller triggers a peer drop, then keep draining in the background.
+ * Get the socket reading, then keep one read pending in the background so a
+ * peer drop has something to settle. `ended` resolves once that read reports
+ * end-of-stream or an error.
  *
- * `Duplex.toWeb` is pull-based: a socket that has never been read stays
- * paused and never observes the peer's FIN/RST, so `closed` would not resolve
- * on drop. Reading one chunk activates the socket's underlying read handle,
- * which then observes connection events for the rest of its life — exactly
- * what the client's persistent read loop guarantees from the moment it
- * connects. Writing a probe frame elicits the echo server's ACK so the first
- * read resolves deterministically (no reliance on event-loop timing).
+ * `Duplex.toWeb` is pull-based: a socket nobody has read from stays paused,
+ * and a paused socket never observes the peer's FIN. Writing a probe message
+ * and reading the echo server's acknowledgment gets the socket flowing
+ * deterministically before the caller drops the peer, instead of relying on
+ * event-loop timing. This mirrors the client during a send, where a read is
+ * pending; see #690 for the idle case.
  */
-async function engageReadPump(duplex: MllpDuplex): Promise<void> {
-  const writer = duplex.writable.getWriter();
-  await writer.write(frame(encodeBytes(REQUEST)));
+async function engageReadPump(
+  connection: MllpConnection
+): Promise<{ ended: Promise<void> }> {
+  const writer = connection.writable.getWriter();
+  await writer.write(frame(encodeBytes(adtA01())));
   writer.releaseLock();
-  const reader = duplex.readable.getReader();
+  const reader = connection.readable.getReader();
   await reader.read();
-  void (async () => {
+  const ended = (async () => {
     try {
       for (;;) {
         const { done } = await reader.read();
@@ -131,54 +125,82 @@ async function engageReadPump(duplex: MllpDuplex): Promise<void> {
       }
     } catch {
       // The reader rejects when the socket is destroyed mid-read — expected
-      // on peer drop. `closed` resolution is observed via the socket's own
-      // "close" event, independent of this reader.
+      // on peer drop.
     }
   })();
+  return { ended };
 }
 
 describe("connectNode — happy path", () => {
-  let server: ServerHandle;
+  let remote: RemoteSystem;
   beforeEach(async () => {
-    server = await startEchoAckServer();
+    remote = await remoteSystem();
   });
   afterEach(async () => {
-    await server.close();
+    await remote.close();
   });
 
-  it("resolves to an MllpDuplex when the server accepts", async () => {
+  it("resolves to an MllpConnection when the remote accepts", async () => {
     const ac = new AbortController();
-    const duplex = await connectNode({
-      host: server.host,
-      port: server.port,
+    const connection = await connectNode({
+      host: remote.host,
+      port: remote.port,
       signal: ac.signal,
     });
-    expect(duplex.readable).toBeDefined();
-    expect(duplex.writable).toBeDefined();
-    await duplex.close();
+    expect(connection.readable).toBeDefined();
+    expect(connection.writable).toBeDefined();
+    await connection.close();
   });
 
   it("round-trips an MLLP message via MllpClient", async () => {
     const client = new MllpClient({
       connect: connectNode,
-      host: server.host,
-      port: server.port,
+      host: remote.host,
+      port: remote.port,
     });
     await client.connect();
-    const response = await client.send(REQUEST);
+    const message = adtA01();
+    const response = await client.send(message);
     expect(response.code).toBe("AA");
-    expect(response.controlId).toBe("MSG001");
+    expect(response.raw).toContain(`MSA|AA|${controlIdOf(message)}`);
     await client.close();
   });
 });
 
 describe("connectNode — close contract", () => {
+  it("close() after a send ends the socket gracefully, with FIN rather than RST", async () => {
+    const seen: string[] = [];
+    const remote = await remoteSystem({
+      onConnection: (socket) => {
+        socket.on("data", (chunk: Buffer) => {
+          const message = chunk.toString("utf8").slice(1, -2);
+          socket.write(frame(encodeBytes(ack("AA", controlIdOf(message)))));
+        });
+        socket.on("end", () => seen.push("end"));
+        socket.on("error", () => seen.push("error"));
+      },
+    });
+    try {
+      const client = new MllpClient({
+        connect: connectNode,
+        host: remote.host,
+        port: remote.port,
+      });
+      await client.send(adtA01());
+      await client.close();
+      await sleep(50);
+      expect(seen).toEqual(["end"]);
+    } finally {
+      await remote.close();
+    }
+  });
+
   it("close() resolves via the grace destroy when the remote system never FINs back", async () => {
     // The adapter contract the whole client trusts: close() MUST resolve.
     // A peer that holds its side open after our FIN (allowHalfOpen, no
     // end()) would park a bare socket.end() forever — the 1 s grace window
     // must destroy and resolve.
-    const server = await startEchoAckServer({
+    const remote = await remoteSystem({
       allowHalfOpen: true,
       onConnection: () => {
         // accept and hold: never respond, never end, never FIN back
@@ -186,20 +208,20 @@ describe("connectNode — close contract", () => {
     });
     try {
       const ac = new AbortController();
-      const duplex = await connectNode({
-        host: server.host,
-        port: server.port,
+      const connection = await connectNode({
+        host: remote.host,
+        port: remote.port,
         signal: ac.signal,
       });
       const started = performance.now();
-      await duplex.close();
+      await connection.close();
       const elapsed = performance.now() - started;
       // The grace window ran (the peer withheld its FIN)…
       expect(elapsed).toBeGreaterThanOrEqual(900);
       // …and the destroy fired rather than parking forever.
       expect(elapsed).toBeLessThan(3000);
     } finally {
-      await server.close();
+      await remote.close();
     }
   });
 });
@@ -233,75 +255,83 @@ describe("connectNode — abort signal", () => {
   });
 });
 
-describe("MllpDuplex contract — closed resolves on peer drop", () => {
-  let server: ServerHandle;
+describe("MllpConnection contract — readable ends when the peer drops", () => {
+  let remote: RemoteSystem;
   beforeEach(async () => {
-    server = await startEchoAckServer();
+    remote = await remoteSystem();
   });
   afterEach(async () => {
-    await server.close();
+    await remote.close();
   });
 
-  it("`closed` resolves when the server drops the socket", async () => {
-    const duplex = await connectNode({
-      host: server.host,
-      port: server.port,
+  it("a pending read settles (end-of-stream or error) when the remote drops the socket", async () => {
+    const connection = await connectNode({
+      host: remote.host,
+      port: remote.port,
       signal: new AbortController().signal,
     });
-    // Engage the pull-based read pump as the client's read loop does;
-    // otherwise the paused socket never observes the RST (see engageReadPump).
-    await engageReadPump(duplex);
-    // Don't await `duplex.closed` until after we trigger the drop.
-    const closedPromise = duplex.closed;
-    server.dropAllSockets();
-    // The duplex's closed Promise must resolve, not reject.
-    await expect(closedPromise).resolves.toBeUndefined();
+    const writer = connection.writable.getWriter();
+    await writer.write(frame(encodeBytes(adtA01())));
+    writer.releaseLock();
+    const reader = connection.readable.getReader();
+    await reader.read(); // the echo remote's ACK: the socket is now flowing
+    const pending = reader.read();
+    remote.dropAllSockets();
+    // Either outcome satisfies the contract; what must not happen is a read
+    // that never settles.
+    await expect(
+      pending.then(
+        () => "settled",
+        () => "settled"
+      )
+    ).resolves.toBe("settled");
+    await connection.close();
   });
 });
 
-describe("MllpDuplex contract — close() is idempotent and always resolves", () => {
-  let server: ServerHandle;
+describe("MllpConnection contract — close() is idempotent and always resolves", () => {
+  let remote: RemoteSystem;
   beforeEach(async () => {
-    server = await startEchoAckServer();
+    remote = await remoteSystem();
   });
   afterEach(async () => {
-    await server.close();
+    await remote.close();
   });
 
-  it("close() resolves on a fresh, never-used duplex", async () => {
-    const duplex = await connectNode({
-      host: server.host,
-      port: server.port,
+  it("close() resolves on a fresh, never-used connection", async () => {
+    const connection = await connectNode({
+      host: remote.host,
+      port: remote.port,
       signal: new AbortController().signal,
     });
-    await expect(duplex.close()).resolves.toBeUndefined();
+    await expect(connection.close()).resolves.toBeUndefined();
   });
 
   it("close() called three times all resolve, no EBADF", async () => {
-    const duplex = await connectNode({
-      host: server.host,
-      port: server.port,
+    const connection = await connectNode({
+      host: remote.host,
+      port: remote.port,
       signal: new AbortController().signal,
     });
     const results = await Promise.all([
-      duplex.close(),
-      duplex.close(),
-      duplex.close(),
+      connection.close(),
+      connection.close(),
+      connection.close(),
     ]);
     expect(results).toEqual([undefined, undefined, undefined]);
   });
 
   it("close() resolves even after the peer has already dropped", async () => {
-    const duplex = await connectNode({
-      host: server.host,
-      port: server.port,
+    const connection = await connectNode({
+      host: remote.host,
+      port: remote.port,
       signal: new AbortController().signal,
     });
-    // Engage the read pump so the pull-based socket observes the drop and
-    // `closed` resolves (see engageReadPump).
-    await engageReadPump(duplex);
-    server.dropAllSockets();
-    await duplex.closed;
-    await expect(duplex.close()).resolves.toBeUndefined();
+    // Engage the read pump so the pull-based socket observes the drop (see
+    // engageReadPump), then wait until the read side has seen it end.
+    const { ended } = await engageReadPump(connection);
+    remote.dropAllSockets();
+    await ended;
+    await expect(connection.close()).resolves.toBeUndefined();
   });
 });

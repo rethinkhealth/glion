@@ -1,385 +1,505 @@
 /**
- * The `MllpClient` — a persistent MLLP client for HL7v2.
+ * `MllpClient`: one connection, one message on the wire at a time.
  *
- * A plain TypeScript implementation: one client owns one connection for its
- * lifetime. The connection lifecycle is a small phase field (`idle → connecting
- * → connected → closed`) plus a single-flight latch; there is no state-machine
- * framework. The per-connection wire — read loop, frame decoder, the response
- * inbox with its pending ACK, drop detection — lives in {@link Connection}
- * (`./connection.ts`), which the client drives directly: `send()` is `await
- * connection.exchange(...)`, a real request/response `Promise`. That direct
- * call is the whole point — a native client owns the connection object, so
- * getting the response back is a method return, not a framework bridge.
+ * HL7v2 over MLLP is lockstep. The client writes a message, and the next
+ * frame from the remote system is its acknowledgment. `send()` is exactly
+ * that: one write, then one read. There is no background reader and no queue.
  *
- * Single-flight: one send is on the wire at a time; a concurrent `send()`
- * rejects with `ALREADY_SENDING`. (A FIFO queue and connection retry are
- * future work; the default is connect-once, no retry.)
+ * All lifecycle state is the single `#state` field, a union of immutable
+ * phase objects. A phase changes by replacing the object, never by mutating
+ * it, and every replacement goes through `#transition()`, which moves only
+ * from the snapshot the caller read. A method that awaited in between may
+ * find that another call moved the client on; that is how a racing
+ * `close()` is detected.
+ *
+ * Everything that ends the connection, whether `close()`, a timeout, a lost
+ * peer, or an unusable acknowledgment, goes through `#shutdown()`, with the
+ * error that caused it as the closed state's reason.
+ *
+ * This is the only layer that throws `MllpClientError`s. Whatever the codec,
+ * the connector, or the streams throw is wrapped here, on `cause`.
  *
  * @module
  */
 
-import type { Root } from "@glion/ast";
-import { parseHL7v2 } from "@glion/parser";
+import {
+  AckApplicationError,
+  AckApplicationReject,
+  AckCode,
+  AckCommitError,
+  AckCommitReject,
+  isAckNakCode,
+} from "@glion/ack";
+import { MllpCodecError, unframe } from "@glion/mllp-codec";
+import type { UnframeOptions } from "@glion/mllp-codec";
 
-import type { MllpClientResponse } from "./ack";
-import { createConnection } from "./connection";
-import type { Connection } from "./connection";
-import { MllpClientError, MllpErrorCode } from "./errors";
-import { prepareOutbound } from "./outbound";
+import { decode, encode } from "./codec";
+import type { Acknowledgment, EncodedMessage } from "./codec";
+import {
+  DEFAULT_CONNECT_TIMEOUT_MS,
+  DEFAULT_MAX_BUFFERED_BYTES,
+  DEFAULT_SEND_TIMEOUT_MS,
+  MAX_TIMEOUT_MS,
+} from "./constants";
+import {
+  MllpAlreadySendingError,
+  MllpClientClosedError,
+  MllpConnectAbortedError,
+  MllpConnectFailedError,
+  MllpConnectTimeoutError,
+  MllpDroppedError,
+  MllpInvalidMessageError,
+  MllpInvalidOptionError,
+  MllpInvalidResponseError,
+  MllpSendTimeoutError,
+} from "./errors";
+import type { MllpClientError, MllpDelivery } from "./errors";
+import type {
+  MllpClientOptions,
+  MllpClientResponse,
+  MllpClientState,
+  MllpConnection,
+  MllpConnector,
+  MllpSendOptions,
+  SendInput,
+} from "./types";
 
-export type { MllpClientResponse } from "./ack";
+type State =
+  | { readonly phase: "idle" }
+  | {
+      readonly phase: "connecting";
+      /** Cancels the connector when `close()` arrives first. */
+      readonly abort: AbortController;
+      /** The connector's promise; a second `connect()` waits on it. */
+      readonly connection: Promise<MllpConnection>;
+    }
+  | {
+      readonly phase: "connected";
+      /**
+       * Messages from the remote system, one per read: the connection's
+       * readable piped through `unframe`. The pipe locks the readable, so the
+       * connection's bytes are only ever read here, de-framed.
+       */
+      readonly reader: ReadableStreamDefaultReader<Uint8Array>;
+      /** Framed messages to the remote system. */
+      readonly writer: WritableStreamDefaultWriter<Uint8Array>;
+      /** Ends the connection: the adapter's `close()`. */
+      readonly close: () => Promise<void>;
+    }
+  | {
+      readonly phase: "sending";
+      readonly reader: ReadableStreamDefaultReader<Uint8Array>;
+      readonly writer: WritableStreamDefaultWriter<Uint8Array>;
+      readonly close: () => Promise<void>;
+      /** MSH-10 of the message waiting for its acknowledgment. */
+      readonly controlId: string;
+    }
+  | {
+      readonly phase: "closed";
+      /** Why the client closed; `null` for an owner `close()`. */
+      readonly reason: MllpClientError | null;
+      /** The connection teardown every `close()` awaits. */
+      readonly teardown: Promise<void>;
+    };
+
+/** The teardown of a client that never opened a connection. */
+const NOTHING_TO_TEAR_DOWN: Promise<void> = Promise.resolve();
+
+// TODO(#689): replace with the shared reader from @glion/ack once it exists.
+const NAK_EXCEPTIONS = {
+  [AckCode.ApplicationError]: AckApplicationError,
+  [AckCode.ApplicationReject]: AckApplicationReject,
+  [AckCode.CommitError]: AckCommitError,
+  [AckCode.CommitReject]: AckCommitReject,
+} as const;
 
 /**
- * What `MllpClient.send()` accepts — a `string` (serialized HL7v2 text) or a
- * `Root` (a parsed tree). Both are normalized to a tree and re-serialized to
- * canonical HL7v2 for the wire: the client is an *originating / cleaning*
- * client, not a byte-exact relay. A `string` is parsed; a `Root` is used as-is.
+ * Sends HL7v2 messages to one remote system over MLLP and returns each
+ * message's acknowledgment.
  *
- * Cleaning is syntactic only — semantics are preserved. Line endings normalize
- * to CR and trailing empty fields / segments are trimmed; escape sequences,
- * Z-segments, repetitions, and components round-trip verbatim. Two caveats:
- * trailing-empty trimming is not idempotent (it drops one trailing empty field
- * per pass), and a `Root` that was escape-_decoded_ upstream (e.g. via
- * `hl7v2DecodeEscapes`) must NOT be sent — `toHl7v2` has no re-encode step and
- * would emit the decoded literal.
+ * One client owns one TCP connection and sends one message at a time, which
+ * is what the protocol requires: the next frame the remote system writes
+ * after a message is that message's acknowledgment. `send()` writes the
+ * message, waits for the acknowledgment, checks that it answers this message,
+ * and resolves with it.
  *
- * Raw bytes are NOT accepted — decode them to text at your I/O boundary (where
- * charset / MSH-18 knowledge lives) and pass the `string`.
+ * ## Usage
+ *
+ * Send as many messages as needed, then close. `send()` connects on first
+ * use; `connect()` opens the connection ahead of time when that is useful,
+ * for example to fail fast at startup.
+ *
+ * ```ts
+ * import { MllpClient } from "@glion/mllp-client";
+ * import { connectNode } from "@glion/mllp-client/node";
+ *
+ * const client = new MllpClient({
+ *   connect: connectNode,
+ *   host: "hl7.example.org",
+ *   port: 2575,
+ * });
+ *
+ * await client.connect();
+ * try {
+ *   const ack = await client.send(adtMessage); // HL7v2 text, or a parsed Root
+ *   ack.code; // "AA" or "CA": the remote system accepted the message
+ * } finally {
+ *   await client.close();
+ * }
+ * ```
+ *
+ * Or scope the client to a block with `await using`:
+ *
+ * ```ts
+ * await using client = new MllpClient({
+ *   connect: connectNode,
+ *   host,
+ *   port,
+ * });
+ * const ack = await client.send(adtMessage);
+ * ```
+ *
+ * ## Lifecycle
+ *
+ * ```text
+ * idle → connecting → connected ⇄ sending → closed
+ * ```
+ *
+ * `state` reports the current phase. A client closes once and never
+ * reconnects: after `close()`, or after a failure that ends the connection,
+ * every call rejects with {@link MllpClientClosedError}, and a new client is
+ * the way back. d
+ *
+ * ## Errors
+ *
+ * A NAK is not an error of the client. When the remote system answers with
+ * `AE`, `AR`, `CE`, or `CR`, `send()` rejects with the matching
+ * `@glion/ack` exception, and the connection stays open.
+ *
+ * Everything the client itself raises extends {@link MllpClientError}. Each
+ * subclass is one situation, each carries a stable `code`, and each carries
+ * `delivery`: `not-sent` when nothing reached the wire, `unknown` when the
+ * message may have been received. The failures that can happen after the
+ * message is written, a timeout, a lost connection, or an unusable reply,
+ * also close the client, because acknowledgments on that connection can no
+ * longer be matched safely.
+ *
+ * ```ts
+ * import { AckException } from "@glion/ack";
+ * import { MllpClientError } from "@glion/mllp-client";
+ *
+ * try {
+ *   await client.send(adtMessage);
+ * } catch (error) {
+ *   if (error instanceof AckException) {
+ *     // The remote system understood the message and rejected it.
+ *     // The connection is still open; error.text carries its reason.
+ *   } else if (error instanceof MllpClientError) {
+ *     // The client or the wire failed. error.code says what happened, and
+ *     // error.delivery says whether the message may have been received.
+ *   }
+ * }
+ * ```
+ *
+ * ## Runtimes
+ *
+ * The client speaks to the network through the `connect` option, an
+ * {@link MllpConnector} that opens one connection as a pair of byte streams.
+ * The Node adapter ships as `@glion/mllp-client/node`; other runtimes
+ * implement the same small interface.
  */
-export type SendInput = string | Root;
-
-/**
- * Bidirectional byte-stream contract that runtime adapters satisfy.
- *
- * **Adapter responsibilities** (the client trusts these; adapter tests enforce
- * them): `close()` MUST resolve (never reject) and be idempotent; `closed` MUST
- * resolve when either side ends the connection while the consumer is draining
- * `readable`, and must not reject.
- */
-export interface MllpDuplex {
-  readonly readable: ReadableStream<Uint8Array>;
-  readonly writable: WritableStream<Uint8Array>;
-  close(): Promise<void>;
-  readonly closed: Promise<void>;
+function assertTimeoutMs(option: string, ms: number): void {
+  if (!Number.isFinite(ms) || ms <= 0 || ms > MAX_TIMEOUT_MS) {
+    throw new MllpInvalidOptionError(
+      option,
+      `a number of milliseconds between 1 and ${MAX_TIMEOUT_MS}`,
+      ms
+    );
+  }
 }
 
-/**
- * Opens one connection to the target. **Contract — honour the `signal`:** when
- * it aborts before the connection opens, reject and leave nothing live. The
- * one racy edge — the connection opening in the instant after the abort — is
- * the CLIENT's to dispose (it closes the orphaned duplex itself); the adapter
- * only owes reject-on-abort-before-resolve. The client passes a signal it
- * aborts on `connectTimeoutMs` or `close()`, and trusts this contract.
- */
-export type MllpConnector = (opts: {
-  host: string;
-  port: number;
-  signal: AbortSignal;
-}) => Promise<MllpDuplex>;
-
-/** The client's connection phase. */
-export type MllpClientState = "closed" | "connected" | "connecting" | "idle";
-
-export interface MllpSendOptions {
-  /** Overrides the default send deadline (ms): write + ACK wait. */
-  readonly timeoutMs?: number;
+function assertByteCap(option: string, bytes: number): void {
+  if (!Number.isInteger(bytes) || bytes <= 0) {
+    throw new MllpInvalidOptionError(option, "a positive integer", bytes);
+  }
 }
 
-export interface MllpClientOptions {
-  readonly host: string;
-  readonly port: number;
-  /** Runtime adapter; e.g. `connectNode` from `@glion/mllp-client/node`. */
-  readonly connect: MllpConnector;
-  /** Default 30 000 ms. */
-  readonly connectTimeoutMs?: number;
-  /** Default 30 000 ms. Per-send `timeoutMs` overrides. */
-  readonly sendTimeoutMs?: number;
-  /**
-   * Maximum bytes buffered while decoding inbound ACK frames. Defence against
-   * remote systems that send unterminated data. The bound is enforced as bytes
-   * arrive — it caps `carried-over bytes + one socket read`, so a custom cap
-   * must leave room for the largest single chunk the transport can deliver,
-   * not just the largest ACK. Default 16 MiB.
-   */
-  readonly maxBufferedBytes?: number;
+/** `encode`, with the codec's failure wrapped as the client's error. */
+function encodeMessage(message: SendInput): EncodedMessage {
+  try {
+    return encode(message);
+  } catch (error) {
+    throw new MllpInvalidMessageError(error);
+  }
 }
-
-const DEFAULT_CONNECT_TIMEOUT_MS = 30_000;
-const DEFAULT_SEND_TIMEOUT_MS = 30_000;
 
 export class MllpClient {
-  readonly #host: string;
-  readonly #port: number;
-  readonly #connect: MllpConnector;
+  readonly #endpoint: { readonly host: string; readonly port: number };
+  readonly #connector: MllpConnector;
   readonly #connectTimeoutMs: number;
   readonly #sendTimeoutMs: number;
-  readonly #maxBufferedBytes: number | undefined;
+  readonly #framing: Required<UnframeOptions>;
+  #state: State = { phase: "idle" };
 
-  /** The lifecycle phase — the single source of truth for `state`. */
-  #phase: MllpClientState = "idle";
-  /** The live wire while `connected`; `null` otherwise. */
-  #connection: Connection | null = null;
-  /**
-   * True while one send is awaiting its ACK (single-flight). Race-free without
-   * locks: it is set synchronously before `send()`'s first `await` and cleared
-   * in `finally`, and JavaScript runs one call at a time — concurrent `send()`
-   * calls can only interleave at `await` points, by which time the flag is up.
-   */
-  #inFlight = false;
-  /** Aborts the in-flight connect (on `connectTimeoutMs` or `close()`). */
-  #connectController: AbortController | null = null;
-  /**
-   * The in-flight connect attempt while `connecting`; `null` otherwise.
-   * Set in the same synchronous step as `#phase = "connecting"`, so the
-   * `connecting` phase always has an attempt to join.
-   */
-  #connecting: Promise<void> | null = null;
-  /**
-   * Why this client became unusable — the drop, connect failure, or connect
-   * timeout (`null` for an owner `close()`, which needs no explanation).
-   * Carried on later CLOSED errors so "the remote system hung up" and "the
-   * connection never opened" are distinguishable from "the application
-   * closed this client".
-   */
-  #closedReason: MllpClientError | null = null;
-
+  /** @throws {MllpInvalidOptionError} A timeout or byte cap is out of range. */
   constructor(opts: MllpClientOptions) {
-    this.#host = opts.host;
-    this.#port = opts.port;
-    this.#connect = opts.connect;
+    // Initialize the client's endpoint, connector, and timeout/byte cap settings.
+    this.#endpoint = { host: opts.host, port: opts.port };
+    this.#connector = opts.connect;
     this.#connectTimeoutMs =
       opts.connectTimeoutMs ?? DEFAULT_CONNECT_TIMEOUT_MS;
     this.#sendTimeoutMs = opts.sendTimeoutMs ?? DEFAULT_SEND_TIMEOUT_MS;
-    this.#maxBufferedBytes = opts.maxBufferedBytes;
+    this.#framing = {
+      maxBufferedBytes: opts.maxBufferedBytes ?? DEFAULT_MAX_BUFFERED_BYTES,
+    };
+
+    // Assertions and validations for the provided options.
+    assertTimeoutMs("connectTimeoutMs", this.#connectTimeoutMs);
+    assertTimeoutMs("sendTimeoutMs", this.#sendTimeoutMs);
+    assertByteCap("maxBufferedBytes", this.#framing.maxBufferedBytes);
   }
 
-  /** Target host the client is configured for. */
+  /** Host name or address of the remote system. */
   get host(): string {
-    return this.#host;
+    return this.#endpoint.host;
   }
 
-  /** Target port the client is configured for. */
+  /** TCP port of the remote system. */
   get port(): number {
-    return this.#port;
+    return this.#endpoint.port;
   }
 
-  /** The connection phase. */
+  /**
+   * The current phase of the client's lifecycle.
+   *
+   * `idle` before the first `connect()`, `connecting` while an attempt is in
+   * flight, `connected` while the connection is open and free, `sending`
+   * while a message is waiting for its acknowledgment, and `closed` once the
+   * client is done, whether by `close()` or by a failure. Useful for logging
+   * and health checks; the methods enforce it themselves.
+   */
   get state(): MllpClientState {
-    return this.#phase;
+    return this.#state.phase;
   }
 
-  /** True while the wire is up (state is `connected`). */
+  /**
+   * Whether the connection is open. True in both `connected` and `sending`.
+   */
   get connected(): boolean {
-    return this.#phase === "connected";
+    return this.#state.phase === "connected" || this.#state.phase === "sending";
   }
 
   /**
-   * Open the wire through the runtime adapter. Idempotent: while `connecting`
-   * it returns the same in-flight attempt — one connection attempt per
-   * instance, every caller sees its outcome — and when already `connected` it
-   * resolves immediately. A hung connect is bounded by `connectTimeoutMs`;
-   * cancel a connecting client with `close()` (every joined caller then
-   * rejects with `CONNECT_ABORTED`).
+   * Open the connection ahead of the first `send()`, which would otherwise
+   * open it. Idempotent: a connected client resolves at once, and a call that
+   * arrives while an attempt is in flight waits for that attempt.
    *
-   * @throws {MllpClientError} `CLOSED` when the instance is already `closed`
-   *   (construct a new instance); `CONNECT_FAILED` when the adapter rejects
-   *   (underlying error on `cause`); `CONNECT_TIMEOUT` when the adapter exceeds
-   *   `connectTimeoutMs`; `CONNECT_ABORTED` when `close()` interrupts the
-   *   in-flight connect.
+   * @throws {MllpConnectFailedError} The connection could not be opened.
+   * @throws {MllpConnectTimeoutError} The connection did not open in time.
+   * @throws {MllpConnectAbortedError} `close()` arrived first.
+   * @throws {MllpClientClosedError} The client is already closed.
    */
-  connect(): Promise<void> {
-    switch (this.#phase) {
-      case "closed": {
-        return Promise.reject(MllpClientError.closed(this.#closedReason));
-      }
-      case "connected": {
-        return Promise.resolve();
-      }
-      case "connecting": {
-        // Join the one in-flight attempt; it is set in the same synchronous
-        // step as the phase (idle case below). The fallback can only fire on
-        // a client bug — reject loudly so it is reported, never masked.
-        return (
-          this.#connecting ??
-          Promise.reject(
-            new Error(
-              '@glion/mllp-client internal invariant violated: phase is "connecting" with no attempt to join — this is a bug in the client, please report it'
-            )
-          )
-        );
-      }
-      case "idle": {
-        this.#phase = "connecting";
-        const attempt = this.#establish();
-        this.#connecting = attempt;
-        return attempt;
-      }
-      default: {
-        const unhandled: never = this.#phase;
-        return Promise.reject(
-          new Error(`unhandled client phase: ${String(unhandled)}`)
-        );
-      }
+  async connect(): Promise<void> {
+    const state = this.#readyToConnectOrThrow();
+    if (state.phase === "connected" || state.phase === "sending") {
+      return;
     }
-  }
+    if (state.phase === "connecting") {
+      // Another call is running the attempt. Its continuation was registered
+      // on `opening` first, so it resumes first and moves the state before
+      // this one reads it.
+      await Promise.allSettled([state.connection]);
+      this.#assertConnection();
+      return;
+    }
 
-  /**
-   * The one connection attempt, end to end: open the wire through the
-   * adapter, then move to `connected` — or to `closed`, throwing the typed
-   * reason. Bounded by `connectTimeoutMs` and cancellable by `close()`; both
-   * abort the controller with the error to surface, so every failure path
-   * lands in the catch already carrying its reason.
-   */
-  async #establish(): Promise<void> {
-    const controller = new AbortController();
-    this.#connectController = controller;
-    const timer = setTimeout(() => {
-      controller.abort(
-        MllpClientError.connectionTimeout(this.#connectTimeoutMs)
-      );
-    }, this.#connectTimeoutMs);
-
+    // Two ways the attempt can be cut short, on one signal: `abort` is ours,
+    // fired by close(); the deadline adds the timeout. Whether close() won is
+    // decided by the state below, not by the signal.
+    const abort = new AbortController();
+    const deadline = AbortSignal.any([
+      abort.signal,
+      AbortSignal.timeout(this.#connectTimeoutMs),
+    ]);
+    let connectionPromise: Promise<MllpConnection>;
     try {
-      const duplex = await this.#connect({
-        host: this.#host,
-        port: this.#port,
-        signal: controller.signal,
+      connectionPromise = this.#connector({
+        ...this.#endpoint,
+        signal: deadline,
       });
-      // The adapter's contract covers rejecting when aborted BEFORE it
-      // resolves. A connection that opens in the instant AFTER the abort is
-      // ours to dispose: close it, then let throwIfAborted surface the reason.
-      if (controller.signal.aborted) {
-        await duplex.close();
-        controller.signal.throwIfAborted();
-      }
-      this.#connection = createConnection({
-        duplex,
-        host: this.#host,
-        maxBufferedBytes: this.#maxBufferedBytes,
-        onDrop: (error) => this.#handleDrop(error),
-        // FIXME(https://github.com/rethinkhealth/glion/issues/685): the client
-        // hard-wires @glion/parser for inbound ACK parsing; the parser should
-        // be an application choice, as on the server (`Mllp.parser()`).
-        parser: parseHL7v2,
-        port: this.#port,
-      });
-      this.#phase = "connected";
     } catch (error) {
-      this.#phase = "closed";
-      // Only this client aborts the controller, always with the typed reason —
-      // CONNECT_TIMEOUT from the deadline, CONNECT_ABORTED from close().
-      const reason: unknown = controller.signal.reason;
-      if (controller.signal.aborted && reason instanceof MllpClientError) {
-        // CONNECT_ABORTED came from an owner close() — like close() itself,
-        // it records no reason; a timeout is not the owner's doing.
-        if (reason.code === MllpErrorCode.CONNECT_TIMEOUT) {
-          this.#closedReason = reason;
-        }
-        throw reason;
+      // A connector that throws is a connector that rejected.
+      connectionPromise = Promise.reject(error);
+    }
+    const connecting: State = {
+      abort,
+      connection: connectionPromise,
+      phase: "connecting",
+    };
+    this.#transition(state, () => connecting);
+
+    let connection: MllpConnection;
+    try {
+      connection = await connectionPromise;
+    } catch (error) {
+      const reason = deadline.aborted
+        ? new MllpConnectTimeoutError(this.#connectTimeoutMs)
+        : new MllpConnectFailedError(error);
+      const closed = this.#transition(connecting, () => ({
+        phase: "closed",
+        reason,
+        teardown: NOTHING_TO_TEAR_DOWN,
+      }));
+      if (!closed) {
+        throw new MllpConnectAbortedError();
       }
-      const failure = MllpClientError.connectionFailure(error);
-      this.#closedReason = failure;
-      throw failure;
-    } finally {
-      clearTimeout(timer);
-      this.#connectController = null;
-      this.#connecting = null;
+      throw reason;
+    }
+
+    if (deadline.aborted && !abort.signal.aborted) {
+      // The connector resolved after the deadline: too late to use. Only
+      // close() moves the state past connecting, and it aborts the signal
+      // first, so this transition cannot lose.
+      const reason = new MllpConnectTimeoutError(this.#connectTimeoutMs);
+      const teardown = connection.close();
+      this.#transition(connecting, () => ({
+        phase: "closed",
+        reason,
+        teardown,
+      }));
+      throw reason;
+    }
+    const connected = this.#transition(connecting, () => ({
+      close: () => connection.close(),
+      phase: "connected",
+      reader: connection.readable
+        .pipeThrough(unframe(this.#framing))
+        .getReader(),
+      writer: connection.writable.getWriter(),
+    }));
+    if (!connected) {
+      // close() moved the client on in the instant before the connector
+      // resolved; its teardown disposes of the connection.
+      throw new MllpConnectAbortedError();
     }
   }
 
   /**
-   * Parse and send `message`, then resolve with the parsed ACK. One send is on
-   * the wire at a time; a concurrent send while one is in flight rejects with
-   * `ALREADY_SENDING`. There is no caller cancellation signal — a send is
-   * bounded by its send deadline (covering the write and the ACK wait), and
-   * `close()` rejects an in-flight send. A timed-out send closes the
-   * connection: a late acknowledgment could never be matched safely.
+   * Send one message and return its acknowledgment. Connects first when the
+   * client is not connected yet.
    *
-   * @throws {AckException} (from `@glion/ack`) The remote system returned a
-   *   NAK.
-   * @throws {MllpClientError} Otherwise; branch on `code`: `NOT_CONNECTED` /
-   *   `CLOSED` (state guard), `ALREADY_SENDING` (a send is already on the
-   *   wire), `INVALID_MESSAGE` (no MSH-10 control ID, or a reserved MLLP
-   *   character VT/FS in the serialized text — nothing was sent; CR is
-   *   allowed as the segment terminator), `SEND_TIMEOUT` (no ACK within the
-   *   deadline — the connection closes; the message's fate is unknown),
-   *   `DROPPED` (terminal), `INVALID_RESPONSE` (the remote system's reply was
-   *   not a usable acknowledgment — see its `message`; the connection closes,
-   *   because acknowledgment correlation can no longer be trusted).
+   * Nothing is written when an option, state, or message error is thrown.
+   * Every other failure also closes the client, because the connection can no
+   * longer be trusted to be in step; check `delivery` before sending the
+   * message again.
+   *
+   * @throws {AckException} The remote system answered with a NAK. The
+   *   connection stays open.
+   * @throws {MllpInvalidOptionError} `timeoutMs` is out of range.
+   * @throws {MllpClientClosedError} The client is closed.
+   * @throws {MllpAlreadySendingError} Another send is in flight.
+   * @throws {MllpInvalidMessageError} The message cannot be sent as-is.
+   * @throws {MllpSendTimeoutError} No acknowledgment arrived in time.
+   * @throws {MllpDroppedError} The connection was lost.
+   * @throws {MllpInvalidResponseError} The reply is not a usable
+   *   acknowledgment.
    */
   async send(
     message: SendInput,
     opts: MllpSendOptions = {}
   ): Promise<MllpClientResponse> {
-    switch (this.#phase) {
-      case "idle":
-      case "connecting": {
-        throw MllpClientError.notConnected();
-      }
-      case "closed": {
-        throw MllpClientError.closed(this.#closedReason);
-      }
-      case "connected": {
-        break;
-      }
-      default: {
-        const unhandled: never = this.#phase;
-        throw new Error(`unhandled client phase: ${String(unhandled)}`);
-      }
-    }
-    if (this.#inFlight) {
-      throw MllpClientError.alreadySending();
-    }
-    const connection = this.#connection;
-    if (connection === null) {
-      throw new Error(
-        '@glion/mllp-client internal invariant violated: phase is "connected" with no live connection — this is a bug in the client, please report it'
-      );
-    }
+    const timeoutMs = opts.timeoutMs ?? this.#sendTimeoutMs;
+    assertTimeoutMs("timeoutMs", timeoutMs);
 
-    this.#inFlight = true;
+    const encoded = encodeMessage(message);
+    if (!this.connected) {
+      try {
+        await this.connect();
+      } catch (error) {
+        // For the send, close() cancelling the attempt is the client closing.
+        throw error instanceof MllpConnectAbortedError
+          ? new MllpClientClosedError()
+          : error;
+      }
+    }
+    // No await from here to the move into `sending`: the state the guard
+    // returns is the state the move starts from.
+    const state = this.#readyToSendOrThrow();
+
+    const sending: State = {
+      ...state,
+      controlId: encoded.controlId,
+      phase: "sending",
+    };
+    this.#transition(state, () => sending);
+
     try {
-      // The outbound boundary (./outbound): parse → serialize → encode →
-      // frame → correlate, throwing with nothing written. See prepareOutbound.
-      const { framed, requestControlId } = prepareOutbound(message, parseHL7v2);
-      // `return await`, deliberately: the finally below must release the
-      // single-flight latch when the exchange SETTLES, not when the promise
-      // is created — a bare return would clear #inFlight while the send is
-      // still on the wire.
-      return await connection.exchange({
-        framed,
-        requestControlId,
-        timeoutMs: opts.timeoutMs ?? this.#sendTimeoutMs,
-      });
+      const bytes = await this.#exchange(sending, encoded, timeoutMs);
+      const ack = this.#decode(sending, bytes);
+      if (isAckNakCode(ack.code)) {
+        throw new NAK_EXCEPTIONS[ack.code](
+          `The remote system did not accept message ${encoded.controlId}: acknowledgment code ${ack.code}.`,
+          {
+            controlId: encoded.controlId,
+            errorCode: ack.errorCode,
+            severity: ack.severity,
+            text: ack.text,
+          }
+        );
+      }
+      return { code: ack.code, raw: ack.raw, tree: ack.tree };
     } finally {
-      this.#inFlight = false;
+      // Back to the state the send started from, unless a failure or close()
+      // moved the client to closed in the meantime; that stands.
+      this.#transition(sending, () => state);
     }
   }
 
   /**
-   * Tear the connection down. Idempotent: resolves from any state and never
-   * rejects. An in-flight `send()` rejects with `MllpClientError` —
-   * `CLOSED` while waiting for the ACK, or `DROPPED` when the close lands
-   * mid-write.
+   * End the connection. Resolves from any phase, never rejects, and resolves
+   * once the connection is actually closed. An in-flight `send()` rejects
+   * with {@link MllpClientClosedError}.
    */
   async close(): Promise<void> {
-    if (this.#phase === "closed") {
-      return;
-    }
-    const connection = this.#connection;
-    this.#connection = null;
-    // Cancel an in-flight connect; its awaiter rejects with CONNECT_ABORTED.
-    if (this.#phase === "connecting") {
-      this.#connectController?.abort(MllpClientError.connectionAborted());
-    }
-    this.#phase = "closed";
-    if (connection) {
-      await connection.shutdown(
-        new MllpClientError(
-          MllpErrorCode.CLOSED,
-          "The connection was closed before this message's acknowledgment arrived."
-        )
-      );
+    const state = this.#state;
+    switch (state.phase) {
+      case "idle": {
+        this.#transition(state, () => ({
+          phase: "closed",
+          reason: null,
+          teardown: NOTHING_TO_TEAR_DOWN,
+        }));
+        break;
+      }
+      case "connecting": {
+        state.abort.abort();
+        const { connection } = state;
+        const teardown = (async () => {
+          let late: MllpConnection;
+          try {
+            late = await connection;
+          } catch {
+            return; // the attempt failed; there is nothing to dispose of
+          }
+          await late.close();
+        })();
+        this.#transition(state, () => ({
+          phase: "closed",
+          reason: null,
+          teardown,
+        }));
+        await teardown;
+        break;
+      }
+      case "connected":
+      case "sending": {
+        await this.#shutdown(state, null);
+        break;
+      }
+      case "closed": {
+        await state.teardown;
+        break;
+      }
     }
   }
 
@@ -388,15 +508,189 @@ export class MllpClient {
     await this.close();
   }
 
+  // ── State changes ───────────────────────────────────────────────────
+
   /**
-   * The connection reported that the remote system ended it. With no retry,
-   * that is terminal: `connection.ts` has already rejected any in-flight send
-   * with `DROPPED`; the client records the closed phase and the reason —
-   * surfaced as the `cause` of later CLOSED errors — and releases the wire.
+   * The only way the state changes. Replaces it with `next()`, but only if it
+   * is still `from`, the snapshot the caller read before deciding to move.
+   * Returns whether the move happened.
+   *
+   * A caller that read `from` and has not awaited since always moves, because
+   * nothing else can run in between. A caller that awaited in between may
+   * find that another call moved the client on; it then reads the current
+   * state to learn who won. `next` is a function so that nothing is built,
+   * and no stream is locked, unless the move happens.
    */
-  #handleDrop(error: MllpClientError): void {
-    this.#phase = "closed";
-    this.#connection = null;
-    this.#closedReason = error;
+  #transition(from: State, next: () => State): boolean {
+    if (this.#state !== from) {
+      return false;
+    }
+    this.#state = next();
+    return true;
+  }
+
+  /**
+   * Ends a live connection. Every caller passes the connected or sending
+   * state it decided on, so there is no phase to check here: close() moves
+   * to closed in the same synchronous segment, and a send reaches here only
+   * once its own read has completed or failed.
+   */
+  #shutdown(
+    state: Extract<State, { phase: "connected" | "sending" }>,
+    reason: MllpClientError | null
+  ): Promise<void> {
+    const { close, reader, writer } = state;
+    const teardown = (async () => {
+      // Release the streams, do not cancel them: cancelling would destroy
+      // the socket under the adapter and skip its graceful close. A read
+      // parked on the released reader rejects, which wakes the send.
+      reader.releaseLock();
+      writer.releaseLock();
+      await close();
+    })();
+    this.#transition(state, () => ({ phase: "closed", reason, teardown }));
+    return teardown;
+  }
+
+  // ── Guards ──────────────────────────────────────────────────────────
+  // Each returns the state an operation needs, or throws the error that says
+  // why the current phase cannot provide it. The switches are exhaustive, so
+  // a new phase has to say what it means for every operation.
+
+  /** Any state a connection attempt can start from, join, or is done in. */
+  #readyToConnectOrThrow(): Exclude<State, { phase: "closed" }> {
+    const state = this.#state;
+    switch (state.phase) {
+      case "idle":
+      case "connecting":
+      case "connected":
+      case "sending": {
+        return state;
+      }
+      case "closed": {
+        throw new MllpClientClosedError(state.reason ?? undefined);
+      }
+    }
+  }
+
+  /** The connected state with nothing in flight. */
+  #readyToSendOrThrow(): Extract<State, { phase: "connected" }> {
+    const state = this.#state;
+    switch (state.phase) {
+      case "idle":
+      case "connecting":
+      case "closed": {
+        // send() connects before asking, and connect() throws for a closed
+        // client, so none of these phases can reach here.
+        throw new Error("send() asked for readiness before connecting");
+      }
+      case "sending": {
+        throw new MllpAlreadySendingError(state.controlId);
+      }
+      case "connected": {
+        return state;
+      }
+    }
+  }
+
+  /**
+   * Once an attempt has settled, the client is either connected or closed.
+   * The `connect()` that ran the attempt classified its failure and stored it
+   * as the closed reason; a caller that waited on the attempt throws that
+   * same error. A closed state with no reason means close() cancelled the
+   * attempt.
+   */
+  #assertConnection(): void {
+    const outcome = this.#state;
+    if (outcome.phase === "closed") {
+      throw outcome.reason ?? new MllpConnectAbortedError();
+    }
+  }
+
+  // ── The exchange ────────────────────────────────────────────────────
+
+  /**
+   * Reads the frame that answered the message in flight.
+   *
+   * A frame that is not a usable acknowledgment of that message ends the
+   * connection. `send()` relies on MLLP being lockstep, one frame answering
+   * one message, and an unreadable frame or one that answers a different
+   * message means the connection is no longer known to be in step. Reading
+   * on would risk taking a stray frame as the next message's acknowledgment,
+   * which is a message reported as accepted that never was.
+   */
+  #decode(
+    sending: Extract<State, { phase: "sending" }>,
+    bytes: Uint8Array
+  ): Acknowledgment {
+    try {
+      return decode(bytes, sending.controlId);
+    } catch (error) {
+      // Correlation can no longer be trusted on this connection; the caller
+      // learns through `delivery` that the message's fate is unknown.
+      const invalid = new MllpInvalidResponseError(sending.controlId, error);
+      void this.#shutdown(sending, invalid);
+      throw invalid;
+    }
+  }
+
+  /**
+   * One write, then one read, within `timeoutMs`. The deadline closes the
+   * connection, which wakes the parked read; the read then reports the
+   * timeout as the reason the exchange did not complete. Whether the write
+   * completed decides the `delivery` of a failure.
+   */
+  async #exchange(
+    sending: Extract<State, { phase: "sending" }>,
+    message: EncodedMessage,
+    timeoutMs: number
+  ): Promise<Uint8Array> {
+    // The deadline closes the connection with the timeout as the reason; that
+    // wakes the parked read, which then reports the timeout.
+    const deadline = setTimeout(() => {
+      void this.#shutdown(
+        sending,
+        new MllpSendTimeoutError(sending.controlId, timeoutMs)
+      );
+    }, timeoutMs);
+    let written = false;
+    try {
+      await sending.writer.write(message.framed);
+      written = true;
+      const next = await sending.reader.read();
+      if (!next.done) {
+        return next.value;
+      }
+    } catch (error) {
+      this.#connectionLost(sending, written ? "unknown" : "not-sent", error);
+    } finally {
+      clearTimeout(deadline);
+    }
+    this.#connectionLost(sending, "unknown");
+  }
+
+  /**
+   * What an interrupted send fails with: whatever already closed the client
+   * (a timeout, or `close()`), or, when this send is the first to notice,
+   * `MllpInvalidResponseError` for a frame the codec could not read and
+   * `MllpDroppedError` for a connection that is gone.
+   */
+  #connectionLost(
+    sending: Extract<State, { phase: "sending" }>,
+    delivery: MllpDelivery,
+    cause?: unknown
+  ): never {
+    if (this.#state.phase === "closed") {
+      throw (
+        this.#state.reason ?? new MllpClientClosedError(undefined, delivery)
+      );
+    }
+    const { controlId } = sending;
+    const error =
+      cause instanceof MllpCodecError
+        ? new MllpInvalidResponseError(controlId, cause)
+        : new MllpDroppedError(controlId, delivery, cause);
+    void this.#shutdown(sending, error);
+    throw error;
   }
 }
