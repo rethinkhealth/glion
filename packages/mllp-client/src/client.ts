@@ -357,19 +357,17 @@ export class MllpClient {
     }
 
     if (deadline.aborted && !abort.signal.aborted) {
-      // The connector resolved after the deadline: too late to use.
+      // The connector resolved after the deadline: too late to use. Only
+      // close() moves the state past connecting, and it aborts the signal
+      // first, so this transition cannot lose.
       const reason = new MllpConnectTimeoutError(this.#connectTimeoutMs);
       const teardown = connection.close();
-      if (
-        this.#transition(connecting, () => ({
-          phase: "closed",
-          reason,
-          teardown,
-        }))
-      ) {
-        throw reason;
-      }
-      throw new MllpConnectAbortedError();
+      this.#transition(connecting, () => ({
+        phase: "closed",
+        reason,
+        teardown,
+      }));
+      throw reason;
     }
     const connected = this.#transition(connecting, () => ({
       close: () => connection.close(),
@@ -437,7 +435,7 @@ export class MllpClient {
 
     try {
       const bytes = await this.#exchange(sending, encoded, timeoutMs);
-      const ack = this.#decode(bytes, encoded.controlId);
+      const ack = this.#decode(sending, bytes);
       if (isAckNakCode(ack.code)) {
         throw new NAK_EXCEPTIONS[ack.code](
           `The remote system did not accept message ${encoded.controlId}: acknowledgment code ${ack.code}.`,
@@ -495,7 +493,7 @@ export class MllpClient {
       }
       case "connected":
       case "sending": {
-        await this.#shutdown(null);
+        await this.#shutdown(state, null);
         break;
       }
       case "closed": {
@@ -531,32 +529,27 @@ export class MllpClient {
     return true;
   }
 
-  /** Ends the connection once; later calls join the same teardown. */
-  #shutdown(reason: MllpClientError | null): Promise<void> {
-    const state = this.#state;
-    switch (state.phase) {
-      case "idle":
-      case "connecting": {
-        return NOTHING_TO_TEAR_DOWN;
-      }
-      case "closed": {
-        return state.teardown;
-      }
-      case "connected":
-      case "sending": {
-        const { close, reader, writer } = state;
-        const teardown = (async () => {
-          // Release the streams, do not cancel them: cancelling would destroy
-          // the socket under the adapter and skip its graceful close. A read
-          // parked on the released reader rejects, which wakes the send.
-          reader.releaseLock();
-          writer.releaseLock();
-          await close();
-        })();
-        this.#transition(state, () => ({ phase: "closed", reason, teardown }));
-        return teardown;
-      }
-    }
+  /**
+   * Ends a live connection. Every caller passes the connected or sending
+   * state it decided on, so there is no phase to check here: close() moves
+   * to closed in the same synchronous segment, and a send reaches here only
+   * once its own read has completed or failed.
+   */
+  #shutdown(
+    state: Extract<State, { phase: "connected" | "sending" }>,
+    reason: MllpClientError | null
+  ): Promise<void> {
+    const { close, reader, writer } = state;
+    const teardown = (async () => {
+      // Release the streams, do not cancel them: cancelling would destroy
+      // the socket under the adapter and skip its graceful close. A read
+      // parked on the released reader rejects, which wakes the send.
+      reader.releaseLock();
+      writer.releaseLock();
+      await close();
+    })();
+    this.#transition(state, () => ({ phase: "closed", reason, teardown }));
+    return teardown;
   }
 
   // ── Guards ──────────────────────────────────────────────────────────
@@ -585,15 +578,14 @@ export class MllpClient {
     const state = this.#state;
     switch (state.phase) {
       case "idle":
-      case "connecting": {
-        // send() connects before asking, so these phases cannot reach here.
+      case "connecting":
+      case "closed": {
+        // send() connects before asking, and connect() throws for a closed
+        // client, so none of these phases can reach here.
         throw new Error("send() asked for readiness before connecting");
       }
       case "sending": {
         throw new MllpAlreadySendingError(state.controlId);
-      }
-      case "closed": {
-        throw new MllpClientClosedError(state.reason ?? undefined);
       }
       case "connected": {
         return state;
@@ -618,7 +610,7 @@ export class MllpClient {
   // ── The exchange ────────────────────────────────────────────────────
 
   /**
-   * Reads the frame that answered the message with `controlId`.
+   * Reads the frame that answered the message in flight.
    *
    * A frame that is not a usable acknowledgment of that message ends the
    * connection. `send()` relies on MLLP being lockstep, one frame answering
@@ -627,14 +619,17 @@ export class MllpClient {
    * on would risk taking a stray frame as the next message's acknowledgment,
    * which is a message reported as accepted that never was.
    */
-  #decode(bytes: Uint8Array, controlId: string): Acknowledgment {
+  #decode(
+    sending: Extract<State, { phase: "sending" }>,
+    bytes: Uint8Array
+  ): Acknowledgment {
     try {
-      return decode(bytes, controlId);
+      return decode(bytes, sending.controlId);
     } catch (error) {
       // Correlation can no longer be trusted on this connection; the caller
       // learns through `delivery` that the message's fate is unknown.
-      const invalid = new MllpInvalidResponseError(controlId, error);
-      void this.#shutdown(invalid);
+      const invalid = new MllpInvalidResponseError(sending.controlId, error);
+      void this.#shutdown(sending, invalid);
       throw invalid;
     }
   }
@@ -654,7 +649,8 @@ export class MllpClient {
     // wakes the parked read, which then reports the timeout.
     const deadline = setTimeout(() => {
       void this.#shutdown(
-        new MllpSendTimeoutError(message.controlId, timeoutMs)
+        sending,
+        new MllpSendTimeoutError(sending.controlId, timeoutMs)
       );
     }, timeoutMs);
     let written = false;
@@ -666,15 +662,11 @@ export class MllpClient {
         return next.value;
       }
     } catch (error) {
-      this.#connectionLost(
-        message.controlId,
-        written ? "unknown" : "not-sent",
-        error
-      );
+      this.#connectionLost(sending, written ? "unknown" : "not-sent", error);
     } finally {
       clearTimeout(deadline);
     }
-    this.#connectionLost(message.controlId, "unknown");
+    this.#connectionLost(sending, "unknown");
   }
 
   /**
@@ -684,7 +676,7 @@ export class MllpClient {
    * `MllpDroppedError` for a connection that is gone.
    */
   #connectionLost(
-    controlId: string,
+    sending: Extract<State, { phase: "sending" }>,
     delivery: MllpDelivery,
     cause?: unknown
   ): never {
@@ -693,11 +685,12 @@ export class MllpClient {
         this.#state.reason ?? new MllpClientClosedError(undefined, delivery)
       );
     }
+    const { controlId } = sending;
     const error =
       cause instanceof MllpCodecError
         ? new MllpInvalidResponseError(controlId, cause)
         : new MllpDroppedError(controlId, delivery, cause);
-    void this.#shutdown(error);
+    void this.#shutdown(sending, error);
     throw error;
   }
 }

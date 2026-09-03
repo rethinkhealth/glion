@@ -69,7 +69,7 @@ function fakeConnection() {
     drop: () => remote.close(),
     received,
     /** The remote system stops reading, so the client's next write fails. */
-    refuseWrites: () => inbox.cancel(),
+    refuseWrites: () => inbox.cancel(new Error("EPIPE")),
     reply,
     /** The remote system sends bytes that are not an MLLP frame. */
     replyBytes: (bytes: Uint8Array) => remote.write(bytes),
@@ -281,8 +281,10 @@ describe("MllpClient", () => {
       await remote.refuseWrites();
 
       await expect(client.send(adtA01())).rejects.toMatchObject({
+        cause: expect.objectContaining({ message: "EPIPE" }),
         code: MllpErrorCode.DROPPED,
         delivery: "not-sent",
+        message: expect.stringContaining("EPIPE"),
       });
       expect(client.state).toBe("closed");
     });
@@ -343,6 +345,45 @@ describe("MllpClient", () => {
       expect(second).toMatchObject({
         reason: { code: MllpErrorCode.CONNECT_FAILED },
         status: "rejected",
+      });
+    });
+
+    it("tells a waiting second call that close() cancelled the attempt", async () => {
+      const client = new MllpClient({
+        connect: async ({ signal }) => {
+          await sleep(60_000, undefined, { signal });
+          throw new Error("unreachable");
+        },
+        host: "hl7.example",
+        port: 2575,
+      });
+
+      const first = client.connect();
+      const second = client.connect();
+      await client.close();
+
+      await expect(first).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECT_ABORTED,
+      });
+      await expect(second).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECT_ABORTED,
+      });
+    });
+
+    it("puts a connector's non-Error rejection in the message", async () => {
+      const client = new MllpClient({
+        // A connector is caller code and may reject with anything; that is
+        // what this test is about.
+        // oxlint-disable-next-line prefer-promise-reject-errors
+        connect: () => Promise.reject("refused by policy"),
+        host: "hl7.example",
+        port: 2575,
+      });
+
+      await expect(client.connect()).rejects.toMatchObject({
+        cause: "refused by policy",
+        code: MllpErrorCode.CONNECT_FAILED,
+        message: expect.stringContaining("refused by policy"),
       });
     });
 
@@ -474,6 +515,29 @@ describe("MllpClient", () => {
       ).toThrow(MllpInvalidOptionError);
     });
 
+    it("rejects INVALID_OPTION for a byte cap that is not a positive integer", () => {
+      expect(
+        () =>
+          new MllpClient({
+            connect: fakeConnection().connect,
+            host: "hl7.example",
+            maxBufferedBytes: 0,
+            port: 2575,
+          })
+      ).toThrow(MllpInvalidOptionError);
+    });
+
+    it("exposes the host and port it was given", () => {
+      const client = new MllpClient({
+        connect: fakeConnection().connect,
+        host: "hl7.example",
+        port: 2575,
+      });
+
+      expect(client.host).toBe("hl7.example");
+      expect(client.port).toBe(2575);
+    });
+
     it("rejects INVALID_OPTION for a per-send timeout out of range", async () => {
       const { client } = await connectedClient();
 
@@ -505,6 +569,23 @@ describe("MllpClient", () => {
       const { client, remote } = await connectedClient();
 
       await Promise.all([client.close(), client.close()]);
+      expect(remote.closeCalls).toBe(1);
+    });
+
+    it("runs at the end of an await using block", async () => {
+      const remote = fakeConnection();
+      let client: MllpClient;
+      {
+        await using scoped = new MllpClient({
+          connect: remote.connect,
+          host: "hl7.example",
+          port: 2575,
+        });
+        client = scoped;
+        await scoped.connect();
+      }
+
+      expect(client.state).toBe("closed");
       expect(remote.closeCalls).toBe(1);
     });
   });
