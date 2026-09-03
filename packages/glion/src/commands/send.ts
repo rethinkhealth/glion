@@ -71,9 +71,9 @@ function takeFlagValue(
 }
 
 /**
- * Reads the integer value of a flag at `index`. Folds the missing-value
- * and non-integer checks into one call so the parse loop carries a single
- * guard per integer flag.
+ * Reads the positive integer value of a flag at `index`. Folds the
+ * missing-value, non-integer, and zero checks into one call so the parse loop
+ * carries a single guard per integer flag.
  */
 function takeIntFlagValue(
   argv: readonly string[],
@@ -87,7 +87,11 @@ function takeIntFlagValue(
   if (!/^\d+$/.test(raw)) {
     return { error: `${flag} requires an integer value, got: ${raw}` };
   }
-  return Number.parseInt(raw, 10);
+  const parsed = Number.parseInt(raw, 10);
+  if (parsed === 0) {
+    return { error: `${flag} requires a positive integer, got: 0` };
+  }
+  return parsed;
 }
 
 /**
@@ -327,23 +331,23 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     segmentCount: tree.children.length,
   };
 
-  const client = new MllpClient({
-    connect: opts.connect ?? connectNode,
-    connectTimeoutMs: timeoutMs,
-    host: target.host,
-    port: target.port,
-    sendTimeoutMs: timeoutMs,
-  });
-
+  let client: MllpClient | undefined;
   let startedAt = performance.now();
   try {
+    client = new MllpClient({
+      connect: opts.connect ?? connectNode,
+      connectTimeoutMs: timeoutMs,
+      host: target.host,
+      port: target.port,
+      sendTimeoutMs: timeoutMs,
+    });
     await client.connect();
     startedAt = performance.now();
     const res = await client.send(canonical, { timeoutMs });
     return emit({
-      ackControlId: res.controlId,
+      ackControlId: request.controlId,
       code: res.code,
-      durationMs: res.durationMs,
+      durationMs: performance.now() - startedAt,
       kind: "accept",
       request,
       target,
@@ -364,12 +368,6 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
       });
     }
     if (error instanceof MllpClientError) {
-      // INVALID_MESSAGE is the caller's input (no MSH-10, or a reserved
-      // VT/FS byte) — nothing reached the wire; everything else is the
-      // transport's story.
-      if (error.code === "INVALID_MESSAGE") {
-        return emit({ kind: "invalid", message: error.message, target });
-      }
       return emit({
         code: error.code,
         kind: "transport",
@@ -380,6 +378,6 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     }
     throw error;
   } finally {
-    await client.close();
+    await client?.close();
   }
 }

@@ -1,189 +1,282 @@
 /**
- * The single error type for `@glion/mllp-client`.
+ * Errors raised by `@glion/mllp-client`.
  *
- * Every failure the client itself raises is an {@link MllpClientError}
- * carrying a {@link MllpErrorCode}. **Branch on `code`** — it is the stable,
- * exhaustive discriminant; a `switch` on it never needs to inspect client
- * state. The human-readable detail is in `message`; a wrapped underlying
- * failure is on the standard `cause`.
+ * One class per situation, all extending {@link MllpClientError}. The class
+ * is the discriminant: catch the base to handle anything the client throws,
+ * or `instanceof` one class to react to one situation. Each class also carries
+ * a fixed `code` (the same word as the class name) for logs, metrics, and
+ * `switch` statements, and `delivery`, which says whether the message may
+ * have reached the remote system.
  *
- * A NAK is deliberately *not* an `MllpClientError`: `send()` throws an
- * `@glion/ack` `AckException` when the remote system understood the message and
- * rejected it. The two are separate buckets — "the wire/protocol failed or
- * the call was misused" (`MllpClientError`) vs. "the remote system said no"
- * (`AckException`) — so a caller catches them separately.
+ * ```text
+ * MllpClientError                 code, delivery
+ * ├── MllpInvalidOptionError      an option is out of range              not-sent
+ * ├── MllpAlreadySendingError     send() while a send is in flight       not-sent
+ * ├── MllpClientClosedError       the client is closed for good          not-sent
+ * ├── MllpInvalidMessageError     the message cannot be sent as-is       not-sent
+ * ├── MllpConnectFailedError      the connection could not be opened     not-sent
+ * ├── MllpConnectTimeoutError     the connection did not open in time    not-sent
+ * ├── MllpConnectAbortedError     close() arrived while connecting       not-sent
+ * ├── MllpSendTimeoutError        no acknowledgment arrived in time      unknown
+ * ├── MllpDroppedError            the connection was lost mid-send       unknown
+ * └── MllpInvalidResponseError    the reply is not a usable ack          unknown
+ * ```
+ *
+ * Errors from the layers below arrive on `cause`, never as the thrown type:
+ * the connector's network error under `MllpConnectFailedError`, the codec's
+ * or parser's error under `MllpInvalidMessageError` and
+ * `MllpInvalidResponseError`, the stream error under `MllpDroppedError`.
+ *
+ * A NAK is deliberately not an `MllpClientError`. When the remote system
+ * understood the message and rejected it, `send()` throws the matching
+ * `@glion/ack` `AckException`, the same type the server raises, so a caller
+ * can tell "the remote system said no" from "the client or the wire failed".
  *
  * @module
  */
 
 export const MllpErrorCode = {
-  /**
-   * A send was started while another was still waiting for its acknowledgment.
-   * The client handles one message at a time — the in-flight send must resolve
-   * before the next one starts.
-   */
   ALREADY_SENDING: "ALREADY_SENDING",
-  /**
-   * The client has already been closed. A closed client is done for good and
-   * will not reconnect — a new one must be created to reach the remote system
-   * again.
-   */
   CLOSED: "CLOSED",
-  /**
-   * The client was closed while it was still connecting, so the connection
-   * never finished opening. Expected when closing mid-connect; otherwise it
-   * means something shut the client down before it was ready.
-   */
   CONNECT_ABORTED: "CONNECT_ABORTED",
-  /**
-   * The connection could not be opened — the host was unreachable, refused the
-   * connection, failed DNS, or rejected the TLS handshake. The address and
-   * whether the remote system is listening are worth checking; the underlying
-   * network error is on `cause`.
-   */
   CONNECT_FAILED: "CONNECT_FAILED",
-  /**
-   * The remote system did not accept the connection in time. The host may be
-   * slow, overloaded, or silently dropping connections; retrying may help, as
-   * may raising `connectTimeoutMs` when the remote system is simply slow to
-   * accept.
-   */
   CONNECT_TIMEOUT: "CONNECT_TIMEOUT",
-  /**
-   * The connection was lost and can no longer be used — the remote system hung
-   * up, the network broke mid-send, or the remote system sent malformed or
-   * unexpected data. The in-flight message did not complete; a new connection
-   * must be opened, and the message resent only when it is safe to repeat. The
-   * specifics are in `message`, with any underlying error on `cause`.
-   */
   DROPPED: "DROPPED",
-  /**
-   * The message cannot be sent as-is: it has no MSH-10 control ID (HL7v2
-   * requires one — without it the acknowledgment cannot be correlated), or
-   * its serialized text contains an MLLP reserved character (VT or FS; the
-   * `MllpCodecError` is on `cause`). Nothing was written to the wire; fix
-   * the message and send again.
-   */
   INVALID_MESSAGE: "INVALID_MESSAGE",
-  /**
-   * The remote system replied, but the reply was not a usable acknowledgment of
-   * the sent message: it was garbled (not UTF-8), missing or carrying an
-   * unrecognized acknowledgment code, or it answered a different message (an
-   * unsolicited or duplicate frame consumed as this send's acknowledgment).
-   * The client closes the connection: an uninterpretable reply means
-   * acknowledgment correlation on this wire can no longer be trusted — resend
-   * on a new client, and only when it is safe to repeat. Whether the
-   * remote system accepted the message is unknowable — its fate should be
-   * treated as unknown. The specifics are in `message`, with any decoding error
-   * on `cause`.
-   */
+  INVALID_OPTION: "INVALID_OPTION",
   INVALID_RESPONSE: "INVALID_RESPONSE",
-  /**
-   * Sending was attempted before the client was connected. The client must
-   * connect, and the connection must succeed, before a message can be sent.
-   */
-  NOT_CONNECTED: "NOT_CONNECTED",
-  /**
-   * The remote system did not acknowledge the message in time. The client
-   * closes the connection: after a timeout, a late acknowledgment could never
-   * be matched safely, so the wire cannot be trusted for further sends.
-   * Whether the remote system received the message is unknown — resend on a
-   * new client, and only when it is safe to repeat. The timeout is
-   * configurable per send via `opts.timeoutMs`, or for the whole client via
-   * `sendTimeoutMs`, and covers the whole exchange: writing the message and
-   * waiting for its acknowledgment.
-   */
   SEND_TIMEOUT: "SEND_TIMEOUT",
 } as const;
 
 export type MllpErrorCode = (typeof MllpErrorCode)[keyof typeof MllpErrorCode];
 
 /**
- * The one error class `@glion/mllp-client` raises. Discriminate with `code`;
- * read `message` for the detail and `cause` for any wrapped underlying error.
+ * Whether a message may have reached the remote system.
+ *
+ * - `not-sent`: nothing reached the wire. Sending again is safe.
+ * - `unknown`: the message may have been received. Send again only when the
+ *   message is safe to repeat.
  */
-export class MllpClientError extends Error {
-  readonly code: MllpErrorCode;
+export type MllpDelivery = "not-sent" | "unknown";
 
-  constructor(
-    code: MllpErrorCode,
-    message: string,
-    options?: { cause?: unknown }
-  ) {
-    super(message, options);
-    this.name = "MllpClientError";
-    this.code = code;
-  }
+/** The text of a lower layer's error, for the message that wraps it. */
+function reasonOf(cause: unknown): string {
+  return cause instanceof Error ? cause.message : String(cause);
+}
 
-  static timeout(timeoutMs: number): MllpClientError {
-    return new MllpClientError(
-      MllpErrorCode.SEND_TIMEOUT,
-      `The request timed out after ${timeoutMs}ms. The connection has been closed: a late acknowledgment could not be matched safely.`
+export abstract class MllpClientError extends Error {
+  abstract readonly code: MllpErrorCode;
+  /** Whether the message may have reached the remote system. */
+  abstract readonly delivery: MllpDelivery;
+}
+
+/** An option is out of range. Raised before anything happens. */
+export class MllpInvalidOptionError extends MllpClientError {
+  override readonly name = "MllpInvalidOptionError";
+  readonly code = MllpErrorCode.INVALID_OPTION;
+  readonly delivery = "not-sent";
+  readonly option: string;
+
+  constructor(option: string, requirement: string, received: unknown) {
+    super(
+      `Option ${option} must be ${requirement}; received ${String(received)}.`
     );
+    this.option = option;
   }
+}
 
-  static connectionFailure(cause: unknown): MllpClientError {
-    return new MllpClientError(
-      MllpErrorCode.CONNECT_FAILED,
-      "The connection could not be opened. See the error's cause for details.",
+/**
+ * `send()` was called while another message was still waiting for its
+ * acknowledgment. The client sends one message at a time.
+ */
+export class MllpAlreadySendingError extends MllpClientError {
+  override readonly name = "MllpAlreadySendingError";
+  readonly code = MllpErrorCode.ALREADY_SENDING;
+  readonly delivery = "not-sent";
+  /** MSH-10 of the message that is still waiting. */
+  readonly controlId: string;
+
+  constructor(controlId: string) {
+    super(
+      `Cannot send: message ${controlId} is still waiting for its acknowledgment — await the in-flight send() first.`
+    );
+    this.controlId = controlId;
+  }
+}
+
+/**
+ * The client is closed for good, by `close()` or by a failure that ended the
+ * connection. A closed client never reconnects; construct a new one. When a
+ * failure closed the client, that error is on `cause`. When `close()`
+ * interrupted a message that had already been written, `delivery` is
+ * `unknown`.
+ */
+export class MllpClientClosedError extends MllpClientError {
+  override readonly name = "MllpClientClosedError";
+  readonly code = MllpErrorCode.CLOSED;
+  readonly delivery: MllpDelivery;
+
+  constructor(cause?: MllpClientError, delivery: MllpDelivery = "not-sent") {
+    super(closedMessage(cause, delivery), { cause });
+    this.delivery = delivery;
+  }
+}
+
+function closedMessage(
+  cause: MllpClientError | undefined,
+  delivery: MllpDelivery
+): string {
+  if (delivery === "unknown") {
+    return "The client was closed while a message was waiting for its acknowledgment — the remote system may or may not have received it; resend on a new MllpClient only if the message is safe to repeat.";
+  }
+  if (cause) {
+    return `The client is closed after an earlier failure (${cause.code}) — construct a new MllpClient to send again.`;
+  }
+  return "The client has been closed — construct a new MllpClient to send again.";
+}
+
+/**
+ * The message cannot be sent as-is: it has no MSH-10 control ID, or it could
+ * not be parsed, serialized, or framed. Nothing was written; the reason is on
+ * `cause`. Fix the message and send again.
+ */
+export class MllpInvalidMessageError extends MllpClientError {
+  override readonly name = "MllpInvalidMessageError";
+  readonly code = MllpErrorCode.INVALID_MESSAGE;
+  readonly delivery = "not-sent";
+
+  constructor(cause: unknown) {
+    super(
+      `The message could not be prepared for sending; nothing was written: ${reasonOf(cause)}`,
       { cause }
     );
   }
+}
 
-  static connectionAborted(): MllpClientError {
-    return new MllpClientError(
-      MllpErrorCode.CONNECT_ABORTED,
-      "Connect was interrupted while the connection was still being established."
-    );
-  }
+/**
+ * The connection could not be opened: the host was unreachable, refused the
+ * connection, or failed DNS or TLS. The connector's error is on `cause`.
+ */
+export class MllpConnectFailedError extends MllpClientError {
+  override readonly name = "MllpConnectFailedError";
+  readonly code = MllpErrorCode.CONNECT_FAILED;
+  readonly delivery = "not-sent";
 
-  static missingControlId(): MllpClientError {
-    return new MllpClientError(
-      MllpErrorCode.INVALID_MESSAGE,
-      "The message has no MSH-10 control ID, so its acknowledgment cannot be correlated. Set MSH-10 and send again."
-    );
-  }
-
-  static reservedCharacter(cause: unknown): MllpClientError {
-    return new MllpClientError(
-      MllpErrorCode.INVALID_MESSAGE,
-      "The message contains an MLLP reserved character (VT or FS), so it cannot be framed. Remove the reserved bytes and send again (the codec error is on the error's cause).",
+  constructor(cause: unknown) {
+    super(
+      `Connecting failed: ${reasonOf(cause)} — check that the host is reachable and the port is listening.`,
       { cause }
     );
   }
+}
 
-  static connectionTimeout(timeoutMs: number): MllpClientError {
-    return new MllpClientError(
-      MllpErrorCode.CONNECT_TIMEOUT,
-      `Connect timed out after ${timeoutMs}ms.`
+/**
+ * The remote system did not accept the connection within `connectTimeoutMs`.
+ * The host may be down, overloaded, or silently dropping packets.
+ */
+export class MllpConnectTimeoutError extends MllpClientError {
+  override readonly name = "MllpConnectTimeoutError";
+  readonly code = MllpErrorCode.CONNECT_TIMEOUT;
+  readonly delivery = "not-sent";
+  readonly timeoutMs: number;
+
+  constructor(timeoutMs: number) {
+    super(
+      `Connecting timed out after ${timeoutMs}ms — check that the host is reachable and the port is listening.`
+    );
+    this.timeoutMs = timeoutMs;
+  }
+}
+
+/** `close()` arrived while the connection was still being established. */
+export class MllpConnectAbortedError extends MllpClientError {
+  override readonly name = "MllpConnectAbortedError";
+  readonly code = MllpErrorCode.CONNECT_ABORTED;
+  readonly delivery = "not-sent";
+
+  constructor() {
+    super(
+      `Connecting was cancelled because the client was closed while the connection was still being established.`
     );
   }
+}
 
-  static closed(closedReason: MllpClientError | null = null): MllpClientError {
-    if (closedReason) {
-      return new MllpClientError(
-        MllpErrorCode.CLOSED,
-        "This client is closed: the connection was lost or never opened (see the error's cause). Construct a new MllpClient to talk to the remote system again.",
-        { cause: closedReason }
-      );
-    }
-    return new MllpClientError(
-      MllpErrorCode.CLOSED,
-      "This client has been closed. Construct a new MllpClient to talk to the remote system again."
+/**
+ * No acknowledgment arrived within the send timeout. The client closes the
+ * connection, because a late acknowledgment could never be matched safely.
+ * Whether the remote system received the message is unknown.
+ */
+export class MllpSendTimeoutError extends MllpClientError {
+  override readonly name = "MllpSendTimeoutError";
+  readonly code = MllpErrorCode.SEND_TIMEOUT;
+  readonly delivery = "unknown";
+  /** MSH-10 of the message that was waiting. */
+  readonly controlId: string;
+  readonly timeoutMs: number;
+
+  constructor(controlId: string, timeoutMs: number) {
+    super(
+      `Message ${controlId} was not acknowledged within ${timeoutMs}ms — the connection has been closed, because a late acknowledgment could not be matched safely. Construct a new MllpClient to send again.`
     );
+    this.controlId = controlId;
+    this.timeoutMs = timeoutMs;
   }
+}
 
-  static notConnected(): MllpClientError {
-    return new MllpClientError(
-      MllpErrorCode.NOT_CONNECTED,
-      "Cannot send: the client is not connected. Call connect() and await it before send()."
-    );
+/**
+ * The connection was lost during a send: the remote system hung up, or the
+ * network broke. `delivery` is `not-sent` when the write itself failed and
+ * `unknown` once the message was written. A stream error, when there was
+ * one, is on `cause`.
+ */
+export class MllpDroppedError extends MllpClientError {
+  override readonly name = "MllpDroppedError";
+  readonly code = MllpErrorCode.DROPPED;
+  readonly delivery: MllpDelivery;
+  /** MSH-10 of the message that was being sent. */
+  readonly controlId: string;
+
+  constructor(controlId: string, delivery: MllpDelivery, cause?: unknown) {
+    super(droppedMessage(controlId, delivery, cause), { cause });
+    this.controlId = controlId;
+    this.delivery = delivery;
   }
+}
 
-  static alreadySending(): MllpClientError {
-    return new MllpClientError(
-      MllpErrorCode.ALREADY_SENDING,
-      "Cannot send: another send is already on the wire. This client is single-flight; await the in-flight send first."
+function droppedMessage(
+  controlId: string,
+  delivery: MllpDelivery,
+  cause: unknown
+): string {
+  const how =
+    cause === undefined
+      ? "The remote system closed the connection."
+      : `The connection failed: ${reasonOf(cause)}`;
+  if (delivery === "not-sent") {
+    return `The connection was lost before message ${controlId} could be written; nothing reached the wire. ${how}`;
+  }
+  return `The connection was lost while message ${controlId} was waiting for its acknowledgment — the remote system may or may not have received it; resend only if the message is safe to repeat. ${how}`;
+}
+
+/**
+ * The reply was not a usable acknowledgment of the message that was waiting:
+ * it could not be decoded, its acknowledgment code was missing or unknown, or
+ * it answered a different message. The client closes the connection, because
+ * acknowledgments on it can no longer be matched safely. The reason is on
+ * `cause`.
+ */
+export class MllpInvalidResponseError extends MllpClientError {
+  override readonly name = "MllpInvalidResponseError";
+  readonly code = MllpErrorCode.INVALID_RESPONSE;
+  readonly delivery = "unknown";
+  /** MSH-10 of the message that was waiting. */
+  readonly controlId: string;
+
+  constructor(controlId: string, cause: unknown) {
+    super(
+      `The acknowledgment for message ${controlId} cannot be used: ${reasonOf(cause)} The connection has been closed; construct a new MllpClient to send again.`,
+      { cause }
     );
+    this.controlId = controlId;
   }
 }

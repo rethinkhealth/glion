@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 
-import type { MllpConnector, MllpDuplex } from "@glion/mllp-client";
+import type { MllpConnection, MllpConnector } from "@glion/mllp-client";
 import { frame } from "@glion/mllp-codec";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -28,11 +28,11 @@ function ackFrame(code: string, withErr = false): Uint8Array {
 }
 
 /**
- * A fake MLLP duplex that replies with `ack` as soon as a request is written.
+ * A fake connection that replies with `ack` as soon as a request is written.
  * The MllpClient's injectable connector is what makes this socket-free.
  */
 function fakeConnector(ack: Uint8Array): MllpConnector {
-  return (): Promise<MllpDuplex> => {
+  return (): Promise<MllpConnection> => {
     let controller: ReadableStreamDefaultController<Uint8Array> | undefined;
     const readable = new ReadableStream<Uint8Array>({
       start(c) {
@@ -44,19 +44,8 @@ function fakeConnector(ack: Uint8Array): MllpConnector {
         controller?.enqueue(ack);
       },
     });
-    let resolveClosed: () => void = () => {
-      // replaced synchronously by the executor below
-    };
-    // oxlint-disable-next-line promise/avoid-new -- deferred resolved on close()
-    const closed = new Promise<void>((resolve) => {
-      resolveClosed = resolve;
-    });
     return Promise.resolve({
-      close: () => {
-        resolveClosed();
-        return Promise.resolve();
-      },
-      closed,
+      close: () => Promise.resolve(),
       readable,
       writable,
     });
@@ -236,7 +225,7 @@ describe("runSend (integration, fake connector)", () => {
     expect(json.message).toContain("Could not read the message");
   });
 
-  it("reports an invalid outcome (exit 2) when the message has no MSH-10", async () => {
+  it("reports INVALID_MESSAGE (exit 2) when the message has no MSH-10", async () => {
     const noControlId = ADT.replace("|MSG00001|", "||");
     const { state, stderr, stdout } = capture();
     const code = await runSend({
@@ -250,11 +239,12 @@ describe("runSend (integration, fake connector)", () => {
 
     expect(code).toBe(2);
     const json = JSON.parse(state.out);
-    expect(json.kind).toBe("invalid");
+    expect(json.kind).toBe("transport");
+    expect(json.code).toBe("INVALID_MESSAGE");
     expect(json.message).toContain("MSH-10");
   });
 
-  it("reports an invalid outcome (exit 2) when the message contains a reserved VT byte", async () => {
+  it("reports INVALID_MESSAGE (exit 2) when the message contains a reserved VT byte", async () => {
     const withVt = `${ADT}\rNTE|1||free\u000Btext`;
     const { state, stderr, stdout } = capture();
     const code = await runSend({
@@ -268,7 +258,8 @@ describe("runSend (integration, fake connector)", () => {
 
     expect(code).toBe(2);
     const json = JSON.parse(state.out);
-    expect(json.kind).toBe("invalid");
+    expect(json.kind).toBe("transport");
+    expect(json.code).toBe("INVALID_MESSAGE");
   });
 
   it("renders the human exchange view on a TTY (accept)", async () => {

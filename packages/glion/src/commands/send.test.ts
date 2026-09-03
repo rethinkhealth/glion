@@ -285,6 +285,22 @@ describe("parseSendArgs", () => {
       });
     });
 
+    it("rejects --port 0", () => {
+      const result = parseSendArgs(["--port", "0"]);
+      expect(result).toEqual({
+        error: "--port requires a positive integer, got: 0",
+        ok: false,
+      });
+    });
+
+    it("rejects --timeout 0", () => {
+      const result = parseSendArgs(["--timeout", "0"]);
+      expect(result).toEqual({
+        error: "--timeout requires a positive integer, got: 0",
+        ok: false,
+      });
+    });
+
     it("rejects an unknown flag", () => {
       const result = parseSendArgs(["--raw"]);
       expect(result).toEqual({ error: "Unknown flag: --raw", ok: false });

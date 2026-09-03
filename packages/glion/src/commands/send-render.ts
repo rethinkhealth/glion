@@ -75,9 +75,9 @@ export interface SendNakOutcome {
 }
 
 /**
- * Transport/protocol failure surfaced as an `MllpClientError`: connect failed
- * or timed out, send timed out, unusable reply (`INVALID_RESPONSE`),
- * connection dropped, etc. Exit 2.
+ * Any failure the MLLP client raised, carried with its `MllpErrorCode`: the
+ * message could not be prepared, the connection failed or timed out, the send
+ * timed out, the reply was unusable, the connection dropped. Exit 2.
  */
 export interface SendTransportOutcome {
   kind: "transport";
@@ -90,8 +90,8 @@ export interface SendTransportOutcome {
 }
 
 /**
- * Pre-send failure: the target/usage could not be resolved or the message
- * could not be read. Exit 2. No request exists yet.
+ * Failure before a client exists: the target could not be resolved or the
+ * message could not be read. Exit 2. No request and no error code exist yet.
  */
 export interface SendInvalidOutcome {
   kind: "invalid";

@@ -1,11 +1,10 @@
 /**
  * Node runtime adapter for `MllpClient`.
  *
- * Wraps a Node `net.Socket` as an {@link MllpDuplex}. The adapter owns
- * the socket lifetime, honours the `MllpDuplex` contract
- * (`close()` resolves idempotently, `closed` resolves on either-side
- * teardown), and exposes the byte streams as Web Streams via
- * `Duplex.toWeb`.
+ * Wraps a Node `net.Socket` as an {@link MllpConnection}: the byte streams are
+ * exposed as Web Streams via `Duplex.toWeb`, and `close()` ends the socket
+ * gracefully, then forces it after a short grace period so it always resolves
+ * within a bounded time.
  *
  * @module
  */
@@ -13,19 +12,19 @@
 import { Socket } from "node:net";
 import { Duplex } from "node:stream";
 
-import type { MllpConnector, MllpDuplex } from "../client";
+import type { MllpConnector, MllpConnection } from "../types";
 
 const GRACEFUL_CLOSE_MS = 1000;
 
 /**
- * Open a TCP connection and return an {@link MllpDuplex}.
+ * Open a TCP connection and return an {@link MllpConnection}.
  *
  * Respects `opts.signal`: aborting before connect resolves destroys
  * the in-flight socket and rejects.
  */
 export const connectNode: MllpConnector = (opts) =>
   // oxlint-disable-next-line promise/avoid-new -- wrapping Node event emitter
-  new Promise<MllpDuplex>((resolve, reject) => {
+  new Promise<MllpConnection>((resolve, reject) => {
     const socket = new Socket();
     // No Nagle — MLLP ACKs are tiny and latency-sensitive.
     socket.setNoDelay(true);
@@ -78,19 +77,10 @@ export const connectNode: MllpConnector = (opts) =>
     socket.connect(opts.port, opts.host);
   });
 
-function adaptSocket(socket: Socket): MllpDuplex {
+function adaptSocket(socket: Socket): MllpConnection {
   const web = Duplex.toWeb(socket);
   const readable = web.readable as ReadableStream<Uint8Array>;
   const writable = web.writable as WritableStream<Uint8Array>;
-
-  // oxlint-disable-next-line promise/avoid-new -- wrapping Node event emitter
-  const closed = new Promise<void>((resolve) => {
-    if (socket.destroyed) {
-      resolve();
-      return;
-    }
-    socket.once("close", () => resolve());
-  });
 
   let closePromise: Promise<void> | null = null;
   const close = (): Promise<void> => {
@@ -127,5 +117,5 @@ function adaptSocket(socket: Socket): MllpDuplex {
     return closePromise;
   };
 
-  return { close, closed, readable, writable };
+  return { close, readable, writable };
 }
