@@ -40,7 +40,6 @@
     "access": "public"
   },
   "scripts": {
-    "bench": "vitest bench --run",
     "build": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "check:readme": "glion-check-readme",

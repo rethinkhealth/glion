@@ -33,7 +33,6 @@
     "access": "public"
   },
   "scripts": {
-    "bench": "vitest bench --run",
     "build": "tsdown && tsc --emitDeclarationOnly",
     "check-types": "tsc --noEmit",
     "check:readme": "glion-check-readme",
