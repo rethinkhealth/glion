@@ -18,7 +18,11 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
 import { renderHuman, renderJson } from "./send-render";
-import type { SendOutcome } from "./send-render";
+import type {
+  SendOutcome,
+  SendRequestSummary,
+  SendTarget,
+} from "./send-render";
 import { resolveTarget } from "./send-target";
 
 /** Connect + ACK-wait deadline used when `--timeout` is omitted. */
@@ -224,6 +228,28 @@ export interface RunSendOptions {
   stdin?: NodeJS.ReadableStream;
 }
 
+/**
+ * The outcome for a client failure. INVALID_MESSAGE and INVALID_OPTION are the
+ * caller's input (a message without MSH-10, a bad --timeout) and nothing
+ * reached the wire; everything else is the transport's story.
+ */
+function clientErrorOutcome(
+  error: MllpClientError,
+  request: SendRequestSummary,
+  target: SendTarget
+): SendOutcome {
+  if (error.code === "INVALID_MESSAGE" || error.code === "INVALID_OPTION") {
+    return { kind: "invalid", message: error.message, target };
+  }
+  return {
+    code: error.code,
+    kind: "transport",
+    message: error.message,
+    request,
+    target,
+  };
+}
+
 function exitCodeFor(outcome: SendOutcome): number {
   switch (outcome.kind) {
     case "accept": {
@@ -327,23 +353,23 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     segmentCount: tree.children.length,
   };
 
-  const client = new MllpClient({
-    connect: opts.connect ?? connectNode,
-    connectTimeoutMs: timeoutMs,
-    host: target.host,
-    port: target.port,
-    sendTimeoutMs: timeoutMs,
-  });
-
+  let client: MllpClient | undefined;
   let startedAt = performance.now();
   try {
+    client = new MllpClient({
+      connect: opts.connect ?? connectNode,
+      connectTimeoutMs: timeoutMs,
+      host: target.host,
+      port: target.port,
+      sendTimeoutMs: timeoutMs,
+    });
     await client.connect();
     startedAt = performance.now();
     const res = await client.send(canonical, { timeoutMs });
     return emit({
-      ackControlId: res.controlId,
+      ackControlId: request.controlId,
       code: res.code,
-      durationMs: res.durationMs,
+      durationMs: performance.now() - startedAt,
       kind: "accept",
       request,
       target,
@@ -364,22 +390,10 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
       });
     }
     if (error instanceof MllpClientError) {
-      // INVALID_MESSAGE is the caller's input (no MSH-10, or a reserved
-      // VT/FS byte) — nothing reached the wire; everything else is the
-      // transport's story.
-      if (error.code === "INVALID_MESSAGE") {
-        return emit({ kind: "invalid", message: error.message, target });
-      }
-      return emit({
-        code: error.code,
-        kind: "transport",
-        message: error.message,
-        request,
-        target,
-      });
+      return emit(clientErrorOutcome(error, request, target));
     }
     throw error;
   } finally {
-    await client.close();
+    await client?.close();
   }
 }

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 
-import type { MllpConnector, MllpDuplex } from "@glion/mllp-client";
+import type { MllpConnection, MllpConnector } from "@glion/mllp-client";
 import { frame } from "@glion/mllp-codec";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -28,11 +28,11 @@ function ackFrame(code: string, withErr = false): Uint8Array {
 }
 
 /**
- * A fake MLLP duplex that replies with `ack` as soon as a request is written.
+ * A fake connection that replies with `ack` as soon as a request is written.
  * The MllpClient's injectable connector is what makes this socket-free.
  */
 function fakeConnector(ack: Uint8Array): MllpConnector {
-  return (): Promise<MllpDuplex> => {
+  return (): Promise<MllpConnection> => {
     let controller: ReadableStreamDefaultController<Uint8Array> | undefined;
     const readable = new ReadableStream<Uint8Array>({
       start(c) {
@@ -44,19 +44,8 @@ function fakeConnector(ack: Uint8Array): MllpConnector {
         controller?.enqueue(ack);
       },
     });
-    let resolveClosed: () => void = () => {
-      // replaced synchronously by the executor below
-    };
-    // oxlint-disable-next-line promise/avoid-new -- deferred resolved on close()
-    const closed = new Promise<void>((resolve) => {
-      resolveClosed = resolve;
-    });
     return Promise.resolve({
-      close: () => {
-        resolveClosed();
-        return Promise.resolve();
-      },
-      closed,
+      close: () => Promise.resolve(),
       readable,
       writable,
     });
