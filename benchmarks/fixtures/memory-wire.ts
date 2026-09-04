@@ -1,10 +1,10 @@
 /**
  * In-memory MLLP wire for the client suite and canary: an
- * {@link MllpDuplex} whose read side answers every complete inbound frame
+ * {@link MllpConnection} whose read side answers every complete inbound frame
  * with an AA ACK echoing the message's MSH-10. Deterministic and CPU-bound.
  */
 import { c, f, m, s } from "@glion/builder";
-import type { MllpConnector, MllpDuplex } from "@glion/mllp-client";
+import type { MllpConnector, MllpConnection } from "@glion/mllp-client";
 import { frame } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
@@ -91,25 +91,18 @@ export const connectInMemory: MllpConnector = (opts) => {
   });
 
   let open = true;
-  let resolveClosed: () => void;
-  // oxlint-disable-next-line promise/avoid-new -- deferred settled by close()
-  const closed = new Promise<void>((resolve) => {
-    resolveClosed = resolve;
-  });
 
-  const duplex: MllpDuplex = {
+  const connection: MllpConnection = {
     // Contract: resolves (never rejects) and is idempotent.
     close() {
       if (open) {
         open = false;
         closeReadable?.();
-        resolveClosed();
       }
       return Promise.resolve();
     },
-    closed,
     readable,
     writable,
   };
-  return Promise.resolve(duplex);
+  return Promise.resolve(connection);
 };

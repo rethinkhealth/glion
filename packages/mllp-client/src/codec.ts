@@ -1,18 +1,17 @@
 /**
- * Two pure functions between HL7v2 and the wire.
+ * Two total functions between HL7v2 and the wire.
  *
  * `encode` turns a message into one MLLP frame: parse → read MSH-10 →
  * serialize → UTF-8 → frame. The tree is the wire currency: the bytes written
- * are the canonical serialization of the tree, not an echo of the input.
+ * are the canonical serialization of the tree, not an echo of the input. It
+ * throws, and `MllpClient.send()` wraps what it throws before anything is
+ * posted to the actor.
  *
- * `decode` turns one received frame into the acknowledgment it carries:
- * UTF-8 → parse → MSA-1 → MSA-2 correlation → MSA-3 / ERR fields. It reads;
- * it does not judge. Whether the acknowledgment is an accept or a NAK is the
- * caller's to act on.
- *
- * This layer throws its own two errors, defined below, and lets the errors of
- * the layers beneath it (parser, serializer, charset, framing) propagate as
- * they are. The client wraps whatever comes out of here.
+ * `decode` turns one received frame into what it means for the message that
+ * was waiting: UTF-8 → parse → MSA-1 → MSA-2 correlation → MSA-3 / ERR
+ * fields, as an {@link AckOutcome}. It never throws — the actor decides on
+ * frames from inside a synchronous handler, so a lower layer's failure has to
+ * arrive as a value.
  *
  * `decode` trusts MSA-1 / MSA-2 / ERR-3 / ERR-4 as found. It does not check
  * MSH-9, the HL7 version, or the structure of the acknowledgment; that
@@ -21,8 +20,16 @@
  * @module
  */
 
-import { isAckCode } from "@glion/ack";
-import type { AckCode } from "@glion/ack";
+import {
+  AckApplicationError,
+  AckApplicationReject,
+  AckCode,
+  AckCommitError,
+  AckCommitReject,
+  isAckCode,
+  isAckNakCode,
+} from "@glion/ack";
+import type { AckException, AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { frame } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
@@ -30,7 +37,15 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
 import { value } from "@glion/util-query";
 
-import type { SendInput } from "./types";
+import type { MllpClientResponse, SendInput } from "./types";
+
+// TODO(#689): replace with the shared reader from @glion/ack once it exists.
+const NAK_EXCEPTIONS = {
+  [AckCode.ApplicationError]: AckApplicationError,
+  [AckCode.ApplicationReject]: AckApplicationReject,
+  [AckCode.CommitError]: AckCommitError,
+  [AckCode.CommitReject]: AckCommitReject,
+} as const;
 
 /**
  * The message has no MSH-10 control ID, so no acknowledgment could be matched
@@ -58,21 +73,20 @@ export interface EncodedMessage {
   readonly controlId: string;
 }
 
-/** What an acknowledgment says, as found in its MSA and ERR segments. */
-export interface Acknowledgment {
-  /** MSA-1. */
-  readonly code: AckCode;
-  /** The acknowledgment, parsed. */
-  readonly tree: Root;
-  /** The acknowledgment as received, decoded to text. */
-  readonly raw: string;
-  /** MSA-3, or ERR-8 when MSA-3 is absent: the remote system's own diagnostic. */
-  readonly text?: string;
-  /** ERR-3: the HL7 error condition. */
-  readonly errorCode?: string;
-  /** ERR-4: the severity. */
-  readonly severity?: string;
-}
+/**
+ * What one received frame turned out to be.
+ *
+ * - `accepted`: the remote system took the message (MSA-1 `AA` or `CA`).
+ * - `rejected`: it understood the message and said no. The exception is the
+ *   `@glion/ack` one for the NAK code, ready to throw; the connection is still
+ *   in step, because the remote system answered properly.
+ * - `invalid`: the frame is not a usable acknowledgment of this message. `cause`
+ *   is the lower layer's error, or this module's own.
+ */
+export type AckOutcome =
+  | { readonly kind: "accepted"; readonly response: MllpClientResponse }
+  | { readonly kind: "rejected"; readonly exception: AckException }
+  | { readonly kind: "invalid"; readonly cause: unknown };
 
 /**
  * Encode one message for the wire.
@@ -96,16 +110,28 @@ export function encode(input: SendInput): EncodedMessage {
 
 /**
  * Decode one received frame as the acknowledgment of the message sent with
- * `expectedControlId`.
- *
- * @throws {UnexpectedAcknowledgmentError} MSA-1 is missing or unknown, or
- *   MSA-2 is missing or names another message.
- * @throws The charset's or parser's error, as is.
+ * `expectedControlId`. Never throws: a charset, parser, or correlation
+ * failure comes back as `invalid`.
  */
 export function decode(
   bytes: Uint8Array,
   expectedControlId: string
-): Acknowledgment {
+): AckOutcome {
+  try {
+    return readAcknowledgment(bytes, expectedControlId);
+  } catch (error) {
+    // The only totality boundary in the package. Whatever the charset layer,
+    // the parser, or the correlation checks below raise becomes a value here,
+    // because the actor reads frames from inside a synchronous handler that
+    // must not throw.
+    return { cause: error, kind: "invalid" };
+  }
+}
+
+function readAcknowledgment(
+  bytes: Uint8Array,
+  expectedControlId: string
+): AckOutcome {
   const raw = decodeBytes(bytes);
   const tree = parseHL7v2(raw);
 
@@ -133,13 +159,27 @@ export function decode(
     );
   }
 
+  if (isAckNakCode(code)) {
+    return {
+      exception: new NAK_EXCEPTIONS[code](
+        `The remote system did not accept message ${expectedControlId}: acknowledgment code ${code}.`,
+        {
+          controlId: expectedControlId,
+          errorCode: read(tree, "ERR-3[1].1.1") || undefined,
+          severity: read(tree, "ERR-4[1].1.1") || undefined,
+          text:
+            read(tree, "MSA-3[1].1.1") ||
+            read(tree, "ERR-8[1].1.1") ||
+            undefined,
+        }
+      ),
+      kind: "rejected",
+    };
+  }
+
   return {
-    code,
-    errorCode: read(tree, "ERR-3[1].1.1") || undefined,
-    raw,
-    severity: read(tree, "ERR-4[1].1.1") || undefined,
-    text: read(tree, "MSA-3[1].1.1") || read(tree, "ERR-8[1].1.1") || undefined,
-    tree,
+    kind: "accepted",
+    response: { code: code as AckSuccessCode, raw, tree },
   };
 }
 
