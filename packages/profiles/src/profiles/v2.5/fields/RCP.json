@@ -19,7 +19,6 @@
       "repeatable": false,
       "datatype": "CQ",
       "maxLength": 10,
-      "table": "HL70126",
       "name": "Quantity Limited Request",
       "item": "31"
     },
