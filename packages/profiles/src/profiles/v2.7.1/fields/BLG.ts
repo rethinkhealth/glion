@@ -10,6 +10,7 @@ export const fields = [
     repeatable: false,
     required: false,
     sequence: 1,
+    table: "HL70100",
   },
   {
     datatype: "ID",
