@@ -41,7 +41,6 @@ export const transitions = new Map<number, Map<string, number>>([
       ["ARV", 7],
       ["IAM", 6],
       ["PV1", 9],
-      ["PV2", 8],
     ]),
   ],
   [
@@ -58,7 +57,6 @@ export const transitions = new Map<number, Map<string, number>>([
       ["ARV", 7],
       ["IAM", 6],
       ["PV1", 9],
-      ["PV2", 8],
     ]),
   ],
   [
