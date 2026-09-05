@@ -179,6 +179,20 @@ describe(format, () => {
       expect(result!.node.type).toBe("group");
       expect(format(result!.node, result!.ancestors)).toBe("ORDER-RESULT");
     });
+
+    it("round-trips a nested group selected by bare name", () => {
+      // Bug: bare-name select of a nested group used to return null. After the
+      // fix it returns the group with ancestors ending at the direct parent,
+      // so format() produces the fully-qualified path without throwing.
+      const nested = m(
+        s("MSH", f("|")),
+        g("INSURANCE", g("ORDER", s("ORC", f("x"))))
+      );
+      const result = select(nested, "ORDER");
+      expect(result).not.toBeNull();
+      expect(result!.node.type).toBe("group");
+      expect(format(result!.node, result!.ancestors)).toBe("INSURANCE-ORDER");
+    });
   });
 
   describe("round-trips with select", () => {
@@ -221,6 +235,17 @@ describe(format, () => {
       expect(result).not.toBeNull();
       // select("OBX") finds it inside groups, format produces the full path
       expect(format(result!.node, result!.ancestors)).toBe("ORDER-RESULT-OBX");
+    });
+
+    it("fully qualifies a bare-name nested group selected by short path", () => {
+      // Before the fix, select(message, "RESULT") returned null (groups were
+      // not recursed). After the fix, select returns the nested group with
+      // ancestors ending at its direct parent, so format produces the full
+      // path — mirroring the segment behavior tested above.
+      const result = select(message, "RESULT");
+      expect(result).not.toBeNull();
+      expect(result!.node.type).toBe("group");
+      expect(format(result!.node, result!.ancestors)).toBe("ORDER-RESULT");
     });
   });
 
