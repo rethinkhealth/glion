@@ -772,7 +772,7 @@ export const effects = {
     groupsOpened: ["PPG_PCG/PATHWAY/GOAL/ORDER/ORDER_DETAIL/ORDER_OBSERVATION"],
   },
   "25:ORC": {
-    groupsClosed: ["PPG_PCG/PATHWAY/GOAL/ORDER/ORDER_DETAIL/ORDER_OBSERVATION"],
+    groupsClosed: ["PPG_PCG/PATHWAY/GOAL/ORDER/ORDER_DETAIL/CHOICE"],
     groupsOpened: ["PPG_PCG/PATHWAY/GOAL/ORDER"],
   },
   "25:PTH": {
