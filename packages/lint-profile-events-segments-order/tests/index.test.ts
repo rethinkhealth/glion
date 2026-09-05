@@ -587,6 +587,139 @@ describe("hl7v2LintSegmentOrder", () => {
     });
   });
 
+  describe("ADT_A60 segment order (PV2 must follow PV1)", () => {
+    // ADT_A60 is "Adverse Reaction Message". PV2 (Patient Visit — Additional
+    // Information) must always follow a PV1; the generated DFA previously
+    // allowed a direct PID -> PV2 transition. See
+    // `packages/profiles/src/profiles/v2.4/events/ADT_A60.ts`.
+    const affectedVersions = ["2.4", "2.5", "2.5.1", "2.6", "2.7"];
+
+    it("rejects PV2 directly after PID with no PV1 (v2.4)", async () => {
+      const definition = await profiles.events.load("2.4", "ADT_A60");
+      const tree = m(s("MSH"), s("EVN"), s("PID"), s("PV2"));
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, { definition })
+        .run(tree, file);
+
+      const invalidErrors = file.messages.filter((msg) =>
+        msg.message.includes("Unexpected segment")
+      );
+      expect(invalidErrors).toHaveLength(1);
+      expect(invalidErrors[0]?.message).toContain("Unexpected segment 'PV2'");
+      // PV2 must not appear among the suggested next segments
+      expect(invalidErrors[0]?.message).not.toMatch(/Expected:.*PV2/);
+      expect(invalidErrors[0]?.message).toMatch(/PV1/);
+    });
+
+    it("accepts PV2 after PV1 (v2.4)", async () => {
+      const definition = await profiles.events.load("2.4", "ADT_A60");
+      const tree = m(s("MSH"), s("EVN"), s("PID"), s("PV1"), s("PV2"));
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, { definition })
+        .run(tree, file);
+
+      expect(file.messages).toHaveLength(0);
+    });
+
+    it("rejects PV2 after PID across all affected versions", async () => {
+      for (const version of affectedVersions) {
+        const definition = await profiles.events.load(version, "ADT_A60");
+        const tree = m(s("MSH"), s("EVN"), s("PID"), s("PV2"));
+        const file = new VFile();
+
+        await unified()
+          .use(hl7v2LintSegmentOrder, { definition })
+          .run(tree, file);
+
+        const invalidErrors = file.messages.filter((msg) =>
+          msg.message.includes("Unexpected segment")
+        );
+        expect(invalidErrors).toHaveLength(1);
+        expect(invalidErrors[0]?.message).toContain("Unexpected segment 'PV2'");
+        expect(invalidErrors[0]?.message).not.toMatch(/Expected:.*PV2/);
+      }
+    });
+
+    it("accepts PV2 after PV1 across all affected versions", async () => {
+      for (const version of affectedVersions) {
+        const definition = await profiles.events.load(version, "ADT_A60");
+        const tree = m(s("MSH"), s("EVN"), s("PID"), s("PV1"), s("PV2"));
+        const file = new VFile();
+
+        await unified()
+          .use(hl7v2LintSegmentOrder, { definition })
+          .run(tree, file);
+
+        expect(file.messages).toHaveLength(0);
+      }
+    });
+
+    it("end-to-end: rejects EVN PID PV2 via MSH-9.3 auto-resolution", async () => {
+      const tree = m(
+        s(
+          "MSH",
+          f("|"),
+          f("^~\\&"),
+          f(""),
+          f(""),
+          f(""),
+          f(""),
+          f(""),
+          f(""),
+          f(c("ADT"), c("A60"), c("ADT_A60")),
+          f(""),
+          f(""),
+          f("2.4")
+        ),
+        s("EVN"),
+        s("PID"),
+        s("PV2")
+      );
+      const file = new VFile();
+
+      await unified().use(hl7v2LintSegmentOrder).run(tree, file);
+
+      const invalidErrors = file.messages.filter((msg) =>
+        msg.message.includes("Unexpected segment")
+      );
+      expect(invalidErrors).toHaveLength(1);
+      expect(invalidErrors[0]?.message).toContain("Unexpected segment 'PV2'");
+    });
+
+    it("end-to-end: accepts EVN PID PV1 PV2 via MSH-9.3 auto-resolution", async () => {
+      const tree = m(
+        s(
+          "MSH",
+          f("|"),
+          f("^~\\&"),
+          f(""),
+          f(""),
+          f(""),
+          f(""),
+          f(""),
+          f(""),
+          f(c("ADT"), c("A60"), c("ADT_A60")),
+          f(""),
+          f(""),
+          f("2.4")
+        ),
+        s("EVN"),
+        s("PID"),
+        s("PV1"),
+        s("PV2")
+      );
+      const file = new VFile();
+
+      await unified().use(hl7v2LintSegmentOrder).run(tree, file);
+
+      expect(file.messages).toHaveLength(0);
+    });
+  });
+
   // https://github.com/rethinkhealth/hl7v2/issues/489
   it("validates correctly when MSH-12 is composite VID — #489", async () => {
     function mshVid(version: string) {
