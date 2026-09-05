@@ -182,9 +182,13 @@ export function selectAll<Path extends string>(
     segments.push(...matchingSegments);
 
     if (includeGroups) {
-      const matchingGroups = collectGroups(scope, parts.segment.name);
-      for (const group of matchingGroups) {
-        groups.push({ ancestors: [...ancestors], group });
+      const matchingGroups = collectGroups(
+        scope,
+        parts.segment.name,
+        ancestors
+      );
+      for (const { group, ancestors: groupAncestors } of matchingGroups) {
+        groups.push({ ancestors: groupAncestors, group });
       }
     }
   }

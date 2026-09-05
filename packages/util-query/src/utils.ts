@@ -39,12 +39,12 @@ export function locateSegmentOrGroup(
   }
 
   // If no segment found, try to find a group
-  const matchedGroups = collectGroups(scope, targetName);
+  const matchedGroups = collectGroups(scope, targetName, ancestors);
   if (matchedGroups.length > 0) {
     const index = (targetRepetition ?? 1) - 1;
-    const group = matchedGroups[index];
-    if (group) {
-      return [group, ancestors];
+    const match = matchedGroups[index];
+    if (match) {
+      return [match.group, match.ancestors];
     }
   }
 
@@ -248,13 +248,25 @@ export function collectSegments(
 
 export function collectGroups(
   nodes: (Segment | Group)[],
-  targetGroupName: string
-): Group[] {
-  const result: Group[] = [];
+  targetGroupName: string,
+  ancestors: Nodes[]
+): { group: Group; ancestors: Nodes[] }[] {
+  const result: { group: Group; ancestors: Nodes[] }[] = [];
 
   for (const node of nodes) {
     if (node.type === "group" && node.name === targetGroupName) {
-      result.push(node);
+      result.push({ ancestors: [...ancestors], group: node });
+    }
+
+    if (node.type === "group") {
+      const nextAncestors = [...ancestors, node];
+      result.push(
+        ...collectGroups(
+          filterSegmentsAndGroups(node.children),
+          targetGroupName,
+          nextAncestors
+        )
+      );
     }
   }
 

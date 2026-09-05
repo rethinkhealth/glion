@@ -200,6 +200,45 @@ describe(select, () => {
     });
   });
 
+  describe("with bare-name resolution of nested groups", () => {
+    // Fixture from the bug report: root > INSURANCE > ORDER > ORC
+    const message = m(
+      s("MSH", f("|")),
+      g("INSURANCE", g("ORDER", s("ORC", f("x"))))
+    );
+
+    it("finds a nested group by bare name at any depth", () => {
+      const result = select(message, "ORDER");
+      expect(result).not.toBeNull();
+      expect(result?.node.type).toBe("group");
+      expect((result?.node as Group).name).toBe("ORDER");
+    });
+
+    it("threads ancestors so the last ancestor is the direct parent", () => {
+      const result = select(message, "ORDER");
+      expect(result?.ancestors.map((node) => node.type)).toStrictEqual([
+        "root",
+        "group",
+      ]);
+      expect((result?.ancestors[1] as Group).name).toBe("INSURANCE");
+    });
+
+    it("resolves segments and nested groups consistently at the same depth", () => {
+      const groupResult = select(message, "ORDER");
+      const segmentResult = select(message, "ORC");
+      expect(groupResult).not.toBeNull();
+      expect(segmentResult).not.toBeNull();
+      // Both resolve at depth; the group's direct parent is INSURANCE,
+      // the segment's direct parent is the ORDER group.
+      expect((groupResult!.ancestors.at(-1) as Group).name).toBe("INSURANCE");
+      expect((segmentResult!.ancestors.at(-1) as Group).name).toBe("ORDER");
+    });
+
+    it("returns null for a non-existent group", () => {
+      expect(select(message, "RESULT")).toBeNull();
+    });
+  });
+
   describe("with empty fields", () => {
     const message = m(s("PID", f(""), f("Value"), f("")));
 
@@ -297,6 +336,36 @@ describe(selectAll, () => {
     ]);
     expect((nested?.ancestors[1] as Group).name).toBe("ORDER");
     expect((nested?.ancestors[2] as Group).name).toBe("RESULT");
+  });
+
+  it("includes implicit group ancestors for nested groups", () => {
+    const message = m(
+      s("MSH", f("|")),
+      g("INSURANCE", g("ORDER", s("ORC", f("x"))))
+    );
+
+    const results = selectAll(message, "ORDER");
+    expect(results).toHaveLength(1);
+    const nested = results[0];
+    expect(nested?.node.type).toBe("group");
+    expect((nested?.node as Group).name).toBe("ORDER");
+    expect(nested?.ancestors.map((node) => node.type)).toStrictEqual([
+      "root",
+      "group",
+    ]);
+    expect((nested?.ancestors[1] as Group).name).toBe("INSURANCE");
+  });
+
+  it("finds nested groups at every depth via bare name", () => {
+    const message = m(
+      s("MSH", f("|")),
+      g("A", g("B", g("C", s("ORC", f("x")))))
+    );
+
+    const results = selectAll(message, "C");
+    expect(results).toHaveLength(1);
+    expect((results[0]?.node as Group).name).toBe("C");
+    expect((results[0]?.ancestors.at(-1) as Group).name).toBe("B");
   });
 
   it("returns empty array when no matches", () => {
