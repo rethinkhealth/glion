@@ -28,7 +28,7 @@
     },
     {
       "type": "group",
-      "name": "RSPONSE",
+      "name": "RESPONSE",
       "optional": true,
       "repeating": false,
       "elements": [
