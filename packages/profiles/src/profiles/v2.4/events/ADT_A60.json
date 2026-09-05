@@ -21,16 +21,24 @@
       "repeating": false
     },
     {
-      "type": "segment",
-      "name": "PV1",
+      "type": "group",
+      "name": "VISIT",
       "optional": true,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "PV2",
-      "optional": true,
-      "repeating": false
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PV1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PV2",
+          "optional": true,
+          "repeating": false
+        }
+      ]
     },
     {
       "type": "segment",
