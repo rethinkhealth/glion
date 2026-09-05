@@ -230,4 +230,47 @@ describe("hl7v2AnnotateProfileFieldsCodeSystems", () => {
     expect(msgs.length).toBeGreaterThan(0);
     expect(msgs[0]!.cause).toBe(loadError);
   });
+
+  // Regression: PR #544 erroneously stripped `table: "HL70100"` from BLG-1
+  // ("When to Charge", CCD) in v2.6+, so the code-systems annotator skipped
+  // BLG-1 and attached no `codeSystem`/`code`. The binding was restored for
+  // v2.6–v2.8.2; BLG-1 should now annotate identically to v2.5.1.
+  describe("BLG-1 (When to Charge) code-system annotation across versions", () => {
+    const versions = ["2.5.1", "2.6", "2.7", "2.7.1", "2.8", "2.8.1", "2.8.2"];
+
+    it.each(versions)(
+      "attaches codeSystem to BLG-1 and resolves the rep code under v%s",
+      async (version) => {
+        const tree = m(msh(version), s("BLG", f(c("O"), c("20241201"))));
+
+        await processor().run(tree);
+
+        const blg1 = getField(tree, "BLG", 0);
+        expect(blg1.data?.table).toBe("HL70100");
+        expect(blg1.data?.codeSystem).toEqual({
+          id: "v2-0100",
+          name: "InvocationEvent",
+          title: "invocationEvent",
+        });
+        expect(getRep(blg1).data?.code).toEqual({
+          display: "On receipt of order",
+          status: "active",
+          value: "O",
+        });
+      }
+    );
+
+    it.each(versions)(
+      "sets codeSystem but no code when BLG-1 value is not in table under v%s",
+      async (version) => {
+        const tree = m(msh(version), s("BLG", f(c("ZZZ"), c("20241201"))));
+
+        await processor().run(tree);
+
+        const blg1 = getField(tree, "BLG", 0);
+        expect(blg1.data?.codeSystem?.id).toBe("v2-0100");
+        expect(getRep(blg1).data?.code).toBeUndefined();
+      }
+    );
+  });
 });

@@ -253,6 +253,71 @@ describe("hl7v2LintTableValues", () => {
     });
   });
 
+  // Regression: PR #544 erroneously stripped `table: "HL70100"` from BLG-1
+  // ("When to Charge", CCD) in v2.6+. CCD.1 "Invocation Event" (ID) is bound to
+  // HL7 table 0100 (codes D/O/R/S/T). The binding was restored for v2.6–v2.8.2.
+  describe("BLG-1 table 0100 binding across versions", () => {
+    const versions = ["2.5.1", "2.6", "2.7", "2.7.1", "2.8", "2.8.1", "2.8.2"];
+
+    it.each(versions)(
+      "flags an invalid BLG-1 invocation event value under v%s",
+      async (version) => {
+        // BLG-1 is a CCD composite; CCD.1 "Invocation Event" carries the coded value
+        const tree = m(msh(version), s("BLG", f(c("ZZZ"), c("20241201"))));
+        const file = new VFile();
+
+        await unified()
+          .use(hl7v2AnnotateProfileContext)
+          .use(hl7v2LintTableValues)
+          .run(tree, file);
+
+        const errors = file.messages.filter(
+          (msg) =>
+            msg.ruleId === "table-values" && msg.message.includes("BLG-1")
+        );
+        expect(errors).toHaveLength(1);
+        expect(errors[0]?.message).toContain("ZZZ");
+        expect(errors[0]?.message).toContain("0100");
+        expect(errors[0]?.message).toContain("Invocation event");
+        expect(errors[0]?.source).toBe("hl7v2-lint");
+      }
+    );
+
+    it.each(versions)(
+      "accepts a valid BLG-1 invocation event value under v%s",
+      async (version) => {
+        const tree = m(msh(version), s("BLG", f(c("D"), c("20241201"))));
+        const file = new VFile();
+
+        await unified()
+          .use(hl7v2AnnotateProfileContext)
+          .use(hl7v2LintTableValues)
+          .run(tree, file);
+
+        const errors = file.messages.filter(
+          (msg) =>
+            msg.ruleId === "table-values" && msg.message.includes("BLG-1")
+        );
+        expect(errors).toHaveLength(0);
+      }
+    );
+
+    it.each(versions)(
+      "skips BLG-1 when the value is empty under v%s",
+      async (version) => {
+        const tree = m(msh(version), s("BLG", f(c(""), c("20241201"))));
+        const file = new VFile();
+
+        await unified()
+          .use(hl7v2AnnotateProfileContext)
+          .use(hl7v2LintTableValues)
+          .run(tree, file);
+
+        expect(file.messages).toHaveLength(0);
+      }
+    );
+  });
+
   // https://github.com/rethinkhealth/hl7v2/issues/489
   it("validates correctly when MSH-12 is composite VID — #489", async () => {
     function mshVid(version: string) {
