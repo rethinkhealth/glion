@@ -1,0 +1,16 @@
+import { MllpClientError, MllpErrorCode } from "./base";
+
+/** An option is out of range. Raised before anything happens. */
+export class MllpInvalidOptionError extends MllpClientError {
+  override readonly name = "MllpInvalidOptionError";
+  readonly code = MllpErrorCode.INVALID_OPTION;
+  readonly delivery = "not-sent";
+  readonly option: string;
+
+  constructor(option: string, requirement: string, received: unknown) {
+    super(
+      `Option ${option} must be ${requirement}; received ${String(received)}.`
+    );
+    this.option = option;
+  }
+}
