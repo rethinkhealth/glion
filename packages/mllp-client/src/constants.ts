@@ -4,6 +4,8 @@
  * @module
  */
 
+import type { State } from "./client/state";
+
 /**
  * Default time to wait for a connection to open, in milliseconds. A TCP
  * handshake completes in a few round-trips; one that has not completed after
@@ -24,3 +26,8 @@ export const DEFAULT_MAX_BUFFERED_BYTES = 16 * 1024 * 1024;
  * to about 1 ms.
  */
 export const MAX_TIMEOUT_MS = 2 ** 31 - 1;
+
+/**
+ * The initial idle phase of the client.
+ */
+export const IDLE_PHASE = { phase: "idle" } satisfies State;

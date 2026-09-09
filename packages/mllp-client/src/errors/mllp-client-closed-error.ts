@@ -1,5 +1,4 @@
 import { MllpClientError, MllpErrorCode } from "./base";
-import type { MllpDelivery } from "./base";
 
 /**
  * The client is closed for good, by `close()` or by a failure that ended the
@@ -7,26 +6,17 @@ import type { MllpDelivery } from "./base";
  * failure closed the client, that error is on `cause`. A `close()` that
  * cancelled a connection attempt raises this too: nothing was written, and the
  * client is done either way. When `close()` interrupted a message that had
- * already been written, `delivery` is `unknown`.
+ * already been written, the remote system may or may not have received it.
  */
 export class MllpClientClosedError extends MllpClientError {
   override readonly name = "MllpClientClosedError";
   readonly code = MllpErrorCode.CLOSED;
-  readonly delivery: MllpDelivery;
-
-  constructor(cause?: MllpClientError, delivery: MllpDelivery = "not-sent") {
-    super(closedMessage(cause, delivery), { cause });
-    this.delivery = delivery;
+  constructor(cause?: MllpClientError) {
+    super(closedMessage(cause), { cause });
   }
 }
 
-function closedMessage(
-  cause: MllpClientError | undefined,
-  delivery: MllpDelivery
-): string {
-  if (delivery === "unknown") {
-    return "The client was closed while a message was waiting for its acknowledgment — the remote system may or may not have received it; resend on a new MllpClient only if the message is safe to repeat.";
-  }
+function closedMessage(cause: MllpClientError | undefined): string {
   if (cause) {
     return `The client is closed after an earlier failure (${cause.code}) — construct a new MllpClient to send again.`;
   }

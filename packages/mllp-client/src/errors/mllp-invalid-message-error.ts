@@ -8,7 +8,6 @@ import { MllpClientError, MllpErrorCode, reasonOf } from "./base";
 export class MllpInvalidMessageError extends MllpClientError {
   override readonly name = "MllpInvalidMessageError";
   readonly code = MllpErrorCode.INVALID_MESSAGE;
-  readonly delivery = "not-sent";
 
   constructor(cause: unknown) {
     super(

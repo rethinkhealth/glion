@@ -7,7 +7,6 @@ import { MllpClientError, MllpErrorCode } from "./base";
 export class MllpAlreadySendingError extends MllpClientError {
   override readonly name = "MllpAlreadySendingError";
   readonly code = MllpErrorCode.ALREADY_SENDING;
-  readonly delivery = "not-sent";
   /** MSH-10 of the message that is still waiting. */
   readonly controlId: string;
 

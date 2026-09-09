@@ -18,19 +18,8 @@ export const MllpErrorCode = {
 
 export type MllpErrorCode = (typeof MllpErrorCode)[keyof typeof MllpErrorCode];
 
-/**
- * Whether a message may have reached the remote system.
- *
- * - `not-sent`: nothing reached the wire. Sending again is safe.
- * - `unknown`: the message may have been received. Send again only when the
- *   message is safe to repeat.
- */
-export type MllpDelivery = "not-sent" | "unknown";
-
 export abstract class MllpClientError extends Error {
   abstract readonly code: MllpErrorCode;
-  /** Whether the message may have reached the remote system. */
-  abstract readonly delivery: MllpDelivery;
 }
 
 /** The text of a lower layer's error, for the message that wraps it. */

@@ -9,7 +9,6 @@ import { MllpClientError, MllpErrorCode, reasonOf } from "./base";
 export class MllpInvalidResponseError extends MllpClientError {
   override readonly name = "MllpInvalidResponseError";
   readonly code = MllpErrorCode.INVALID_RESPONSE;
-  readonly delivery = "unknown";
   /** MSH-10 of the message that was waiting, when the thrower knew it. */
   readonly controlId?: string;
 

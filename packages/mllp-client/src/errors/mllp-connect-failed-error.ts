@@ -7,7 +7,6 @@ import { MllpClientError, MllpErrorCode, reasonOf } from "./base";
 export class MllpConnectFailedError extends MllpClientError {
   override readonly name = "MllpConnectFailedError";
   readonly code = MllpErrorCode.CONNECT_FAILED;
-  readonly delivery = "not-sent";
 
   constructor(cause: unknown) {
     super(

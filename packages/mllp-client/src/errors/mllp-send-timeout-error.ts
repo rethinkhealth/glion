@@ -7,7 +7,6 @@ import { MllpClientError, MllpErrorCode } from "./base";
 export class MllpSendTimeoutError extends MllpClientError {
   override readonly name = "MllpSendTimeoutError";
   readonly code = MllpErrorCode.SEND_TIMEOUT;
-  readonly delivery = "unknown";
   /** MSH-10 of the message that was waiting. */
   readonly controlId: string;
   readonly timeoutMs: number;

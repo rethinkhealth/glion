@@ -7,7 +7,6 @@ import { MllpClientError, MllpErrorCode } from "./base";
 export class MllpConnectTimeoutError extends MllpClientError {
   override readonly name = "MllpConnectTimeoutError";
   readonly code = MllpErrorCode.CONNECT_TIMEOUT;
-  readonly delivery = "not-sent";
   readonly timeoutMs: number;
 
   constructor(timeoutMs: number) {
