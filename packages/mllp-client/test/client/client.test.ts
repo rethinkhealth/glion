@@ -473,6 +473,26 @@ describe("MllpClient", () => {
       });
     });
 
+    it("rejects INVALID_RESPONSE and closes when a NAK answers a different message", async () => {
+      // Given
+      const { client, remote } = await connectedClient();
+      const { controlId, tree } = adtA01();
+
+      // When the rejection names a message this client never sent
+      const sending = client.send(tree);
+      await remote.received();
+      await remote.replies(ack("AE", { controlId: "OTHER" }).text);
+
+      // Then a NAK answers this message only if MSA-2 says it does — the same
+      // verdict an accept gets on the same evidence.
+      await expect(sending).rejects.toMatchObject({
+        code: MllpErrorCode.INVALID_RESPONSE,
+        controlId,
+        message: expect.stringContaining('MSA-2 is "OTHER"'),
+      });
+      expect(client.state).toBe("closed");
+    });
+
     it("rejects INVALID_RESPONSE and closes when the reply is not MLLP", async () => {
       // Given
       const { client, remote } = await connectedClient();

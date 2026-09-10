@@ -2,7 +2,8 @@
  * What the client makes of a message going out, and of an acknowledgment
  * coming back.
  *
- * Serializing a tree and reading an MSA are here.
+ * Serializing a tree, reading an MSA, and deciding whether that MSA answers a
+ * given message are here.
  *
  * Pure: nothing here knows the client has phases, or that a failure ends the
  * connection.
@@ -10,7 +11,7 @@
  * @module
  */
 
-import { isAckSuccessCode } from "@glion/ack";
+import { isAckCode, isAckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
@@ -21,7 +22,7 @@ import {
   MllpInvalidResponseError,
   nakException,
 } from "../errors";
-import type { MllpClientResponse } from "../types";
+import type { Acknowledgment, MllpClientResponse } from "../types";
 import { read } from "../utils";
 
 /**
@@ -48,17 +49,15 @@ export function encode(tree: Root): Uint8Array {
 /**
  * Reads one message as the acknowledgment it carries.
  *
- * MSH-9 and the HL7 version are not checked (#668). `controlId` is MSA-2 as
- * found; correlating it against the message sent is the caller's.
+ * MSA-1 is read, not judged, and MSA-2 is not correlated — see
+ * {@link responseTo}. MSH-9 and the HL7 version are not checked (#668).
  *
  * @param bytes One message, as it came off the connection.
- * @returns The acknowledgment, when MSA-1 accepted the message.
- * @throws {AckException} MSA-1 is `AE`, `AR`, `CE`, or `CR`.
  * @throws {MllpInvalidResponseError} The bytes are not readable as an
  *   acknowledgment: bad charset, unparseable HL7v2, or an MSA-1 that is absent
  *   or is not one of the six codes. The reason is on `cause`.
  */
-export function decode(bytes: Uint8Array): MllpClientResponse {
+export function decode(bytes: Uint8Array): Acknowledgment {
   let raw: string;
   let tree: Root;
   try {
@@ -71,16 +70,8 @@ export function decode(bytes: Uint8Array): MllpClientResponse {
     throw new MllpInvalidResponseError(error);
   }
 
-  // Asked before MSA-1 is judged here, because a refusal is the one answer
-  // that leaves the connection in step. It reads MSA-1 for itself, and gives
-  // nothing back for anything that is not a NAK.
-  const nak = nakException(tree);
-  if (nak !== undefined) {
-    throw nak;
-  }
-
   const code = read(tree, "MSA-1[1].1.1");
-  if (!isAckSuccessCode(code)) {
+  if (!isAckCode(code)) {
     throw new MllpInvalidResponseError(
       code === ""
         ? "MSA-1 is empty, so accept or reject cannot be determined."
@@ -90,14 +81,37 @@ export function decode(bytes: Uint8Array): MllpClientResponse {
 
   return {
     code,
-    // Reported, not required: an empty MSA-2 answers nothing, and only the
-    // caller knows what it sent.
     controlId: read(tree, "MSA-2[1].1.1"),
-    // The acknowledgment's own MSH-10, not the one it answers. Reported for
-    // tracing; correlation must never use it.
     id: read(tree, "MSH-10[1].1.1"),
     raw,
     text: read(tree, "MSA-3[1].1.1") || undefined,
     tree,
   };
+}
+
+/**
+ * `ack` as the answer to the message `controlId` identifies.
+ *
+ * Correlation is checked before MSA-1 is read, so a verdict is only ever
+ * reported for the message it was given about.
+ *
+ * @throws {MllpInvalidResponseError} MSA-2 names another message.
+ * @throws {AckException} MSA-1 is `AE`, `AR`, `CE`, or `CR`.
+ */
+export function responseTo(
+  ack: Acknowledgment,
+  controlId: string
+): MllpClientResponse {
+  if (ack.controlId !== controlId) {
+    throw new MllpInvalidResponseError(
+      `MSA-2 is "${ack.controlId}", so it answers a different message — usually a late acknowledgment from an earlier timed-out send.`,
+      controlId
+    );
+  }
+
+  const { code } = ack;
+  if (!isAckSuccessCode(code)) {
+    throw nakException(ack.tree, code);
+  }
+  return { ...ack, code };
 }

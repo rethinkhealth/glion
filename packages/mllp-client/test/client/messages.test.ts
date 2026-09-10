@@ -1,6 +1,7 @@
 /**
- * `encode()` and `decode()`: one tree to the frame it is written as,
- * and one received frame to the acknowledgment it carries.
+ * `encode()`, `decode()` and `responseTo()`: one tree to the bytes it is sent
+ * as, received bytes to the acknowledgment they carry, and that acknowledgment
+ * to the answer it is for one message.
  */
 
 import {
@@ -14,7 +15,7 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
 import { describe, expect, it } from "vitest";
 
-import { decode, encode } from "../../src/client/messages";
+import { decode, encode, responseTo } from "../../src/client/messages";
 import {
   MllpClientError,
   MllpInvalidMessageError,
@@ -108,102 +109,13 @@ describe("decode()", () => {
   });
 
   describe("a NAK", () => {
-    const EXCEPTIONS = [
-      ["AE", AckApplicationError],
-      ["AR", AckApplicationReject],
-      ["CE", AckCommitError],
-      ["CR", AckCommitReject],
-    ] as const;
-
-    it.each(EXCEPTIONS)("throws the %s exception", (code, exception) => {
+    it.each(["AE", "AR", "CE", "CR"])("reads %s without judging it", (code) => {
+      // Whether a NAK is this message's answer is not decided here — that
+      // needs the control ID of the message sent. See `responseTo()`.
       const { text } = ack(code);
       const bytes = encodeBytes(text);
 
-      expect(() => decode(bytes)).toThrow(exception);
-    });
-
-    it("is not an MllpClientError: the remote system answered properly", () => {
-      // The class is how a caller tells "the remote system said no" from "the
-      // client or the wire failed", and only the second closes the connection.
-      const { text } = ack("AE");
-      const bytes = encodeBytes(text);
-
-      expect(() => decode(bytes)).not.toThrow(MllpClientError);
-    });
-
-    it("carries MSA-2 as the control ID", () => {
-      const { text, controlId } = ack("AE");
-      const bytes = encodeBytes(text);
-
-      expect(() => decode(bytes)).toThrow(
-        expect.objectContaining({ controlId })
-      );
-    });
-
-    it("carries ERR-3 as the error code and ERR-4 as the severity", () => {
-      const { text } = ack("AE", { msa3: "Required field missing" });
-      const bytes = encodeBytes(
-        [text, "ERR|||204^Required field missing^HL70357|E|||PID.5"].join("\r")
-      );
-
-      expect(() => decode(bytes)).toThrow(
-        expect.objectContaining({
-          errorCode: "204",
-          severity: "E",
-          text: "Required field missing",
-        })
-      );
-    });
-
-    it("says what the remote system gave, in the message", () => {
-      const { text } = ack("AE", { msa3: "Required field missing" });
-      const bytes = encodeBytes(
-        [text, "ERR|||204^Required field missing^HL70357|E|||PID.5"].join("\r")
-      );
-
-      expect(() => decode(bytes)).toThrow(
-        "Required field missing; ERR-3 204; ERR-4 E."
-      );
-    });
-
-    it("says so when the remote system gave no reason", () => {
-      const { text } = ack("CE");
-      const bytes = encodeBytes(text);
-
-      expect(() => decode(bytes)).toThrow("It gave no reason.");
-    });
-
-    it("falls back to ERR-8 for the text when MSA-3 is absent", () => {
-      const { text } = ack("AR");
-      const bytes = encodeBytes(
-        [text, "ERR|||207^Application error^HL70357|E||||Try again later"].join(
-          "\r"
-        )
-      );
-
-      expect(() => decode(bytes)).toThrow(
-        expect.objectContaining({ text: "Try again later" })
-      );
-    });
-
-    it("prefers MSA-3 over ERR-8 when both are present", () => {
-      const { text } = ack("AR", { msa3: "From MSA-3" });
-      const bytes = encodeBytes(
-        [text, "ERR|||207^Application error^HL70357|E||||From ERR-8"].join("\r")
-      );
-
-      expect(() => decode(bytes)).toThrow(
-        expect.objectContaining({ text: "From MSA-3" })
-      );
-    });
-
-    it("has no ERR fields when there is no ERR segment", () => {
-      const { text } = ack("CE");
-      const bytes = encodeBytes(text);
-
-      expect(() => decode(bytes)).toThrow(
-        expect.objectContaining({ errorCode: undefined, severity: undefined })
-      );
+      expect(decode(bytes)).toMatchObject({ code });
     });
   });
 
@@ -290,6 +202,158 @@ describe("decode()", () => {
       expect(() => decode(bytes)).toThrow(MllpInvalidResponseError);
       expect(() => decode(bytes)).toThrow(
         expect.objectContaining({ cause: expect.any(CharsetError) })
+      );
+    });
+  });
+});
+
+describe("responseTo()", () => {
+  describe("an accept", () => {
+    it.each(["AA", "CA"])("returns the %s acknowledgment", (code) => {
+      const { text, controlId } = ack(code);
+      const bytes = encodeBytes(text);
+
+      expect(responseTo(decode(bytes), controlId)).toMatchObject({
+        code,
+        controlId,
+      });
+    });
+  });
+
+  describe("a NAK", () => {
+    const EXCEPTIONS = [
+      ["AE", AckApplicationError],
+      ["AR", AckApplicationReject],
+      ["CE", AckCommitError],
+      ["CR", AckCommitReject],
+    ] as const;
+
+    it.each(EXCEPTIONS)("throws the %s exception", (code, exception) => {
+      const { text, controlId } = ack(code);
+      const bytes = encodeBytes(text);
+
+      expect(() => responseTo(decode(bytes), controlId)).toThrow(exception);
+    });
+
+    it("is not an MllpClientError: the remote system answered properly", () => {
+      // The class is how a caller tells "the remote system said no" from "the
+      // client or the wire failed", and only the second closes the connection.
+      const { text, controlId } = ack("AE");
+      const bytes = encodeBytes(text);
+
+      expect(() => responseTo(decode(bytes), controlId)).not.toThrow(
+        MllpClientError
+      );
+    });
+
+    it("carries MSA-2 as the control ID", () => {
+      const { text, controlId } = ack("AE");
+      const bytes = encodeBytes(text);
+
+      expect(() => responseTo(decode(bytes), controlId)).toThrow(
+        expect.objectContaining({ controlId })
+      );
+    });
+
+    it("carries ERR-3 as the error code and ERR-4 as the severity", () => {
+      const { text, controlId } = ack("AE", { msa3: "Required field missing" });
+      const bytes = encodeBytes(
+        [text, "ERR|||204^Required field missing^HL70357|E|||PID.5"].join("\r")
+      );
+
+      expect(() => responseTo(decode(bytes), controlId)).toThrow(
+        expect.objectContaining({
+          errorCode: "204",
+          severity: "E",
+          text: "Required field missing",
+        })
+      );
+    });
+
+    it("says what the remote system gave, in the message", () => {
+      const { text, controlId } = ack("AE", { msa3: "Required field missing" });
+      const bytes = encodeBytes(
+        [text, "ERR|||204^Required field missing^HL70357|E|||PID.5"].join("\r")
+      );
+
+      expect(() => responseTo(decode(bytes), controlId)).toThrow(
+        "Required field missing; ERR-3 204; ERR-4 E."
+      );
+    });
+
+    it("says so when the remote system gave no reason", () => {
+      const { text, controlId } = ack("CE");
+      const bytes = encodeBytes(text);
+
+      expect(() => responseTo(decode(bytes), controlId)).toThrow(
+        "It gave no reason."
+      );
+    });
+
+    it("falls back to ERR-8 for the text when MSA-3 is absent", () => {
+      const { text, controlId } = ack("AR");
+      const bytes = encodeBytes(
+        [text, "ERR|||207^Application error^HL70357|E||||Try again later"].join(
+          "\r"
+        )
+      );
+
+      expect(() => responseTo(decode(bytes), controlId)).toThrow(
+        expect.objectContaining({ text: "Try again later" })
+      );
+    });
+
+    it("prefers MSA-3 over ERR-8 when both are present", () => {
+      const { text, controlId } = ack("AR", { msa3: "From MSA-3" });
+      const bytes = encodeBytes(
+        [text, "ERR|||207^Application error^HL70357|E||||From ERR-8"].join("\r")
+      );
+
+      expect(() => responseTo(decode(bytes), controlId)).toThrow(
+        expect.objectContaining({ text: "From MSA-3" })
+      );
+    });
+
+    it("has no ERR fields when there is no ERR segment", () => {
+      const { text, controlId } = ack("CE");
+      const bytes = encodeBytes(text);
+
+      expect(() => responseTo(decode(bytes), controlId)).toThrow(
+        expect.objectContaining({ errorCode: undefined, severity: undefined })
+      );
+    });
+  });
+
+  describe("an acknowledgment of another message", () => {
+    it("throws INVALID_RESPONSE when MSA-2 names a different message", () => {
+      const { text } = ack("AA", { controlId: "OTHER" });
+      const bytes = encodeBytes(text);
+
+      expect(() => responseTo(decode(bytes), "OURS")).toThrow(
+        MllpInvalidResponseError
+      );
+      expect(() => responseTo(decode(bytes), "OURS")).toThrow(
+        'MSA-2 is "OTHER"'
+      );
+    });
+
+    it("throws INVALID_RESPONSE for a NAK that names a different message", () => {
+      // Correlation is checked before MSA-1: a rejection of someone else's
+      // message is not this message's answer.
+      const { text } = ack("AE", { controlId: "OTHER" });
+      const bytes = encodeBytes(text);
+
+      expect(() => responseTo(decode(bytes), "OURS")).toThrow(
+        MllpInvalidResponseError
+      );
+    });
+
+    it("throws INVALID_RESPONSE when MSA-2 is empty", () => {
+      const { text } = ack("AA", { controlId: "" });
+      const bytes = encodeBytes(text);
+
+      expect(() => responseTo(decode(bytes), "OURS")).toThrow(
+        MllpInvalidResponseError
       );
     });
   });

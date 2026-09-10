@@ -12,7 +12,6 @@ import {
   AckCode,
   AckCommitError,
   AckCommitReject,
-  isAckNakCode,
 } from "@glion/ack";
 import type { AckException, AckExceptionOptions, AckNakCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
@@ -46,17 +45,12 @@ function nakMessage(code: AckNakCode, nak: AckExceptionOptions): string {
 }
 
 /**
- * The exception the acknowledgment in `tree` carries, or `undefined` when
- * MSA-1 is not a NAK.
+ * The exception a NAK of `code` carries, read from `tree`.
  *
- * Reads MSA-1 for the class, MSA-2 for `controlId`, ERR-3 for `errorCode`,
- * ERR-4 for `severity`, and MSA-3 (or ERR-8) for `text`.
+ * `code` picks the class; MSA-2 gives `controlId`, ERR-3 `errorCode`, ERR-4
+ * `severity`, and MSA-3 (or ERR-8) `text`.
  */
-export function nakException(tree: Root): AckException | undefined {
-  const code = read(tree, "MSA-1[1].1.1");
-  if (!isAckNakCode(code)) {
-    return undefined;
-  }
+export function nakException(tree: Root, code: AckNakCode): AckException {
   const nak: AckExceptionOptions = {
     controlId: read(tree, "MSA-2[1].1.1"),
     errorCode: read(tree, "ERR-3[1].1.1") || undefined,

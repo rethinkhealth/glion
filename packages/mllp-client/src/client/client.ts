@@ -1,3 +1,4 @@
+import { AckException } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { MllpCodecError } from "@glion/mllp-codec";
 
@@ -32,7 +33,7 @@ import {
 import { createConnection } from "./connection";
 import type { MllpConnection } from "./connection";
 import { MllpClientEmitter } from "./events";
-import { decode, encode } from "./messages";
+import { decode, encode, responseTo } from "./messages";
 import type { State } from "./state";
 
 /**
@@ -347,32 +348,22 @@ export class MllpClient extends MllpClientEmitter {
   }
 
   /**
-   * The acknowledgment in `reply`, once it is known to answer the message in
-   * flight.
+   * `reply` as this message's acknowledgment.
    *
    * A reply that cannot be read, or that answers another message, ends the
-   * connection.
+   * connection. A NAK does not: the remote system understood the message.
    */
   #readAcknowledgment(
     controlId: string,
     reply: Uint8Array
   ): MllpClientResponse {
     try {
-      const ack = decode(reply);
-      if (ack.controlId !== controlId) {
-        throw new MllpInvalidResponseError(
-          `MSA-2 is "${ack.controlId}", so it answers a different message — usually a late acknowledgment from an earlier timed-out send.`,
-          controlId
-        );
-      }
-      return ack;
+      return responseTo(decode(reply), controlId);
     } catch (error) {
-      if (error instanceof MllpInvalidResponseError) {
-        this.#fail(this.#state, error);
+      if (error instanceof AckException) {
+        throw error;
       }
-      // An AckException means the remote system answered properly, and
-      // anything else is a bug of ours. Neither is a verdict on the wire.
-      throw error;
+      this.#fail(this.#state, error);
     }
   }
 
