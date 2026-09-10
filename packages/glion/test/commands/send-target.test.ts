@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import type { SendArgs } from "./send";
-import { deriveLocalTarget, resolveTarget } from "./send-target";
+import type { SendArgs } from "../../src/commands/send";
+import {
+  deriveLocalTarget,
+  resolveTarget,
+} from "../../src/commands/send-target";
 
 function args(overrides: Partial<SendArgs> = {}): SendArgs {
   return { help: false, json: false, local: false, ...overrides };

@@ -7,7 +7,7 @@ import type { MllpSocket } from "@glion/mllp-client";
 import { frame } from "@glion/mllp-codec";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { runSend } from "./send";
+import { runSend } from "../../src/commands/send";
 
 const ADT = [
   "MSH|^~\\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5",
