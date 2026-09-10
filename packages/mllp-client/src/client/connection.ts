@@ -15,6 +15,7 @@ import {
   MllpConnectFailedError,
   MllpConnectTimeoutError,
   MllpInvalidMessageError,
+  MllpSendTimeoutError,
 } from "../errors";
 import type { MllpSocket, MllpStreams } from "../types";
 
@@ -25,27 +26,25 @@ import type { MllpSocket, MllpStreams } from "../types";
 export interface MllpConnection {
   /**
    * Resolves once the connection is open and rejects if it never opens.
-   * `write` and `read` are usable only after it resolves.
+   * `exchange` is usable only after it resolves.
    */
   readonly ready: Promise<void>;
   /**
-   * Frames one message and writes it.
+   * Sends one message and returns the next one the remote system sends back,
+   * unframed, within `timeoutMs`. `null` once the remote system has closed and
+   * every message it sent has been read.
    *
    * @throws {MllpInvalidMessageError} The message contains a reserved MLLP
    *   byte, so nothing was written.
+   * @throws {MllpSendTimeoutError} Nothing came back within `timeoutMs`. The
+   *   connection is destroyed.
+   * @throws {MllpCodecError} The remote system sent bytes that are not an MLLP
+   *   frame.
    */
-  write(message: Uint8Array): Promise<void>;
+  exchange(message: Uint8Array, timeoutMs: number): Promise<Uint8Array | null>;
   /**
-   * The next message from the remote system, unframed, or `null` once it has
-   * closed and every message it sent has been read.
-   *
-   * Rejects with `MllpCodecError` when the remote system sends bytes that are
-   * not an MLLP frame, and with the socket's own error when it failed.
-   */
-  read(): Promise<Uint8Array | null>;
-  /**
-   * Ends the connection now, and resolves once the socket is down. `ready`, a
-   * waiting `read`, and a waiting `write` all reject with `reason`.
+   * Ends the connection now, and resolves once the socket is down. `ready` and
+   * a waiting `exchange` both reject with `reason`.
    *
    * Never rejects. Idempotent. Bounded.
    */
@@ -117,53 +116,57 @@ export function createConnection(
   })();
   let closing: Promise<void> | null = null;
 
-  return {
-    destroy(reason?: unknown) {
-      closing ??= (async () => {
-        abort.abort(reason);
-        // Waited for, not read: the attempt's failure belongs to whoever
-        // awaited `ready`. Both promises are listed so neither is left
-        // unhandled when nobody did.
-        const [attempt] = await Promise.allSettled([streams, ready]);
-        // An attempt that failed closed the socket before it rejected, so
-        // only one that opened has anything left to end.
-        if (attempt.status === "fulfilled") {
-          // Release the streams, do not cancel them: cancelling would destroy
-          // the socket under the adapter and skip its graceful close.
-          attempt.value.reader.releaseLock();
-          attempt.value.writer.releaseLock();
-          await socket.close();
-        }
-      })();
-      return closing;
-    },
-    async read() {
-      const { reader } = await streams;
-      try {
-        const next = await reader.read();
-        return next.done ? null : next.value;
-      } catch (error) {
-        // `destroy` released the lock under us: report why it ended, not how.
-        throw abort.signal.aborted ? abort.signal.reason : error;
+  const destroy = (reason?: unknown): Promise<void> => {
+    closing ??= (async () => {
+      abort.abort(reason);
+      // Waited for, not read: the attempt's failure belongs to whoever
+      // awaited `ready`. Both promises are listed so neither is left
+      // unhandled when nobody did.
+      const [attempt] = await Promise.allSettled([streams, ready]);
+      // An attempt that failed closed the socket before it rejected, so
+      // only one that opened has anything left to end.
+      if (attempt.status === "fulfilled") {
+        // Release the streams, do not cancel them: cancelling would destroy
+        // the socket under the adapter and skip its graceful close.
+        attempt.value.reader.releaseLock();
+        attempt.value.writer.releaseLock();
+        await socket.close();
       }
-    },
-    ready,
-    async write(message: Uint8Array) {
-      let framed: Uint8Array;
-      try {
-        framed = frame(message);
-      } catch (error) {
-        // Raised before the writer is touched, so nothing reached the wire and
-        // the connection is still in step.
-        throw new MllpInvalidMessageError(error);
-      }
-      const { writer } = await streams;
-      try {
-        await writer.write(framed);
-      } catch (error) {
-        // `destroy` released the lock under us: report why it ended, not how.
-        throw abort.signal.aborted ? abort.signal.reason : error;
-      }
-    },
+    })();
+    return closing;
   };
+
+  const exchange = async (
+    message: Uint8Array,
+    timeoutMs: number
+  ): Promise<Uint8Array | null> => {
+    let framed: Uint8Array;
+    try {
+      framed = frame(message);
+    } catch (error) {
+      // Raised before the writer is touched, so nothing reached the wire and
+      // the connection is still in step.
+      throw new MllpInvalidMessageError(error);
+    }
+
+    // Destroying is what wakes the read parked below. `clearTimeout` runs in a
+    // microtask and this fires as a macrotask, so a deadline that fires at all
+    // is one whose exchange is still in flight.
+    const deadline = setTimeout(() => {
+      void destroy(new MllpSendTimeoutError(timeoutMs));
+    }, timeoutMs);
+    try {
+      const { reader, writer } = await streams;
+      await writer.write(framed);
+      const reply = await reader.read();
+      return reply.done ? null : reply.value;
+    } catch (error) {
+      // `destroy` released the lock under us: report why it ended, not how.
+      throw abort.signal.aborted ? abort.signal.reason : error;
+    } finally {
+      clearTimeout(deadline);
+    }
+  };
+
+  return { destroy, exchange, ready };
 }

@@ -1,6 +1,6 @@
 /**
- * `createConnection()` on its own: opening a socket, reading and writing
- * messages over it, and ending it.
+ * `createConnection()` on its own: opening a socket, exchanging messages over
+ * it, and ending it.
  */
 
 import { setTimeout } from "node:timers/promises";
@@ -106,8 +106,8 @@ describe("createConnection()", () => {
     });
   });
 
-  describe("read()", () => {
-    it("returns the message with its MLLP framing removed", async () => {
+  describe("exchange()", () => {
+    it("frames the message, sends it, and returns the reply unframed", async () => {
       // Given
       const { socket, remote } = stubSocket();
       const connection = createConnection(socket, {
@@ -115,17 +115,22 @@ describe("createConnection()", () => {
         timeoutMs: 5000,
       });
       await connection.ready;
-      const { text } = adtA01();
+      const message = encodeBytes(adtA01().text);
 
       // When
-      await remote.sends(frame(encodeBytes(text)));
-      const message = await connection.read();
+      // Not awaited yet: the in-memory stream applies backpressure until the
+      // far end pulls, so reading is what lets the write complete.
+      const exchanging = connection.exchange(message, 5000);
 
       // Then
-      expect(decodeBytes(message ?? new Uint8Array())).toBe(text);
+      expect(await remote.wrote()).toEqual(frame(message));
+      await remote.sends(frame(encodeBytes("MSH|^~\\&|ACK")));
+      expect(decodeBytes((await exchanging) ?? new Uint8Array())).toBe(
+        "MSH|^~\\&|ACK"
+      );
     });
 
-    it("returns ANY message with its MLLP framing removed", async () => {
+    it("returns ANY reply with its MLLP framing removed", async () => {
       // Given
       const { socket, remote } = stubSocket();
       const connection = createConnection(socket, {
@@ -135,11 +140,14 @@ describe("createConnection()", () => {
       await connection.ready;
 
       // When
+      const exchanging = connection.exchange(encodeBytes(adtA01().text), 5000);
+      await remote.wrote();
       await remote.sends(frame(encodeBytes("ANY_MESSAGE")));
-      const message = await connection.read();
 
       // Then
-      expect(decodeBytes(message ?? new Uint8Array())).toBe("ANY_MESSAGE");
+      expect(decodeBytes((await exchanging) ?? new Uint8Array())).toBe(
+        "ANY_MESSAGE"
+      );
     });
 
     it("returns null once the remote system has closed", async () => {
@@ -152,13 +160,15 @@ describe("createConnection()", () => {
       await connection.ready;
 
       // When
+      const exchanging = connection.exchange(encodeBytes(adtA01().text), 5000);
+      await remote.wrote();
       await remote.hangsUp();
 
       // Then
-      expect(await connection.read()).toBeNull();
+      expect(await exchanging).toBeNull();
     });
 
-    it("rejects when the bytes are not an MLLP frame", async () => {
+    it("rejects when the reply is not an MLLP frame", async () => {
       // Given
       const { socket, remote } = stubSocket();
       const connection = createConnection(socket, {
@@ -168,13 +178,15 @@ describe("createConnection()", () => {
       await connection.ready;
 
       // When
+      const exchanging = connection.exchange(encodeBytes(adtA01().text), 5000);
+      await remote.wrote();
       await remote.sends(encodeBytes("HTTP/1.1 400 Bad Request\r\n"));
 
       // Then
-      await expect(connection.read()).rejects.toBeInstanceOf(MllpCodecError);
+      await expect(exchanging).rejects.toBeInstanceOf(MllpCodecError);
     });
 
-    it("rejects a frame that never ends, once it passes the byte cap", async () => {
+    it("rejects a reply frame that never ends, once it passes the byte cap", async () => {
       // Given
       const { socket, remote } = stubSocket();
       const connection = createConnection(socket, {
@@ -189,32 +201,12 @@ describe("createConnection()", () => {
       ]);
 
       // When
+      const exchanging = connection.exchange(encodeBytes(adtA01().text), 5000);
+      await remote.wrote();
       await remote.sends(unterminated);
 
       // Then
-      await expect(connection.read()).rejects.toBeInstanceOf(MllpCodecError);
-    });
-  });
-
-  describe("write()", () => {
-    it("frames the message and puts it on the socket", async () => {
-      // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
-        maxBufferedBytes: 1024,
-        timeoutMs: 5000,
-      });
-      await connection.ready;
-      const message = encodeBytes(adtA01().text);
-
-      // When
-      // Not awaited yet: the in-memory stream applies backpressure until the
-      // far end pulls, so reading is what lets the write complete.
-      const writing = connection.write(message);
-
-      // Then
-      expect(await remote.wrote()).toEqual(frame(message));
-      await writing;
+      await expect(exchanging).rejects.toBeInstanceOf(MllpCodecError);
     });
 
     it("rejects INVALID_MESSAGE without writing when the message cannot be framed", async () => {
@@ -228,9 +220,51 @@ describe("createConnection()", () => {
       const reserved = encodeBytes(`MSH|^~\\&|A${String.fromCodePoint(0x1c)}`);
 
       // When / Then
-      await expect(connection.write(reserved)).rejects.toMatchObject({
+      await expect(connection.exchange(reserved, 5000)).rejects.toMatchObject({
         code: MllpErrorCode.INVALID_MESSAGE,
       });
+      expect(remote.close).not.toHaveBeenCalled();
+    });
+
+    it("rejects SEND_TIMEOUT and ends the socket when no reply arrives in time", async () => {
+      // Given
+      const { socket, remote } = stubSocket();
+      const connection = createConnection(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+      await connection.ready;
+
+      // When
+      const exchanging = connection.exchange(encodeBytes(adtA01().text), 20);
+      await remote.wrote();
+
+      // Then
+      await expect(exchanging).rejects.toMatchObject({
+        code: MllpErrorCode.SEND_TIMEOUT,
+        timeoutMs: 20,
+      });
+      expect(remote.close).toHaveBeenCalledTimes(1);
+    });
+
+    it("leaves the socket open when the reply arrives in time", async () => {
+      // Given
+      const { socket, remote } = stubSocket();
+      const connection = createConnection(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+      await connection.ready;
+
+      // When the reply arrives well inside a short timeout
+      const exchanging = connection.exchange(encodeBytes(adtA01().text), 20);
+      await remote.wrote();
+      await remote.sends(frame(encodeBytes("ACK")));
+      await exchanging;
+
+      // Then the socket is still open past the window a timeout would have
+      // ended it in, so the next message has a connection to go out on.
+      await setTimeout(40);
       expect(remote.close).not.toHaveBeenCalled();
     });
   });
@@ -269,17 +303,18 @@ describe("createConnection()", () => {
       expect(remote.close).toHaveBeenCalledTimes(1);
     });
 
-    it("rejects a waiting read with the reason it was destroyed for", async () => {
-      // Given a read parked on the connection: this is how a send deadline
-      // reaches the caller.
-      const { socket } = stubSocket();
+    it("rejects a waiting exchange with the reason it was destroyed for", async () => {
+      // Given an exchange parked on its reply: this is how a close reaches the
+      // caller waiting for an acknowledgment.
+      const { socket, remote } = stubSocket();
       const connection = createConnection(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
       await connection.ready;
-      const reason = new Error("no acknowledgment in time");
-      const waiting = connection.read();
+      const reason = new Error("the client closed");
+      const waiting = connection.exchange(encodeBytes(adtA01().text), 5000);
+      await remote.wrote();
 
       // When
       await connection.destroy(reason);
@@ -288,20 +323,22 @@ describe("createConnection()", () => {
       await expect(waiting).rejects.toBe(reason);
     });
 
-    it("rejects a waiting read even with no reason given", async () => {
+    it("rejects a waiting exchange even with no reason given", async () => {
       // Given
-      const { socket } = stubSocket();
+      const { socket, remote } = stubSocket();
       const connection = createConnection(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
       await connection.ready;
-      const waiting = connection.read();
+      const waiting = connection.exchange(encodeBytes(adtA01().text), 5000);
+      await remote.wrote();
 
       // When
       await connection.destroy();
 
-      // Then: what must never happen is a read that hangs the caller forever.
+      // Then: what must never happen is an exchange that hangs the caller
+      // forever.
       await expect(waiting).rejects.toThrow();
     });
   });
