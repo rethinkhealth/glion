@@ -1,7 +1,6 @@
 /**
- * `encode()`, `decode()` and `responseTo()`: one tree to the bytes it is sent
- * as, received bytes to the acknowledgment they carry, and that acknowledgment
- * to the answer it is for one message.
+ * `encode()` and `decode()`: one tree to the bytes it is sent as, and received
+ * bytes to what they turned out to be as a reply to it.
  */
 
 import {
@@ -9,13 +8,14 @@ import {
   AckApplicationReject,
   AckCommitError,
   AckCommitReject,
+  AckException,
 } from "@glion/ack";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
 import { describe, expect, it } from "vitest";
 
-import { decode, encode, responseTo } from "../../src/client/messages";
+import { decode, encode } from "../../src/client/messages";
 import {
   MllpClientError,
   MllpInvalidMessageError,
@@ -24,199 +24,97 @@ import {
 import { ack, adtA01 } from "../fixtures";
 
 describe("encode()", () => {
-  describe("the bytes", () => {
+  describe("a message it can send", () => {
     it("carries the tree's canonical serialization", () => {
       const { text } = adtA01();
       const tree = parseHL7v2(text);
 
-      expect(decodeBytes(encode(tree))).toBe(toHl7v2(tree));
+      expect(decodeBytes(encode(tree).bytes)).toBe(toHl7v2(tree));
     });
 
-    it("encodes them as UTF-8", () => {
+    it("encodes the bytes as UTF-8", () => {
       const { text } = adtA01();
-      const tree = parseHL7v2(text.replace("John", "Jörg"));
+      const tree = parseHL7v2(text.replace("Doe^John", "Dôe^Jöhn"));
 
-      expect(decodeBytes(encode(tree))).toContain("Jörg");
+      expect(decodeBytes(encode(tree).bytes)).toContain("Dôe^Jöhn");
+    });
+
+    it("reports the MSH-10 its acknowledgment must echo", () => {
+      const { controlId, tree } = adtA01();
+
+      expect(encode(tree).controlId).toBe(controlId);
     });
   });
 
-  describe("the control ID", () => {
+  describe("a message it cannot send", () => {
     it("throws when the message has no MSH-10, so nothing is written", () => {
-      const { text } = adtA01({ controlId: "" });
+      const { tree } = adtA01({ controlId: "" });
 
-      expect(() => encode(parseHL7v2(text))).toThrow(MllpInvalidMessageError);
+      expect(() => encode(tree)).toThrow(MllpInvalidMessageError);
+      expect(() => encode(tree)).toThrow("no MSH-10 control ID");
     });
   });
 });
 
 describe("decode()", () => {
   describe("an accept", () => {
-    it.each(["AA", "CA"])("reads %s", (code) => {
-      const { text } = ack(code);
-      const bytes = encodeBytes(text);
+    it.each(["AA", "CA"])("reports %s as an accept", (code) => {
+      const { text, controlId } = ack(code);
 
-      expect(decode(bytes)).toMatchObject({ code });
+      expect(decode(encodeBytes(text), controlId)).toMatchObject({
+        response: { code, controlId },
+        type: "accept",
+      });
     });
 
     it("carries the acknowledgment as both text and tree", () => {
-      const { text } = ack("AA");
-      const bytes = encodeBytes(text);
+      const { text, controlId } = ack("AA");
 
-      const outcome = decode(bytes);
+      const reply = decode(encodeBytes(text), controlId);
 
-      expect(outcome.raw).toBe(text);
-      expect(outcome.tree.type).toBe("root");
+      expect(reply).toMatchObject({
+        response: { raw: text, tree: { type: "root" } },
+        type: "accept",
+      });
     });
 
     it("reads MSA-3 as the text", () => {
-      const { text } = ack("AA", { msa3: "Message accepted" });
-      const bytes = encodeBytes(text);
+      const { text, controlId } = ack("AA", { msa3: "Stored" });
 
-      expect(decode(bytes)).toMatchObject({ text: "Message accepted" });
+      expect(decode(encodeBytes(text), controlId)).toMatchObject({
+        response: { text: "Stored" },
+      });
     });
 
     it("has no text when MSA-3 is absent", () => {
-      const { text } = ack("AA");
-      const bytes = encodeBytes(text);
+      const { text, controlId } = ack("AA");
 
-      expect(decode(bytes).text).toBeUndefined();
-    });
-
-    it("never carries the ERR fields", () => {
-      const { text } = ack("AA");
-      const bytes = encodeBytes(
-        [text, "ERR|||204^Required field missing^HL70357|E|||PID.5"].join("\r")
-      );
-
-      const outcome = decode(bytes);
-
-      expect(outcome).not.toHaveProperty("errorCode");
-      expect(outcome).not.toHaveProperty("severity");
+      expect(decode(encodeBytes(text), controlId)).toMatchObject({
+        response: { text: undefined },
+      });
     });
 
     it("does not take ERR-8 as its text", () => {
-      // ERR-8 stands in for MSA-3 only on a NAK. An ERR segment beside an
-      // accept describes nothing, so the accept has no text.
-      const { text } = ack("AA");
+      // ERR-8 stands in for MSA-3 on a NAK only; an accept has no ERR to read.
+      const { text, controlId } = ack("AA");
       const bytes = encodeBytes(
-        [text, "ERR|||207^Application error^HL70357|E||||Try again later"].join(
-          "\r"
-        )
+        [text, "ERR|||0^Message accepted^HL70357|I||||Ignore me"].join("\r")
       );
 
-      expect(decode(bytes).text).toBeUndefined();
-    });
-  });
-
-  describe("a NAK", () => {
-    it.each(["AE", "AR", "CE", "CR"])("reads %s without judging it", (code) => {
-      // Whether a NAK is this message's answer is not decided here — that
-      // needs the control ID of the message sent. See `responseTo()`.
-      const { text } = ack(code);
-      const bytes = encodeBytes(text);
-
-      expect(decode(bytes)).toMatchObject({ code });
-    });
-  });
-
-  describe("the two control IDs", () => {
-    it("reads MSH-10 as the acknowledgment's own id", () => {
-      const original_id = "SOME_ID";
-      const { text, id } = ack("AA", { id: original_id });
-      const bytes = encodeBytes(text);
-
-      expect(decode(bytes).id).toBe(original_id);
-      expect(decode(bytes).id).toBe(id);
+      expect(decode(bytes, controlId)).toMatchObject({
+        response: { text: undefined },
+      });
     });
 
-    it("reads MSA-2 as the id of the message answered", () => {
-      const { text, controlId } = ack("AA");
-      const bytes = encodeBytes(text);
-
-      expect(decode(bytes).controlId).toBe(controlId);
-    });
-
-    it("keeps the two apart", () => {
+    it("keeps the acknowledgment's own id apart from the one it answers", () => {
       // Confusing them is how correlation silently breaks: every reply would
       // be compared against the receiver's own identifier for it.
       const { text, id, controlId } = ack("AA");
-      const bytes = encodeBytes(text);
 
-      const outcome = decode(bytes);
+      const reply = decode(encodeBytes(text), controlId);
 
-      expect(outcome.id).toBe(id);
-      expect(outcome.controlId).toBe(controlId);
-      expect(outcome.id).not.toBe(outcome.controlId);
-    });
-
-    it("reports MSA-2 naming another message, leaving correlation to the caller", () => {
-      const { text } = ack("AA", { controlId: "OTHER" });
-      const bytes = encodeBytes(text);
-
-      expect(decode(bytes).controlId).toBe("OTHER");
-    });
-
-    it("reports an empty MSA-2 rather than refusing the frame", () => {
-      // An acknowledgment that names no message is still an acknowledgment.
-      const { text } = ack("AA", { controlId: "" });
-      const bytes = encodeBytes(text);
-
-      expect(decode(bytes).controlId).toBe("");
-    });
-  });
-
-  describe("a frame it cannot read", () => {
-    it("names the failure as the client's, not the charset's or the parser's", () => {
-      // A caller that had to treat every throw as the remote system's fault
-      // would close a healthy connection whenever the fault was ours.
-      const { text } = ack("AA");
-      const bytes = encodeBytes(text.split("\r")[0] ?? "");
-
-      expect(() => decode(bytes)).toThrow(MllpInvalidResponseError);
-    });
-
-    it("throws when MSA-1 is empty", () => {
-      const { text } = ack("");
-      const bytes = encodeBytes(text);
-
-      expect(() => decode(bytes)).toThrow("MSA-1 is empty");
-    });
-
-    it("throws when there is no MSA segment at all", () => {
-      const { text } = ack("AA");
-      const bytes = encodeBytes(text.split("\r")[0] ?? "");
-
-      expect(() => decode(bytes)).toThrow("MSA-1 is empty");
-    });
-
-    it("throws when MSA-1 is not one of the six acknowledgment codes", () => {
-      const { text } = ack("OK");
-      const bytes = encodeBytes(text);
-
-      expect(() => decode(bytes)).toThrow('MSA-1 is "OK"');
-    });
-
-    it("lets the charset error through when the bytes are not UTF-8", () => {
-      const bytes = new Uint8Array([0xff, 0xfe, 0x4d, 0x53, 0x48]);
-
-      expect(() => decode(bytes)).toThrow(MllpInvalidResponseError);
-      expect(() => decode(bytes)).toThrow(
-        expect.objectContaining({ cause: expect.any(CharsetError) })
-      );
-    });
-  });
-});
-
-describe("responseTo()", () => {
-  describe("an accept", () => {
-    it.each(["AA", "CA"])("returns the %s acknowledgment", (code) => {
-      const { text, controlId } = ack(code);
-      const bytes = encodeBytes(text);
-
-      expect(responseTo(decode(bytes), controlId)).toMatchObject({
-        code,
-        controlId,
-      });
+      expect(reply).toMatchObject({ response: { controlId, id } });
+      expect(id).not.toBe(controlId);
     });
   });
 
@@ -228,31 +126,35 @@ describe("responseTo()", () => {
       ["CR", AckCommitReject],
     ] as const;
 
-    it.each(EXCEPTIONS)("throws the %s exception", (code, exception) => {
+    it.each(EXCEPTIONS)("reports %s as a nak", (code, exception) => {
       const { text, controlId } = ack(code);
-      const bytes = encodeBytes(text);
 
-      expect(() => responseTo(decode(bytes), controlId)).toThrow(exception);
+      const reply = decode(encodeBytes(text), controlId);
+
+      expect(reply.type).toBe("nak");
+      expect(reply).toMatchObject({ exception: expect.any(exception) });
     });
 
     it("is not an MllpClientError: the remote system answered properly", () => {
       // The class is how a caller tells "the remote system said no" from "the
       // client or the wire failed", and only the second closes the connection.
       const { text, controlId } = ack("AE");
-      const bytes = encodeBytes(text);
 
-      expect(() => responseTo(decode(bytes), controlId)).not.toThrow(
-        MllpClientError
-      );
+      const reply = decode(encodeBytes(text), controlId);
+
+      expect(reply.type).toBe("nak");
+      expect(reply).toMatchObject({ exception: expect.any(AckException) });
+      expect(reply).not.toMatchObject({
+        exception: expect.any(MllpClientError),
+      });
     });
 
     it("carries MSA-2 as the control ID", () => {
       const { text, controlId } = ack("AE");
-      const bytes = encodeBytes(text);
 
-      expect(() => responseTo(decode(bytes), controlId)).toThrow(
-        expect.objectContaining({ controlId })
-      );
+      expect(decode(encodeBytes(text), controlId)).toMatchObject({
+        exception: { controlId },
+      });
     });
 
     it("carries ERR-3 as the error code and ERR-4 as the severity", () => {
@@ -261,13 +163,13 @@ describe("responseTo()", () => {
         [text, "ERR|||204^Required field missing^HL70357|E|||PID.5"].join("\r")
       );
 
-      expect(() => responseTo(decode(bytes), controlId)).toThrow(
-        expect.objectContaining({
+      expect(decode(bytes, controlId)).toMatchObject({
+        exception: {
           errorCode: "204",
           severity: "E",
           text: "Required field missing",
-        })
-      );
+        },
+      });
     });
 
     it("says what the remote system gave, in the message", () => {
@@ -276,18 +178,21 @@ describe("responseTo()", () => {
         [text, "ERR|||204^Required field missing^HL70357|E|||PID.5"].join("\r")
       );
 
-      expect(() => responseTo(decode(bytes), controlId)).toThrow(
-        "Required field missing; ERR-3 204; ERR-4 E."
-      );
+      expect(decode(bytes, controlId)).toMatchObject({
+        exception: {
+          message: expect.stringContaining(
+            "Required field missing; ERR-3 204; ERR-4 E."
+          ),
+        },
+      });
     });
 
     it("says so when the remote system gave no reason", () => {
       const { text, controlId } = ack("CE");
-      const bytes = encodeBytes(text);
 
-      expect(() => responseTo(decode(bytes), controlId)).toThrow(
-        "It gave no reason."
-      );
+      expect(decode(encodeBytes(text), controlId)).toMatchObject({
+        exception: { message: expect.stringContaining("It gave no reason.") },
+      });
     });
 
     it("falls back to ERR-8 for the text when MSA-3 is absent", () => {
@@ -298,9 +203,9 @@ describe("responseTo()", () => {
         )
       );
 
-      expect(() => responseTo(decode(bytes), controlId)).toThrow(
-        expect.objectContaining({ text: "Try again later" })
-      );
+      expect(decode(bytes, controlId)).toMatchObject({
+        exception: { text: "Try again later" },
+      });
     });
 
     it("prefers MSA-3 over ERR-8 when both are present", () => {
@@ -309,52 +214,83 @@ describe("responseTo()", () => {
         [text, "ERR|||207^Application error^HL70357|E||||From ERR-8"].join("\r")
       );
 
-      expect(() => responseTo(decode(bytes), controlId)).toThrow(
-        expect.objectContaining({ text: "From MSA-3" })
-      );
+      expect(decode(bytes, controlId)).toMatchObject({
+        exception: { text: "From MSA-3" },
+      });
     });
 
     it("has no ERR fields when there is no ERR segment", () => {
       const { text, controlId } = ack("CE");
-      const bytes = encodeBytes(text);
 
-      expect(() => responseTo(decode(bytes), controlId)).toThrow(
-        expect.objectContaining({ errorCode: undefined, severity: undefined })
-      );
+      expect(decode(encodeBytes(text), controlId)).toMatchObject({
+        exception: { errorCode: undefined, severity: undefined },
+      });
     });
   });
 
-  describe("an acknowledgment of another message", () => {
-    it("throws INVALID_RESPONSE when MSA-2 names a different message", () => {
+  describe("a reply that answers another message", () => {
+    it("reports an accept naming another message as invalid", () => {
       const { text } = ack("AA", { controlId: "OTHER" });
-      const bytes = encodeBytes(text);
 
-      expect(() => responseTo(decode(bytes), "OURS")).toThrow(
-        MllpInvalidResponseError
-      );
-      expect(() => responseTo(decode(bytes), "OURS")).toThrow(
-        'MSA-2 is "OTHER"'
-      );
+      expect(decode(encodeBytes(text), "OURS")).toMatchObject({
+        error: { message: expect.stringContaining('MSA-2 is "OTHER"') },
+        type: "invalid",
+      });
     });
 
-    it("throws INVALID_RESPONSE for a NAK that names a different message", () => {
-      // Correlation is checked before MSA-1: a rejection of someone else's
-      // message is not this message's answer.
+    it("reports a NAK naming another message as invalid, not as a nak", () => {
+      // MSA-2 is read before MSA-1: a rejection of someone else's message is
+      // not this message's answer.
       const { text } = ack("AE", { controlId: "OTHER" });
-      const bytes = encodeBytes(text);
 
-      expect(() => responseTo(decode(bytes), "OURS")).toThrow(
-        MllpInvalidResponseError
-      );
+      expect(decode(encodeBytes(text), "OURS").type).toBe("invalid");
     });
 
-    it("throws INVALID_RESPONSE when MSA-2 is empty", () => {
+    it("reports an empty MSA-2 as invalid", () => {
       const { text } = ack("AA", { controlId: "" });
-      const bytes = encodeBytes(text);
 
-      expect(() => responseTo(decode(bytes), "OURS")).toThrow(
-        MllpInvalidResponseError
-      );
+      expect(decode(encodeBytes(text), "OURS").type).toBe("invalid");
+    });
+  });
+
+  describe("a reply it cannot read", () => {
+    it("names the failure as the client's, not the charset's or the parser's", () => {
+      // A caller that had to treat every failure as the remote system's fault
+      // would close a healthy connection whenever the fault was ours.
+      const { text, controlId } = ack("AA");
+      const bytes = encodeBytes(text.split("\r")[0] ?? "");
+
+      expect(decode(bytes, controlId)).toMatchObject({
+        error: expect.any(MllpInvalidResponseError),
+        type: "invalid",
+      });
+    });
+
+    it("reports an empty MSA-1 as invalid", () => {
+      const { text, controlId } = ack("");
+
+      expect(decode(encodeBytes(text), controlId)).toMatchObject({
+        error: { message: expect.stringContaining("MSA-1 is empty") },
+        type: "invalid",
+      });
+    });
+
+    it("reports an MSA-1 outside Table 0008 as invalid", () => {
+      const { text, controlId } = ack("OK");
+
+      expect(decode(encodeBytes(text), controlId)).toMatchObject({
+        error: { message: expect.stringContaining('MSA-1 is "OK"') },
+        type: "invalid",
+      });
+    });
+
+    it("keeps the charset error as the cause when the bytes are not UTF-8", () => {
+      const bytes = new Uint8Array([0xff, 0xfe, 0x4d, 0x53, 0x48]);
+
+      expect(decode(bytes, "OURS")).toMatchObject({
+        error: { cause: expect.any(CharsetError) },
+        type: "invalid",
+      });
     });
   });
 });

@@ -4,7 +4,7 @@
  * @module
  */
 
-import type { AckCode, AckSuccessCode } from "@glion/ack";
+import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 
 // ── For adapter authors ──────────────────────────────────────────────
@@ -70,11 +70,12 @@ export interface MllpClientOptions {
 }
 
 /**
- * An acknowledgment as it came off the connection. MSA-1 is whichever of the
- * six codes of Table 0008 was found, and MSA-2 is not correlated against
- * anything.
+ * An acknowledgment that accepted the message: MSA-1 is `AA` or `CA`.
+ *
+ * A NAK never reaches here — `send()` throws the matching `@glion/ack`
+ * exception instead.
  */
-export interface Acknowledgment {
+export interface MllpClientResponse {
   /**
    * MSH-10 of the acknowledgment itself: the receiver's own identifier for
    * this reply, which it will have logged under. Useful for tracing a message
@@ -98,15 +99,6 @@ export interface Acknowledgment {
   readonly raw: string;
   /** MSA-3: the remote system's own diagnostic, when it gave one. */
   readonly text?: string;
-  /** MSA-1, as found: one of the six codes of Table 0008. */
-  readonly code: AckCode;
-}
-
-/**
- * The acknowledgment of a message the remote system accepted, correlated
- * against the message it answers.
- */
-export interface MllpClientResponse extends Acknowledgment {
   /** MSA-1: `AA` or `CA`. */
   readonly code: AckSuccessCode;
 }

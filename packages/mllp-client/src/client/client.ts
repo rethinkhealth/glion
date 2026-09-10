@@ -1,4 +1,3 @@
-import { AckException } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { MllpCodecError } from "@glion/mllp-codec";
 
@@ -21,7 +20,6 @@ import type {
   MllpSendOptions,
   MllpSocket,
 } from "../types";
-import { read } from "../utils";
 import {
   assertByteCap,
   assertConnecting,
@@ -33,7 +31,7 @@ import {
 import { createConnection } from "./connection";
 import type { MllpConnection } from "./connection";
 import { MllpClientEmitter } from "./events";
-import { decode, encode, responseTo } from "./messages";
+import { decode, encode } from "./messages";
 import type { State } from "./state";
 
 /**
@@ -163,11 +161,10 @@ export class MllpClient extends MllpClientEmitter {
     const timeoutMs = opts.timeoutMs ?? this.#sendTimeoutMs;
     assertTimeoutMs("timeoutMs", timeoutMs);
 
-    // Encoded before connecting, so a message the client cannot serialize
-    // never opens a socket. `encode` rejects one without MSH-10, which is why
-    // reading it afterwards always finds one.
-    const bytes = encode(message);
-    const controlId = read(message, "MSH-10[1].1.1");
+    // Encoded before connecting, so a message the client cannot send never
+    // opens a socket.
+    // This encoding can throw if the message cannot be serialized or encoded.
+    const { bytes, controlId } = encode(message);
 
     if (!this.connected) {
       await this.connect();
@@ -351,19 +348,24 @@ export class MllpClient extends MllpClientEmitter {
    * `reply` as this message's acknowledgment.
    *
    * A reply that cannot be read, or that answers another message, ends the
-   * connection. A NAK does not: the remote system understood the message.
+   * connection. A NAK does not: the remote system understood the message, so
+   * the wire is still in step.
    */
   #readAcknowledgment(
     controlId: string,
     reply: Uint8Array
   ): MllpClientResponse {
-    try {
-      return responseTo(decode(reply), controlId);
-    } catch (error) {
-      if (error instanceof AckException) {
-        throw error;
+    const answer = decode(reply, controlId);
+    switch (answer.type) {
+      case "accept": {
+        return answer.response;
       }
-      this.#fail(this.#state, error);
+      case "nak": {
+        throw answer.exception;
+      }
+      case "invalid": {
+        this.#fail(this.#state, answer.error);
+      }
     }
   }
 
