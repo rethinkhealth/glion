@@ -8,6 +8,8 @@
 
 **Breaking: a NAK is thrown, not returned.** `AE`, `AR`, `CE` and `CR` reject with the matching `@glion/ack` exception — the same types the server raises — and leave the connection open. `MllpClientResponse` is the accept case only, and reports `id` (the acknowledgment's own MSH-10) separately from `controlId` (MSA-2, the message it answers).
 
+**A reply is correlated before it is judged.** MSA-2 is read before MSA-1, so an accept or a NAK is only ever reported for the message it answers. A reply naming a different message fails with `MllpInvalidResponseError` whatever its MSA-1 says — previously a NAK skipped the correlation check entirely and was reported as the rejection of whichever message happened to be in flight.
+
 **`close()` and `destroy()` are now different verbs.** `close()` lets the message in flight finish and refuses new sends from the moment it is called; `destroy()` ends the connection at once and rejects whatever was in flight with `MllpClientClosedError`. Both resolve from any phase, never reject, and are idempotent. `client.state` gains `closing`.
 
 **Events.** `client.on(...)` / `off(...)` for `connect`, `disconnect` and `close`. `disconnect` carries the failure that ended the connection, or `null` when this process closed it.
