@@ -2,8 +2,8 @@
  * What the client makes of a message going out, and of an acknowledgment
  * coming back.
  *
- * Serializing a tree and reading an MSA are here; MLLP's block bytes come from
- * `@glion/mllp-codec`.
+ * Serializing a tree and reading an MSA are here. MLLP framing is the
+ * connection's.
  *
  * Pure: nothing here knows the client has phases, or that a failure ends the
  * connection.
@@ -13,7 +13,6 @@
 
 import { isAckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
-import { frame } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
@@ -27,13 +26,11 @@ import type { MllpClientResponse } from "../types";
 import { read } from "../utils";
 
 /**
- * The frame to write for `tree`, and the MSH-10 its acknowledgment must name.
- *
- * The bytes are the tree's canonical serialization, not an echo of whatever
- * the caller parsed.
+ * `tree` as the bytes to send, in canonical HL7v2 rather than an echo of
+ * whatever the caller parsed. Framing belongs to the connection.
  *
  * @throws {MllpInvalidMessageError} The message has no MSH-10, or it could not
- *   be serialized, encoded, or framed.
+ *   be serialized or encoded.
  */
 export function encode(tree: Root): Uint8Array {
   const controlId = read(tree, "MSH-10[1].1.1");
@@ -43,11 +40,7 @@ export function encode(tree: Root): Uint8Array {
     );
   }
   try {
-    // Framed here, not at the write: `frame` rejects a message containing a
-    // reserved MLLP byte, and that is a fact about the message. It has to
-    // surface before the client commits to sending, or a caller's bad message
-    // becomes a dropped connection.
-    return frame(encodeBytes(toHl7v2(tree)));
+    return encodeBytes(toHl7v2(tree));
   } catch (error) {
     throw new MllpInvalidMessageError(error);
   }
