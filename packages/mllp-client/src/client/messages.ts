@@ -2,8 +2,7 @@
  * What the client makes of a message going out, and of an acknowledgment
  * coming back.
  *
- * Serializing a tree and reading an MSA are here. MLLP framing is the
- * connection's.
+ * Serializing a tree and reading an MSA are here.
  *
  * Pure: nothing here knows the client has phases, or that a failure ends the
  * connection.
@@ -47,12 +46,12 @@ export function encode(tree: Root): Uint8Array {
 }
 
 /**
- * Reads one unframed message as the acknowledgment it carries.
+ * Reads one message as the acknowledgment it carries.
  *
  * MSH-9 and the HL7 version are not checked (#668). `controlId` is MSA-2 as
  * found; correlating it against the message sent is the caller's.
  *
- * @param bytes One unframed message: the payload of a single MLLP frame.
+ * @param bytes One message, as it came off the connection.
  * @returns The acknowledgment, when MSA-1 accepted the message.
  * @throws {AckException} MSA-1 is `AE`, `AR`, `CE`, or `CR`.
  * @throws {MllpInvalidResponseError} The bytes are not readable as an

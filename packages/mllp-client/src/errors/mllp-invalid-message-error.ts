@@ -1,9 +1,9 @@
 import { MllpClientError, MllpErrorCode, reasonOf } from "./base";
 
 /**
- * The message cannot be sent as-is: it has no MSH-10 control ID, or it could
- * not be parsed, serialized, or framed. Nothing was written; the reason is on
- * `cause`. Fix the message and send again.
+ * The message cannot be sent as-is: it has no MSH-10 control ID, it could not
+ * be serialized, or it contains a byte MLLP reserves. Nothing was written; the
+ * reason is on `cause`. Fix the message and send again.
  */
 export class MllpInvalidMessageError extends MllpClientError {
   override readonly name = "MllpInvalidMessageError";

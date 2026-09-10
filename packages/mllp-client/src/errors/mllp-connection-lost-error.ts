@@ -5,19 +5,19 @@ import { MllpClientError, MllpErrorCode, reasonOf } from "./base";
  * network broke. The remote system may or may not have received the message.
  * A stream error, when there was one, is on `cause`.
  */
-export class MllpDroppedError extends MllpClientError {
-  override readonly name = "MllpDroppedError";
-  readonly code = MllpErrorCode.DROPPED;
+export class MllpConnectionLostError extends MllpClientError {
+  override readonly name = "MllpConnectionLostError";
+  readonly code = MllpErrorCode.CONNECTION_LOST;
   /** MSH-10 of the message that was being sent. */
   readonly controlId: string;
 
   constructor(controlId: string, cause?: unknown) {
-    super(droppedMessage(controlId, cause), { cause });
+    super(lostMessage(controlId, cause), { cause });
     this.controlId = controlId;
   }
 }
 
-function droppedMessage(controlId: string, cause: unknown): string {
+function lostMessage(controlId: string, cause: unknown): string {
   const how =
     cause === undefined
       ? "The remote system closed the connection."

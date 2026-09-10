@@ -2,7 +2,7 @@
  * Node runtime adapter for `MllpClient`.
  *
  * Opens a `net.Socket` and ends it the way Node expects — gracefully first,
- * then forced after a short grace period, so teardown always resolves in
+ * then forced after a short grace period, so closing always resolves in
  * bounded time. Framing and stream ownership belong to the layer above.
  *
  * @module
@@ -126,14 +126,14 @@ export function nodeSocket(opts: NodeSocketOptions): MllpSocket {
   const gracefulCloseMs = opts.gracefulCloseMs ?? DEFAULT_GRACEFUL_CLOSE_MS;
   const keepAliveIdleMs = opts.keepAliveIdleMs ?? DEFAULT_KEEPALIVE_IDLE_MS;
   /** Ends whatever `connect()` last opened. Nothing is open to begin with. */
-  let teardown = (): Promise<void> => Promise.resolve();
+  let closeOpen = (): Promise<void> => Promise.resolve();
 
   return {
-    close: () => teardown(),
+    close: () => closeOpen(),
 
     async connect(signal: AbortSignal): Promise<MllpStreams> {
       const socket = await dial(opts.host, opts.port, keepAliveIdleMs, signal);
-      teardown = () => end(socket, gracefulCloseMs);
+      closeOpen = () => end(socket, gracefulCloseMs);
 
       const web = Duplex.toWeb(socket);
       return {
