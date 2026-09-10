@@ -5,7 +5,6 @@ import {
   DEFAULT_CONNECT_TIMEOUT_MS,
   DEFAULT_MAX_BUFFERED_BYTES,
   DEFAULT_SEND_TIMEOUT_MS,
-  IDLE_PHASE,
 } from "../constants";
 import {
   MllpClientClosedError,
@@ -73,7 +72,7 @@ export class MllpClient extends MllpClientEmitter {
   readonly #connectTimeoutMs: number;
   readonly #sendTimeoutMs: number;
   readonly #maxBufferedBytes: number;
-  #state: State = IDLE_PHASE;
+  #state: State = { phase: "idle" };
   /** The one connection this client ever makes, once it starts making it. */
   #connection: MllpConnection | null = null;
 

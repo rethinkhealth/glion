@@ -12,14 +12,13 @@
  * @module
  */
 
-export { MllpClient } from "./client/index";
-export type { MllpConnection } from "./client/connection";
-export { MllpClientEmitter } from "./client/events";
+export { MllpClient, MllpClientEmitter } from "./client/index";
 export type {
   MllpClientEvent,
   MllpClientEvents,
   MllpClientListener,
-} from "./client/events";
+  MllpConnection,
+} from "./client/index";
 export type {
   MllpClientOptions,
   MllpClientResponse,

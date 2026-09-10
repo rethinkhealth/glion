@@ -5,3 +5,10 @@
  */
 
 export { MllpClient } from "./client";
+export type { MllpConnection } from "./connection";
+export { MllpClientEmitter } from "./events";
+export type {
+  MllpClientEvent,
+  MllpClientEvents,
+  MllpClientListener,
+} from "./events";
