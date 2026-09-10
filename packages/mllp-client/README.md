@@ -4,12 +4,10 @@ Simple and safe MLLP client for HL7v2, for Node.js and TypeScript.
 
 ```ts
 import { MllpClient } from "@glion/mllp-client";
-import { connectNode } from "@glion/mllp-client/node";
+import { nodeSocket } from "@glion/mllp-client/node";
 
 const client = new MllpClient({
-  host: "hl7.example.org",
-  port: 2575,
-  connect: connectNode,
+  socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
 });
 
 const ack = await client.send(message);
@@ -39,10 +37,10 @@ Node.js 20 or later. ESM only.
 
 ### Package exports
 
-| Subpath                   | Description                                             |
-| ------------------------- | ------------------------------------------------------- |
-| `@glion/mllp-client`      | `MllpClient`, the error classes, and the public types   |
-| `@glion/mllp-client/node` | `connectNode`, the Node.js `net.Socket` runtime adapter |
+| Subpath                   | Description                                            |
+| ------------------------- | ------------------------------------------------------ |
+| `@glion/mllp-client`      | `MllpClient`, the error classes, and the public types  |
+| `@glion/mllp-client/node` | `nodeSocket`, the Node.js `net.Socket` runtime adapter |
 
 ## Use
 
@@ -50,12 +48,10 @@ Node.js 20 or later. ESM only.
 
 ```ts
 import { MllpClient } from "@glion/mllp-client";
-import { connectNode } from "@glion/mllp-client/node";
+import { nodeSocket } from "@glion/mllp-client/node";
 
 await using client = new MllpClient({
-  connect: connectNode,
-  host: "hl7.example.org",
-  port: 2575,
+  socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
 });
 
 const ack = await client.send(adtMessage);
@@ -85,7 +81,7 @@ try {
 
 ### Handle a failure
 
-Everything else the client throws is an `MllpClientError`. Check `delivery` before you send the message again.
+Everything else the client throws is an `MllpClientError`, carrying a stable `code`.
 
 ```ts
 import { MllpClientError } from "@glion/mllp-client";
@@ -95,22 +91,16 @@ try {
 } catch (error) {
   if (error instanceof MllpClientError) {
     console.log(error.code); //=> e.g. "SEND_TIMEOUT"
-    console.log(error.delivery); //=> "not-sent" or "unknown"
   }
 }
 ```
-
-| `delivery` | Meaning                                                                      |
-| ---------- | ---------------------------------------------------------------------------- |
-| `not-sent` | Nothing reached the wire. Safe to send again.                                |
-| `unknown`  | The message may have been received. Send again only if it is safe to repeat. |
 
 ### Connect early
 
 `connect()` opens the connection without sending anything. Use it to fail fast at startup.
 
 ```ts
-const client = new MllpClient({ connect: connectNode, host, port });
+const client = new MllpClient({ socket: nodeSocket({ host, port }) });
 await client.connect();
 ```
 
@@ -118,14 +108,12 @@ Calling it on a connected client does nothing. Calling it while a connection att
 
 ## Options
 
-| Option             | Type            | Default  | Description                                                          |
-| ------------------ | --------------- | -------- | -------------------------------------------------------------------- |
-| `host`             | `string`        | required | Host of the remote system.                                           |
-| `port`             | `number`        | required | Port of the remote system.                                           |
-| `connect`          | `MllpConnector` | required | Runtime adapter, such as `connectNode`.                              |
-| `connectTimeoutMs` | `number`        | `10000`  | Time allowed to open the connection.                                 |
-| `sendTimeoutMs`    | `number`        | `30000`  | Time allowed from writing a message to receiving its acknowledgment. |
-| `maxBufferedBytes` | `number`        | 16 MiB   | Largest incoming frame. Larger frames drop the connection.           |
+| Option             | Type         | Default  | Description                                                          |
+| ------------------ | ------------ | -------- | -------------------------------------------------------------------- |
+| `socket`           | `MllpSocket` | required | Runtime adapter, such as `nodeSocket({ host, port })`.               |
+| `connectTimeoutMs` | `number`     | `10000`  | Time allowed to open the connection.                                 |
+| `sendTimeoutMs`    | `number`     | `30000`  | Time allowed from writing a message to receiving its acknowledgment. |
+| `maxBufferedBytes` | `number`     | 16 MiB   | Largest incoming message. A larger one drops the connection.         |
 
 `send(message, { timeoutMs })` overrides `sendTimeoutMs` for one message.
 
@@ -141,11 +129,14 @@ Sends one message and resolves with its acknowledgment. The message must have an
 
 One message at a time. A second `send()` while one is in flight throws `MllpAlreadySendingError`.
 
-| Field  | Type             | Description                 |
-| ------ | ---------------- | --------------------------- |
-| `code` | `AckSuccessCode` | MSA-1, `AA` or `CA`.        |
-| `tree` | `Root`           | The acknowledgment, parsed. |
-| `raw`  | `string`         | The acknowledgment as text. |
+| Field       | Type             | Description                                              |
+| ----------- | ---------------- | -------------------------------------------------------- |
+| `code`      | `AckSuccessCode` | MSA-1, `AA` or `CA`.                                     |
+| `controlId` | `string`         | MSA-2: the MSH-10 of the message this answers.           |
+| `id`        | `string`         | MSH-10 of the acknowledgment itself.                     |
+| `text`      | `string?`        | MSA-3, the remote system's diagnostic, when it gave one. |
+| `tree`      | `Root`           | The acknowledgment, parsed.                              |
+| `raw`       | `string`         | The acknowledgment as text.                              |
 
 ### `client.connect()`
 
@@ -153,50 +144,74 @@ Opens the connection. See [Connect early](#connect-early).
 
 ### `client.close()`
 
-Closes the connection. Never throws. Resolves once the connection is closed. A send in flight throws `MllpClientClosedError`. Also available as `client[Symbol.asyncDispose]()`.
+Closes the connection once the message in flight has been acknowledged. Never throws. Resolves once the connection is down. New sends are refused from the moment it is called. Also available as `client[Symbol.asyncDispose]()`.
+
+### `client.destroy()`
+
+Closes the connection now, without waiting. Never throws. Resolves once the connection is down. A message in flight rejects with `MllpClientClosedError`.
 
 ### `client.state`
 
-`idle`, `connecting`, `connected`, `sending`, or `closed`. `client.connected` is `true` in `connected` and `sending`.
+`idle`, `connecting`, `connected`, `sending`, `closing`, or `closed`. `client.connected` is `true` in `connected` and `sending`.
 
 A client closes once. After `close()`, or after a failure that closes the connection, every call throws `MllpClientClosedError`. Create a new client to reconnect.
 
+## Events
+
+`client.on(event, listener)` registers a listener; `client.off(event, listener)` removes it. Both return the client.
+
+| Event        | Listener                                   | When                                                                        |
+| ------------ | ------------------------------------------ | --------------------------------------------------------------------------- |
+| `connect`    | `() => void`                               | The connection opened.                                                      |
+| `disconnect` | `(error: MllpClientError \| null) => void` | The connection went down. `error` is the failure, or `null` on a `close()`. |
+| `close`      | `() => void`                               | The client closed. Fires once, from any phase.                              |
+
+```ts
+client.on("disconnect", (error) => {
+  console.log(error?.code ?? "closed by this process");
+});
+```
+
 ## Errors
 
-| Class                      | `code`             | `delivery`                                                 | When                                                                   |
-| -------------------------- | ------------------ | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `MllpInvalidOptionError`   | `INVALID_OPTION`   | `not-sent`                                                 | A timeout or byte cap is out of range.                                 |
-| `MllpAlreadySendingError`  | `ALREADY_SENDING`  | `not-sent`                                                 | A send is already in flight.                                           |
-| `MllpClientClosedError`    | `CLOSED`           | `not-sent`, or `unknown` when `close()` interrupted a send | The client is closed. The failure that closed it is on `cause`.        |
-| `MllpInvalidMessageError`  | `INVALID_MESSAGE`  | `not-sent`                                                 | No MSH-10, or the message could not be parsed or framed.               |
-| `MllpConnectFailedError`   | `CONNECT_FAILED`   | `not-sent`                                                 | The connection could not be opened. Details on `cause`.                |
-| `MllpConnectTimeoutError`  | `CONNECT_TIMEOUT`  | `not-sent`                                                 | The connection did not open in time.                                   |
-| `MllpConnectAbortedError`  | `CONNECT_ABORTED`  | `not-sent`                                                 | `close()` was called while connecting.                                 |
-| `MllpSendTimeoutError`     | `SEND_TIMEOUT`     | `unknown`                                                  | No acknowledgment in time. Closes the client.                          |
-| `MllpDroppedError`         | `DROPPED`          | `not-sent` if the write failed, `unknown` after            | The connection was lost mid-send. Closes the client.                   |
-| `MllpInvalidResponseError` | `INVALID_RESPONSE` | `unknown`                                                  | The reply was not an acknowledgment of the message. Closes the client. |
+| Class                      | `code`             | When                                                                                                         |
+| -------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `MllpInvalidOptionError`   | `INVALID_OPTION`   | A timeout or byte cap is out of range.                                                                       |
+| `MllpAlreadySendingError`  | `ALREADY_SENDING`  | A send is already in flight.                                                                                 |
+| `MllpClientClosedError`    | `CLOSED`           | The client is closed, or `close()` cancelled a connection attempt. The failure that closed it is on `cause`. |
+| `MllpInvalidMessageError`  | `INVALID_MESSAGE`  | No MSH-10, or the message could not be serialized or sent as-is.                                             |
+| `MllpConnectFailedError`   | `CONNECT_FAILED`   | The connection could not be opened. Details on `cause`.                                                      |
+| `MllpConnectTimeoutError`  | `CONNECT_TIMEOUT`  | The connection did not open in time.                                                                         |
+| `MllpSendTimeoutError`     | `SEND_TIMEOUT`     | No acknowledgment in time. Closes the client.                                                                |
+| `MllpConnectionLostError`  | `CONNECTION_LOST`  | The connection was lost mid-send. Closes the client.                                                         |
+| `MllpInvalidResponseError` | `INVALID_RESPONSE` | The reply was not an acknowledgment of the message. Closes the client.                                       |
 
-The last three close the client on purpose. MLLP is lockstep: the next frame answers the last message. After a late, lost, or wrong frame, the client can no longer tell which frame answers which message, so it stops rather than guess.
+The last three close the client on purpose. MLLP is lockstep: the next message the remote system sends answers the last one sent. After a late, lost, or unreadable reply, the client can no longer tell which reply answers which message, so it stops rather than guess.
 
 ## Runtime adapters
 
-The `connect` option is an `MllpConnector`: a function that opens one connection and returns an `MllpConnection`.
+The `socket` option is an `MllpSocket`: one socket to one remote system, which the client opens, uses, and ends.
 
 ```ts
-interface MllpConnection {
+interface MllpSocket {
+  connect(signal: AbortSignal): Promise<MllpStreams>;
+  close(): Promise<void>;
+}
+
+interface MllpStreams {
   readonly readable: ReadableStream<Uint8Array>;
   readonly writable: WritableStream<Uint8Array>;
-  close(): Promise<void>;
 }
 ```
 
 Rules for an adapter:
 
-1. `close()` never throws, can be called more than once, and always finishes, even if the remote system never answers.
-2. When the connection ends, a pending read on `readable` ends or errors. Bytes sent before a clean close arrive first.
-3. The client owns the streams while connected and releases them before calling `close()`.
+1. `connect()` rejects with `signal.reason` when the signal aborts, and a rejection leaves nothing open.
+2. `close()` never rejects, can be called more than once, and always finishes within a bounded time, even if the remote system never answers.
+3. When the socket ends, a pending read on `readable` ends or errors. Bytes sent before a clean close arrive first.
+4. The client owns the streams while connected and releases them before calling `close()`.
 
-The connector must reject when its `signal` aborts. `connectNode` from `@glion/mllp-client/node` does all of this over `net.Socket`.
+An adapter never sees an MLLP frame: framing belongs to the layer above. `nodeSocket` from `@glion/mllp-client/node` does all of this over `net.Socket`.
 
 ## Part of Glion
 
