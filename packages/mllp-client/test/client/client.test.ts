@@ -6,6 +6,7 @@
 import { setTimeout } from "node:timers/promises";
 
 import { AckApplicationError } from "@glion/ack";
+import { parseHL7v2 } from "@glion/parser";
 import { encodeBytes } from "@glion/util-charset";
 import { describe, expect, it, vi } from "vitest";
 
@@ -302,6 +303,31 @@ describe("MllpClient", () => {
       const sending = client.send(adtA01().tree);
       await remote.acknowledges("AA");
       await sending;
+      await client.close();
+    });
+
+    it("rejects INVALID_MESSAGE and stays usable when a message carries a reserved byte", async () => {
+      // Given a message whose content carries FS, which MLLP reserves as the
+      // end of a block. It parses and serializes; only framing refuses it.
+      const { client, remote } = await connectedClient();
+      const reserved = parseHL7v2(
+        adtA01().text.replace(
+          "Doe^John",
+          `Doe${String.fromCodePoint(0x1c)}^John`
+        )
+      );
+
+      // When
+      const rejected = client.send(reserved);
+
+      // Then nothing reached the wire, so the connection is still in step.
+      await expect(rejected).rejects.toMatchObject({
+        code: MllpErrorCode.INVALID_MESSAGE,
+      });
+      expect(client.state).toBe("connected");
+      const sending = client.send(adtA01().tree);
+      await remote.acknowledges("AA");
+      await expect(sending).resolves.toMatchObject({ code: "AA" });
       await client.close();
     });
 
