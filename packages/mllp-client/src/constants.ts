@@ -15,7 +15,7 @@ export const DEFAULT_CONNECT_TIMEOUT_MS = 10_000;
 /** Default time to wait for an acknowledgment after sending, in milliseconds. */
 export const DEFAULT_SEND_TIMEOUT_MS = 30_000;
 
-/** Default maximum bytes buffered while receiving one frame (16 MiB). */
+/** Default maximum bytes buffered while receiving one message (16 MiB). */
 export const DEFAULT_MAX_BUFFERED_BYTES = 16 * 1024 * 1024;
 
 /**

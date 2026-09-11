@@ -1,5 +1,5 @@
 export { AckCode, Hl7ErrorCode, Severity } from "./constants";
-export { isAckCode, isAckNakCode } from "./helper";
+export { isAckCode, isAckNakCode, isAckSuccessCode } from "./helper";
 export type { AckNakCode, AckSuccessCode } from "./constants";
 export {
   AckApplicationError,

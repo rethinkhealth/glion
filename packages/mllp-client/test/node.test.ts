@@ -16,10 +16,19 @@ import { frame } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import type { MllpConnection } from "../src/client/connection";
+import { createConnection } from "../src/client/connection";
+import {
+  DEFAULT_CONNECT_TIMEOUT_MS,
+  DEFAULT_MAX_BUFFERED_BYTES,
+} from "../src/constants";
 import { MllpClient } from "../src/index";
-import type { MllpConnection } from "../src/index";
-import { connectNode } from "../src/runtime/node";
+import { nodeSocket } from "../src/runtime/node";
+import type { MllpSocket } from "../src/types";
 import { ack, adtA01, controlIdOf } from "./fixtures";
+
+/** Long enough that only the remote system can settle an exchange. */
+const NO_DEADLINE = 60_000;
 
 interface RemoteSystem {
   readonly host: string;
@@ -60,7 +69,11 @@ async function remoteSystem(
       // write one small frame per chunk, so a chunk is VT, message, FS, CR.
       socket.on("data", (chunk: Buffer) => {
         const message = chunk.toString("utf8").slice(1, -2);
-        socket.write(frame(encodeBytes(ack("AA", controlIdOf(message)))));
+        socket.write(
+          frame(
+            encodeBytes(ack("AA", { controlId: controlIdOf(message) }).text)
+          )
+        );
       });
     }
   );
@@ -96,42 +109,22 @@ async function remoteSystem(
 }
 
 /**
- * Get the socket reading, then keep one read pending in the background so a
- * peer drop has something to settle. `ended` resolves once that read reports
- * end-of-stream or an error.
- *
- * `Duplex.toWeb` is pull-based: a socket nobody has read from stays paused,
- * and a paused socket never observes the peer's FIN. Writing a probe message
- * and reading the echo server's acknowledgment gets the socket flowing
- * deterministically before the caller drops the peer, instead of relying on
- * event-loop timing. This mirrors the client during a send, where a read is
- * pending; see #690 for the idle case.
+ * Opens a connection to `remote` over the real Node adapter, keeping the
+ * socket so a test can assert on it directly.
  */
-async function engageReadPump(
-  connection: MllpConnection
-): Promise<{ ended: Promise<void> }> {
-  const writer = connection.writable.getWriter();
-  await writer.write(frame(encodeBytes(adtA01())));
-  writer.releaseLock();
-  const reader = connection.readable.getReader();
-  await reader.read();
-  const ended = (async () => {
-    try {
-      for (;;) {
-        const { done } = await reader.read();
-        if (done) {
-          return;
-        }
-      }
-    } catch {
-      // The reader rejects when the socket is destroyed mid-read — expected
-      // on peer drop.
-    }
-  })();
-  return { ended };
+async function open(
+  remote: RemoteSystem
+): Promise<{ connection: MllpConnection; socket: MllpSocket }> {
+  const socket = nodeSocket({ host: remote.host, port: remote.port });
+  const connection = createConnection(socket, {
+    maxBufferedBytes: DEFAULT_MAX_BUFFERED_BYTES,
+    timeoutMs: DEFAULT_CONNECT_TIMEOUT_MS,
+  });
+  await connection.ready;
+  return { connection, socket };
 }
 
-describe("connectNode — happy path", () => {
+describe("nodeSocket — happy path", () => {
   let remote: RemoteSystem;
   beforeEach(async () => {
     remote = await remoteSystem();
@@ -140,41 +133,41 @@ describe("connectNode — happy path", () => {
     await remote.close();
   });
 
-  it("resolves to an MllpConnection when the remote accepts", async () => {
-    const ac = new AbortController();
-    const connection = await connectNode({
-      host: remote.host,
-      port: remote.port,
-      signal: ac.signal,
-    });
-    expect(connection.readable).toBeDefined();
-    expect(connection.writable).toBeDefined();
-    await connection.close();
+  it("hands over both byte streams when the remote accepts", async () => {
+    const socket = nodeSocket({ host: remote.host, port: remote.port });
+
+    const streams = await socket.connect(new AbortController().signal);
+
+    expect(streams.readable).toBeDefined();
+    expect(streams.writable).toBeDefined();
+    await socket.close();
   });
 
   it("round-trips an MLLP message via MllpClient", async () => {
     const client = new MllpClient({
-      connect: connectNode,
-      host: remote.host,
-      port: remote.port,
+      socket: nodeSocket({ host: remote.host, port: remote.port }),
     });
     await client.connect();
-    const message = adtA01();
-    const response = await client.send(message);
+    const { controlId, tree } = adtA01();
+    const response = await client.send(tree);
     expect(response.code).toBe("AA");
-    expect(response.raw).toContain(`MSA|AA|${controlIdOf(message)}`);
+    expect(response.raw).toContain(`MSA|AA|${controlId}`);
     await client.close();
   });
 });
 
-describe("connectNode — close contract", () => {
+describe("nodeSocket — close contract", () => {
   it("close() after a send ends the socket gracefully, with FIN rather than RST", async () => {
     const seen: string[] = [];
     const remote = await remoteSystem({
       onConnection: (socket) => {
         socket.on("data", (chunk: Buffer) => {
           const message = chunk.toString("utf8").slice(1, -2);
-          socket.write(frame(encodeBytes(ack("AA", controlIdOf(message)))));
+          socket.write(
+            frame(
+              encodeBytes(ack("AA", { controlId: controlIdOf(message) }).text)
+            )
+          );
         });
         socket.on("end", () => seen.push("end"));
         socket.on("error", () => seen.push("error"));
@@ -182,11 +175,9 @@ describe("connectNode — close contract", () => {
     });
     try {
       const client = new MllpClient({
-        connect: connectNode,
-        host: remote.host,
-        port: remote.port,
+        socket: nodeSocket({ host: remote.host, port: remote.port }),
       });
-      await client.send(adtA01());
+      await client.send(adtA01().tree);
       await client.close();
       await sleep(50);
       expect(seen).toEqual(["end"]);
@@ -207,14 +198,10 @@ describe("connectNode — close contract", () => {
       },
     });
     try {
-      const ac = new AbortController();
-      const connection = await connectNode({
-        host: remote.host,
-        port: remote.port,
-        signal: ac.signal,
-      });
+      const socket = nodeSocket({ host: remote.host, port: remote.port });
+      await socket.connect(new AbortController().signal);
       const started = performance.now();
-      await connection.close();
+      await socket.close();
       const elapsed = performance.now() - started;
       // The grace window ran (the peer withheld its FIN)…
       expect(elapsed).toBeGreaterThanOrEqual(900);
@@ -226,32 +213,52 @@ describe("connectNode — close contract", () => {
   });
 });
 
-describe("connectNode — refused connections", () => {
+describe("nodeSocket — refused connections", () => {
   it("rejects when nothing is listening on the port", async () => {
     // Use an arbitrary high port unlikely to be in use.
     const ac = new AbortController();
     await expect(
-      connectNode({
-        host: "127.0.0.1",
-        port: 1,
-        signal: ac.signal,
-      })
+      nodeSocket({ host: "127.0.0.1", port: 1 }).connect(ac.signal)
     ).rejects.toThrow();
   });
 });
 
-describe("connectNode — abort signal", () => {
-  it("destroys the in-flight socket and rejects when signal aborts", async () => {
-    // Use a host that takes a long time to connect (TEST-NET-1).
-    // We abort before the OS can resolve / connect.
+describe("nodeSocket — abort signal", () => {
+  it("rejects with the reason the signal was aborted with", async () => {
+    // TEST-NET-1 never answers, so the abort always wins the race.
     const ac = new AbortController();
-    const p = connectNode({
-      host: "192.0.2.1",
-      port: 65_535,
-      signal: ac.signal,
-    });
+    const reason = new Error("the caller gave up");
+    const opening = nodeSocket({ host: "192.0.2.1", port: 65_535 }).connect(
+      ac.signal
+    );
+
+    setTimeout(() => ac.abort(reason), 5);
+
+    await expect(opening).rejects.toBe(reason);
+  });
+
+  it("rejects with the reason when the signal was already aborted", async () => {
+    const reason = new Error("the caller gave up");
+
+    await expect(
+      nodeSocket({ host: "192.0.2.1", port: 65_535 }).connect(
+        AbortSignal.abort(reason)
+      )
+    ).rejects.toBe(reason);
+  });
+
+  it("leaves nothing open, so close() resolves at once", async () => {
+    const ac = new AbortController();
+    const socket = nodeSocket({ host: "192.0.2.1", port: 65_535 });
+    const opening = socket.connect(ac.signal);
+
     setTimeout(() => ac.abort(), 5);
-    await expect(p).rejects.toThrow();
+    await expect(opening).rejects.toThrow();
+
+    // No grace window to wait out: the attempt destroyed its socket.
+    const started = performance.now();
+    await socket.close();
+    expect(performance.now() - started).toBeLessThan(100);
   });
 });
 
@@ -264,28 +271,27 @@ describe("MllpConnection contract — readable ends when the peer drops", () => 
     await remote.close();
   });
 
-  it("a pending read settles (end-of-stream or error) when the remote drops the socket", async () => {
-    const connection = await connectNode({
-      host: remote.host,
-      port: remote.port,
-      signal: new AbortController().signal,
-    });
-    const writer = connection.writable.getWriter();
-    await writer.write(frame(encodeBytes(adtA01())));
-    writer.releaseLock();
-    const reader = connection.readable.getReader();
-    await reader.read(); // the echo remote's ACK: the socket is now flowing
-    const pending = reader.read();
+  it("a pending exchange settles (end-of-stream or error) when the remote drops the socket", async () => {
+    const { connection } = await open(remote);
+    // `Duplex.toWeb` is pull-based: a socket nobody has read from stays
+    // paused, and a paused socket never observes the peer's drop. One
+    // completed exchange gets it flowing.
+    await connection.exchange(encodeBytes(adtA01().text), NO_DEADLINE);
     remote.dropAllSockets();
-    // Either outcome satisfies the contract; what must not happen is a read
-    // that never settles.
+
+    // Either outcome satisfies the contract; what must not happen is an
+    // exchange that never settles.
+    const pending = connection.exchange(
+      encodeBytes(adtA01().text),
+      NO_DEADLINE
+    );
     await expect(
       pending.then(
         () => "settled",
         () => "settled"
       )
     ).resolves.toBe("settled");
-    await connection.close();
+    await connection.destroy();
   });
 });
 
@@ -298,40 +304,37 @@ describe("MllpConnection contract — close() is idempotent and always resolves"
     await remote.close();
   });
 
-  it("close() resolves on a fresh, never-used connection", async () => {
-    const connection = await connectNode({
-      host: remote.host,
-      port: remote.port,
-      signal: new AbortController().signal,
-    });
-    await expect(connection.close()).resolves.toBeUndefined();
+  it("close() resolves on a fresh, never-used socket", async () => {
+    const socket = nodeSocket({ host: remote.host, port: remote.port });
+    await socket.connect(new AbortController().signal);
+
+    await expect(socket.close()).resolves.toBeUndefined();
   });
 
   it("close() called three times all resolve, no EBADF", async () => {
-    const connection = await connectNode({
-      host: remote.host,
-      port: remote.port,
-      signal: new AbortController().signal,
-    });
+    const socket = nodeSocket({ host: remote.host, port: remote.port });
+    await socket.connect(new AbortController().signal);
     const results = await Promise.all([
-      connection.close(),
-      connection.close(),
-      connection.close(),
+      socket.close(),
+      socket.close(),
+      socket.close(),
     ]);
     expect(results).toEqual([undefined, undefined, undefined]);
   });
 
   it("close() resolves even after the peer has already dropped", async () => {
-    const connection = await connectNode({
-      host: remote.host,
-      port: remote.port,
-      signal: new AbortController().signal,
-    });
-    // Engage the read pump so the pull-based socket observes the drop (see
-    // engageReadPump), then wait until the read side has seen it end.
-    const { ended } = await engageReadPump(connection);
+    const { connection, socket } = await open(remote);
+    // One completed exchange gets the pull-based socket flowing, so the next
+    // one observes the drop rather than parking on a paused socket.
+    await connection.exchange(encodeBytes(adtA01().text), NO_DEADLINE);
     remote.dropAllSockets();
-    await ended;
-    await expect(connection.close()).resolves.toBeUndefined();
+    try {
+      await connection.exchange(encodeBytes(adtA01().text), NO_DEADLINE);
+    } catch {
+      // The drop reaches the read side as an error; either way it has settled,
+      // which is what close() is being asked to survive.
+    }
+
+    await expect(socket.close()).resolves.toBeUndefined();
   });
 });
