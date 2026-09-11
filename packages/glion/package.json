@@ -48,7 +48,7 @@
     "check-types": "tsc --noEmit",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
-    "test:bun": "bun --bun ./node_modules/vitest/vitest.mjs run test/e2e/",
+    "test:bun": "bun --bun ./node_modules/vitest/vitest.mjs run tests/e2e/",
     "test:watch": "vitest",
     "publint": "publint --strict"
   },

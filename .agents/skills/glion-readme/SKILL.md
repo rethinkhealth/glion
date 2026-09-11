@@ -33,7 +33,7 @@ Always read these files before producing or editing a README:
 1. **`docs/adr/0017-documentation-framework.md`** — sections §6.3 (reference voice), §7 (cross-cutting conventions), and §11 (common mistakes). The skill assumes those rules; do not re-derive them.
 2. **`<package>/package.json`** — name, version, `peerDependencies`, `dependencies`, `description`, `exports`.
 3. **`<package>/src/index.ts`** (and any other entry source) — exports, public types, options interfaces, default values.
-4. **`<package>/tests/`** or **`<package>/test/`** — behavioural ground truth. Examples in the README must match what the tests actually verify. Do not invent HL7v2 fixtures; lift them from tests where possible.
+4. **`<package>/tests/`** — behavioural ground truth. Examples in the README must match what the tests actually verify. Do not invent HL7v2 fixtures; lift them from tests where possible.
 5. **One or two sibling READMEs in the same category** — for house style. The category-detection rules are in §"Detect the package category" below.
 6. **`<package>/CHANGELOG.md`** — only when filling the **Since** pill on a lint rule. Use the earliest published version.
 
@@ -244,7 +244,7 @@ If a pill cannot be determined from sources, write `<unknown>` and surface it to
 
 The fixtures in `### Valid` and `### Invalid` blocks come from the rule's tests. Procedure:
 
-1. Read the test files in `<package>/tests/` or `<package>/test/`.
+1. Read the test files in `<package>/tests/`.
 2. Identify the test cases that demonstrate the canonical pass/fail behaviour. Skip edge-case tests for the README — they belong in tests, not in user-facing docs.
 3. Lift the HL7v2 fixture verbatim. Trim any boilerplate that obscures the point of the example.
 4. Lift the diagnostic message verbatim. Do not paraphrase reported messages — they are part of the rule's contract.
