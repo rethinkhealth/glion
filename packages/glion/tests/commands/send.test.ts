@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseSendArgs } from "./send";
+import { parseSendArgs } from "../../src/commands/send";
 
 describe("parseSendArgs", () => {
   describe("message source", () => {

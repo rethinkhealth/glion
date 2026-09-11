@@ -6,6 +6,6 @@
     "outDir": "./dist",
     "rootDir": "."
   },
-  "include": ["src/**/*", "test/**/*"],
-  "exclude": ["test/e2e/fixtures/**"]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["tests/e2e/fixtures/**"]
 }

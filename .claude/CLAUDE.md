@@ -261,6 +261,7 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 
 - **Vitest**, base config in `tools/testing/src/vitest.config.ts` (`@glion/testing`).
 - Test files: `**/*.test.ts`, `**/*.test.tsx`.
+- Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier.
 - Each package has its own `vitest.config.ts` for package-specific settings.
 - Coverage reporters: text, html, json.
 - `expect()` inside `it()` / `test()` blocks.
@@ -278,5 +279,5 @@ All benchmarks live in the `benchmarks/` workspace — never add a `bench/` dire
 2. `package.json` — use `workspace:*` for internal deps; include scripts `build`, `check-types`, `test`, `test:watch`.
 3. `tsconfig.json` — extend `@glion/tsconfig/library.json`.
 4. `tsdown.config.ts` — for the bundle build.
-5. `vitest.config.ts` — for tests.
+5. `vitest.config.ts` — for tests; put the tests themselves in `tests/`.
 6. `README.md` — required (`check:readme` task validates).
