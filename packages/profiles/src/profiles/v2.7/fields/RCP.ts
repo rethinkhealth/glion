@@ -21,7 +21,6 @@ export const fields = [
     repeatable: false,
     required: false,
     sequence: 2,
-    table: "HL70126",
   },
   {
     datatype: "CNE",

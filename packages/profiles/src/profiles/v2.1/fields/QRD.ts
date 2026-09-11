@@ -74,7 +74,6 @@ export const fields = [
     repeatable: false,
     required: true,
     sequence: 7,
-    table: "HL70126",
   },
   {
     datatype: "ST",
