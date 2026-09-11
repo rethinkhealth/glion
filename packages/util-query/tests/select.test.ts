@@ -239,6 +239,45 @@ describe(select, () => {
     });
   });
 
+  describe("with the same group name at several depths", () => {
+    const message = m(
+      s("MSH", f("|")),
+      g("ORDER", s("ORC", f("first"))),
+      g(
+        "INSURANCE",
+        g("ORDER", s("ORC", f("nested-1"))),
+        g("ORDER", s("ORC", f("nested-2")))
+      ),
+      g("ORDER", s("ORC", f("last")))
+    );
+
+    const parentName = (result: ReturnType<typeof select> | null) =>
+      (result?.ancestors.at(-1) as Group | Root).type === "root"
+        ? "root"
+        : (result?.ancestors.at(-1) as Group).name;
+
+    it("indexes [n] across depths in document order", () => {
+      expect(parentName(select(message, "ORDER"))).toBe("root");
+      expect(parentName(select(message, "ORDER[2]"))).toBe("INSURANCE");
+      expect(parentName(select(message, "ORDER[3]"))).toBe("INSURANCE");
+      expect(parentName(select(message, "ORDER[4]"))).toBe("root");
+      expect(select(message, "ORDER[5]")).toBeNull();
+    });
+
+    it("indexes segments the same way", () => {
+      expect(parentName(select(message, "ORC[2]"))).toBe("ORDER");
+      expect(
+        select(message, "ORC[2]")?.ancestors.map((node) => node.type)
+      ).toStrictEqual(["root", "group", "group"]);
+    });
+
+    it("pins the level with a group prefix", () => {
+      const nested = select(message, "INSURANCE-ORDER[2]");
+      expect(parentName(nested)).toBe("INSURANCE");
+      expect(select(message, "INSURANCE-ORDER[3]")).toBeNull();
+    });
+  });
+
   describe("with empty fields", () => {
     const message = m(s("PID", f(""), f("Value"), f("")));
 
@@ -366,6 +405,30 @@ describe(selectAll, () => {
     expect(results).toHaveLength(1);
     expect((results[0]?.node as Group).name).toBe("C");
     expect((results[0]?.ancestors.at(-1) as Group).name).toBe("B");
+  });
+
+  it("returns same-named groups at several depths in document order", () => {
+    const message = m(
+      s("MSH", f("|")),
+      g("ORDER", s("ORC", f("first"))),
+      g(
+        "INSURANCE",
+        g("ORDER", s("ORC", f("nested-1"))),
+        g("ORDER", s("ORC", f("nested-2")))
+      ),
+      g("ORDER", s("ORC", f("last")))
+    );
+
+    const results = selectAll(message, "ORDER");
+    expect(results).toHaveLength(4);
+    expect(
+      results.map(({ ancestors }) => ancestors.at(-1)?.type)
+    ).toStrictEqual(["root", "group", "group", "root"]);
+
+    const segments = selectAll(message, "ORC");
+    expect(segments.map(({ ancestors }) => ancestors.length)).toStrictEqual([
+      2, 3, 3, 2,
+    ]);
   });
 
   it("returns empty array when no matches", () => {
