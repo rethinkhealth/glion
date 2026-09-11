@@ -6,7 +6,7 @@ A simple HL7v2 MLLP client for Node.js, Cloudflare Workers, and the browser.
 - 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, TCP keepalive by default, and explicit states you can read.
 - ⚡ **Thin over TCP.** One socket, one message at a time. No queue, no worker threads, no polling.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
-- 🧩 **Any transport.** TCP included. TLS, Cloudflare Workers or an in-memory socket plugins.
+- 🧩 **Any transport.** TCP included. TLS, Cloudflare Workers or an in-memory socket plug in behind it.
 - 🔤 **Typed end to end.** TypeScript throughout, with parsed HL7v2 going in and coming out.
 
 ## Install
@@ -71,7 +71,9 @@ try {
 `connect()` opens the connection without sending anything. Call it at startup to find out immediately that a host, port, or firewall is wrong, instead of on your first real message.
 
 ```ts
-const client = new MllpClient({ socket: nodeSocket({ host, port }) });
+const client = new MllpClient({
+  socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
+});
 await client.connect();
 ```
 
@@ -191,8 +193,6 @@ Closes the connection now, without waiting for anything in flight. A message in 
 
 Resolves when the connection is down, from any phase. Never throws. Idempotent.
 
-Use `close()` unless you need the socket released immediately.
-
 ### `client[Symbol.asyncDispose]()`
 
 Calls `close()`. Lets a client be scoped with `await using`:
@@ -287,6 +287,31 @@ const client = new MllpClient({
   socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
 });
 ```
+
+### Custom Socket
+
+You can expand `MllpSocket` to build a custom socket to one remote system, which the client opens, uses, and ends.
+
+```ts
+interface MllpSocket {
+  connect(signal: AbortSignal): Promise<MllpStreams>;
+  close(): Promise<void>;
+}
+
+interface MllpStreams {
+  readonly readable: ReadableStream<Uint8Array>;
+  readonly writable: WritableStream<Uint8Array>;
+}
+```
+
+An implementation must satisfy four rules:
+
+1. `connect()` rejects with `signal.reason` when the signal aborts, and a rejection leaves nothing open.
+2. `close()` never rejects, may be called more than once, and always finishes within a bounded time, even when the receiver never answers.
+3. When the socket ends, a pending read on `readable` ends or errors. Bytes sent before a clean close arrive first.
+4. The client owns the streams while connected, and releases them before calling `close()`.
+
+An implementation never sees an MLLP frame — framing belongs to the layer above.
 
 ## Errors
 
@@ -405,7 +430,7 @@ Not an `MllpClientError`. The receiver read the message and refused it, which is
 | `errorCode` | ERR-3  | HL7v2 Table 0357 error condition, when given. |
 | `severity`  | ERR-4  | `E`, `W`, or `I`, when given.                 |
 
-The class is the MSA-1 code: `AckApplicationError` (`AE`), `AckApplicationReject` (`AR`), `AckCommitError` (`CE`), `AckCommitReject` (`CR`). An MLLP server built on Glion raises the same types, so both ends of an integration catch the same thing. |
+The class is the MSA-1 code: `AckApplicationError` (`AE`), `AckApplicationReject` (`AR`), `AckCommitError` (`CE`), `AckCommitReject` (`CR`). An MLLP server built on Glion raises the same types, so both ends of an integration catch the same thing.
 
 ## FAQs
 
