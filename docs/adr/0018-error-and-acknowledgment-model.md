@@ -2,9 +2,7 @@
 
 ## Status
 
-Proposed
-
-> **Update (2026-08):** `@glion/mllp-transport` was renamed to `@glion/mllp-codec`, and `FramingError` / `FramingErrorCode` became `MllpCodecError` / `MllpCodecErrorCode` (codes renamed: `MISSING_START_BLOCK` → `UNEXPECTED_DATA`, `MISSING_END_BLOCK` → `INCOMPLETE_MESSAGE`, `FRAME_TOO_LARGE` → `MESSAGE_TOO_LARGE`, `EMBEDDED_CONTROL_CHAR` → `RESERVED_CHARACTER`). The client also stopped leaking the codec type: `MllpClient.send()` wraps a reserved-character failure as `MllpClientError` `INVALID_MESSAGE` with the codec error on `cause`, and the server reports byte-stream violations to `onError` as `MllpServerError` `PROTOCOL_VIOLATION`. Package and class names below are otherwise left as written.
+Accepted
 
 ## Context
 
@@ -13,7 +11,7 @@ distinct channels**, and until now there was no shared rule for which channel a
 given failure belongs in or how each channel should be shaped. The channels:
 
 1. **Thrown `Error` subclasses.** Several packages define their own error
-   classes: `FramingError` (`@glion/mllp-transport`), `MllpClientError`
+   classes: `MllpCodecError` (`@glion/mllp-codec`), `MllpClientError`
    (`@glion/mllp-client`), the `AckException` family (`@glion/ack`),
    `GlionError` (`@glion/glion` CLI), `ConfigurationError` (`@glion/config`),
    `RangeParseError` / `VersionParseError` (`@glion/util-semver`).
@@ -66,19 +64,19 @@ Every package that throws defines **one** base `Error` subclass carrying a
 stable, exhaustive `code: string`. The `code` is the contract callers branch on;
 a `switch` on it never needs to inspect internal state.
 
-- **Subclass only for a category that carries distinct typed fields a caller
-  reads** — never to restate what `code` already says. Code-specific detail
-  rides on optional fields populated only for the relevant codes (e.g.
-  `MllpClientError.reason` for `DROPPED`, `timeoutMs` for the timeouts,
-  `expected`/`actual`/`tree`/`raw` for `CORRELATION_MISMATCH`).
+- **One class per situation, each fixing its `code`.** `instanceof` the base
+  catches everything a package throws; `instanceof` a subclass catches one
+  situation; `code` is the same word as the class, for logs, metrics, and
+  `switch` statements. Situation-specific detail rides on the subclass (e.g.
+  `MllpConnectionLostError.controlId`, `MllpSendTimeoutError.timeoutMs`).
 - **Always set `cause`** when wrapping an underlying failure; never swallow.
 - **Errors belong at the layer that owns them.** A layer lets a lower layer's
   error propagate, or wraps it with `cause` — it does not re-encode another
   layer's failures as its own taxonomy.
 
-Reference implementations: `FramingError` + `FramingErrorCode`,
-`MllpClientError` + `MllpErrorCode`. The single deliberate exception to
-"subclass only for fields" is a **domain taxonomy** — see §3.
+Reference implementations: `MllpCodecError` + `MllpCodecErrorCode`,
+`MllpClientError` + `MllpErrorCode`. A **domain taxonomy** subclasses for a
+different reason — see §3.
 
 ### 3. The ACK is a first-class, shared error domain owned by `@glion/ack`
 
@@ -92,8 +90,7 @@ Reference implementations: `FramingError` + `FramingErrorCode`,
 | `AckCommitError`       | `CE`  | could not be committed/persisted  |
 | `AckCommitReject`      | `CR`  | rejected at the commit level      |
 
-These subclasses are the **deliberate exception** to §2's "subclass only for
-fields" rule. They carry the same fields, but they encode **distinct domain
+These subclasses carry the same fields, but they encode **distinct domain
 concepts a caller branches on** (reject vs. error; application vs. commit, with
 different retry semantics) and they _are_ the canonical HL7v2 taxonomy — not a
 second encoding of a `code`. `instanceof AckException` catches any NAK;
@@ -102,11 +99,12 @@ second encoding of a `code`. `instanceof AckException` catches any NAK;
 The family is **bidirectional and wire-symmetric** — one vocabulary, both
 directions, no drift:
 
-- The **server** throws an `AckException` and serializes it to an _outbound_
-  NAK via `acknowledge()` / `toErrSegment()` (consumed by `@glion/mllp-ack`).
+- The **server** throws an `AckException`; rendering it as an _outbound_ NAK
+  is the framework's job (ADR 0019).
 - The **client** parses an _inbound_ NAK and throws the **same**
-  `AckException`, reading ERR-3 / ERR-4 into `errorCode` / `severity` and
-  carrying `raw` + the parsed `tree`.
+  `AckException`, reading MSA-2 into `controlId`, ERR-3 / ERR-4 into
+  `errorCode` / `severity`, and MSA-3 (or ERR-8) into `text`. It never carries
+  the payload (§6).
 
 `@glion/ack` does **not** re-implement parsing: a received ACK is parsed with
 `@glion/parser` and read with `@glion/util-query`, then surfaced through these
@@ -120,8 +118,8 @@ A consumer of `MllpClient.send()` distinguishes exactly two failure buckets, and
 they are **separate hierarchies caught separately** — deliberately not merged:
 
 - **"The wire/protocol failed, or the call was misused."** →
-  `MllpClientError` (connect/send timeout, peer drop, framing error, parse
-  failure, state guard) or `FramingError` (outbound framing). The message never
+  `MllpClientError` (connect/send timeout, lost connection, unreadable reply,
+  state guard, a message the codec refuses to frame). The message never
   reached the peer, or the peer's reply was unintelligible.
 - **"The peer understood the message and said no."** → an `@glion/ack`
   `AckException`. Delivery and parsing succeeded; this is an application
@@ -168,15 +166,10 @@ Structure follows ADR 0003: `<what failed, with context> — <why / next step>`.
 Worked example (an actual fix this ADR motivated):
 
 ```ts
-// Weak: no context, leaks an implementation detail as the "reason".
-throw new MllpClientError(CONNECT_ABORTED, "Connect interrupted by close()");
-
-// Strong: what failed, where, why, in domain terms.
-throw new MllpClientError(
-  MllpErrorCode.CONNECT_ABORTED,
-  `Connect to ${host}:${port} was interrupted: close() was called while the ` +
-    "connection was still being established."
-);
+// Weak: no context, no next step.
+"Connect timed out"
+// Strong: what failed, for how long, and what to check.
+`Connecting timed out after ${timeoutMs}ms — check that the host is reachable and the port is listening.`;
 ```
 
 Every package must assert on its user-facing error strings in tests (as the
