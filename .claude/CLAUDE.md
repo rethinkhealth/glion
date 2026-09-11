@@ -149,7 +149,7 @@ Generic `ignoreErrors`-style helpers and bare `catch {}` are code smells — the
 
 Each layer handles its own concerns. Adapters absorb their own teardown errors and idempotency quirks. Core trusts adapter contracts. Don't write defensive `try/catch` in a core module to guard against a bug in the runtime adapter — document the contract loudly in the JSDoc and let adapter-level tests enforce it.
 
-**Example**: `MllpDuplexStream.close()` MUST resolve (never reject) and MUST be idempotent. The core awaits `duplex.close()` in `finally` blocks and fires-and-forgets via `void duplex.close()` from the abort handler; the Node/Deno/Workers adapters take responsibility for honouring the contract internally.
+**Example**: `MllpConnection.close()` MUST resolve (never reject) and MUST be idempotent. The core relies on that contract on every teardown path; the Node/Deno/Workers adapters take responsibility for honouring it internally.
 
 ### 4. Functional over class for internal types
 
