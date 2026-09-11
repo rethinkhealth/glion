@@ -11,7 +11,7 @@ export class MllpConnectTimeoutError extends MllpClientError {
 
   constructor(timeoutMs: number) {
     super(
-      `Connecting timed out after ${timeoutMs}ms — check that the host is reachable and the port is listening.`
+      "Connecting timed out — check that the host is reachable and the port is listening."
     );
     this.timeoutMs = timeoutMs;
   }

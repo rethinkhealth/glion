@@ -1,5 +1,8 @@
 /**
- * The base every client error extends, and the two values each one carries.
+ * The base every client error extends, and the code each one carries.
+ *
+ * Every message is fixed per class. What varies is on the error's fields and
+ * on `cause`.
  *
  * @module
  */
@@ -20,9 +23,4 @@ export type MllpErrorCode = (typeof MllpErrorCode)[keyof typeof MllpErrorCode];
 
 export abstract class MllpClientError extends Error {
   abstract readonly code: MllpErrorCode;
-}
-
-/** The text of a lower layer's error, for the message that wraps it. */
-export function reasonOf(cause: unknown): string {
-  return cause instanceof Error ? cause.message : String(cause);
 }

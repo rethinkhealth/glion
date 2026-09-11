@@ -1,63 +1,67 @@
+/**
+ * Invariant guards and option validation. An `assert*` throws only for a
+ * caller's out-of-range option, or for a state the phase graph does not allow,
+ * which is a bug. Expected runtime conditions are handled where they occur.
+ *
+ * @module
+ */
+
 import { MAX_TIMEOUT_MS } from "../constants";
-import {
-  MllpAlreadySendingError,
-  MllpClientClosedError,
-  MllpInvalidOptionError,
-} from "../errors";
+import { MllpInvalidOptionError } from "../errors";
 import type { MllpConnection } from "./connection";
 import type { State } from "./state";
 
 export function assertTimeoutMs(option: string, ms: number): void {
   if (!Number.isFinite(ms) || ms <= 0 || ms > MAX_TIMEOUT_MS) {
     throw new MllpInvalidOptionError(
-      option,
-      `a number of milliseconds between 1 and ${MAX_TIMEOUT_MS}`,
-      ms
+      `${option} must be a number of milliseconds between 1 and ${MAX_TIMEOUT_MS}.`
     );
   }
 }
 
-export function assertByteCap(option: string, bytes: number): void {
+export function assertByteCap(bytes: number): void {
   if (!Number.isInteger(bytes) || bytes <= 0) {
-    throw new MllpInvalidOptionError(option, "a positive integer", bytes);
+    throw new MllpInvalidOptionError(
+      "maxBufferedBytes must be a positive integer."
+    );
   }
 }
 
-/** Any state a connection attempt can start from, join, or is done in. */
-export function assertReadyToConnect(current: State) {
-  switch (current.phase) {
-    case "idle":
-    case "connecting":
-    case "connected":
-    case "sending": {
-      return;
-    }
-    case "closing": {
-      throw new MllpClientClosedError();
-    }
-    case "closed": {
-      throw new MllpClientClosedError();
-    }
+export function assertReconnectAttempts(attempts: number): void {
+  const unbounded = attempts === Number.POSITIVE_INFINITY;
+  if (!unbounded && (!Number.isInteger(attempts) || attempts < 0)) {
+    throw new MllpInvalidOptionError(
+      "reconnect.attempts must be a non-negative integer, or Infinity."
+    );
+  }
+}
+
+export function assertReconnectDelay(ms: unknown): asserts ms is number {
+  if (
+    typeof ms !== "number" ||
+    !Number.isFinite(ms) ||
+    ms < 0 ||
+    ms > MAX_TIMEOUT_MS
+  ) {
+    throw new MllpInvalidOptionError(
+      `reconnect.delay must return a number of milliseconds between 0 and ${MAX_TIMEOUT_MS}.`
+    );
   }
 }
 
 /** The one phase a connection can be handed over from. */
-export function assertConnecting(
+export function assertOpening(
   current: State
 ): asserts current is Extract<State, { phase: "connecting" }> {
   switch (current.phase) {
     case "connecting": {
       return;
     }
-    case "closing": {
-      throw new MllpClientClosedError();
-    }
-    case "closed": {
-      throw new MllpClientClosedError();
-    }
     case "idle":
     case "connected":
-    case "sending": {
+    case "sending":
+    case "closing":
+    case "closed": {
       throw new Error(
         `A connection opened while the client was ${current.phase}, which its phase graph does not allow. This is a bug in @glion/mllp-client; please report it.`
       );
@@ -65,31 +69,14 @@ export function assertConnecting(
   }
 }
 
-/** The one phase a message can be written from. */
-export function assertReadyToSend(
+/** The phase `send()` writes from, once it has connected. */
+export function assertConnected(
   current: State
 ): asserts current is Extract<State, { phase: "connected" }> {
-  switch (current.phase) {
-    case "connected": {
-      return;
-    }
-    case "sending": {
-      throw new MllpAlreadySendingError(current.controlId);
-    }
-    case "closing": {
-      throw new MllpClientClosedError();
-    }
-    case "closed": {
-      throw new MllpClientClosedError();
-    }
-    case "idle":
-    case "connecting": {
-      // send() awaits connect(), which settles only once the phase has moved
-      // past both.
-      throw new Error(
-        `Cannot send: the client is ${current.phase}, which its phase graph does not allow after connecting. This is a bug in @glion/mllp-client; please report it.`
-      );
-    }
+  if (current.phase !== "connected") {
+    throw new Error(
+      `Cannot send: the client is ${current.phase} right after connecting, which its phase graph does not allow. This is a bug in @glion/mllp-client; please report it.`
+    );
   }
 }
 

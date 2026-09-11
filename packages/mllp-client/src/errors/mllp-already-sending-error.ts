@@ -12,7 +12,7 @@ export class MllpAlreadySendingError extends MllpClientError {
 
   constructor(controlId: string) {
     super(
-      `Cannot send: message ${controlId} is still waiting for its acknowledgment — await the in-flight send() first.`
+      "Cannot send: another message is still waiting for its acknowledgment — await the in-flight send() first."
     );
     this.controlId = controlId;
   }

@@ -23,6 +23,7 @@ export type {
   MllpClientOptions,
   MllpClientResponse,
   MllpClientState,
+  MllpReconnectOptions,
   MllpSendOptions,
   MllpSocket,
   MllpStreams,

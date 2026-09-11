@@ -166,10 +166,11 @@ Structure follows ADR 0003: `<what failed, with context> — <why / next step>`.
 Worked example (an actual fix this ADR motivated):
 
 ```ts
-// Weak: no context, no next step.
-"Connect timed out"
-// Strong: what failed, for how long, and what to check.
-`Connecting timed out after ${timeoutMs}ms — check that the host is reachable and the port is listening.`;
+// Weak: no next step.
+"Connect timed out";
+// Strong: what failed and what to check. Fixed per class; the number is on
+// the error's `timeoutMs` field, and a lower layer's error is on `cause`.
+"Connecting timed out — check that the host is reachable and the port is listening.";
 ```
 
 Every package must assert on its user-facing error strings in tests (as the

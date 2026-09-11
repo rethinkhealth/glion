@@ -1,9 +1,7 @@
 /**
- * An in-memory socket for the client tests.
- *
- * Two `TransformStream`s stand in for the byte streams a runtime adapter would
- * hand over, with the remote end in the test's hands, so every path runs
- * without a port.
+ * An in-memory socket for the client tests: two `TransformStream`s per
+ * connection, with the remote end in the test's hands. Each `connect()` after
+ * the first gets a fresh pair.
  *
  * @module
  */
@@ -14,6 +12,7 @@ import { vi } from "vitest";
 
 import { MllpClient } from "../../src/index";
 import type {
+  MllpClientEvent,
   MllpClientOptions,
   MllpSocket,
   MllpStreams,
@@ -26,36 +25,49 @@ export type Opening = (
   signal: AbortSignal
 ) => Promise<MllpStreams>;
 
+/** One connection's streams, with the remote end's handles on them. */
+function link() {
+  const toClient = new TransformStream<Uint8Array, Uint8Array>();
+  const fromClient = new TransformStream<Uint8Array, Uint8Array>();
+  return {
+    inbound: fromClient.readable.getReader(),
+    outbound: toClient.writable.getWriter(),
+    streams: {
+      readable: toClient.readable,
+      writable: fromClient.writable,
+    } satisfies MllpStreams,
+  };
+}
+
 /**
- * A socket wired to two in-memory streams, with its far end in the test's
- * hands.
+ * A socket wired to in-memory streams, with its far end in the test's hands.
+ * `remote` always speaks for the latest connection.
  */
 export function stubSocket(
   opening: Opening = (streams) => Promise.resolve(streams)
 ) {
-  const toClient = new TransformStream<Uint8Array, Uint8Array>();
-  const fromClient = new TransformStream<Uint8Array, Uint8Array>();
-  const outbound = toClient.writable.getWriter();
-  const inbound = fromClient.readable.getReader();
-
-  const streams: MllpStreams = {
-    readable: toClient.readable,
-    writable: fromClient.writable,
-  };
+  let current = link();
+  let opened = 0;
 
   const close = vi.fn(async () => {
     try {
-      await outbound.close();
+      await current.outbound.close();
     } catch {
       // The connection released its reader first, which already ended this
       // side; the socket's close is contracted never to reject.
     }
   });
-  const connect = vi.fn((signal: AbortSignal) => opening(streams, signal));
+  const connect = vi.fn((signal: AbortSignal) => {
+    if (opened > 0) {
+      current = link();
+    }
+    opened += 1;
+    return opening(current.streams, signal);
+  });
 
   /** The next message the client wrote, as text. */
   async function received(): Promise<string> {
-    const next = await inbound.read();
+    const next = await current.inbound.read();
     if (next.done) {
       throw new Error("the client closed its writable side");
     }
@@ -64,7 +76,7 @@ export function stubSocket(
 
   /** The remote system answers with one framed message. */
   function replies(text: string): Promise<void> {
-    return outbound.write(frame(encodeBytes(text)));
+    return current.outbound.write(frame(encodeBytes(text)));
   }
 
   return {
@@ -78,25 +90,31 @@ export function stubSocket(
       /** The socket's own close, so a test can count it. */
       close,
       /** The remote system hangs up. */
-      hangsUp: () => outbound.close(),
+      hangsUp: () => current.outbound.close(),
+      /** How many times the socket has been asked to open. */
+      get opened(): number {
+        return opened;
+      },
       received,
       /** The remote system stops reading, so the client's next write fails. */
-      refusesWrites: () => inbound.cancel(new Error("EPIPE")),
+      refusesWrites: () => current.inbound.cancel(new Error("EPIPE")),
       replies,
       /** The remote system sends bytes, framed or not. */
-      sends: (bytes: Uint8Array) => outbound.write(bytes),
+      sends: (bytes: Uint8Array) => current.outbound.write(bytes),
       /** The signal the socket was given to open with. */
       get signal(): AbortSignal | undefined {
         return connect.mock.calls[0]?.[0];
       },
       /** The next bytes the client wrote. */
       async wrote(): Promise<Uint8Array | undefined> {
-        const next = await inbound.read();
+        const next = await current.inbound.read();
         return next.value;
       },
     },
     socket: { close, connect } satisfies MllpSocket,
-    streams,
+    get streams(): MllpStreams {
+      return current.streams;
+    },
   };
 }
 
@@ -108,4 +126,19 @@ export async function connectedClient(
   const client = new MllpClient({ socket, ...opts });
   await client.connect();
   return { client, remote };
+}
+
+/** Resolves the next time `client` reports `event`. */
+export function emitted(
+  client: MllpClient,
+  event: MllpClientEvent
+): Promise<void> {
+  // oxlint-disable-next-line promise/avoid-new -- wrapping a listener
+  return new Promise<void>((resolve) => {
+    const once = () => {
+      client.off(event, once);
+      resolve();
+    };
+    client.on(event, once);
+  });
 }

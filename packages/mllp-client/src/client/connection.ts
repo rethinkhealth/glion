@@ -1,10 +1,6 @@
 /**
- * The message layer over a byte socket.
- *
- * An {@link MllpSocket} carries bytes; MLLP carries messages, delimited by the
- * frame bytes. This is the boundary between the two, both ways: a message
- * written here is framed, and bytes read here are unframed. An adapter never
- * sees a frame.
+ * The message layer over a byte socket: a message written here is framed, and
+ * bytes read here are unframed.
  *
  * @module
  */
@@ -20,13 +16,14 @@ import {
 import type { MllpSocket, MllpStreams } from "../types";
 
 /**
- * One session over a socket, from opening it to ending it. It exists before it
- * is open: `ready` says when it is, and `destroy()` ends it from any point.
+ * One session over a socket. `ready` resolves once it is open; `destroy()`
+ * ends it from any point.
  */
 export interface MllpConnection {
   /**
-   * Resolves once the connection is open and rejects if it never opens.
-   * `exchange` is usable only after it resolves.
+   * Resolves once the connection is open. Rejects with
+   * {@link MllpConnectFailedError}, {@link MllpConnectTimeoutError}, or the
+   * reason `destroy()` was given. `exchange` is usable only after it resolves.
    */
   readonly ready: Promise<void>;
   /**
@@ -99,8 +96,7 @@ async function openSocketStreams(
       writer: streams.writable.getWriter(),
     };
   } catch (error) {
-    // The socket opened, so this owns it: `destroy` ends only an attempt that
-    // fulfilled, and this one is about to reject.
+    // `destroy` ends only an attempt that fulfilled; this one is about to reject.
     await socket.close();
     throw new MllpConnectFailedError(error);
   }
@@ -126,12 +122,8 @@ export function createConnection(
   const destroy = (reason?: unknown): Promise<void> => {
     closing ??= (async () => {
       abort.abort(reason);
-      // Waited for, not read: the attempt's failure belongs to whoever
-      // awaited `ready`. Both promises are listed so neither is left
-      // unhandled when nobody did.
+      // Both are listed so neither is left unhandled when nobody awaited `ready`.
       const [attempt] = await Promise.allSettled([streams, ready]);
-      // An attempt that failed closed the socket before it rejected, so
-      // only one that opened has anything left to end.
       if (attempt.status === "fulfilled") {
         // Release the streams, do not cancel them: cancelling would destroy
         // the socket under the adapter and skip its graceful close.
@@ -151,8 +143,7 @@ export function createConnection(
     try {
       framed = frame(message);
     } catch (error) {
-      // Raised before the writer is touched, so nothing reached the wire and
-      // the connection is still in step.
+      // Raised before the writer is touched: nothing reached the wire.
       throw new MllpInvalidMessageError(error);
     }
 
@@ -171,11 +162,6 @@ export function createConnection(
       // `destroy` released the lock under us: report why it ended, not how.
       throw abort.signal.aborted ? abort.signal.reason : error;
     } finally {
-      // THis ensures that the timeout is cleared regardless of whether the
-      // exchange succeeded, failed, or was aborted.
-      // This prevents the timeout from firing after the exchange has completed.
-      // It is important to clear the timeout here to avoid potential memory leaks
-      // or unexpected behavior.
       clearTimeout(deadline);
     }
   };

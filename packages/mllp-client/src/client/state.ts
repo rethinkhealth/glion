@@ -6,15 +6,19 @@
  * @module
  */
 
+import type { MllpClientError } from "../errors";
+
 export type State =
   | { readonly phase: "idle" }
   | {
       readonly phase: "connecting";
       /**
-       * The attempt, settling only once the phase has moved on. A second
-       * `connect()` awaits this and gets the first one's outcome.
+       * Settles once the phase has moved on, to `connected` or to `closed`.
+       * Never rejects. A waiter reads the phase after it settles.
        */
       readonly ready: Promise<void>;
+      /** Aborted by `close()` and `destroy()`. Ends a wait between attempts. */
+      readonly abort: AbortController;
     }
   | { readonly phase: "connected" }
   | {
@@ -29,4 +33,8 @@ export type State =
       /** The send `close()` is waiting out. */
       readonly done: Promise<unknown>;
     }
-  | { readonly phase: "closed" };
+  | {
+      readonly phase: "closed";
+      /** The failure that closed the client, or `null` when the owner did. */
+      readonly reason: MllpClientError | null;
+    };

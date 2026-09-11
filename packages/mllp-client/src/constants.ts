@@ -4,12 +4,7 @@
  * @module
  */
 
-/**
- * Default time to wait for a connection to open, in milliseconds. A TCP
- * handshake completes in a few round-trips; one that has not completed after
- * 10 seconds indicates a down host or a firewall dropping packets, and waiting
- * longer only delays that signal.
- */
+/** Default time to wait for a connection to open, in milliseconds. */
 export const DEFAULT_CONNECT_TIMEOUT_MS = 10_000;
 
 /** Default time to wait for an acknowledgment after sending, in milliseconds. */
@@ -17,6 +12,9 @@ export const DEFAULT_SEND_TIMEOUT_MS = 30_000;
 
 /** Default maximum bytes buffered while receiving one message (16 MiB). */
 export const DEFAULT_MAX_BUFFERED_BYTES = 16 * 1024 * 1024;
+
+/** Default number of reconnect attempts after a failed one. */
+export const DEFAULT_RECONNECT_ATTEMPTS = 5;
 
 /**
  * Maximum timeout `setTimeout` supports, in milliseconds (2^31 − 1). Larger

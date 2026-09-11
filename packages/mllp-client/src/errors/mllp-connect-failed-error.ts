@@ -1,8 +1,8 @@
-import { MllpClientError, MllpErrorCode, reasonOf } from "./base";
+import { MllpClientError, MllpErrorCode } from "./base";
 
 /**
  * The connection could not be opened: the host was unreachable, refused the
- * connection, or failed DNS or TLS. The connector's error is on `cause`.
+ * connection, or failed DNS or TLS. The socket's error is on `cause`.
  */
 export class MllpConnectFailedError extends MllpClientError {
   override readonly name = "MllpConnectFailedError";
@@ -10,7 +10,7 @@ export class MllpConnectFailedError extends MllpClientError {
 
   constructor(cause: unknown) {
     super(
-      `Connecting failed: ${reasonOf(cause)} — check that the host is reachable and the port is listening.`,
+      "Connecting failed — check that the host is reachable and the port is listening.",
       { cause }
     );
   }

@@ -1,4 +1,4 @@
-import { MllpClientError, MllpErrorCode, reasonOf } from "./base";
+import { MllpClientError, MllpErrorCode } from "./base";
 
 /**
  * The connection was lost during a send: the remote system hung up, or the
@@ -12,15 +12,10 @@ export class MllpConnectionLostError extends MllpClientError {
   readonly controlId: string;
 
   constructor(controlId: string, cause?: unknown) {
-    super(lostMessage(controlId, cause), { cause });
+    super(
+      "The connection was lost while a message was waiting for its acknowledgment — the remote system may or may not have received it; resend only if the message is safe to repeat.",
+      { cause }
+    );
     this.controlId = controlId;
   }
-}
-
-function lostMessage(controlId: string, cause: unknown): string {
-  const how =
-    cause === undefined
-      ? "The remote system closed the connection."
-      : `The connection failed: ${reasonOf(cause)}`;
-  return `The connection was lost while message ${controlId} was waiting for its acknowledgment — the remote system may or may not have received it; resend only if the message is safe to repeat. ${how}`;
 }

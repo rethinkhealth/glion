@@ -1,12 +1,6 @@
 /**
- * What the client makes of a message going out, and of an acknowledgment
- * coming back.
- *
- * Serializing a tree, reading an MSA, and deciding whether that MSA answers a
- * given message are here.
- *
- * Pure: nothing here knows the client has phases, or that a failure ends the
- * connection.
+ * Encoding a message to send, and decoding the acknowledgment that answers it.
+ * Pure.
  *
  * @module
  */
@@ -35,8 +29,7 @@ export interface EncodingResponse {
 }
 
 /**
- * `tree` as the message to send, in canonical HL7v2 rather than an echo of
- * whatever the caller parsed.
+ * `tree` as the message to send, in canonical HL7v2.
  *
  * @throws {MllpInvalidMessageError} The message has no MSH-10, or it could not
  *   be serialized or encoded.
@@ -56,10 +49,7 @@ export function encode(tree: Root): EncodingResponse {
   }
 }
 
-/**
- * What the bytes coming back turned out to be: the three things a reply can be
- * to the message it was read for.
- */
+/** A reply, as one of the three things it can be to the message it was read for. */
 export type DecodeResponse =
   /** MSA-1 accepted the message. */
   | { readonly type: "accept"; readonly response: MllpClientResponse }
@@ -74,11 +64,11 @@ export type DecodeResponse =
 /**
  * `bytes` as the reply to the message `controlId` identifies.
  *
- * MSA-2 is checked before MSA-1 is read, so an accept or a NAK is only ever
- * reported for the message it answers. MSH-9 and the HL7 version are not
- * checked (#668).
+ * MSA-2 is checked before MSA-1 is read: an accept or a NAK is reported only
+ * for the message it answers. MSH-9 and the HL7 version are not checked
+ * (#668).
  *
- * Total: what to do with each answer is the caller's.
+ * Never throws.
  */
 export function decode(bytes: Uint8Array, controlId: string): DecodeResponse {
   let raw: string;
@@ -115,8 +105,7 @@ export function decode(bytes: Uint8Array, controlId: string): DecodeResponse {
     response: {
       code,
       controlId: answers,
-      // The acknowledgment's own MSH-10, not the one it answers. Reported for
-      // tracing; correlation must never use it.
+      // MSH-10 of the acknowledgment itself. MUST NOT be used for correlation.
       id: read(tree, "MSH-10[1].1.1"),
       raw,
       text: read(tree, "MSA-3[1].1.1") || undefined,
