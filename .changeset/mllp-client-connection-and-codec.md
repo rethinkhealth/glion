@@ -2,6 +2,8 @@
 "@glion/mllp-client": minor
 ---
 
+Rebuilds the client as a lockstep MLLP client: one socket to one remote system, one message on the wire at a time. `send()` writes the message, waits for the acknowledgment, checks that it answers this message, and resolves with it. There is no background reader and no queue. The lifecycle is one immutable phase object, replaced on every change, so a racing `close()` is detected rather than overwritten.
+
 **Breaking: the client takes a socket, not a host and port.** `MllpClientOptions.socket` is an `MllpSocket` — `connect(signal)` hands over the byte streams, `close()` ends them. The Node adapter is `nodeSocket({ host, port })` from `@glion/mllp-client/node`, with `gracefulCloseMs` and `keepAliveIdleMs` as options. A third-party runtime implements the same two methods.
 
 **Breaking: `send()` takes a parsed `Root`.** Text is parsed at the caller's boundary. The message must carry an MSH-10 control ID; one without it throws `MllpInvalidMessageError` before anything is written.
@@ -17,3 +19,5 @@
 **Errors are one class per situation**, each with a fixed `code`, in an `errors/` folder of one file per class. `MllpDroppedError` is now `MllpConnectionLostError` (`CONNECTION_LOST`). The `delivery` field is gone: it reported a distinction the client could not actually observe.
 
 Every wire-layer failure closes the client — a lost connection, an unreadable reply, a reply that answers another message, or a send that times out. MLLP is lockstep, so after any of those the client can no longer tell which reply answers which message. Construct a new client to carry on.
+
+**Also breaking, vs 0.17.x:** `send()` connects on first use, so `connect()` is optional (`NOT_CONNECTED` and `ALREADY_CONNECTED` are gone). Option validation throws `MllpInvalidOptionError` rather than a platform `RangeError`. An acknowledgment must echo MSA-2: a reply with an empty MSA-2 cannot be matched to a message and is `INVALID_RESPONSE`, where the previous client accepted it.

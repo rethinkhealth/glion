@@ -91,12 +91,19 @@ async function openSocketStreams(
     throw new MllpConnectFailedError(error);
   }
 
-  return {
-    reader: streams.readable
-      .pipeThrough(unframe({ maxBufferedBytes: opts.maxBufferedBytes }))
-      .getReader(),
-    writer: streams.writable.getWriter(),
-  };
+  try {
+    return {
+      reader: streams.readable
+        .pipeThrough(unframe({ maxBufferedBytes: opts.maxBufferedBytes }))
+        .getReader(),
+      writer: streams.writable.getWriter(),
+    };
+  } catch (error) {
+    // The socket opened, so this owns it: `destroy` ends only an attempt that
+    // fulfilled, and this one is about to reject.
+    await socket.close();
+    throw new MllpConnectFailedError(error);
+  }
 }
 
 /**
@@ -164,6 +171,11 @@ export function createConnection(
       // `destroy` released the lock under us: report why it ended, not how.
       throw abort.signal.aborted ? abort.signal.reason : error;
     } finally {
+      // THis ensures that the timeout is cleared regardless of whether the
+      // exchange succeeded, failed, or was aborted.
+      // This prevents the timeout from firing after the exchange has completed.
+      // It is important to clear the timeout here to avoid potential memory leaks
+      // or unexpected behavior.
       clearTimeout(deadline);
     }
   };

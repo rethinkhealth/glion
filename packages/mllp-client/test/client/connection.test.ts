@@ -7,7 +7,7 @@ import { setTimeout } from "node:timers/promises";
 
 import { frame, MllpCodecError } from "@glion/mllp-codec";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
-import { describe, it } from "vitest";
+import { describe, it, vi } from "vitest";
 
 import { createConnection } from "../../src/client/connection";
 import { MllpErrorCode } from "../../src/errors";
@@ -103,6 +103,28 @@ describe("createConnection()", () => {
         code: MllpErrorCode.CONNECT_TIMEOUT,
         timeoutMs: 5,
       });
+    });
+  });
+
+  describe("opening it fails", () => {
+    it("ends a socket whose streams cannot be taken over", async () => {
+      // Given a socket that hands back a readable someone else already holds.
+      const { socket, remote } = stubSocket((streams) => {
+        streams.readable.getReader();
+        return Promise.resolve(streams);
+      });
+
+      // When
+      const connection = createConnection(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+
+      // Then the socket that opened is not left open behind the rejection.
+      await expect(connection.ready).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECT_FAILED,
+      });
+      expect(remote.close).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -245,6 +267,34 @@ describe("createConnection()", () => {
         timeoutMs: 20,
       });
       expect(remote.close).toHaveBeenCalledTimes(1);
+    });
+
+    it("leaves the socket open when the deadline elapses after the reply", async () => {
+      // Given a clock the test owns, so the deadline is not held back by the
+      // event loop: `clearTimeout` runs in the microtask drain after the read
+      // settles, and nothing here waits for a real macrotask.
+      vi.useFakeTimers();
+      try {
+        const { socket, remote } = stubSocket();
+        const connection = createConnection(socket, {
+          maxBufferedBytes: 1024,
+          timeoutMs: 5000,
+        });
+        await connection.ready;
+
+        // When the reply arrives, and only then does the clock pass 20ms
+        const exchanging = connection.exchange(encodeBytes(adtA01().text), 20);
+        await remote.wrote();
+        await remote.sends(frame(encodeBytes("ACK")));
+        await exchanging;
+        await vi.advanceTimersByTimeAsync(60);
+
+        // Then a deadline that fires destroys the connection, and destroying
+        // is not scoped to the exchange that armed it.
+        expect(remote.close).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it("leaves the socket open when the reply arrives in time", async () => {

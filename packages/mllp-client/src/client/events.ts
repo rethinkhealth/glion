@@ -9,13 +9,8 @@ import type { MllpClientError } from "../errors";
 export interface MllpClientEvents {
   /** The connection is open and ready for messages. */
   connect(): void;
-  /**
-   * The connection ended. `error` is why, or `null` when the owner ended it.
-   * A client that reconnects emits `reconnecting` next.
-   */
+  /** The connection ended. `error` is why, or `null` when the owner ended it. */
   disconnect(error: MllpClientError | null): void;
-  /** A new connection will be opened in `delayMs`. `attempt` counts from 1. */
-  reconnecting(attempt: number, delayMs: number): void;
   /** The client is done and will not connect again. */
   close(): void;
 }
