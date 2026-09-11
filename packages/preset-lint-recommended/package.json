@@ -1,6 +1,6 @@
 {
   "name": "@glion/preset-lint-recommended",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "hl7v2-lint preset with recommended rules",
   "keywords": [
     "definition",

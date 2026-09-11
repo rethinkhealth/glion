@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-segment-header-length",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "hl7v2-lint rule to warn when segment header length is invalid",
   "keywords": [
     "definition",

@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-profile-required-components",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Lint rule to validate required components in composite datatype fields",
   "keywords": [
     "health",

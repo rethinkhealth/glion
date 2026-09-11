@@ -1,5 +1,24 @@
 # @rethinkhealth/hl7v2-annotate-profile-context
 
+## 0.18.0
+
+### Minor Changes
+
+- dca5259: **BREAKING:** Raise `engines.node` from `>=20` to `>=22` across all `@glion/*` packages and `create-glion`, and drop Node 20.x from the CI test matrix (#728).
+
+  Node 20 reached end-of-life on 2026-04-30 and is no longer tested. The supported and tested runtimes are Node 22 and Node 24.
+
+  Downstream impact: applications that pin Node 20 will need to upgrade to Node 22 or later. Node 22 is in Maintenance LTS until April 2027; Node 24 is the current Active LTS and the recommended target.
+
+### Patch Changes
+
+- Updated dependencies [dca5259]
+- Updated dependencies [5f18700]
+  - @glion/ast@0.18.0
+  - @glion/profiles@0.18.0
+  - @glion/util-query@0.18.0
+  - @glion/util-visit@0.18.0
+
 ## 0.17.0
 
 ### Patch Changes

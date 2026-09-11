@@ -1,6 +1,6 @@
 {
   "name": "@glion/benchmarks",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "description": "Centralized CodSpeed benchmarks for HL7v2",
   "type": "module",
