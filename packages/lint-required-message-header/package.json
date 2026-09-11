@@ -63,7 +63,7 @@
     "typescript": "6.0.3",
     "vfile": "^6.0.3",
     "vfile-reporter": "^8.1.1",
-    "vitest": "4.1.5"
+    "vitest": "4.1.11"
   },
   "engines": {
     "node": ">=20"
