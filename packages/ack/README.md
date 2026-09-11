@@ -73,7 +73,7 @@ new CommitInternalError(message, cause?); // CE, code 207
 
 ### Type guards
 
-`isAckCode(value)` narrows a string to `AckCode` (any of the six Table 0008 codes). `isAckNakCode(value)` narrows to `AckNakCode` (`AE` / `AR` / `CE` / `CR`); on an `AckCode`, the negative branch narrows to `AckSuccessCode` (`AA` / `CA`).
+`isAckCode(value)` narrows a string to `AckCode` (any of the six Table 0008 codes). `isAckNakCode(value)` narrows to `AckNakCode` (`AE` / `AR` / `CE` / `CR`). `isAckSuccessCode(value)` narrows to `AckSuccessCode` (`AA` / `CA`).
 
 ### Constants
 
