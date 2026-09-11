@@ -20,7 +20,7 @@ export const fields = [
     repeatable: false,
     required: true,
     sequence: 2,
-    table: "HL70206",
+    table: "HL70287",
   },
   {
     datatype: "CWE",
