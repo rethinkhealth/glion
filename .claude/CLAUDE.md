@@ -12,7 +12,7 @@ TypeScript monorepo for HL7v2 message processing built on the `unified` framewor
 
 - Under active development — not recommended for production workloads.
 - **ESM-only**, no CommonJS.
-- **Node.js ≥ 20** (uses `AbortSignal.any` and other Node 20 primitives).
+- **Node.js ≥ 22** (CI tests 22.x and 24.x; Node 22 primitives such as `Promise.withResolvers` and `AbortSignal.any` are available).
 - **pnpm only** — enforced by an `only-allow` preinstall hook.
 - Pre-commit hooks run linting via `lint-staged`.
 - Turbo caching is enabled for `build`, `test`, and `check-types`.
