@@ -38,10 +38,6 @@ export function assertReadyToConnect(current: State) {
     case "closed": {
       throw new MllpClientClosedError();
     }
-    // This should never happen if all phases are covered above.
-    default: {
-      throw new Error(`Unexpected state phase.`);
-    }
   }
 }
 

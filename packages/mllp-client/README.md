@@ -1,6 +1,6 @@
 # @glion/mllp-client
 
-A simple HL7v2 MLLP client for Node.js, Cloudflare Workers, and the browser.
+A simple HL7v2 MLLP client for Node.js and Cloudflare Workers.
 
 - 📦 **MLLP built in.** Framing, message boundaries and acknowledgment matching are handled. You send a parsed message and get one back.
 - 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, TCP keepalive by default, and explicit states you can read.
@@ -8,6 +8,8 @@ A simple HL7v2 MLLP client for Node.js, Cloudflare Workers, and the browser.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
 - 🧩 **Any transport.** TCP included. TLS, Cloudflare Workers or an in-memory socket plug in behind it.
 - 🔤 **Typed end to end.** TypeScript throughout, with parsed HL7v2 going in and coming out.
+
+> **Coming soon** — TLS and Cloudflare Workers adapters. Today the only bundled adapter is Node.js over TCP.
 
 ## Install
 
@@ -259,7 +261,7 @@ client
 
 ## Runtimes
 
-The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#mllpsocket) — two methods — so supporting a new runtime means writing an adapter, not forking the client.
+The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#custom-socket) — two methods — so supporting a new runtime means writing an adapter, not forking the client.
 
 Node.js is the only adapter that ships today.
 
