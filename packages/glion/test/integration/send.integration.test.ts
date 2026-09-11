@@ -3,11 +3,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 
-import type { MllpConnection, MllpConnector } from "@glion/mllp-client";
+import type { MllpSocket } from "@glion/mllp-client";
 import { frame } from "@glion/mllp-codec";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { runSend } from "./send";
+import { runSend } from "../../src/commands/send";
 
 const ADT = [
   "MSH|^~\\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5",
@@ -28,29 +28,34 @@ function ackFrame(code: string, withErr = false): Uint8Array {
 }
 
 /**
- * A fake connection that replies with `ack` as soon as a request is written.
- * The MllpClient's injectable connector is what makes this socket-free.
+ * A socket that replies with `ack` as soon as a message is written. The
+ * client's injectable socket is what makes this port-free.
  */
-function fakeConnector(ack: Uint8Array): MllpConnector {
-  return (): Promise<MllpConnection> => {
-    let controller: ReadableStreamDefaultController<Uint8Array> | undefined;
-    const readable = new ReadableStream<Uint8Array>({
-      start(c) {
-        controller = c;
-      },
-    });
-    const writable = new WritableStream<Uint8Array>({
-      write() {
-        controller?.enqueue(ack);
-      },
-    });
-    return Promise.resolve({
-      close: () => Promise.resolve(),
-      readable,
-      writable,
-    });
+function fakeSocket(ack: Uint8Array): MllpSocket {
+  return {
+    close: () => Promise.resolve(),
+    connect: () => {
+      let controller: ReadableStreamDefaultController<Uint8Array> | undefined;
+      const readable = new ReadableStream<Uint8Array>({
+        start(c) {
+          controller = c;
+        },
+      });
+      const writable = new WritableStream<Uint8Array>({
+        write() {
+          controller?.enqueue(ack);
+        },
+      });
+      return Promise.resolve({ readable, writable });
+    },
   };
 }
+
+/** A socket that never opens. */
+const refusingSocket: MllpSocket = {
+  close: () => Promise.resolve(),
+  connect: () => Promise.reject(new Error("ECONNREFUSED")),
+};
 
 /** Capture stdout/stderr; `tty` makes stdout report as a TTY (human output). */
 function capture(tty = false) {
@@ -71,7 +76,7 @@ function capture(tty = false) {
   return { state, stderr, stdout };
 }
 
-describe("runSend (integration, fake connector)", () => {
+describe("runSend (integration, fake socket)", () => {
   const tempDirs: string[] = [];
 
   afterEach(async () => {
@@ -95,8 +100,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      connect: fakeConnector(ackFrame("AA")),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
       stdout,
@@ -114,8 +119,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      connect: fakeConnector(ackFrame("AE", true)),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AE", true)),
       stderr,
       stdin: Readable.from(ADT),
       stdout,
@@ -131,12 +136,10 @@ describe("runSend (integration, fake connector)", () => {
 
   it("exits 2 on a connection failure", async () => {
     const { state, stderr, stdout } = capture();
-    const failing: MllpConnector = () =>
-      Promise.reject(new Error("ECONNREFUSED"));
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      connect: failing,
       cwd: "/tmp",
+      socket: refusingSocket,
       stderr,
       stdin: Readable.from(ADT),
       stdout,
@@ -152,8 +155,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: [],
-      connect: fakeConnector(ackFrame("AA")),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
       stdout,
@@ -167,8 +170,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stdout, stderr } = capture();
     const code = await runSend({
       argv: ["--help"],
-      connect: fakeConnector(ackFrame("AA")),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
       stdout,
@@ -183,8 +186,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stdout, stderr } = capture();
     const code = await runSend({
       argv: ["--nope"],
-      connect: fakeConnector(ackFrame("AA")),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
       stdout,
@@ -199,8 +202,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stdout, stderr } = capture();
     const code = await runSend({
       argv: [file, "--host", "h", "--port", "1"],
-      connect: fakeConnector(ackFrame("AA")),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdout,
     });
@@ -213,8 +216,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stdout, stderr } = capture();
     const code = await runSend({
       argv: ["/no/such/file.hl7", "--host", "h", "--port", "1"],
-      connect: fakeConnector(ackFrame("AA")),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdout,
     });
@@ -230,8 +233,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      connect: fakeConnector(ackFrame("AA")),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(noControlId),
       stdout,
@@ -249,8 +252,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      connect: fakeConnector(ackFrame("AA")),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(withVt),
       stdout,
@@ -266,8 +269,8 @@ describe("runSend (integration, fake connector)", () => {
     const { state, stdout, stderr } = capture(true);
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      connect: fakeConnector(ackFrame("AA")),
       cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
       stdout,
@@ -282,12 +285,10 @@ describe("runSend (integration, fake connector)", () => {
 
   it("writes human transport errors to stderr on a TTY", async () => {
     const { state, stdout, stderr } = capture(true);
-    const failing: MllpConnector = () =>
-      Promise.reject(new Error("ECONNREFUSED"));
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      connect: failing,
       cwd: "/tmp",
+      socket: refusingSocket,
       stderr,
       stdin: Readable.from(ADT),
       stdout,

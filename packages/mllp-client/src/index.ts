@@ -1,42 +1,42 @@
 /**
  * `@glion/mllp-client` — persistent MLLP client for HL7v2.
  *
- * One connection, one send on the wire at a time. `send()` accepts a `string`
- * or a `Root`: every input is parsed to a tree and re-serialized to canonical
- * HL7v2 for the wire (an _originating / cleaning_ client, not a byte-exact
- * relay), and the same tree reads MSH-10 for correlation. A NAK (AE/AR/CE/CR)
- * rejects with the central `@glion/ack` exception family
- * (`AckApplicationError`, `AckApplicationReject`, `AckCommitError`,
- * `AckCommitReject`) — the same types the server throws; import them and
- * `AckException` from `@glion/ack`. Runtime adapters live behind
- * {@link MllpConnector} — the default Node adapter is in
+ * One socket to one remote system, one message on the wire at a time.
+ * `send()` takes a parsed `Root`, writes it, and resolves with the
+ * acknowledgment that answers it. A NAK (`AE`, `AR`, `CE`, `CR`) rejects with
+ * the matching `@glion/ack` exception — the same type the server raises.
+ *
+ * Runtime adapters implement {@link MllpSocket}; the Node adapter is in
  * `@glion/mllp-client/node`.
  *
  * @module
  */
 
-export { MllpClient } from "./client";
+export { MllpClient, MllpClientEmitter } from "./client/index";
+export type {
+  MllpClientEvent,
+  MllpClientEvents,
+  MllpClientListener,
+  MllpConnection,
+} from "./client/index";
 export type {
   MllpClientOptions,
   MllpClientResponse,
   MllpClientState,
-  MllpConnector,
   MllpSendOptions,
-  MllpConnection,
-  SendInput,
+  MllpSocket,
+  MllpStreams,
 } from "./types";
 export {
   MllpAlreadySendingError,
   MllpClientClosedError,
   MllpClientError,
-  MllpConnectAbortedError,
   MllpConnectFailedError,
   MllpConnectTimeoutError,
-  MllpDroppedError,
+  MllpConnectionLostError,
   MllpErrorCode,
   MllpInvalidMessageError,
   MllpInvalidOptionError,
   MllpInvalidResponseError,
   MllpSendTimeoutError,
 } from "./errors";
-export type { MllpDelivery } from "./errors";

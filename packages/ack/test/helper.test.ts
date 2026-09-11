@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AckCode } from "../src/constants";
-import { isAckCode, isAckNakCode } from "../src/helper";
+import { isAckCode, isAckNakCode, isAckSuccessCode } from "../src/helper";
 
 describe("isAckCode", () => {
   it("is true for every Table 0008 code", () => {
@@ -34,5 +34,36 @@ describe("isAckNakCode", () => {
     expect(isAckNakCode("")).toBe(false);
     expect(isAckNakCode("XX")).toBe(false);
     expect(isAckNakCode("ae")).toBe(false);
+  });
+});
+
+describe("isAckSuccessCode", () => {
+  it.each([AckCode.ApplicationAccept, AckCode.CommitAccept])(
+    "accepts %s",
+    (code) => {
+      expect(isAckSuccessCode(code)).toBe(true);
+    }
+  );
+
+  it.each([
+    AckCode.ApplicationError,
+    AckCode.ApplicationReject,
+    AckCode.CommitError,
+    AckCode.CommitReject,
+  ])("rejects the NAK code %s", (code) => {
+    expect(isAckSuccessCode(code)).toBe(false);
+  });
+
+  it.each(["", "OK", "aa"])(
+    "rejects %o, which is not a code at all",
+    (value) => {
+      expect(isAckSuccessCode(value)).toBe(false);
+    }
+  );
+
+  it("partitions Table 0008 with isAckNakCode", () => {
+    for (const code of Object.values(AckCode)) {
+      expect(isAckSuccessCode(code)).toBe(!isAckNakCode(code));
+    }
   });
 });

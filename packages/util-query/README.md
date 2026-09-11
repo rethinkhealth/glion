@@ -196,6 +196,10 @@ Repetition indexes are **1-based**. If you omit `[n]`, `select`/`value`/`matches
 
 Paths select whatever exists in the AST — segments or groups. A bare name (`NAME`) returns whichever exists, trying segments first; adding a field suffix (`NAME-N`) forces segment access because field numbers only apply to segments. Groups can also appear as navigation prefixes (`ORDER-ORC`, `ORDER-TIMING-TQ1-1`).
 
+Group prefixes and the final name resolve differently. Each group in the prefix must be a direct child of the previous scope (`INSURANCE-ORDER` matches only an `ORDER` group directly inside `INSURANCE`). The final name is searched at any depth below that scope, in document order, so `select(ast, "OBX")` finds an `OBX` nested inside `ORDER-RESULT` and `select(ast, "RESULT")` finds the nested `RESULT` group. `[n]` on the final name indexes that document-order list across depths, matching the segment-sequence convention of the HL7 `ERL` data type: `OBX[3]` is the third `OBX` in the message regardless of grouping, and `ORDER[2]` may be a nested `ORDER` that opens before the second top-level one. Use a group prefix to pin the level when a name occurs at several depths.
+
+Because the final name ignores grouping, a bare segment path returns the same node whether or not a grouping plugin has run on the tree.
+
 ```typescript
 // Selecting groups directly
 const orderGroup = select(ast, "ORDER");
