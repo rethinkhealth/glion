@@ -1,10 +1,10 @@
 /**
- * In-memory MLLP wire for the client suite and canary: an
- * {@link MllpDuplex} whose read side answers every complete inbound frame
- * with an AA ACK echoing the message's MSH-10. Deterministic and CPU-bound.
+ * In-memory MLLP wire for the client suite and canary: an {@link MllpSocket}
+ * whose read side answers every complete inbound frame with an AA ACK echoing
+ * the message's MSH-10. Deterministic and CPU-bound.
  */
 import { c, f, m, s } from "@glion/builder";
-import type { MllpConnector, MllpDuplex } from "@glion/mllp-client";
+import type { MllpSocket, MllpStreams } from "@glion/mllp-client";
 import { frame } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
@@ -48,8 +48,8 @@ function ackFrameFor(payload: Uint8Array): Uint8Array {
  * The client writes one whole frame per send, so frame completion is
  * detected by the FS+CR trailer at the end of a write.
  */
-export const connectInMemory: MllpConnector = (opts) => {
-  opts.signal.throwIfAborted();
+function open(signal: AbortSignal): Promise<MllpStreams> {
+  signal.throwIfAborted();
 
   let enqueueAck: ((ack: Uint8Array) => void) | undefined;
   let closeReadable: (() => void) | undefined;
@@ -90,26 +90,21 @@ export const connectInMemory: MllpConnector = (opts) => {
     },
   });
 
-  let open = true;
-  let resolveClosed: () => void;
-  // oxlint-disable-next-line promise/avoid-new -- deferred settled by close()
-  const closed = new Promise<void>((resolve) => {
-    resolveClosed = resolve;
-  });
-
-  const duplex: MllpDuplex = {
-    // Contract: resolves (never rejects) and is idempotent.
-    close() {
-      if (open) {
-        open = false;
-        closeReadable?.();
-        resolveClosed();
-      }
-      return Promise.resolve();
-    },
-    closed,
-    readable,
-    writable,
+  closeStreams = () => {
+    closeReadable?.();
   };
-  return Promise.resolve(duplex);
+  return Promise.resolve({ readable, writable });
+}
+
+/** Ends whatever `connect()` last opened. Nothing is open to begin with. */
+let closeStreams = (): void => {
+  // Nothing opened yet.
+};
+
+export const memorySocket: MllpSocket = {
+  close: () => {
+    closeStreams();
+    return Promise.resolve();
+  },
+  connect: open,
 };

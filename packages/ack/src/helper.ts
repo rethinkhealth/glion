@@ -6,7 +6,7 @@
  */
 
 import { AckCode } from "./constants";
-import type { AckNakCode } from "./constants";
+import type { AckNakCode, AckSuccessCode } from "./constants";
 
 // Derived from AckCode, so the guard can never drift from the table.
 const ACK_CODES: ReadonlySet<string> = new Set(Object.values(AckCode));
@@ -27,4 +27,12 @@ export function isAckNakCode(value: string): value is AckNakCode {
     value !== AckCode.ApplicationAccept &&
     value !== AckCode.CommitAccept
   );
+}
+
+/**
+ * Narrow an arbitrary string to an accept code — the accept half of Table
+ * 0008, and the complement of {@link isAckNakCode}.
+ */
+export function isAckSuccessCode(value: string): value is AckSuccessCode {
+  return value === AckCode.ApplicationAccept || value === AckCode.CommitAccept;
 }

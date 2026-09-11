@@ -11,8 +11,8 @@ import { readFile } from "node:fs/promises";
 import { AckException } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { MllpClient, MllpClientError } from "@glion/mllp-client";
-import type { MllpConnector } from "@glion/mllp-client";
-import { connectNode } from "@glion/mllp-client/node";
+import type { MllpSocket } from "@glion/mllp-client";
+import { nodeSocket } from "@glion/mllp-client/node";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
@@ -222,8 +222,8 @@ export interface RunSendOptions {
   cwd: string;
   stdout?: NodeJS.WritableStream;
   stderr?: NodeJS.WritableStream;
-  /** Runtime connector; injectable for tests. Defaults to the Node TCP adapter. */
-  connect?: MllpConnector;
+  /** Runtime socket; injectable for tests. Defaults to the Node TCP adapter. */
+  socket?: MllpSocket;
   /** Stdin source used when no file is given; injectable for tests. */
   stdin?: NodeJS.ReadableStream;
 }
@@ -335,15 +335,14 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   let startedAt = performance.now();
   try {
     client = new MllpClient({
-      connect: opts.connect ?? connectNode,
       connectTimeoutMs: timeoutMs,
-      host: target.host,
-      port: target.port,
       sendTimeoutMs: timeoutMs,
+      socket:
+        opts.socket ?? nodeSocket({ host: target.host, port: target.port }),
     });
     await client.connect();
     startedAt = performance.now();
-    const res = await client.send(canonical, { timeoutMs });
+    const res = await client.send(tree, { timeoutMs });
     return emit({
       ackControlId: request.controlId,
       code: res.code,

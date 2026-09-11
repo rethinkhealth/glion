@@ -7,107 +7,98 @@
 import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 
+// ── For adapter authors ──────────────────────────────────────────────
+//
+// An adapter implements one runtime's transport and nothing else: open a
+// socket, expose it as byte streams, and end it. MLLP framing and stream
+// ownership are handled above, so an adapter never sees a frame.
+
+/** The byte streams an open socket carries. */
+export interface MllpStreams {
+  /** Bytes from the remote system. */
+  readonly readable: ReadableStream<Uint8Array>;
+  /** Bytes to the remote system. */
+  readonly writable: WritableStream<Uint8Array>;
+}
+
+/** A socket to one remote system. */
+export interface MllpSocket {
+  /**
+   * Opens the socket and returns its byte streams.
+   *
+   * Rejects with `signal.reason` when cancelled. A rejection leaves nothing
+   * open. Called again only after `close()`.
+   */
+  connect(signal: AbortSignal): Promise<MllpStreams>;
+  /**
+   * Ends the socket `connect()` opened, and resolves once it is down.
+   *
+   * Never rejects. Idempotent. Bounded, even when the remote system does not
+   * answer. An attempt still in flight is cancelled through its signal.
+   */
+  close(): Promise<void>;
+}
+
 // ── For application authors ──────────────────────────────────────────
 
 /** The client's connection phase. */
 export type MllpClientState =
   | "closed"
+  | "closing"
   | "connected"
   | "connecting"
   | "idle"
   | "sending";
 
 export interface MllpSendOptions {
-  /** Overrides the default send deadline (ms): write + ACK wait. */
+  /** Overrides the default send deadline: write plus acknowledgment wait. */
   readonly timeoutMs?: number;
 }
 
 export interface MllpClientOptions {
-  readonly host: string;
-  readonly port: number;
-  /** Runtime adapter; e.g. `connectNode` from `@glion/mllp-client/node`. */
-  readonly connect: MllpConnector;
+  /** Runtime adapter; e.g. `nodeSocket` from `@glion/mllp-client/node`. */
+  readonly socket: MllpSocket;
   /** Time to wait for the connection to open. Default 10 000 ms. */
   readonly connectTimeoutMs?: number;
   /** Time to wait for an acknowledgment after sending. Default 30 000 ms. */
   readonly sendTimeoutMs?: number;
   /**
-   * Maximum bytes buffered while receiving one frame. A remote system that
-   * never terminates a frame is dropped once it exceeds this. Default 16 MiB.
+   * Maximum bytes buffered while receiving one message. A remote system that
+   * never finishes one is dropped once it exceeds this. Default 16 MiB.
    */
   readonly maxBufferedBytes?: number;
 }
 
 /**
- * What `MllpClient.send()` accepts — a `string` (serialized HL7v2 text) or a
- * `Root` (a parsed tree). Both are normalized to a tree and re-serialized to
- * canonical HL7v2 for the wire. A `string` is parsed; a `Root` is used as-is.
+ * An acknowledgment that accepted the message: MSA-1 is `AA` or `CA`.
  *
- * Cleaning is syntactic only — semantics are preserved. Line endings normalize
- * to CR and trailing empty fields / segments are trimmed; escape sequences,
- * Z-segments, repetitions, and components round-trip verbatim. Two caveats:
- * trailing-empty trimming is not idempotent (it drops one trailing empty field
- * per pass), and a `Root` that was escape-_decoded_ upstream (e.g. via
- * `hl7v2DecodeEscapes`) must not be sent — `toHl7v2` has no re-encode step and
- * would emit the decoded literal.
- *
- * Raw bytes are not accepted — decode them to text at your I/O boundary (where
- * charset / MSH-18 knowledge lives) and pass the `string`.
- */
-export type SendInput = string | Root;
-
-/**
- * The acknowledgment that accepted a sent message. A NAK rejects `send()`
- * instead.
+ * A NAK never reaches here — `send()` throws the matching `@glion/ack`
+ * exception instead.
  */
 export interface MllpClientResponse {
-  /** MSA-1: `AA` or `CA`. */
-  readonly code: AckSuccessCode;
+  /**
+   * MSH-10 of the acknowledgment itself: the receiver's own identifier for
+   * this reply, which it will have logged under. Useful for tracing a message
+   * across both systems; never useful for correlation — see `controlId`.
+   */
+  readonly id: string;
+  /**
+   * MSA-2, which HL7v2 also calls the Message Control ID: the MSH-10 of the
+   * message this one answers.
+   *
+   * The standard gives MSH-10 and MSA-2 the same field name, and that is not
+   * an accident — MSA-2 *contains* the other message's MSH-10. Which is why
+   * `id` and this are both control IDs and mean opposite things: `id` is who
+   * this acknowledgment is, `controlId` is who it is about. MSA-2 is the only
+   * back-reference HL7v2 provides, and so the only thing correlation can use.
+   */
+  readonly controlId: string;
   /** The acknowledgment, parsed. */
   readonly tree: Root;
   /** The acknowledgment as received, decoded to text. */
   readonly raw: string;
+  /** MSA-3: the remote system's own diagnostic, when it gave one. */
+  readonly text?: string;
+  /** MSA-1: `AA` or `CA`. */
+  readonly code: AckSuccessCode;
 }
-
-// ── For adapter authors ──────────────────────────────────────────────
-//
-// A connection carries bytes and nothing else — it knows nothing about HL7v2
-// or MLLP framing. The contract is documented, not defended: the client
-// trusts every clause, and each adapter proves them at its own layer with
-// the shared conformance suite.
-
-/**
- * One open connection, as a pair of byte streams and a way to end it.
- *
- * Adapters must honour three clauses:
- *
- * 1. `close()` is idempotent, never rejects, and resolves within a bounded time
- *    even if the remote system never responds — end the connection gracefully
- *    first, then force it.
- * 2. When the connection ends for any reason, `readable` reports end-of-stream or
- *    an error to a pending read. Bytes the remote system wrote before closing
- *    gracefully arrive before end-of-stream.
- * 3. The streams belong to the client for the connection's lifetime; the client
- *    releases them before calling `close()`.
- */
-export interface MllpConnection {
-  /** Bytes from the remote system. */
-  readonly readable: ReadableStream<Uint8Array>;
-  /** Bytes to the remote system. */
-  readonly writable: WritableStream<Uint8Array>;
-  /** Ends the connection. Idempotent; never rejects; bounded in time. */
-  close(): Promise<void>;
-}
-
-/**
- * Opens one connection to a host and port.
- *
- * The connector must honour the `signal`: when it aborts before the
- * connection opens, reject and leave nothing live. A connection that opens in
- * the instant after the abort is the client's to close.
- */
-export type MllpConnector = (opts: {
-  readonly host: string;
-  readonly port: number;
-  readonly signal: AbortSignal;
-}) => Promise<MllpConnection>;

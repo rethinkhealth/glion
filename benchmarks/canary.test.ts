@@ -16,7 +16,7 @@ import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
 
-import { connectInMemory } from "./fixtures/memory-wire";
+import { memorySocket } from "./fixtures/memory-wire";
 import {
   ADT_A01_SMALL,
   hl7,
@@ -74,12 +74,10 @@ describe("canary — suites measure real work", () => {
 
   it("mllp-client: the in-memory wire returns an AA response", async () => {
     const client = new MllpClient({
-      connect: connectInMemory,
-      host: "in-memory",
-      port: 2575,
+      socket: memorySocket,
     });
     await client.connect();
-    const response = await client.send(ADT_A01_MINIMAL);
+    const response = await client.send(parseHL7v2(ADT_A01_MINIMAL));
     await client.close();
     expect(response.code).toBe("AA");
   });
