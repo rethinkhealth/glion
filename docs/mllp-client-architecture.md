@@ -180,7 +180,7 @@ Coverage ≥ 94.20% is credible with margin: the branches that dragged #669 unde
 
 ## 10. What survives, dies, and is mined
 
-Survives: errors.ts (~95%, message retouches), runtime/node.ts (~95%, +unref), all of ack.ts/outbound.ts logic transplanted into codec.ts, test/fake-duplex.ts (147 LOC) + test/fixtures.ts (60 LOC) verbatim, client.test.ts + node.test.ts as the regression net, the README's prose skeleton. Dies: connection.ts (306), inbox.ts (161), the `#establish`/`#connecting`/`#inFlight`/abortReason plumbing, `watchForDrop`, both invariant strings, both FIXME(#685) markers. Mined from #667/XState without porting code: the legality-table test matrix, run-to-completion macrostep semantics (reborn as the drain), root-default legality (reborn as command cells in every phase); PR #667 closes once the rewrite is green, per the baseline's own §7.5.
+Survives: errors.ts (~95%, message retouches), runtime/node.ts (~95%, +unref), all of ack.ts/outbound.ts logic transplanted into codec.ts, tests/fake-duplex.ts (147 LOC) + tests/fixtures.ts (60 LOC) verbatim, client.test.ts + node.test.ts as the regression net, the README's prose skeleton. Dies: connection.ts (306), inbox.ts (161), the `#establish`/`#connecting`/`#inFlight`/abortReason plumbing, `watchForDrop`, both invariant strings, both FIXME(#685) markers. Mined from #667/XState without porting code: the legality-table test matrix, run-to-completion macrostep semantics (reborn as the drain), root-default legality (reborn as command cells in every phase); PR #667 closes once the rewrite is green, per the baseline's own §7.5.
 
 ## 11. Calibrated risks
 
