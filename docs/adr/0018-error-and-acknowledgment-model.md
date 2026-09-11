@@ -69,6 +69,16 @@ a `switch` on it never needs to inspect internal state.
   situation; `code` is the same word as the class, for logs, metrics, and
   `switch` statements. Situation-specific detail rides on the subclass (e.g.
   `MllpConnectionLostError.controlId`, `MllpSendTimeoutError.timeoutMs`).
+- **One code is one fact.** A code that stood for two situations (`CLOSED` for
+  both "the client is closed" and "`destroy()` cut off the send in flight")
+  is split (`CLOSED`, `SEND_ABORTED`).
+- **A label for the decision callers make.** Beside `code`, every client error
+  carries `delivery`: `not-sent` (nothing reached the wire; safe to send again)
+  or `unknown` (it may have reached the peer). This is the MongoDB error-label
+  and AWS `$retryable` idea, reduced to the one question an HL7v2 sender asks.
+  A NAK is the third answer, `refused`, and lives on `AckException`.
+- **Fixed messages.** The message is one sentence per class, with the next
+  step; what varies is on fields and on `cause`.
 - **Always set `cause`** when wrapping an underlying failure; never swallow.
 - **Errors belong at the layer that owns them.** A layer lets a lower layer's
   error propagate, or wraps it with `cause` — it does not re-encode another

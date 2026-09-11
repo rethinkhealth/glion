@@ -14,7 +14,7 @@ Until #714 that argument closed the client. Every wire failure was terminal, and
 
 ## Decision
 
-1. **A wire failure ends the connection; the client dials again.** `CONNECTION_LOST`, `SEND_TIMEOUT`, and `INVALID_RESPONSE` still end the connection. The client then returns to `connecting` and dials under a `reconnect` policy: `attempts` (default 5) and `delay(attempt)` (default full-jitter exponential backoff from 200 ms, capped at 2 s). `attempts` is the only way the policy stops. The policy applies to the first connection too: a refused first dial is retried the same way. `reconnect: false` restores a terminal client. The attempt counter starts over each time a connection opens.
+1. **A wire failure ends the connection; the client dials again.** `CONNECTION_LOST`, `SEND_TIMEOUT`, and `INVALID_RESPONSE` still end the connection. The client then returns to `connecting` and dials under a `reconnect` policy: `attempts` (default 5, so the client gives up about 30 seconds after the first failure) and `delay(attempt)` (default full-jitter exponential backoff from 1 s, capped at 30 s). `attempts` is the only way the policy stops. The policy applies to the first connection too: a refused first dial is retried the same way. `reconnect: false` restores a terminal client. The attempt counter starts over each time a connection opens.
 
 2. **A message in flight when the connection ends is never sent again by the client.** Its `send()` rejects with the failure. Whether the receiver has the message is unknown to the client and known, at best, to the caller. Reconnect restores the link, not the message.
 
@@ -28,13 +28,14 @@ Until #714 that argument closed the client. Every wire failure was terminal, and
 
 - A long-lived client survives a network blip on its own. The error texts and README no longer say "construct a new MllpClient".
 - `disconnect` is gone. A lost connection is an internal matter of the client; code that logged it listens for `close` and reads its error, or watches for repeat `connect` events.
-- The default policy is bounded, so a client whose peer is gone for good closes after a few seconds and releases its timer; an unbounded policy is `attempts: Infinity`.
+- The default policy gives up about 30 seconds after the first failure, so a `send()` against a host that is down rejects within that budget and a one-shot script exits. A client that must outlast a long outage sets `attempts: Infinity`, as ioredis and Socket.IO do by default, and accepts that the process stays alive until `close()`.
 - An idle drop is still noticed only by the next `send()` (#690). Until that lands, the send that discovers the drop fails, and the one after it goes out on the new connection.
 
 ## Alternatives considered
 
 - **Reconnect only after a connection has opened once**, so a wrong host fails in one connect timeout. Rejected: a daemon that starts before its receiver is the common case, and the bounded default keeps a wrong host cheap.
-- **Unbounded attempts by default**, as ioredis and interface engines do. Rejected: a referenced timer keeps a Node process alive forever after the peer is decommissioned, and `unref` is not portable across runtimes.
+- **A bounded default of a few seconds.** Tried first. Rejected: it covers a network blip and nothing else; a receiving engine restart takes tens of seconds. The 30-second budget covers that.
+- **Unlimited attempts by default**, as ioredis, Socket.IO, MQTT.js, and gRPC ship. Rejected: with `sendTimeoutMs` starting at the write, a `send()` against a host that is down would never settle, and every one-shot script and the CLI would hang instead of failing.
 - **A separate `reconnecting` phase**, as the issue proposed. Rejected: it holds the same fields and runs the same loop as `connecting`, and a lost connection is not something the client reports.
 - **Passing the failure to `delay(attempt, error)`**, so a policy could stop on a permanent cause. Rejected: nothing needs it, and the attempt limit already bounds a permanent failure.
 - **`retry` as the option name** (the issue's proposal). Rejected: reserved for message retry, which has the opposite safety profile.

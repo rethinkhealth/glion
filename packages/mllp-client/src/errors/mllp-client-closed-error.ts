@@ -1,12 +1,14 @@
 import { MllpClientError, MllpErrorCode } from "./base";
 
 /**
- * The client is closed, by `close()`, by `destroy()`, or by a lost connection
- * the reconnect policy did not restore. That last failure is on `cause`.
+ * The call cannot be served: the client is closed, by `close()`, by
+ * `destroy()`, or by a lost connection the reconnect policy did not restore.
+ * That last failure is on `cause`.
  */
 export class MllpClientClosedError extends MllpClientError {
   override readonly name = "MllpClientClosedError";
   readonly code = MllpErrorCode.CLOSED;
+  readonly delivery = "not-sent";
 
   constructor(cause: MllpClientError | null = null) {
     super(

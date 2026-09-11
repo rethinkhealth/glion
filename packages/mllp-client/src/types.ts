@@ -37,7 +37,7 @@ export interface MllpSocket {
 
 // ── For application authors ──────────────────────────────────────────
 
-/** The client's connection phase. */
+/** The client's phase. */
 export type MllpClientState =
   | "closed"
   | "closing"
@@ -57,7 +57,7 @@ export interface MllpReconnectOptions {
   /**
    * Time to wait before `attempt` in milliseconds.
    *
-   * @default full-jitter exponential backoff from 200 ms, capped at 2 s
+   * @default full-jitter exponential backoff from 1 s, capped at 30 s
    */
   readonly delay?: (attempt: number) => number;
 }
@@ -93,7 +93,7 @@ export interface MllpClientOptions {
    * How the client dials again after a connection attempt fails or an open
    * connection is lost. `false`: it closes instead.
    *
-   * @default 5 attempts with full-jitter backoff
+   * @default 5 attempts with full-jitter backoff, about 30 seconds in all
    */
   readonly reconnect?: MllpReconnectOptions | false;
 }

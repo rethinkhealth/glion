@@ -13,7 +13,10 @@ export const DEFAULT_SEND_TIMEOUT_MS = 30_000;
 /** Default maximum bytes buffered while receiving one message (16 MiB). */
 export const DEFAULT_MAX_BUFFERED_BYTES = 16 * 1024 * 1024;
 
-/** Default number of reconnect attempts after a failed one. */
+/**
+ * Default number of reconnect attempts after a failed one. With the default
+ * delay, the last one starts about 30 seconds after the first failure.
+ */
 export const DEFAULT_RECONNECT_ATTEMPTS = 5;
 
 /**

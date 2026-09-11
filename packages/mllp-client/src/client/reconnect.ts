@@ -1,5 +1,5 @@
 /**
- * The reconnect policy: its default delay, and the wait between attempts.
+ * The reconnect policy, its default delay, and the wait between attempts.
  *
  * @module
  */
@@ -11,14 +11,14 @@ export interface ReconnectPolicy {
 }
 
 /** Ceiling of the first default wait, in milliseconds. Doubles per attempt. */
-const BACKOFF_BASE_MS = 200;
+const BACKOFF_BASE_MS = 1000;
 
 /** Ceiling of every default wait, in milliseconds. */
-const BACKOFF_CAP_MS = 2000;
+const BACKOFF_CAP_MS = 30_000;
 
 /**
  * Full-jitter exponential backoff: a wait drawn uniformly from zero to
- * `min(2 s, 200 ms × 2^(attempt − 1))`.
+ * `min(30 s, 1 s × 2^(attempt − 1))`.
  */
 export function defaultReconnectDelay(attempt: number): number {
   const ceiling = Math.min(

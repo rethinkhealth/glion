@@ -1,6 +1,6 @@
 /**
- * The message layer over a byte socket: a message written here is framed, and
- * bytes read here are unframed.
+ * One session over a socket: the message layer over its bytes. A message
+ * written here is framed, and bytes read here are unframed.
  *
  * @module
  */
@@ -16,14 +16,15 @@ import {
 import type { MllpSocket, MllpStreams } from "../types";
 
 /**
- * One session over a socket. `ready` resolves once it is open; `destroy()`
- * ends it from any point.
+ * One session over one socket, for that socket's lifetime. `ready` resolves
+ * once it is open; `destroy()` ends it from any point.
  */
-export interface MllpConnection {
+export interface MllpSession {
   /**
-   * Resolves once the connection is open. Rejects with
+   * Resolves once the session is open. Rejects with
    * {@link MllpConnectFailedError}, {@link MllpConnectTimeoutError}, or the
-   * reason `destroy()` was given. `exchange` is usable only after it resolves.
+   * reason `destroy()` was given; when destroyed while opening, only once the
+   * socket is down. `exchange` is usable only after it resolves.
    */
   readonly ready: Promise<void>;
   /**
@@ -34,14 +35,14 @@ export interface MllpConnection {
    * @throws {MllpInvalidMessageError} The message contains a reserved MLLP
    *   byte, so nothing was written.
    * @throws {MllpSendTimeoutError} Nothing came back within `timeoutMs`. The
-   *   connection is destroyed.
+   *   session is destroyed.
    * @throws {MllpCodecError} The remote system sent bytes that are not an MLLP
    *   frame.
    */
   exchange(message: Uint8Array, timeoutMs: number): Promise<Uint8Array | null>;
   /**
-   * Ends the connection now, and resolves once the socket is down. `ready` and
-   * a waiting `exchange` both reject with `reason`.
+   * Ends the session now, and resolves once the socket is down. `ready` and a
+   * waiting `exchange` both reject with `reason`.
    *
    * Never rejects. Idempotent. Bounded.
    */
@@ -55,7 +56,7 @@ export interface ConnectOptions {
   readonly maxBufferedBytes: number;
 }
 
-/** The socket's streams, framed and locked for this connection's use. */
+/** The socket's streams, framed and locked for this session's use. */
 interface Framing {
   readonly reader: ReadableStreamDefaultReader<Uint8Array>;
   readonly writer: WritableStreamDefaultWriter<Uint8Array>;
@@ -103,27 +104,31 @@ async function openSocketStreams(
 }
 
 /**
- * Starts opening a connection over `socket`, and hands it back at once.
+ * Starts opening a session over `socket`, and hands it back at once. The
+ * session ends itself, with `signal.reason`, when `signal` aborts.
  *
- * Nothing is left open on any path: an attempt that fails or is cancelled
- * closes the socket before `ready` rejects.
+ * Never throws: every failure, an adapter's synchronous throw included,
+ * reaches `ready`. Nothing is left open on any path: an attempt that fails or
+ * is cancelled closes the socket before `ready` rejects.
  */
-export function createConnection(
+export function createSession(
   socket: MllpSocket,
-  opts: ConnectOptions
-): MllpConnection {
+  opts: ConnectOptions,
+  signal?: AbortSignal
+): MllpSession {
   const abort = new AbortController();
   const streams = openSocketStreams(socket, abort.signal, opts);
-  const ready = (async () => {
-    await streams;
-  })();
+  const cancel = () => void destroy(signal?.reason);
   let closing: Promise<void> | null = null;
 
   const destroy = (reason?: unknown): Promise<void> => {
     closing ??= (async () => {
       abort.abort(reason);
-      // Both are listed so neither is left unhandled when nobody awaited `ready`.
-      const [attempt] = await Promise.allSettled([streams, ready]);
+      signal?.removeEventListener("abort", cancel);
+      // Handled here for an owner that never awaits `ready`; the failure is
+      // still theirs to read.
+      void Promise.allSettled([ready]);
+      const [attempt] = await Promise.allSettled([streams]);
       if (attempt.status === "fulfilled") {
         // Release the streams, do not cancel them: cancelling would destroy
         // the socket under the adapter and skip its graceful close.
@@ -134,6 +139,21 @@ export function createConnection(
     })();
     return closing;
   };
+
+  const ready = (async () => {
+    signal?.addEventListener("abort", cancel, { once: true });
+    try {
+      await streams;
+    } catch (error) {
+      signal?.removeEventListener("abort", cancel);
+      throw error;
+    }
+    if (closing !== null) {
+      // Destroyed while opening: the socket is down before this settles.
+      await closing;
+      throw abort.signal.reason;
+    }
+  })();
 
   const exchange = async (
     message: Uint8Array,

@@ -1,9 +1,6 @@
 /**
- * Node runtime adapter for `MllpClient`.
- *
- * Opens a `net.Socket` and ends it the way Node expects — gracefully first,
- * then forced after a short grace period, so closing always resolves in
- * bounded time. Framing and stream ownership belong to the layer above.
+ * Node runtime adapter for `MllpClient`: one `net.Socket`, ended gracefully
+ * first and forced after a grace period. Closing resolves in bounded time.
  *
  * @module
  */

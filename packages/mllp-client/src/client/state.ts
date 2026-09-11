@@ -1,5 +1,6 @@
 /**
- * The client's phases, and what each one is holding.
+ * The client's phases, and what each one is holding: the message in flight,
+ * and the close. Connectivity is the connection's.
  *
  * Types only. A phase changes by replacing the object, never by mutating it.
  *
@@ -10,17 +11,6 @@ import type { MllpClientError } from "../errors";
 
 export type State =
   | { readonly phase: "idle" }
-  | {
-      readonly phase: "connecting";
-      /**
-       * Settles once the phase has moved on, to `connected` or to `closed`.
-       * Never rejects. A waiter reads the phase after it settles.
-       */
-      readonly ready: Promise<void>;
-      /** Aborted by `close()` and `destroy()`. Ends a wait between attempts. */
-      readonly abort: AbortController;
-    }
-  | { readonly phase: "connected" }
   | {
       readonly phase: "sending";
       /** MSH-10 of the message waiting for its acknowledgment. */

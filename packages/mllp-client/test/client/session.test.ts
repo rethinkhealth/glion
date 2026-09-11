@@ -1,5 +1,5 @@
 /**
- * `createConnection()` on its own: opening a socket, exchanging messages over
+ * `createSession()` on its own: opening a socket, exchanging messages over
  * it, and ending it.
  */
 
@@ -9,19 +9,19 @@ import { frame, MllpCodecError } from "@glion/mllp-codec";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
 import { describe, it, vi } from "vitest";
 
-import { createConnection } from "../../src/client/connection";
+import { createSession } from "../../src/client/session";
 import { MllpErrorCode } from "../../src/errors";
 import { adtA01 } from "../fixtures";
 import { stubSocket } from "./fixtures";
 
-describe("createConnection()", () => {
+describe("createSession()", () => {
   describe("opening", () => {
     it("resolves `ready` once the socket has opened", async () => {
       // Given
       const { socket } = stubSocket();
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -38,7 +38,7 @@ describe("createConnection()", () => {
       });
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5, // very short timeout to trigger abort
       });
@@ -55,7 +55,7 @@ describe("createConnection()", () => {
       );
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -74,7 +74,7 @@ describe("createConnection()", () => {
       });
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -93,7 +93,7 @@ describe("createConnection()", () => {
       });
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5, // very short timeout to expire before the socket opens
       });
@@ -115,7 +115,7 @@ describe("createConnection()", () => {
       });
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -132,7 +132,7 @@ describe("createConnection()", () => {
     it("frames the message, sends it, and returns the reply unframed", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -155,7 +155,7 @@ describe("createConnection()", () => {
     it("returns ANY reply with its MLLP framing removed", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -175,7 +175,7 @@ describe("createConnection()", () => {
     it("returns null once the remote system has closed", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -193,7 +193,7 @@ describe("createConnection()", () => {
     it("rejects when the reply is not an MLLP frame", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -211,7 +211,7 @@ describe("createConnection()", () => {
     it("rejects a reply frame that never ends, once it passes the byte cap", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 16, // small cap so a short frame overruns it
         timeoutMs: 5000,
       });
@@ -234,7 +234,7 @@ describe("createConnection()", () => {
     it("rejects INVALID_MESSAGE without writing when the message cannot be framed", async () => {
       // Given a message carrying FS, which MLLP reserves as the end of a block.
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -251,7 +251,7 @@ describe("createConnection()", () => {
     it("rejects SEND_TIMEOUT and ends the socket when no reply arrives in time", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -276,7 +276,7 @@ describe("createConnection()", () => {
       vi.useFakeTimers();
       try {
         const { socket, remote } = stubSocket();
-        const connection = createConnection(socket, {
+        const connection = createSession(socket, {
           maxBufferedBytes: 1024,
           timeoutMs: 5000,
         });
@@ -300,7 +300,7 @@ describe("createConnection()", () => {
     it("leaves the socket open when the reply arrives in time", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -323,7 +323,7 @@ describe("createConnection()", () => {
     it("ends the socket", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -339,7 +339,7 @@ describe("createConnection()", () => {
     it("ends it once, however many times it is called", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -357,7 +357,7 @@ describe("createConnection()", () => {
       // Given an exchange parked on its reply: this is how a close reaches the
       // caller waiting for an acknowledgment.
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -376,7 +376,7 @@ describe("createConnection()", () => {
     it("rejects a waiting exchange even with no reason given", async () => {
       // Given
       const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -400,7 +400,7 @@ describe("createConnection()", () => {
         await setTimeout(60_000, undefined, { signal });
         throw new Error("unreachable");
       });
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -415,7 +415,7 @@ describe("createConnection()", () => {
         await setTimeout(60_000, undefined, { signal });
         throw new Error("unreachable");
       });
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -433,7 +433,7 @@ describe("createConnection()", () => {
         await setTimeout(60_000, undefined, { signal });
         throw new Error("unreachable");
       });
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -452,7 +452,7 @@ describe("createConnection()", () => {
         await setTimeout(20); // opens after the caller has given up
         return streams;
       });
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });

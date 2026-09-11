@@ -4,4 +4,5 @@ import { MllpClientError, MllpErrorCode } from "./base";
 export class MllpInvalidOptionError extends MllpClientError {
   override readonly name = "MllpInvalidOptionError";
   readonly code = MllpErrorCode.INVALID_OPTION;
+  readonly delivery = "not-sent";
 }

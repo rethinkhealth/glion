@@ -145,9 +145,18 @@ Generic `ignoreErrors`-style helpers and bare `catch {}` are code smells — the
 
 **Default**: let errors propagate. Tests will catch unhandled rejections; CI will catch regressions; bugs become loud, not silent.
 
-### 3. Errors belong at the layer that owns them
+### 3. Errors are facts, raised by the layer that observed them
 
-Each layer handles its own concerns. Adapters absorb their own teardown errors and idempotency quirks. Core trusts adapter contracts. Don't write defensive `try/catch` in a core module to guard against a bug in the runtime adapter — document the contract loudly in the JSDoc and let adapter-level tests enforce it.
+An error records a fact, in the package's one error vocabulary, and is raised by the layer that observed the fact. Four rules follow:
+
+- **Raise where observed.** The layer holding the socket raises the wire's facts (refused, timed out, lost). The layer holding the message raises the message's facts (cannot be sent, reply does not match, refused by the receiver).
+- **Relay unchanged.** A layer above lets a lower fact propagate as it is. It wraps with `cause` only where the meaning changes at its own boundary, and never re-labels a fact into a parallel class or a second taxonomy.
+- **Never reach down.** A layer does not build a lower layer's fact from that layer's raw signals (an end-of-stream, a raw stream error). If it finds itself doing so, the fact belongs one layer down.
+- **Carry facts, not interpretations.** Hooks, results, and state hold what a layer observed, never what its caller made of it.
+
+Each layer also handles its own concerns: adapters absorb their own teardown errors and idempotency quirks, and core trusts adapter contracts. Don't write defensive `try/catch` in a core module to guard against a bug in the runtime adapter — document the contract loudly in the JSDoc and let adapter-level tests enforce it.
+
+**Anti-pattern from real work**: the client turned the session's `null` reply and raw stream error into `MllpConnectionLostError`. The session observed the loss; it raises it now, and the client relays it.
 
 **Example**: `MllpDuplexStream.close()` MUST resolve (never reject) and MUST be idempotent. The core awaits `duplex.close()` in `finally` blocks and fires-and-forgets via `void duplex.close()` from the abort handler; the Node/Deno/Workers adapters take responsibility for honouring the contract internally.
 
@@ -194,7 +203,19 @@ Don't explain WHAT the code does — well-named identifiers do that. Don't refer
 
 When considering a defensive measure, give actual numbers. "Zero with current adapters; low for custom adapters, mitigated by adapter-level testing" beats "could happen." Calibrated risk is how the project decides what to defend against and what to leave bare.
 
-### 12. Iterate to find the right design
+### 12. Assertions are for bugs
+
+An `assert*` function throws only when an internal invariant is violated — a state the phase graph does not allow, a handle that cannot be null there. Its error says "this is a bug; please report it." Expected runtime conditions — the client is closed, a send is already in flight, the remote refused — are ordinary control flow at the call site, throwing the typed public error directly. Validating an option a caller passed is the one `assert*` that throws a public error: it runs before anything happens, and an out-of-range option is a caller bug. Never route a runtime condition through an `assert*` helper, and never let an `assert*` helper stand in as a middleman that builds a public error from placeholders.
+
+**Anti-pattern from real work**: `assertReadyToSend(state)` that threw `MllpAlreadySendingError` and `MllpClientClosedError` for normal states, next to a genuine bug guard for impossible ones. The two runtime throws belong in `send()`; only the impossible-state branch is an assertion.
+
+### 13. No indirection
+
+A value has one owner and travels one way. Do not pass a value into a layer only to receive it back through a callback; the layer that decides something owns the inputs to that decision and nothing else. Do not introduce a parallel type or taxonomy (an internal error class, a placeholder that a helper turns into the real thing) to avoid using the package's own. Do not wrap a call in a function that makes no decision. If you cannot say what a layer _decides_ with a value it holds, it should not hold it.
+
+**Anti-pattern from real work**: `connection.reconnect(reason)` took the client's typed error, stored it, and handed it back through `onClose(reason)` so the client could emit it. The connection decided nothing with it. Now `reconnect()` returns whether it will dial again, and the client, which owns the reason, closes with it.
+
+### 14. Iterate to find the right design
 
 Multiple proposal-and-pushback rounds are fine and expected. Reject your own first proposal when a better one surfaces. Don't default to the most defensive option just to feel safe — defaulting to defense is how `ignoreErrors` and `releaseLockSafely` are born. The design is "done" when the simplest version that handles the real failure modes is on the page, not when every conceivable failure has a guard.
 
@@ -240,6 +261,7 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 
 ### Code organization
 
+- Branch on a discriminated union with one construct: an exhaustive `switch` over the discriminant, every arm listed, no `default`. Never mix an `if` chain, a ternary, and a `switch` on the same discriminant in one function — pick the `switch`.
 - Keep functions focused; cap cognitive complexity.
 - Extract complex conditions into well-named boolean variables.
 - Group related code; separate concerns.

@@ -1,12 +1,14 @@
-import { MllpClientError, MllpErrorCode } from "./base";
+import { MllpErrorCode } from "./base";
+import { MllpConnectionError } from "./mllp-connection-error";
 
 /**
  * The remote system did not accept the connection within `connectTimeoutMs`.
  * The host may be down, overloaded, or silently dropping packets.
  */
-export class MllpConnectTimeoutError extends MllpClientError {
-  override readonly name = "MllpConnectTimeoutError";
-  readonly code = MllpErrorCode.CONNECT_TIMEOUT;
+export class MllpConnectionTimeoutError extends MllpConnectionError {
+  override readonly name = "MllpConnectionTimeoutError";
+  readonly code = MllpErrorCode.CONNECTION_TIMEOUT;
+  readonly delivery = "not-sent";
   readonly timeoutMs: number;
 
   constructor(timeoutMs: number) {
