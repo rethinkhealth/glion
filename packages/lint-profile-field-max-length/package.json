@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-profile-field-max-length",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Lint rule to validate field value lengths against HL7v2 profile maxLength",
   "keywords": [
     "health",

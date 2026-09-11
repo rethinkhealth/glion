@@ -1,5 +1,26 @@
 # @rethinkhealth/hl7v2-util-query
 
+## 0.18.0
+
+### Minor Changes
+
+- dca5259: **BREAKING:** Raise `engines.node` from `>=20` to `>=22` across all `@glion/*` packages and `create-glion`, and drop Node 20.x from the CI test matrix (#728).
+
+  Node 20 reached end-of-life on 2026-04-30 and is no longer tested. The supported and tested runtimes are Node 22 and Node 24.
+
+  Downstream impact: applications that pin Node 20 will need to upgrade to Node 22 or later. Node 22 is in Maintenance LTS until April 2027; Node 24 is the current Active LTS and the recommended target.
+
+### Patch Changes
+
+- 5f18700: Fix `select` and `selectAll` to resolve a nested group by bare name, matching how nested segments already resolve.
+  - Fix `select(root, "ORDER")` returning `null` when the `ORDER` group is nested inside another group
+  - Fix `ancestors` for a nested group match to end at its direct parent, so `format()` round-trips the result
+  - Document that the final path name matches at any depth in document order and that `[n]` indexes that order, while group prefixes match direct children only
+
+- Updated dependencies [dca5259]
+  - @glion/ast@0.18.0
+  - @glion/utils@0.18.0
+
 ## 0.17.0
 
 ### Patch Changes

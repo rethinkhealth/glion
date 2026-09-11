@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-message-version",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "hl7v2-lint rule to warn when message version is not supported",
   "keywords": [
     "definition",

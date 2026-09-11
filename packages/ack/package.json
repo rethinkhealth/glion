@@ -1,6 +1,6 @@
 {
   "name": "@glion/ack",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "HL7v2 acknowledgment message builder and typed error classes",
   "keywords": [
     "ack",

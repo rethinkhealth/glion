@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-profile-events-segments-order",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Linting based on events profiles for segment orders",
   "keywords": [
     "health",

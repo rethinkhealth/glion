@@ -1,5 +1,34 @@
 # @rethinkhealth/hl7v2-ack
 
+## 0.18.0
+
+### Minor Changes
+
+- ee6738b: Sharpen `@glion/ack` as the owner of Table 0008 vocabulary:
+  - `isAckNakCode(value)` — type guard for the reject half of Table 0008 (mirrors `isAckCode`); the complement narrows to `AckSuccessCode`.
+  - `AckException.code` is narrowed from the full Table 0008 union to `AckNakCode` — an acknowledgment exception always represents a NAK, and its type now says so.
+  - Type names are simplified: `AckCode`, `Hl7ErrorCode`, and `Severity` now double as the union types of their own values (the monorepo-wide const-object pattern); `AckCodeValue`, `Hl7ErrorCodeValue`, and `SeverityValue` are removed.
+  - `uid()` moves to its own package, `@glion/util-uid` — control-ID generation is generic, not acknowledgment vocabulary. Import it from there; the ID scheme is documented in that package's changeset.
+  - The package no longer emits ERR segments: `AckException.toErrSegment()` and `acknowledge()`'s `includeErrSegment` option are removed. The ERR layout changed across HL7v2 versions (ELD in ERR-1 before v2.5, ERR-3/ERR-4 after), so a version-agnostic package cannot render one correctly — exceptions still carry `errorCode` and `severity`, and the implementation appends its own version-appropriate ERR to the returned tree.
+  - `acknowledge()` (with `AcknowledgeOptions` / `SendingInfo`) moves to `@glion/mllp-ack`: `@glion/ack` is now the version-agnostic acknowledgment language — codes, guards, exceptions, `uid` — with `@glion/ast` as its only dependency; response construction lives with the server middleware.
+  - `AckException` slims to data that belongs on an error: `raw` and `tree` are removed (full HL7v2 payloads on exceptions end up in logs and error trackers — a PHI hazard — and had no consumer), replaced by `text` (MSA-3, the remote system's own diagnostic sentence). Full-fidelity `raw`/`tree` remain on the accepted-response type.
+
+- 033cdb6: Add `isAckSuccessCode`, the accept half of the Table 0008 guards. The package exported the `AckSuccessCode` type but only `isAckCode` and `isAckNakCode`, so narrowing a string to an accept meant composing the two.
+- dca5259: **BREAKING:** Raise `engines.node` from `>=20` to `>=22` across all `@glion/*` packages and `create-glion`, and drop Node 20.x from the CI test matrix (#728).
+
+  Node 20 reached end-of-life on 2026-04-30 and is no longer tested. The supported and tested runtimes are Node 22 and Node 24.
+
+  Downstream impact: applications that pin Node 20 will need to upgrade to Node 22 or later. Node 22 is in Maintenance LTS until April 2027; Node 24 is the current Active LTS and the recommended target.
+
+### Patch Changes
+
+- 7715edf: Remove `@glion/mllp-ack` from the ecosystem: `ackMiddleware` and `acknowledge()` are retired ahead of built-in acknowledgment translation at the framework's error boundary in `@glion/mllp` (ADR 0019).
+  - Remove `@glion/mllp-ack` from quick-start snippets and package catalogs; apps reply by returning a `Response` or via `app.onError()` until the built-in translation lands
+  - Remove the `@glion/mllp-ack` workspace dependency from `@glion/cli`
+
+- Updated dependencies [dca5259]
+  - @glion/ast@0.18.0
+
 ## 0.17.0
 
 ### Minor Changes

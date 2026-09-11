@@ -1,6 +1,6 @@
 {
   "name": "@glion/annotate-profile-fields",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Unified plugin to annotate HL7v2 field nodes with profile metadata",
   "keywords": [
     "annotate",

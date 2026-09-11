@@ -1,5 +1,28 @@
 # @rethinkhealth/hl7v2-preset-lint-profile-recommended
 
+## 0.18.0
+
+### Minor Changes
+
+- dca5259: **BREAKING:** Raise `engines.node` from `>=20` to `>=22` across all `@glion/*` packages and `create-glion`, and drop Node 20.x from the CI test matrix (#728).
+
+  Node 20 reached end-of-life on 2026-04-30 and is no longer tested. The supported and tested runtimes are Node 22 and Node 24.
+
+  Downstream impact: applications that pin Node 20 will need to upgrade to Node 22 or later. Node 22 is in Maintenance LTS until April 2027; Node 24 is the current Active LTS and the recommended target.
+
+### Patch Changes
+
+- Updated dependencies [dca5259]
+  - @glion/annotate-profile-context@0.18.0
+  - @glion/lint-profile-events-segments-order@0.18.0
+  - @glion/lint-profile-extra-components@0.18.0
+  - @glion/lint-profile-extra-fields@0.18.0
+  - @glion/lint-profile-field-max-length@0.18.0
+  - @glion/lint-profile-field-repetition@0.18.0
+  - @glion/lint-profile-required-components@0.18.0
+  - @glion/lint-profile-required-fields@0.18.0
+  - @glion/lint-profile-table-values@0.18.0
+
 ## 0.17.0
 
 ### Patch Changes
