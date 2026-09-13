@@ -25,8 +25,10 @@
     "build": "turbo run build",
     "check": "ultracite check",
     "check-types": "turbo run check-types",
+    "check:actions": "glion-check-actions",
     "check:readmes": "turbo run check:readme",
     "check:release": "glion-check-release",
+    "check:workflows": "uvx zizmor --persona pedantic .github/workflows",
     "ci:install": "pnpm install --frozen-lockfile",
     "ci:update": "pnpm --recursive update",
     "ci:version": "pnpm changeset version",
@@ -51,6 +53,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "1.0.1",
     "@changesets/cli": "3.0.2",
+    "@glion/check-actions": "workspace:*",
     "@glion/check-release": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "husky": "9.1.7",

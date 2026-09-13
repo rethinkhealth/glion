@@ -10,8 +10,15 @@ on:
     #   - "src/**/*.js"
     #   - "src/**/*.jsx"
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   claude-review:
+    name: Claude Code Review
     # Optional: Filter by PR author
     if: |
       github.event.label.name == 'claude'
@@ -21,20 +28,21 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
-      id-token: write
+      contents: read # checkout
+      pull-requests: read # read the PR under review
+      issues: read # read linked issues
+      id-token: write # exchange OIDC for the Claude GitHub App token that posts comments
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
+          persist-credentials: false
           fetch-depth: 1
 
       - name: Run Claude Code Review
         id: claude-review
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@9cdae7f0d995e3ba7c33f226087fdf82a59cd520 # v1.0.223
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           track_progress: true # ✨ Enables tracking comments
