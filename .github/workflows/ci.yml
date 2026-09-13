@@ -6,6 +6,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+# Nothing here writes back: Codecov authenticates with its own secret and
+# the pnpm cache needs only read scope.
+permissions:
+  contents: read
+
 jobs:
   testing:
     timeout-minutes: 15
