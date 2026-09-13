@@ -218,8 +218,8 @@ export function judge(pins, facts) {
  *
  * Calls `tagsByCommit` and `latestRelease` once per repository and
  * `commitDate` once per SHA-pinned group. When a repository has no
- * release, `latest` is its highest version tag. Rejects when any lookup
- * rejects.
+ * release, or its latest release tag is not a version, `latest` is its
+ * highest version tag. Rejects when any lookup rejects.
  *
  * @param {Pin[]} pins References in any order.
  * @param {Repository} repository The lookups.
@@ -231,9 +231,11 @@ export async function checkActions(pins, repository) {
     await Promise.all(
       [...new Set(groups.map(([{ repo }]) => repo))].map(async (repo) => {
         const tags = repository.tagsByCommit(repo);
+        const release = await repository.latestRelease(repo);
         const latest =
-          (await repository.latestRelease(repo)) ??
-          highestVersion([...tags.values()].flat());
+          release !== undefined && parseVersion(release)
+            ? release
+            : highestVersion([...tags.values()].flat());
         return [repo, { latest, tags }];
       })
     )
