@@ -6,10 +6,10 @@ A simple HL7v2 MLLP client for Node.js and Cloudflare Workers.
 - 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, TCP keepalive by default, and explicit states you can read.
 - ⚡ **Thin over TCP.** One socket, one message at a time. No queue, no worker threads, no polling.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
-- 🧩 **Any transport.** TCP included. TLS, Cloudflare Workers or an in-memory socket plug in behind it.
+- 🧩 **Any transport.** TCP on Node.js and Cloudflare Workers included. TLS or an in-memory socket plug in behind the same two-method interface.
 - 🔤 **Typed end to end.** TypeScript throughout, with parsed HL7v2 going in and coming out.
 
-> **Coming soon** — TLS and Cloudflare Workers adapters. Today the only bundled adapter is Node.js over TCP.
+> TLS is not bundled yet; it is tracked in [#657](https://github.com/rethinkhealth/glion/issues/657).
 
 ## Install
 
@@ -263,7 +263,7 @@ client
 
 The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#custom-socket) — two methods — so supporting a new runtime means writing an adapter, not forking the client.
 
-Node.js is the only adapter that ships today.
+Two adapters ship: [Node.js](#nodejs) and [Cloudflare Workers](#cloudflare-workers).
 
 ### Node.js
 
@@ -289,6 +289,43 @@ const client = new MllpClient({
   socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
 });
 ```
+
+### Cloudflare Workers
+
+```ts
+import { workersSocket } from "@glion/mllp-client/workers";
+
+workersSocket(options: WorkersSocketOptions): MllpSocket
+```
+
+Plain TCP over `cloudflare:sockets`. The module resolves only inside the Workers runtime; import it from the `./workers` subpath, never from `.`.
+
+| Option | Type     | Default  | Description                           |
+| ------ | -------- | -------- | ------------------------------------- |
+| `host` | `string` | required | Host name or address of the receiver. |
+| `port` | `number` | required | TCP port of the receiver.             |
+
+```ts
+import { MllpClient } from "@glion/mllp-client";
+import { workersSocket } from "@glion/mllp-client/workers";
+
+export default {
+  async fetch(request: Request): Promise<Response> {
+    await using client = new MllpClient({
+      socket: workersSocket({ host: "hl7.example.org", port: 2575 }),
+    });
+    const ack = await client.send(await messageFrom(request));
+    return Response.json({ code: ack.code, controlId: ack.controlId });
+  },
+};
+```
+
+What differs from Node:
+
+- A Worker reaches only endpoints routable from Cloudflare's network. A receiver on a private network needs a publicly reachable endpoint in front of it.
+- `close()` resolves as soon as the runtime has ended the socket; there is no grace window.
+- Under `wrangler dev`, connections go through a local proxy, so `MllpConnectFailedError.cause` carries the proxy's message rather than a socket error code. `code` is the same in both.
+- Cloudflare blocks some destination ports.
 
 ### Custom Socket
 

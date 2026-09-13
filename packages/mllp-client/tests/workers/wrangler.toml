@@ -1,0 +1,6 @@
+# The harness Worker `tests/workers/workers.test.ts` spawns through
+# `wrangler.unstable_dev`. Never deployed.
+
+name = "mllp-client-workers-harness"
+main = "./harness.ts"
+compatibility_date = "2026-09-01"
