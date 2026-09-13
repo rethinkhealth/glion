@@ -1,0 +1,13 @@
+{
+  "languages": [
+    "actions",
+    "javascript",
+    "javascript-typescript",
+    "python",
+    "typescript"
+  ],
+  "query_suite": "default",
+  "schedule": "weekly",
+  "state": "configured",
+  "threat_model": "remote"
+}

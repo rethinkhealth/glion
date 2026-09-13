@@ -1,0 +1,90 @@
+{
+  "bypass_actors": [],
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": ["~DEFAULT_BRANCH"]
+    }
+  },
+  "enforcement": "active",
+  "name": "default",
+  "rules": [
+    {
+      "parameters": {
+        "code_scanning_tools": [
+          {
+            "alerts_threshold": "errors",
+            "security_alerts_threshold": "high_or_higher",
+            "tool": "CodeQL"
+          },
+          {
+            "alerts_threshold": "errors_and_warnings",
+            "security_alerts_threshold": "medium_or_higher",
+            "tool": "zizmor"
+          }
+        ]
+      },
+      "type": "code_scanning"
+    },
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "license_compliance_scanning"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "parameters": {
+        "allowed_merge_methods": ["merge", "squash", "rebase"],
+        "dismiss_stale_reviews_on_push": false,
+        "dismissal_restriction": {
+          "allowed_actors": [],
+          "enabled": false
+        },
+        "require_code_owner_review": false,
+        "require_extra_approval_for_unattributed_changes": false,
+        "require_last_push_approval": false,
+        "required_approving_review_count": 0,
+        "required_review_thread_resolution": true,
+        "required_reviewers": []
+      },
+      "type": "pull_request"
+    },
+    {
+      "type": "required_linear_history"
+    },
+    {
+      "type": "required_signatures"
+    },
+    {
+      "parameters": {
+        "do_not_enforce_on_create": false,
+        "required_status_checks": [
+          {
+            "context": "codecov/patch"
+          },
+          {
+            "context": "linting"
+          },
+          {
+            "context": "Packaging (publint)"
+          },
+          {
+            "context": "testing (ubuntu-latest, 22.x)"
+          },
+          {
+            "context": "testing (ubuntu-latest, 24.x)"
+          },
+          {
+            "context": "Type checking"
+          }
+        ],
+        "strict_required_status_checks_policy": true
+      },
+      "type": "required_status_checks"
+    }
+  ],
+  "target": "branch"
+}
