@@ -12,17 +12,18 @@
  * @module
  */
 
-export { MllpClient, MllpClientEmitter } from "./client/index";
+export { MllpClient } from "./client";
+export { MllpClientEmitter } from "./events";
 export type {
   MllpClientEvent,
   MllpClientEvents,
   MllpClientListener,
-  MllpConnection,
-} from "./client/index";
+} from "./events";
 export type {
   MllpClientOptions,
   MllpClientResponse,
   MllpClientState,
+  MllpReconnectOptions,
   MllpSendOptions,
   MllpSocket,
   MllpStreams,
@@ -31,12 +32,15 @@ export {
   MllpAlreadySendingError,
   MllpClientClosedError,
   MllpClientError,
-  MllpConnectFailedError,
-  MllpConnectTimeoutError,
+  MllpConnectionError,
+  MllpConnectionFailedError,
   MllpConnectionLostError,
+  MllpConnectionTimeoutError,
   MllpErrorCode,
   MllpInvalidMessageError,
   MllpInvalidOptionError,
   MllpInvalidResponseError,
+  MllpSendAbortedError,
   MllpSendTimeoutError,
 } from "./errors";
+export type { MllpDelivery } from "./errors";

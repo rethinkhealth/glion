@@ -4,12 +4,5 @@ import { MllpClientError, MllpErrorCode } from "./base";
 export class MllpInvalidOptionError extends MllpClientError {
   override readonly name = "MllpInvalidOptionError";
   readonly code = MllpErrorCode.INVALID_OPTION;
-  readonly option: string;
-
-  constructor(option: string, requirement: string, received: unknown) {
-    super(
-      `Option ${option} must be ${requirement}; received ${String(received)}.`
-    );
-    this.option = option;
-  }
+  readonly delivery = "not-sent";
 }

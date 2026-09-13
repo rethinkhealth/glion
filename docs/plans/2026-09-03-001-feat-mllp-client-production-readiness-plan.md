@@ -163,5 +163,5 @@ The package is pre-1.0 and already shipped one breaking rewrite (#669, #691). Th
 
 ## Related
 
-- ADR 0020 (`docs/adr/0020-mllp-client-architecture.md`), ADR 0018, ADR 0019
+- ADR 0020 (withdrawn 2026-09-10; the shipped design is recorded by the package itself, and reconnect by ADR 0021), ADR 0018, ADR 0019
 - Issues: #657 (TLS), #690 (idle drop), #646 (idempotency/retry), #470 (observability), #685 (parser injection), #668/#670 (ACK conformance), #658 (HTTP→MLLP gateway), #671/#662 (charset)

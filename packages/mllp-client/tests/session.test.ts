@@ -1,5 +1,5 @@
 /**
- * `createConnection()` on its own: opening a socket, exchanging messages over
+ * `createSession()` on its own: opening a socket, exchanging messages over
  * it, and ending it.
  */
 
@@ -9,19 +9,19 @@ import { frame, MllpCodecError } from "@glion/mllp-codec";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
 import { describe, it, vi } from "vitest";
 
-import { createConnection } from "../../src/client/connection";
-import { MllpErrorCode } from "../../src/errors";
-import { adtA01 } from "../fixtures";
-import { stubSocket } from "./fixtures";
+import { MllpErrorCode } from "../src/errors";
+import { createSession } from "../src/session";
+import { adtA01 } from "./fixtures";
+import { memorySocket } from "./remote";
 
-describe("createConnection()", () => {
+describe("createSession()", () => {
   describe("opening", () => {
     it("resolves `ready` once the socket has opened", async () => {
       // Given
-      const { socket } = stubSocket();
+      const { socket } = memorySocket();
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -32,13 +32,13 @@ describe("createConnection()", () => {
 
     it("hands the socket a signal that carries the deadline", async () => {
       // Given
-      const { socket, remote } = stubSocket(async (_streams, signal) => {
+      const { socket, remote } = memorySocket(async (_streams, signal) => {
         await setTimeout(60_000, undefined, { signal }); // simulate a long delay to test abort
         throw new Error("unreachable");
       });
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5, // very short timeout to trigger abort
       });
@@ -48,14 +48,14 @@ describe("createConnection()", () => {
       expect(remote.signal?.aborted).toBe(true);
     });
 
-    it("rejects `ready` with CONNECT_FAILED when the socket rejects", async () => {
+    it("rejects `ready` with CONNECTION_FAILED when the socket rejects", async () => {
       // Given
-      const { socket } = stubSocket(() =>
+      const { socket } = memorySocket(() =>
         Promise.reject(new Error("ECONNREFUSED"))
       );
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -63,44 +63,44 @@ describe("createConnection()", () => {
       // Then
       await expect(connection.ready).rejects.toMatchObject({
         cause: expect.objectContaining({ message: "ECONNREFUSED" }),
-        code: MllpErrorCode.CONNECT_FAILED,
+        code: MllpErrorCode.CONNECTION_FAILED,
       });
     });
 
-    it("rejects `ready` with CONNECT_FAILED when the socket throws synchronously", async () => {
+    it("rejects `ready` with CONNECTION_FAILED when the socket throws synchronously", async () => {
       // Given
-      const { socket } = stubSocket(() => {
+      const { socket } = memorySocket(() => {
         throw new Error("no such host");
       });
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
 
       // Then
       await expect(connection.ready).rejects.toMatchObject({
-        code: MllpErrorCode.CONNECT_FAILED,
+        code: MllpErrorCode.CONNECTION_FAILED,
       });
     });
 
-    it("rejects `ready` with CONNECT_TIMEOUT when the socket does not open in time", async () => {
+    it("rejects `ready` with CONNECTION_TIMEOUT when the socket does not open in time", async () => {
       // Given
-      const { socket } = stubSocket(async (_streams, signal) => {
+      const { socket } = memorySocket(async (_streams, signal) => {
         await setTimeout(60_000, undefined, { signal });
         throw new Error("unreachable");
       });
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5, // very short timeout to expire before the socket opens
       });
 
       // Then
       await expect(connection.ready).rejects.toMatchObject({
-        code: MllpErrorCode.CONNECT_TIMEOUT,
+        code: MllpErrorCode.CONNECTION_TIMEOUT,
         timeoutMs: 5,
       });
     });
@@ -109,20 +109,20 @@ describe("createConnection()", () => {
   describe("opening it fails", () => {
     it("ends a socket whose streams cannot be taken over", async () => {
       // Given a socket that hands back a readable someone else already holds.
-      const { socket, remote } = stubSocket((streams) => {
+      const { socket, remote } = memorySocket((streams) => {
         streams.readable.getReader();
         return Promise.resolve(streams);
       });
 
       // When
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
 
       // Then the socket that opened is not left open behind the rejection.
       await expect(connection.ready).rejects.toMatchObject({
-        code: MllpErrorCode.CONNECT_FAILED,
+        code: MllpErrorCode.CONNECTION_FAILED,
       });
       expect(remote.close).toHaveBeenCalledTimes(1);
     });
@@ -131,8 +131,8 @@ describe("createConnection()", () => {
   describe("exchange()", () => {
     it("frames the message, sends it, and returns the reply unframed", async () => {
       // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -147,15 +147,32 @@ describe("createConnection()", () => {
       // Then
       expect(await remote.wrote()).toEqual(frame(message));
       await remote.sends(frame(encodeBytes("MSH|^~\\&|ACK")));
-      expect(decodeBytes((await exchanging) ?? new Uint8Array())).toBe(
-        "MSH|^~\\&|ACK"
-      );
+      expect(decodeBytes(await exchanging)).toBe("MSH|^~\\&|ACK");
+    });
+
+    it("returns a complete reply even when the remote system hangs up right after it", async () => {
+      // Given
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+      await connection.ready;
+      const exchanging = connection.exchange(encodeBytes(adtA01().text), 5000);
+      await remote.wrote();
+
+      // When the reply and the end of the stream arrive together
+      void remote.sends(frame(encodeBytes("MSH|^~\\&|ACK")));
+      void remote.hangsUp();
+
+      // Then the reply is read before the end is seen
+      expect(decodeBytes(await exchanging)).toBe("MSH|^~\\&|ACK");
     });
 
     it("returns ANY reply with its MLLP framing removed", async () => {
       // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -167,15 +184,13 @@ describe("createConnection()", () => {
       await remote.sends(frame(encodeBytes("ANY_MESSAGE")));
 
       // Then
-      expect(decodeBytes((await exchanging) ?? new Uint8Array())).toBe(
-        "ANY_MESSAGE"
-      );
+      expect(decodeBytes(await exchanging)).toBe("ANY_MESSAGE");
     });
 
-    it("returns null once the remote system has closed", async () => {
+    it("rejects CONNECTION_LOST once the remote system has closed", async () => {
       // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -187,13 +202,72 @@ describe("createConnection()", () => {
       await remote.hangsUp();
 
       // Then
-      expect(await exchanging).toBeNull();
+      await expect(exchanging).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECTION_LOST,
+      });
+    });
+
+    it("waits for the session to open when called before it has", async () => {
+      // Given a socket that takes its time to open
+      const { socket, remote } = memorySocket(async (streams) => {
+        await setTimeout(20);
+        return streams;
+      });
+      const connection = createSession(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+
+      // When
+      const exchanging = connection.exchange(encodeBytes(adtA01().text), 5000);
+      await remote.acknowledges("AA");
+
+      // Then
+      await expect(exchanging).resolves.toBeInstanceOf(Uint8Array);
+      await connection.destroy();
+    });
+
+    it("rejects with the opening's own failure when the session never opens", async () => {
+      // Given
+      const { socket } = memorySocket(() =>
+        Promise.reject(new Error("ECONNREFUSED"))
+      );
+      const connection = createSession(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+
+      // When / Then
+      await expect(
+        connection.exchange(encodeBytes(adtA01().text), 5000)
+      ).rejects.toMatchObject({ code: MllpErrorCode.CONNECTION_FAILED });
+    });
+
+    it("rejects CONNECTION_LOST with the stream's error when the connection resets", async () => {
+      // Given
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+      await connection.ready;
+      const exchanging = connection.exchange(encodeBytes(adtA01().text), 5000);
+      await remote.wrote();
+
+      // When
+      await remote.resets();
+
+      // Then
+      await expect(exchanging).rejects.toMatchObject({
+        cause: expect.objectContaining({ message: "ECONNRESET" }),
+        code: MllpErrorCode.CONNECTION_LOST,
+      });
     });
 
     it("rejects when the reply is not an MLLP frame", async () => {
       // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -210,8 +284,8 @@ describe("createConnection()", () => {
 
     it("rejects a reply frame that never ends, once it passes the byte cap", async () => {
       // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 16, // small cap so a short frame overruns it
         timeoutMs: 5000,
       });
@@ -233,8 +307,8 @@ describe("createConnection()", () => {
 
     it("rejects INVALID_MESSAGE without writing when the message cannot be framed", async () => {
       // Given a message carrying FS, which MLLP reserves as the end of a block.
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -246,12 +320,66 @@ describe("createConnection()", () => {
         code: MllpErrorCode.INVALID_MESSAGE,
       });
       expect(remote.close).not.toHaveBeenCalled();
+
+      // And the wire is still in step: the next message is the first thing
+      // the remote end reads.
+      const valid = encodeBytes(adtA01().text);
+      const exchanging = connection.exchange(valid, 5000);
+      expect(await remote.wrote()).toEqual(frame(valid));
+      await remote.sends(frame(encodeBytes("MSH|^~\\&|ACK")));
+      await exchanging;
+      await connection.destroy();
+    });
+
+    it("rejects INVALID_MESSAGE before waiting for the session to open", async () => {
+      // Given a session that never opens
+      const { socket } = memorySocket(async (_streams, signal) => {
+        await setTimeout(60_000, undefined, { signal });
+        throw new Error("unreachable");
+      });
+      const connection = createSession(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+      const opening = expect(connection.ready).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECTION_FAILED,
+      });
+      const reserved = encodeBytes(`MSH|^~\\&|A${String.fromCodePoint(0x1c)}`);
+
+      // When / Then the message is refused for what it is, not for the
+      // session's state.
+      await expect(connection.exchange(reserved, 5000)).rejects.toMatchObject({
+        code: MllpErrorCode.INVALID_MESSAGE,
+      });
+      await connection.destroy();
+      await opening;
+    });
+
+    it("rejects INVALID_MESSAGE without starting the send deadline", async () => {
+      // Given a deadline that would fire almost at once
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+      await connection.ready;
+      const reserved = encodeBytes(`MSH|^~\\&|A${String.fromCodePoint(0x1c)}`);
+
+      // When
+      await expect(connection.exchange(reserved, 1)).rejects.toMatchObject({
+        code: MllpErrorCode.INVALID_MESSAGE,
+      });
+      await setTimeout(10);
+
+      // Then no deadline fired, so nothing tore the socket down.
+      expect(remote.close).not.toHaveBeenCalled();
+      await connection.destroy();
     });
 
     it("rejects SEND_TIMEOUT and ends the socket when no reply arrives in time", async () => {
       // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -275,8 +403,8 @@ describe("createConnection()", () => {
       // settles, and nothing here waits for a real macrotask.
       vi.useFakeTimers();
       try {
-        const { socket, remote } = stubSocket();
-        const connection = createConnection(socket, {
+        const { socket, remote } = memorySocket();
+        const connection = createSession(socket, {
           maxBufferedBytes: 1024,
           timeoutMs: 5000,
         });
@@ -299,8 +427,8 @@ describe("createConnection()", () => {
 
     it("leaves the socket open when the reply arrives in time", async () => {
       // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -322,8 +450,8 @@ describe("createConnection()", () => {
   describe("destroy() once it is open", () => {
     it("ends the socket", async () => {
       // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -338,8 +466,8 @@ describe("createConnection()", () => {
 
     it("ends it once, however many times it is called", async () => {
       // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -353,30 +481,11 @@ describe("createConnection()", () => {
       expect(remote.close).toHaveBeenCalledTimes(1);
     });
 
-    it("rejects a waiting exchange with the reason it was destroyed for", async () => {
+    it("rejects a waiting exchange with SEND_ABORTED", async () => {
       // Given an exchange parked on its reply: this is how a close reaches the
       // caller waiting for an acknowledgment.
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
-        maxBufferedBytes: 1024,
-        timeoutMs: 5000,
-      });
-      await connection.ready;
-      const reason = new Error("the client closed");
-      const waiting = connection.exchange(encodeBytes(adtA01().text), 5000);
-      await remote.wrote();
-
-      // When
-      await connection.destroy(reason);
-
-      // Then
-      await expect(waiting).rejects.toBe(reason);
-    });
-
-    it("rejects a waiting exchange even with no reason given", async () => {
-      // Given
-      const { socket, remote } = stubSocket();
-      const connection = createConnection(socket, {
+      const { socket, remote } = memorySocket();
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
@@ -387,78 +496,124 @@ describe("createConnection()", () => {
       // When
       await connection.destroy();
 
-      // Then: what must never happen is an exchange that hangs the caller
-      // forever.
-      await expect(waiting).rejects.toThrow();
+      // Then
+      await expect(waiting).rejects.toMatchObject({
+        code: MllpErrorCode.SEND_ABORTED,
+      });
+    });
+  });
+
+  describe("cancelled by `signal` while it is still opening", () => {
+    it("ends itself: `ready` rejects with CONNECTION_FAILED once the socket is down", async () => {
+      // Given
+      const { socket, remote } = memorySocket(async (_streams, signal) => {
+        await setTimeout(60_000, undefined, { signal });
+        throw new Error("unreachable");
+      });
+      const abort = new AbortController();
+      const connection = createSession(
+        socket,
+        { maxBufferedBytes: 1024, timeoutMs: 5000 },
+        abort.signal
+      );
+      const opening = expect(connection.ready).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECTION_FAILED,
+      });
+
+      // When
+      abort.abort();
+
+      // Then
+      await opening;
+      expect(remote.signal?.aborted).toBe(true);
     });
   });
 
   describe("destroy() while it is still opening", () => {
     it("resolves, even though the socket never opened", async () => {
       // Given
-      const { socket } = stubSocket(async (_streams, signal) => {
+      const { socket } = memorySocket(async (_streams, signal) => {
         await setTimeout(60_000, undefined, { signal });
         throw new Error("unreachable");
       });
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
+      });
+
+      const opening = expect(connection.ready).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECTION_FAILED,
       });
 
       // When / Then
       await expect(connection.destroy()).resolves.toBeUndefined();
+      await opening;
     });
 
     it("tells the socket to stop", async () => {
       // Given
-      const { socket, remote } = stubSocket(async (_streams, signal) => {
+      const { socket, remote } = memorySocket(async (_streams, signal) => {
         await setTimeout(60_000, undefined, { signal });
         throw new Error("unreachable");
       });
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
 
+      const opening = expect(connection.ready).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECTION_FAILED,
+      });
+
       // When
       await connection.destroy();
+      await opening;
 
       // Then
       expect(remote.signal?.aborted).toBe(true);
     });
 
-    it("rejects `ready` with the reason it was destroyed for", async () => {
+    it("rejects `ready` with CONNECTION_FAILED, the cancellation as its cause", async () => {
       // Given
-      const { socket } = stubSocket(async (_streams, signal) => {
+      const { socket } = memorySocket(async (_streams, signal) => {
         await setTimeout(60_000, undefined, { signal });
         throw new Error("unreachable");
       });
-      const connection = createConnection(socket, {
+      const connection = createSession(socket, {
         maxBufferedBytes: 1024,
         timeoutMs: 5000,
       });
-      const reason = new Error("the client closed");
 
-      // When
-      await connection.destroy(reason);
-
-      // Then
-      await expect(connection.ready).rejects.toBe(reason);
-    });
-
-    it("closes a socket that opens after the cancellation anyway", async () => {
-      // Given a socket that ignores the signal and opens anyway.
-      const { socket, remote } = stubSocket(async (streams) => {
-        await setTimeout(20); // opens after the caller has given up
-        return streams;
-      });
-      const connection = createConnection(socket, {
-        maxBufferedBytes: 1024,
-        timeoutMs: 5000,
+      const opening = expect(connection.ready).rejects.toMatchObject({
+        cause: expect.objectContaining({ name: "AbortError" }),
+        code: MllpErrorCode.CONNECTION_FAILED,
       });
 
       // When
       await connection.destroy();
+
+      // Then
+      await opening;
+    });
+
+    it("closes a socket that opens after the cancellation anyway", async () => {
+      // Given a socket that ignores the signal and opens anyway.
+      const { socket, remote } = memorySocket(async (streams) => {
+        await setTimeout(20); // opens after the caller has given up
+        return streams;
+      });
+      const connection = createSession(socket, {
+        maxBufferedBytes: 1024,
+        timeoutMs: 5000,
+      });
+
+      const opening = expect(connection.ready).rejects.toMatchObject({
+        code: MllpErrorCode.CONNECTION_FAILED,
+      });
+
+      // When
+      await connection.destroy();
+      await opening;
 
       // Then
       expect(remote.close).toHaveBeenCalled();

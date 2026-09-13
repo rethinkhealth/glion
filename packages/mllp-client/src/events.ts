@@ -4,15 +4,16 @@
  * @module
  */
 
-import type { MllpClientError } from "../errors";
+import type { MllpClientError } from "./errors";
 
 export interface MllpClientEvents {
   /** The connection is open and ready for messages. */
   connect(): void;
-  /** The connection ended. `error` is why, or `null` when the owner ended it. */
-  disconnect(error: MllpClientError | null): void;
-  /** The client is done and will not connect again. */
-  close(): void;
+  /**
+   * The client is done and will not connect again. `error` is the failure the
+   * reconnect policy did not recover from, or `null` when it closes normally.
+   */
+  close(error: MllpClientError | null): void;
 }
 
 /** The name of one thing a client reports. */
@@ -22,8 +23,7 @@ export type MllpClientEvent = keyof MllpClientEvents;
 export type MllpClientListener<E extends MllpClientEvent> = MllpClientEvents[E];
 
 /**
- * The listener half of a client: everything about who is watching, and
- * nothing about what they are watching.
+ * The listeners of a client.
  *
  * A listener that throws propagates to whoever triggered the event, the same
  * as Node's `EventEmitter`.

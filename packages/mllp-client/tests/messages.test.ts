@@ -15,13 +15,13 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
 import { describe, expect, it } from "vitest";
 
-import { decode, encode } from "../../src/client/messages";
 import {
   MllpClientError,
   MllpInvalidMessageError,
   MllpInvalidResponseError,
-} from "../../src/errors";
-import { ack, adtA01 } from "../fixtures";
+} from "../src/errors";
+import { decode, encode } from "../src/messages";
+import { ack, adtA01 } from "./fixtures";
 
 describe("encode()", () => {
   describe("a message it can send", () => {
@@ -51,7 +51,11 @@ describe("encode()", () => {
       const { tree } = adtA01({ controlId: "" });
 
       expect(() => encode(tree)).toThrow(MllpInvalidMessageError);
-      expect(() => encode(tree)).toThrow("no MSH-10 control ID");
+      expect(() => encode(tree)).toThrow(
+        expect.objectContaining({
+          cause: expect.stringContaining("no MSH-10 control ID"),
+        })
+      );
     });
   });
 });
@@ -233,7 +237,7 @@ describe("decode()", () => {
       const { text } = ack("AA", { controlId: "OTHER" });
 
       expect(decode(encodeBytes(text), "OURS")).toMatchObject({
-        error: { message: expect.stringContaining('MSA-2 is "OTHER"') },
+        error: { cause: expect.stringContaining('MSA-2 is "OTHER"') },
         type: "invalid",
       });
     });
@@ -270,7 +274,7 @@ describe("decode()", () => {
       const { text, controlId } = ack("");
 
       expect(decode(encodeBytes(text), controlId)).toMatchObject({
-        error: { message: expect.stringContaining("MSA-1 is empty") },
+        error: { cause: expect.stringContaining("MSA-1 is empty") },
         type: "invalid",
       });
     });
@@ -279,7 +283,7 @@ describe("decode()", () => {
       const { text, controlId } = ack("OK");
 
       expect(decode(encodeBytes(text), controlId)).toMatchObject({
-        error: { message: expect.stringContaining('MSA-1 is "OK"') },
+        error: { cause: expect.stringContaining('MSA-1 is "OK"') },
         type: "invalid",
       });
     });

@@ -1,9 +1,6 @@
 /**
  * Reading a single value out of an HL7v2 tree.
  *
- * No bytes, no MLLP, no client. Staged here so it can move to
- * `@glion/util-query` without dragging any of those with it.
- *
  * @module
  */
 
