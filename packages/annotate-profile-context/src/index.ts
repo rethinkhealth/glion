@@ -141,17 +141,7 @@ async function loadDatatypes(
 
   // Levels 2-3: component and subcomponent datatypes
   for (let depth = 0; depth < 2; depth++) {
-    const childIds = new Set<string>();
-    for (const dtDef of datatypes.values()) {
-      if (dtDef.kind !== "composite") {
-        continue;
-      }
-      for (const comp of dtDef.componentsBySequence.values()) {
-        if (!datatypes.has(comp.datatypeId)) {
-          childIds.add(comp.datatypeId);
-        }
-      }
-    }
+    const childIds = unresolvedComponentDatatypeIds(datatypes);
     if (childIds.size === 0) {
       break;
     }
@@ -159,6 +149,23 @@ async function loadDatatypes(
   }
 
   return datatypes;
+}
+
+function unresolvedComponentDatatypeIds(
+  datatypes: Map<string, DatatypeDefinition>
+): Set<string> {
+  const ids = new Set<string>();
+  for (const dtDef of datatypes.values()) {
+    if (dtDef.kind !== "composite") {
+      continue;
+    }
+    for (const comp of dtDef.componentsBySequence.values()) {
+      if (!datatypes.has(comp.datatypeId)) {
+        ids.add(comp.datatypeId);
+      }
+    }
+  }
+  return ids;
 }
 
 // ---------------------------------------------------------------------------

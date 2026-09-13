@@ -178,6 +178,7 @@ function createFrameDecoder(opts: UnframeOptions = {}): FrameDecoder {
       return length;
     },
 
+    // oxlint-disable-next-line complexity/complexity -- byte-level frame scanner: each branch is one framing state, kept in one loop so the hot path stays allocation-free
     push(chunk, onPayload) {
       // Empty chunks: some adapters yield a zero-byte read before
       // EOF (e.g. Node's `'data'` after `socket.end()` in some

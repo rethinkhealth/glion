@@ -61,6 +61,7 @@ type ParseResult =
   | { ok: true; args: ParsedArgs }
   | { ok: false; error: string };
 
+// oxlint-disable-next-line complexity/complexity -- left-to-right flag scan: one branch per flag
 function parseArgs(argv: readonly string[]): ParseResult {
   const positional: string[] = [];
   let configPath: string | undefined;
