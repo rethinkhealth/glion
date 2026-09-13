@@ -165,14 +165,14 @@ Assert on `code` and on events. Never on `cause.message`: it is `ECONNREFUSED` o
 
 ### 2.4 Execution per runtime
 
-| Runtime       | How the suite runs                                                                                                                                                               | Receiver                     | Script      |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | ----------- |
-| Node 20/22/24 | vitest                                                                                                                                                                           | in-process `node:net`        | `test`      |
-| Bun           | `bun --bun ./node_modules/vitest/vitest.mjs run` (the `vitest` bin is a shell shim Bun cannot execute; the CLI package already uses this form). Workers run in Bun: verified.    | in-process `node:net` compat | `test:bun`  |
-| Deno          | `deno run -A ./node_modules/vitest/vitest.mjs run`. Workers run in Deno: verified.                                                                                               | in-process compat            | `test:deno` |
-| Workers       | Node-side vitest spawns `wrangler dev` on a harness Worker that is a scenario and case runner; each test starts its own loopback receiver and POSTs `{ scenario \| case, port }` | Node process, per test       | `test:cf`   |
+| Runtime       | How the suite runs                                                                                                                                                              | Receiver                     | Script      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | ----------- |
+| Node 20/22/24 | vitest                                                                                                                                                                          | in-process `node:net`        | `test`      |
+| Bun           | `bun --bun ./node_modules/vitest/vitest.mjs run` (the `vitest` bin is a shell shim Bun cannot execute; the CLI package already uses this form). Workers run in Bun: verified.   | in-process `node:net` compat | `test:bun`  |
+| Deno          | `deno run -A ./node_modules/vitest/vitest.mjs run`. Workers run in Deno: verified.                                                                                              | in-process compat            | `test:deno` |
+| Workers       | vitest inside `workerd` through `@cloudflare/vitest-plugin`; a Node `globalSetup` starts one receiver per behaviour and hands the ports to the tests through `provide`/`inject` | Node process, per behaviour  | `test:cf`   |
 
-Why the harness and not `@cloudflare/vitest-pool-workers`: the receiver has to be a Node process regardless (workerd cannot listen), the pool's coverage instrumentation needs `node:inspector/promises` which workerd does not ship (recorded in #616), and the harness is the mode that has passed. Reconsider only if the pool gains a way to host the receiver.
+Why the Vitest integration and not an HTTP harness: the maintainer's call (2026-09-13). The adapter is exercised as a unit in its real runtime, with ordinary assertions on `MllpClient`, instead of through a JSON facade. The receiver still has to be a Node process, since `workerd` cannot listen, so the suite's receiver factory must accept pre-started receivers by behaviour, and the three cases that observe the receiver's side (C2's connection count, C13's FIN, C14's second connection) become adapter-optional there. Coverage is not collected for that project: the integration does not support V8 coverage.
 
 ### 2.5 CI
 
@@ -202,7 +202,7 @@ Steps 2 and 3 are independent of each other.
 - **D2** Workers option names: `host` and `port` mirroring `nodeSocket` versus `hostname` mirroring `cloudflare:sockets`. **Resolved 2026-09-10: `host` and `port`.**
 - **D3** Deno CI job now versus when a consumer asks. **Resolved 2026-09-10: now.**
 - **D4** Conformance suite location. **Resolved 2026-09-10: in-repo `tests/conformance/`.** Promoting it to a `@glion/mllp-client/conformance` subpath for custom-adapter authors stays open; precedent: `abstract-level` ships its implementer suite.
-- **D5** Workers execution. **Resolved 2026-09-10: the wrangler harness.**
+- **D5** Workers execution. **Resolved 2026-09-13: inside `workerd` through `@cloudflare/vitest-plugin`.** The wrangler HTTP harness built first was rejected by the maintainer.
 - **D6** TLS option shape on `nodeSocket`. **Resolved 2026-09-10: TLS is a later issue, tracked in #657 (client and `glion send`) and #626 (Workers round trip). The per-runtime matrix in §1.4 was posted to #657.** Step 4 in §3 waits on it.
 
 ## 5. Calibrated risks
