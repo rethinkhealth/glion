@@ -1,5 +1,4 @@
 // oxlint-disable promise/prefer-await-to-then
-import { describe, expect, it } from "vitest";
 
 import { createLruCache } from "../../src/cache/lru";
 

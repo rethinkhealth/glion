@@ -1,6 +1,6 @@
 {
   "name": "@glion/tsconfig",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "description": "Rethink Health TSConfig",
   "keywords": [],
@@ -11,7 +11,7 @@
   ],
   "devDependencies": {},
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "pnpm@10.14.0"
 }

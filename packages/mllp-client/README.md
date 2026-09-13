@@ -17,7 +17,7 @@ A simple HL7v2 MLLP client for Node.js and Cloudflare Workers.
 npm install @glion/mllp-client
 ```
 
-Node.js 20 or later. ESM only.
+Node.js 22 or later. ESM only.
 
 ## Use
 

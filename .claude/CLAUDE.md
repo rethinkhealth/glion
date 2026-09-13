@@ -12,7 +12,7 @@ TypeScript monorepo for HL7v2 message processing built on the `unified` framewor
 
 - Under active development — not recommended for production workloads.
 - **ESM-only**, no CommonJS.
-- **Node.js ≥ 20** (uses `AbortSignal.any` and other Node 20 primitives).
+- **Node.js ≥ 22** (CI tests 22.x and 24.x; Node 22 primitives such as `Promise.withResolvers` and `AbortSignal.any` are available).
 - **pnpm only** — enforced by an `only-allow` preinstall hook.
 - Pre-commit hooks run linting via `lint-staged`.
 - Turbo caching is enabled for `build`, `test`, and `check-types`.
@@ -31,9 +31,9 @@ pnpm test:watch               # Watch mode
 pnpm --filter @glion/<pkg> test [pattern]   # Single package, optional pattern
 
 # Lint & format
-pnpm lint                     # Check via Ultracite (Oxlint + Oxfmt)
-pnpm format                   # Auto-fix
-pnpm dlx ultracite fix        # Same as `pnpm format`
+pnpm check                    # Check via Ultracite (Oxlint + Oxfmt)
+pnpm fix                      # Auto-fix
+pnpm dlx ultracite fix        # Same as `pnpm fix`
 
 # Benchmarks (see benchmarks/README.md before adding or renaming any)
 pnpm bench                    # CodSpeed regression suite (benchmarks/suites/)
@@ -221,7 +221,7 @@ Multiple proposal-and-pushback rounds are fine and expected. Reject your own fir
 
 ## Code Style
 
-The project uses **Ultracite** (Oxlint + Oxfmt). Most issues are auto-fixable with `pnpm format`. The pre-commit hook runs `lint-staged` to enforce formatting before commits.
+The project uses **Ultracite** (Oxlint + Oxfmt). Most issues are auto-fixable with `pnpm fix`. The pre-commit hook runs `lint-staged` to enforce formatting before commits.
 
 Beyond what the linter catches, write code that is **type-safe, explicit, and direct**.
 
@@ -262,7 +262,7 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 ### Code organization
 
 - Branch on a discriminated union with one construct: an exhaustive `switch` over the discriminant, every arm listed, no `default`. Never mix an `if` chain, a ternary, and a `switch` on the same discriminant in one function — pick the `switch`.
-- Keep functions focused; cap cognitive complexity.
+- Keep functions focused. `complexity/complexity` caps every function at cyclomatic 20 and cognitive 15 in `src/`; a `// oxlint-disable-next-line complexity/complexity -- <reason>` is reserved for byte scanners, grammar parsers, and flag scanners whose branches are the domain, and the reason names that structure.
 - Extract complex conditions into well-named boolean variables.
 - Group related code; separate concerns.
 
@@ -281,9 +281,12 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 
 ## Testing
 
+The contract for what a change must bring with it (tests, round-trip properties, regression-first bug fixes, mutation survivors, changesets) lives in the Testing section of `CONTRIBUTING.md`. It applies to agents and people alike; read it before opening a PR. The points below are the mechanics.
+
 - **Vitest**, base config in `tools/testing/src/vitest.config.ts` (`@glion/testing`).
 - Test files: `**/*.test.ts`, `**/*.test.tsx`.
-- Each package has its own `vitest.config.ts` for package-specific settings.
+- Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier.
+- Each package has its own `vitest.config.ts` for package-specific settings, and a `tests/tsconfig.json` so tests are type-checked by `pnpm check-types` (CI runs it).
 - Coverage reporters: text, html, json.
 - `expect()` inside `it()` / `test()` blocks.
 - No `.only` / `.skip` in committed tests.
@@ -300,5 +303,5 @@ All benchmarks live in the `benchmarks/` workspace — never add a `bench/` dire
 2. `package.json` — use `workspace:*` for internal deps; include scripts `build`, `check-types`, `test`, `test:watch`.
 3. `tsconfig.json` — extend `@glion/tsconfig/library.json`.
 4. `tsdown.config.ts` — for the bundle build.
-5. `vitest.config.ts` — for tests.
+5. `vitest.config.ts` — for tests; put the tests themselves in `tests/`, with a `tests/tsconfig.json` copied from any sibling package so `check-types` covers them (`tsc --noEmit && tsc --noEmit -p tests/tsconfig.json`).
 6. `README.md` — required (`check:readme` task validates).

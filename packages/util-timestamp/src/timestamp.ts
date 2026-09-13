@@ -224,7 +224,7 @@ export class Timestamp {
    * @param value - An HL7v2 TS-formatted string
    * @throws {TypeError} If the string is not a valid HL7v2 timestamp
    */
-  // oxlint-disable-next-line complexity
+  // oxlint-disable-next-line complexity/complexity -- hand-rolled DTM scanner: one branch per precision component and offset form, kept regex-free for speed
   static parse(value: string): Timestamp {
     const len = value.length;
     if (len < 4) {

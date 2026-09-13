@@ -1,5 +1,24 @@
 # @rethinkhealth/hl7v2
 
+## 0.18.0
+
+### Minor Changes
+
+- dca5259: **BREAKING:** Raise `engines.node` from `>=20` to `>=22` across all `@glion/*` packages and `create-glion`, and drop Node 20.x from the CI test matrix (#728).
+
+  Node 20 reached end-of-life on 2026-04-30 and is no longer tested. The supported and tested runtimes are Node 22 and Node 24.
+
+  Downstream impact: applications that pin Node 20 will need to upgrade to Node 22 or later. Node 22 is in Maintenance LTS until April 2027; Node 24 is the current Active LTS and the recommended target.
+
+- e260ee4: `Hl7v2Processor` — the unified processor type every HL7v2 pipeline satisfies — is exported from `@glion/parser`, its ecosystem home. `@glion/mllp` re-exports it unchanged. Its head and tail admit `undefined` (`Processor<Root, Root | undefined, Root | undefined>`), so the bare `unified().use(hl7v2Parser).freeze()` is assignable alongside full transformer/compiler pipelines like `@glion/hl7v2`'s `parseHL7v2` — no casts needed. The package's public d.ts types now come from real dependencies (`@glion/ast`, `@glion/config`, `@types/unist` moved into `dependencies`).
+
+### Patch Changes
+
+- Updated dependencies [dca5259]
+  - @glion/ast@0.18.0
+  - @glion/config@0.18.0
+  - @glion/utils@0.18.0
+
 ## 0.17.0
 
 ### Patch Changes

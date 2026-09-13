@@ -1,6 +1,6 @@
 {
   "name": "@glion/ack",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "HL7v2 acknowledgment message builder and typed error classes",
   "keywords": [
     "ack",
@@ -35,7 +35,7 @@
   },
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly",
-    "check-types": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -58,7 +58,7 @@
     "vitest": "4.1.11"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "pnpm@10.14.0"
 }

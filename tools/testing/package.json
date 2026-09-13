@@ -1,6 +1,6 @@
 {
   "name": "@glion/testing",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "description": "Testing utilities for Rethink Health",
   "files": [
@@ -30,7 +30,7 @@
     "vitest": "4.1.11"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "pnpm@10.14.0"
 }

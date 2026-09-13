@@ -65,7 +65,7 @@ glion send samples/adt-a01.hl7 --local --json
 
 ## Notes
 
-- Requires Node.js ≥ 20.
+- Requires Node.js ≥ 22.
 - [`@glion/mllp`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp) — server API and routing reference.
 - [`@glion/mllp-ack`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-ack) — ACK middleware.
 - [`@glion/ack`](https://github.com/rethinkhealth/glion/tree/main/packages/ack) — `AckException` hierarchy.

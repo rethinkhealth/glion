@@ -1,6 +1,6 @@
 {
   "name": "@glion/mllp-codec",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "MLLP byte-level framing codec for HL7v2 (encode/decode VT/FS/CR)",
   "keywords": [
     "health",
@@ -35,7 +35,7 @@
   },
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly",
-    "check-types": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -54,7 +54,7 @@
     "vitest": "4.1.11"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "pnpm@10.14.0"
 }

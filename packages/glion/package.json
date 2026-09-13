@@ -1,6 +1,6 @@
 {
   "name": "@glion/cli",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "MLLP dev tool — dev server with live TUI, production JSON-line events, hot reload, and a send command for HL7v2 messages",
   "keywords": [
     "cli",
@@ -48,7 +48,7 @@
     "check-types": "tsc --noEmit",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
-    "test:bun": "bun --bun ./node_modules/vitest/vitest.mjs run test/e2e/",
+    "test:bun": "bun --bun ./node_modules/vitest/vitest.mjs run tests/e2e/",
     "test:watch": "vitest",
     "publint": "publint --strict"
   },
@@ -85,7 +85,7 @@
     "react": "^18.3.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "pnpm@10.14.0"
 }

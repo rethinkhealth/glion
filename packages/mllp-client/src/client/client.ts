@@ -308,16 +308,8 @@ export class MllpClient extends MllpClientEmitter {
       try {
         await session.ready;
       } catch (error) {
-        if (signal.aborted) {
-          throw new MllpClientClosedError();
-        }
-        if (attempt < this.#policy.attempts) {
-          continue;
-        }
-        if (error instanceof MllpConnectionError) {
-          this.#closed(error);
-        }
-        throw error;
+        this.#failed(attempt, error, signal);
+        continue;
       }
       if (signal.aborted) {
         // Aborted between the socket opening and this running; the session
@@ -329,6 +321,24 @@ export class MllpClient extends MllpClientEmitter {
       this.emit("connect");
       return;
     }
+  }
+
+  /**
+   * Attempt `attempt` failed with `error`: returns when the policy allows
+   * another. Throws `MllpClientClosedError` once `signal` has aborted, and
+   * `error` once the policy is out of attempts, the client closed with it.
+   */
+  #failed(attempt: number, error: unknown, signal: AbortSignal): void {
+    if (signal.aborted) {
+      throw new MllpClientClosedError();
+    }
+    if (attempt < this.#policy.attempts) {
+      return;
+    }
+    if (error instanceof MllpConnectionError) {
+      this.#closed(error);
+    }
+    throw error;
   }
 
   /**

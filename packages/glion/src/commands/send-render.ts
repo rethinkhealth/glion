@@ -242,72 +242,73 @@ export function renderJson(outcome: SendOutcome): string {
 }
 
 function toJsonRecord(outcome: SendOutcome): Record<string, unknown> {
-  if (outcome.kind === "accept") {
-    const record: Record<string, unknown> = {
-      code: outcome.code,
-      controlId: outcome.ackControlId,
-      durationMs: outcome.durationMs,
-      host: outcome.target.host,
-      ok: true,
-      port: outcome.target.port,
-      requestControlId: outcome.request.controlId,
-    };
-    if (outcome.text !== undefined) {
-      record.text = outcome.text;
+  switch (outcome.kind) {
+    case "accept": {
+      const record: Record<string, unknown> = {
+        code: outcome.code,
+        controlId: outcome.ackControlId,
+        durationMs: outcome.durationMs,
+        host: outcome.target.host,
+        ok: true,
+        port: outcome.target.port,
+        requestControlId: outcome.request.controlId,
+      };
+      if (outcome.text !== undefined) {
+        record.text = outcome.text;
+      }
+      return record;
     }
-    return record;
+    case "nak": {
+      const record: Record<string, unknown> = {
+        code: outcome.code,
+        controlId: outcome.ackControlId,
+        durationMs: outcome.durationMs,
+        host: outcome.target.host,
+        kind: "nak",
+        ok: false,
+        port: outcome.target.port,
+        requestControlId: outcome.request.controlId,
+      };
+      if (outcome.errorCode !== undefined) {
+        record.errorCode = outcome.errorCode;
+      }
+      if (outcome.severity !== undefined) {
+        record.severity = outcome.severity;
+      }
+      if (outcome.text !== undefined) {
+        record.text = outcome.text;
+      }
+      return record;
+    }
+    case "transport": {
+      const record: Record<string, unknown> = {
+        code: outcome.code,
+        delivery: outcome.delivery,
+        host: outcome.target.host,
+        kind: "transport",
+        message: outcome.message,
+        ok: false,
+        port: outcome.target.port,
+      };
+      if (outcome.request !== undefined) {
+        record.requestControlId = outcome.request.controlId;
+      }
+      if (outcome.cause !== undefined) {
+        record.cause = outcome.cause;
+      }
+      return record;
+    }
+    case "invalid": {
+      const record: Record<string, unknown> = {
+        kind: "invalid",
+        message: outcome.message,
+        ok: false,
+      };
+      if (outcome.target !== undefined) {
+        record.host = outcome.target.host;
+        record.port = outcome.target.port;
+      }
+      return record;
+    }
   }
-
-  if (outcome.kind === "nak") {
-    const record: Record<string, unknown> = {
-      code: outcome.code,
-      controlId: outcome.ackControlId,
-      durationMs: outcome.durationMs,
-      host: outcome.target.host,
-      kind: "nak",
-      ok: false,
-      port: outcome.target.port,
-      requestControlId: outcome.request.controlId,
-    };
-    if (outcome.errorCode !== undefined) {
-      record.errorCode = outcome.errorCode;
-    }
-    if (outcome.severity !== undefined) {
-      record.severity = outcome.severity;
-    }
-    if (outcome.text !== undefined) {
-      record.text = outcome.text;
-    }
-    return record;
-  }
-
-  if (outcome.kind === "transport") {
-    const record: Record<string, unknown> = {
-      code: outcome.code,
-      delivery: outcome.delivery,
-      host: outcome.target.host,
-      kind: "transport",
-      message: outcome.message,
-      ok: false,
-      port: outcome.target.port,
-    };
-    if (outcome.request !== undefined) {
-      record.requestControlId = outcome.request.controlId;
-    }
-    if (outcome.cause !== undefined) {
-      record.cause = outcome.cause;
-    }
-    return record;
-  }
-
-  const record: Record<string, unknown> = {
-    kind: "invalid",
-    message: outcome.message,
-    ok: false,
-  };
-  if (outcome.target !== undefined) {
-    record.host = outcome.target.host;
-    record.port = outcome.target.port;
-  }
-  return record;
 }

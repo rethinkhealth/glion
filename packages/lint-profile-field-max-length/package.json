@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-profile-field-max-length",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Lint rule to validate field value lengths against HL7v2 profile maxLength",
   "keywords": [
     "health",
@@ -34,7 +34,7 @@
   },
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -63,7 +63,7 @@
     "vitest": "4.1.11"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "pnpm@10.14.0"
 }

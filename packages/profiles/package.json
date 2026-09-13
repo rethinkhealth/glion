@@ -1,6 +1,6 @@
 {
   "name": "@glion/profiles",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "HL7v2 version-specific profile definitions (fields, data types, tables, segments) with LRU-cached loading",
   "keywords": [
     "health",
@@ -41,7 +41,7 @@
   },
   "scripts": {
     "build": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "check-types": "tsc -p tsconfig.build.json --noEmit",
+    "check-types": "tsc -p tsconfig.build.json --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -69,7 +69,7 @@
     "vitest": "4.1.11"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "pnpm@10.14.0"
 }

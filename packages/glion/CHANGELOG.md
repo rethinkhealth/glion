@@ -1,5 +1,39 @@
 # @glion/cli
 
+## 0.18.0
+
+### Minor Changes
+
+- dca5259: **BREAKING:** Raise `engines.node` from `>=20` to `>=22` across all `@glion/*` packages and `create-glion`, and drop Node 20.x from the CI test matrix (#728).
+
+  Node 20 reached end-of-life on 2026-04-30 and is no longer tested. The supported and tested runtimes are Node 22 and Node 24.
+
+  Downstream impact: applications that pin Node 20 will need to upgrade to Node 22 or later. Node 22 is in Maintenance LTS until April 2027; Node 24 is the current Active LTS and the recommended target.
+
+### Patch Changes
+
+- 7715edf: `glion send` now reports an unsendable message — one with no MSH-10 control ID, or with a reserved VT/FS byte in its serialized text — as the `invalid` outcome kind (previously `transport`). The exit code stays 2; JSON consumers switching on `kind` should treat `invalid` as a pre-wire input failure: nothing reached the wire.
+- 7715edf: Remove `@glion/mllp-ack` from the ecosystem: `ackMiddleware` and `acknowledge()` are retired ahead of built-in acknowledgment translation at the framework's error boundary in `@glion/mllp` (ADR 0019).
+  - Remove `@glion/mllp-ack` from quick-start snippets and package catalogs; apps reply by returning a `Response` or via `app.onError()` until the built-in translation lands
+  - Remove the `@glion/mllp-ack` workspace dependency from `@glion/cli`
+
+- Updated dependencies [ee6738b]
+- Updated dependencies [033cdb6]
+- Updated dependencies [dca5259]
+- Updated dependencies [033cdb6]
+- Updated dependencies [64d78d6]
+- Updated dependencies [5f18700]
+- Updated dependencies [e260ee4]
+- Updated dependencies [7715edf]
+- Updated dependencies [5d81ea0]
+  - @glion/ack@0.18.0
+  - @glion/ast@0.18.0
+  - @glion/mllp-client@0.18.0
+  - @glion/mllp@0.18.0
+  - @glion/parser@0.18.0
+  - @glion/to-hl7v2@0.18.0
+  - @glion/util-query@0.18.0
+
 ## 0.17.0
 
 ### Minor Changes

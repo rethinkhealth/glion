@@ -18,7 +18,11 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
 import { renderHuman, renderJson } from "./send-render";
-import type { SendOutcome } from "./send-render";
+import type {
+  SendOutcome,
+  SendRequestSummary,
+  SendTarget,
+} from "./send-render";
 import { resolveTarget } from "./send-target";
 
 /** Connect + ACK-wait deadline used when `--timeout` is omitted. */
@@ -102,6 +106,7 @@ function takeIntFlagValue(
  * `-`-prefixed tokens rejected, and at most one positional accepted.
  * It never throws and never touches process state.
  */
+// oxlint-disable-next-line complexity/complexity -- left-to-right flag scan: one branch per flag
 export function parseSendArgs(argv: readonly string[]): ParseSendResult {
   const positional: string[] = [];
   let host: string | undefined;
@@ -273,6 +278,55 @@ function ackText(tree: Root | undefined): string | undefined {
  * view on a TTY, otherwise a single JSON line. Returns the process exit code;
  * it never calls process.exit, mirroring runDev/runStart.
  */
+function readMessageText(
+  args: SendArgs,
+  opts: RunSendOptions
+): Promise<string> {
+  return args.file === undefined
+    ? readStream(opts.stdin ?? process.stdin)
+    : readFile(args.file, "utf8");
+}
+
+/**
+ * Maps a failed exchange to its outcome. A NAK and a transport failure are
+ * outcomes; anything else is a bug and propagates.
+ */
+function sendErrorOutcome(
+  error: unknown,
+  exchange: {
+    request: SendRequestSummary;
+    target: SendTarget;
+    startedAt: number;
+  }
+): SendOutcome {
+  const { request, target, startedAt } = exchange;
+  if (error instanceof AckException) {
+    return {
+      ackControlId: error.controlId ?? "",
+      code: error.code,
+      durationMs: performance.now() - startedAt,
+      errorCode: error.errorCode,
+      kind: "nak",
+      request,
+      severity: error.severity,
+      target,
+      text: error.text,
+    };
+  }
+  if (error instanceof MllpClientError) {
+    return {
+      cause: causeOf(error),
+      code: error.code,
+      delivery: error.delivery,
+      kind: "transport",
+      message: error.message,
+      request,
+      target,
+    };
+  }
+  throw error;
+}
+
 export async function runSend(opts: RunSendOptions): Promise<number> {
   const stdout = opts.stdout ?? process.stdout;
   const stderr = opts.stderr ?? process.stderr;
@@ -307,10 +361,7 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
 
   let text: string;
   try {
-    text =
-      args.file === undefined
-        ? await readStream(opts.stdin ?? process.stdin)
-        : await readFile(args.file, "utf8");
+    text = await readMessageText(args, opts);
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     return emit({
@@ -356,31 +407,7 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
       text: ackText(res.tree),
     });
   } catch (error) {
-    if (error instanceof AckException) {
-      return emit({
-        ackControlId: error.controlId ?? "",
-        code: error.code,
-        durationMs: performance.now() - startedAt,
-        errorCode: error.errorCode,
-        kind: "nak",
-        request,
-        severity: error.severity,
-        target,
-        text: error.text,
-      });
-    }
-    if (error instanceof MllpClientError) {
-      return emit({
-        cause: causeOf(error),
-        code: error.code,
-        delivery: error.delivery,
-        kind: "transport",
-        message: error.message,
-        request,
-        target,
-      });
-    }
-    throw error;
+    return emit(sendErrorOutcome(error, { request, startedAt, target }));
   } finally {
     await client?.close();
   }
