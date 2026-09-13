@@ -68,6 +68,7 @@ All public packages MUST pass `publint --strict` on every pull request. Implemen
 - Publishes happen **only** from the `Changesets` workflow in `.github/workflows/release.yml`, triggered by merges to `main`.
 - The pack job runs `pnpm build` and packs every publishable package into a tarball; the publish job publishes those tarballs and nothing else, so artifacts are built from the exact source on `main`.
 - Developers MUST NOT run `npm publish` or `pnpm publish` from local machines. No exceptions: even hotfix releases go through a PR → merge → release workflow.
+- `pnpm check:release` (`tools/check-release`) verifies after every publish, and weekly, that each public package's workspace version is on the registry with a provenance attestation. A version that reached npm without provenance was not published by this workflow.
 - Publishing is delegated to `changeset publish`, which publishes each package's packed tarball in dependency order, skips versions already on the registry, and reports per package instead of aborting the whole run on the first failure. It passes `--no-git-checks` to pnpm because CI operates on a detached HEAD; that flag does not weaken any other guarantee.
 
 ### 5. Minimal package contents — addresses (1) defence-in-depth
@@ -130,3 +131,4 @@ Every public package MUST declare `"files": ["dist"]` (or equivalent narrow allo
 - 2026-04-21: Accepted. Section 1 (publint) landed in PR for issue #591. Sections 2–6 describe the target posture; gaps are explicit.
 - 2026-05-08: Section 2 landed. pnpm 10 and OIDC trusted publishing replaced `NPM_TOKEN` (#635).
 - 2026-09-13: Release workflow split into select-mode, version, pack, and publish jobs on Changesets CLI v3 and `changesets/action@v2`, with `id-token: write` confined to the publish job.
+- 2026-09-13: Release canary added. Nothing had reached npm between 2026-05-08 and 2026-09-13 because publish-mode runs failed only when no changesets were pending; the canary makes that state fail on its own schedule.

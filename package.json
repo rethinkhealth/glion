@@ -26,6 +26,7 @@
     "check": "ultracite check",
     "check-types": "turbo run check-types",
     "check:readmes": "turbo run check:readme",
+    "check:release": "glion-check-release",
     "ci:install": "pnpm install --frozen-lockfile",
     "ci:update": "pnpm --recursive update",
     "ci:version": "pnpm changeset version",
@@ -50,6 +51,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "1.0.1",
     "@changesets/cli": "3.0.2",
+    "@glion/check-release": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "husky": "9.1.7",
     "lint-staged": "16.4.0",

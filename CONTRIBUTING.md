@@ -25,6 +25,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [Testing](#testing)
 - [Packaging Checks](#packaging-checks)
 - [Preview Releases](#preview-releases)
+- [Release Canary](#release-canary)
 
 ## Code of Conduct
 
@@ -141,6 +142,12 @@ Run `pnpm build && pnpm publint` locally before pushing. CI enforces the same ch
 ## Preview Releases
 
 Every PR and every commit on `main` publishes preview packages to [pkg.pr.new](https://pkg.pr.new) via `.github/workflows/preview.yml`. The pkg.pr.new bot posts install commands as a PR comment so reviewers and bug reporters can validate a change before it is released to npm. See [ADR 0016](./docs/adr/0016-continuous-preview-releases.md) for rationale.
+
+<!-- omit in toc -->
+
+## Release Canary
+
+`pnpm check:release` compares every public package's workspace version with the npm registry and fails when a version is missing or was published without a provenance attestation. It runs at the end of every publish in `.github/workflows/release.yml` and weekly from `.github/workflows/release-canary.yml`. A new package fails it until a maintainer has published it once from their own account, because npm trusted publishing cannot create a package; see [ADR 0015](./docs/adr/0015-secure-publishing.md).
 
 <!-- omit in toc -->
 

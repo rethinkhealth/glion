@@ -135,3 +135,6 @@ jobs:
         with:
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
           create-github-releases: false
+
+      - name: Verify every workspace version is on npm with provenance
+        run: pnpm check:release
