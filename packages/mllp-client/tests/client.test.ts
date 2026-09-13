@@ -23,6 +23,7 @@ import { ack, adtA01, controlIdOf } from "./fixtures";
 import {
   acknowledging,
   connectedClient,
+  hangingUpOn,
   remoteSystem,
   silence,
 } from "./remote";
@@ -366,31 +367,52 @@ describe("MllpClient", () => {
       await client.close();
     });
 
-    it("rejects ALREADY_SENDING while a message is in flight", async () => {
+    it("waits for the message in flight, then sends", async () => {
       // Given
-      const { client } = await connectedClient();
-      const first = client.send(adtA01().tree);
+      const { client, remote } = await connectedClient();
+      const [first, second] = [adtA01(), adtA01()];
+      const inFlight = client.send(first.tree);
 
-      // When / Then
-      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
-        code: MllpErrorCode.ALREADY_SENDING,
+      // When
+      const waiting = client.send(second.tree);
+
+      // Then the second goes out once the first is acknowledged
+      await expect(inFlight).resolves.toMatchObject({
+        controlId: first.controlId,
       });
-      await expect(first).resolves.toMatchObject({ code: "AA" });
+      await expect(waiting).resolves.toMatchObject({
+        controlId: second.controlId,
+      });
+      expect(remote.received.map(controlIdOf)).toEqual([
+        first.controlId,
+        second.controlId,
+      ]);
       await client.close();
     });
 
-    it("rejects ALREADY_SENDING while the first send is still connecting", async () => {
+    it("waits its turn when the first send is still connecting", async () => {
       // Given a socket that takes its time to open
       const remote = remoteSystem(slow(20));
       const client = new MllpClient({ socket: remote.socket });
-      const first = client.send(adtA01().tree);
+      const [first, second] = [adtA01(), adtA01()];
+      const opening = client.send(first.tree);
       expect(client.state).toBe("connecting");
 
-      // When / Then
-      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
-        code: MllpErrorCode.ALREADY_SENDING,
+      // When
+      const waiting = client.send(second.tree);
+
+      // Then both go out on the one connection, in order
+      await expect(opening).resolves.toMatchObject({
+        controlId: first.controlId,
       });
-      await expect(first).resolves.toMatchObject({ code: "AA" });
+      await expect(waiting).resolves.toMatchObject({
+        controlId: second.controlId,
+      });
+      expect(remote.received.map(controlIdOf)).toEqual([
+        first.controlId,
+        second.controlId,
+      ]);
+      expect(remote.opened).toBe(1);
       await client.close();
     });
 
@@ -1077,42 +1099,222 @@ describe("MllpClient reconnect", () => {
 });
 
 describe("MllpClient — an application that overlaps sends", () => {
-  it("fires a batch with Promise.all: the first goes out, the rest are refused, not queued", async () => {
+  it("fires a batch with Promise.all: each goes out in turn, in call order", async () => {
     // Given a remote system that acknowledges every message it receives
     const { client, remote } = await connectedClient();
-    const batch = [adtA01(), adtA01(), adtA01()];
+    const batch = [adtA01(), adtA01(), adtA01(), adtA01(), adtA01()];
 
-    // When the application sends all three at once, as it would with any
+    // When the application sends all five at once, as it would with any
     // HTTP client
+    const acks = await Promise.all(batch.map((m) => client.send(m.tree)));
+
+    // Then each is acknowledged, and the remote system saw them one at a
+    // time, in the order they were sent, on the one connection
+    expect(acks.map((a) => a.controlId)).toEqual(batch.map((m) => m.controlId));
+    expect(remote.received.map(controlIdOf)).toEqual(
+      batch.map((m) => m.controlId)
+    );
+    expect(remote.opened).toBe(1);
+    expect(client.state).toBe("connected");
+    await client.close();
+  });
+
+  it("keeps call order when a send arrives while others are already waiting", async () => {
+    // Given a message in flight and one waiting behind it
+    const { client, remote } = await connectedClient();
+    const [first, second, third] = [adtA01(), adtA01(), adtA01()];
+    const sends = [client.send(first.tree), client.send(second.tree)];
+    await remote.receives();
+
+    // When a third arrives while the first is still on the wire
+    sends.push(client.send(third.tree));
+
+    // Then it goes out last
+    await Promise.all(sends);
+    expect(remote.received.map(controlIdOf)).toEqual([
+      first.controlId,
+      second.controlId,
+      third.controlId,
+    ]);
+    await client.close();
+  });
+
+  it("goes on past a NAK: the message behind a rejected one still goes out", async () => {
+    // Given a remote system that refuses the first message and accepts the
+    // rest
+    const { client, remote } = await connectedClient();
+    const batch = [adtA01(), adtA01(), adtA01()];
+    remote.answers(
+      (message) =>
+        ack(controlIdOf(message) === batch[0]?.controlId ? "AE" : "AA", {
+          controlId: controlIdOf(message),
+        }).text
+    );
+
+    // When
     const [first, second, third] = await Promise.allSettled(
       batch.map((m) => client.send(m.tree))
     );
 
-    // Then the first is acknowledged ...
+    // Then the NAK is the first send's outcome alone; the connection stayed
+    // open and the other two were acknowledged behind it
     expect(first).toMatchObject({
+      reason: expect.any(AckApplicationError),
+      status: "rejected",
+    });
+    expect(second).toMatchObject({
       status: "fulfilled",
-      value: { code: "AA", controlId: batch[0]?.controlId },
+      value: { code: "AA", controlId: batch[1]?.controlId },
+    });
+    expect(third).toMatchObject({
+      status: "fulfilled",
+      value: { code: "AA", controlId: batch[2]?.controlId },
+    });
+    expect(remote.received.map(controlIdOf)).toEqual(
+      batch.map((m) => m.controlId)
+    );
+    expect(remote.opened).toBe(1);
+    await client.close();
+  });
+
+  it("sends nothing behind a message whose delivery is unknown, batch or not", async () => {
+    // Given a remote system that hangs up while answering the second message
+    const { client, remote } = await connectedClient();
+    const batch = [adtA01(), adtA01(), adtA01()];
+    remote.answers(hangingUpOn(batch[1]?.controlId, remote));
+
+    // When the application fires all three at once
+    const [first, second, third] = await Promise.allSettled(
+      batch.map((m) => client.send(m.tree))
+    );
+
+    // Then the first is acknowledged, the second's delivery is unknown, and
+    // the third never left the process: it rejects with the loss that closed
+    // the client on `cause`, so nothing is sent out of order
+    expect(first).toMatchObject({ status: "fulfilled" });
+    expect(second).toMatchObject({
+      reason: { code: MllpErrorCode.CONNECTION_LOST, delivery: "unknown" },
+      status: "rejected",
+    });
+    expect(third).toMatchObject({
+      reason: {
+        cause: expect.any(MllpConnectionLostError),
+        code: MllpErrorCode.CLOSED,
+        delivery: "not-sent",
+      },
+      status: "rejected",
+    });
+    expect(remote.received.map(controlIdOf)).toEqual([
+      batch[0]?.controlId,
+      batch[1]?.controlId,
+    ]);
+    expect(client.state).toBe("closed");
+  });
+
+  it("refuses the sends still waiting when close() is called", async () => {
+    // Given a message in flight and one waiting behind it
+    const { client, remote } = await connectedClient();
+    const [first, second] = [adtA01(), adtA01()];
+    const inFlight = client.send(first.tree);
+    const waiting = client.send(second.tree);
+    await remote.receives();
+
+    // When the application closes the client
+    const closing = client.close();
+
+    // Then the message in flight is acknowledged, the waiting one never
+    // leaves the process, and the client is down
+    await expect(inFlight).resolves.toMatchObject({
+      controlId: first.controlId,
+    });
+    await expect(waiting).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+      delivery: "not-sent",
+    });
+    await closing;
+    expect(remote.received.map(controlIdOf)).toEqual([first.controlId]);
+    expect(client.state).toBe("closed");
+  });
+
+  it("refuses the sends still waiting when destroy() cuts the one in flight", async () => {
+    // Given a message in flight, unanswered, and one waiting behind it
+    const { client, remote } = await connectedClient();
+    remote.answers(silence);
+    const inFlight = client.send(adtA01().tree);
+    const waiting = client.send(adtA01().tree);
+    await remote.receives();
+
+    // When
+    await client.destroy();
+
+    // Then the one on the wire is of unknown delivery, and the waiting one
+    // was never sent
+    await expect(inFlight).rejects.toMatchObject({
+      code: MllpErrorCode.SEND_ABORTED,
+      delivery: "unknown",
+    });
+    await expect(waiting).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+      delivery: "not-sent",
+    });
+    expect(remote.received).toHaveLength(1);
+  });
+
+  it("starts a waiting send's timeout at its write, not at the call", async () => {
+    // Given a remote system that takes longer to answer the first message
+    // than the second send allows
+    const { client, remote } = await connectedClient();
+    const [first, second] = [adtA01(), adtA01()];
+    remote.answers(async (message) => {
+      if (controlIdOf(message) === first.controlId) {
+        await setTimeout(60);
+      }
+      return ack("AA", { controlId: controlIdOf(message) }).text;
     });
 
-    // ... and the other two are refused by the client before anything is
-    // written. Each refusal names the message that was in flight, and
-    // `delivery` says the refused message never left the process.
-    for (const refusal of [second, third]) {
-      expect(refusal).toMatchObject({
-        reason: {
-          code: MllpErrorCode.ALREADY_SENDING,
-          controlId: batch[0]?.controlId,
-          delivery: "not-sent",
-        },
-        status: "rejected",
-      });
-    }
+    // When the second is sent with a deadline shorter than its wait
+    const inFlight = client.send(first.tree);
+    const waiting = client.send(second.tree, { timeoutMs: 20 });
 
-    // The client is unharmed, and the remote system only ever saw the first
-    // message: the other two were not delayed, they were dropped.
-    expect(client.state).toBe("connected");
-    expect(remote.received.map(controlIdOf)).toEqual([batch[0]?.controlId]);
-    expect(remote.opened).toBe(1);
+    // Then it is not timed out for the time it spent in line
+    await expect(inFlight).resolves.toMatchObject({
+      controlId: first.controlId,
+    });
+    await expect(waiting).resolves.toMatchObject({
+      controlId: second.controlId,
+    });
+    await client.close();
+  });
+
+  it("does not hold the queue with a message that cannot be sent", async () => {
+    // Given a batch whose second message has no MSH-10
+    const { client, remote } = await connectedClient();
+    const first = adtA01();
+    const noControlId = adtA01({ controlId: "" }).tree;
+    const third = adtA01();
+
+    // When the application fires all three at once
+    const [a, b, c] = await Promise.allSettled([
+      client.send(first.tree),
+      client.send(noControlId),
+      client.send(third.tree),
+    ]);
+
+    // Then the unsendable one is refused before it takes a place, and the
+    // one behind it still goes out
+    expect(a).toMatchObject({ status: "fulfilled" });
+    expect(b).toMatchObject({
+      reason: { code: MllpErrorCode.INVALID_MESSAGE, delivery: "not-sent" },
+      status: "rejected",
+    });
+    expect(c).toMatchObject({
+      status: "fulfilled",
+      value: { controlId: third.controlId },
+    });
+    expect(remote.received.map(controlIdOf)).toEqual([
+      first.controlId,
+      third.controlId,
+    ]);
     await client.close();
   });
 
@@ -1160,13 +1362,7 @@ describe("MllpClient — an application that overlaps sends", () => {
     // Given a remote system that hangs up while answering the second message
     const { client, remote } = await connectedClient();
     const batch = [adtA01(), adtA01(), adtA01()];
-    remote.answers((message) => {
-      if (controlIdOf(message) === batch[1]?.controlId) {
-        void remote.hangsUp();
-        return;
-      }
-      return ack("AA", { controlId: controlIdOf(message) }).text;
-    });
+    remote.answers(hangingUpOn(batch[1]?.controlId, remote));
 
     // When the application sends the series in turn
     const outcomes: unknown[] = [];
@@ -1180,7 +1376,8 @@ describe("MllpClient — an application that overlaps sends", () => {
     }
 
     // Then the second message's delivery is unknown, the third was never
-    // sent, and the remote system saw exactly the first two.
+    // sent and carries the loss on `cause`, and the remote system saw exactly
+    // the first two.
     expect(outcomes).toEqual([
       batch[0]?.controlId,
       expect.objectContaining({
@@ -1188,6 +1385,7 @@ describe("MllpClient — an application that overlaps sends", () => {
         delivery: "unknown",
       }),
       expect.objectContaining({
+        cause: expect.any(MllpConnectionLostError),
         code: MllpErrorCode.CLOSED,
         delivery: "not-sent",
       }),

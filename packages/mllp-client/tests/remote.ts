@@ -143,6 +143,23 @@ export function acknowledging(code: string, msa3 = ""): Answer {
 /** Never answers. */
 export const silence: Answer = () => {};
 
+/**
+ * Acknowledges every message with `AA`, except the one whose MSH-10 is
+ * `controlId`: `remote` hangs up instead of answering it.
+ */
+export function hangingUpOn(
+  controlId: string | undefined,
+  remote: { hangsUp: () => Promise<void> }
+): Answer {
+  return (message) => {
+    if (controlIdOf(message) === controlId) {
+      void remote.hangsUp();
+      return;
+    }
+    return ack("AA", { controlId: controlIdOf(message) }).text;
+  };
+}
+
 /** One accepted connection, as the remote system holds it. */
 interface Connection {
   readonly messages: ReadableStreamDefaultReader<Uint8Array>;
