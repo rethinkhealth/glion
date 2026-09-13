@@ -1,0 +1,7 @@
+{
+  "allowed_actions": "all",
+  "can_approve_pull_request_reviews": false,
+  "default_workflow_permissions": "read",
+  "enabled": true,
+  "sha_pinning_required": true
+}

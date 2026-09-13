@@ -1,0 +1,93 @@
+name: Repository configuration audit
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+
+env:
+  DRIFT_ISSUE_TITLE: Repository configuration drift
+
+jobs:
+  audit:
+    name: Repository configuration audit
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # checkout
+      issues: write # open, update, or close the drift issue
+
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm ci:install
+
+      # REPO_AUDIT_TOKEN is a read-only administration token; without it the
+      # Actions and code scanning objects are unreadable and the run fails.
+      - name: Diff the live configuration against .github/repo-baseline
+        id: audit
+        env:
+          GH_TOKEN: ${{ secrets.REPO_AUDIT_TOKEN || github.token }}
+        run: |
+          set +e
+          pnpm --silent check:repo-config > report.txt 2>&1
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat report.txt
+
+      - name: Find the open drift issue
+        id: issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          number=$(gh issue list --state open --label security --search "\"$DRIFT_ISSUE_TITLE\" in:title" --json number --jq '.[0].number // ""')
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+      - name: Open or update the drift issue
+        if: steps.audit.outputs.status != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "The configuration audit ($RUN_URL) found the live repository configuration differs from \`.github/repo-baseline/\`, or could not read part of it."
+            echo
+            echo '```'
+            cat report.txt
+            echo '```'
+            echo
+            echo "Either revert the settings change, or update the baseline in a pull request with \`pnpm check:repo-config --update\`."
+          } > body.md
+          if [ -n "$ISSUE_NUMBER" ]; then
+            gh issue comment "$ISSUE_NUMBER" --body-file body.md
+          else
+            gh issue create --title "$DRIFT_ISSUE_TITLE" --label security --body-file body.md
+          fi
+
+      - name: Close the drift issue on a clean run
+        if: steps.audit.outputs.status == '0' && steps.issue.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: gh issue close "$ISSUE_NUMBER" --comment "The configuration audit ($RUN_URL) found the live configuration matches the baseline again."
+
+      - name: Fail on drift or unreadable configuration
+        if: steps.audit.outputs.status != '0'
+        run: exit 1

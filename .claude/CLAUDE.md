@@ -54,6 +54,7 @@ pnpm check:release            # Verify every public package version is on npm wi
 # Workflows
 pnpm check:actions            # Verify every SHA-pinned action's version comment, commit date, and latest release
 pnpm check:workflows          # zizmor over .github/workflows (needs uv; same audit CI runs)
+pnpm check:repo-config        # Diff live GitHub repo settings against .github/repo-baseline (--update rewrites it)
 ```
 
 ## Architecture

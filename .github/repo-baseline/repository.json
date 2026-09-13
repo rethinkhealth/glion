@@ -1,0 +1,26 @@
+{
+  "allow_auto_merge": true,
+  "allow_forking": true,
+  "allow_merge_commit": false,
+  "allow_rebase_merge": false,
+  "allow_squash_merge": true,
+  "allow_update_branch": true,
+  "default_branch": "main",
+  "delete_branch_on_merge": true,
+  "has_discussions": false,
+  "has_projects": true,
+  "has_wiki": false,
+  "private_vulnerability_reporting": true,
+  "security_and_analysis": {
+    "dependabot_security_updates": "enabled",
+    "secret_scanning": "enabled",
+    "secret_scanning_ai_detection": "disabled",
+    "secret_scanning_delegated_alert_dismissal": "disabled",
+    "secret_scanning_delegated_bypass": "disabled",
+    "secret_scanning_non_provider_patterns": "enabled",
+    "secret_scanning_push_protection": "enabled",
+    "secret_scanning_validity_checks": "enabled"
+  },
+  "visibility": "public",
+  "web_commit_signoff_required": false
+}
