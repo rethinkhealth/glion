@@ -4,7 +4,7 @@ A simple HL7v2 MLLP client for Node.js and Cloudflare Workers.
 
 - 📦 **MLLP built in.** Framing, message boundaries and acknowledgment matching are handled. You send a parsed message and get one back.
 - 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, connection attempts retried with backoff, TCP keepalive by default, and explicit states you can read.
-- ⚡ **Thin over TCP.** One socket, one message on the wire at a time. Further sends wait. No worker threads, no polling.
+- ⚡ **Thin over TCP.** One socket, one message on the wire at a time. Further sends queue in call order. No worker threads, no polling.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
 - 🧩 **Any transport.** TCP included. TLS, Cloudflare Workers or an in-memory socket plug in behind it.
 - 🔤 **Typed end to end.** TypeScript throughout, with parsed HL7v2 going in and coming out.
@@ -177,13 +177,13 @@ Sends one message and resolves with the acknowledgment that answers it. Connects
 
 Every error carries `delivery`, `not-sent` or `unknown`, the one fact a retry needs; see [Errors](#errors).
 
-One message is on the wire at a time. A `send()` arriving while another is in flight waits for it, so a batch may be fired at once and goes out in order:
+One message is on the wire at a time. A `send()` arriving while another is in flight waits its turn, and sends go out in the order they were called, so a batch may be fired at once:
 
 ```ts
 const acks = await Promise.all(batch.map((message) => client.send(message)));
 ```
 
-Waiting sends go out one at a time. A send made while others are waiting, from the acknowledgment of an earlier one for instance, may go out before them. The line is in memory and has no bound. `timeoutMs` runs from the moment the message is written, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects with `MllpClientClosedError` and `delivery: "not-sent"`; nothing behind a failed message goes out. See [Does `send()` queue?](#does-send-queue).
+The queue is in memory and has no bound. `timeoutMs` runs from the moment the message is written, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects with `MllpClientClosedError` and `delivery: "not-sent"`; nothing behind a failed message goes out. See [Does `send()` queue?](#does-send-queue).
 
 ### `client.connect()`
 
@@ -481,9 +481,9 @@ The client closes with the failure, and never sends the failed message again —
 
 ### Does `send()` queue?
 
-Yes, in memory and without a bound. A `send()` arriving while a message is on the wire waits for that message's acknowledgment, then goes out, one at a time. A batch fired at once goes out in order, so an A01 fired before its A03 reaches the receiver first; a send made while others are waiting may go ahead of them. Nothing goes out behind a message whose delivery is unknown: a failure closes the client, and every send still waiting rejects with `CLOSED` and `delivery: "not-sent"`.
+Yes, in memory and without a bound. A `send()` arriving while a message is on the wire waits for that message's acknowledgment, then goes out; sends leave in the order they were called, one at a time, so an A01 fired before its A03 reaches the receiver first. Nothing goes out behind a message whose delivery is unknown: a failure closes the client, and every send still waiting rejects with `CLOSED` and `delivery: "not-sent"`.
 
-The line exists only in this process. A message waiting in it is not on disk, so a crash loses it without a trace, and a producer faster than the receiver grows it without limit. An interface that must not lose events keeps its own persistent outbound queue and hands the client one message at a time; the client's line is for a batch whose outcomes the caller is awaiting.
+The queue exists only in this process. A message waiting in it is not on disk, so a crash loses it without a trace, and a producer faster than the receiver grows it without limit. An interface that must not lose events keeps its own persistent outbound queue and hands the client one message at a time; the client's line is for a batch whose outcomes the caller is awaiting.
 
 ### Why a socket rather than a host and port?
 

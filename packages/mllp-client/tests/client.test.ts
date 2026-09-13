@@ -1286,6 +1286,38 @@ describe("MllpClient — an application that overlaps sends", () => {
     await client.close();
   });
 
+  it("does not hold the queue with a message that cannot be sent", async () => {
+    // Given a batch whose second message has no MSH-10
+    const { client, remote } = await connectedClient();
+    const first = adtA01();
+    const noControlId = adtA01({ controlId: "" }).tree;
+    const third = adtA01();
+
+    // When the application fires all three at once
+    const [a, b, c] = await Promise.allSettled([
+      client.send(first.tree),
+      client.send(noControlId),
+      client.send(third.tree),
+    ]);
+
+    // Then the unsendable one is refused before it takes a place, and the
+    // one behind it still goes out
+    expect(a).toMatchObject({ status: "fulfilled" });
+    expect(b).toMatchObject({
+      reason: { code: MllpErrorCode.INVALID_MESSAGE, delivery: "not-sent" },
+      status: "rejected",
+    });
+    expect(c).toMatchObject({
+      status: "fulfilled",
+      value: { controlId: third.controlId },
+    });
+    expect(remote.received.map(controlIdOf)).toEqual([
+      first.controlId,
+      third.controlId,
+    ]);
+    await client.close();
+  });
+
   it("delivers the rest of a series when one message cannot be sent", async () => {
     // Given a series whose second message carries a reserved MLLP byte
     const { client, remote } = await connectedClient();

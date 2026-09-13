@@ -41,7 +41,7 @@ import type {
  * One client owns one socket and puts one message on the wire at a time.
  * `send()` writes the message, waits for the acknowledgment, checks that it
  * answers this message, and resolves with it. A send arriving while another
- * is in flight waits for it.
+ * is in flight waits its turn; sends go out in the order they were called.
  *
  * ```ts
  * import { MllpClient } from "@glion/mllp-client";
@@ -75,6 +75,11 @@ export class MllpClient extends MllpClientEmitter {
   readonly #policy: ReconnectPolicy;
   readonly #sendTimeoutMs: number;
   #state: State = { phase: "idle" };
+  /**
+   * Sends in call order: the head is the send in progress, the rest wait.
+   * Each entry resolves when its send may start.
+   */
+  readonly #queue: PromiseWithResolvers<unknown>[] = [];
 
   /**
    * @throws {MllpInvalidOptionError} A timeout, byte cap, or attempt count is
@@ -164,10 +169,9 @@ export class MllpClient extends MllpClientEmitter {
    * client is not connected yet, and waits for the send in flight, if any,
    * before writing.
    *
-   * Waiting sends go out one at a time. A send made while others are waiting
-   * may go out before them. The line has no bound. `timeoutMs` runs from the
-   * write, not from the call. A send still waiting when the client closes
-   * rejects with {@link MllpClientClosedError}.
+   * Sends go out in the order `send()` was called. The queue has no bound.
+   * `timeoutMs` runs from the write, not from the call. A send still waiting
+   * when the client closes rejects with {@link MllpClientClosedError}.
    *
    * Nothing is written when an option, phase, or message error is thrown.
    * Every other failure also closes the client.
@@ -195,35 +199,41 @@ export class MllpClient extends MllpClientEmitter {
 
     const { bytes, controlId } = encode(message); // throws {MllpInvalidMessageError}
 
-    if (!this.connected) {
-      await this.connect();
+    const turn = Promise.withResolvers();
+    try {
+      this.#queue.push(turn);
+      if (this.#queue.length > 1) {
+        await turn.promise;
+      }
+      if (!this.connected) {
+        await this.connect();
+      }
+      const state = this.#state;
+      switch (state.phase) {
+        case "closing": {
+          throw new MllpClientClosedError();
+        }
+        case "closed": {
+          throw new MllpClientClosedError(state.reason);
+        }
+        case "idle":
+        case "connecting":
+        case "sending": {
+          throw new Error(
+            `send() found the client ${state.phase} at its turn. This is a bug in @glion/mllp-client; please report it.`
+          );
+        }
+        case "connected": {
+          break;
+        }
+      }
+      const done = this.#send(state.session, controlId, bytes, timeoutMs);
+      this.#state = { done, phase: "sending", session: state.session };
+      return await done;
+    } finally {
+      this.#queue.shift();
+      this.#queue[0]?.resolve(null);
     }
-    let state = this.#state;
-    while (state.phase === "sending") {
-      await Promise.allSettled([state.done]);
-      state = this.#state;
-    }
-    switch (state.phase) {
-      case "closing": {
-        throw new MllpClientClosedError();
-      }
-      case "closed": {
-        throw new MllpClientClosedError(state.reason);
-      }
-      case "idle":
-      case "connecting": {
-        throw new Error(
-          `send() found the client ${state.phase} after it connected. This is a bug in @glion/mllp-client; please report it.`
-        );
-      }
-      case "connected": {
-        break;
-      }
-    }
-
-    const done = this.#send(state.session, controlId, bytes, timeoutMs);
-    this.#state = { done, phase: "sending", session: state.session };
-    return await done;
   }
 
   /**
