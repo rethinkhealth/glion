@@ -9,6 +9,8 @@ const API = "https://api.github.com";
 const TAG_PREFIX = "refs/tags/";
 const PEELED_SUFFIX = "^{}";
 const DATE_LENGTH = 10;
+const NOT_FOUND = 404;
+const UNPROCESSABLE = 422;
 
 /**
  * A token for the GitHub API: `GITHUB_TOKEN`, then `GH_TOKEN`, then the
@@ -84,12 +86,14 @@ export function tagsByCommit(repo) {
 
 /**
  * @param {string} path API path starting with `/`.
- * @param {string | undefined} token Bearer token, or `undefined` for anonymous
- *   access.
- * @returns {Promise<unknown>} Parsed JSON body, or `undefined` on 404.
+ * @param {string} [token] Bearer token; omitted for anonymous access.
+ * @param {readonly number[]} missing Response statuses that mean "no such
+ *   object".
+ * @returns {Promise<unknown>} Parsed JSON body, or `undefined` on a `missing`
+ *   status.
  * @throws On any other non-2xx response.
  */
-async function api(path, token) {
+async function api(path, token, missing = [NOT_FOUND]) {
   const headers = {
     accept: "application/vnd.github+json",
     "user-agent": "glion-check-actions",
@@ -98,7 +102,7 @@ async function api(path, token) {
     headers.authorization = `Bearer ${token}`;
   }
   const response = await fetch(`${API}${path}`, { headers });
-  if (response.status === 404) {
+  if (missing.includes(response.status)) {
     return;
   }
   if (!response.ok) {
@@ -115,13 +119,16 @@ async function api(path, token) {
  *
  * @param {string} repo `owner/name`.
  * @param {string} sha Full commit SHA.
- * @param {string | undefined} token Bearer token, or `undefined` for anonymous
- *   access.
+ * @param {string} [token] Bearer token; omitted for anonymous access.
  * @returns {Promise<string | undefined>} The committer date, or `undefined`
  *   when the commit is unknown.
  */
 export async function commitDate(repo, sha, token) {
-  const commit = await api(`/repos/${repo}/commits/${sha}`, token);
+  // GitHub answers 422, not 404, for a well-formed SHA the repository does not have.
+  const commit = await api(`/repos/${repo}/commits/${sha}`, token, [
+    NOT_FOUND,
+    UNPROCESSABLE,
+  ]);
   return commit?.commit?.committer?.date?.slice(0, DATE_LENGTH);
 }
 
@@ -130,8 +137,7 @@ export async function commitDate(repo, sha, token) {
  * no releases.
  *
  * @param {string} repo `owner/name`.
- * @param {string | undefined} token Bearer token, or `undefined` for anonymous
- *   access.
+ * @param {string} [token] Bearer token; omitted for anonymous access.
  * @returns {Promise<string | undefined>} The release's `tag_name`, or
  *   `undefined` when there are no releases.
  */

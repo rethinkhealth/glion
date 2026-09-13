@@ -250,6 +250,20 @@ describe("checkActions", () => {
     expect(row?.facts.latest).toBe("v6.0.10");
   });
 
+  it("falls back to the highest version tag when the latest release tag is not a version", async () => {
+    const bundled = {
+      ...repository,
+      latestRelease: () => Promise.resolve("codeql-bundle-v2.27.0"),
+      tagsByCommit: () => new Map([[SHA, ["v4", "v4.38.0"]]]),
+    };
+    const [row] = await checkActions(
+      [pin({ comment: "v4.38.0", repo: "github/codeql-action" })],
+      bundled
+    );
+    expect(row?.facts.latest).toBe("v4.38.0");
+    expect(row?.latestStatus).toBe("current");
+  });
+
   it("rejects when a lookup rejects", async () => {
     const failing = {
       ...repository,
