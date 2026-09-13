@@ -17,6 +17,8 @@ interface Entry extends Turn {
 }
 
 export interface Queue {
+  /** How many turns wait behind the head. */
+  readonly pending: number;
   /** Takes the last place. */
   enter(): Turn;
   /** Gives `turn`'s place up. Starts the next send when `turn` was the head. */
@@ -44,6 +46,9 @@ export function createQueue(): Queue {
       if (place === 0) {
         entries[0]?.resolve();
       }
+    },
+    get pending() {
+      return Math.max(0, entries.length - 1);
     },
     rejectWaiting(error) {
       for (const entry of entries.slice(1)) {
