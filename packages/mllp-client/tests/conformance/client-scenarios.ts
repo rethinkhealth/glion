@@ -1,150 +1,206 @@
 /**
- * `describeMllpClientScenarios`: the client's behaviour over a real socket
- * as a vitest suite an adapter instantiates with its own runner.
+ * `MllpClient` over a real socket, as a vitest suite an adapter
+ * instantiates. Runtime-neutral, the same way as the socket contract.
  *
  * @module
  */
 
+import { AckApplicationError } from "@glion/ack";
 import { describe, expect, it } from "vitest";
 
-import type { MllpSocket } from "../../src/index";
-import { startReceiver } from "./receiver";
-import { runScenario, scenarioIds, scenarios } from "./scenarios";
-import type { ScenarioId } from "./scenarios";
-import type { RemoteAddress, ScenarioOutcome } from "./types";
+import { MllpClient } from "../../src/index";
+import type { MllpClientOptions, MllpSocket } from "../../src/index";
+import { adtA01 } from "../fixtures";
+import type { Address, Peer } from "../loopback";
+import { BLACKHOLE } from "./socket-contract";
 
-/** Executes one scenario wherever the client under test lives. */
-export interface ClientScenarioRunner {
-  run(id: ScenarioId, address: RemoteAddress): Promise<ScenarioOutcome>;
-}
+const SHORT_TIMEOUT_MS = 300;
 
-/** A runner that opens the socket in this process. */
-export function inProcess(
-  open: (address: RemoteAddress) => MllpSocket
-): ClientScenarioRunner {
-  return { run: (id, address) => runScenario(id, open(address)) };
+/** Generous bound for a 300 ms deadline to be honoured. */
+const DEADLINE_SLACK_MS = 3000;
+
+export interface ClientScenarioOptions {
+  /** A socket to `address`. */
+  readonly open: (address: Address) => MllpSocket;
+  /** A receiver behaving as `peer`, released when the test ends. */
+  readonly receiver: (peer: Peer) => Promise<Address & AsyncDisposable>;
 }
 
 const ownerClosed = ["connect", "close:null"];
 
-const expected: Readonly<
-  Record<ScenarioId, (outcome: ScenarioOutcome) => void>
-> = {
-  "S1-three-sends": (outcome) => {
-    expect(outcome.results.map((r) => r.code)).toEqual(["AA", "AA", "AA"]);
-    expect(outcome).toMatchObject({
-      events: ownerClosed,
-      state: "closed",
-      stateAfterRun: "connected",
-    });
-  },
-  "S10-close-from-connected": (outcome) => {
-    expect(outcome).toMatchObject({
-      events: ownerClosed,
-      results: [],
-      state: "closed",
-      stateAfterRun: "connected",
-    });
-  },
-  "S11-reconnect-gives-up": (outcome) => {
-    expect(outcome.results).toMatchObject([
-      { code: "CONNECTION_FAILED", error: "MllpConnectionFailedError" },
-    ]);
-    expect(outcome.events).toEqual(["close:CONNECTION_FAILED"]);
-  },
-  "S2-split-acknowledgment": (outcome) => {
-    expect(outcome.results).toMatchObject([{ code: "AA" }]);
-    expect(outcome.events).toEqual(ownerClosed);
-  },
-  "S3-silent-receiver": (outcome) => {
-    expect(outcome.results).toMatchObject([
-      {
-        code: "SEND_TIMEOUT",
-        delivery: "unknown",
-        error: "MllpSendTimeoutError",
-      },
-    ]);
-    expect(outcome).toMatchObject({
-      events: ["connect", "close:SEND_TIMEOUT"],
-      stateAfterRun: "closed",
-    });
-  },
-  "S4-dropped-after-read": (outcome) => {
-    expect(outcome.results).toMatchObject([
-      {
-        code: "CONNECTION_LOST",
-        delivery: "unknown",
-        error: "MllpConnectionLostError",
-      },
-    ]);
-    expect(outcome.events).toEqual(["connect", "close:CONNECTION_LOST"]);
-  },
-  "S5-one-shot-peer": (outcome) => {
-    expect(outcome.results).toMatchObject([
-      { code: "AA" },
-      { code: "CONNECTION_LOST" },
-    ]);
-    expect(outcome).toMatchObject({
-      events: ["connect", "close:CONNECTION_LOST"],
-      stateAfterRun: "closed",
-    });
-  },
-  "S6-refused": (outcome) => {
-    expect(outcome.results).toMatchObject([
-      {
-        code: "CONNECTION_FAILED",
-        delivery: "not-sent",
-        error: "MllpConnectionFailedError",
-      },
-    ]);
-    expect(outcome.events).toEqual(["close:CONNECTION_FAILED"]);
-  },
-  "S7-blackhole": (outcome) => {
-    expect(outcome.results).toMatchObject([
-      {
-        code: "CONNECTION_TIMEOUT",
-        delivery: "not-sent",
-        error: "MllpConnectionTimeoutError",
-      },
-    ]);
-    expect(outcome.events).toEqual(["close:CONNECTION_TIMEOUT"]);
-  },
-  "S8-application-reject": (outcome) => {
-    expect(outcome.results).toMatchObject([
-      { code: "AE", error: "AckApplicationError" },
-      { code: "AA" },
-    ]);
-    expect(outcome).toMatchObject({
-      events: ownerClosed,
-      stateAfterRun: "connected",
-    });
-  },
-  "S9-destroy-during-send": (outcome) => {
-    expect(outcome.results).toMatchObject([
-      { code: "SEND_ABORTED", error: "MllpSendAbortedError" },
-    ]);
-    expect(outcome).toMatchObject({
-      events: ownerClosed,
-      stateAfterRun: "closed",
-    });
-  },
-};
-
 /**
- * Registers one test per scenario, each against its own receiver.
- *
- * `name` labels the suite. Every scenario runs through `runner`.
+ * Registers the scenarios for the adapter `name`, each against its own
+ * receiver.
  */
 export function describeMllpClientScenarios(
   name: string,
-  runner: ClientScenarioRunner
+  { open, receiver }: ClientScenarioOptions
 ): void {
-  describe(`${name} — MllpClient scenarios`, () => {
-    for (const id of scenarioIds) {
-      it(id, async () => {
-        await using receiver = await startReceiver(scenarios[id].receiver);
-        expected[id](await runner.run(id, receiver.address));
+  /** A client that dials `address` once, with its events recorded. */
+  function connectTo(
+    address: Address,
+    options: Partial<MllpClientOptions> = {}
+  ) {
+    const events: string[] = [];
+    const client = new MllpClient({
+      reconnect: false,
+      socket: open(address),
+      ...options,
+    });
+    client
+      .on("connect", () => events.push("connect"))
+      .on("close", (error) => events.push(`close:${error?.code ?? "null"}`));
+    return { client, events };
+  }
+
+  describe(`${name}: MllpClient over a real socket`, () => {
+    it("sends three messages on one connection", async () => {
+      await using peer = await receiver("acknowledges");
+      const { client, events } = connectTo(peer);
+
+      for (let i = 0; i < 3; i += 1) {
+        const { controlId, tree } = adtA01();
+        await expect(client.send(tree)).resolves.toMatchObject({
+          code: "AA",
+          controlId,
+        });
+      }
+      expect(client.state).toBe("connected");
+      await client.close();
+
+      expect(client.state).toBe("closed");
+      expect(events).toEqual(ownerClosed);
+    });
+
+    it("reads an acknowledgment split across two chunks", async () => {
+      await using peer = await receiver("splitsAcknowledgment");
+      const { client } = connectTo(peer);
+
+      await expect(client.send(adtA01().tree)).resolves.toMatchObject({
+        code: "AA",
       });
-    }
+      await client.close();
+    });
+
+    it("rejects SEND_TIMEOUT and closes when the receiver stays silent", async () => {
+      await using peer = await receiver("silent");
+      const { client, events } = connectTo(peer, {
+        sendTimeoutMs: SHORT_TIMEOUT_MS,
+      });
+
+      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+        code: "SEND_TIMEOUT",
+        delivery: "unknown",
+      });
+
+      expect(client.state).toBe("closed");
+      expect(events).toEqual(["connect", "close:SEND_TIMEOUT"]);
+    });
+
+    it("rejects CONNECTION_LOST and closes when the receiver drops after reading", async () => {
+      await using peer = await receiver("dropsAfterRead");
+      const { client, events } = connectTo(peer);
+
+      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+        code: "CONNECTION_LOST",
+        delivery: "unknown",
+      });
+
+      expect(events).toEqual(["connect", "close:CONNECTION_LOST"]);
+    });
+
+    it("reads the acknowledgment a one-shot receiver sends with its FIN, then loses the connection", async () => {
+      await using peer = await receiver("acknowledgesThenEnds");
+      const { client, events } = connectTo(peer);
+
+      await expect(client.send(adtA01().tree)).resolves.toMatchObject({
+        code: "AA",
+      });
+      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+        code: "CONNECTION_LOST",
+      });
+
+      expect(events).toEqual(["connect", "close:CONNECTION_LOST"]);
+    });
+
+    it("rejects CONNECTION_FAILED when nothing is listening", async () => {
+      await using peer = await receiver("refused");
+      const { client, events } = connectTo(peer);
+
+      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+        code: "CONNECTION_FAILED",
+        delivery: "not-sent",
+      });
+
+      expect(events).toEqual(["close:CONNECTION_FAILED"]);
+    });
+
+    it("rejects CONNECTION_TIMEOUT within its deadline when the address never answers", async () => {
+      const { client, events } = connectTo(BLACKHOLE, {
+        connectTimeoutMs: SHORT_TIMEOUT_MS,
+      });
+
+      const started = performance.now();
+      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+        code: "CONNECTION_TIMEOUT",
+        delivery: "not-sent",
+      });
+
+      expect(performance.now() - started).toBeLessThan(DEADLINE_SLACK_MS);
+      expect(events).toEqual(["close:CONNECTION_TIMEOUT"]);
+    });
+
+    it("rejects with the NAK and keeps the connection", async () => {
+      await using peer = await receiver("rejectsFirst");
+      const { client, events } = connectTo(peer);
+
+      await expect(client.send(adtA01().tree)).rejects.toBeInstanceOf(
+        AckApplicationError
+      );
+      expect(client.state).toBe("connected");
+      await expect(client.send(adtA01().tree)).resolves.toMatchObject({
+        code: "AA",
+      });
+      await client.close();
+
+      expect(events).toEqual(ownerClosed);
+    });
+
+    it("rejects SEND_ABORTED for the send destroy() interrupts", async () => {
+      await using peer = await receiver("silent");
+      const { client, events } = connectTo(peer);
+      await client.connect();
+
+      const sending = client.send(adtA01().tree);
+      expect(client.state).toBe("sending");
+      await client.destroy();
+
+      await expect(sending).rejects.toMatchObject({ code: "SEND_ABORTED" });
+      expect(events).toEqual(ownerClosed);
+    });
+
+    it("closes from connected with no error", async () => {
+      await using peer = await receiver("acknowledges");
+      const { client, events } = connectTo(peer);
+      await client.connect();
+
+      await client.close();
+
+      expect(client.state).toBe("closed");
+      expect(events).toEqual(ownerClosed);
+    });
+
+    it("dials again under the reconnect policy, then gives up", async () => {
+      await using peer = await receiver("refused");
+      const { client, events } = connectTo(peer, {
+        reconnect: { attempts: 1, delay: () => 0 },
+      });
+
+      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+        code: "CONNECTION_FAILED",
+      });
+
+      expect(events).toEqual(["close:CONNECTION_FAILED"]);
+    });
   });
 }

@@ -1,38 +1,75 @@
 /**
  * The Node runtime adapter: the conformance suites over real loopback
- * sockets, plus what only Node's `net.Socket` guarantees.
+ * sockets, plus what only Node's `net.Socket` lets a test observe.
  */
+
+import { setTimeout as sleep } from "node:timers/promises";
 
 import { describe, expect, it } from "vitest";
 
+import { MllpClient } from "../src/index";
 import { DEFAULT_GRACEFUL_CLOSE_MS, nodeSocket } from "../src/runtime/node";
-import {
-  describeMllpClientScenarios,
-  inProcess as scenariosInProcess,
-} from "./conformance/client-scenarios";
-import { startReceiver } from "./conformance/receiver";
-import {
-  describeMllpSocketContract,
-  inProcess as contractInProcess,
-} from "./conformance/socket-contract";
+import { describeMllpClientScenarios } from "./conformance/client-scenarios";
+import { describeMllpSocketContract } from "./conformance/socket-contract";
+import { adtA01 } from "./fixtures";
+import { listen, peers, startPeer } from "./loopback";
 
 /** Slack on top of the grace window for the destroy to be observed. */
 const CLOSE_SLACK_MS = 500;
 
-describeMllpSocketContract(
-  "nodeSocket",
-  contractInProcess(nodeSocket, {
-    closeBoundMs: DEFAULT_GRACEFUL_CLOSE_MS + CLOSE_SLACK_MS,
-    finOnClose: true,
-  })
-);
+/** Time for the remote system to observe the client's close. */
+const SETTLE_MS = 50;
 
-describeMllpClientScenarios("nodeSocket", scenariosInProcess(nodeSocket));
+describeMllpSocketContract("nodeSocket", {
+  closeBoundMs: DEFAULT_GRACEFUL_CLOSE_MS + CLOSE_SLACK_MS,
+  open: nodeSocket,
+  receiver: startPeer,
+});
 
-describe("nodeSocket — grace window", () => {
-  it("waits gracefulCloseMs for the remote system's FIN before destroying", async () => {
-    await using receiver = await startReceiver("holdsOpen");
-    const socket = nodeSocket({ ...receiver.address, gracefulCloseMs: 200 });
+describeMllpClientScenarios("nodeSocket", {
+  open: nodeSocket,
+  receiver: startPeer,
+});
+
+describe("nodeSocket over net.Socket", () => {
+  it("does not dial when the signal is already aborted", async () => {
+    await using remote = await listen(peers.acknowledges);
+    const socket = nodeSocket(remote);
+
+    await expect(
+      socket.connect(AbortSignal.abort(new Error("the caller gave up")))
+    ).rejects.toThrow();
+    await sleep(SETTLE_MS);
+
+    expect(remote.connections).toBe(0);
+  });
+
+  it("dials a fresh connection after close()", async () => {
+    await using remote = await listen(peers.acknowledges);
+    const socket = nodeSocket(remote);
+
+    await socket.connect(new AbortController().signal);
+    await socket.close();
+    await socket.connect(new AbortController().signal);
+    await socket.close();
+
+    expect(remote.connections).toBe(2);
+  });
+
+  it("ends with FIN, not RST, when close() follows an exchange", async () => {
+    await using remote = await listen(peers.acknowledges);
+    const client = new MllpClient({ socket: nodeSocket(remote) });
+
+    await client.send(adtA01().tree);
+    await client.close();
+    await sleep(SETTLE_MS);
+
+    expect(remote.closes).toEqual(["end"]);
+  });
+
+  it("destroys the socket after gracefulCloseMs when the remote system never answers the FIN", async () => {
+    await using remote = await listen(peers.holdsOpen);
+    const socket = nodeSocket({ ...remote, gracefulCloseMs: 200 });
     await socket.connect(new AbortController().signal);
 
     const started = performance.now();

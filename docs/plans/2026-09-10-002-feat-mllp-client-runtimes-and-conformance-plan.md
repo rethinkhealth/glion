@@ -219,6 +219,8 @@ Steps 2 and 3 are independent of each other.
 - **`crypto.randomUUID()` over `node:crypto`** in the fixtures, so the same fixture module bundles into the harness Worker.
 - **Reconnect (#714, landed as #756)** retries the dialing, not a lost connection, and is on by default with about 30 s of backoff. Every scenario runs with `reconnect: false` so a refused port or a blackhole fails in one attempt; S11 runs the policy over a real socket with `attempts: 1` and a zero delay. #756 also renamed the connection errors (`CONNECTION_FAILED`, `CONNECTION_TIMEOUT`), added `SEND_ABORTED` for a send `destroy()` cuts off, and replaced `disconnect` with `close(error)`; the tables above use the shipped names.
 
+- **Cases are tests, not data (2026-09-13).** The first cut returned outcome records from each case so a harness Worker could ship them over HTTP, and a second table asserted on them. With Workers tests running inside `workerd` that layer had one caller and no reason to exist; the suites are now plain `describe` factories over `it` and `expect`, and the numbered ids above are the design's index, not the tests' names. One loopback fixture, `tests/loopback.ts`, serves every runtime; the three observations only the receiver can make (no dial on a pre-aborted signal, FIN not RST, a fresh connection after close) live in `tests/node.test.ts`.
+
 ## Related
 
 - `docs/plans/2026-09-03-001-feat-mllp-client-production-readiness-plan.md` (T0-4 TLS), ADR 0019. ADR 0020 §5 and `docs/mllp-client-architecture.md` §7 first specified the conformance suite; both are withdrawn by ADR 0021 on the #714 branch.
