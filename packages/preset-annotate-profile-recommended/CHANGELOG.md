@@ -1,5 +1,16 @@
 # @rethinkhealth/hl7v2-preset-annotate-profile-recommended
 
+## 0.20.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/annotate-profile-context@0.20.0
+  - @glion/annotate-profile-datatypes@0.20.0
+  - @glion/annotate-profile-fields@0.20.0
+  - @glion/annotate-profile-fields-code-systems@0.20.0
+  - @glion/annotate-profile-segments@0.20.0
+
 ## 0.19.0
 
 ### Patch Changes

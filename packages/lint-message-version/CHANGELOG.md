@@ -1,5 +1,13 @@
 # @rethinkhealth/hl7v2-lint-message-version
 
+## 0.20.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/util-query@0.20.0
+  - @glion/util-semver@0.20.0
+
 ## 0.19.0
 
 ### Patch Changes

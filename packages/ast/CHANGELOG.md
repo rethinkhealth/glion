@@ -1,5 +1,9 @@
 # @rethinkhealth/hl7v2-ast
 
+## 0.20.0
+
+No changes in this release.
+
 ## 0.19.0
 
 No changes in this release.
