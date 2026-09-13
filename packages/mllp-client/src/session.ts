@@ -14,8 +14,8 @@ import {
   MllpInvalidMessageError,
   MllpSendAbortedError,
   MllpSendTimeoutError,
-} from "../errors";
-import type { MllpSocket, MllpStreams } from "../types";
+} from "./errors";
+import type { MllpSocket, MllpStreams } from "./types";
 
 /**
  * One session over one socket, for that socket's lifetime. `ready` resolves

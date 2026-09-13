@@ -4,7 +4,7 @@
  * @module
  */
 
-import type { MllpClientError } from "../errors";
+import type { MllpClientError } from "./errors";
 
 export interface MllpClientEvents {
   /** The connection is open and ready for messages. */

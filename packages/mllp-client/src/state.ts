@@ -7,7 +7,7 @@
  * @module
  */
 
-import type { MllpClientError } from "../errors";
+import type { MllpClientError } from "./errors";
 import type { MllpSession } from "./session";
 
 export type State =

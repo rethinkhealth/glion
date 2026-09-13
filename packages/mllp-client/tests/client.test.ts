@@ -18,15 +18,15 @@ import {
   MllpInvalidMessageError,
   MllpInvalidOptionError,
   MllpSendTimeoutError,
-} from "../../src/index";
-import { ack, adtA01, controlIdOf } from "../fixtures";
+} from "../src/index";
+import { ack, adtA01, controlIdOf } from "./fixtures";
 import {
   acknowledging,
   connectedClient,
   remoteSystem,
   silence,
-} from "./fixtures";
-import type { Opening } from "./fixtures";
+} from "./remote";
+import type { Opening } from "./remote";
 
 /** A socket the remote system refuses with `error`. */
 function refused(error: unknown): Opening {

@@ -14,13 +14,9 @@ import { frame, unframe } from "@glion/mllp-codec";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
 import { vi } from "vitest";
 
-import { MllpClient } from "../../src/index";
-import type {
-  MllpClientOptions,
-  MllpSocket,
-  MllpStreams,
-} from "../../src/index";
-import { ack, controlIdOf } from "../fixtures";
+import { MllpClient } from "../src/index";
+import type { MllpClientOptions, MllpSocket, MllpStreams } from "../src/index";
+import { ack, controlIdOf } from "./fixtures";
 
 /** How a socket answers `connect()`. */
 export type Opening = (

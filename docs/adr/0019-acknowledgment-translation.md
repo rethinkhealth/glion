@@ -6,7 +6,7 @@ Proposed
 
 ## Context
 
-> `@glion/mllp-ack`, and the `ackMiddleware` this section describes, were removed by PR 1 of §9 (`.changeset/remove-mllp-ack.md`). Its file references are historical. The client half now lives in `packages/mllp-client/src/client/messages.ts` and `packages/mllp-client/src/errors/nak-exception.ts`, which already falls back to ERR-8 for `text`; ERR-2 → `location` remains open.
+> `@glion/mllp-ack`, and the `ackMiddleware` this section describes, were removed by PR 1 of §9 (`.changeset/remove-mllp-ack.md`). Its file references are historical. The client half now lives in `packages/mllp-client/src/messages.ts` and `packages/mllp-client/src/errors/nak-exception.ts`, which already falls back to ERR-8 for `text`; ERR-2 → `location` remains open.
 
 The MLLP server translates application outcomes into HL7v2 acknowledgments through `ackMiddleware` (`packages/mllp-ack/src/ack.ts:46-83`): an optional middleware that wraps `next()` in its own try/catch, normalises every throw into an `AckException`, builds MSH+MSA via `acknowledge()` (`packages/mllp-ack/src/acknowledge.ts`), and appends an ERR segment only when the application supplies an `errSegment` callback.
 

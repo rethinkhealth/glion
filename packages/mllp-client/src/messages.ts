@@ -16,9 +16,9 @@ import {
   MllpInvalidMessageError,
   MllpInvalidResponseError,
   nakException,
-} from "../errors";
-import type { MllpClientResponse } from "../types";
-import { read } from "../utils";
+} from "./errors";
+import type { MllpClientResponse } from "./types";
+import { read } from "./utils";
 
 /** A message ready to go out. */
 export interface EncodingResponse {

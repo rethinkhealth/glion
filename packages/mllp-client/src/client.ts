@@ -2,11 +2,16 @@ import type { Root } from "@glion/ast";
 import { MllpCodecError } from "@glion/mllp-codec";
 
 import {
+  assertByteCap,
+  assertReconnectAttempts,
+  assertTimeoutMs,
+} from "./assertions";
+import {
   DEFAULT_CONNECT_TIMEOUT_MS,
   DEFAULT_MAX_BUFFERED_BYTES,
   DEFAULT_RECONNECT_ATTEMPTS,
   DEFAULT_SEND_TIMEOUT_MS,
-} from "../constants";
+} from "./constants";
 import {
   MllpAlreadySendingError,
   MllpClientClosedError,
@@ -14,19 +19,7 @@ import {
   MllpConnectionError,
   MllpInvalidMessageError,
   MllpInvalidResponseError,
-} from "../errors";
-import type {
-  MllpClientOptions,
-  MllpClientResponse,
-  MllpClientState,
-  MllpSendOptions,
-  MllpSocket,
-} from "../types";
-import {
-  assertByteCap,
-  assertReconnectAttempts,
-  assertTimeoutMs,
-} from "./assertions";
+} from "./errors";
 import { MllpClientEmitter } from "./events";
 import { decode, encode } from "./messages";
 import { defaultReconnectDelay, sleep } from "./reconnect";
@@ -34,6 +27,13 @@ import type { ReconnectPolicy } from "./reconnect";
 import { createSession } from "./session";
 import type { ConnectOptions, MllpSession } from "./session";
 import type { State } from "./state";
+import type {
+  MllpClientOptions,
+  MllpClientResponse,
+  MllpClientState,
+  MllpSendOptions,
+  MllpSocket,
+} from "./types";
 
 /**
  * Sends HL7v2 messages to one remote system over MLLP and returns each

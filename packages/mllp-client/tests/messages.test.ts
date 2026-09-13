@@ -15,13 +15,13 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
 import { describe, expect, it } from "vitest";
 
-import { decode, encode } from "../../src/client/messages";
 import {
   MllpClientError,
   MllpInvalidMessageError,
   MllpInvalidResponseError,
-} from "../../src/errors";
-import { ack, adtA01 } from "../fixtures";
+} from "../src/errors";
+import { decode, encode } from "../src/messages";
+import { ack, adtA01 } from "./fixtures";
 
 describe("encode()", () => {
   describe("a message it can send", () => {

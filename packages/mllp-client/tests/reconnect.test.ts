@@ -4,7 +4,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { defaultReconnectDelay, sleep } from "../../src/client/reconnect";
+import { defaultReconnectDelay, sleep } from "../src/reconnect";
 
 describe("defaultReconnectDelay()", () => {
   afterEach(() => {

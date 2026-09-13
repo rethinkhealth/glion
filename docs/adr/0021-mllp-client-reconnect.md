@@ -4,7 +4,7 @@
 
 Accepted (2026-09-10; revised 2026-09-12, see the last alternative)
 
-Withdraws ADR 0020, whose mailbox-actor design was built, measured, and rejected on 2026-09-07 (`docs/plans/2026-09-03-001-feat-mllp-client-production-readiness-plan.md` §0). The shipped client is its own record: `packages/mllp-client/src/client/` and `packages/mllp-client/src/errors/`.
+Withdraws ADR 0020, whose mailbox-actor design was built, measured, and rejected on 2026-09-07 (`docs/plans/2026-09-03-001-feat-mllp-client-production-readiness-plan.md` §0). The shipped client is its own record: `packages/mllp-client/src/` (`client.ts`, `session.ts`, `state.ts`, `reconnect.ts`) and `packages/mllp-client/src/errors/`.
 
 ## Context
 

@@ -9,10 +9,10 @@ import { frame, MllpCodecError } from "@glion/mllp-codec";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
 import { describe, it, vi } from "vitest";
 
-import { createSession } from "../../src/client/session";
-import { MllpErrorCode } from "../../src/errors";
-import { adtA01 } from "../fixtures";
-import { memorySocket } from "./fixtures";
+import { MllpErrorCode } from "../src/errors";
+import { createSession } from "../src/session";
+import { adtA01 } from "./fixtures";
+import { memorySocket } from "./remote";
 
 describe("createSession()", () => {
   describe("opening", () => {

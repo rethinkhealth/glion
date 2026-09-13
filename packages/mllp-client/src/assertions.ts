@@ -5,8 +5,8 @@
  * @module
  */
 
-import { MAX_TIMEOUT_MS } from "../constants";
-import { MllpInvalidOptionError } from "../errors";
+import { MAX_TIMEOUT_MS } from "./constants";
+import { MllpInvalidOptionError } from "./errors";
 
 export function assertTimeoutMs(option: string, ms: number): void {
   if (!Number.isFinite(ms) || ms <= 0 || ms > MAX_TIMEOUT_MS) {
