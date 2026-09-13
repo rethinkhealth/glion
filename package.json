@@ -27,7 +27,6 @@
     "check-types": "turbo run check-types",
     "check:readmes": "turbo run check:readme",
     "ci:install": "pnpm install --frozen-lockfile",
-    "ci:publish": "pnpm recursive publish --no-git-checks --access public",
     "ci:update": "pnpm --recursive update",
     "ci:version": "pnpm changeset version",
     "clean": "rimraf packages/*/dist packages/*/node_modules packages/*/coverage packages/*/.turbo node_modules packages/*/tsconfig.tsbuildinfo",
@@ -49,7 +48,8 @@
     "syncpack": "14.3.1"
   },
   "devDependencies": {
-    "@changesets/cli": "2.31.0",
+    "@changesets/changelog-github": "1.0.1",
+    "@changesets/cli": "3.0.2",
     "@glion/tsconfig": "workspace:*",
     "husky": "9.1.7",
     "lint-staged": "16.4.0",
