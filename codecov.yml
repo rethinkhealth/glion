@@ -1,10 +1,28 @@
 codecov:
   require_ci_to_pass: true
 
-# Benchmark harness code (suites, lab sweeps, fixtures) is not product
-# code — its "coverage" is whatever the canary happens to execute.
+coverage:
+  status:
+    # New and changed lines must be exercised. This is the gate.
+    patch:
+      default:
+        target: 90%
+        threshold: 2%
+    # Project-wide coverage is reported, not enforced: a PR that only touches
+    # already-uncovered legacy code must not fail here. The CRAP worklist
+    # (#738) drives that number down, not a global target.
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        informational: true
+
 ignore:
+  # Benchmark harness code (suites, lab sweeps, fixtures) is not product
+  # code — its "coverage" is whatever the canary happens to execute.
   - "benchmarks/**"
+  # Generated HL7v2 profile data; excluded from vitest coverage as well.
+  - "packages/profiles/src/profiles/**"
 
 comment:
   layout: "reach, diff, flags, files"
