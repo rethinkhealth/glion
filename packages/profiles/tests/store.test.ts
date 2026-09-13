@@ -1,5 +1,4 @@
 // oxlint-disable promise/prefer-await-to-then
-import { describe, expect, it, vi } from "vitest";
 
 import { createLruCache } from "../src/cache/lru";
 import type { ProfileStoreConfig } from "../src/store";
@@ -161,13 +160,9 @@ describe("createProfileStore", () => {
 
       await expect(store.load("2.5", "FAIL")).rejects.toThrow("boom");
 
-      // Wait a tick for the .catch handler to run
-      // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
-      // oxlint-disable-next-line promise/avoid-new promise/param-names
-      await new Promise((r) => {
-        setTimeout(r, 0);
+      await vi.waitFor(() => {
+        expect(store.has("2.5", "FAIL")).toBe(false);
       });
-      expect(store.has("2.5", "FAIL")).toBe(false);
     });
   });
 });
