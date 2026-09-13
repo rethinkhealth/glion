@@ -93,13 +93,37 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.4.2
       - name: Install dependencies
         run: pnpm ci:install
       - name: Build (all packages via turbo for correct dependency order)
         run: pnpm build
       - name: Run Bun-runtime tests across all packages that opt in
         run: pnpm test:bun
+
+  testing-deno:
+    name: Testing (Deno runtime)
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "pnpm"
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.9.6
+      - name: Install dependencies
+        run: pnpm ci:install
+      - name: Build (all packages via turbo for correct dependency order)
+        run: pnpm build
+      - name: Run Deno-runtime tests across all packages that opt in
+        run: pnpm test:deno
 
   testing-cf:
     name: Testing (Cloudflare Workers / workerd)

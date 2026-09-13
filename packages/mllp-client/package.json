@@ -38,10 +38,12 @@
     "build": "tsdown && tsc --emitDeclarationOnly",
     "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
+    "publint": "publint --strict",
     "test": "vitest run",
+    "test:bun": "bun --bun ./node_modules/vitest/vitest.mjs run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest",
-    "publint": "publint --strict"
+    "test:deno": "deno run -A ./node_modules/vitest/vitest.mjs run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@glion/ack": "workspace:*",

@@ -1,15 +1,15 @@
 # @glion/mllp-client
 
-A simple HL7v2 MLLP client for Node.js and Cloudflare Workers.
+An HL7v2 MLLP client for Node.js, Bun, and Deno.
 
 - 📦 **MLLP built in.** Framing, message boundaries and acknowledgment matching are handled. You send a parsed message and get one back.
 - 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, TCP keepalive by default, and explicit states you can read.
 - ⚡ **Thin over TCP.** One socket, one message at a time. No queue, no worker threads, no polling.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
-- 🧩 **Any transport.** TCP included. TLS, Cloudflare Workers or an in-memory socket plug in behind it.
+- 🧩 **Any transport.** TCP on Node.js, Bun, and Deno included. TLS, Cloudflare Workers or an in-memory socket plug in behind the same two-method interface.
 - 🔤 **Typed end to end.** TypeScript throughout, with parsed HL7v2 going in and coming out.
 
-> **Coming soon** — TLS and Cloudflare Workers adapters. Today the only bundled adapter is Node.js over TCP.
+> TLS and Cloudflare Workers adapters are not bundled yet. TLS is tracked in [#657](https://github.com/rethinkhealth/glion/issues/657).
 
 ## Install
 
@@ -261,9 +261,15 @@ client
 
 ## Runtimes
 
-The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#custom-socket) — two methods — so supporting a new runtime means writing an adapter, not forking the client.
+The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#custom-socket) — two methods — so supporting a runtime means an adapter, not a fork of the client.
 
-Node.js is the only adapter that ships today.
+| Runtime      | Adapter                 | Import                    | TLS                                                       | Proven by                               |
+| ------------ | ----------------------- | ------------------------- | --------------------------------------------------------- | --------------------------------------- |
+| Node.js ≥ 22 | [`nodeSocket`](#nodejs) | `@glion/mllp-client/node` | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Node 22 and 24 |
+| Bun          | [`nodeSocket`](#nodejs) | `@glion/mllp-client/node` | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Bun 1.4        |
+| Deno         | [`nodeSocket`](#nodejs) | `@glion/mllp-client/node` | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Deno 2.9       |
+
+Every adapter runs the same conformance suite: the [`MllpSocket` contract](#custom-socket) case by case, and the client's behaviour over a real socket scenario by scenario. A custom socket can run it too; see `tests/conformance/` in the package source.
 
 ### Node.js
 
@@ -273,7 +279,7 @@ import { nodeSocket } from "@glion/mllp-client/node";
 nodeSocket(options: NodeSocketOptions): MllpSocket
 ```
 
-Plain TCP over `net.Socket`.
+Plain TCP over `net.Socket`. The same adapter runs on Bun and Deno through their `node:net` compatibility; no separate import is needed there.
 
 | Option            | Type     | Default  | Description                                                                                                 |
 | ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------- |
@@ -282,13 +288,15 @@ Plain TCP over `net.Socket`.
 | `gracefulCloseMs` | `number` | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                               |
 | `keepAliveIdleMs` | `number` | `30000`  | Idle time before the first keepalive probe, so a silent NAT or firewall drop surfaces before the next send. |
 
-`TCP_NODELAY` is set, so a message goes out immediately rather than waiting on Nagle's algorithm.
+`TCP_NODELAY` is set, so a message goes out immediately rather than waiting on Nagle's algorithm. On Bun and Deno the keepalive delay is passed through to the runtime; whether the runtime honours it is not verified.
 
 ```ts
 const client = new MllpClient({
   socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
 });
 ```
+
+Deno needs `--allow-net` for the receiver's host and port.
 
 ### Custom Socket
 
