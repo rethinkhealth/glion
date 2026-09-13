@@ -360,7 +360,7 @@ What differs from Node:
 
 - A Worker reaches only endpoints routable from Cloudflare's network. A receiver on a private network needs a publicly reachable endpoint in front of it.
 - `close()` resolves as soon as the runtime has ended the socket; there is no grace window.
-- Under `wrangler dev`, connections go through a local proxy, so `MllpConnectFailedError.cause` carries the proxy's message rather than a socket error code. `code` is the same in both.
+- Locally, under Miniflare (`wrangler dev` or the Vitest integration), connections go through a proxy, so `MllpConnectionFailedError.cause` carries the proxy's message rather than a socket error code. `code` is the same in both.
 - Cloudflare blocks some destination ports.
 
 ### Custom Socket
