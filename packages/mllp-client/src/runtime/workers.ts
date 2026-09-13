@@ -1,13 +1,13 @@
 /**
- * Cloudflare Workers runtime adapter for `MllpClient`.
- *
- * Opens a socket through `cloudflare:sockets` and closes it through the
- * same. Framing and stream ownership belong to the layer above.
+ * Cloudflare Workers runtime adapter for `MllpClient`: one socket over
+ * `cloudflare:sockets`. Framing and stream ownership belong to the layer
+ * above.
  *
  * @module
  */
 
 import { connect } from "cloudflare:sockets";
+import type { Socket } from "cloudflare:sockets";
 
 import type { MllpSocket, MllpStreams } from "../types";
 
@@ -25,43 +25,62 @@ export interface WorkersSocketOptions {
  * #657.
  */
 export function workersSocket(opts: WorkersSocketOptions): MllpSocket {
-  let closeOpen = (): Promise<void> => Promise.resolve();
+  let open: Socket | undefined;
 
   return {
-    close: () => closeOpen(),
+    async close(): Promise<void> {
+      const socket = open;
+      open = undefined;
+      await socket?.close();
+    },
 
     async connect(signal: AbortSignal): Promise<MllpStreams> {
-      if (signal.aborted) {
-        throw signal.reason;
-      }
+      signal.throwIfAborted();
       const socket = connect(
         { hostname: opts.host, port: opts.port },
         { allowHalfOpen: false, secureTransport: "off" }
       );
-
-      let onAbort: (() => void) | undefined;
-      // oxlint-disable-next-line promise/avoid-new -- wrapping an abort event
-      const aborted = new Promise<never>((_resolve, reject) => {
-        onAbort = () => reject(signal.reason);
-        signal.addEventListener("abort", onAbort, { once: true });
-      });
+      const attempt = new AbortController();
       try {
-        await Promise.race([socket.opened, aborted]);
+        await Promise.race([socket.opened, aborted(signal, attempt.signal)]);
       } catch (error) {
-        // workerd settles `close()` on a socket that never opened only once
-        // the attempt itself settles, and then rejects it with the attempt's
-        // own error. Nothing is open to end, so neither is waited for.
-        // oxlint-disable-next-line promise/prefer-await-to-then -- see above
-        void socket.close().catch(() => {});
-        throw signal.aborted ? signal.reason : error;
-      } finally {
-        if (onAbort) {
-          signal.removeEventListener("abort", onAbort);
+        if (!signal.aborted) {
+          throw error;
         }
+        void discard(socket);
+        throw signal.reason;
+      } finally {
+        attempt.abort();
       }
-
-      closeOpen = () => socket.close();
+      open = socket;
       return { readable: socket.readable, writable: socket.writable };
     },
   };
+}
+
+/**
+ * Rejects with `signal.reason` once `signal` aborts, unless `until` aborts
+ * first.
+ */
+function aborted(signal: AbortSignal, until: AbortSignal): Promise<never> {
+  // oxlint-disable-next-line promise/avoid-new -- wrapping an abort event
+  return new Promise((_resolve, reject) => {
+    signal.addEventListener("abort", () => reject(signal.reason), {
+      once: true,
+      signal: until,
+    });
+  });
+}
+
+/**
+ * Ends a socket whose attempt was cancelled. workerd settles that close only
+ * once the attempt itself settles, and with the attempt's own failure.
+ */
+async function discard(socket: Socket): Promise<void> {
+  try {
+    await socket.close();
+  } catch {
+    // The cancelled attempt's failure; `connect()` already rejected with the
+    // cancellation, and nothing is open.
+  }
 }
