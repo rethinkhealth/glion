@@ -1,5 +1,20 @@
 # @rethinkhealth/hl7v2-preset-lint-profile-recommended
 
+## 0.19.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/annotate-profile-context@0.19.0
+  - @glion/lint-profile-events-segments-order@0.19.0
+  - @glion/lint-profile-extra-components@0.19.0
+  - @glion/lint-profile-extra-fields@0.19.0
+  - @glion/lint-profile-field-max-length@0.19.0
+  - @glion/lint-profile-field-repetition@0.19.0
+  - @glion/lint-profile-required-components@0.19.0
+  - @glion/lint-profile-required-fields@0.19.0
+  - @glion/lint-profile-table-values@0.19.0
+
 ## 0.18.0
 
 ### Minor Changes

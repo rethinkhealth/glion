@@ -1,5 +1,15 @@
 # @rethinkhealth/hl7v2-lint-profile-events-segments-order
 
+## 0.19.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/ast@0.19.0
+  - @glion/profiles@0.19.0
+  - @glion/util-query@0.19.0
+  - @glion/util-visit@0.19.0
+
 ## 0.18.0
 
 ### Minor Changes
