@@ -23,7 +23,6 @@ import { ack, adtA01, controlIdOf } from "./fixtures";
 import {
   acknowledging,
   connectedClient,
-  hangingUpOn,
   remoteSystem,
   silence,
 } from "./remote";
@@ -1201,8 +1200,9 @@ describe("MllpClient — an application that overlaps sends", () => {
   it("sends nothing behind a message whose delivery is unknown, batch or not", async () => {
     // Given a remote system that hangs up while answering the second message
     const { client, remote } = await connectedClient();
-    const batch = [adtA01(), adtA01(), adtA01()];
-    remote.answers(hangingUpOn(batch[1]?.controlId, remote));
+    const lost = adtA01();
+    const batch = [adtA01(), lost, adtA01()];
+    remote.hangsUpOn(lost.controlId);
 
     // When the application fires all three at once
     const [first, second, third] = await Promise.allSettled(
@@ -1382,8 +1382,9 @@ describe("MllpClient — an application that overlaps sends", () => {
   it("sends nothing behind a message whose delivery is unknown", async () => {
     // Given a remote system that hangs up while answering the second message
     const { client, remote } = await connectedClient();
-    const batch = [adtA01(), adtA01(), adtA01()];
-    remote.answers(hangingUpOn(batch[1]?.controlId, remote));
+    const lost = adtA01();
+    const batch = [adtA01(), lost, adtA01()];
+    remote.hangsUpOn(lost.controlId);
 
     // When the application sends the series in turn
     const outcomes: unknown[] = [];

@@ -143,23 +143,6 @@ export function acknowledging(code: string, msa3 = ""): Answer {
 /** Never answers. */
 export const silence: Answer = () => {};
 
-/**
- * Acknowledges every message with `AA`, except the one whose MSH-10 is
- * `controlId`: `remote` hangs up instead of answering it.
- */
-export function hangingUpOn(
-  controlId: string | undefined,
-  remote: { hangsUp: () => Promise<void> }
-): Answer {
-  return (message) => {
-    if (controlIdOf(message) === controlId) {
-      void remote.hangsUp();
-      return;
-    }
-    return ack("AA", { controlId: controlIdOf(message) }).text;
-  };
-}
-
 /** One accepted connection, as the remote system holds it. */
 interface Connection {
   readonly messages: ReadableStreamDefaultReader<Uint8Array>;
@@ -260,6 +243,19 @@ export function remoteSystem(opening: Opening = accepts) {
     },
     /** Hangs up: ends what it sends, so the client's next read sees the end. */
     hangsUp: () => connection().outbound.close(),
+    /**
+     * Acknowledges every message with `AA` from now on, except the one whose
+     * MSH-10 is `controlId`: hangs up instead of answering it.
+     */
+    hangsUpOn(controlId: string): void {
+      answer = async (message) => {
+        if (controlIdOf(message) === controlId) {
+          await connection().outbound.close();
+          return;
+        }
+        return ack("AA", { controlId: controlIdOf(message) }).text;
+      };
+    },
     /** How many times the client opened the socket. */
     get opened(): number {
       return opened;
