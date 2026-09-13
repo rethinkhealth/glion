@@ -26,7 +26,7 @@
     "check": "ultracite check",
     "check-types": "turbo run check-types",
     "check:readmes": "turbo run check:readme",
-    "ci:install": "pnpm install --no-frozen-lockfile",
+    "ci:install": "pnpm install --frozen-lockfile",
     "ci:publish": "pnpm recursive publish --no-git-checks --access public",
     "ci:update": "pnpm --recursive update",
     "ci:version": "pnpm changeset version",

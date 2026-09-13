@@ -36,7 +36,7 @@
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly && pnpm build:schema",
     "build:schema": "node --input-type=module -e \"import{writeFileSync}from'fs';import{jsonSchema}from'./dist/json-schema.js';writeFileSync('schema.json',JSON.stringify(jsonSchema,null,2));\"",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

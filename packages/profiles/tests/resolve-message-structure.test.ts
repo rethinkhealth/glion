@@ -1,5 +1,3 @@
-import { describe, expect, it } from "vitest";
-
 import { resolveMessageStructure } from "../src/resolve-message-structure";
 
 describe("resolveMessageStructure", () => {
