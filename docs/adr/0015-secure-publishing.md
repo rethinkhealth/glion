@@ -49,11 +49,11 @@ All public packages MUST pass `publint --strict` on every pull request. Implemen
 
 **Target state:**
 
-- `pnpm ci:publish` passes `--provenance` so that npm records a sigstore attestation for each published tarball. This uses the `id-token: write` GitHub Actions permission already declared in `release.yml`.
+- Every published tarball carries a sigstore provenance attestation, minted from the `id-token: write` GitHub Actions permission declared on the publish job in `release.yml`.
 - npm scope `@glion` uses **trusted publishing** (npm's OIDC-based alternative to long-lived tokens), so no `NPM_TOKEN` secret is required in the workflow.
 - All human publishers on the scope have 2FA enforced for both login and write operations.
 
-**Current gap (2026-04-21):** Commit `3ea71c2e` normalized the `repository` field in every package.json in preparation for provenance, but `pnpm ci:publish` does not yet pass `--provenance` and the scope has not been migrated to trusted publishers. Tracked separately from this ADR; called out here so the gap is visible and does not silently rot.
+**Status (2026-09-13):** the `@glion` scope publishes through npm trusted publishing (OIDC) from `.github/workflows/release.yml`; there is no `NPM_TOKEN` secret. npm derives provenance from the OIDC exchange, so no `--provenance` flag is passed. The publish job is the only job that holds `id-token: write`; it publishes tarballs packed by a separate job that holds `contents: read` only. Trusted publishers are configured per package on npmjs.com, and a package that does not exist yet cannot be created through OIDC: a new package needs one token-based publish from a maintainer before the workflow can release it. That first publish is the one sanctioned exception to section 4.
 
 ### 3. Supply-chain integrity — addresses (3)
 
@@ -66,9 +66,9 @@ All public packages MUST pass `publint --strict` on every pull request. Implemen
 ### 4. Publish trigger integrity — addresses (4)
 
 - Publishes happen **only** from the `Changesets` workflow in `.github/workflows/release.yml`, triggered by merges to `main`.
-- The workflow runs `pnpm build` before `pnpm ci:publish`, guaranteeing artifacts are built from the exact source on `main`.
+- The pack job runs `pnpm build` and packs every publishable package into a tarball; the publish job publishes those tarballs and nothing else, so artifacts are built from the exact source on `main`.
 - Developers MUST NOT run `npm publish` or `pnpm publish` from local machines. No exceptions: even hotfix releases go through a PR → merge → release workflow.
-- The `--no-git-checks` flag on `pnpm recursive publish` is scoped to CI only; it exists because CI operates on a detached HEAD and has no dirty working tree. It does not weaken any other guarantee.
+- Publishing is delegated to `changeset publish`, which publishes each package's packed tarball in dependency order, skips versions already on the registry, and reports per package instead of aborting the whole run on the first failure. It passes `--no-git-checks` to pnpm because CI operates on a detached HEAD; that flag does not weaken any other guarantee.
 
 ### 5. Minimal package contents — addresses (1) defence-in-depth
 
@@ -128,3 +128,5 @@ Every public package MUST declare `"files": ["dist"]` (or equivalent narrow allo
 ## History
 
 - 2026-04-21: Accepted. Section 1 (publint) landed in PR for issue #591. Sections 2–6 describe the target posture; gaps are explicit.
+- 2026-05-08: Section 2 landed. pnpm 10 and OIDC trusted publishing replaced `NPM_TOKEN` (#635).
+- 2026-09-13: Release workflow split into select-mode, version, pack, and publish jobs on Changesets CLI v3 and `changesets/action@v2`, with `id-token: write` confined to the publish job.

@@ -48,7 +48,7 @@ pnpm syncpack:fix             # Auto-fix mismatches
 # Releases
 pnpm changeset                # Create a new changeset
 pnpm ci:version               # Bump versions
-pnpm ci:publish               # Publish to npm
+pnpm changeset publish-plan   # Preview what the release workflow would publish
 ```
 
 ## Architecture
