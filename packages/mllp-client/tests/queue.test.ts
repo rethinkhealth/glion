@@ -88,6 +88,22 @@ describe("createQueue", () => {
     expect(await settled(newcomer.wait as Promise<unknown>)).toBe(true);
   });
 
+  it("counts the turns waiting behind the head", () => {
+    const queue = createQueue();
+    expect(queue.pending).toBe(0);
+
+    const head = queue.enter();
+    expect(queue.pending).toBe(0);
+    const second = queue.enter();
+    queue.enter();
+    expect(queue.pending).toBe(2);
+
+    queue.leave(head);
+    expect(queue.pending).toBe(1);
+    queue.leave(second);
+    expect(queue.pending).toBe(0);
+  });
+
   it("lets a place be taken again once everyone has left", () => {
     const queue = createQueue();
     const head = queue.enter();
