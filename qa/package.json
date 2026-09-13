@@ -5,6 +5,7 @@
   "description": "Healthcare-grade QA verification for HL7v2 parser pipeline",
   "type": "module",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "test": "vitest run"
   },
   "devDependencies": {
@@ -14,8 +15,10 @@
     "@glion/testing": "workspace:*",
     "@glion/to-hl7v2": "workspace:*",
     "@glion/tsconfig": "workspace:*",
+    "@types/node": "25.6.0",
     "fast-check": "^3.23.2",
     "unified": "^11.0.5",
+    "vfile": "^6.0.3",
     "vitest": "4.1.11"
   },
   "engines": {

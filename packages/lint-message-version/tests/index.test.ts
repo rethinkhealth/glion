@@ -1,15 +1,13 @@
 /** Biome-ignore-all lint/style/noNonNullAssertion: unit tests */
 import { readFile } from "node:fs/promises";
+import path from "node:path";
 
+import type { Root } from "@glion/ast";
 import { c, f, m, s } from "@glion/builder";
 import { unified } from "unified";
 import { VFile } from "vfile";
 
 import hl7v2LintMessageVersion from "../src";
-
-import path = require("node:path");
-
-import type { Root } from "@glion/ast";
 
 const messageToJson = (message: VFile["messages"][0]) =>
   // oxlint-disable-next-line unicorn/prefer-structured-clone

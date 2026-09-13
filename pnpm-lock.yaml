@@ -2424,12 +2424,18 @@ importers:
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../tools/tsconfig
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
       fast-check:
         specifier: ^3.23.2
         version: 3.23.2
       unified:
         specifier: ^11.0.5
         version: 11.0.5
+      vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@25.6.0)(@vitest/coverage-v8@4.1.11)(vite@7.3.5(@types/node@25.6.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.4))

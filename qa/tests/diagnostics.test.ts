@@ -10,6 +10,7 @@
  * characters.
  */
 import { parseHL7v2 } from "@glion/hl7v2";
+import type { VFile } from "vfile";
 
 import { readFixture } from "../src/fixtures";
 
@@ -25,15 +26,22 @@ import { readFixture } from "../src/fixtures";
  * Uses exact equality on the expected substring to prevent partial-match
  * false passes (e.g., offset range "PID|1" would not pass for expected "PID").
  */
+type Diagnostic = VFile["messages"][number];
+
+function offsets(diagnostic: Diagnostic): { start?: number; end?: number } {
+  const { place } = diagnostic;
+  if (place === undefined || !("start" in place)) {
+    return {};
+  }
+  return { end: place.end.offset, start: place.start.offset };
+}
+
 function expectOffsetContains(
   source: string,
-  diagnostic: {
-    place?: { start?: { offset?: number }; end?: { offset?: number } };
-  },
+  diagnostic: Diagnostic,
   expectedSubstring: string
 ) {
-  const start = diagnostic.place?.start?.offset;
-  const end = diagnostic.place?.end?.offset;
+  const { start, end } = offsets(diagnostic);
   if (start === undefined || end === undefined) {
     expect.unreachable("Diagnostic is missing start or end offset");
     return;
@@ -213,8 +221,7 @@ describe("QR2: diagnostic precision", () => {
       const file = await parseHL7v2.process(source);
       const diag = file.messages[0]!;
 
-      const start = diag.place?.start?.offset;
-      const end = diag.place?.end?.offset;
+      const { start, end } = offsets(diag);
       expect(start).toBeDefined();
       expect(end).toBeDefined();
 
@@ -231,18 +238,12 @@ describe("QR2: diagnostic precision", () => {
       );
 
       // EVN trailing: the slice should be "||" (2 pipes for 2 trailing empties)
-      const evnSlice = source.slice(
-        trailingDiags[0]!.place!.start!.offset!,
-        trailingDiags[0]!.place!.end!.offset!
-      );
-      expect(evnSlice).toBe("||");
+      const evn = offsets(trailingDiags[0]!);
+      expect(source.slice(evn.start, evn.end)).toBe("||");
 
       // PID trailing: the slice should be "||||||" (6 pipes for 6 trailing empties)
-      const pidSlice = source.slice(
-        trailingDiags[1]!.place!.start!.offset!,
-        trailingDiags[1]!.place!.end!.offset!
-      );
-      expect(pidSlice).toBe("||||||");
+      const pid = offsets(trailingDiags[1]!);
+      expect(source.slice(pid.start, pid.end)).toBe("||||||");
     });
   });
 });

@@ -5,7 +5,7 @@ import { unified } from "unified";
 
 import { hl7v2EncodeEscapes } from "../src/index";
 
-const subValue = (results: { children: Segment[] }) =>
+const subValue = (results: Root) =>
   (results.children[0] as Segment)?.children[0]?.children[0]?.children[0]
     ?.children[0]?.value;
 
