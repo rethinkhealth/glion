@@ -22,7 +22,9 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [I Want To Contribute](#i-want-to-contribute)
   - [Reporting Bugs](#reporting-bugs)
   - [Suggesting Enhancements](#suggesting-enhancements)
+- [Testing](#testing)
 - [Packaging Checks](#packaging-checks)
+- [Preview Releases](#preview-releases)
 
 ## Code of Conduct
 
@@ -110,6 +112,23 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/rethin
 - Provide a **step-by-step description of the suggested enhancement** in as many details as possible.
 - **Describe the current behavior** and **explain which behavior you expected to see instead** and why. At this point you can also tell which alternatives do not work for you.
 - **Explain why this enhancement would be useful** to most @glion/hl7v2 users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
+
+<!-- omit in toc -->
+
+## Testing
+
+Every change is judged by the same automated gates whether a person or an agent wrote it: `pnpm check` (lint, formatting, complexity caps), `pnpm check-types` (source and tests), `pnpm test`, and patch coverage on the PR. Run the first three locally before pushing. Human review is reserved for design, HL7v2 semantics, and security, which is only possible when the gates carry everything else.
+
+What a change must bring with it:
+
+1. **Tests next to the code they prove.** Behaviour changes ship with tests in the owning package's `tests/` directory, mirroring the `src/` layout (`src/commands/send.ts` is tested by `tests/commands/send.test.ts`). Adapter behaviour is tested at the adapter, core behaviour at the core.
+2. **A round-trip property for every inverse pair.** A new encode/decode, frame/unframe, parse/format, or select/set pair ships with a [fast-check](https://fast-check.dev/) property asserting `decode(encode(x)) === x` over generated inputs. Example tests cover the cases you imagined; the property covers the empty string, the delimiter inside the data, and the chunk boundary you did not.
+3. **A failing test before a bug fix.** A bug fix lands the regression first, in the owning package's `tests/` for logic bugs or as a `qa/fixtures/` message for shape bugs, named after the symptom. The fix is proven by a test that failed on the parent commit.
+4. **Mutation survivors triaged** (once the changed-files mutation script lands). For the parser, serializer, codec, client, server, and query packages, run it after tests pass. Each surviving mutant gets either a test whose name states the HL7v2 or MLLP contract it protects, or a one-line reason why it is equivalent. Never a test named after the mutant.
+5. **Lint rules through the shared harness** (once it lands in `@glion/testing`). A lint rule's README Valid and Invalid examples are its test cases, so the two cannot drift.
+6. **A changeset** for any change to a published package (`pnpm changeset`).
+
+Where things live: `benchmarks/README.md` is the contract for performance work, `qa/README.md` describes the conformance, fuzz, and round-trip suites that run against the packages as a consumer would.
 
 <!-- omit in toc -->
 
