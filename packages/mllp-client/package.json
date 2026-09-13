@@ -29,7 +29,8 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./node": "./dist/runtime/node.js"
+    "./node": "./dist/runtime/node.js",
+    "./workers": "./dist/runtime/workers.js"
   },
   "publishConfig": {
     "access": "public"
@@ -38,10 +39,11 @@
     "build": "tsdown && tsc --emitDeclarationOnly",
     "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
+    "publint": "publint --strict",
     "test": "vitest run",
+    "test:cf": "vitest run --config vitest.workers.config.ts",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest",
-    "publint": "publint --strict"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@glion/ack": "workspace:*",
@@ -61,7 +63,8 @@
     "publint": "0.3.18",
     "tsdown": "0.21.10",
     "typescript": "6.0.3",
-    "vitest": "4.1.11"
+    "vitest": "4.1.11",
+    "wrangler": "4.131.0"
   },
   "engines": {
     "node": ">=22"
