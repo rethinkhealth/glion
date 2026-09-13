@@ -17,7 +17,7 @@ const ABBREVIATED_PACKUMENT = "application/vnd.npm.install-v1+json";
 
 /** @type {import("./check.mjs").FetchPackument} */
 async function fetchPackument(name) {
-  const response = await fetch(`${REGISTRY_URL}/${name.replace("/", "%2f")}`, {
+  const response = await fetch(`${REGISTRY_URL}/${encodeURIComponent(name)}`, {
     headers: { accept: ABBREVIATED_PACKUMENT },
   });
   if (response.status === 404) {
