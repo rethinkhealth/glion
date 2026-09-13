@@ -3,7 +3,7 @@
 // packages/*/reports/stryker.json that exists.
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const packagesDir = fileURLToPath(new URL("../packages/", import.meta.url));
 const rows = [];
@@ -19,8 +19,11 @@ for (const name of names.toSorted()) {
     // No report: the package is out of scope or was not mutated in this run.
     continue;
   }
-  const configPath = join(packagesDir, name, "stryker.config.json");
-  const { thresholds } = JSON.parse(await readFile(configPath, "utf8"));
+  const configPath = pathToFileURL(
+    join(packagesDir, name, "stryker.config.mjs")
+  );
+  const config = await import(configPath);
+  const { thresholds } = config.default;
   const counts = {
     error: 0,
     ignored: 0,
