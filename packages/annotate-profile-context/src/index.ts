@@ -123,6 +123,7 @@ function loadFields(
  * through composite datatypes to resolve component and subcomponent
  * datatypes (max 2 additional levels).
  */
+// oxlint-disable-next-line complexity/complexity -- cold-path profile loading: extracting the nested component scan regressed the cold-cache lint-profile bench 34% under CodSpeed, so it stays inline
 async function loadDatatypes(
   fields: Map<string, FieldDefinition>,
   version: string
@@ -141,7 +142,17 @@ async function loadDatatypes(
 
   // Levels 2-3: component and subcomponent datatypes
   for (let depth = 0; depth < 2; depth++) {
-    const childIds = unresolvedComponentDatatypeIds(datatypes);
+    const childIds = new Set<string>();
+    for (const dtDef of datatypes.values()) {
+      if (dtDef.kind !== "composite") {
+        continue;
+      }
+      for (const comp of dtDef.componentsBySequence.values()) {
+        if (!datatypes.has(comp.datatypeId)) {
+          childIds.add(comp.datatypeId);
+        }
+      }
+    }
     if (childIds.size === 0) {
       break;
     }
@@ -149,23 +160,6 @@ async function loadDatatypes(
   }
 
   return datatypes;
-}
-
-function unresolvedComponentDatatypeIds(
-  datatypes: Map<string, DatatypeDefinition>
-): Set<string> {
-  const ids = new Set<string>();
-  for (const dtDef of datatypes.values()) {
-    if (dtDef.kind !== "composite") {
-      continue;
-    }
-    for (const comp of dtDef.componentsBySequence.values()) {
-      if (!datatypes.has(comp.datatypeId)) {
-        ids.add(comp.datatypeId);
-      }
-    }
-  }
-  return ids;
 }
 
 // ---------------------------------------------------------------------------
