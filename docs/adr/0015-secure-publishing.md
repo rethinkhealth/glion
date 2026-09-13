@@ -68,7 +68,7 @@ All public packages MUST pass `publint --strict` on every pull request. Implemen
 - Publishes happen **only** from the `Changesets` workflow in `.github/workflows/release.yml`, triggered by merges to `main`.
 - The pack job runs `pnpm build` and packs every publishable package into a tarball; the publish job publishes those tarballs and nothing else, so artifacts are built from the exact source on `main`.
 - Developers MUST NOT run `npm publish` or `pnpm publish` from local machines. No exceptions: even hotfix releases go through a PR → merge → release workflow.
-- `pnpm check:release` (`tools/check-release`) verifies after every publish, and weekly, that each public package's workspace version is on the registry with a provenance attestation. A version that reached npm without provenance was not published by this workflow.
+- `pnpm check:release` (`tools/check-release`) verifies weekly that each public package's workspace version is on the registry with a provenance attestation, so a failed or forgotten publish cannot go unnoticed between releases. A version that reached npm without provenance was not published by this workflow.
 - Publishing is delegated to `changeset publish`, which publishes each package's packed tarball in dependency order, skips versions already on the registry, and reports per package instead of aborting the whole run on the first failure. It passes `--no-git-checks` to pnpm because CI operates on a detached HEAD; that flag does not weaken any other guarantee.
 
 ### 5. Minimal package contents — addresses (1) defence-in-depth
