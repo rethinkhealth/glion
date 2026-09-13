@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@glion/utils": "workspace:*",
-    "cosmiconfig": "9.0.1",
+    "cosmiconfig": "10.0.1",
     "unified": "11.0.5",
     "zod": "3.25.76"
   },
@@ -62,7 +62,7 @@
     "zod-to-json-schema": "3.25.0"
   },
   "engines": {
-    "node": ">=22"
+    "node": "^22.18 || >=24"
   },
   "packageManager": "pnpm@10.14.0"
 }
