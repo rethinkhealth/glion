@@ -90,8 +90,8 @@ export interface MllpClientOptions {
    */
   readonly maxBufferedBytes?: number;
   /**
-   * How the client dials again after a connection attempt fails or an open
-   * connection is lost. `false`: it closes instead.
+   * How the client dials again after a connection attempt fails. `false`: it
+   * dials once.
    *
    * @default 5 attempts with full-jitter backoff, about 30 seconds in all
    */

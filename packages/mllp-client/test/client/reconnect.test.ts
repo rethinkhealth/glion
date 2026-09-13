@@ -11,20 +11,20 @@ describe("defaultReconnectDelay()", () => {
     vi.restoreAllMocks();
   });
 
-  it("doubles the ceiling with each attempt, from 200 ms", () => {
+  it("doubles the ceiling with each attempt, from 1 s", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
 
-    expect(defaultReconnectDelay(1)).toBe(100);
-    expect(defaultReconnectDelay(2)).toBe(200);
-    expect(defaultReconnectDelay(3)).toBe(400);
-    expect(defaultReconnectDelay(4)).toBe(800);
+    expect(defaultReconnectDelay(1)).toBe(500);
+    expect(defaultReconnectDelay(2)).toBe(1000);
+    expect(defaultReconnectDelay(3)).toBe(2000);
+    expect(defaultReconnectDelay(4)).toBe(4000);
   });
 
-  it("never exceeds 2 s, however many attempts", () => {
+  it("never exceeds 30 s, however many attempts", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.999_999);
 
-    for (const attempt of [5, 6, 10, 30, 1000]) {
-      expect(defaultReconnectDelay(attempt)).toBe(1999);
+    for (const attempt of [6, 7, 10, 30, 1000]) {
+      expect(defaultReconnectDelay(attempt)).toBe(29_999);
     }
   });
 
@@ -40,7 +40,7 @@ describe("defaultReconnectDelay()", () => {
       const delay = defaultReconnectDelay(attempt);
       expect(Number.isInteger(delay)).toBe(true);
       expect(delay).toBeGreaterThanOrEqual(0);
-      expect(delay).toBeLessThan(2000);
+      expect(delay).toBeLessThan(30_000);
     }
   });
 });

@@ -11,7 +11,7 @@ import { readFile } from "node:fs/promises";
 import { AckException } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { MllpClient, MllpClientError } from "@glion/mllp-client";
-import type { MllpSocket } from "@glion/mllp-client";
+import type { MllpClientOptions, MllpSocket } from "@glion/mllp-client";
 import { nodeSocket } from "@glion/mllp-client/node";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
@@ -224,6 +224,8 @@ export interface RunSendOptions {
   stderr?: NodeJS.WritableStream;
   /** Runtime socket; injectable for tests. Defaults to the Node TCP adapter. */
   socket?: MllpSocket;
+  /** Reconnect policy; injectable for tests. Defaults to the client's. */
+  reconnect?: MllpClientOptions["reconnect"];
   /** Stdin source used when no file is given; injectable for tests. */
   stdin?: NodeJS.ReadableStream;
 }
@@ -336,6 +338,7 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   try {
     client = new MllpClient({
       connectTimeoutMs: timeoutMs,
+      reconnect: opts.reconnect,
       sendTimeoutMs: timeoutMs,
       socket:
         opts.socket ?? nodeSocket({ host: target.host, port: target.port }),
@@ -368,7 +371,9 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     }
     if (error instanceof MllpClientError) {
       return emit({
+        cause: causeOf(error),
         code: error.code,
+        delivery: error.delivery,
         kind: "transport",
         message: error.message,
         request,
@@ -379,4 +384,14 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   } finally {
     await client?.close();
   }
+}
+
+/** The text of `error.cause`, when there is one. */
+function causeOf(error: Error): string | undefined {
+  if (error.cause === undefined) {
+    return undefined;
+  }
+  return error.cause instanceof Error
+    ? error.cause.message
+    : String(error.cause);
 }

@@ -196,6 +196,7 @@ Recommend landing #690 first, in its own PR, so #714's headline test is real. #7
 - D1 on by default. D2 the policy covers the first connection too (recommendation overruled). D3 `reconnect`, with `delay(attempt)`: the error parameter proposed above, and the separate `reconnecting` phase of §1.3, were both dropped for simplicity; a lost connection returns the client to `connecting`. D4 revisited 2026-09-11 against peer defaults: full-jitter backoff 1 s → 30 s cap, 5 attempts (about 30 s in all; unlimited was tried and rejected because a `send()` against a down host would never settle), the default function living in `reconnect.ts`. D5 waiters wait; `CLOSED` carries `cause`. D6 ADR 0021; ADR 0020 withdrawn.
 - R1–R5: message retry, NAK-triggered or otherwise, is separate work; the maintainer files its own issue, with §2 as the design.
 - Step 1 (#690) was not ordered first; #714 shipped without it, so an idle drop is still discovered by the next `send()`.
+- Revised 2026-09-12: reopening after a loss was dropped. It was built twice, first dialing in the background and then lazily on the next `send()`, and both versions put a connection lifecycle inside the client that the socket already has. A lost connection now closes the client with the failure, as before #714; the policy covers only the attempts to open one, the first connection included. The application constructs a new client, as it would open a new socket.
 
 ## Related
 

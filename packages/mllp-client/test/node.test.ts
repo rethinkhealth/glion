@@ -14,15 +14,15 @@ import { setTimeout as sleep } from "node:timers/promises";
 
 import { frame } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { MllpConnection } from "../src/client/connection";
-import { createConnection } from "../src/client/connection";
+import type { MllpSession } from "../src/client/session";
+import { createSession } from "../src/client/session";
 import {
   DEFAULT_CONNECT_TIMEOUT_MS,
   DEFAULT_MAX_BUFFERED_BYTES,
 } from "../src/constants";
-import { MllpClient } from "../src/index";
+import { MllpClient, MllpErrorCode } from "../src/index";
 import { nodeSocket } from "../src/runtime/node";
 import type { MllpSocket } from "../src/types";
 import { ack, adtA01, controlIdOf } from "./fixtures";
@@ -114,9 +114,9 @@ async function remoteSystem(
  */
 async function open(
   remote: RemoteSystem
-): Promise<{ connection: MllpConnection; socket: MllpSocket }> {
+): Promise<{ connection: MllpSession; socket: MllpSocket }> {
   const socket = nodeSocket({ host: remote.host, port: remote.port });
-  const connection = createConnection(socket, {
+  const connection = createSession(socket, {
     maxBufferedBytes: DEFAULT_MAX_BUFFERED_BYTES,
     timeoutMs: DEFAULT_CONNECT_TIMEOUT_MS,
   });
@@ -262,7 +262,7 @@ describe("nodeSocket — abort signal", () => {
   });
 });
 
-describe("MllpConnection contract — readable ends when the peer drops", () => {
+describe("MllpSession contract — readable ends when the peer drops", () => {
   let remote: RemoteSystem;
   beforeEach(async () => {
     remote = await remoteSystem();
@@ -295,7 +295,7 @@ describe("MllpConnection contract — readable ends when the peer drops", () => 
   });
 });
 
-describe("MllpConnection contract — close() is idempotent and always resolves", () => {
+describe("MllpSession contract — close() is idempotent and always resolves", () => {
   let remote: RemoteSystem;
   beforeEach(async () => {
     remote = await remoteSystem();
@@ -336,5 +336,38 @@ describe("MllpConnection contract — close() is idempotent and always resolves"
     }
 
     await expect(socket.close()).resolves.toBeUndefined();
+  });
+});
+
+describe("MllpClient over nodeSocket — a dropped connection", () => {
+  it("closes the client with CONNECTION_LOST; a new client dials a fresh socket", async () => {
+    const remote = await remoteSystem();
+    const socket = nodeSocket({ host: remote.host, port: remote.port });
+    const client = new MllpClient({ socket });
+    // A first exchange, so the remote system has accepted the socket it is
+    // about to drop.
+    await client.send(adtA01().tree);
+    const closed = vi.fn();
+    client.on("close", closed);
+
+    remote.dropAllSockets();
+    await sleep(10);
+    // The drop is noticed by the next send, which fails and closes the client.
+    await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+      code: MllpErrorCode.CONNECTION_LOST,
+    });
+    expect(client.state).toBe("closed");
+    expect(closed).toHaveBeenCalledWith(
+      expect.objectContaining({ code: MllpErrorCode.CONNECTION_LOST })
+    );
+
+    // The same adapter serves a new client.
+    const next = new MllpClient({ socket });
+    await expect(next.send(adtA01().tree)).resolves.toMatchObject({
+      code: "AA",
+    });
+
+    await next.close();
+    await remote.close();
   });
 });

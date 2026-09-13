@@ -3,7 +3,7 @@
 A simple HL7v2 MLLP client for Node.js and Cloudflare Workers.
 
 - 📦 **MLLP built in.** Framing, message boundaries and acknowledgment matching are handled. You send a parsed message and get one back.
-- 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, TCP keepalive by default, and explicit states you can read.
+- 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, connection attempts retried with backoff, TCP keepalive by default, and explicit states you can read.
 - ⚡ **Thin over TCP.** One socket, one message at a time. No queue, no worker threads, no polling.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
 - 🧩 **Any transport.** TCP included. TLS, Cloudflare Workers or an in-memory socket plug in behind it.
@@ -81,16 +81,45 @@ await client.connect();
 
 Calling it twice is safe. On a connected client it returns immediately; while a connection is still opening, it waits for that attempt and shares its result.
 
+### Reconnect
+
+A connection that cannot be opened is dialed again. By default the client makes five further attempts, waiting a random time before each: up to 1 s, then 2 s, 4 s, 8 s, and 16 s, so it gives up about 30 seconds after the first failure and closes with the last attempt's error. `attempts: Infinity` keeps dialing; `close()` stops it. A `send()` that arrives while the client is connecting waits for the outcome.
+
+A connection that is lost is not restored. The client closes with the failure, and the message in flight is **not sent again**: its `send()` rejects, and whether the receiver got it is the caller's to decide. A client is as disposable as a socket: construct a new one to send again.
+
+```ts
+const client = new MllpClient({
+  socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
+  reconnect: {
+    attempts: 20,
+    delay: (attempt) => {
+      logger.warn({ attempt }, "mllp reconnecting");
+      return Math.min(30_000, 500 * 2 ** attempt);
+    },
+  },
+});
+```
+
+`reconnect: false` turns it off: the client dials once.
+
 ## Options
 
-| Option             | Type         | Default  | Description                                                                                            |
-| ------------------ | ------------ | -------- | ------------------------------------------------------------------------------------------------------ |
-| `socket`           | `MllpSocket` | required | Runtime adapter, such as `nodeSocket({ host, port })`.                                                 |
-| `connectTimeoutMs` | `number`     | `10000`  | Time allowed to open the connection. Exceeded: `MllpConnectTimeoutError`.                              |
-| `sendTimeoutMs`    | `number`     | `30000`  | Time allowed from writing a message to receiving its acknowledgment. Exceeded: `MllpSendTimeoutError`. |
-| `maxBufferedBytes` | `number`     | 16 MiB   | Largest reply the client buffers. Exceeded: `MllpInvalidResponseError`.                                |
+| Option             | Type                            | Default   | Description                                                                                            |
+| ------------------ | ------------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| `socket`           | `MllpSocket`                    | required  | Runtime adapter, such as `nodeSocket({ host, port })`.                                                 |
+| `connectTimeoutMs` | `number`                        | `10000`   | Time allowed to open the connection. Exceeded: `MllpConnectionTimeoutError`.                           |
+| `sendTimeoutMs`    | `number`                        | `30000`   | Time allowed from writing a message to receiving its acknowledgment. Exceeded: `MllpSendTimeoutError`. |
+| `maxBufferedBytes` | `number`                        | 16 MiB    | Largest reply the client buffers. Exceeded: `MllpInvalidResponseError`.                                |
+| `reconnect`        | `MllpReconnectOptions \| false` | see below | How the client dials again after a failed attempt. `false` dials once.                                 |
 
 `send(message, { timeoutMs })` overrides `sendTimeoutMs` for one message.
+
+`MllpReconnectOptions`:
+
+| Option     | Type                          | Default                                      | Description                                                                        |
+| ---------- | ----------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `attempts` | `number`                      | `5`                                          | Attempts after a failed one before the client closes. `Infinity` for no limit.     |
+| `delay`    | `(attempt: number) => number` | full-jitter backoff from 1 s, capped at 30 s | Milliseconds to wait before `attempt` (from 1). Called only while attempts remain. |
 
 ## API
 
@@ -104,7 +133,7 @@ Creates a client for one remote system. Nothing is opened until the first `conne
 
 **Parameters** — see [Options](#options).
 
-**Throws** `MllpInvalidOptionError` when a timeout is not a positive number of milliseconds, or `maxBufferedBytes` is not a positive integer.
+**Throws** `MllpInvalidOptionError` when a timeout is not a positive number of milliseconds, `maxBufferedBytes` is not a positive integer, or `reconnect.attempts` is not a non-negative integer.
 
 ```ts
 const client = new MllpClient({
@@ -144,8 +173,10 @@ Sends one message and resolves with the acknowledgment that answers it. Connects
 - `MllpInvalidOptionError` — `timeoutMs` is out of range. Nothing was sent.
 - `MllpAlreadySendingError` — another send is in flight.
 - `MllpClientClosedError` — the client is closed.
-- `MllpConnectFailedError`, `MllpConnectTimeoutError` — the connection could not be opened.
+- `MllpConnectionFailedError`, `MllpConnectionTimeoutError` — the connection could not be opened.
 - `MllpSendTimeoutError`, `MllpConnectionLostError`, `MllpInvalidResponseError` — the exchange failed. These close the connection; see [Errors](#errors).
+
+Every error carries `delivery`, `not-sent` or `unknown`, the one fact a retry needs; see [Errors](#errors).
 
 One message at a time. To send several, await each in turn:
 
@@ -162,11 +193,11 @@ for (const message of batch) {
 connect(): Promise<void>
 ```
 
-Opens the connection without sending anything. Optional — `send()` connects on first use — but calling it at startup surfaces a wrong host, port, or firewall rule immediately.
+Opens the connection without sending anything, dialing again under the [reconnect](#reconnect) policy when an attempt fails. Optional — `send()` connects on first use — but calling it at startup surfaces a wrong host, port, or firewall rule as soon as the policy gives up.
 
-Idempotent. On a connected client it resolves at once; while an attempt is in flight it waits for that attempt and shares its result.
+Idempotent. On a connected client it resolves at once; while an attempt is in flight it waits for the outcome and shares it.
 
-**Throws** `MllpConnectFailedError`, `MllpConnectTimeoutError`, or `MllpClientClosedError` when the client is already closed or `close()` cancelled the attempt.
+**Throws** the last attempt's `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, or `MllpClientClosedError` when the client is already closed or `close()` cancelled the attempt.
 
 ### `client.close()`
 
@@ -174,7 +205,7 @@ Idempotent. On a connected client it resolves at once; while an attempt is in fl
 close(): Promise<void>
 ```
 
-Closes the connection once the message in flight has been acknowledged. New sends are refused from the moment it is called, so an in-flight message is never cut off.
+Closes the connection once the message in flight has been acknowledged. New sends are refused from the moment it is called, so an in-flight message is never cut off. An attempt to connect stops at once.
 
 Resolves when the connection is down, from any phase. Never throws. Idempotent. The wait is bounded by the in-flight send's own deadline.
 
@@ -191,7 +222,7 @@ process.on("SIGTERM", async () => {
 destroy(): Promise<void>
 ```
 
-Closes the connection now, without waiting for anything in flight. A message in flight rejects with `MllpClientClosedError`.
+Closes the connection now, without waiting for anything in flight. A message in flight rejects with `MllpSendAbortedError`. An attempt to connect stops at once.
 
 Resolves when the connection is down, from any phase. Never throws. Idempotent.
 
@@ -212,16 +243,16 @@ Calls `close()`. Lets a client be scoped with `await using`:
 readonly state: MllpClientState
 ```
 
-| Value        | Meaning                                                   |
-| ------------ | --------------------------------------------------------- |
-| `idle`       | Nothing opened yet.                                       |
-| `connecting` | An attempt is in flight.                                  |
-| `connected`  | Open, with no message in flight.                          |
-| `sending`    | A message is on the wire, waiting for its acknowledgment. |
-| `closing`    | `close()` is waiting out the message in flight.           |
-| `closed`     | Done.                                                     |
+| Value        | Meaning                                                                     |
+| ------------ | --------------------------------------------------------------------------- |
+| `idle`       | Nothing opened yet. The first `send()` or `connect()` opens the connection. |
+| `connecting` | The connection is being opened, further attempts included.                  |
+| `connected`  | Open, with no message in flight.                                            |
+| `sending`    | A message is on the wire, waiting for its acknowledgment.                   |
+| `closing`    | `close()` is waiting out the message in flight.                             |
+| `closed`     | Done.                                                                       |
 
-A client closes once and does not reconnect. After `close()`, `destroy()`, or a failure that ended the connection, every call throws `MllpClientClosedError`; construct a new client to send again.
+A client closes once. After `close()`, `destroy()`, a connection the reconnect policy could not open, or a connection that was lost, every call throws `MllpClientClosedError`; construct a new client to send again.
 
 ### `client.connected`
 
@@ -240,22 +271,18 @@ off<E>(event: E, listener: MllpClientListener<E>): this
 
 Adds or removes a listener. Both return the client, so calls chain.
 
-| Event        | Listener                                   | Fires when                                                                      |
-| ------------ | ------------------------------------------ | ------------------------------------------------------------------------------- |
-| `connect`    | `() => void`                               | The connection opened.                                                          |
-| `disconnect` | `(error: MllpClientError \| null) => void` | The connection went down. `error` is the failure, or `null` when you closed it. |
-| `close`      | `() => void`                               | The client is done. Fires once, from any phase, even if it never connected.     |
+| Event     | Listener                                   | Fires when                                                                                                                                                  |
+| --------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `connect` | `() => void`                               | The connection opened.                                                                                                                                      |
+| `close`   | `(error: MllpClientError \| null) => void` | The client is done. Fires once, from any phase, even if it never connected. `error` is the failure it could not recover from, or `null` when you closed it. |
 
-Order is fixed: `connect`, then `disconnect`, then `close`. Listeners are synchronous, and one that throws propagates to whatever triggered the event.
+A lost connection is not an event of its own: it closes the client, so `close` fires with the failure. Listeners are synchronous, and one that throws propagates to whatever triggered the event.
 
 ```ts
 client
   .on("connect", () => metrics.increment("mllp.connected"))
-  .on("disconnect", (error) => {
-    logger.warn(
-      { code: error?.code ?? "closed_by_owner" },
-      "mllp disconnected"
-    );
+  .on("close", (error) => {
+    logger.warn({ code: error?.code ?? "closed_by_owner" }, "mllp closed");
   });
 ```
 
@@ -317,9 +344,16 @@ An implementation never sees an MLLP frame — framing belongs to the layer abov
 
 ## Errors
 
-Every failure the client raises extends `MllpClientError` and carries a fixed `code`, so you can `switch` on it or put it in a log field without matching on messages. Errors from the layers below arrive on `cause`, never as the thrown type.
+Every failure the client raises extends `MllpClientError` and carries three fixed things: a `code`, one word per class for a `switch` or a log field; a `delivery`, what became of the message; and a message that never changes. Errors from the layers below arrive on `cause`, never as the thrown type.
 
 A rejection from the receiver is **not** an `MllpClientError` — see [`AckException`](#ackexception).
+
+`delivery` is the one fact a retry decision needs:
+
+| `delivery` | Meaning                                                                           | Codes                                                                                                       |
+| ---------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `not-sent` | Nothing reached the wire. The message may be sent again as it is.                 | `INVALID_OPTION`, `INVALID_MESSAGE`, `ALREADY_SENDING`, `CLOSED`, `CONNECTION_FAILED`, `CONNECTION_TIMEOUT` |
+| `unknown`  | The message may have reached the receiver. Sending it again may deliver it twice. | `SEND_TIMEOUT`, `CONNECTION_LOST`, `SEND_ABORTED`, `INVALID_RESPONSE`                                       |
 
 ```ts
 import { MllpClientError, MllpErrorCode } from "@glion/mllp-client";
@@ -328,30 +362,32 @@ try {
   await client.send(message);
 } catch (error) {
   if (error instanceof MllpClientError) {
+    if (error.delivery === "not-sent") {
+      return requeue(message); // safe to send again
+    }
     switch (error.code) {
-      case MllpErrorCode.SEND_TIMEOUT:
-      case MllpErrorCode.CONNECTION_LOST:
-        return requeue(message); // this client is finished
-      case MllpErrorCode.INVALID_MESSAGE:
-        return quarantine(message); // nothing was sent
+      case MllpErrorCode.INVALID_RESPONSE:
+        return quarantine(message); // the receiver answered, unreadably
       default:
-        throw error;
+        return holdForReview(message); // it may already have been processed
     }
   }
 }
 ```
 
+The four failures of the wire — `CONNECTION_FAILED`, `CONNECTION_TIMEOUT`, `SEND_TIMEOUT`, `CONNECTION_LOST` — also extend `MllpConnectionError`, one `instanceof` for "the link, not the message".
+
 ### `INVALID_OPTION`
 
-`MllpInvalidOptionError` · field: `option`
+`MllpInvalidOptionError` · delivery `not-sent`
 
-A constructor option or a per-send `timeoutMs` is out of range — a timeout that is not a positive number of milliseconds, or a `maxBufferedBytes` that is not a positive integer. `option` names which one.
+A constructor option or a per-send `timeoutMs` is out of range — a timeout that is not a positive number of milliseconds, a `maxBufferedBytes` that is not a positive integer, or a `reconnect.attempts` that is not a non-negative integer or `Infinity`. The message names which one.
 
 Thrown before anything is opened or sent. A configuration bug, not a runtime condition.
 
 ### `INVALID_MESSAGE`
 
-`MllpInvalidMessageError` · field: `cause`
+`MllpInvalidMessageError` · delivery `not-sent` · field: `cause`
 
 The message cannot be sent as it stands: no MSH-10 control ID, or it could not be serialized, or its content contains a byte MLLP reserves as a frame marker.
 
@@ -359,64 +395,71 @@ The message cannot be sent as it stands: no MSH-10 control ID, or it could not b
 
 ### `ALREADY_SENDING`
 
-`MllpAlreadySendingError` · field: `controlId`
+`MllpAlreadySendingError` · delivery `not-sent` · field: `controlId`
 
 `send()` was called while another send was in flight. `controlId` identifies the message already on the wire.
 
 The client is lockstep by design. Await each send before starting the next, or give each concurrent stream its own client.
 
-### `CONNECT_FAILED`
+### `CLOSED`
 
-`MllpConnectFailedError` · field: `cause`
+`MllpClientClosedError` · delivery `not-sent` · field: `cause`
+
+The client is closed, so the call cannot be served. Also the error a `connect()` gets when `close()` cancelled the attempt it was waiting for.
+
+A client closes once. Construct a new one to send again. When the client closed because the reconnect policy gave up, `cause` is the last attempt's failure.
+
+### `CONNECTION_FAILED`
+
+`MllpConnectionFailedError` · delivery `not-sent` · field: `cause`
 
 The socket could not be opened. `cause` carries the underlying error — `ECONNREFUSED`, `ENOTFOUND`, `EHOSTUNREACH` and the like.
 
 Check host, port, and whether a firewall allows the route. Nothing was opened, so there is nothing to close.
 
-### `CONNECT_TIMEOUT`
+### `CONNECTION_TIMEOUT`
 
-`MllpConnectTimeoutError` · field: `timeoutMs`
+`MllpConnectionTimeoutError` · delivery `not-sent` · field: `timeoutMs`
 
 The receiver did not accept the connection within `connectTimeoutMs`.
 
-Typically a packet-dropping firewall rather than a refused connection — a refusal arrives fast and surfaces as `CONNECT_FAILED`.
-
-### `CLOSED`
-
-`MllpClientClosedError`
-
-The client is closed, so the call cannot be served. Also the error that rejects a message in flight when `destroy()` interrupts it, and a connection attempt that `close()` cancelled.
-
-A client closes once. Construct a new one to send again; why the old one closed reached the `disconnect` event.
+Typically a packet-dropping firewall rather than a refused connection — a refusal arrives fast and surfaces as `CONNECTION_FAILED`.
 
 ### `SEND_TIMEOUT`
 
-`MllpSendTimeoutError` · field: `timeoutMs` — **closes the connection**
+`MllpSendTimeoutError` · delivery `unknown` · field: `timeoutMs` — **closes the connection**
 
 No acknowledgment arrived within the send timeout.
 
-Whether the receiver got the message is unknown: it may be slow, or it may have processed the message and failed to reply. The connection closes because a late acknowledgment can no longer be told apart from the next message's — see [Why does a failed send close the connection?](#why-does-a-failed-send-close-the-connection)
+Whether the receiver got the message is unknown: it may be slow, or it may have processed the message and failed to reply. The connection closes because a late acknowledgment can no longer be told apart from the next message's — see [Why does a failed send close the connection?](#why-does-a-failed-send-close-the-connection). The client closes with this error; the message is not sent again.
 
 ### `CONNECTION_LOST`
 
-`MllpConnectionLostError` · fields: `controlId`, `cause` — **closes the connection**
+`MllpConnectionLostError` · delivery `unknown` · field: `cause` — **closes the connection**
 
 The link went away mid-send: the receiver hung up, or the network broke. `cause` carries the stream error when there was one.
 
-Whether the message was received is unknown. `controlId` identifies it, for your retry log.
+Whether the message was received is unknown. The client closes with this error; the message is not sent again.
+
+### `SEND_ABORTED`
+
+`MllpSendAbortedError` · delivery `unknown`
+
+`destroy()` cut off the message in flight. `close()` never raises this: it waits the message out.
 
 ### `INVALID_RESPONSE`
 
-`MllpInvalidResponseError` · fields: `controlId?`, `cause` — **closes the connection**
+`MllpInvalidResponseError` · delivery `unknown` · fields: `controlId?`, `cause` — **closes the connection**
 
 The reply was not a usable acknowledgment of the message that was waiting. Causes, in the order they are checked:
 
 - the bytes were not valid UTF-8 or not parseable HL7v2;
 - MSA-2 names a different message — usually a late acknowledgment from an earlier timed-out send;
 - MSA-1 is empty or is not one of the six codes of Table 0008;
-- the reply passed `maxBufferedBytes` before it was complete.
+- the reply passed `maxBufferedBytes` before it was complete;
+- the connection closed partway through the reply.
 
-The connection closes because the client can no longer tell which reply answers which message.
+The connection closes because the client can no longer tell which reply answers which message. The client closes with this error.
 
 ### `AckException`
 
@@ -443,6 +486,8 @@ MLLP has no correlation of its own. The only thing tying a reply to a message is
 Once a send times out, that no longer holds. A wrong guess here reports one message's outcome under another message's identity, which in a clinical feed is worse than an error.
 
 Clients that pipeline can survive a timeout, because they keep a table of outstanding control IDs and a background reader to match against it. A lockstep client has no table to fall back on.
+
+The client closes with the failure, and never sends the failed message again — only you know whether the receiver already has it. Construct a new client to go on, as you would open a new socket.
 
 ### Why a socket rather than a host and port?
 

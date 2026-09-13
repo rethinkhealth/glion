@@ -2,10 +2,10 @@
 "@glion/mllp-client": minor
 ---
 
-Reconnect after a failed attempt or a lost connection.
+Dial again when a connection attempt fails.
 
-A connection that cannot be opened, or that is lost, is dialed again under a new `reconnect` option: `attempts` (default 5) and `delay(attempt)` (default full-jitter backoff from 200 ms, capped at 2 s). The client returns to `connecting`, and `connect` fires again when a connection opens. The `disconnect` event is removed; `close` now carries the failure the policy could not recover from, or `null` when the owner closed the client. `reconnect: false` keeps the previous behaviour, where a lost connection closes the client.
+A connection that cannot be opened is dialed again under a new `reconnect` option: `attempts` (default 5, about 30 seconds of backoff in all) and `delay(attempt)` (default full-jitter backoff from 1 s, capped at 30 s). Once the policy gives up, the client closes with the last attempt's error. `reconnect: false` dials once. `close()` and `destroy()` stop the dialing at once.
 
-A message in flight when the connection is lost is not sent again: its `send()` still rejects with `CONNECTION_LOST`, `SEND_TIMEOUT`, or `INVALID_RESPONSE`. A `send()` or `connect()` arriving while the client is reconnecting waits for the new connection. `close()` and `destroy()` stop a reconnect at once.
+A lost connection still closes the client, and the message in flight is not sent again: its `send()` rejects with `CONNECTION_LOST`, `SEND_TIMEOUT`, or `INVALID_RESPONSE`. The `disconnect` event is removed; `close` now carries the failure the client closed on, or `null` when the owner closed it. The `MllpConnection` type is no longer exported.
 
-`MllpClientClosedError` gains `cause`: the last attempt's failure, when the client closed because the policy gave up.
+The errors are redesigned around one question, what became of the message: every `MllpClientError` carries `delivery`, `"not-sent"` or `"unknown"`. `CONNECT_FAILED` and `CONNECT_TIMEOUT` are renamed `CONNECTION_FAILED` and `CONNECTION_TIMEOUT` (classes `MllpConnectionFailedError`, `MllpConnectionTimeoutError`); a send cut off by `destroy()` now rejects with `SEND_ABORTED` (`MllpSendAbortedError`) rather than `CLOSED`; `MllpConnectionError` is a new abstract base for the four wire failures; `MllpConnectionLostError` no longer carries `controlId`. `MllpClientClosedError` gains `cause`: the last attempt's failure, when the client closed because the policy gave up.

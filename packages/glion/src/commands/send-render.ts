@@ -84,9 +84,13 @@ export interface SendTransportOutcome {
   target: SendTarget;
   /** May be absent if we failed before serializing the request. */
   request?: SendRequestSummary;
-  /** The `MllpErrorCode` value, e.g. `SEND_TIMEOUT`, `CONNECT_FAILED`. */
+  /** The `MllpErrorCode` value, e.g. `SEND_TIMEOUT`, `CONNECTION_FAILED`. */
   code: string;
+  /** What became of the message: `not-sent`, or `unknown`. */
+  delivery: "not-sent" | "unknown";
   message: string;
+  /** The text of the error's `cause`, when it had one. */
+  cause?: string;
 }
 
 /**
@@ -158,7 +162,8 @@ export function renderHuman(outcome: SendOutcome): string {
   }
   if (outcome.kind === "transport") {
     const where = `${outcome.target.host}:${outcome.target.port}`;
-    return `x  ${where}  ${outcome.code}  ${outcome.message}`;
+    const line = `x  ${where}  ${outcome.code}  ${outcome.message}`;
+    return outcome.cause === undefined ? line : `${line}\n   ${outcome.cause}`;
   }
 
   const sentLine = renderSentLine(outcome.target, outcome.request);
@@ -279,6 +284,7 @@ function toJsonRecord(outcome: SendOutcome): Record<string, unknown> {
   if (outcome.kind === "transport") {
     const record: Record<string, unknown> = {
       code: outcome.code,
+      delivery: outcome.delivery,
       host: outcome.target.host,
       kind: "transport",
       message: outcome.message,
@@ -287,6 +293,9 @@ function toJsonRecord(outcome: SendOutcome): Record<string, unknown> {
     };
     if (outcome.request !== undefined) {
       record.requestControlId = outcome.request.controlId;
+    }
+    if (outcome.cause !== undefined) {
+      record.cause = outcome.cause;
     }
     return record;
   }

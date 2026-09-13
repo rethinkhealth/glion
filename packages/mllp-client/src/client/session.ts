@@ -5,12 +5,14 @@
  * @module
  */
 
-import { frame, unframe } from "@glion/mllp-codec";
+import { MllpCodecError, frame, unframe } from "@glion/mllp-codec";
 
 import {
-  MllpConnectFailedError,
-  MllpConnectTimeoutError,
+  MllpConnectionFailedError,
+  MllpConnectionTimeoutError,
+  MllpConnectionLostError,
   MllpInvalidMessageError,
+  MllpSendAbortedError,
   MllpSendTimeoutError,
 } from "../errors";
 import type { MllpSocket, MllpStreams } from "../types";
@@ -22,31 +24,38 @@ import type { MllpSocket, MllpStreams } from "../types";
 export interface MllpSession {
   /**
    * Resolves once the session is open. Rejects with
-   * {@link MllpConnectFailedError}, {@link MllpConnectTimeoutError}, or the
-   * reason `destroy()` was given; when destroyed while opening, only once the
-   * socket is down. `exchange` is usable only after it resolves.
+   * {@link MllpConnectionFailedError} or {@link MllpConnectionTimeoutError};
+   * when destroyed while opening, with the former, and only once the socket
+   * is down. The owner MUST await it, or observe it, before destroying a
+   * session that has not opened.
    */
   readonly ready: Promise<void>;
   /**
-   * Sends one message and returns the next one the remote system sends back,
-   * unframed, within `timeoutMs`. `null` once the remote system has closed and
-   * every message it sent has been read.
+   * Sends one message, once the session is open, and returns the next one the
+   * remote system sends back, unframed. `timeoutMs` bounds the write and the
+   * wait for the reply; it does not cover the opening.
    *
    * @throws {MllpInvalidMessageError} The message contains a reserved MLLP
    *   byte, so nothing was written.
+   * @throws {MllpConnectionFailedError} The session never opened.
+   * @throws {MllpConnectionTimeoutError} The session never opened in time.
    * @throws {MllpSendTimeoutError} Nothing came back within `timeoutMs`. The
    *   session is destroyed.
+   * @throws {MllpSendAbortedError} `destroy()` ended the session while the
+   *   reply was awaited.
+   * @throws {MllpConnectionLostError} The remote system closed, or the stream
+   *   failed, before a reply came.
    * @throws {MllpCodecError} The remote system sent bytes that are not an MLLP
    *   frame.
    */
-  exchange(message: Uint8Array, timeoutMs: number): Promise<Uint8Array | null>;
+  exchange(message: Uint8Array, timeoutMs: number): Promise<Uint8Array>;
   /**
-   * Ends the session now, and resolves once the socket is down. `ready` and a
-   * waiting `exchange` both reject with `reason`.
+   * Ends the session now, and resolves once the socket is down. A `ready`
+   * still pending rejects; so does an `exchange` still waiting.
    *
    * Never rejects. Idempotent. Bounded.
    */
-  destroy(reason?: unknown): Promise<void>;
+  destroy(): Promise<void>;
 }
 
 export interface ConnectOptions {
@@ -65,9 +74,9 @@ interface Framing {
 /**
  * Opens `socket` and takes ownership of its streams.
  *
- * @throws `signal.reason` when the caller cancelled.
- * @throws {MllpConnectTimeoutError} No socket within `timeoutMs`.
- * @throws {MllpConnectFailedError} The socket failed to open.
+ * @throws {MllpConnectionTimeoutError} No socket within `timeoutMs`.
+ * @throws {MllpConnectionFailedError} The socket failed to open, or `signal`
+ *   cancelled the attempt; the adapter's rejection is on `cause`.
  */
 async function openSocketStreams(
   socket: MllpSocket,
@@ -80,13 +89,10 @@ async function openSocketStreams(
   try {
     streams = await socket.connect(AbortSignal.any([signal, timeout]));
   } catch (error) {
-    if (signal.aborted) {
-      throw signal.reason;
-    }
     if (timeout.aborted) {
-      throw new MllpConnectTimeoutError(opts.timeoutMs);
+      throw new MllpConnectionTimeoutError(opts.timeoutMs);
     }
-    throw new MllpConnectFailedError(error);
+    throw new MllpConnectionFailedError(error);
   }
 
   try {
@@ -99,13 +105,13 @@ async function openSocketStreams(
   } catch (error) {
     // `destroy` ends only an attempt that fulfilled; this one is about to reject.
     await socket.close();
-    throw new MllpConnectFailedError(error);
+    throw new MllpConnectionFailedError(error);
   }
 }
 
 /**
  * Starts opening a session over `socket`, and hands it back at once. The
- * session ends itself, with `signal.reason`, when `signal` aborts.
+ * session ends itself when `signal` aborts.
  *
  * Never throws: every failure, an adapter's synchronous throw included,
  * reaches `ready`. Nothing is left open on any path: an attempt that fails or
@@ -118,27 +124,8 @@ export function createSession(
 ): MllpSession {
   const abort = new AbortController();
   const streams = openSocketStreams(socket, abort.signal, opts);
-  const cancel = () => void destroy(signal?.reason);
   let closing: Promise<void> | null = null;
-
-  const destroy = (reason?: unknown): Promise<void> => {
-    closing ??= (async () => {
-      abort.abort(reason);
-      signal?.removeEventListener("abort", cancel);
-      // Handled here for an owner that never awaits `ready`; the failure is
-      // still theirs to read.
-      void Promise.allSettled([ready]);
-      const [attempt] = await Promise.allSettled([streams]);
-      if (attempt.status === "fulfilled") {
-        // Release the streams, do not cancel them: cancelling would destroy
-        // the socket under the adapter and skip its graceful close.
-        attempt.value.reader.releaseLock();
-        attempt.value.writer.releaseLock();
-        await socket.close();
-      }
-    })();
-    return closing;
-  };
+  const cancel = () => void destroy();
 
   const ready = (async () => {
     signal?.addEventListener("abort", cancel, { once: true });
@@ -151,14 +138,36 @@ export function createSession(
     if (closing !== null) {
       // Destroyed while opening: the socket is down before this settles.
       await closing;
-      throw abort.signal.reason;
+      throw new MllpConnectionFailedError(abort.signal.reason);
     }
   })();
+
+  const destroy = (): Promise<void> => {
+    closing ??= (async () => {
+      // Aborting cancels a dial still in flight, through the signal the
+      // adapter was given, and marks the session as ended, so that a read or
+      // write released below reports SEND_ABORTED rather than a stream error.
+      abort.abort();
+      signal?.removeEventListener("abort", cancel);
+      // Opening settles either way once aborted. An open that failed has
+      // already closed whatever it opened; only one that succeeded leaves
+      // streams to release and a socket to close.
+      const [opened] = await Promise.allSettled([streams]);
+      if (opened.status === "fulfilled") {
+        // Release the streams, do not cancel them: cancelling would destroy
+        // the socket under the adapter and skip its graceful close.
+        opened.value.reader.releaseLock();
+        opened.value.writer.releaseLock();
+        await socket.close();
+      }
+    })();
+    return closing;
+  };
 
   const exchange = async (
     message: Uint8Array,
     timeoutMs: number
-  ): Promise<Uint8Array | null> => {
+  ): Promise<Uint8Array> => {
     let framed: Uint8Array;
     try {
       framed = frame(message);
@@ -167,20 +176,35 @@ export function createSession(
       throw new MllpInvalidMessageError(error);
     }
 
+    await ready;
+
     // Destroying is what wakes the read parked below. `clearTimeout` runs in a
     // microtask and this fires as a macrotask, so a deadline that fires at all
     // is one whose exchange is still in flight.
+    let timedOut = false;
     const deadline = setTimeout(() => {
-      void destroy(new MllpSendTimeoutError(timeoutMs));
+      timedOut = true;
+      void destroy();
     }, timeoutMs);
     try {
       const { reader, writer } = await streams;
       await writer.write(framed);
       const reply = await reader.read();
-      return reply.done ? null : reply.value;
+      if (reply.done) {
+        throw new MllpConnectionLostError();
+      }
+      return reply.value;
     } catch (error) {
-      // `destroy` released the lock under us: report why it ended, not how.
-      throw abort.signal.aborted ? abort.signal.reason : error;
+      if (timedOut) {
+        throw new MllpSendTimeoutError(timeoutMs);
+      }
+      if (abort.signal.aborted) {
+        throw new MllpSendAbortedError();
+      }
+      throw error instanceof MllpCodecError ||
+        error instanceof MllpConnectionLostError
+        ? error
+        : new MllpConnectionLostError(error);
     } finally {
       clearTimeout(deadline);
     }

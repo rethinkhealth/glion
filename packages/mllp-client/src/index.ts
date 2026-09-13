@@ -17,7 +17,6 @@ export type {
   MllpClientEvent,
   MllpClientEvents,
   MllpClientListener,
-  MllpConnection,
 } from "./client/index";
 export type {
   MllpClientOptions,
@@ -32,12 +31,15 @@ export {
   MllpAlreadySendingError,
   MllpClientClosedError,
   MllpClientError,
-  MllpConnectFailedError,
-  MllpConnectTimeoutError,
+  MllpConnectionError,
+  MllpConnectionFailedError,
   MllpConnectionLostError,
+  MllpConnectionTimeoutError,
   MllpErrorCode,
   MllpInvalidMessageError,
   MllpInvalidOptionError,
   MllpInvalidResponseError,
+  MllpSendAbortedError,
   MllpSendTimeoutError,
 } from "./errors";
+export type { MllpDelivery } from "./errors";

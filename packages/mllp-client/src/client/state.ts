@@ -1,6 +1,6 @@
 /**
- * The client's phases, and what each one is holding: the message in flight,
- * and the close. Connectivity is the connection's.
+ * The client's phases, and what each one is holding: the session, the message
+ * in flight, and the close.
  *
  * Types only. A phase changes by replacing the object, never by mutating it.
  *
@@ -8,11 +8,24 @@
  */
 
 import type { MllpClientError } from "../errors";
+import type { MllpSession } from "./session";
 
 export type State =
   | { readonly phase: "idle" }
   | {
+      readonly phase: "connecting";
+      /** The dialing. Settles as `connect()` does. */
+      readonly opening: Promise<void>;
+      /** Aborted by `close()` and `destroy()`. Stops the dialing. */
+      readonly abort: AbortController;
+    }
+  | {
+      readonly phase: "connected";
+      readonly session: MllpSession;
+    }
+  | {
       readonly phase: "sending";
+      readonly session: MllpSession;
       /** MSH-10 of the message waiting for its acknowledgment. */
       readonly controlId: string;
       /** Settles when the send is over, however it ended. */
@@ -20,6 +33,7 @@ export type State =
     }
   | {
       readonly phase: "closing";
+      readonly session: MllpSession;
       /** The send `close()` is waiting out. */
       readonly done: Promise<unknown>;
     }
