@@ -184,7 +184,7 @@ One message is on the wire at a time. A `send()` arriving while another is in fl
 const acks = await Promise.all(batch.map((message) => client.send(message)));
 ```
 
-The queue is in memory and has no bound. `timeoutMs` runs from the moment the write starts, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects with `MllpClientClosedError` and `delivery: "not-sent"`; nothing behind a failed message goes out. See [Does `send()` queue?](#does-send-queue).
+The queue is in memory and has no bound. `timeoutMs` runs from the moment the write starts, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects at once with `MllpClientClosedError` and `delivery: "not-sent"`; nothing behind a failed message goes out. A send waiting behind a dial that fails rejects with the dial's error, `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, as `connect()` does. See [Does `send()` queue?](#does-send-queue).
 
 ### `client.connect()`
 

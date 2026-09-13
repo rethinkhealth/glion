@@ -1257,6 +1257,83 @@ describe("MllpClient — an application that overlaps sends", () => {
     expect(client.state).toBe("closed");
   });
 
+  it("rejects a send queued behind a failed dial with the dial's error, as connect() would", async () => {
+    // Given a remote system that refuses the connection
+    const remote = remoteSystem(refused(new Error("ECONNREFUSED")));
+    const client = new MllpClient({ reconnect: false, socket: remote.socket });
+
+    // When two sends are fired at once, so the second queues behind the dial
+    const [head, queued] = await Promise.allSettled([
+      client.send(adtA01().tree),
+      client.send(adtA01().tree),
+    ]);
+
+    // Then both get the dial's failure: neither was written
+    expect(head).toMatchObject({
+      reason: { code: MllpErrorCode.CONNECTION_FAILED, delivery: "not-sent" },
+      status: "rejected",
+    });
+    expect(queued).toMatchObject({
+      reason: { code: MllpErrorCode.CONNECTION_FAILED, delivery: "not-sent" },
+      status: "rejected",
+    });
+    expect(remote.opened).toBe(1);
+    expect(client.state).toBe("closed");
+  });
+
+  it("refuses the sends still waiting the moment close() is called, not when the message in flight settles", async () => {
+    // Given a message on the wire that the remote system never answers, and
+    // one waiting behind it
+    const { client, remote } = await connectedClient();
+    remote.answers(silence);
+    const inFlight = client.send(adtA01().tree, { timeoutMs: 500 });
+    const waiting = client.send(adtA01().tree);
+    await remote.receives();
+
+    // When the application closes the client
+    const closing = client.close();
+
+    // Then the waiting send is refused at once, while the message on the
+    // wire is still waiting for its acknowledgment
+    await expect(waiting).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+      delivery: "not-sent",
+    });
+    expect(client.state).toBe("closing");
+
+    await expect(inFlight).rejects.toMatchObject({
+      code: MllpErrorCode.SEND_TIMEOUT,
+    });
+    await closing;
+  });
+
+  it("refuses a send arriving while close() waits out the message in flight", async () => {
+    // Given a message on the wire that the remote system never answers, and
+    // close() waiting for it
+    const { client, remote } = await connectedClient();
+    remote.answers(silence);
+    const inFlight = client.send(adtA01().tree, { timeoutMs: 500 });
+    await remote.receives();
+    const closing = client.close();
+    expect(client.state).toBe("closing");
+
+    // When a send arrives
+    const late = client.send(adtA01().tree);
+
+    // Then it is refused at once, without taking a place behind the message
+    // on the wire
+    await expect(late).rejects.toMatchObject({
+      code: MllpErrorCode.CLOSED,
+      delivery: "not-sent",
+    });
+    expect(client.state).toBe("closing");
+
+    await expect(inFlight).rejects.toMatchObject({
+      code: MllpErrorCode.SEND_TIMEOUT,
+    });
+    await closing;
+  });
+
   it("refuses the sends still waiting when destroy() cuts the one in flight", async () => {
     // Given a message in flight, unanswered, and one waiting behind it
     const { client, remote } = await connectedClient();

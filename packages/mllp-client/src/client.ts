@@ -21,6 +21,7 @@ import {
 } from "./errors";
 import { MllpClientEmitter } from "./events";
 import { decode, encode } from "./messages";
+import { createQueue } from "./queue";
 import { defaultReconnectDelay, sleep } from "./reconnect";
 import type { ReconnectPolicy } from "./reconnect";
 import { createSession } from "./session";
@@ -75,11 +76,7 @@ export class MllpClient extends MllpClientEmitter {
   readonly #policy: ReconnectPolicy;
   readonly #sendTimeoutMs: number;
   #state: State = { phase: "idle" };
-  /**
-   * Sends in call order: the head is the send in progress, the rest wait.
-   * Each entry resolves when its send may start.
-   */
-  readonly #queue: PromiseWithResolvers<unknown>[] = [];
+  readonly #queue = createQueue();
 
   /**
    * @throws {MllpInvalidOptionError} A timeout, byte cap, or attempt count is
@@ -171,8 +168,9 @@ export class MllpClient extends MllpClientEmitter {
    *
    * Sends go out in the order `send()` was called. The queue has no bound.
    * `timeoutMs` runs from the moment the write starts, not from the call. A
-   * send still waiting
-   * when the client closes rejects with {@link MllpClientClosedError}.
+   * send still waiting when the client closes rejects with
+   * {@link MllpClientClosedError}; one waiting behind a dial that fails
+   * rejects with the dial's error, as `connect()` does.
    *
    * Nothing is written when an option, phase, or message error is thrown.
    * Every wire failure also closes the client; a NAK does not.
@@ -200,11 +198,28 @@ export class MllpClient extends MllpClientEmitter {
 
     const { bytes, controlId } = encode(message); // throws {MllpInvalidMessageError}
 
-    const turn = Promise.withResolvers();
+    // Checked here so a send never waits its turn on a closing client, and
+    // again at the turn, since the phase can change during the wait.
+    const at = this.#state;
+    switch (at.phase) {
+      case "closing": {
+        throw new MllpClientClosedError();
+      }
+      case "closed": {
+        throw new MllpClientClosedError(at.reason);
+      }
+      case "idle":
+      case "connecting":
+      case "connected":
+      case "sending": {
+        break;
+      }
+    }
+
+    const turn = this.#queue.enter();
     try {
-      this.#queue.push(turn);
-      if (this.#queue.length > 1) {
-        await turn.promise;
+      if (turn.wait !== null) {
+        await turn.wait;
       }
       if (!this.connected) {
         await this.connect();
@@ -232,8 +247,7 @@ export class MllpClient extends MllpClientEmitter {
       this.#state = { done, phase: "sending", session: state.session };
       return await done;
     } finally {
-      this.#queue.shift();
-      this.#queue[0]?.resolve(null);
+      this.#queue.leave(turn);
     }
   }
 
@@ -255,6 +269,10 @@ export class MllpClient extends MllpClientEmitter {
           phase: "closing",
           session: from.session,
         };
+        // #closed() rejects the waiters too, but only after the message on
+        // the wire settles, up to its full timeoutMs. They cannot go out from
+        // here on, so they are told now.
+        this.#queue.rejectWaiting(new MllpClientClosedError());
         await Promise.allSettled([from.done]);
         break;
       }
@@ -369,12 +387,23 @@ export class MllpClient extends MllpClientEmitter {
   /**
    * The terminal move, from any phase: `reason` is the failure the client
    * closes with, or `null` when the owner closes it. Once.
+   *
+   * Sends waiting their turn are rejected with `reason` when its delivery is
+   * `not-sent`, and with {@link MllpClientClosedError} carrying `reason`
+   * otherwise.
    */
   #closed(reason: MllpClientError | null): void {
     if (this.#state.phase === "closed") {
       return;
     }
     this.#state = { phase: "closed", reason };
+    // A waiter's message was never written, so a failure of unknown delivery
+    // is not its own.
+    this.#queue.rejectWaiting(
+      reason?.delivery === "not-sent"
+        ? reason
+        : new MllpClientClosedError(reason)
+    );
     this.emit("close", reason);
   }
 

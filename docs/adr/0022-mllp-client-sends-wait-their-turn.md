@@ -20,7 +20,7 @@ The protocol allows it: lockstep with a queue in front of it is still lockstep. 
 
 3. **`timeoutMs` runs from the moment the write starts.** Time spent waiting is not counted. A send at the back of a long queue can wait longer than its own timeout before it starts.
 
-4. **A closed client refuses the sends still waiting.** `close()` moves to `closing` at once, so a waiter that wakes into it, or into `closed` after a failure or `destroy()`, rejects with `MllpClientClosedError` and `delivery: "not-sent"`, carrying the failure on `cause`. Nothing goes out behind a message whose delivery is unknown, and `close()` still never cuts off the message on the wire.
+4. **Whatever ends a wait tells the waiters the fact, at once.** `close()` and `destroy()` reject every send waiting its turn with `MllpClientClosedError` the moment they are called, and a send arriving during `closing` or `closed` is refused before it takes a place. A failure on the wire rejects the waiters with `MllpClientClosedError` carrying that failure on `cause`: their messages were never written, so their delivery is `not-sent` even though the head's is unknown. A dial that fails rejects the waiters with the dial's own error, `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, as ADR 0021 already gives a `connect()` waiting on the same dial. Nothing goes out behind a message whose delivery is unknown, and `close()` still never cuts off the message on the wire.
 
 ## Consequences
 
@@ -29,7 +29,7 @@ The protocol allows it: lockstep with a queue in front of it is still lockstep. 
 - A failure under message _n_ rejects _n_ with `delivery: "unknown"` and every message behind it with `CLOSED`, `delivery: "not-sent"`: the application sees the whole tail, in order, and can persist or resend it.
 - An application that fires sends without awaiting them and then calls `close()` gets `CLOSED` for everything but the message on the wire. Awaiting the sends first is the documented shape.
 - Backpressure is no longer visible on the first overlap. A producer faster than the receiver grows the queue in memory. The client does not measure it, and `client.state` does not show it: the phase is whatever the head is doing, `connecting` while it dials and `sending` while its message is on the wire.
-- The phase graph is unchanged: no queue phase. The queue is one array beside it. `close()` and `destroy()` do not touch it: a waiter that wakes into `closing` or `closed` rejects on its own.
+- The phase graph is unchanged: no queue phase. The queue is one array beside it; each send removes its own entry, so the queue can be rejected into from `close()`, `destroy()`, a failed dial, and a wire failure.
 
 ## Alternatives considered
 
