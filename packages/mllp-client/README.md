@@ -196,7 +196,7 @@ Opens the connection without sending anything, dialing again under the [reconnec
 
 Idempotent. On a connected client it resolves at once; while an attempt is in flight it waits for the outcome and shares it.
 
-**Throws** the last attempt's `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, or `MllpClientClosedError` when the client is already closed or `close()` cancelled the attempt.
+**Throws** the last attempt's `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, or `MllpClientClosedError` when the client is already closed or `close()` or `destroy()` cancelled the attempt.
 
 ### `client.close()`
 
@@ -206,7 +206,7 @@ close(): Promise<void>
 
 Closes the connection once the message in flight has been acknowledged. New sends, and sends still waiting their turn, are refused from the moment it is called with `MllpClientClosedError`; the message in flight is never cut off. Await the sends you want delivered before calling it. An attempt to connect stops at once.
 
-Resolves when the connection is down, from any phase. Never throws. Idempotent. The wait is bounded by the in-flight send's own deadline.
+Resolves when the connection is down, from any phase. Never throws. Idempotent. The wait is bounded by the in-flight send's own deadline. If the message it waits for fails, the client closes with that failure; otherwise with `null`, the owner's decision.
 
 ```ts
 process.on("SIGTERM", async () => {
@@ -215,13 +215,13 @@ process.on("SIGTERM", async () => {
 });
 ```
 
-### `client.destroy()`
+### `client.destroy(reason?)`
 
 ```ts
-destroy(): Promise<void>
+destroy(reason?: MllpClientError | null): Promise<void>
 ```
 
-Closes the connection now, without waiting for anything in flight. A message in flight rejects with `MllpSendAbortedError`. An attempt to connect stops at once.
+Closes the connection now, without waiting for anything in flight. A message in flight rejects with `MllpSendAbortedError`. An attempt to connect stops at once. The client closes with `reason`: the `close` event carries it, and so does `cause` on every later call's `MllpClientClosedError`. Omitted or `null`, the client closed by its owner's decision, as `net.Socket.destroy(error)` does. Sends waiting their turn are rejected with `reason` itself when its delivery is `not-sent`, and with `MllpClientClosedError` carrying `reason` otherwise. Arriving while the client is already closing, it cuts the message in flight and joins the ending under way; that ending's reason stands, and `reason` is not recorded.
 
 Resolves when the connection is down, from any phase. Never throws. Idempotent.
 
@@ -242,16 +242,24 @@ Calls `close()`. Lets a client be scoped with `await using`:
 readonly state: MllpClientState
 ```
 
-| Value        | Meaning                                                                       |
-| ------------ | ----------------------------------------------------------------------------- |
-| `idle`       | Nothing opened yet. The first `send()` or `connect()` opens the connection.   |
-| `connecting` | The connection is being opened, further attempts included.                    |
-| `connected`  | Open, with no message in flight.                                              |
-| `sending`    | A message is on the wire, waiting for its acknowledgment. Further sends wait. |
-| `closing`    | `close()` is waiting out the message in flight.                               |
-| `closed`     | Done.                                                                         |
+| Value        | Meaning                                                                          |
+| ------------ | -------------------------------------------------------------------------------- |
+| `idle`       | Nothing opened yet. The first `send()` or `connect()` opens the connection.      |
+| `connecting` | The connection is being opened, further attempts included.                       |
+| `connected`  | Open, with no message in flight.                                                 |
+| `sending`    | A message is on the wire, waiting for its acknowledgment. Further sends wait.    |
+| `closing`    | The client is ending: a message being waited out, or the connection coming down. |
+| `closed`     | The connection is down.                                                          |
 
 A client closes once. After `close()`, `destroy()`, a connection the reconnect policy could not open, or a connection that was lost, every call throws `MllpClientClosedError`; construct a new client to send again.
+
+### `client.pending`
+
+```ts
+readonly pending: number
+```
+
+How many sends wait their turn, the one in flight excluded. The queue's backlog, for a metric or a backpressure decision; `0` whenever nothing waits.
 
 ### `client.connected`
 
@@ -270,10 +278,10 @@ off<E>(event: E, listener: MllpClientListener<E>): this
 
 Adds or removes a listener. Both return the client, so calls chain.
 
-| Event     | Listener                                   | Fires when                                                                                                                                                  |
-| --------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `connect` | `() => void`                               | The connection opened.                                                                                                                                      |
-| `close`   | `(error: MllpClientError \| null) => void` | The client is done. Fires once, from any phase, even if it never connected. `error` is the failure it could not recover from, or `null` when you closed it. |
+| Event     | Listener                                   | Fires when                                                                                                                                                   |
+| --------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `connect` | `() => void`                               | The connection opened.                                                                                                                                       |
+| `close`   | `(error: MllpClientError \| null) => void` | The connection is down. Fires once, from any phase, even if it never connected. `error` is the failure that closed the client, or `null` when you closed it. |
 
 A lost connection is not an event of its own: it closes the client, so `close` fires with the failure. Listeners are synchronous, and one that throws propagates to whatever triggered the event.
 
@@ -301,12 +309,12 @@ nodeSocket(options: NodeSocketOptions): MllpSocket
 
 Plain TCP over `net.Socket`.
 
-| Option            | Type     | Default  | Description                                                                                                 |
-| ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------- |
-| `host`            | `string` | required | Host name or address of the receiver.                                                                       |
-| `port`            | `number` | required | TCP port of the receiver.                                                                                   |
-| `gracefulCloseMs` | `number` | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                               |
-| `keepAliveIdleMs` | `number` | `30000`  | Idle time before the first keepalive probe, so a silent NAT or firewall drop surfaces before the next send. |
+| Option            | Type     | Default  | Description                                                                                                                                                                   |
+| ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `host`            | `string` | required | Host name or address of the receiver.                                                                                                                                         |
+| `port`            | `number` | required | TCP port of the receiver.                                                                                                                                                     |
+| `gracefulCloseMs` | `number` | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                                                                                                 |
+| `keepAliveIdleMs` | `number` | `30000`  | Idle time before the first keepalive probe, so after a silent NAT or firewall drop the next send fails at once with `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`. |
 
 `TCP_NODELAY` is set, so a message goes out immediately rather than waiting on Nagle's algorithm.
 
@@ -396,9 +404,9 @@ The message cannot be sent as it stands: no MSH-10 control ID, or it could not b
 
 `MllpClientClosedError` · delivery `not-sent` · field: `cause`
 
-The client is closed, so the call cannot be served. Also the error a `connect()` gets when `close()` cancelled the attempt it was waiting for, and the error a `send()` gets when the client closed while it was waiting its turn.
+The client is closed or closing, so the call cannot be served. Also the error a `connect()` gets when `close()` or `destroy()` cancelled the attempt it was waiting for, and the error a `send()` gets when the client closed while it was waiting its turn; a send waiting behind a dial that failed gets the dial's error instead.
 
-A client closes once. Construct a new one to send again. When the client closed on a failure, `cause` is that failure: the last attempt's `CONNECTION_FAILED` or `CONNECTION_TIMEOUT` when the reconnect policy gave up, or the `CONNECTION_LOST`, `SEND_TIMEOUT`, or `INVALID_RESPONSE` that ended an earlier message.
+A client closes once. Construct a new one to send again. When the client closed on a failure, `cause` is that failure: the last attempt's `CONNECTION_FAILED` or `CONNECTION_TIMEOUT` when the reconnect policy gave up, the `CONNECTION_LOST`, `SEND_TIMEOUT`, or `INVALID_RESPONSE` that ended an earlier message, including one `close()` was waiting out, or the `reason` given to `destroy()`.
 
 ### `CONNECTION_FAILED`
 
@@ -482,7 +490,7 @@ The client closes with the failure, and never sends the failed message again —
 
 ### Does `send()` queue?
 
-Yes, in memory and without a bound. A `send()` arriving while a message is on the wire waits for that message's acknowledgment, then goes out; sends leave in the order they were called, one at a time, so an A01 fired before its A03 reaches the receiver first. Nothing goes out behind a message whose delivery is unknown: a failure closes the client, and every send still waiting rejects with `CLOSED` and `delivery: "not-sent"`.
+Yes, in memory and without a bound. A `send()` arriving while a message is on the wire waits for that message's acknowledgment, then goes out; sends leave in the order they were called, one at a time, so an A01 fired before its A03 reaches the receiver first. Nothing goes out behind a message whose delivery is unknown: a failure closes the client, and every send still waiting rejects with `CLOSED` and `delivery: "not-sent"`. A send waiting behind a dial that fails rejects with the dial's error, as `connect()` does.
 
 The queue exists only in this process. A message waiting in it is not on disk, so a crash loses it without a trace, and a producer faster than the receiver grows it without limit. An interface that must not lose events keeps its own persistent outbound queue and hands the client one message at a time; the client's line is for a batch whose outcomes the caller is awaiting.
 

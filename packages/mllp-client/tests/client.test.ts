@@ -614,6 +614,51 @@ describe("MllpClient", () => {
   });
 
   describe("close()", () => {
+    it("reports the failure of the message it waits out to a call arriving during the teardown", async () => {
+      // Given a message on the wire whose connection resets as close() is
+      // called, in the same turn
+      const { client, remote } = await connectedClient();
+      remote.answers(silence);
+      const sending = client.send(adtA01().tree);
+      await remote.receives();
+      const resetting = remote.resets();
+      const closing = client.close();
+
+      // When a send arrives once the message has failed, while the
+      // connection is still coming down
+      await expect(sending).rejects.toBeInstanceOf(MllpConnectionLostError);
+      const late = client.send(adtA01().tree);
+
+      // Then it learns the failure as the cause of CLOSED
+      await expect(late).rejects.toMatchObject({
+        cause: expect.any(MllpConnectionLostError),
+        code: MllpErrorCode.CLOSED,
+      });
+      await Promise.all([resetting, closing]);
+    });
+
+    it("closes with the failure of the message it waited out", async () => {
+      // Given close() waiting out a message the remote system never answers
+      const { client, remote } = await connectedClient();
+      remote.answers(silence);
+      const reasons: unknown[] = [];
+      client.on("close", (reason) => reasons.push(reason));
+      const sending = client.send(adtA01().tree, { timeoutMs: 50 });
+      await remote.receives();
+
+      // When the message times out under close()
+      await client.close();
+
+      // Then the send has its failure, and the client closed on it: the
+      // close event carries it, and so does every later call
+      await expect(sending).rejects.toBeInstanceOf(MllpSendTimeoutError);
+      expect(reasons).toEqual([expect.any(MllpSendTimeoutError)]);
+      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+        cause: expect.any(MllpSendTimeoutError),
+        code: MllpErrorCode.CLOSED,
+      });
+    });
+
     it("ends the connection", async () => {
       // Given
       const { client, remote } = await connectedClient();
@@ -686,6 +731,73 @@ describe("MllpClient", () => {
   });
 
   describe("destroy()", () => {
+    it("cuts the message close() is waiting out, and the client closes by its owner", async () => {
+      // Given close() waiting out a message the remote system never answers
+      const { client, remote } = await connectedClient();
+      remote.answers(silence);
+      const reasons: unknown[] = [];
+      client.on("close", (reason) => reasons.push(reason));
+      const sending = client.send(adtA01().tree);
+      await remote.receives();
+      const closing = client.close();
+      expect(client.state).toBe("closing");
+
+      // When
+      await client.destroy();
+
+      // Then the message is cut, both calls resolve with the connection down,
+      // and the client closed by its owner: close() started the ending
+      await expect(sending).rejects.toMatchObject({
+        code: MllpErrorCode.SEND_ABORTED,
+      });
+      await closing;
+      expect(client.state).toBe("closed");
+      expect(remote.closed).toBe(1);
+      expect(reasons).toEqual([null]);
+    });
+
+    it("gives the calls waiting on the dial its reason", async () => {
+      // Given a dial in progress, a connect() and a send() waiting on it
+      const remote = remoteSystem(slow(50));
+      const client = new MllpClient({ socket: remote.socket });
+      const reason = new MllpConnectionLostError();
+      const connecting = client.connect();
+      const sending = client.send(adtA01().tree);
+
+      // When the client is destroyed with a reason
+      await client.destroy(reason);
+
+      // Then both learn it as the cause of CLOSED
+      await expect(connecting).rejects.toMatchObject({
+        cause: reason,
+        code: MllpErrorCode.CLOSED,
+      });
+      await expect(sending).rejects.toMatchObject({
+        cause: reason,
+        code: MllpErrorCode.CLOSED,
+        delivery: "not-sent",
+      });
+    });
+
+    it("gives a send arriving during its teardown its reason", async () => {
+      // Given a connected client being destroyed with a reason
+      const { client } = await connectedClient();
+      const reason = new MllpConnectionLostError();
+      const destroying = client.destroy(reason);
+      expect(client.state).toBe("closing");
+
+      // When a send arrives
+      const late = client.send(adtA01().tree);
+
+      // Then it is refused with the reason on cause
+      await expect(late).rejects.toMatchObject({
+        cause: reason,
+        code: MllpErrorCode.CLOSED,
+        delivery: "not-sent",
+      });
+      await destroying;
+    });
+
     it("rejects SEND_ABORTED for the send it interrupts", async () => {
       // Given a message waiting for its acknowledgment
       const { client, remote } = await connectedClient();
@@ -1115,6 +1227,23 @@ describe("MllpClient — an application that overlaps sends", () => {
     );
     expect(remote.opened).toBe(1);
     expect(client.state).toBe("connected");
+    await client.close();
+  });
+
+  it("reports how many sends wait their turn", async () => {
+    // Given a connected client with nothing to do
+    const { client, remote } = await connectedClient();
+    expect(client.pending).toBe(0);
+
+    // When three sends are fired at once
+    const batch = [adtA01(), adtA01(), adtA01()];
+    const sends = batch.map((m) => client.send(m.tree));
+
+    // Then two wait behind the one on the wire, until each is acknowledged
+    expect(client.pending).toBe(2);
+    await remote.receives();
+    await Promise.all(sends);
+    expect(client.pending).toBe(0);
     await client.close();
   });
 

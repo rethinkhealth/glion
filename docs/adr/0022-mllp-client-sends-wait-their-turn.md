@@ -28,7 +28,7 @@ The protocol allows it: lockstep with a queue in front of it is still lockstep. 
 - Two producers on one client are served first-come first-served. A producer that awaits each send in turn takes its place behind whoever is waiting, so it cannot starve the other.
 - A failure under message _n_ rejects _n_ with `delivery: "unknown"` and every message behind it with `CLOSED`, `delivery: "not-sent"`: the application sees the whole tail, in order, and can persist or resend it.
 - An application that fires sends without awaiting them and then calls `close()` gets `CLOSED` for everything but the message on the wire. Awaiting the sends first is the documented shape.
-- Backpressure is no longer visible on the first overlap. A producer faster than the receiver grows the queue in memory. The client does not measure it, and `client.state` does not show it: the phase is whatever the head is doing, `connecting` while it dials and `sending` while its message is on the wire.
+- Backpressure is no longer visible on the first overlap. A producer faster than the receiver grows the queue in memory. `client.pending` counts the sends waiting their turn, the hook for a metric or a backpressure decision; `client.state` does not show it, since the phase is whatever the head is doing, `connecting` while it dials and `sending` while its message is on the wire.
 - The phase graph is unchanged: no queue phase. The queue is one array beside it; each send removes its own entry, so the queue can be rejected into from `close()`, `destroy()`, a failed dial, and a wire failure.
 
 ## Alternatives considered
