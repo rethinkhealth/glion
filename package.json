@@ -35,6 +35,8 @@
     "clean": "rimraf packages/*/dist packages/*/node_modules packages/*/coverage packages/*/.turbo node_modules packages/*/tsconfig.tsbuildinfo",
     "dev": "turbo run dev",
     "fix": "ultracite fix",
+    "mutate": "turbo run mutate",
+    "mutate:changed": "turbo run mutate --filter='[origin/main]'",
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky",
     "publint": "turbo run publint",

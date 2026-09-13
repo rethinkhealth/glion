@@ -42,6 +42,10 @@
     "publint": {
       "dependsOn": ["build"],
       "outputs": []
+    },
+    "mutate": {
+      "dependsOn": ["^build"],
+      "cache": false
     }
   }
 }

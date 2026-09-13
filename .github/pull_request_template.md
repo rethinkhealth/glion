@@ -14,4 +14,5 @@ See the [Testing](../CONTRIBUTING.md#testing) section of CONTRIBUTING for what e
 - [ ] Any new inverse pair (encode/decode, frame/unframe, parse/format, select/set) has a fast-check round-trip property.
 - [ ] A bug fix includes a regression test or `qa/fixtures/` message that fails on the parent commit.
 - [ ] `pnpm check`, `pnpm check-types`, and `pnpm test` pass locally.
+- [ ] For packages with a `stryker.config.json`, `pnpm mutate:changed` passes and each surviving mutant has a contract-named test or a documented equivalence.
 - [ ] A changeset is included for any published package change.

@@ -36,10 +36,11 @@
     "build": "tsdown && tsc --emitDeclarationOnly",
     "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
+    "mutate": "stryker run",
+    "publint": "publint --strict",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest",
-    "publint": "publint --strict"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@glion/utils": "workspace:*",
@@ -54,6 +55,8 @@
     "@glion/testing": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "@glion/util-query": "workspace:*",
+    "@stryker-mutator/core": "10.0.0",
+    "@stryker-mutator/vitest-runner": "10.0.0",
     "@types/node": "25.6.0",
     "@types/unist": "^3.0.3",
     "@vitest/coverage-v8": "4.1.11",
