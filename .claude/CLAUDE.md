@@ -50,6 +50,10 @@ pnpm changeset                # Create a new changeset
 pnpm ci:version               # Bump versions
 pnpm changeset publish-plan   # Preview what the release workflow would publish
 pnpm check:release            # Verify every public package version is on npm with provenance
+
+# Workflows
+pnpm check:actions            # Verify every SHA-pinned action's version comment, commit date, and latest release
+pnpm check:workflows          # zizmor over .github/workflows (needs uv; same audit CI runs)
 ```
 
 ## Architecture

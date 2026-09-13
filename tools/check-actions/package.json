@@ -1,0 +1,27 @@
+{
+  "name": "@glion/check-actions",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Internal tool: verify every SHA-pinned GitHub Action in .github/workflows against the tags, commit date, and latest release of its repository.",
+  "bin": {
+    "glion-check-actions": "./src/cli.mjs"
+  },
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@glion/testing": "workspace:*",
+    "@glion/tsconfig": "workspace:*",
+    "@types/node": "25.6.0",
+    "@vitest/coverage-v8": "4.1.11",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
