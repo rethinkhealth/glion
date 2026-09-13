@@ -5,8 +5,6 @@
  * has to catch.
  */
 
-import { randomUUID } from "node:crypto";
-
 import type { Root } from "@glion/ast";
 import { parseHL7v2 } from "@glion/parser";
 
@@ -22,7 +20,7 @@ export function adtA01(options: { readonly controlId?: string } = {}): {
   readonly tree: Root;
   readonly controlId: string;
 } {
-  const { controlId = randomUUID() } = options;
+  const { controlId = crypto.randomUUID() } = options;
   const text = [
     `MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|${controlId}|P|2.5`,
     "EVN|A01|20241201120000",
@@ -49,8 +47,12 @@ export function ack(
     id?: string;
   } = {}
 ): { readonly text: string; readonly id: string; readonly controlId: string } {
-  const { controlId = randomUUID(), msa3 = "", id: providedId } = options;
-  const id = providedId ?? randomUUID();
+  const {
+    controlId = crypto.randomUUID(),
+    msa3 = "",
+    id: providedId,
+  } = options;
+  const id = providedId ?? crypto.randomUUID();
   return {
     controlId,
     id,
