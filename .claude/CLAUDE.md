@@ -240,7 +240,7 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 
 ### Code organization
 
-- Keep functions focused; cap cognitive complexity.
+- Keep functions focused. `complexity/complexity` caps every function at cyclomatic 20 and cognitive 15 in `src/`; a `// oxlint-disable-next-line complexity/complexity -- <reason>` is reserved for byte scanners, grammar parsers, and flag scanners whose branches are the domain, and the reason names that structure.
 - Extract complex conditions into well-named boolean variables.
 - Group related code; separate concerns.
 
