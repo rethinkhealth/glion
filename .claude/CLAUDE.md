@@ -31,9 +31,9 @@ pnpm test:watch               # Watch mode
 pnpm --filter @glion/<pkg> test [pattern]   # Single package, optional pattern
 
 # Lint & format
-pnpm lint                     # Check via Ultracite (Oxlint + Oxfmt)
-pnpm format                   # Auto-fix
-pnpm dlx ultracite fix        # Same as `pnpm format`
+pnpm check                    # Check via Ultracite (Oxlint + Oxfmt)
+pnpm fix                      # Auto-fix
+pnpm dlx ultracite fix        # Same as `pnpm fix`
 
 # Benchmarks (see benchmarks/README.md before adding or renaming any)
 pnpm bench                    # CodSpeed regression suite (benchmarks/suites/)
@@ -200,7 +200,7 @@ Multiple proposal-and-pushback rounds are fine and expected. Reject your own fir
 
 ## Code Style
 
-The project uses **Ultracite** (Oxlint + Oxfmt). Most issues are auto-fixable with `pnpm format`. The pre-commit hook runs `lint-staged` to enforce formatting before commits.
+The project uses **Ultracite** (Oxlint + Oxfmt). Most issues are auto-fixable with `pnpm fix`. The pre-commit hook runs `lint-staged` to enforce formatting before commits.
 
 Beyond what the linter catches, write code that is **type-safe, explicit, and direct**.
 
@@ -240,7 +240,7 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 
 ### Code organization
 
-- Keep functions focused; cap cognitive complexity.
+- Keep functions focused. `complexity/complexity` caps every function at cyclomatic 20 and cognitive 15 in `src/`; a `// oxlint-disable-next-line complexity/complexity -- <reason>` is reserved for byte scanners, grammar parsers, and flag scanners whose branches are the domain, and the reason names that structure.
 - Extract complex conditions into well-named boolean variables.
 - Group related code; separate concerns.
 
@@ -259,10 +259,12 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 
 ## Testing
 
+The contract for what a change must bring with it (tests, round-trip properties, regression-first bug fixes, mutation survivors, changesets) lives in the Testing section of `CONTRIBUTING.md`. It applies to agents and people alike; read it before opening a PR. The points below are the mechanics.
+
 - **Vitest**, base config in `tools/testing/src/vitest.config.ts` (`@glion/testing`).
 - Test files: `**/*.test.ts`, `**/*.test.tsx`.
 - Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier.
-- Each package has its own `vitest.config.ts` for package-specific settings.
+- Each package has its own `vitest.config.ts` for package-specific settings, and a `tests/tsconfig.json` so tests are type-checked by `pnpm check-types` (CI runs it).
 - Coverage reporters: text, html, json.
 - `expect()` inside `it()` / `test()` blocks.
 - No `.only` / `.skip` in committed tests.
@@ -279,5 +281,5 @@ All benchmarks live in the `benchmarks/` workspace — never add a `bench/` dire
 2. `package.json` — use `workspace:*` for internal deps; include scripts `build`, `check-types`, `test`, `test:watch`.
 3. `tsconfig.json` — extend `@glion/tsconfig/library.json`.
 4. `tsdown.config.ts` — for the bundle build.
-5. `vitest.config.ts` — for tests; put the tests themselves in `tests/`.
+5. `vitest.config.ts` — for tests; put the tests themselves in `tests/`, with a `tests/tsconfig.json` copied from any sibling package so `check-types` covers them (`tsc --noEmit && tsc --noEmit -p tests/tsconfig.json`).
 6. `README.md` — required (`check:readme` task validates).

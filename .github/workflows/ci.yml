@@ -4,7 +4,12 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
+
+# Nothing here writes back: Codecov authenticates with its own secret and
+# the pnpm cache needs only read scope.
+permissions:
+  contents: read
 
 jobs:
   testing:
@@ -54,10 +59,30 @@ jobs:
         run: pnpm ci:install
       - name: Linting
         run: pnpm check
-      - name: Formatting
-        run: pnpm fix
+      - name: Dependency version alignment
+        run: pnpm syncpack
       - name: README standardization
         run: pnpm check:readmes
+
+  check-types:
+    name: Type checking
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm ci:install
+      - name: Build (declarations of workspace dependencies)
+        run: pnpm build
+      - name: Type checking (src and tests)
+        run: pnpm check-types
 
   packaging:
     name: Packaging (publint)
@@ -146,3 +171,27 @@ jobs:
         run: pnpm test:cf
         env:
           NODE_OPTIONS: "--max_old_space_size=8192"
+
+  testing-deno:
+    name: Testing (Deno runtime)
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "pnpm"
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Install dependencies
+        run: pnpm ci:install
+      - name: Build (all packages via turbo for correct dependency order)
+        run: pnpm build
+      - name: Run Deno-runtime tests across all packages that opt in
+        run: pnpm test:deno

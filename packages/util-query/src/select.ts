@@ -149,7 +149,7 @@ export function select<Path extends string>(
  * @param path - The HL7 path string (must not include repetition index)
  * @returns Array of objects containing nodes and their ancestor chains
  */
-// oxlint-disable-next-line complexity
+// oxlint-disable-next-line complexity/complexity -- path walker: one branch per scope level (group, segment, field, component, subcomponent)
 export function selectAll<Path extends string>(
   root: Root,
   path: Path

@@ -252,7 +252,7 @@ describe("defensive: pre-existing data", () => {
   it("preserves non-conflicting pre-existing properties", async () => {
     const tree = m(msh("2.5"));
     const msh9 = (tree.children[0] as Segment).children[8]!;
-    (msh9 as { data: Record<string, unknown> }).data = {
+    (msh9 as unknown as { data: Record<string, unknown> }).data = {
       customProp: "preserved",
     };
 
