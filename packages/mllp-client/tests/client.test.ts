@@ -1139,6 +1139,27 @@ describe("MllpClient — an application that overlaps sends", () => {
     await client.close();
   });
 
+  it("keeps call order when a send is issued from an earlier send's acknowledgment", async () => {
+    // Given a message on the wire and a second one waiting behind it
+    const { client, remote } = await connectedClient();
+    const [first, second, third] = [adtA01(), adtA01(), adtA01()];
+    const a = client.send(first.tree);
+    const b = client.send(second.tree);
+
+    // When the first is acknowledged and its caller sends a third at once
+    await a;
+    const c = client.send(third.tree);
+
+    // Then the second goes out before the third: it was called first
+    await Promise.all([b, c]);
+    expect(remote.received.map(controlIdOf)).toEqual([
+      first.controlId,
+      second.controlId,
+      third.controlId,
+    ]);
+    await client.close();
+  });
+
   it("goes on past a NAK: the message behind a rejected one still goes out", async () => {
     // Given a remote system that refuses the first message and accepts the
     // rest

@@ -1,6 +1,5 @@
 /**
- * Regression found in review of
- * https://github.com/rethinkhealth/glion/issues/754; no issue of its own.
+ * Regression for https://github.com/rethinkhealth/glion/issues/776.
  *
  * Date: 2026-09-13
  * Symptom: a second `close()` arriving while the first was waiting out the
