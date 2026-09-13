@@ -26,8 +26,6 @@ export type State =
   | {
       readonly phase: "sending";
       readonly session: MllpSession;
-      /** MSH-10 of the message waiting for its acknowledgment. */
-      readonly controlId: string;
       /** Settles when the send is over, however it ended. */
       readonly done: Promise<unknown>;
     }

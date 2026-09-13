@@ -13,7 +13,6 @@ import {
   DEFAULT_SEND_TIMEOUT_MS,
 } from "./constants";
 import {
-  MllpAlreadySendingError,
   MllpClientClosedError,
   MllpClientError,
   MllpConnectionError,
@@ -39,9 +38,10 @@ import type {
  * Sends HL7v2 messages to one remote system over MLLP and returns each
  * message's acknowledgment.
  *
- * One client owns one socket and sends one message at a time. `send()` writes
- * the message, waits for the acknowledgment, checks that it answers this
- * message, and resolves with it.
+ * One client owns one socket and puts one message on the wire at a time.
+ * `send()` writes the message, waits for the acknowledgment, checks that it
+ * answers this message, and resolves with it. A send arriving while another
+ * is in flight waits for it.
  *
  * ```ts
  * import { MllpClient } from "@glion/mllp-client";
@@ -161,7 +161,13 @@ export class MllpClient extends MllpClientEmitter {
 
   /**
    * Sends one message and returns its acknowledgment. Connects first when the
-   * client is not connected yet.
+   * client is not connected yet, and waits for the send in flight, if any,
+   * before writing.
+   *
+   * Waiting sends go out one at a time. A send made while others are waiting
+   * may go out before them. The line has no bound. `timeoutMs` runs from the
+   * write, not from the call. A send still waiting when the client closes
+   * rejects with {@link MllpClientClosedError}.
    *
    * Nothing is written when an option, phase, or message error is thrown.
    * Every other failure also closes the client.
@@ -170,8 +176,8 @@ export class MllpClient extends MllpClientEmitter {
    *   connection stays open.
    * @throws {MllpInvalidOptionError} `timeoutMs` is out of range.
    * @throws {MllpInvalidMessageError} The message cannot be sent as-is.
-   * @throws {MllpClientClosedError} The client is closed.
-   * @throws {MllpAlreadySendingError} Another send is in flight.
+   * @throws {MllpClientClosedError} The client is closed, or closed while
+   *   this send was waiting its turn.
    * @throws {MllpConnectionFailedError} The connection could not be opened.
    * @throws {MllpConnectionTimeoutError} The connection did not open in time.
    * @throws {MllpSendTimeoutError} No acknowledgment arrived in time.
@@ -190,20 +196,14 @@ export class MllpClient extends MllpClientEmitter {
     const { bytes, controlId } = encode(message); // throws {MllpInvalidMessageError}
 
     if (!this.connected) {
-      // Connect if not already connected.
-      // note: if the state is closed or closing, connect() will throw before
-      // we get here.
       await this.connect();
     }
-    // No await from here to the move into `sending`: the phase read here is
-    // the phase the move starts from.
-    const state = this.#state;
+    let state = this.#state;
+    while (state.phase === "sending") {
+      await Promise.allSettled([state.done]);
+      state = this.#state;
+    }
     switch (state.phase) {
-      case "sending": {
-        // A send arriving mid-flight is refused, not queued: the caller owns
-        // the sequence. Waiting instead is under review in #754.
-        throw new MllpAlreadySendingError(state.controlId);
-      }
       case "closing": {
         throw new MllpClientClosedError();
       }
@@ -222,27 +222,41 @@ export class MllpClient extends MllpClientEmitter {
     }
 
     const done = this.#send(state.session, controlId, bytes, timeoutMs);
-    this.#state = { controlId, done, phase: "sending", session: state.session };
+    this.#state = { done, phase: "sending", session: state.session };
     return await done;
   }
 
   /**
    * Ends the connection once the message in flight is acknowledged, and
-   * resolves when it is down. New sends are refused from the moment this is
-   * called. An attempt to connect stops at once.
+   * resolves when it is down. New sends, and sends waiting their turn, are
+   * refused from the moment this is called. An attempt to connect stops at
+   * once.
    *
    * Resolves from any phase. Never rejects. Idempotent. The wait is bounded by
    * the in-flight send's own deadline; {@link destroy} does not wait at all.
    */
   async close(): Promise<void> {
     const from = this.#state;
-    if (from.phase === "sending") {
-      this.#state = {
-        done: from.done,
-        phase: "closing",
-        session: from.session,
-      };
-      await Promise.allSettled([from.done]);
+    switch (from.phase) {
+      case "sending": {
+        this.#state = {
+          done: from.done,
+          phase: "closing",
+          session: from.session,
+        };
+        await Promise.allSettled([from.done]);
+        break;
+      }
+      case "closing": {
+        await Promise.allSettled([from.done]);
+        break;
+      }
+      case "idle":
+      case "connecting":
+      case "connected":
+      case "closed": {
+        break;
+      }
     }
     await this.destroy();
   }

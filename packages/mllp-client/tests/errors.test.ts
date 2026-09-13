@@ -5,7 +5,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  MllpAlreadySendingError,
   MllpClientClosedError,
   MllpClientError,
   MllpConnectionError,
@@ -23,7 +22,6 @@ import {
 const every: readonly [MllpClientError, string, "not-sent" | "unknown"][] = [
   [new MllpInvalidOptionError("x"), "INVALID_OPTION", "not-sent"],
   [new MllpInvalidMessageError(new Error("x")), "INVALID_MESSAGE", "not-sent"],
-  [new MllpAlreadySendingError("MSG1"), "ALREADY_SENDING", "not-sent"],
   [new MllpClientClosedError(), "CLOSED", "not-sent"],
   [
     new MllpConnectionFailedError(new Error("x")),

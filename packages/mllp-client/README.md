@@ -4,7 +4,7 @@ A simple HL7v2 MLLP client for Node.js and Cloudflare Workers.
 
 - 📦 **MLLP built in.** Framing, message boundaries and acknowledgment matching are handled. You send a parsed message and get one back.
 - 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, connection attempts retried with backoff, TCP keepalive by default, and explicit states you can read.
-- ⚡ **Thin over TCP.** One socket, one message at a time. No queue, no worker threads, no polling.
+- ⚡ **Thin over TCP.** One socket, one message on the wire at a time. Further sends wait. No worker threads, no polling.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
 - 🧩 **Any transport.** TCP included. TLS, Cloudflare Workers or an in-memory socket plug in behind it.
 - 🔤 **Typed end to end.** TypeScript throughout, with parsed HL7v2 going in and coming out.
@@ -171,21 +171,19 @@ Sends one message and resolves with the acknowledgment that answers it. Connects
 - `AckException` — the receiver refused the message. The connection stays open.
 - `MllpInvalidMessageError` — no MSH-10, or the message could not be serialized. Nothing was sent.
 - `MllpInvalidOptionError` — `timeoutMs` is out of range. Nothing was sent.
-- `MllpAlreadySendingError` — another send is in flight.
-- `MllpClientClosedError` — the client is closed.
+- `MllpClientClosedError` — the client is closed, or closed while this send was waiting its turn.
 - `MllpConnectionFailedError`, `MllpConnectionTimeoutError` — the connection could not be opened.
 - `MllpSendTimeoutError`, `MllpConnectionLostError`, `MllpInvalidResponseError` — the exchange failed. These close the connection; see [Errors](#errors).
 
 Every error carries `delivery`, `not-sent` or `unknown`, the one fact a retry needs; see [Errors](#errors).
 
-One message at a time. To send several, await each in turn:
+One message is on the wire at a time. A `send()` arriving while another is in flight waits for it, so a batch may be fired at once and goes out in order:
 
 ```ts
-for (const message of batch) {
-  const ack = await client.send(message);
-  record(ack.controlId, ack.code);
-}
+const acks = await Promise.all(batch.map((message) => client.send(message)));
 ```
+
+Waiting sends go out one at a time. A send made while others are waiting, from the acknowledgment of an earlier one for instance, may go out before them. The line is in memory and has no bound. `timeoutMs` runs from the moment the message is written, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects with `MllpClientClosedError` and `delivery: "not-sent"`; nothing behind a failed message goes out. See [Does `send()` queue?](#does-send-queue).
 
 ### `client.connect()`
 
@@ -205,7 +203,7 @@ Idempotent. On a connected client it resolves at once; while an attempt is in fl
 close(): Promise<void>
 ```
 
-Closes the connection once the message in flight has been acknowledged. New sends are refused from the moment it is called, so an in-flight message is never cut off. An attempt to connect stops at once.
+Closes the connection once the message in flight has been acknowledged. New sends, and sends still waiting their turn, are refused from the moment it is called with `MllpClientClosedError`; the message in flight is never cut off. Await the sends you want delivered before calling it. An attempt to connect stops at once.
 
 Resolves when the connection is down, from any phase. Never throws. Idempotent. The wait is bounded by the in-flight send's own deadline.
 
@@ -243,14 +241,14 @@ Calls `close()`. Lets a client be scoped with `await using`:
 readonly state: MllpClientState
 ```
 
-| Value        | Meaning                                                                     |
-| ------------ | --------------------------------------------------------------------------- |
-| `idle`       | Nothing opened yet. The first `send()` or `connect()` opens the connection. |
-| `connecting` | The connection is being opened, further attempts included.                  |
-| `connected`  | Open, with no message in flight.                                            |
-| `sending`    | A message is on the wire, waiting for its acknowledgment.                   |
-| `closing`    | `close()` is waiting out the message in flight.                             |
-| `closed`     | Done.                                                                       |
+| Value        | Meaning                                                                       |
+| ------------ | ----------------------------------------------------------------------------- |
+| `idle`       | Nothing opened yet. The first `send()` or `connect()` opens the connection.   |
+| `connecting` | The connection is being opened, further attempts included.                    |
+| `connected`  | Open, with no message in flight.                                              |
+| `sending`    | A message is on the wire, waiting for its acknowledgment. Further sends wait. |
+| `closing`    | `close()` is waiting out the message in flight.                               |
+| `closed`     | Done.                                                                         |
 
 A client closes once. After `close()`, `destroy()`, a connection the reconnect policy could not open, or a connection that was lost, every call throws `MllpClientClosedError`; construct a new client to send again.
 
@@ -350,10 +348,10 @@ A rejection from the receiver is **not** an `MllpClientError` — see [`AckExcep
 
 `delivery` is the one fact a retry decision needs:
 
-| `delivery` | Meaning                                                                           | Codes                                                                                                       |
-| ---------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `not-sent` | Nothing reached the wire. The message may be sent again as it is.                 | `INVALID_OPTION`, `INVALID_MESSAGE`, `ALREADY_SENDING`, `CLOSED`, `CONNECTION_FAILED`, `CONNECTION_TIMEOUT` |
-| `unknown`  | The message may have reached the receiver. Sending it again may deliver it twice. | `SEND_TIMEOUT`, `CONNECTION_LOST`, `SEND_ABORTED`, `INVALID_RESPONSE`                                       |
+| `delivery` | Meaning                                                                           | Codes                                                                                    |
+| ---------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `not-sent` | Nothing reached the wire. The message may be sent again as it is.                 | `INVALID_OPTION`, `INVALID_MESSAGE`, `CLOSED`, `CONNECTION_FAILED`, `CONNECTION_TIMEOUT` |
+| `unknown`  | The message may have reached the receiver. Sending it again may deliver it twice. | `SEND_TIMEOUT`, `CONNECTION_LOST`, `SEND_ABORTED`, `INVALID_RESPONSE`                    |
 
 ```ts
 import { MllpClientError, MllpErrorCode } from "@glion/mllp-client";
@@ -393,21 +391,13 @@ The message cannot be sent as it stands: no MSH-10 control ID, or it could not b
 
 **Nothing reached the wire and the connection is still in step**, so the next message can go out on it. Fix or quarantine the message; do not reconnect.
 
-### `ALREADY_SENDING`
-
-`MllpAlreadySendingError` · delivery `not-sent` · field: `controlId`
-
-`send()` was called while another send was in flight. `controlId` identifies the message already on the wire.
-
-The client is lockstep by design. Await each send before starting the next, or give each concurrent stream its own client.
-
 ### `CLOSED`
 
 `MllpClientClosedError` · delivery `not-sent` · field: `cause`
 
-The client is closed, so the call cannot be served. Also the error a `connect()` gets when `close()` cancelled the attempt it was waiting for.
+The client is closed, so the call cannot be served. Also the error a `connect()` gets when `close()` cancelled the attempt it was waiting for, and the error a `send()` gets when the client closed while it was waiting its turn.
 
-A client closes once. Construct a new one to send again. When the client closed because the reconnect policy gave up, `cause` is the last attempt's failure.
+A client closes once. Construct a new one to send again. When the client closed on a failure, the reconnect policy giving up or the connection being lost under an earlier message, `cause` is that failure.
 
 ### `CONNECTION_FAILED`
 
@@ -488,6 +478,12 @@ Once a send times out, that no longer holds. A wrong guess here reports one mess
 Clients that pipeline can survive a timeout, because they keep a table of outstanding control IDs and a background reader to match against it. A lockstep client has no table to fall back on.
 
 The client closes with the failure, and never sends the failed message again — only you know whether the receiver already has it. Construct a new client to go on, as you would open a new socket.
+
+### Does `send()` queue?
+
+Yes, in memory and without a bound. A `send()` arriving while a message is on the wire waits for that message's acknowledgment, then goes out, one at a time. A batch fired at once goes out in order, so an A01 fired before its A03 reaches the receiver first; a send made while others are waiting may go ahead of them. Nothing goes out behind a message whose delivery is unknown: a failure closes the client, and every send still waiting rejects with `CLOSED` and `delivery: "not-sent"`.
+
+The line exists only in this process. A message waiting in it is not on disk, so a crash loses it without a trace, and a producer faster than the receiver grows it without limit. An interface that must not lose events keeps its own persistent outbound queue and hands the client one message at a time; the client's line is for a batch whose outcomes the caller is awaiting.
 
 ### Why a socket rather than a host and port?
 
