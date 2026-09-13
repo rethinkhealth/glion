@@ -170,11 +170,12 @@ export class MllpClient extends MllpClientEmitter {
    * before writing.
    *
    * Sends go out in the order `send()` was called. The queue has no bound.
-   * `timeoutMs` runs from the write, not from the call. A send still waiting
+   * `timeoutMs` runs from the moment the write starts, not from the call. A
+   * send still waiting
    * when the client closes rejects with {@link MllpClientClosedError}.
    *
    * Nothing is written when an option, phase, or message error is thrown.
-   * Every other failure also closes the client.
+   * Every wire failure also closes the client; a NAK does not.
    *
    * @throws {AckException} The remote system answered with a NAK. The
    *   connection stays open.

@@ -174,6 +174,7 @@ Sends one message and resolves with the acknowledgment that answers it. Connects
 - `MllpClientClosedError` — the client is closed, or closed while this send was waiting its turn.
 - `MllpConnectionFailedError`, `MllpConnectionTimeoutError` — the connection could not be opened.
 - `MllpSendTimeoutError`, `MllpConnectionLostError`, `MllpInvalidResponseError` — the exchange failed. These close the connection; see [Errors](#errors).
+- `MllpSendAbortedError` — `destroy()` cut the send off. Delivery is unknown.
 
 Every error carries `delivery`, `not-sent` or `unknown`, the one fact a retry needs; see [Errors](#errors).
 
@@ -183,7 +184,7 @@ One message is on the wire at a time. A `send()` arriving while another is in fl
 const acks = await Promise.all(batch.map((message) => client.send(message)));
 ```
 
-The queue is in memory and has no bound. `timeoutMs` runs from the moment the message is written, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects with `MllpClientClosedError` and `delivery: "not-sent"`; nothing behind a failed message goes out. See [Does `send()` queue?](#does-send-queue).
+The queue is in memory and has no bound. `timeoutMs` runs from the moment the write starts, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects with `MllpClientClosedError` and `delivery: "not-sent"`; nothing behind a failed message goes out. See [Does `send()` queue?](#does-send-queue).
 
 ### `client.connect()`
 
@@ -397,7 +398,7 @@ The message cannot be sent as it stands: no MSH-10 control ID, or it could not b
 
 The client is closed, so the call cannot be served. Also the error a `connect()` gets when `close()` cancelled the attempt it was waiting for, and the error a `send()` gets when the client closed while it was waiting its turn.
 
-A client closes once. Construct a new one to send again. When the client closed on a failure, the reconnect policy giving up or the connection being lost under an earlier message, `cause` is that failure.
+A client closes once. Construct a new one to send again. When the client closed on a failure, `cause` is that failure: the last attempt's `CONNECTION_FAILED` or `CONNECTION_TIMEOUT` when the reconnect policy gave up, or the `CONNECTION_LOST`, `SEND_TIMEOUT`, or `INVALID_RESPONSE` that ended an earlier message.
 
 ### `CONNECTION_FAILED`
 

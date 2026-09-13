@@ -1288,14 +1288,14 @@ describe("MllpClient — an application that overlaps sends", () => {
     const [first, second] = [adtA01(), adtA01()];
     remote.answers(async (message) => {
       if (controlIdOf(message) === first.controlId) {
-        await setTimeout(60);
+        await setTimeout(150);
       }
       return ack("AA", { controlId: controlIdOf(message) }).text;
     });
 
     // When the second is sent with a deadline shorter than its wait
     const inFlight = client.send(first.tree);
-    const waiting = client.send(second.tree, { timeoutMs: 20 });
+    const waiting = client.send(second.tree, { timeoutMs: 100 });
 
     // Then it is not timed out for the time it spent in line
     await expect(inFlight).resolves.toMatchObject({

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-09-12)
+Accepted (2026-09-13)
 
 Revises the part of ADR 0020's rejection that ruled out any queue in the client. ADR 0021 withdrew ADR 0020's mailbox actor; this decision adds a wait, not the actor.
 
@@ -18,7 +18,7 @@ The protocol allows it: lockstep with a queue in front of it is still lockstep. 
 
 2. **The queue has no bound.** The README says so, and says that an interface that must not lose events keeps its own persistent queue in front of the client. A bound, when wanted, is one check on the queue's length before pushing.
 
-3. **`timeoutMs` runs from the write.** Time spent waiting is not counted. A send at the back of a long queue can wait longer than its own timeout before it starts.
+3. **`timeoutMs` runs from the moment the write starts.** Time spent waiting is not counted. A send at the back of a long queue can wait longer than its own timeout before it starts.
 
 4. **A closed client refuses the sends still waiting.** `close()` moves to `closing` at once, so a waiter that wakes into it, or into `closed` after a failure or `destroy()`, rejects with `MllpClientClosedError` and `delivery: "not-sent"`, carrying the failure on `cause`. Nothing goes out behind a message whose delivery is unknown, and `close()` still never cuts off the message on the wire.
 
@@ -28,7 +28,7 @@ The protocol allows it: lockstep with a queue in front of it is still lockstep. 
 - Two producers on one client are served first-come first-served. A producer that awaits each send in turn takes its place behind whoever is waiting, so it cannot starve the other.
 - A failure under message _n_ rejects _n_ with `delivery: "unknown"` and every message behind it with `CLOSED`, `delivery: "not-sent"`: the application sees the whole tail, in order, and can persist or resend it.
 - An application that fires sends without awaiting them and then calls `close()` gets `CLOSED` for everything but the message on the wire. Awaiting the sends first is the documented shape.
-- Backpressure is no longer visible on the first overlap. A producer faster than the receiver grows the queue in memory. The client does not measure it; `client.state` reads `sending` throughout.
+- Backpressure is no longer visible on the first overlap. A producer faster than the receiver grows the queue in memory. The client does not measure it, and `client.state` does not show it: the phase is whatever the head is doing, `connecting` while it dials and `sending` while its message is on the wire.
 - The phase graph is unchanged: no queue phase. The queue is one array beside it. `close()` and `destroy()` do not touch it: a waiter that wakes into `closing` or `closed` rejects on its own.
 
 ## Alternatives considered
