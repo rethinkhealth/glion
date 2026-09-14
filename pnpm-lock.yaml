@@ -1768,6 +1768,12 @@ importers:
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
+      '@stryker-mutator/core':
+        specifier: 10.0.0
+        version: 10.0.0(@types/node@25.6.0)
+      '@stryker-mutator/vitest-runner':
+        specifier: 10.0.0
+        version: 10.0.0(@stryker-mutator/core@10.0.0(@types/node@25.6.0))(vitest@4.1.11)
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
@@ -7819,7 +7825,7 @@ snapshots:
 
   string-width@7.2.0:
     dependencies:
-      emoji-regex: 10.4.0
+      emoji-regex: 10.6.0
       get-east-asian-width: 1.4.0
       strip-ansi: 7.2.0
 
