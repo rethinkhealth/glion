@@ -140,6 +140,9 @@ export async function listen(options: ListenOptions = {}): Promise<Listener> {
     (socket) => {
       connections += 1;
       sockets.add(socket);
+      // Without this, Nagle on this side and delayed ACK on the client's turn
+      // a large echo into a stall per segment; MLLP servers disable it too.
+      socket.setNoDelay(true);
       socket.on("close", () => sockets.delete(socket));
       socket.on("end", () => closes.push("end"));
       socket.on("error", (error: NodeJS.ErrnoException) => {
