@@ -129,6 +129,8 @@ What a change must bring with it:
 5. **Lint rules through the shared harness** (once it lands in `@glion/testing`). A lint rule's README Valid and Invalid examples are its test cases, so the two cannot drift.
 6. **A changeset** for any change to a published package (`pnpm changeset`).
 
+Before review, `pnpm crap:changed` ranks the functions you touched by change risk, complexity weighted by missing coverage; a function above 30 wants a test or a split. CI posts the same ranking on the pull request. It is a worklist, not a gate.
+
 Where things live: `benchmarks/README.md` is the contract for performance work, `qa/README.md` describes the conformance, fuzz, and round-trip suites that run against the packages as a consumer would.
 
 <!-- omit in toc -->

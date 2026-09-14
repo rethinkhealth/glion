@@ -1,0 +1,106 @@
+name: Change risk (CRAP)
+
+# CRAP = CC² × (1 − coverage)³ + CC, per function. High when a function is
+# both complex and under-tested. Informational: it ranks where the next test
+# goes; mutation testing is the gate on whether tests are real.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    # Weekly full ranking, Monday 06:30 UTC.
+    - cron: "30 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read # checkout
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  crap:
+    name: ${{ github.event_name == 'pull_request' && 'Change risk (changed files)' || 'Change risk (all packages)' }}
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # checkout
+      checks: write # test-reporter publishes the per-function report as a check run
+      pull-requests: write # the ranked table is posted as one comment, edited on each push
+
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+          # The changed-files list diffs against the base branch.
+          fetch-depth: 0
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.x
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm ci:install
+      - name: Build
+        run: pnpm build
+      - name: Test with coverage
+        run: pnpm test:coverage
+      - name: Score changed files
+        if: github.event_name == 'pull_request'
+        # Exit 2 means a function is above the threshold; that is the
+        # information this job exists to surface, not a failure of the job.
+        continue-on-error: true
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          mkdir -p reports/crap
+          git diff --name-only "origin/$BASE_REF..." -- 'packages/*/src/**/*.ts' 'packages/*/src/**/*.tsx' > reports/crap/changed.txt
+          if [ -s reports/crap/changed.txt ]; then
+            xargs pnpm exec crap-typescript --threshold 30 --format text --output reports/crap/report.md --junit-report reports/crap/junit.xml < reports/crap/changed.txt
+          else
+            echo "No source files under packages/*/src changed." > reports/crap/report.md
+          fi
+      - name: Score all packages
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        run: |
+          mkdir -p reports/crap
+          pnpm exec crap-typescript --threshold 30 --format text --exclude 'packages/profiles/src/profiles/**' --output reports/crap/report.md --junit-report reports/crap/junit.xml packages
+      - name: Keep the table, drop the tool's preamble
+        if: always()
+        run: |
+          sed -n '/^|/,$p' reports/crap/report.md > reports/crap/table.md
+          if [ ! -s reports/crap/table.md ]; then
+            cp reports/crap/report.md reports/crap/table.md
+          fi
+          {
+            echo "## Change risk (CRAP)"
+            echo
+            cat reports/crap/table.md
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish per-function report
+        if: always() && hashFiles('reports/crap/junit.xml') != ''
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        with:
+          name: Change risk (CRAP) per function
+          path: reports/crap/junit.xml
+          reporter: java-junit
+          fail-on-error: false
+          fail-on-empty: false
+          list-tests: failed
+      - name: Comment on the pull request
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: crap
+          path: reports/crap/table.md
+          message: |
+            ## Change risk (CRAP) for the files this pull request touches
+
+            {{{content}}}
+
+            ---
+
+            <sub>CRAP = CC² × (1 − coverage)³ + CC per function, from <a href="https://github.com/fabian-barney/crap-typescript"><code>crap-typescript</code></a> over the coverage this run produced. A function scores high when it is both complex and under-tested; the classic threshold is 30. Rows marked <code>failed</code> are above it. This job never blocks a merge: it says where the next test belongs, and mutation testing says whether the tests there are real. Run it locally with <code>pnpm crap:changed</code>.</sub>

@@ -33,6 +33,8 @@
     "ci:update": "pnpm --recursive update",
     "ci:version": "pnpm changeset version",
     "clean": "rimraf packages/*/dist packages/*/node_modules packages/*/coverage packages/*/.turbo node_modules packages/*/tsconfig.tsbuildinfo",
+    "crap": "crap-typescript --threshold 30 --format text --exclude 'packages/profiles/src/profiles/**' packages",
+    "crap:changed": "git diff --name-only origin/main... -- 'packages/*/src/**/*.ts' 'packages/*/src/**/*.tsx' | xargs -r crap-typescript --threshold 30 --format text",
     "dev": "turbo run dev",
     "fix": "ultracite fix",
     "mutate": "turbo run mutate",
@@ -54,6 +56,7 @@
     "syncpack": "14.3.1"
   },
   "devDependencies": {
+    "@barney-media/crap-typescript": "^0.5.2",
     "@changesets/changelog-github": "1.0.1",
     "@changesets/cli": "3.0.2",
     "@glion/check-actions": "workspace:*",
