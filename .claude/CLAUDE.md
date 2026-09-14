@@ -288,6 +288,17 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 
 The contract for what a change must bring with it (tests, round-trip properties, regression-first bug fixes, mutation survivors, changesets) lives in the Testing section of `CONTRIBUTING.md`. It applies to agents and people alike; read it before opening a PR. The points below are the mechanics.
 
+### Before a change is done
+
+Run these in order after editing. Each is pass/fail; "looks done" is not done.
+
+1. `pnpm --filter <package> test` for every package you touched. A Stop hook (`.claude/hooks/stop-tests.sh`) runs the tests of every package with uncommitted changes and blocks the turn from ending while any fail, so a red suite is never left for the reviewer.
+2. `pnpm mutate:changed` if any touched package has a `stryker.config.mjs`. For each surviving mutant, first write one line naming the HL7v2 or MLLP contract it violates, then add a test whose name states that contract. If no contract is violated, add `// Stryker disable next-line <Mutator>: <reason>` and move on. Never lower a `break`. A test named after a mutant is rejected in review.
+3. `pnpm crap:changed` once #738 lands: a touched function above 30 gets a test or a split before the PR.
+4. In the PR description, report killed, equivalent, and open survivor counts for the packages you mutated.
+
+Steps 1 and 2 correspond to the "Mutation testing" comment CI posts on the PR; the reviewer compares your report against it.
+
 - **Vitest**, base config in `tools/testing/src/vitest.config.ts` (`@glion/testing`).
 - Test files: `**/*.test.ts`, `**/*.test.tsx`.
 - Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier.
