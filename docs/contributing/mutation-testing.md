@@ -56,7 +56,7 @@ open packages/parser/reports/mutation/mutation.html
 
 Every survivor gets one of two responses. Decide which before writing anything.
 
-**If the mutant changes observable behaviour**, write a test that fails on the mutant and passes on the original. Name it after the contract it protects, in HL7v2 or MLLP terms, never after the mutant:
+**If the mutant changes observable behavior**, write a test that fails on the mutant and passes on the original. Name it after the contract it protects, in HL7v2 or MLLP terms, never after the mutant:
 
 ```ts
 // yes
