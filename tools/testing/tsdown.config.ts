@@ -5,6 +5,7 @@ export default defineConfig({
   dts: false,
   entry: {
     index: "src/index.ts",
+    stryker: "src/stryker.ts",
   },
   fixedExtension: false,
   format: "esm",
