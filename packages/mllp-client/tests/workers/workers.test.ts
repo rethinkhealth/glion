@@ -157,9 +157,12 @@ describe("workersSocket", () => {
 
     const sending = client.send(adtA01().tree);
     expect(client.state).toBe("sending");
+    const aborted = expect(sending).rejects.toMatchObject({
+      code: "SEND_ABORTED",
+    });
     await client.destroy();
 
-    await expect(sending).rejects.toMatchObject({ code: "SEND_ABORTED" });
+    await aborted;
     expect(events).toEqual(ownerClosed);
   });
 
