@@ -1,6 +1,6 @@
 /**
- * The Node runtime adapter: the conformance suites over real loopback
- * sockets, plus what only Node's `net.Socket` lets a test observe.
+ * The Node runtime adapter: what only `net.Socket` lets a test observe. The
+ * conformance suites run over it in `tests/conformance/node.test.ts`.
  */
 
 import { setTimeout as sleep } from "node:timers/promises";
@@ -8,28 +8,15 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { describe, expect, it } from "vitest";
 
 import { MllpClient } from "../src/index";
-import { DEFAULT_GRACEFUL_CLOSE_MS, nodeSocket } from "../src/runtime/node";
-import { describeMllpClientScenarios } from "./conformance/client-scenarios";
-import { describeMllpSocketContract } from "./conformance/socket-contract";
+import { nodeSocket } from "../src/runtime/node";
 import { adtA01 } from "./fixtures";
-import { listen, peers, startPeer } from "./loopback";
+import { listen, peers } from "./loopback";
 
 /** Slack on top of the grace window for the destroy to be observed. */
 const CLOSE_SLACK_MS = 500;
 
 /** Time for the remote system to observe the client's close. */
 const SETTLE_MS = 50;
-
-describeMllpSocketContract("nodeSocket", {
-  closeBoundMs: DEFAULT_GRACEFUL_CLOSE_MS + CLOSE_SLACK_MS,
-  open: nodeSocket,
-  receiver: startPeer,
-});
-
-describeMllpClientScenarios("nodeSocket", {
-  open: nodeSocket,
-  receiver: startPeer,
-});
 
 describe("nodeSocket over net.Socket", () => {
   it("does not dial when the signal is already aborted", async () => {
