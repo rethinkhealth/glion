@@ -24,7 +24,7 @@ The protocol allows it: lockstep with a queue in front of it is still lockstep. 
 
 ## Consequences
 
-- `Promise.all(batch.map((m) => client.send(m)))` delivers the batch in order on one connection; the sequential loop is no longer required.
+- `Promise.allSettled(batch.map((m) => client.send(m)))` delivers the batch in order on one connection; the sequential loop is no longer required.
 - Two producers on one client are served first-come first-served. A producer that awaits each send in turn takes its place behind whoever is waiting, so it cannot starve the other.
 - A failure under message _n_ rejects _n_ with `delivery: "unknown"` and every message behind it with `CLOSED`, `delivery: "not-sent"`: the application sees the whole tail, in order, and can persist or resend it.
 - An application that fires sends without awaiting them and then calls `close()` gets `CLOSED` for everything but the message on the wire. Awaiting the sends first is the documented shape.

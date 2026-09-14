@@ -181,7 +181,9 @@ Every error carries `delivery`, `not-sent` or `unknown`, the one fact a retry ne
 One message is on the wire at a time. A `send()` arriving while another is in flight waits its turn, and sends go out in the order they were called, so a batch may be fired at once:
 
 ```ts
-const acks = await Promise.all(batch.map((message) => client.send(message)));
+const outcomes = await Promise.allSettled(
+  batch.map((message) => client.send(message))
+);
 ```
 
 The queue is in memory and has no bound. `timeoutMs` runs from the moment the write starts, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects at once with `MllpClientClosedError` and `delivery: "not-sent"`; nothing behind a failed message goes out. A send waiting behind a dial that fails rejects with the dial's error, `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, as `connect()` does. See [Does `send()` queue?](#does-send-queue).
