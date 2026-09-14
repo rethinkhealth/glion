@@ -1,16 +1,16 @@
 /**
  * The Node runtime adapter: what only `net.Socket` lets a test observe. The
- * conformance suites run over it in `tests/conformance/node.test.ts`.
+ * conformance suites run over it in `node.conformance.test.ts`.
  */
 
 import { setTimeout as sleep } from "node:timers/promises";
 
 import { describe, expect, it } from "vitest";
 
-import { MllpClient } from "../src/index";
-import { nodeSocket } from "../src/runtime/node";
-import { adtA01 } from "./fixtures";
-import { listen, peers } from "./loopback";
+import { MllpClient } from "../../src/index";
+import { nodeSocket } from "../../src/runtime/node";
+import { adtA01 } from "../fixtures";
+import { listen, peers } from "../loopback";
 
 /** Slack on top of the grace window for the destroy to be observed. */
 const CLOSE_SLACK_MS = 500;

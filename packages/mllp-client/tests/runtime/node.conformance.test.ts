@@ -4,9 +4,9 @@
  */
 
 import { DEFAULT_GRACEFUL_CLOSE_MS, nodeSocket } from "../../src/runtime/node";
+import { describeMllpClientScenarios } from "../conformance/client-scenarios";
+import { describeMllpSocketContract } from "../conformance/socket-contract";
 import { startPeer } from "../loopback";
-import { describeMllpClientScenarios } from "./client-scenarios";
-import { describeMllpSocketContract } from "./socket-contract";
 
 /** Slack on top of the grace window for the destroy to be observed. */
 const CLOSE_SLACK_MS = 500;
