@@ -6,7 +6,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       // Selected by `test:cf` through `vitest.workers.config.ts`.
-      exclude: ["node_modules", "dist", "tests/workers/**"],
+      exclude: ["node_modules", "dist", "tests/runtime/workers.test.ts"],
       name: "hl7v2-mllp-client",
     },
   })

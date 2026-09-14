@@ -2,7 +2,7 @@
  * The Cloudflare Workers runtime adapter, inside `workerd`: this file runs in
  * the Workers runtime through `@cloudflare/vitest-plugin`, so `workersSocket`
  * dials through the runtime's own `cloudflare:sockets`. The receivers are
- * Node listeners started by `global-setup.ts`.
+ * Node listeners started by `workers.setup.ts`.
  */
 
 import { AckApplicationError } from "@glion/ack";
@@ -25,7 +25,7 @@ const DEADLINE_SLACK_MS = 3000;
 
 const ownerClosed = ["connect", "close:null"];
 
-/** The receiver `peer` names, started by `global-setup.ts`. */
+/** The receiver `peer` names, started by `workers.setup.ts`. */
 const at = (peer: Peer): Address => ({
   host: "127.0.0.1",
   port: inject("receivers")[peer],
