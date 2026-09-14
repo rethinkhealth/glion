@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "Internal tool: verify every SHA-pinned GitHub Action in .github/workflows against the tags, commit date, and latest release of its repository.",
+  "license": "MIT",
   "bin": {
     "glion-check-actions": "./src/cli.mjs"
   },

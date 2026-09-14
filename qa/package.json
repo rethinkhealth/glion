@@ -3,6 +3,7 @@
   "version": "0.18.0",
   "private": true,
   "description": "Healthcare-grade QA verification for HL7v2 parser pipeline",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "check-types": "tsc --noEmit",
