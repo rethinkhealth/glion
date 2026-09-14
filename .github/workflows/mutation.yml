@@ -1,0 +1,73 @@
+name: Mutation testing
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    # Weekly full run, Monday 06:00 UTC.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read # checkout
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  mutation:
+    name: ${{ github.event_name == 'pull_request' && 'Mutation testing (changed packages)' || 'Mutation testing (all packages)' }}
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # checkout
+      pull-requests: write # the score table is posted as one comment, edited on each push
+
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+          # turbo's `[origin/main]` filter needs the base ref.
+          fetch-depth: 0
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.x
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm ci:install
+      - name: Build
+        run: pnpm build
+      - name: Mutate changed packages
+        if: github.event_name == 'pull_request'
+        run: pnpm mutate:changed
+      - name: Mutate all packages
+        if: github.event_name != 'pull_request'
+        run: pnpm mutate
+      - name: Upload reports
+        id: upload
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: stryker-reports
+          path: packages/*/reports/
+          if-no-files-found: ignore
+      - name: Summarize scores
+        if: always()
+        env:
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        # The report exits 1 below a break; the gate already failed on the
+        # Stryker step, so the table is still written.
+        run: |
+          pnpm --silent mutate:report --format markdown > mutation-report.md || true
+          cat mutation-report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Comment scores on the pull request
+        if: always() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr comment "$PR_NUMBER" --body-file mutation-report.md --edit-last --create-if-none

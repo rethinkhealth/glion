@@ -53,3 +53,7 @@ temp
 .claude/worktrees/
 .worktrees/
 .context/
+
+# Stryker mutation testing
+reports
+.stryker-tmp
