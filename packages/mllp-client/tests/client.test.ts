@@ -756,6 +756,32 @@ describe("MllpClient", () => {
       expect(reasons).toEqual([null]);
     });
 
+    it("records its reason when it cuts a message close() is waiting out", async () => {
+      // Given close() waiting out a message the remote system never answers
+      const { client, remote } = await connectedClient();
+      remote.answers(silence);
+      const reasons: unknown[] = [];
+      client.on("close", (reason) => reasons.push(reason));
+      const sending = client.send(adtA01().tree);
+      await remote.receives();
+      const closing = client.close();
+
+      // When the client is destroyed with a reason
+      const reason = new MllpConnectionLostError();
+      await client.destroy(reason);
+
+      // Then the client closed on that reason: nothing else was known
+      await expect(sending).rejects.toMatchObject({
+        code: MllpErrorCode.SEND_ABORTED,
+      });
+      await closing;
+      expect(reasons).toEqual([reason]);
+      await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+        cause: reason,
+        code: MllpErrorCode.CLOSED,
+      });
+    });
+
     it("gives the calls waiting on the dial its reason", async () => {
       // Given a dial in progress, a connect() and a send() waiting on it
       const remote = remoteSystem(slow(50));
@@ -1415,7 +1441,7 @@ describe("MllpClient — an application that overlaps sends", () => {
     // one waiting behind it
     const { client, remote } = await connectedClient();
     remote.answers(silence);
-    const inFlight = client.send(adtA01().tree, { timeoutMs: 500 });
+    const inFlight = client.send(adtA01().tree, { timeoutMs: 50 });
     const waiting = client.send(adtA01().tree);
     await remote.receives();
 
@@ -1441,7 +1467,7 @@ describe("MllpClient — an application that overlaps sends", () => {
     // close() waiting for it
     const { client, remote } = await connectedClient();
     remote.answers(silence);
-    const inFlight = client.send(adtA01().tree, { timeoutMs: 500 });
+    const inFlight = client.send(adtA01().tree, { timeoutMs: 50 });
     await remote.receives();
     const closing = client.close();
     expect(client.state).toBe("closing");

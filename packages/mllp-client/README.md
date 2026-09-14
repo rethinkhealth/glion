@@ -186,7 +186,7 @@ const outcomes = await Promise.allSettled(
 );
 ```
 
-The queue is in memory and has no bound. `timeoutMs` runs from the moment the write starts, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects at once with `MllpClientClosedError` and `delivery: "not-sent"`; nothing behind a failed message goes out. A send waiting behind a dial that fails rejects with the dial's error, `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, as `connect()` does. See [Does `send()` queue?](#does-send-queue).
+The queue is in memory and has no bound. `timeoutMs` runs from the moment the write starts, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects at once with `delivery: "not-sent"`: with `MllpClientClosedError`, or with the failure itself when the failure is one of not being sent, such as the dial's `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, as `connect()` gets. Nothing behind a failed message goes out. See [Does `send()` queue?](#does-send-queue).
 
 ### `client.connect()`
 
@@ -223,7 +223,7 @@ process.on("SIGTERM", async () => {
 destroy(reason?: MllpClientError | null): Promise<void>
 ```
 
-Closes the connection now, without waiting for anything in flight. A message in flight rejects with `MllpSendAbortedError`. An attempt to connect stops at once. The client closes with `reason`: the `close` event carries it, and so does `cause` on every later call's `MllpClientClosedError`. Omitted or `null`, the client closed by its owner's decision, as `net.Socket.destroy(error)` does. Sends waiting their turn are rejected with `reason` itself when its delivery is `not-sent`, and with `MllpClientClosedError` carrying `reason` otherwise. Arriving while the client is already closing, it cuts the message in flight and joins the ending under way; that ending's reason stands, and `reason` is not recorded.
+Closes the connection now, without waiting for anything in flight. A message in flight rejects with `MllpSendAbortedError`. An attempt to connect stops at once. The client closes with `reason`: the `close` event carries it, and so does `cause` on every later call's `MllpClientClosedError`. Omitted or `null`, the client closed by its owner's decision, as `net.Socket.destroy(error)` does. Sends waiting their turn are rejected with `reason` itself when its delivery is `not-sent`, and with `MllpClientClosedError` carrying `reason` otherwise. Arriving while the client is already closing, it cuts the message in flight and joins the ending under way; `reason` is recorded when no failure is known yet.
 
 Resolves when the connection is down, from any phase. Never throws. Idempotent.
 
@@ -311,12 +311,12 @@ nodeSocket(options: NodeSocketOptions): MllpSocket
 
 Plain TCP over `net.Socket`.
 
-| Option            | Type     | Default  | Description                                                                                                                                                                   |
-| ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `host`            | `string` | required | Host name or address of the receiver.                                                                                                                                         |
-| `port`            | `number` | required | TCP port of the receiver.                                                                                                                                                     |
-| `gracefulCloseMs` | `number` | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                                                                                                 |
-| `keepAliveIdleMs` | `number` | `30000`  | Idle time before the first keepalive probe, so after a silent NAT or firewall drop the next send fails at once with `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`. |
+| Option            | Type     | Default  | Description                                                                                                                                                                              |
+| ----------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `host`            | `string` | required | Host name or address of the receiver.                                                                                                                                                    |
+| `port`            | `number` | required | TCP port of the receiver.                                                                                                                                                                |
+| `gracefulCloseMs` | `number` | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                                                                                                            |
+| `keepAliveIdleMs` | `number` | `30000`  | Idle time before the first keepalive probe. Once the probes fail, the OS ends the socket, and the next send fails at once with `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`. |
 
 `TCP_NODELAY` is set, so a message goes out immediately rather than waiting on Nagle's algorithm.
 

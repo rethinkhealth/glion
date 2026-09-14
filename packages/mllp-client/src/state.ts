@@ -26,8 +26,6 @@ export type State =
   | {
       readonly phase: "sending";
       readonly session: MllpSession;
-      /** Settles when the send is over, however it ended. */
-      readonly done: Promise<unknown>;
     }
   | {
       readonly phase: "closing";

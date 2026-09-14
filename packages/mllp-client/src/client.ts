@@ -3,6 +3,7 @@ import { MllpCodecError } from "@glion/mllp-codec";
 
 import {
   assertByteCap,
+  assertPhase,
   assertReconnectAttempts,
   assertTimeoutMs,
 } from "./assertions";
@@ -15,6 +16,7 @@ import {
 import {
   MllpClientClosedError,
   MllpClientError,
+  MllpConnectionError,
   MllpInvalidResponseError,
   MllpSendAbortedError,
 } from "./errors";
@@ -24,7 +26,7 @@ import { createQueue } from "./queue";
 import { defaultReconnectDelay, sleep } from "./reconnect";
 import type { ReconnectPolicy } from "./reconnect";
 import { createSession } from "./session";
-import type { ConnectOptions, MllpSession } from "./session";
+import type { ConnectOptions } from "./session";
 import type { Open, State } from "./state";
 import type {
   MllpClientOptions,
@@ -165,7 +167,7 @@ export class MllpClient extends MllpClientEmitter {
     try {
       await opening;
     } catch (error) {
-      if (error instanceof MllpClientError) {
+      if (error instanceof MllpConnectionError) {
         await this.destroy(error);
       }
       throw error;
@@ -209,20 +211,10 @@ export class MllpClient extends MllpClientEmitter {
 
     const { bytes, controlId } = encode(message); // throws {MllpInvalidMessageError}
 
-    // Checked here so a send never waits its turn on a closing client, and
-    // again at the turn, since the phase can change during the wait.
+    // Refused before taking a place, and again by connect() at its turn.
     const at = this.#state;
-    switch (at.phase) {
-      case "closing":
-      case "closed": {
-        throw new MllpClientClosedError(at.reason);
-      }
-      case "idle":
-      case "connecting":
-      case "connected":
-      case "sending": {
-        break;
-      }
+    if (at.phase === "closing" || at.phase === "closed") {
+      throw new MllpClientClosedError(at.reason);
     }
 
     const turn = this.#queue.enter();
@@ -233,26 +225,7 @@ export class MllpClient extends MllpClientEmitter {
       if (!this.connected) {
         await this.connect();
       }
-      const state = this.#state;
-      switch (state.phase) {
-        case "closing":
-        case "closed": {
-          throw new MllpClientClosedError(state.reason);
-        }
-        case "idle":
-        case "connecting":
-        case "sending": {
-          throw new Error(
-            `send() found the client ${state.phase} at its turn. This is a bug in @glion/mllp-client; please report it.`
-          );
-        }
-        case "connected": {
-          break;
-        }
-      }
-      const done = this.#send(state.session, controlId, bytes, timeoutMs);
-      this.#state = { done, phase: "sending", session: state.session };
-      return await done;
+      return await this.#send(controlId, bytes, timeoutMs);
     } finally {
       this.#queue.leave(turn);
     }
@@ -310,7 +283,7 @@ export class MllpClient extends MllpClientEmitter {
    * turn are rejected with `reason` when its delivery is `not-sent`, and with
    * {@link MllpClientClosedError} carrying `reason` otherwise. Arriving while
    * the client is already closing, it cuts the message in flight and joins
-   * the ending under way; `reason` is not recorded.
+   * the ending under way; `reason` is recorded when no failure is known yet.
    */
   async destroy(reason: MllpClientError | null = null): Promise<void> {
     const from = this.#state;
@@ -319,6 +292,9 @@ export class MllpClient extends MllpClientEmitter {
         return;
       }
       case "closing": {
+        if (from.reason === null && reason !== null) {
+          this.#state = { ...from, reason };
+        }
         // A close() waiting out the message in flight: cut it.
         await from.session?.destroy();
         await from.closed;
@@ -405,32 +381,19 @@ export class MllpClient extends MllpClientEmitter {
   // ── The end ─────────────────────────────────────────────────────────
 
   /**
-   * Lets the message in flight, if any, settle, then ends what `from` holds:
-   * with the failure that ended the message on the wire, or with `null`.
+   * Lets the message in flight, if any, settle, then ends what `from` holds.
    */
   async #close(from: Open): Promise<void> {
-    if (from.phase !== "sending") {
-      await this.#destroy(from, null);
-      return;
+    if (from.phase === "sending") {
+      await this.#queue.drained();
     }
-    const [outcome] = await Promise.allSettled([from.done]);
-    const failure =
-      outcome.status === "rejected" &&
-      outcome.reason instanceof MllpClientError &&
-      outcome.reason.delivery === "unknown" &&
-      !(outcome.reason instanceof MllpSendAbortedError)
-        ? outcome.reason
-        : null;
-    const closing = this.#state;
-    if (failure !== null && closing.phase === "closing") {
-      this.#state = { ...closing, reason: failure };
-    }
-    await this.#destroy(from, failure);
+    await this.#destroy(from, null);
   }
 
   /**
    * Ends what `from` holds, the dial or the session, then moves to `closed`
-   * with `reason` and reports `close`. A dial is aborted with `reason`.
+   * with the reason `closing` holds by then and reports `close`. A dial is
+   * aborted with `reason`.
    *
    * MUST NOT touch `#state` before its first `await`: the caller moves to
    * `closing` after calling it.
@@ -446,72 +409,79 @@ export class MllpClient extends MllpClientEmitter {
       case "connected":
       case "sending": {
         await from.session.destroy();
+        break;
       }
     }
-    this.#state = { phase: "closed", reason };
-    this.emit("close", reason);
+    const ending = this.#state;
+    assertPhase(ending, "closing", "The teardown");
+    this.#state = { phase: "closed", reason: ending.reason };
+    this.emit("close", ending.reason);
   }
 
   // ── The exchange ────────────────────────────────────────────────────
 
   /**
-   * One message on the wire, and the acknowledgment it comes back with.
+   * The `sending` phase: the message on the wire and its acknowledgment,
+   * from `connected` and back to it.
    *
-   * Settles when the send is over, however it ended. A failure of unknown
-   * delivery closes the client; a NAK, or a message refused before the
-   * write, does not.
+   * A failure of unknown delivery closes the client with it. A NAK, or a
+   * message refused before the write, leaves the connection in step.
    */
   async #send(
-    session: MllpSession,
     controlId: string,
     bytes: Uint8Array,
     timeoutMs: number
   ): Promise<MllpClientResponse> {
+    const at = this.#state;
+    assertPhase(at, "connected", "send() at its turn");
+    const { session } = at;
+    this.#state = { phase: "sending", session };
     try {
       const reply = await session.exchange(bytes, timeoutMs);
-      return acknowledgment(reply, controlId);
+      return decode(reply, controlId);
     } catch (error) {
-      const reason =
-        error instanceof MllpCodecError
-          ? new MllpInvalidResponseError(error, controlId)
-          : error;
-      // The wire is at an unknown position: no later reply can be matched.
-      // During `closing`, the ending under way reports the failure.
-      const outOfStep =
-        reason instanceof MllpClientError && reason.delivery === "unknown";
-      if (outOfStep && this.#state.phase === "sending") {
-        await this.destroy(reason);
-      }
-      throw reason;
+      return await this.#sendFailed(error, controlId);
     } finally {
       if (this.#state.phase === "sending") {
         this.#state = { phase: "connected", session };
       }
     }
   }
-}
 
-/**
- * `reply` as the acknowledgment of the message `controlId`.
- *
- * @throws {AckException} The reply is a NAK.
- * @throws {MllpInvalidResponseError} The reply cannot be read, or answers
- *   another message.
- */
-function acknowledgment(
-  reply: Uint8Array,
-  controlId: string
-): MllpClientResponse {
-  const answer = decode(reply, controlId);
-  switch (answer.type) {
-    case "accept": {
-      return answer.response;
+  /**
+   * The send of `controlId` failed with `error`. Throws it as the client
+   * reports it: a reply the codec could not read is
+   * {@link MllpInvalidResponseError}. A failure of unknown delivery, other
+   * than a send cut off by `destroy()`, closes the client first.
+   *
+   * From `closing`, the ending under way is waiting for this send: started,
+   * not awaited.
+   */
+  async #sendFailed(error: unknown, controlId: string): Promise<never> {
+    // Bytes that are not MLLP are not an acknowledgment of this message.
+    const reason =
+      error instanceof MllpCodecError
+        ? new MllpInvalidResponseError(error, controlId)
+        : error;
+
+    // A NAK, or a message refused before the write: the wire is in step.
+    if (!(reason instanceof MllpClientError) || reason.delivery !== "unknown") {
+      throw reason;
     }
-    case "nak": {
-      throw answer.exception;
+
+    // Cut off by destroy(): that call's ending, not this send's failure.
+    if (reason instanceof MllpSendAbortedError) {
+      throw reason;
     }
-    case "invalid": {
-      throw answer.error;
+
+    // The wire is at an unknown position: the client closes with the failure.
+    // From `closing`, the ending under way is waiting for this send, so it is
+    // started, not awaited.
+    if (this.#state.phase === "sending") {
+      await this.destroy(reason);
+    } else {
+      void this.destroy(reason);
     }
+    throw reason;
   }
 }

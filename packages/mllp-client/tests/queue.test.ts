@@ -104,6 +104,34 @@ describe("createQueue", () => {
     expect(queue.pending).toBe(0);
   });
 
+  it("refuses to let a turn leave twice", () => {
+    const queue = createQueue();
+    const head = queue.enter();
+    queue.leave(head);
+
+    expect(() => queue.leave(head)).toThrow(/bug/);
+  });
+
+  it("reports drained once every turn has left", async () => {
+    const queue = createQueue();
+    await queue.drained();
+
+    const head = queue.enter();
+    const second = queue.enter();
+    let drained = false;
+    const draining = queue.drained().then(() => {
+      drained = true;
+    });
+
+    queue.leave(head);
+    await Promise.resolve();
+    expect(drained).toBe(false);
+
+    queue.leave(second);
+    await draining;
+    expect(drained).toBe(true);
+  });
+
   it("lets a place be taken again once everyone has left", () => {
     const queue = createQueue();
     const head = queue.enter();
