@@ -19,12 +19,13 @@ export function strykerConfig(
   options: StrykerConfigOptions
 ): PartialStrykerOptions {
   return {
+    htmlReporter: { fileName: "reports/mutation/index.html" },
     ignoreStatic: true,
     incremental: true,
     incrementalFile: "reports/stryker-incremental.json",
     jsonReporter: { fileName: "reports/stryker.json" },
     plugins: ["@stryker-mutator/vitest-runner"],
-    reporters: ["clear-text", "progress", "json"],
+    reporters: ["clear-text", "progress", "json", "html"],
     testRunner: "vitest",
     thresholds: { break: options.break, high: 85, low: 70 },
     vitest: { configFile: "vitest.config.ts" },
