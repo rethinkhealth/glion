@@ -245,30 +245,30 @@ export class MllpClient extends MllpClientEmitter {
   async close(): Promise<void> {
     const from = this.#state;
     switch (from.phase) {
-      case "closed": {
-        return;
-      }
       case "closing": {
         await from.closed;
         return;
       }
-      case "idle": {
-        this.#state = { phase: "closed", reason: null };
-        this.emit("close", null);
-        return;
-      }
-      case "connecting":
-      case "connected":
       case "sending": {
-        const closed = this.#close(from);
+        const closed = (async () => {
+          await this.#queue.drained();
+          await this.#destroy(from, null);
+        })();
         this.#state = {
           closed,
           phase: "closing",
           reason: null,
-          session: "session" in from ? from.session : null,
+          session: from.session,
         };
         this.#queue.rejectWaiting(new MllpClientClosedError());
         await closed;
+        return;
+      }
+      case "idle":
+      case "connecting":
+      case "connected":
+      case "closed": {
+        await this.destroy();
       }
     }
   }
@@ -379,16 +379,6 @@ export class MllpClient extends MllpClientEmitter {
   }
 
   // ── The end ─────────────────────────────────────────────────────────
-
-  /**
-   * Lets the message in flight, if any, settle, then ends what `from` holds.
-   */
-  async #close(from: Open): Promise<void> {
-    if (from.phase === "sending") {
-      await this.#queue.drained();
-    }
-    await this.#destroy(from, null);
-  }
 
   /**
    * Ends what `from` holds, the dial or the session, then moves to `closed`
