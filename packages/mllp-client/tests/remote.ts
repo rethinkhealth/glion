@@ -243,6 +243,19 @@ export function remoteSystem(opening: Opening = accepts) {
     },
     /** Hangs up: ends what it sends, so the client's next read sees the end. */
     hangsUp: () => connection().outbound.close(),
+    /**
+     * Acknowledges every message with `AA` from now on, except the one whose
+     * MSH-10 is `controlId`: hangs up instead of answering it.
+     */
+    hangsUpOn(controlId: string): void {
+      answer = async (message) => {
+        if (controlIdOf(message) === controlId) {
+          await connection().outbound.close();
+          return;
+        }
+        return ack("AA", { controlId: controlIdOf(message) }).text;
+      };
+    },
     /** How many times the client opened the socket. */
     get opened(): number {
       return opened;

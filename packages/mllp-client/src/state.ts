@@ -26,19 +26,24 @@ export type State =
   | {
       readonly phase: "sending";
       readonly session: MllpSession;
-      /** MSH-10 of the message waiting for its acknowledgment. */
-      readonly controlId: string;
-      /** Settles when the send is over, however it ended. */
-      readonly done: Promise<unknown>;
     }
   | {
       readonly phase: "closing";
-      readonly session: MllpSession;
-      /** The send `close()` is waiting out. */
-      readonly done: Promise<unknown>;
+      /** The failure the client is closing on, or `null` when the owner is. */
+      readonly reason: MllpClientError | null;
+      /** The session being ended, or `null` when it is the dial. */
+      readonly session: MllpSession | null;
+      /** Settles once the client is `closed`. */
+      readonly closed: Promise<unknown>;
     }
   | {
       readonly phase: "closed";
       /** The failure that closed the client, or `null` when the owner did. */
       readonly reason: MllpClientError | null;
     };
+
+/** The phases with something open: the dial, or the session. */
+export type Open = Extract<
+  State,
+  { phase: "connecting" | "connected" | "sending" }
+>;

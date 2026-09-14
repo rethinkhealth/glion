@@ -29,7 +29,6 @@ export type {
   MllpStreams,
 } from "./types";
 export {
-  MllpAlreadySendingError,
   MllpClientClosedError,
   MllpClientError,
   MllpConnectionError,
