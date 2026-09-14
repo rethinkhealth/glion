@@ -6,33 +6,35 @@ Accepted. Implemented in PR #764 for issue #737.
 
 ## Context
 
-### What coverage measures, and what it leaves out
+### What mutation testing is
 
-Coverage records which lines ran while the tests executed. It says nothing about what the tests asserted. A test can execute every line of a function, assert something unrelated, and count as full coverage. Coverage therefore answers "did this code run?" and leaves "would a test notice if this code were wrong?" unanswered.
+Mutation testing measures how good a test suite is at detecting faults. A tool makes one small change to the program, called a mutant: it flips a comparison operator, deletes a statement, replaces a constant, negates a condition. It then runs the tests against that mutant. If at least one test fails, the mutant is killed. If every test still passes, the mutant survives, and the suite has just been shown to be blind to that fault. The tool repeats this for every mutant it can generate and reports the mutation score: the share of mutants that were killed.
 
-Mutation testing answers the second question. It changes the code in small, plausible ways, such as flipping a comparison or deleting a branch, runs the tests against each change, and reports which changes went undetected. An undetected change is a place where the tests would not catch a bug.
+Some mutants cannot be killed because the change does not alter behavior; a `<` becomes `<=` on a value that is never equal, for instance. These are equivalent mutants. They are excluded from the score once identified, and identifying them takes judgement.
 
-### Why the gap matters more for agent-written tests
+The technique dates from the 1970s. It is the standard answer to the question every other test metric dodges: not whether the tests ran the code, but whether they would fail if the code were wrong. The reason it is trusted as a proxy: on datasets of real, historical faults, a suite's ability to kill mutants correlates significantly with its ability to detect those faults, and the correlation holds after controlling for coverage.
 
-Tests written by language models fail in two characteristic ways that coverage cannot see.
+### Why coverage is not enough
 
-The first is boundary blindness. A model tends to test a representative valid input and a representative invalid one, far from the edge. A mutant that moves a `<` to a `<=` changes behavior only at the edge, so those tests keep passing.
+Coverage records which lines ran during the tests. It does not record what the tests asserted. A test can execute every line of a function, check nothing about the result, and still count as full coverage. The patch-coverage gate from PR #749 therefore guarantees that new code runs under test. It cannot guarantee that a bug in that code would make a test fail.
 
-The second is asserting on expectation rather than behavior. A model writes the value it expects the code to return, not the value the code returns. When the two agree the test is fine. When they disagree the test encodes the model's assumption, and the wrong code and the wrong test pass together.
+### Why it matters for glion
 
-Mutation testing catches both. A boundary mutant survives when no test probes the edge. An expectation-anchored test lets many mutants survive because it never exercised the real behavior.
+glion is a parser, serializer, and wire codec for HL7v2, the messaging standard that carries admissions, lab results, and medication orders between hospital systems. Its failures are silent by nature. A parser that drops a field, a serializer that emits the wrong delimiter, or a codec that accepts a truncated frame produces a well-formed but wrong message, and no consumer sees an error. The QA plan of April 2026 names silent data corruption and diagnostic integrity as the two risks that shape the whole test strategy.
 
-### What the evidence says about the metric
+The existing layers address input: conformance corpora, fuzzing, and round-trip properties prove the pipeline handles the messages it will meet. None of them measures the tests themselves. The packages where a silent wrong branch does the most damage, the parser, the serializer, the codec, and the query and escape utilities, are exactly the ones full of small decisions, off-by-one bounds, and delimiter comparisons that a single flipped operator turns into corruption. Those are the faults mutation testing is built to expose.
 
-A replication study published in July 2026 examined whether coverage and mutation score predict how many real faults a test suite detects. The answer depends on the setting. When the code under test is assumed correct, and the tests exist to catch future regressions, both metrics track fault detection well. When the code under test is itself suspected of being wrong, neither metric is reliable.
+### The metric's limits
 
-Almost every glion pull request is a regression setting. The change is reviewed, merged, and expected to hold. So the metric is meaningful here, with one condition: the coverage number needs a strength signal behind it, or it can be satisfied by tests that assert nothing.
+Mutation score is meaningful when the code under test is trusted and the tests exist to keep it that way. It says little when the code is itself suspected of being wrong, because a suite that agrees with wrong code scores well. Almost every glion pull request is the first case: a reviewed change expected to hold. That is the setting where mutation score tracks real fault detection.
 
-### Where glion stood
+### Who writes the tests
 
-The patch-coverage gate from PR #749 requires new lines to run. Nothing required that the tests covering them could fail. That was the missing signal.
+Contributions to glion come from people and from coding agents, and the gate has to hold for both. Agent-written tests have two documented weaknesses that coverage cannot see: they tend to probe inputs far from boundaries, and they tend to assert the value the model expected rather than the value the code returns. Mutation testing catches both, because a boundary mutant survives when no test reaches the edge, and an expectation-anchored test lets mutants through wholesale. This is a reason to want the gate, not the reason for it.
 
-The roadmap in issue #747 places mutation testing first in its second phase because three later items consume its output: the agent verify loop (#739), the depth work on `mllp-client` (#740), and the semantic-mutant experiment (#745).
+### Sequencing
+
+The roadmap in issue #747 places mutation testing first in its second phase because later items consume its output: the depth work on `mllp-client` (#740) uses survivors as its worklist, the contributor verify loop (#739) runs it before review, and the semantic-mutant experiment (#745) builds on its reports.
 
 ## Decision
 
@@ -95,7 +97,7 @@ A test named after a mutant is rejected in review. This is the same rule the com
 
 Test strength becomes a number per package with a floor that only rises.
 
-Agents get an adversarial sensor they can act on alone. A survivor is a concrete, reproducible statement that the tests would not catch a particular bug, and the fix is a test, not a judgement call.
+Every contributor, human or agent, gets a concrete, reproducible statement of which bugs the tests would not catch, and can act on it before review.
 
 The survivors are a ranked worklist. Across the six packages the first run left 196 mutants surviving and 66 with no covering test. That replaces guesswork about where the next test belongs.
 
@@ -127,6 +129,7 @@ The mutation score is a regression guard, not a proof of correctness. In a packa
 
 - Issue #737, epic #747, PR #764
 - `docs/contributing/mutation-testing.md`: how to run it and triage survivors
+- Just, Jalali, Inozemtseva, Ernst, Holmes, Fraser, "Are Mutants a Valid Substitute for Real Faults in Software Testing?", FSE 2014: https://homes.cs.washington.edu/~mernst/pubs/mutation-effectiveness-fse2014.pdf
 - Replication study on coverage and mutation score for LLM-generated tests: https://arxiv.org/abs/2607.22880
 - Stryker incremental mode: https://stryker-mutator.io/docs/stryker-js/incremental/
 - Stryker disable comments: https://stryker-mutator.io/docs/stryker-js/disable-mutants/
