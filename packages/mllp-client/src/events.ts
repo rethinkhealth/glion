@@ -10,8 +10,8 @@ export interface MllpClientEvents {
   /** The connection is open and ready for messages. */
   connect(): void;
   /**
-   * The client is done and will not connect again. `error` is the failure the
-   * reconnect policy did not recover from, or `null` when it closes normally.
+   * The connection is down and the client will not connect again. `error` is
+   * the failure that closed it, or `null` when the owner did.
    */
   close(error: MllpClientError | null): void;
 }
