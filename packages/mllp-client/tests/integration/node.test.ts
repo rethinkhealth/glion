@@ -19,13 +19,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_CONNECT_TIMEOUT_MS,
   DEFAULT_MAX_BUFFERED_BYTES,
-} from "../src/constants";
-import { MllpClient, MllpErrorCode } from "../src/index";
-import { nodeSocket } from "../src/runtime/node";
-import type { MllpSession } from "../src/session";
-import { createSession } from "../src/session";
-import type { MllpSocket } from "../src/types";
-import { ack, adtA01, controlIdOf } from "./fixtures";
+} from "../../src/constants";
+import { MllpClient, MllpErrorCode } from "../../src/index";
+import { nodeSocket } from "../../src/runtime/node";
+import type { MllpSession } from "../../src/session";
+import { createSession } from "../../src/session";
+import type { MllpSocket } from "../../src/types";
+import { ack, adtA01, controlIdOf } from "../fixtures";
 
 /** Long enough that only the remote system can settle an exchange. */
 const NO_DEADLINE = 60_000;
