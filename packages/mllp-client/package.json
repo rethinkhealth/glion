@@ -29,7 +29,8 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./node": "./dist/runtime/node.js"
+    "./node": "./dist/runtime/node.js",
+    "./workers": "./dist/runtime/workers.js"
   },
   "publishConfig": {
     "access": "public"
