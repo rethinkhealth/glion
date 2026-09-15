@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config";
 
 /**
  * `test:cf`: the Workers adapter tests, run inside `workerd`. The receivers
- * they dial are Node listeners started by `tests/runtime/workers.setup.ts`.
+ * they dial are started in Node by `tests/integration/setup.ts`.
  */
 export default defineConfig({
   plugins: [
@@ -15,8 +15,8 @@ export default defineConfig({
     }),
   ],
   test: {
-    globalSetup: ["./tests/runtime/workers.setup.ts"],
-    include: ["tests/runtime/workers.test.ts"],
+    globalSetup: ["./tests/integration/setup.ts"],
+    include: ["tests/integration/workers.test.ts"],
     name: "workerd",
   },
 });

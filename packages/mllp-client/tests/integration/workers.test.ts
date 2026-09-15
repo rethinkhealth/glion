@@ -1,8 +1,8 @@
 /**
  * The Cloudflare Workers runtime adapter, inside `workerd`: this file runs in
  * the Workers runtime through `@cloudflare/vitest-plugin`, so `workersSocket`
- * dials through the runtime's own `cloudflare:sockets`. The receivers are
- * Node listeners started by `workers.setup.ts`.
+ * dials through the runtime's own `cloudflare:sockets`. The remote systems
+ * are started in Node by `setup.ts` and reached through `inject()`.
  */
 
 import { AckApplicationError } from "@glion/ack";
@@ -12,7 +12,7 @@ import { MllpClient } from "../../src/index";
 import type { MllpClientOptions } from "../../src/index";
 import { workersSocket } from "../../src/runtime/workers";
 import { adtA01 } from "../fixtures";
-import type { Address, Peer } from "../loopback";
+import type { Address } from "./remote-tcp";
 
 /** TEST-NET-1 (RFC 5737): never routed, so a SYN there is never answered. */
 const BLACKHOLE: Address = { host: "192.0.2.1", port: 65_535 };
@@ -25,11 +25,7 @@ const DEADLINE_SLACK_MS = 3000;
 
 const ownerClosed = ["connect", "close:null"];
 
-/** The receiver `peer` names, started by `workers.setup.ts`. */
-const at = (peer: Peer): Address => ({
-  host: "127.0.0.1",
-  port: inject("receivers")[peer],
-});
+const remotes = () => inject("remotes");
 
 /** A client that dials `address` once, with its events recorded. */
 function connectTo(address: Address, options: Partial<MllpClientOptions> = {}) {
@@ -47,7 +43,7 @@ function connectTo(address: Address, options: Partial<MllpClientOptions> = {}) {
 
 describe("workersSocket", () => {
   it("sends three messages on one connection", async () => {
-    const { client, events } = connectTo(at("acknowledges"));
+    const { client, events } = connectTo(remotes().acknowledging);
 
     for (let i = 0; i < 3; i += 1) {
       const { controlId, tree } = adtA01();
@@ -64,7 +60,7 @@ describe("workersSocket", () => {
   });
 
   it("reads an acknowledgment split across two chunks", async () => {
-    const { client } = connectTo(at("splitsAcknowledgment"));
+    const { client } = connectTo(remotes().splitting);
 
     await expect(client.send(adtA01().tree)).resolves.toMatchObject({
       code: "AA",
@@ -73,7 +69,7 @@ describe("workersSocket", () => {
   });
 
   it("rejects SEND_TIMEOUT and closes when the receiver stays silent", async () => {
-    const { client, events } = connectTo(at("silent"), {
+    const { client, events } = connectTo(remotes().silent, {
       sendTimeoutMs: SHORT_TIMEOUT_MS,
     });
 
@@ -87,7 +83,7 @@ describe("workersSocket", () => {
   });
 
   it("rejects CONNECTION_LOST when the receiver drops after reading", async () => {
-    const { client, events } = connectTo(at("dropsAfterRead"));
+    const { client, events } = connectTo(remotes().dropping);
 
     await expect(client.send(adtA01().tree)).rejects.toMatchObject({
       code: "CONNECTION_LOST",
@@ -98,7 +94,7 @@ describe("workersSocket", () => {
   });
 
   it("reads the acknowledgment a one-shot receiver sends with its FIN", async () => {
-    const { client, events } = connectTo(at("acknowledgesThenEnds"));
+    const { client, events } = connectTo(remotes().acknowledgingThenEnding);
 
     await expect(client.send(adtA01().tree)).resolves.toMatchObject({
       code: "AA",
@@ -111,7 +107,7 @@ describe("workersSocket", () => {
   });
 
   it("rejects CONNECTION_FAILED when nothing is listening", async () => {
-    const { client, events } = connectTo(at("refused"));
+    const { client, events } = connectTo(remotes().refused);
 
     await expect(client.send(adtA01().tree)).rejects.toMatchObject({
       code: "CONNECTION_FAILED",
@@ -137,7 +133,7 @@ describe("workersSocket", () => {
   });
 
   it("rejects with the NAK and keeps the connection", async () => {
-    const { client, events } = connectTo(at("rejectsFirst"));
+    const { client, events } = connectTo(remotes().rejectingFirst);
 
     await expect(client.send(adtA01().tree)).rejects.toBeInstanceOf(
       AckApplicationError
@@ -152,7 +148,7 @@ describe("workersSocket", () => {
   });
 
   it("rejects SEND_ABORTED for the send destroy() interrupts", async () => {
-    const { client, events } = connectTo(at("silent"));
+    const { client, events } = connectTo(remotes().silent);
     await client.connect();
 
     const sending = client.send(adtA01().tree);
@@ -167,7 +163,7 @@ describe("workersSocket", () => {
   });
 
   it("dials again under the reconnect policy, then gives up", async () => {
-    const { client, events } = connectTo(at("refused"), {
+    const { client, events } = connectTo(remotes().refused, {
       reconnect: { attempts: 1, delay: () => 0 },
     });
 
@@ -179,7 +175,7 @@ describe("workersSocket", () => {
   });
 
   it("close() is bounded when the receiver never answers the FIN", async () => {
-    const { client, events } = connectTo(at("holdsOpen"));
+    const { client, events } = connectTo(remotes().holdingOpen);
     await client.connect();
 
     const started = performance.now();
