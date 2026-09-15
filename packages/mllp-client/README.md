@@ -305,7 +305,7 @@ The client speaks MLLP over a pair of byte streams and knows nothing else about 
 | Bun          | [`nodeSocket`](#nodejs) | `@glion/mllp-client/node` | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Bun 1.4        |
 | Deno         | [`nodeSocket`](#nodejs) | `@glion/mllp-client/node` | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Deno 2.9       |
 
-Every adapter runs the same conformance suite: the [`MllpSocket` contract](#custom-socket) case by case, and the client's behaviour over a real socket scenario by scenario. A custom socket can run it too; see `tests/conformance/` in the package source.
+Every adapter runs the same conformance suite: the [`MllpSocket` contract](#custom-socket) case by case, and the client's behaviour over a real socket scenario by scenario. A custom socket can run it too; see `tests/integration/conformance/` in the package source.
 
 ### Node.js
 

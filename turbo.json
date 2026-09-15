@@ -46,6 +46,9 @@
     "mutate": {
       "dependsOn": ["^build"],
       "cache": false
+    },
+    "test:integration": {
+      "dependsOn": ["^build"]
     }
   }
 }

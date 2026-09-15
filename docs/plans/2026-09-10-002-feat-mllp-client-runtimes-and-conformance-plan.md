@@ -221,6 +221,25 @@ Steps 2 and 3 are independent of each other.
 
 - **Cases are tests, not data (2026-09-13).** The first cut returned outcome records from each case so a harness Worker could ship them over HTTP, and a second table asserted on them. With Workers tests running inside `workerd` that layer had one caller and no reason to exist; the suites are now plain `describe` factories over `it` and `expect`, and the numbered ids above are the design's index, not the tests' names. One loopback fixture, `tests/loopback.ts`, serves every runtime; the three observations only the receiver can make (no dial on a pre-aborted signal, FIN not RST, a fresh connection after close) live in `tests/node.test.ts`.
 
+## 7. Test layers
+
+Three layers, each with one home, one script, and one reason to exist. A test moves down a layer only when what it checks cannot be observed at the layer above.
+
+| Layer       | What it proves                                                                   | Transport                                               | Where                                                    | Script                                                 | Runs                                                    |
+| ----------- | -------------------------------------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------- |
+| Unit        | The client's behaviour: phases, queue, reconnect, errors, acknowledgment reading | In-memory socket (`tests/remote.ts`)                    | `packages/mllp-client/tests/*.test.ts`                   | `test`, with coverage                                  | Every push, Node 22 and 24                              |
+| Integration | An adapter honours the `MllpSocket` contract, and the client behaves over it     | Real loopback TCP, remote systems started by `setup.ts` | `packages/mllp-client/tests/integration/`                | `test:integration`; `test:bun`, `test:deno`, `test:cf` | Every push, one job per runtime                         |
+| End-to-end  | The shipped packages interoperate, as a consumer runs them                       | Real TCP between real programs                          | `qa/tests/*.e2e.test.ts` and `packages/glion/tests/e2e/` | `test:e2e`                                             | Every push for in-repo peers; nightly for external ones |
+
+The integration layer is the conformance suite of §2. Its receivers are started once per run by a vitest `globalSetup` and reach every test project, in every runtime, through `provide`/`inject`; that is Cloudflare's own documented pattern for a Vitest-managed TCP server, and it is the only pattern that works for tests running inside `workerd`, which cannot listen. Receivers are stateless per connection so that parallel test files can share them. A test that needs to observe the far end, such as FIN versus RST, owns its receiver instead.
+
+The end-to-end layer does not exist yet. Planned, in order:
+
+1. **Client against `@glion/mllp`**, both real, over TCP, in `qa/`: an `AA` round trip, a NAK from a handler and its `AckException`, the ERR segment round trip from ADR 0019, a 100-message batch in call order under the send queue, and a receiver restart absorbed by the reconnect policy. This is the interop step from §3 and the first thing that would catch a client and server disagreeing about the wire.
+2. **The CLI**: `packages/glion/tests/e2e/send.e2e.test.ts` already drives the built `glion send` binary against a real server, on Node and Bun. It stays where it is and gains the NAK and TLS cases as they land.
+3. **Cross-runtime end-to-end**: the Workers client against the Node server, inside `workerd`, once the integration suite runs there.
+4. **A third-party engine**, such as the HAPI test panel or Mirth in a container, on a nightly schedule and on demand, never on every push. This is the only layer that can show the client talking to something not written here.
+
 ## Related
 
 - `docs/plans/2026-09-03-001-feat-mllp-client-production-readiness-plan.md` (T0-4 TLS), ADR 0019. ADR 0020 §5 and `docs/mllp-client-architecture.md` §7 first specified the conformance suite; both are withdrawn by ADR 0021 on the #714 branch.

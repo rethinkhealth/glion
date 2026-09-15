@@ -1,17 +1,17 @@
 /**
- * `MllpClient` over a real socket, as a vitest suite an adapter
- * instantiates. Runtime-neutral, the same way as the socket contract.
+ * `MllpClient` over a real socket, as a vitest suite an adapter instantiates.
+ * Runtime-neutral, the same way as the socket contract.
  *
  * @module
  */
 
 import { AckApplicationError } from "@glion/ack";
-import { describe, expect, it } from "vitest";
+import { describe, expect, inject, it } from "vitest";
 
-import { MllpClient } from "../../src/index";
-import type { MllpClientOptions, MllpSocket } from "../../src/index";
-import { adtA01 } from "../fixtures";
-import type { Address, Peer } from "../loopback";
+import { MllpClient } from "../../../src/index";
+import type { MllpClientOptions, MllpSocket } from "../../../src/index";
+import { adtA01 } from "../../fixtures";
+import type { Address } from "../remote-tcp";
 import { BLACKHOLE } from "./socket-contract";
 
 const SHORT_TIMEOUT_MS = 300;
@@ -19,23 +19,15 @@ const SHORT_TIMEOUT_MS = 300;
 /** Generous bound for a 300 ms deadline to be honoured. */
 const DEADLINE_SLACK_MS = 3000;
 
-export interface ClientScenarioOptions {
-  /** A socket to `address`. */
-  readonly open: (address: Address) => MllpSocket;
-  /** A receiver behaving as `peer`, released when the test ends. */
-  readonly receiver: (peer: Peer) => Promise<Address & AsyncDisposable>;
-}
-
 const ownerClosed = ["connect", "close:null"];
 
-/**
- * Registers the scenarios for the adapter `name`, each against its own
- * receiver.
- */
+/** Registers the scenarios for the adapter `name`. */
 export function describeMllpClientScenarios(
   name: string,
-  { open, receiver }: ClientScenarioOptions
+  open: (address: Address) => MllpSocket
 ): void {
+  const remotes = () => inject("remotes");
+
   /** A client that dials `address` once, with its events recorded. */
   function connectTo(
     address: Address,
@@ -55,8 +47,7 @@ export function describeMllpClientScenarios(
 
   describe(`${name}: MllpClient over a real socket`, () => {
     it("sends three messages on one connection", async () => {
-      await using peer = await receiver("acknowledges");
-      const { client, events } = connectTo(peer);
+      const { client, events } = connectTo(remotes().acknowledging);
 
       for (let i = 0; i < 3; i += 1) {
         const { controlId, tree } = adtA01();
@@ -73,8 +64,7 @@ export function describeMllpClientScenarios(
     });
 
     it("reads an acknowledgment split across two chunks", async () => {
-      await using peer = await receiver("splitsAcknowledgment");
-      const { client } = connectTo(peer);
+      const { client } = connectTo(remotes().splitting);
 
       await expect(client.send(adtA01().tree)).resolves.toMatchObject({
         code: "AA",
@@ -83,8 +73,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects SEND_TIMEOUT and closes when the receiver stays silent", async () => {
-      await using peer = await receiver("silent");
-      const { client, events } = connectTo(peer, {
+      const { client, events } = connectTo(remotes().silent, {
         sendTimeoutMs: SHORT_TIMEOUT_MS,
       });
 
@@ -98,8 +87,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects CONNECTION_LOST and closes when the receiver drops after reading", async () => {
-      await using peer = await receiver("dropsAfterRead");
-      const { client, events } = connectTo(peer);
+      const { client, events } = connectTo(remotes().dropping);
 
       await expect(client.send(adtA01().tree)).rejects.toMatchObject({
         code: "CONNECTION_LOST",
@@ -110,8 +98,7 @@ export function describeMllpClientScenarios(
     });
 
     it("reads the acknowledgment a one-shot receiver sends with its FIN, then loses the connection", async () => {
-      await using peer = await receiver("acknowledgesThenEnds");
-      const { client, events } = connectTo(peer);
+      const { client, events } = connectTo(remotes().acknowledgingThenEnding);
 
       await expect(client.send(adtA01().tree)).resolves.toMatchObject({
         code: "AA",
@@ -124,8 +111,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects CONNECTION_FAILED when nothing is listening", async () => {
-      await using peer = await receiver("refused");
-      const { client, events } = connectTo(peer);
+      const { client, events } = connectTo(remotes().refused);
 
       await expect(client.send(adtA01().tree)).rejects.toMatchObject({
         code: "CONNECTION_FAILED",
@@ -151,8 +137,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects with the NAK and keeps the connection", async () => {
-      await using peer = await receiver("rejectsFirst");
-      const { client, events } = connectTo(peer);
+      const { client, events } = connectTo(remotes().rejectingFirst);
 
       await expect(client.send(adtA01().tree)).rejects.toBeInstanceOf(
         AckApplicationError
@@ -167,8 +152,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects SEND_ABORTED for the send destroy() interrupts", async () => {
-      await using peer = await receiver("silent");
-      const { client, events } = connectTo(peer);
+      const { client, events } = connectTo(remotes().silent);
       await client.connect();
 
       const sending = client.send(adtA01().tree);
@@ -183,8 +167,7 @@ export function describeMllpClientScenarios(
     });
 
     it("closes from connected with no error", async () => {
-      await using peer = await receiver("acknowledges");
-      const { client, events } = connectTo(peer);
+      const { client, events } = connectTo(remotes().acknowledging);
       await client.connect();
 
       await client.close();
@@ -194,8 +177,7 @@ export function describeMllpClientScenarios(
     });
 
     it("dials again under the reconnect policy, then gives up", async () => {
-      await using peer = await receiver("refused");
-      const { client, events } = connectTo(peer, {
+      const { client, events } = connectTo(remotes().refused, {
         reconnect: { attempts: 1, delay: () => 0 },
       });
 

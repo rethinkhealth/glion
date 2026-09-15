@@ -48,6 +48,7 @@
     "test:cf": "turbo run test:cf",
     "test:coverage": "turbo run test -- --coverage",
     "test:deno": "turbo run test:deno",
+    "test:integration": "turbo run test:integration",
     "test:watch": "turbo run test -- --watch"
   },
   "dependencies": {

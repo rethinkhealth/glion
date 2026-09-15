@@ -41,9 +41,10 @@
     "mutate": "stryker run",
     "publint": "publint --strict",
     "test": "vitest run",
-    "test:bun": "bun --bun ./node_modules/vitest/vitest.mjs run",
+    "test:bun": "bun --bun ./node_modules/vitest/vitest.mjs run --config vitest.integration.config.ts",
     "test:coverage": "vitest run --coverage",
-    "test:deno": "deno run -A ./node_modules/vitest/vitest.mjs run",
+    "test:deno": "deno run -A ./node_modules/vitest/vitest.mjs run --config vitest.integration.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:watch": "vitest"
   },
   "dependencies": {

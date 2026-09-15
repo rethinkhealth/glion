@@ -45,6 +45,8 @@ jobs:
         run: pnpm build
       - name: Testing
         run: pnpm test:coverage
+      - name: Integration testing
+        run: pnpm test:integration
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
