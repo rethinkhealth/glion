@@ -70,16 +70,7 @@ async function startAckServer(ackText: string): Promise<RunningServer> {
   return { close: () => closeServer(server), port };
 }
 
-// `glion send` exercises the MLLP *client* (@glion/mllp-client's connectNode +
-// Duplex.toWeb), which supports Node and Cloudflare Workers — not Bun. Under the
-// `bun --bun` CI job, process.execPath is the bun binary, so the spawned
-// `dist/index.js send` runs the client under Bun and times out. (The sibling
-// glion-start e2e passes under Bun because it exercises the server, not the
-// client.) Skip here; Node e2e + the fake-connector integration tests cover the
-// send path on supported runtimes.
-const isBun = Boolean(process.versions.bun);
-
-describe.skipIf(isBun)("glion send e2e", () => {
+describe("glion send e2e", () => {
   let server: RunningServer | undefined;
 
   afterEach(async () => {
