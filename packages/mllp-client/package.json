@@ -42,6 +42,7 @@
     "mutate": "stryker run",
     "publint": "publint --strict",
     "test": "vitest run",
+    "test:cf": "vitest run --config vitest.workers.config.ts",
     "test:coverage": "vitest run --coverage",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:watch": "vitest"
@@ -56,6 +57,7 @@
     "@glion/util-query": "workspace:*"
   },
   "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.1.8",
     "@cloudflare/workers-types": "5.20260915.1",
     "@glion/check-readme": "workspace:*",
     "@glion/testing": "workspace:*",
