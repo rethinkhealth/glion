@@ -1,7 +1,7 @@
 import { defineConfig } from "vitest/config";
 
 /**
- * Integration tests: the runtime adapters over real loopback sockets, against
+ * Integration tests: the runtime adapters over real sockets, against
  * the remote systems `tests/integration/setup.ts` starts. Not merged with the
  * base config: merging concatenates `include`, which would add the unit tests.
  */

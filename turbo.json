@@ -26,13 +26,7 @@
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
-    "test:bun": {
-      "dependsOn": ["^build"]
-    },
     "test:cf": {
-      "dependsOn": ["^build"]
-    },
-    "test:deno": {
       "dependsOn": ["^build"]
     },
     "check:readme": {
@@ -46,9 +40,6 @@
     "mutate": {
       "dependsOn": ["^build"],
       "cache": false
-    },
-    "test:integration": {
-      "dependsOn": ["^build"]
     }
   }
 }

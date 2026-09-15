@@ -1,5 +1,5 @@
 /**
- * A remote system over loopback TCP: reads the frames a client writes and
+ * A remote system over TCP: reads the frames a client writes and
  * answers each one through an `Answer`. Node only.
  *
  * @module
@@ -68,7 +68,7 @@ export function rejectingFirst(): Answer {
   };
 }
 
-/** Starts a remote system on a loopback port the OS picks. */
+/** Starts a remote system on 127.0.0.1, on a port the OS picks. */
 export async function listen(options: ListenOptions = {}): Promise<Remote> {
   const answer = options.answer ?? acknowledging("AA");
   const sockets = new Set<Socket>();

@@ -1,5 +1,5 @@
 /**
- * The Node runtime adapter over real loopback sockets: the conformance
+ * The Node runtime adapter over real sockets: the conformance
  * suites, plus what only `net.Socket` lets a test observe at the far end.
  */
 
