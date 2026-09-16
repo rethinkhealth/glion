@@ -52,12 +52,14 @@ export function workersSocket(opts: WorkersSocketOptions): MllpSocket {
       } catch (error) {
         // Two ways here: the dial failed (`opened` rejected), or the caller
         // cancelled. A failed dial is reported as it is. A cancelled one is
-        // reported as the cancellation, and the socket is discarded without
-        // waiting, since its close settles only once the dial does.
+        // reported as the cancellation; its socket is closed without waiting,
+        // since workerd settles that close only once the dial does, and then
+        // with the dial's own failure, which nobody is left to act on.
         if (!signal.aborted) {
           throw error;
         }
-        void discard(socket);
+        // oxlint-disable-next-line promise/prefer-await-to-then -- awaiting would wait out the dial
+        socket.close().catch(() => {});
         throw signal.reason;
       } finally {
         attempt.abort();
@@ -82,17 +84,4 @@ function aborted(signal: AbortSignal, until: AbortSignal): Promise<never> {
       signal: until,
     });
   });
-}
-
-/**
- * Ends a socket whose attempt was cancelled. workerd settles that close only
- * once the attempt itself settles, and with the attempt's own failure.
- */
-async function discard(socket: Socket): Promise<void> {
-  try {
-    await socket.close();
-  } catch {
-    // The cancelled attempt's failure; `connect()` already rejected with the
-    // cancellation, and nothing is open.
-  }
 }
