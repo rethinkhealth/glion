@@ -131,6 +131,20 @@ describe("nodeSocket over tls.TLSSocket", () => {
     });
   });
 
+  it("sends without verifying the certificate when rejectUnauthorized is false", async () => {
+    const client = new MllpClient({
+      socket: nodeSocket({
+        ...acknowledging,
+        tls: { rejectUnauthorized: false },
+      }),
+    });
+
+    await expect(client.send(adtA01().tree)).resolves.toMatchObject({
+      code: "AA",
+    });
+    await client.close();
+  });
+
   it("presents the client certificate to a remote system that requires one", async () => {
     const client = new MllpClient({
       socket: nodeSocket({
