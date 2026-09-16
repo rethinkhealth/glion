@@ -91,7 +91,7 @@ describe("glion send with a message the client cannot prepare", () => {
       stdout,
     });
 
-    expect(state.err).toMatch(/^x {2}.*INVALID_MESSAGE/);
+    expect(state.err).toMatch(/^x {2}.*INVALID_MESSAGE/m);
     expect(state.err).toContain("MSH-10");
   });
 });

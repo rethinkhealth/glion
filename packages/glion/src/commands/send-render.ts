@@ -275,6 +275,25 @@ function quote(text: string): string {
   return `"${text}"`;
 }
 
+/** The `== connected <host:port> <duration>` line: the connection is open. */
+export function renderConnected(
+  target: SendTarget,
+  durationMs: number
+): string {
+  return `== connected  ${target.host}:${target.port}  ${fmtMs(durationMs)}`;
+}
+
+/**
+ * The `== closed <host:port> <code> <message>` line: the connection is down
+ * on `error`, and the client will not connect again.
+ */
+export function renderClosed(
+  target: SendTarget,
+  error: { code: string; message: string }
+): string {
+  return `== closed     ${target.host}:${target.port}  ${error.code}  ${error.message}`;
+}
+
 // ── JSON line ────────────────────────────────────────────────────────
 
 /**
