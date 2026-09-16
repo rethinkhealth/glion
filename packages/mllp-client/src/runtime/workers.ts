@@ -8,6 +8,7 @@
 
 import { connect } from "cloudflare:sockets";
 
+import { MllpInvalidOptionError } from "../errors";
 import type { MllpSocket, MllpStreams } from "../types";
 
 type Socket = ReturnType<typeof connect>;
@@ -17,15 +18,32 @@ export interface WorkersSocketOptions {
   readonly host: string;
   /** TCP port of the remote system. */
   readonly port: number;
+  /**
+   * TLS for the connection. `true`: verify the remote system's certificate
+   * against the public CAs Workers trusts, for `host`. `false`: plain TCP.
+   *
+   * Workers takes no CA, client certificate, or server name. A remote system
+   * MUST present a publicly trusted certificate for `host`.
+   *
+   * @default false
+   */
+  readonly tls?: boolean;
 }
 
 /**
  * A TCP socket to one remote system, over `cloudflare:sockets`.
  *
- * Each `connect()` opens a fresh socket. Plain TCP only; TLS is tracked in
- * #657.
+ * Each `connect()` opens a fresh socket.
+ *
+ * @throws {MllpInvalidOptionError} `tls` is not a boolean.
  */
 export function workersSocket(opts: WorkersSocketOptions): MllpSocket {
+  const { tls = false } = opts;
+  if (typeof tls !== "boolean") {
+    throw new MllpInvalidOptionError(
+      "tls must be true or false on Workers: it takes no CA, client certificate, or server name. Give the remote system a publicly trusted certificate for its host name."
+    );
+  }
   let open: Socket | undefined;
 
   return {
@@ -41,7 +59,7 @@ export function workersSocket(opts: WorkersSocketOptions): MllpSocket {
       // settles when the handshake does.
       const socket = connect(
         { hostname: opts.host, port: opts.port },
-        { allowHalfOpen: false, secureTransport: "off" }
+        { allowHalfOpen: false, secureTransport: tls ? "on" : "off" }
       );
       // Raced, not awaited: `opened` alone would hold a cancelled attempt
       // until the dial times out. `listener` is the abort listener's

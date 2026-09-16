@@ -1,5 +1,5 @@
 /**
- * A remote system over TCP: reads the frames a client writes and
+ * A remote system over TCP or TLS: reads the frames a client writes and
  * answers each one through an `Answer`. Node only.
  *
  * @module
@@ -9,6 +9,8 @@ import { once } from "node:events";
 import { createServer } from "node:net";
 import type { AddressInfo, Socket } from "node:net";
 import { Readable } from "node:stream";
+import { createServer as createTlsServer } from "node:tls";
+import type { TlsOptions } from "node:tls";
 
 import { frame, unframe } from "@glion/mllp-codec";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
@@ -36,6 +38,8 @@ export interface ListenOptions {
   readonly answer?: Answer;
   /** Keep this side open after the client's FIN. Default `false`. */
   readonly allowHalfOpen?: boolean;
+  /** Serve TLS with these options. Default: plain TCP. */
+  readonly tls?: TlsOptions;
 }
 
 export interface Remote extends Address, AsyncDisposable {
@@ -97,22 +101,23 @@ export async function listen(options: ListenOptions = {}): Promise<Remote> {
     }
   };
 
-  const server = createServer(
-    { allowHalfOpen: options.allowHalfOpen ?? false },
-    (socket) => {
-      connections += 1;
-      sockets.add(socket);
-      // MLLP servers disable Nagle; with it on, a large reply stalls once per
-      // segment against the client's delayed ACK.
-      socket.setNoDelay(true);
-      socket.on("close", () => sockets.delete(socket));
-      socket.on("end", () => closes.push("end"));
-      socket.on("error", (error: NodeJS.ErrnoException) => {
-        closes.push(error.code ?? error.message);
-      });
-      void serve(socket);
-    }
-  );
+  const accept = (socket: Socket) => {
+    connections += 1;
+    sockets.add(socket);
+    // MLLP servers disable Nagle; with it on, a large reply stalls once per
+    // segment against the client's delayed ACK.
+    socket.setNoDelay(true);
+    socket.on("close", () => sockets.delete(socket));
+    socket.on("end", () => closes.push("end"));
+    socket.on("error", (error: NodeJS.ErrnoException) => {
+      closes.push(error.code ?? error.message);
+    });
+    void serve(socket);
+  };
+  const allowHalfOpen = options.allowHalfOpen ?? false;
+  const server = options.tls
+    ? createTlsServer({ ...options.tls, allowHalfOpen }, accept)
+    : createServer({ allowHalfOpen }, accept);
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
   const { address: host, port } = server.address() as AddressInfo;
