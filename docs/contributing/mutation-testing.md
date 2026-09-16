@@ -81,7 +81,7 @@ If you are not sure which case you have, it is the first case. Write the test; i
 
 ## Raise the floor when you can
 
-When a package's score is comfortably above `break` after your triage, raise the `break` in its `stryker.config.mjs` to the new score minus five. That file is two lines; everything else comes from `strykerConfig` in `@glion/testing/stryker`, so a change to the shared settings is one edit. Never lower it. A PR that needs a lower `break` is a PR that removed a test.
+When a package's score is comfortably above `break` after your triage, raise the `break` in its `stryker.config.mjs` to the new score minus five. The shared settings come from `strykerConfig` in `@glion/testing/stryker`, so a change to the shared settings is one edit. Never lower it. A PR that needs a lower `break` is a PR that removed a test.
 
 ## Verifying
 
