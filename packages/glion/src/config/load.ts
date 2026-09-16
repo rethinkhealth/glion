@@ -2,6 +2,7 @@ import { isAbsolute, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { GlionError } from "../errors";
+import { ensureCacheDir } from "../prebuild";
 import { compileConfig } from "./compile";
 import {
   CONFIG_FILENAMES,
@@ -16,8 +17,6 @@ import { makeGlionConfigSchema } from "./schema";
 export interface LoadConfigOptions {
   /** Project root — config files are searched here. */
   cwd: string;
-  /** Absolute path to the .glion/ cache directory (created by the caller). */
-  cacheDir: string;
   /** Skip discovery and load this specific file. */
   explicitPath?: string;
 }
@@ -103,9 +102,15 @@ export async function loadConfig(
   // otherwise it bubbles up as a raw error and the supervisor
   // classifies it as a generic child crash — misleading because the
   // failure is in the user's config file, not the child process.
+  // The cache directory is created here, where there is something to put in
+  // it: a project with no config file compiles nothing and keeps a clean
+  // directory. It is created outside the try below so that a directory which
+  // cannot be created is reported as itself, not as a compile failure.
+  const cacheDir = await ensureCacheDir(opts.cwd);
+
   let compiled: string;
   try {
-    compiled = await compileConfig(absConfigPath, opts.cacheDir);
+    compiled = await compileConfig(absConfigPath, cacheDir);
   } catch (error) {
     throw new GlionError(
       "config-invalid",

@@ -8,6 +8,7 @@
 export type GlionErrorKind =
   | "config-not-found"
   | "config-invalid"
+  | "cache-dir-failed"
   | "entry-load-failed"
   | "entry-not-mllp-instance"
   | "tls-read-failed"

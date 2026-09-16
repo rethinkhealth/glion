@@ -86,10 +86,11 @@ function parseArgs(argv: readonly string[]): ParseResult {
       return { error: `unknown flag: ${arg}`, ok: false };
     }
     // The `send` subcommand owns the remaining argv — its flags are parsed
-    // separately, so hand everything after it through untouched.
+    // separately, so hand everything after it through untouched. A `--config`
+    // before the token is a default the subcommand's own flag overrides.
     if (arg === "send") {
       return {
-        args: { command: "send", sendArgv: argv.slice(i + 1) },
+        args: { command: "send", configPath, sendArgv: argv.slice(i + 1) },
         ok: true,
       };
     }
@@ -147,6 +148,7 @@ export function runGlion(opts: RunGlionOptions): Promise<number> {
     case "send": {
       return runSend({
         argv: parsed.args.sendArgv ?? [],
+        configPath: parsed.args.configPath,
         cwd: opts.cwd,
         stderr,
         stdout,

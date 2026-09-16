@@ -69,6 +69,27 @@ Type exported from `@glion/cli/config`:
 | `tls`             | `{ cert: string; key: string }` | Enable MLLP over TLS.                                                |
 | `watch`           | `string[]`                      | Additional paths the dev watcher should reload on.                   |
 | `gracefulCloseMs` | `number`                        | Drain timeout for `glion start`. Defaults to `5000`.                 |
+| `client`          | `object`                        | The MLLP client `glion send` dials with; see below.                  |
+
+`client` configures the MLLP client behind `glion send`. Every field is optional and defaults to the client's own default; see `@glion/mllp-client` for `MllpClientOptions`.
+
+```ts
+export default defineConfig({
+  entry: "./src/app.ts",
+  client: {
+    connectTimeoutMs: 5000,
+    sendTimeoutMs: 10_000,
+    reconnect: { attempts: 2, delay: (attempt) => attempt * 500 },
+  },
+});
+```
+
+| Field              | Type                                                            | Description                                                                                    |
+| ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `connectTimeoutMs` | `number`                                                        | Time to wait for the connection to open. Defaults to `10000`.                                  |
+| `sendTimeoutMs`    | `number`                                                        | Time to wait for an acknowledgment after sending. Defaults to `30000`.                         |
+| `maxBufferedBytes` | `number`                                                        | Maximum bytes buffered while receiving one acknowledgment. Defaults to 16 MiB.                 |
+| `reconnect`        | `{ attempts?: number; delay?: (attempt) => number }` or `false` | Attempts after a failed dial before giving up. Defaults to 5 with backoff; `false` dials once. |
 
 ## Commands
 
@@ -93,15 +114,16 @@ The message is read from `<file>`, or from stdin when `<file>` is omitted or is 
 | Flag              | Description                                                                   |
 | ----------------- | ----------------------------------------------------------------------------- |
 | `--host <host>`   | Target host.                                                                  |
-| `--port <port>`   | Target port.                                                                  |
+| `--port <port>`   | Target port. Defaults to `2575`, the MLLP standard.                           |
 | `--config <path>` | Config file to load instead of discovering one (same names as `dev`/`start`). |
-| `--timeout <ms>`  | Deadline spanning connect and the ACK wait. Defaults to `30000`.              |
 | `--json`          | Prints one JSON line instead of the human exchange view.                      |
 
 The target is the one the invocation names. `glion send` is a client: it sends to the system you point it at, and takes no part in what address a server of this project binds — so sending to your own dev server is the same command as sending to any other receiver.
 
+Timeouts and the dial policy come from the `client` block of `glion.config.ts` when the project has one, and are the client's defaults otherwise: a dial that fails is tried again up to five times with backoff, about thirty seconds in all. Set `client.reconnect` to `false` to dial once.
+
 ```bash
-glion send adt.hl7 --host 127.0.0.1 --port 2575
+glion send adt.hl7 --host 127.0.0.1
 cat adt.hl7 | glion send --host 127.0.0.1 --port 2575 --json
 ```
 

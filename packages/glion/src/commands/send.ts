@@ -14,7 +14,7 @@ import {
   MllpClientError,
   MllpInvalidMessageError,
 } from "@glion/mllp-client";
-import type { MllpClientOptions, MllpSocket } from "@glion/mllp-client";
+import type { MllpSocket } from "@glion/mllp-client";
 import { nodeSocket } from "@glion/mllp-client/node";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
@@ -26,19 +26,15 @@ import type {
   SendRequestSummary,
   SendTarget,
 } from "./send-render";
-import { resolveTarget } from "./send-target";
-
-/** Connect + ACK-wait deadline used when `--timeout` is omitted. */
-export const DEFAULT_SEND_TIMEOUT_MS = 30_000;
+import { resolveProject } from "./send-target";
 
 /**
  * Parsed `glion send` invocation.
  *
  * - `file` — positional message source. `undefined` or `"-"` both mean "read from
  *   stdin"; the handler treats them identically.
- * - `host` / `port` — the target to send to.
+ * - `host` / `port` — the target to send to. `port` defaults to 2575.
  * - `configPath` — config file to load instead of discovering one in `cwd`.
- * - `timeoutMs` — deadline spanning connect + ACK wait.
  * - `json` — force JSON output even on a TTY.
  * - `help` — print subcommand help instead of sending.
  */
@@ -47,7 +43,6 @@ export interface SendArgs {
   host?: string;
   port?: number;
   configPath?: string;
-  timeoutMs?: number;
   json: boolean;
   help: boolean;
 }
@@ -73,26 +68,31 @@ function takeFlagValue(
   return next;
 }
 
+/** The highest port number a target can have. */
+const MAX_PORT = 65_535;
+
 /**
- * Reads the positive integer value of a flag at `index`. Folds the
- * missing-value, non-integer, and zero checks into one call so the parse loop
- * carries a single guard per integer flag.
+ * Reads the port value of `--port` at `index`. Folds the missing-value,
+ * non-integer, and out-of-range checks into one call so the parse loop carries
+ * a single guard for the flag — and so a port no host can listen on is
+ * rejected here, not after a dial that cannot succeed.
  */
-function takeIntFlagValue(
+function takePortValue(
   argv: readonly string[],
-  index: number,
-  flag: string
+  index: number
 ): number | { error: string } {
-  const raw = takeFlagValue(argv, index, flag);
+  const raw = takeFlagValue(argv, index, "--port");
   if (typeof raw === "object") {
     return raw;
   }
   if (!/^\d+$/.test(raw)) {
-    return { error: `${flag} requires an integer value, got: ${raw}` };
+    return { error: `--port requires an integer value, got: ${raw}` };
   }
   const parsed = Number.parseInt(raw, 10);
-  if (parsed === 0) {
-    return { error: `${flag} requires a positive integer, got: 0` };
+  if (parsed < 1 || parsed > MAX_PORT) {
+    return {
+      error: `--port requires a port between 1 and ${MAX_PORT}, got: ${raw}`,
+    };
   }
   return parsed;
 }
@@ -100,18 +100,23 @@ function takeIntFlagValue(
 /**
  * Pure parser for the argv that follows the `send` subcommand token.
  *
+ * `inheritedConfigPath` is the `--config` given before that token: the config
+ * to load unless the argv names one of its own.
+ *
  * Mirrors the return shape and style of `parseArgs` in `run.ts`: a
  * left-to-right scan, value flags consuming the next token, unknown
  * `-`-prefixed tokens rejected, and at most one positional accepted.
  * It never throws and never touches process state.
  */
 // oxlint-disable-next-line complexity/complexity -- left-to-right flag scan: one branch per flag
-export function parseSendArgs(argv: readonly string[]): ParseSendResult {
+export function parseSendArgs(
+  argv: readonly string[],
+  inheritedConfigPath?: string
+): ParseSendResult {
   const positional: string[] = [];
   let host: string | undefined;
   let port: number | undefined;
-  let configPath: string | undefined;
-  let timeoutMs: number | undefined;
+  let configPath = inheritedConfigPath;
   let json = false;
   let help = false;
 
@@ -136,7 +141,7 @@ export function parseSendArgs(argv: readonly string[]): ParseSendResult {
       continue;
     }
     if (arg === "--port") {
-      const parsed = takeIntFlagValue(argv, i, "--port");
+      const parsed = takePortValue(argv, i);
       if (typeof parsed === "object") {
         return { error: parsed.error, ok: false };
       }
@@ -145,20 +150,11 @@ export function parseSendArgs(argv: readonly string[]): ParseSendResult {
       continue;
     }
     if (arg === "--config") {
-      const flagValue = argv[i + 1];
-      if (flagValue === undefined || flagValue.startsWith("-")) {
-        return { error: "--config requires a path argument", ok: false };
+      const flagValue = takeFlagValue(argv, i, "--config");
+      if (typeof flagValue === "object") {
+        return { error: flagValue.error, ok: false };
       }
       configPath = flagValue;
-      i += 1;
-      continue;
-    }
-    if (arg === "--timeout") {
-      const parsed = takeIntFlagValue(argv, i, "--timeout");
-      if (typeof parsed === "object") {
-        return { error: parsed.error, ok: false };
-      }
-      timeoutMs = parsed;
       i += 1;
       continue;
     }
@@ -180,7 +176,7 @@ export function parseSendArgs(argv: readonly string[]): ParseSendResult {
   const file = rawFile === undefined || rawFile === "-" ? undefined : rawFile;
 
   return {
-    args: { configPath, file, help, host, json, port, timeoutMs },
+    args: { configPath, file, help, host, json, port },
     ok: true,
   };
 }
@@ -198,13 +194,15 @@ Message source:
 
 Target:
   --host <host>          target host
-  --port <port>          target port
+  --port <port>          target port; defaults to 2575, the MLLP standard
 
 Options:
   --config <path>        config file to load instead of discovering one in cwd
-  --timeout <ms>         deadline spanning connect + ACK wait (default 30000)
   --json                 print one JSON line instead of the human exchange view
   -h, --help             show this help
+
+Timeouts and the dial policy come from \`client\` in glion.config.ts:
+  client: { connectTimeoutMs, sendTimeoutMs, reconnect: { attempts, delay } | false }
 
 Exit codes:
   0  the peer accepted the message (AA/CA)
@@ -221,8 +219,11 @@ export interface RunSendOptions {
   stderr?: NodeJS.WritableStream;
   /** Runtime socket; injectable for tests. Defaults to the Node TCP adapter. */
   socket?: MllpSocket;
-  /** Reconnect policy; injectable for tests. Defaults to the client's. */
-  reconnect?: MllpClientOptions["reconnect"];
+  /**
+   * The `--config` path given before the `send` token. A `--config` among
+   * `argv` — the subcommand's own flag — wins over it.
+   */
+  configPath?: string;
   /** Stdin source used when no file is given; injectable for tests. */
   stdin?: NodeJS.ReadableStream;
 }
@@ -323,7 +324,7 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   const stdout = opts.stdout ?? process.stdout;
   const stderr = opts.stderr ?? process.stderr;
 
-  const parsed = parseSendArgs(opts.argv);
+  const parsed = parseSendArgs(opts.argv, opts.configPath);
   if (!parsed.ok) {
     stderr.write(`glion send: ${parsed.error}\n\n${SEND_HELP_TEXT}`);
     return 2;
@@ -345,11 +346,11 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     return exitCodeFor(outcome);
   };
 
-  const resolved = resolveTarget(args);
-  if (!resolved.ok) {
-    return emit({ kind: "invalid", message: resolved.reason });
+  const project = await resolveProject(args, opts.cwd);
+  if (!project.ok) {
+    return emit({ kind: "invalid", message: project.reason });
   }
-  const target = { host: resolved.host, port: resolved.port };
+  const { config, target } = project;
 
   let text: string;
   try {
@@ -369,26 +370,25 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   // message is the receiver's call, surfaced as a NAK. We do not pre-validate.
   const tree = parseHL7v2(text);
   const canonical = toHl7v2(tree);
-  const timeoutMs = args.timeoutMs ?? DEFAULT_SEND_TIMEOUT_MS;
   const request = {
     byteCount: ENCODER.encode(canonical).length,
     controlId: value(tree, "MSH.10.1")?.value ?? "",
     segmentCount: tree.children.length,
   };
 
-  let client: MllpClient | undefined;
+  // The config schema bounds every `client` setting to what the client itself
+  // accepts, so the constructor rejecting one here would be a bug, not a
+  // report: it stays outside the try that reports the exchange.
+  const client = new MllpClient({
+    ...config?.client,
+    socket: opts.socket ?? nodeSocket({ host: target.host, port: target.port }),
+  });
+
   let startedAt = performance.now();
   try {
-    client = new MllpClient({
-      connectTimeoutMs: timeoutMs,
-      reconnect: opts.reconnect,
-      sendTimeoutMs: timeoutMs,
-      socket:
-        opts.socket ?? nodeSocket({ host: target.host, port: target.port }),
-    });
     await client.connect();
     startedAt = performance.now();
-    const res = await client.send(tree, { timeoutMs });
+    const res = await client.send(tree);
     return emit({
       ackControlId: res.controlId,
       code: res.code,
@@ -401,7 +401,7 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   } catch (error) {
     return emit(sendErrorOutcome(error, { request, startedAt, target }));
   } finally {
-    await client?.close();
+    await client.close();
   }
 }
 

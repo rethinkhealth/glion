@@ -62,7 +62,6 @@ export async function runStart(opts: RunStartOptions): Promise<number> {
     // is compiled to .glion/ via rolldown, then validated against
     // the Zod schema with defaults applied.
     const config = await loadConfig({
-      cacheDir,
       cwd: opts.cwd,
       explicitPath: opts.configPath,
     });
