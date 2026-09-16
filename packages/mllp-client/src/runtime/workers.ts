@@ -44,11 +44,12 @@ export function workersSocket(opts: WorkersSocketOptions): MllpSocket {
         { allowHalfOpen: false, secureTransport: "off" }
       );
       // Raced, not awaited: `opened` alone would hold a cancelled attempt
-      // until the dial times out. `attempt` unhooks the abort listener once
-      // the race is decided, so nothing stays subscribed to `signal`.
-      const attempt = new AbortController();
+      // until the dial times out. `listener` is the abort listener's
+      // lifetime: aborting it removes the listener once the race is decided,
+      // so nothing stays subscribed to `signal`.
+      const listener = new AbortController();
       try {
-        await Promise.race([socket.opened, aborted(signal, attempt.signal)]);
+        await Promise.race([socket.opened, aborted(signal, listener.signal)]);
       } catch (error) {
         // Two ways here: the dial failed (`opened` rejected), or the caller
         // cancelled. A failed dial is reported as it is. A cancelled one is
@@ -62,7 +63,7 @@ export function workersSocket(opts: WorkersSocketOptions): MllpSocket {
         socket.close().catch(() => {});
         throw signal.reason;
       } finally {
-        attempt.abort();
+        listener.abort();
       }
       // Only an opened socket is held, so `close()` has something to end
       // exactly when `connect()` fulfilled.
