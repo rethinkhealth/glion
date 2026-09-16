@@ -44,10 +44,12 @@
     "syncpack": "npx syncpack lint",
     "syncpack:fix": "npx syncpack fix",
     "test": "turbo run test",
-    "test:bun": "turbo run test:bun",
     "test:cf": "turbo run test:cf",
     "test:coverage": "turbo run test -- --coverage",
-    "test:deno": "turbo run test:deno",
+    "test:integration": "turbo run build && pnpm test:integration:node && pnpm test:integration:bun && pnpm test:integration:deno && pnpm test:cf",
+    "test:integration:bun": "bun --bun ./node_modules/vitest/vitest.mjs run --config vitest.integration.config.ts",
+    "test:integration:deno": "deno run -A ./node_modules/vitest/vitest.mjs run --config vitest.integration.config.ts",
+    "test:integration:node": "vitest run --config vitest.integration.config.ts",
     "test:watch": "turbo run test -- --watch"
   },
   "dependencies": {
@@ -70,7 +72,8 @@
     "rimraf": "6.1.3",
     "turbo": "2.10.12",
     "typescript": "6.0.3",
-    "ultracite": "7.6.3"
+    "ultracite": "7.6.3",
+    "vitest": "4.1.11"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx}": [

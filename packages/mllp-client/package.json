@@ -29,20 +29,23 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./node": "./dist/runtime/node.js"
+    "./node": "./dist/runtime/node.js",
+    "./workers": "./dist/runtime/workers.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly",
-    "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json && tsc -p tsconfig.cloudflare.json",
     "check:readme": "glion-check-readme",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest",
+    "mutate": "stryker run",
     "publint": "publint --strict",
-    "mutate": "stryker run"
+    "test": "vitest run",
+    "test:cf": "vitest run --config vitest.workers.config.ts",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@glion/ack": "workspace:*",
@@ -54,6 +57,8 @@
     "@glion/util-query": "workspace:*"
   },
   "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.1.8",
+    "@cloudflare/workers-types": "5.20260915.1",
     "@glion/check-readme": "workspace:*",
     "@glion/testing": "workspace:*",
     "@glion/tsconfig": "workspace:*",

@@ -1,0 +1,11 @@
+{
+  // The adapter against Cloudflare's published types, with the ambient
+  // `cloudflare-sockets.d.ts` left out. Run by `check-types`.
+  "extends": "@glion/tsconfig/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "src",
+    "types": ["@cloudflare/workers-types"]
+  },
+  "include": ["src/runtime/workers.ts"]
+}
