@@ -143,8 +143,10 @@ jobs:
         run: pnpm ci:install
       - name: Build (all packages via turbo for correct dependency order)
         run: pnpm build
-      - name: Run Bun-runtime tests across all packages that opt in
-        run: pnpm test:bun
+      - name: Integration tests under Bun
+        run: pnpm test:integration:bun
+      - name: CLI end-to-end under Bun
+        run: pnpm --filter @glion/cli test:bun
 
   testing-cf:
     name: Testing (Cloudflare Workers / workerd)
@@ -193,5 +195,5 @@ jobs:
         run: pnpm ci:install
       - name: Build (all packages via turbo for correct dependency order)
         run: pnpm build
-      - name: Run Deno-runtime tests across all packages that opt in
-        run: pnpm test:deno
+      - name: Integration tests under Deno
+        run: pnpm test:integration:deno
