@@ -37,14 +37,23 @@ export function workersSocket(opts: WorkersSocketOptions): MllpSocket {
 
     async connect(signal: AbortSignal): Promise<MllpStreams> {
       signal.throwIfAborted();
+      // `connect()` returns at once with the dial in progress; `opened`
+      // settles when the handshake does.
       const socket = connect(
         { hostname: opts.host, port: opts.port },
         { allowHalfOpen: false, secureTransport: "off" }
       );
+      // Raced, not awaited: `opened` alone would hold a cancelled attempt
+      // until the dial times out. `attempt` unhooks the abort listener once
+      // the race is decided, so nothing stays subscribed to `signal`.
       const attempt = new AbortController();
       try {
         await Promise.race([socket.opened, aborted(signal, attempt.signal)]);
       } catch (error) {
+        // Two ways here: the dial failed (`opened` rejected), or the caller
+        // cancelled. A failed dial is reported as it is. A cancelled one is
+        // reported as the cancellation, and the socket is discarded without
+        // waiting, since its close settles only once the dial does.
         if (!signal.aborted) {
           throw error;
         }
@@ -53,6 +62,8 @@ export function workersSocket(opts: WorkersSocketOptions): MllpSocket {
       } finally {
         attempt.abort();
       }
+      // Only an opened socket is held, so `close()` has something to end
+      // exactly when `connect()` fulfilled.
       open = socket;
       return { readable: socket.readable, writable: socket.writable };
     },
