@@ -1,5 +1,14 @@
 # @rethinkhealth/hl7v2
 
+## 0.20.0
+
+### Patch Changes
+
+- Updated dependencies [[`8f37d7e`](https://github.com/rethinkhealth/glion/commit/8f37d7e93b31ef48158f6e19ff7842fb9adb0e1f)]:
+  - @glion/config@0.20.0
+  - @glion/ast@0.20.0
+  - @glion/utils@0.20.0
+
 ## 0.19.0
 
 ### Patch Changes
