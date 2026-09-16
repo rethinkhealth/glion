@@ -9,9 +9,11 @@ export default defineConfig({
   plugins: [
     cloudflareTest({
       miniflare: {
-        // No `nodejs_compat`: the client and the adapter use Web APIs only.
-        // Dates from 2026-08-04 enable it by default; a bump must keep it off.
-        compatibilityDate: "2026-08-01",
+        // The newest date the plugin's bundled workerd accepts. Node
+        // compatibility is on by default from 2026-08-04 and switched off
+        // here: the client and the adapter use Web APIs only.
+        compatibilityDate: "2026-08-22",
+        compatibilityFlags: ["no_nodejs_compat"],
       },
     }),
   ],
