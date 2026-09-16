@@ -8,6 +8,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
+    // `workers.test.ts` runs inside workerd: `vitest.workers.config.ts`.
+    exclude: ["node_modules", "dist", "tests/integration/workers.test.ts"],
     globalSetup: ["./tests/integration/setup.ts"],
     globals: true,
     include: ["tests/integration/**/*.test.ts"],
