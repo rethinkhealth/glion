@@ -7,9 +7,10 @@
  */
 
 import { connect } from "cloudflare:sockets";
-import type { Socket } from "cloudflare:sockets";
 
 import type { MllpSocket, MllpStreams } from "../types";
+
+type Socket = ReturnType<typeof connect>;
 
 export interface WorkersSocketOptions {
   /** Host name or address of the remote system. */

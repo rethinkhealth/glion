@@ -1762,6 +1762,9 @@ importers:
         specifier: workspace:*
         version: link:../util-query
     devDependencies:
+      '@cloudflare/workers-types':
+        specifier: 5.20260915.1
+        version: 5.20260915.1
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
@@ -2951,6 +2954,9 @@ packages:
   '@clack/prompts@1.8.0':
     resolution: {integrity: sha512-PXzLZ8N34rxmuo4dJg3xtOXhcBse94qGjDqsteoEYrFrrZ5FSjIGwMAuOcv64ln8rHVBBD06XeVGr+/JX+plcA==}
     engines: {node: '>= 20.12.0'}
+
+  '@cloudflare/workers-types@5.20260915.1':
+    resolution: {integrity: sha512-3Lw2wkyVcEDdD0W6rNBmannaAkUsWGsO5TjbyHflWIDlhxtFRDFnxqHoDlg4YiVxinsIcBl1j9jW1kdruUhZpg==}
 
   '@codspeed/core@5.4.0':
     resolution: {integrity: sha512-SwGjXDixN/zX1awBR95LzS0KxIs931qwf7Hbk7BRWv1jAdlMYf9o9GlSnWER4zGBHz941BvzFQJ1O2RIofW3cg==}
@@ -5937,6 +5943,8 @@ snapshots:
       fast-string-width: 3.0.2
       fast-wrap-ansi: 0.2.0
       sisteransi: 1.0.5
+
+  '@cloudflare/workers-types@5.20260915.1': {}
 
   '@codspeed/core@5.4.0':
     dependencies:

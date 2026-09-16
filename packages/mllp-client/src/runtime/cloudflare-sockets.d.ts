@@ -4,7 +4,13 @@
  * Declared here rather than through `@cloudflare/workers-types`, which
  * redeclares Web Streams and other globals project-wide and conflicts with
  * `@types/node`. Shape per
- * https://developers.cloudflare.com/workers/runtime-apis/tcp-sockets/.
+ * https://developers.cloudflare.com/workers/runtime-apis/tcp-sockets/ and
+ * `@cloudflare/workers-types@5.20260915.1`.
+ *
+ * Drift is caught two ways: `tsconfig.cloudflare.json` type-checks the
+ * adapter against `@cloudflare/workers-types` instead of this file, as part
+ * of `check-types`, and `tests/integration/workers.test.ts` runs the adapter
+ * inside `workerd`.
  */
 declare module "cloudflare:sockets" {
   export interface SocketAddress {
