@@ -55,6 +55,13 @@ jobs:
             - Potential bugs or issues
             - Security implications
             - Performance considerations
+            - Test strength: for packages with a stryker.config.mjs, the
+              "Mutation testing" comment on this PR lists surviving mutants.
+              Every survivor in a file this PR touches needs either a test
+              named after the HL7v2 or MLLP contract it protects, or a
+              `// Stryker disable next-line <Mutator>: <reason>` stating the
+              equivalence. Flag a test named after a mutant, and flag a
+              lowered `break` threshold; both are rejected.
 
             Provide detailed feedback using inline comments for specific issues.
 

@@ -6,7 +6,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx ultracite fix"
+            "command": "sh .claude/hooks/format-edited-file.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .claude/hooks/stop-tests.sh",
+            "timeout": 600
           }
         ]
       }
