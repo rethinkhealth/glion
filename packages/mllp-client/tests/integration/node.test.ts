@@ -4,6 +4,7 @@
  */
 
 import { setTimeout as sleep } from "node:timers/promises";
+import type { TLSSocket } from "node:tls";
 
 import { describe, expect, inject, it } from "vitest";
 
@@ -13,7 +14,7 @@ import { adtA01 } from "../fixtures";
 import { silence } from "../remote";
 import { describeMllpClientScenarios } from "./conformance/client-scenarios";
 import { describeMllpSocketContract } from "./conformance/socket-contract";
-import { listen } from "./remote-tcp";
+import { acknowledgment, listen } from "./remote-tcp";
 import type { Address } from "./remote-tcp";
 
 /** Slack on top of the grace window for the destroy to be observed. */
@@ -143,6 +144,29 @@ describe("nodeSocket over tls.TLSSocket", () => {
       code: "AA",
     });
     await client.close();
+  });
+
+  it("sends host as the TLS server name", async () => {
+    const servernames: unknown[] = [];
+    await using remote = await listen({
+      answer: (message, socket) => {
+        servernames.push((socket as TLSSocket).servername);
+        return acknowledgment(message);
+      },
+      tls: { cert: pki.serverCert, key: pki.serverKey },
+    });
+    const client = new MllpClient({
+      socket: nodeSocket({
+        host: pki.servername,
+        port: remote.port,
+        tls: { ca: pki.ca },
+      }),
+    });
+
+    await client.send(adtA01().tree);
+    await client.close();
+
+    expect(servernames).toEqual([pki.servername]);
   });
 
   it("presents the client certificate to a remote system that requires one", async () => {

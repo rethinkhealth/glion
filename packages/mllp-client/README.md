@@ -297,12 +297,12 @@ client
 
 The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#custom-socket) — two methods — so supporting a runtime means an adapter, not a fork of the client.
 
-| Runtime            | Adapter                                | Import                       | TLS                                         | Proven by                                 |
-| ------------------ | -------------------------------------- | ---------------------------- | ------------------------------------------- | ----------------------------------------- |
-| Node.js ≥ 22       | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Node 22 and 24   |
-| Bun                | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Bun 1.4          |
-| Deno               | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Deno 2.9         |
-| Cloudflare Workers | [`workersSocket`](#cloudflare-workers) | `@glion/mllp-client/workers` | Public trust store only                     | Integration suite in CI, inside `workerd` |
+| Runtime            | Adapter                                | Import                       | TLS                                         | Proven by                                                                                                                               |
+| ------------------ | -------------------------------------- | ---------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Node.js ≥ 22       | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Node 22 and 24                                                                                                 |
+| Bun                | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Bun 1.4                                                                                                        |
+| Deno               | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Deno 2.9                                                                                                       |
+| Cloudflare Workers | [`workersSocket`](#cloudflare-workers) | `@glion/mllp-client/workers` | Public trust store only                     | Integration suite in CI, inside `workerd`; TCP only, TLS handshake untested ([#626](https://github.com/rethinkhealth/glion/issues/626)) |
 
 Every adapter runs the same conformance suite: the [`MllpSocket` contract](#custom-socket) case by case, and the client's behaviour over a real socket scenario by scenario. On Node.js, Bun, and Deno it runs twice, over TCP and over TLS. A custom socket can run it too; see `tests/integration/conformance/` in the package source.
 
@@ -336,23 +336,23 @@ Deno needs `--allow-net` for the receiver's host and port.
 
 #### TLS
 
-`tls: true` verifies the receiver's certificate against the runtime's trusted CAs, for `host`, and needs no certificate files:
+`tls: true` verifies the receiver's certificate against the runtime's trusted CAs, for `host`, and needs no certificate files. `host` is sent as the server name (SNI) unless it is an IP address.
 
 ```ts
 nodeSocket({ host: "hl7.example.org", port: 2575, tls: true });
 ```
 
-An object adds Node's `tls.connect()` options:
+An object passes Node's `tls.connect()` options:
 
-| Option               | Type                        | Default     | Description                                                              |
-| -------------------- | --------------------------- | ----------- | ------------------------------------------------------------------------ |
-| `ca`                 | `string \| Buffer \| Array` | Runtime CAs | CA certificates that issued the receiver's certificate, PEM.             |
-| `cert`               | `string \| Buffer \| Array` | none        | Client certificate chain for mutual TLS, PEM.                            |
-| `key`                | `string \| Buffer \| Array` | none        | Private key for `cert`, PEM.                                             |
-| `passphrase`         | `string`                    | none        | Passphrase for an encrypted `key` or `pfx`.                              |
-| `pfx`                | `string \| Buffer \| Array` | none        | Client certificate and key as PKCS#12.                                   |
-| `servername`         | `string`                    | `host`      | Name the receiver's certificate is verified against, and the SNI name.   |
-| `rejectUnauthorized` | `boolean`                   | `true`      | `false` accepts any certificate, including one presented by an attacker. |
+| Option               | Type                        | Default                      | Description                                                                                      |
+| -------------------- | --------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ca`                 | `string \| Buffer \| Array` | Runtime CAs                  | CA certificates that issued the receiver's certificate, PEM. Replaces the runtime's trusted CAs. |
+| `cert`               | `string \| Buffer \| Array` | none                         | Client certificate chain for mutual TLS, PEM.                                                    |
+| `key`                | `string \| Buffer \| Array` | none                         | Private key for `cert`, PEM.                                                                     |
+| `passphrase`         | `string`                    | none                         | Passphrase for an encrypted `key` or `pfx`.                                                      |
+| `pfx`                | `string \| Buffer \| Array` | none                         | Client certificate and key as PKCS#12.                                                           |
+| `servername`         | `string`                    | `host`, unless an IP address | Name the receiver's certificate is verified against, and the SNI name.                           |
+| `rejectUnauthorized` | `boolean`                   | `true`                       | `false` accepts any certificate, including one presented by an attacker.                         |
 
 ```ts
 import { readFileSync } from "node:fs";
@@ -373,7 +373,9 @@ A receiver dialed by IP address must present a certificate that lists that addre
 
 A handshake that fails rejects with [`CONNECTION_FAILED`](#connection_failed), with Node's TLS error on `cause`: for example `UNABLE_TO_VERIFY_LEAF_SIGNATURE` or `ERR_TLS_CERT_ALTNAME_INVALID`.
 
-A receiver that refuses the client certificate does so after the handshake. The first `send()` rejects with `CONNECTION_LOST` on Node.js and Deno, and with `SEND_TIMEOUT` on Bun. On Deno, a wrong `passphrase` does not fail the handshake; the connection opens without the client certificate and fails the same way.
+A receiver that refuses the client certificate over TLS 1.2 fails the handshake: [`CONNECTION_FAILED`](#connection_failed), nothing sent. Over TLS 1.3 it refuses after the handshake, so the connection opens and the first `send()` rejects with delivery `unknown`: `CONNECTION_LOST` on Node.js and Deno, `SEND_TIMEOUT` on Bun.
+
+On Deno, a wrong `passphrase` does not fail the handshake; the connection opens without the client certificate and fails as a refused client certificate.
 
 ### Cloudflare Workers
 
@@ -479,7 +481,7 @@ The four failures of the wire — `CONNECTION_FAILED`, `CONNECTION_TIMEOUT`, `SE
 
 `MllpInvalidOptionError` · delivery `not-sent`
 
-A constructor option or a per-send `timeoutMs` is out of range — a timeout that is not a positive number of milliseconds, a `maxBufferedBytes` that is not a positive integer, or a `reconnect.attempts` that is not a non-negative integer or `Infinity`. The message names which one.
+A constructor option or a per-send `timeoutMs` is out of range — a timeout that is not a positive number of milliseconds, a `maxBufferedBytes` that is not a positive integer, or a `reconnect.attempts` that is not a non-negative integer or `Infinity`. `workersSocket()` also throws it for a `tls` that is not a boolean. The message names which one.
 
 Thrown before anything is opened or sent. A configuration bug, not a runtime condition.
 
@@ -513,7 +515,7 @@ Check host, port, whether a firewall allows the route, and, over TLS, the certif
 
 The receiver did not accept the connection within `connectTimeoutMs`.
 
-Typically a packet-dropping firewall rather than a refused connection — a refusal arrives fast and surfaces as `CONNECTION_FAILED`.
+Typically a packet-dropping firewall rather than a refused connection — a refusal arrives fast and surfaces as `CONNECTION_FAILED`. With `tls` set, also a receiver that speaks plain TCP and never answers the TLS handshake.
 
 ### `SEND_TIMEOUT`
 

@@ -6,7 +6,7 @@
  * @module
  */
 
-import { connect as connectTcp } from "node:net";
+import { connect as connectTcp, isIP } from "node:net";
 import type { Socket } from "node:net";
 import { Duplex } from "node:stream";
 import { connect as connectTls } from "node:tls";
@@ -39,9 +39,11 @@ export interface NodeSocketOptions {
   readonly port: number;
   /**
    * TLS for the connection. `true`: verify the remote system's certificate
-   * against the runtime's trusted CAs, for `host`. An object: the same, with
-   * Node's `tls.connect()` options applied, such as `ca`, `cert` and `key`
-   * for mutual TLS, or `servername`. `false`: plain TCP.
+   * against the runtime's trusted CAs, for `host`, sent as the server name
+   * (SNI) unless `host` is an IP address. An object: the same, with Node's
+   * `tls.connect()` options applied. `ca` replaces the runtime's trusted CAs.
+   * `cert` and `key` present a client certificate. `servername` replaces
+   * `host` as the server name. `false`: plain TCP.
    *
    * A remote system dialed by IP address MUST present a certificate for that
    * address, or `servername` MUST name one the certificate lists.
@@ -84,20 +86,13 @@ function dial(
   return new Promise<Socket>((resolve, reject) => {
     signal.throwIfAborted();
 
-    const onOpened = () => {
-      done();
-      resolve(socket);
-    };
-    const socket = tls
-      ? connectTls({ ...tls, host, port }, onOpened)
-      : connectTcp({ host, port }, onOpened);
-    // No Nagle — MLLP acknowledgments are tiny and latency-sensitive.
-    socket.setNoDelay(true);
-    socket.setKeepAlive(true, keepAliveIdleMs);
-
     const done = () => {
       socket.removeListener("error", onError);
       signal.removeEventListener("abort", onAbort);
+    };
+    const onOpened = () => {
+      done();
+      resolve(socket);
     };
     const onError = (error: Error) => {
       done();
@@ -110,8 +105,18 @@ function dial(
       reject(signal.reason);
     };
 
+    // `tls.connect()` sends SNI only when `servername` is set. An IP address is
+    // never a server name (RFC 6066 §3).
+    const servername = isIP(host) ? undefined : host;
+    const socket = tls
+      ? connectTls({ servername, ...tls, host, port }, onOpened)
+      : connectTcp({ host, port }, onOpened);
     socket.once("error", onError);
     signal.addEventListener("abort", onAbort, { once: true });
+
+    // No Nagle — MLLP acknowledgments are tiny and latency-sensitive.
+    socket.setNoDelay(true);
+    socket.setKeepAlive(true, keepAliveIdleMs);
   });
 }
 

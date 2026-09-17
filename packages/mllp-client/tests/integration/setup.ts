@@ -69,6 +69,9 @@ declare module "vitest" {
 
 const SERVERNAME = "localhost";
 
+/** X.509 GeneralName tag for a DNS name (RFC 5280 §4.2.1.6). */
+const DNS_NAME = 2;
+
 /** A CA, a server certificate for `localhost`, and a client certificate. */
 async function issue() {
   const ca = await generate([{ name: "commonName", value: "glion test CA" }], {
@@ -79,19 +82,24 @@ async function issue() {
     ],
   });
   const signedBy = { cert: ca.cert, key: ca.private };
-  const server = await generate([{ name: "commonName", value: SERVERNAME }], {
-    algorithm: "sha256",
-    ca: signedBy,
-    extensions: [
-      { altNames: [{ type: 2, value: SERVERNAME }], name: "subjectAltName" },
-      { name: "extKeyUsage", serverAuth: true },
-    ],
-  });
-  const client = await generate([{ name: "commonName", value: "glion" }], {
-    algorithm: "sha256",
-    ca: signedBy,
-    extensions: [{ clientAuth: true, name: "extKeyUsage" }],
-  });
+  const [server, client] = await Promise.all([
+    generate([{ name: "commonName", value: SERVERNAME }], {
+      algorithm: "sha256",
+      ca: signedBy,
+      extensions: [
+        {
+          altNames: [{ type: DNS_NAME, value: SERVERNAME }],
+          name: "subjectAltName",
+        },
+        { name: "extKeyUsage", serverAuth: true },
+      ],
+    }),
+    generate([{ name: "commonName", value: "glion" }], {
+      algorithm: "sha256",
+      ca: signedBy,
+      extensions: [{ clientAuth: true, name: "extKeyUsage" }],
+    }),
+  ]);
   return { ca: ca.cert, client, server };
 }
 

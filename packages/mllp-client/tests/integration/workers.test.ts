@@ -27,8 +27,9 @@ describeMllpClientScenarios("workersSocket", workersSocket, inject("remotes"));
 describe("workersSocket over TLS", () => {
   it("throws INVALID_OPTION for TLS settings Workers cannot apply", () => {
     const options = {
-      ...inject("remotesOverTls").acknowledging,
-      tls: { ca: inject("pki").ca },
+      host: "hl7.example.org",
+      port: 2575,
+      tls: { ca: "-----BEGIN CERTIFICATE-----" },
     } as unknown as WorkersSocketOptions;
 
     expect(() => workersSocket(options)).toThrow(
