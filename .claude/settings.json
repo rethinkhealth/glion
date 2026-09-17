@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx ultracite fix"
+            "command": "sh .claude/hooks/format-edited-file.sh"
           }
         ]
       }
