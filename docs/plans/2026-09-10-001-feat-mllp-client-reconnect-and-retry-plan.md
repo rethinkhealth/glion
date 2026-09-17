@@ -24,7 +24,7 @@ Terminality moves from the client to the connection. A connection still ends on 
 What does not change:
 
 - **A message in flight when the connection dies is never retried by the client.** Its `send()` rejects exactly as today. Reconnect restores the link, not the message.
-- Lockstep. One send at a time; `ALREADY_SENDING` is unchanged.
+- Lockstep. One send at a time; `ALREADY_SENDING` is unchanged. _Superseded by ADR 0022: a send arriving mid-flight now waits its turn, and `ALREADY_SENDING` is gone._
 - `close()` and `destroy()` win. From `reconnecting` they cancel the wait, or the dial in flight, at once, and the client is `closed`.
 
 ### 1.2 Decisions to confirm
@@ -101,11 +101,11 @@ idle → connecting → connected ⇄ sending → closing → closed
 
 A failed send has one of three delivery outcomes. The resend risk differs in kind, not degree:
 
-| Outcome  | Errors                                                      | Processed by the receiver?             | Resend risk                                                                                                                                |
-| -------- | ----------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Not sent | `CONNECT_FAILED`, `CONNECT_TIMEOUT`, `CLOSED` while waiting | No                                     | None. (`INVALID_MESSAGE`, `INVALID_OPTION`, `ALREADY_SENDING` are also not-sent but permanent for the same input; resending is pointless.) |
-| Unknown  | `CONNECTION_LOST`, `SEND_TIMEOUT`, `INVALID_RESPONSE`       | Maybe                                  | A duplicated clinical event.                                                                                                               |
-| Refused  | `AckException` (`AE`, `AR`, `CE`, `CR`)                     | No. The receiver answered and refused. | None from duplication.                                                                                                                     |
+| Outcome  | Errors                                                      | Processed by the receiver?             | Resend risk                                                                                                             |
+| -------- | ----------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Not sent | `CONNECT_FAILED`, `CONNECT_TIMEOUT`, `CLOSED` while waiting | No                                     | None. (`INVALID_MESSAGE`, `INVALID_OPTION` are also not-sent but permanent for the same input; resending is pointless.) |
+| Unknown  | `CONNECTION_LOST`, `SEND_TIMEOUT`, `INVALID_RESPONSE`       | Maybe                                  | A duplicated clinical event.                                                                                            |
+| Refused  | `AckException` (`AE`, `AR`, `CE`, `CR`)                     | No. The receiver answered and refused. | None from duplication.                                                                                                  |
 
 So a NAK is the one failure where resending is duplicate-safe by construction, and the transport case is its mirror: resending after a NAK is safe but usually useless, resending after unknown delivery is often useful but unsafe. That is the "opposite retry semantics" ADR 0018 names.
 
@@ -166,7 +166,7 @@ interface MllpRetryOptions {
 
 - Same MSH-10 and the same bytes on every attempt: the message is encoded once. The client never generates MSH-10 (#646, production-readiness plan §5).
 - A caller whose receiver deduplicates by MSH-10 opts into unknown-delivery retries per send with `when: () => true`. That is the T1-4 shape: `unknown` requires an explicit per-send opt-in.
-- Inside the client, `#send` loops. A resend after a NAK reuses the open connection. A resend after a not-sent failure awaits the reconnect through the same path a fresh `send()` does (D5). The wait uses the §1 abortable sleep. The phase stays `sending` across attempts, so `ALREADY_SENDING` holds. `close()` lets the attempt in flight finish and stops further attempts; `destroy()` cuts the wait.
+- Inside the client, `#send` loops. A resend after a NAK reuses the open connection. A resend after a not-sent failure awaits the reconnect through the same path a fresh `send()` does (D5). The wait uses the §1 abortable sleep. The phase stays `sending` across attempts, so sends arriving meanwhile wait their turn (ADR 0022; `ALREADY_SENDING` is gone) and go out after the retrying message, or reject `CLOSED` if it closes the client. `close()` lets the attempt in flight finish and stops further attempts; `destroy()` cuts the wait.
 
 **R3 — The classification is vocabulary and ships in `@glion/ack`**, next to `isAckNakCode`: a guard over (MSA-1, ERR-3) saying whether the receiver marked the refusal as one to resend later. Server authors read the same table to choose what to emit, which keeps both ends of the wire in one vocabulary (ADR 0018 §3). Naming is open: HL7v2 has no word for it ("resend" in §2.9.2 is the nearest), and "transient" or "retryable" are not HL7 words.
 

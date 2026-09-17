@@ -22,6 +22,7 @@ export default defineConfig({
       ],
     },
   },
+  report: false,
   sourcemap: true,
   target: "es2022",
 });

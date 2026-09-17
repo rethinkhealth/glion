@@ -6,7 +6,6 @@
  */
 
 import { isAckNakCode, isAckSuccessCode } from "@glion/ack";
-import type { AckException } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
@@ -49,40 +48,35 @@ export function encode(tree: Root): EncodingResponse {
   }
 }
 
-/** A reply, as one of the three things it can be to the message it was read for. */
-export type DecodeResponse =
-  /** MSA-1 accepted the message. */
-  | { readonly type: "accept"; readonly response: MllpClientResponse }
-  /** MSA-1 refused it. The remote system understood the message. */
-  | { readonly type: "nak"; readonly exception: AckException }
-  /**
-   * Not a usable acknowledgment of this message: unreadable bytes, an MSA-1
-   * outside Table 0008, or an MSA-2 naming another message.
-   */
-  | { readonly type: "invalid"; readonly error: MllpInvalidResponseError };
-
 /**
- * `bytes` as the reply to the message `controlId` identifies.
+ * `bytes` as the acknowledgment of the message `controlId` identifies.
  *
  * MSA-2 is checked before MSA-1 is read: an accept or a NAK is reported only
  * for the message it answers. MSH-9 and the HL7 version are not checked
  * (#668).
  *
- * Never throws.
+ * @throws {AckException} MSA-1 refused the message. The remote system
+ *   understood it.
+ * @throws {MllpInvalidResponseError} Not a usable acknowledgment of this
+ *   message: unreadable bytes, an MSA-1 outside Table 0008, or an MSA-2
+ *   naming another message.
  */
-export function decode(bytes: Uint8Array, controlId: string): DecodeResponse {
+export function decode(
+  bytes: Uint8Array,
+  controlId: string
+): MllpClientResponse {
   let raw: string;
   let tree: Root;
   try {
     raw = decodeBytes(bytes);
     tree = parseHL7v2(raw);
   } catch (error) {
-    return invalid(error, controlId);
+    throw new MllpInvalidResponseError(error, controlId);
   }
 
   const answers = read(tree, "MSA-2[1].1.1");
   if (answers !== controlId) {
-    return invalid(
+    throw new MllpInvalidResponseError(
       `MSA-2 is "${answers}", so it answers a different message — usually a late acknowledgment from an earlier timed-out send.`,
       controlId
     );
@@ -90,10 +84,10 @@ export function decode(bytes: Uint8Array, controlId: string): DecodeResponse {
 
   const code = read(tree, "MSA-1[1].1.1");
   if (isAckNakCode(code)) {
-    return { exception: nakException(tree, code), type: "nak" };
+    throw nakException(tree, code);
   }
   if (!isAckSuccessCode(code)) {
-    return invalid(
+    throw new MllpInvalidResponseError(
       code === ""
         ? "MSA-1 is empty, so accept or reject cannot be determined."
         : `MSA-1 is "${code}", which is not one of AA, AE, AR, CA, CE, or CR.`,
@@ -102,22 +96,12 @@ export function decode(bytes: Uint8Array, controlId: string): DecodeResponse {
   }
 
   return {
-    response: {
-      code,
-      controlId: answers,
-      // MSH-10 of the acknowledgment itself. MUST NOT be used for correlation.
-      id: read(tree, "MSH-10[1].1.1"),
-      raw,
-      text: read(tree, "MSA-3[1].1.1") || undefined,
-      tree,
-    },
-    type: "accept",
-  };
-}
-
-function invalid(reason: unknown, controlId: string): DecodeResponse {
-  return {
-    error: new MllpInvalidResponseError(reason, controlId),
-    type: "invalid",
+    code,
+    controlId: answers,
+    // MSH-10 of the acknowledgment itself. MUST NOT be used for correlation.
+    id: read(tree, "MSH-10[1].1.1"),
+    raw,
+    text: read(tree, "MSA-3[1].1.1") || undefined,
+    tree,
   };
 }

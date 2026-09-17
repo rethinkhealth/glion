@@ -1,4 +1,3 @@
-export { MllpAlreadySendingError } from "./mllp-already-sending-error";
 export { MllpClientError, MllpErrorCode } from "./base";
 export type { MllpDelivery } from "./base";
 export { MllpClientClosedError } from "./mllp-client-closed-error";

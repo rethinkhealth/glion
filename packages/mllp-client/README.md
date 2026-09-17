@@ -1,15 +1,15 @@
 # @glion/mllp-client
 
-A simple HL7v2 MLLP client for Node.js and Cloudflare Workers.
+An HL7v2 MLLP client for Node.js, Bun, Deno, and Cloudflare Workers.
 
 - 📦 **MLLP built in.** Framing, message boundaries and acknowledgment matching are handled. You send a parsed message and get one back.
 - 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, connection attempts retried with backoff, TCP keepalive by default, and explicit states you can read.
-- ⚡ **Thin over TCP.** One socket, one message at a time. No queue, no worker threads, no polling.
+- ⚡ **Thin over TCP.** One socket, one message on the wire at a time. Further sends queue in call order. No worker threads, no polling.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
-- 🧩 **Any transport.** TCP included. TLS, Cloudflare Workers or an in-memory socket plug in behind it.
+- 🧩 **Any transport.** TCP on Node.js, Bun, Deno, and Cloudflare Workers included. TLS or an in-memory socket plug in behind the same two-method interface.
 - 🔤 **Typed end to end.** TypeScript throughout, with parsed HL7v2 going in and coming out.
 
-> **Coming soon** — TLS and Cloudflare Workers adapters. Today the only bundled adapter is Node.js over TCP.
+> TLS is not bundled yet; it is tracked in [#657](https://github.com/rethinkhealth/glion/issues/657).
 
 ## Install
 
@@ -171,21 +171,22 @@ Sends one message and resolves with the acknowledgment that answers it. Connects
 - `AckException` — the receiver refused the message. The connection stays open.
 - `MllpInvalidMessageError` — no MSH-10, or the message could not be serialized. Nothing was sent.
 - `MllpInvalidOptionError` — `timeoutMs` is out of range. Nothing was sent.
-- `MllpAlreadySendingError` — another send is in flight.
-- `MllpClientClosedError` — the client is closed.
+- `MllpClientClosedError` — the client is closed, or closed while this send was waiting its turn.
 - `MllpConnectionFailedError`, `MllpConnectionTimeoutError` — the connection could not be opened.
 - `MllpSendTimeoutError`, `MllpConnectionLostError`, `MllpInvalidResponseError` — the exchange failed. These close the connection; see [Errors](#errors).
+- `MllpSendAbortedError` — `destroy()` cut the send off. Delivery is unknown.
 
 Every error carries `delivery`, `not-sent` or `unknown`, the one fact a retry needs; see [Errors](#errors).
 
-One message at a time. To send several, await each in turn:
+One message is on the wire at a time. A `send()` arriving while another is in flight waits its turn, and sends go out in the order they were called, so a batch may be fired at once:
 
 ```ts
-for (const message of batch) {
-  const ack = await client.send(message);
-  record(ack.controlId, ack.code);
-}
+const outcomes = await Promise.allSettled(
+  batch.map((message) => client.send(message))
+);
 ```
+
+The queue is in memory and has no bound. `timeoutMs` runs from the moment the write starts, not from the call. A send still waiting when `close()` or `destroy()` is called, or when a failure closes the client, rejects at once with `delivery: "not-sent"`: with `MllpClientClosedError`, or with the failure itself when the failure is one of not being sent, such as the dial's `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, as `connect()` gets. Nothing behind a failed message goes out. See [Does `send()` queue?](#does-send-queue).
 
 ### `client.connect()`
 
@@ -197,7 +198,7 @@ Opens the connection without sending anything, dialing again under the [reconnec
 
 Idempotent. On a connected client it resolves at once; while an attempt is in flight it waits for the outcome and shares it.
 
-**Throws** the last attempt's `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, or `MllpClientClosedError` when the client is already closed or `close()` cancelled the attempt.
+**Throws** the last attempt's `MllpConnectionFailedError` or `MllpConnectionTimeoutError`, or `MllpClientClosedError` when the client is already closed or `close()` or `destroy()` cancelled the attempt.
 
 ### `client.close()`
 
@@ -205,9 +206,9 @@ Idempotent. On a connected client it resolves at once; while an attempt is in fl
 close(): Promise<void>
 ```
 
-Closes the connection once the message in flight has been acknowledged. New sends are refused from the moment it is called, so an in-flight message is never cut off. An attempt to connect stops at once.
+Closes the connection once the message in flight has been acknowledged. New sends, and sends still waiting their turn, are refused from the moment it is called with `MllpClientClosedError`; the message in flight is never cut off. Await the sends you want delivered before calling it. An attempt to connect stops at once.
 
-Resolves when the connection is down, from any phase. Never throws. Idempotent. The wait is bounded by the in-flight send's own deadline.
+Resolves when the connection is down, from any phase. Never throws. Idempotent. The wait is bounded by the in-flight send's own deadline. If the message it waits for fails, the client closes with that failure; otherwise with `null`, the owner's decision.
 
 ```ts
 process.on("SIGTERM", async () => {
@@ -216,13 +217,13 @@ process.on("SIGTERM", async () => {
 });
 ```
 
-### `client.destroy()`
+### `client.destroy(reason?)`
 
 ```ts
-destroy(): Promise<void>
+destroy(reason?: MllpClientError | null): Promise<void>
 ```
 
-Closes the connection now, without waiting for anything in flight. A message in flight rejects with `MllpSendAbortedError`. An attempt to connect stops at once.
+Closes the connection now, without waiting for anything in flight. A message in flight rejects with `MllpSendAbortedError`. An attempt to connect stops at once. The client closes with `reason`: the `close` event carries it, and so does `cause` on every later call's `MllpClientClosedError`. Omitted or `null`, the client closed by its owner's decision, as `net.Socket.destroy(error)` does. Sends waiting their turn are rejected with `reason` itself when its delivery is `not-sent`, and with `MllpClientClosedError` carrying `reason` otherwise. Arriving while the client is already closing, it cuts the message in flight and joins the ending under way; `reason` is recorded when no failure is known yet.
 
 Resolves when the connection is down, from any phase. Never throws. Idempotent.
 
@@ -243,16 +244,24 @@ Calls `close()`. Lets a client be scoped with `await using`:
 readonly state: MllpClientState
 ```
 
-| Value        | Meaning                                                                     |
-| ------------ | --------------------------------------------------------------------------- |
-| `idle`       | Nothing opened yet. The first `send()` or `connect()` opens the connection. |
-| `connecting` | The connection is being opened, further attempts included.                  |
-| `connected`  | Open, with no message in flight.                                            |
-| `sending`    | A message is on the wire, waiting for its acknowledgment.                   |
-| `closing`    | `close()` is waiting out the message in flight.                             |
-| `closed`     | Done.                                                                       |
+| Value        | Meaning                                                                          |
+| ------------ | -------------------------------------------------------------------------------- |
+| `idle`       | Nothing opened yet. The first `send()` or `connect()` opens the connection.      |
+| `connecting` | The connection is being opened, further attempts included.                       |
+| `connected`  | Open, with no message in flight.                                                 |
+| `sending`    | A message is on the wire, waiting for its acknowledgment. Further sends wait.    |
+| `closing`    | The client is ending: a message being waited out, or the connection coming down. |
+| `closed`     | The connection is down.                                                          |
 
 A client closes once. After `close()`, `destroy()`, a connection the reconnect policy could not open, or a connection that was lost, every call throws `MllpClientClosedError`; construct a new client to send again.
+
+### `client.pending`
+
+```ts
+readonly pending: number
+```
+
+How many sends wait their turn, the one in flight excluded. The queue's backlog, for a metric or a backpressure decision; `0` whenever nothing waits.
 
 ### `client.connected`
 
@@ -271,10 +280,10 @@ off<E>(event: E, listener: MllpClientListener<E>): this
 
 Adds or removes a listener. Both return the client, so calls chain.
 
-| Event     | Listener                                   | Fires when                                                                                                                                                  |
-| --------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `connect` | `() => void`                               | The connection opened.                                                                                                                                      |
-| `close`   | `(error: MllpClientError \| null) => void` | The client is done. Fires once, from any phase, even if it never connected. `error` is the failure it could not recover from, or `null` when you closed it. |
+| Event     | Listener                                   | Fires when                                                                                                                                                   |
+| --------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `connect` | `() => void`                               | The connection opened.                                                                                                                                       |
+| `close`   | `(error: MllpClientError \| null) => void` | The connection is down. Fires once, from any phase, even if it never connected. `error` is the failure that closed the client, or `null` when you closed it. |
 
 A lost connection is not an event of its own: it closes the client, so `close` fires with the failure. Listeners are synchronous, and one that throws propagates to whatever triggered the event.
 
@@ -288,9 +297,16 @@ client
 
 ## Runtimes
 
-The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#custom-socket) — two methods — so supporting a new runtime means writing an adapter, not forking the client.
+The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#custom-socket) — two methods — so supporting a runtime means an adapter, not a fork of the client.
 
-Node.js is the only adapter that ships today.
+| Runtime            | Adapter                                | Import                       | TLS                                                       | Proven by                                 |
+| ------------------ | -------------------------------------- | ---------------------------- | --------------------------------------------------------- | ----------------------------------------- |
+| Node.js ≥ 22       | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Node 22 and 24   |
+| Bun                | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Bun 1.4          |
+| Deno               | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Deno 2.9         |
+| Cloudflare Workers | [`workersSocket`](#cloudflare-workers) | `@glion/mllp-client/workers` | [#657](https://github.com/rethinkhealth/glion/issues/657) | Integration suite in CI, inside `workerd` |
+
+Every adapter runs the same conformance suite: the [`MllpSocket` contract](#custom-socket) case by case, and the client's behaviour over a real socket scenario by scenario. A custom socket can run it too; see `tests/integration/conformance/` in the package source.
 
 ### Node.js
 
@@ -300,22 +316,61 @@ import { nodeSocket } from "@glion/mllp-client/node";
 nodeSocket(options: NodeSocketOptions): MllpSocket
 ```
 
-Plain TCP over `net.Socket`.
+Plain TCP over `net.Socket`. The same adapter runs on Bun and Deno through their `node:net` compatibility; no separate import is needed there.
 
-| Option            | Type     | Default  | Description                                                                                                 |
-| ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------- |
-| `host`            | `string` | required | Host name or address of the receiver.                                                                       |
-| `port`            | `number` | required | TCP port of the receiver.                                                                                   |
-| `gracefulCloseMs` | `number` | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                               |
-| `keepAliveIdleMs` | `number` | `30000`  | Idle time before the first keepalive probe, so a silent NAT or firewall drop surfaces before the next send. |
+| Option            | Type     | Default  | Description                                                                                                                                                                              |
+| ----------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `host`            | `string` | required | Host name or address of the receiver.                                                                                                                                                    |
+| `port`            | `number` | required | TCP port of the receiver.                                                                                                                                                                |
+| `gracefulCloseMs` | `number` | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                                                                                                            |
+| `keepAliveIdleMs` | `number` | `30000`  | Idle time before the first keepalive probe. Once the probes fail, the OS ends the socket, and the next send fails at once with `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`. |
 
-`TCP_NODELAY` is set, so a message goes out immediately rather than waiting on Nagle's algorithm.
+`TCP_NODELAY` is set, so a message goes out immediately rather than waiting on Nagle's algorithm. On Bun and Deno the keepalive delay is passed through to the runtime; whether the runtime honours it is not verified.
 
 ```ts
 const client = new MllpClient({
   socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
 });
 ```
+
+Deno needs `--allow-net` for the receiver's host and port.
+
+### Cloudflare Workers
+
+```ts
+import { workersSocket } from "@glion/mllp-client/workers";
+
+workersSocket(options: WorkersSocketOptions): MllpSocket
+```
+
+Plain TCP over `cloudflare:sockets`. The module resolves only inside the Workers runtime; import it from the `./workers` subpath, never from `.`.
+
+| Option | Type     | Default  | Description                           |
+| ------ | -------- | -------- | ------------------------------------- |
+| `host` | `string` | required | Host name or address of the receiver. |
+| `port` | `number` | required | TCP port of the receiver.             |
+
+```ts
+import { MllpClient } from "@glion/mllp-client";
+import { workersSocket } from "@glion/mllp-client/workers";
+
+export default {
+  async fetch(request: Request): Promise<Response> {
+    await using client = new MllpClient({
+      socket: workersSocket({ host: "hl7.example.org", port: 2575 }),
+    });
+    const ack = await client.send(await messageFrom(request));
+    return Response.json({ code: ack.code, controlId: ack.controlId });
+  },
+};
+```
+
+What differs from Node:
+
+- A Worker reaches only endpoints routable from Cloudflare's network. A receiver on a private network needs a publicly reachable endpoint in front of it.
+- `close()` resolves as soon as the runtime has ended the socket; there is no grace window.
+- Locally, under Miniflare (`wrangler dev` or the Vitest integration), connections go through a proxy, so `MllpConnectionFailedError.cause` carries the proxy's message rather than a socket error code. `code` is the same in both.
+- Cloudflare blocks some destination ports.
 
 ### Custom Socket
 
@@ -350,10 +405,10 @@ A rejection from the receiver is **not** an `MllpClientError` — see [`AckExcep
 
 `delivery` is the one fact a retry decision needs:
 
-| `delivery` | Meaning                                                                           | Codes                                                                                                       |
-| ---------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `not-sent` | Nothing reached the wire. The message may be sent again as it is.                 | `INVALID_OPTION`, `INVALID_MESSAGE`, `ALREADY_SENDING`, `CLOSED`, `CONNECTION_FAILED`, `CONNECTION_TIMEOUT` |
-| `unknown`  | The message may have reached the receiver. Sending it again may deliver it twice. | `SEND_TIMEOUT`, `CONNECTION_LOST`, `SEND_ABORTED`, `INVALID_RESPONSE`                                       |
+| `delivery` | Meaning                                                                           | Codes                                                                                    |
+| ---------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `not-sent` | Nothing reached the wire. The message may be sent again as it is.                 | `INVALID_OPTION`, `INVALID_MESSAGE`, `CLOSED`, `CONNECTION_FAILED`, `CONNECTION_TIMEOUT` |
+| `unknown`  | The message may have reached the receiver. Sending it again may deliver it twice. | `SEND_TIMEOUT`, `CONNECTION_LOST`, `SEND_ABORTED`, `INVALID_RESPONSE`                    |
 
 ```ts
 import { MllpClientError, MllpErrorCode } from "@glion/mllp-client";
@@ -393,21 +448,13 @@ The message cannot be sent as it stands: no MSH-10 control ID, or it could not b
 
 **Nothing reached the wire and the connection is still in step**, so the next message can go out on it. Fix or quarantine the message; do not reconnect.
 
-### `ALREADY_SENDING`
-
-`MllpAlreadySendingError` · delivery `not-sent` · field: `controlId`
-
-`send()` was called while another send was in flight. `controlId` identifies the message already on the wire.
-
-The client is lockstep by design. Await each send before starting the next, or give each concurrent stream its own client.
-
 ### `CLOSED`
 
 `MllpClientClosedError` · delivery `not-sent` · field: `cause`
 
-The client is closed, so the call cannot be served. Also the error a `connect()` gets when `close()` cancelled the attempt it was waiting for.
+The client is closed or closing, so the call cannot be served. Also the error a `connect()` gets when `close()` or `destroy()` cancelled the attempt it was waiting for, and the error a `send()` gets when the client closed while it was waiting its turn; a send waiting behind a dial that failed gets the dial's error instead.
 
-A client closes once. Construct a new one to send again. When the client closed because the reconnect policy gave up, `cause` is the last attempt's failure.
+A client closes once. Construct a new one to send again. When the client closed on a failure, `cause` is that failure: the last attempt's `CONNECTION_FAILED` or `CONNECTION_TIMEOUT` when the reconnect policy gave up, the `CONNECTION_LOST`, `SEND_TIMEOUT`, or `INVALID_RESPONSE` that ended an earlier message, including one `close()` was waiting out, or the `reason` given to `destroy()`.
 
 ### `CONNECTION_FAILED`
 
@@ -488,6 +535,12 @@ Once a send times out, that no longer holds. A wrong guess here reports one mess
 Clients that pipeline can survive a timeout, because they keep a table of outstanding control IDs and a background reader to match against it. A lockstep client has no table to fall back on.
 
 The client closes with the failure, and never sends the failed message again — only you know whether the receiver already has it. Construct a new client to go on, as you would open a new socket.
+
+### Does `send()` queue?
+
+Yes, in memory and without a bound. A `send()` arriving while a message is on the wire waits for that message's acknowledgment, then goes out; sends leave in the order they were called, one at a time, so an A01 fired before its A03 reaches the receiver first. Nothing goes out behind a message whose delivery is unknown: a failure closes the client, and every send still waiting rejects with `CLOSED` and `delivery: "not-sent"`. A send waiting behind a dial that fails rejects with the dial's error, as `connect()` does.
+
+The queue exists only in this process. A message waiting in it is not on disk, so a crash loses it without a trace, and a producer faster than the receiver grows it without limit. An interface that must not lose events keeps its own persistent outbound queue and hands the client one message at a time; the client's line is for a batch whose outcomes the caller is awaiting.
 
 ### Why a socket rather than a host and port?
 

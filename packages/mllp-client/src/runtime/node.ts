@@ -29,8 +29,9 @@ export interface NodeSocketOptions {
    */
   readonly gracefulCloseMs?: number;
   /**
-   * Idle time before the first keepalive probe, in milliseconds. A silent NAT
-   * or firewall drop surfaces after this rather than at the next send.
+   * Idle time before the first keepalive probe, in milliseconds. Once the
+   * probes fail, the OS ends the socket, and the next send fails at once with
+   * `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`.
    *
    * @default 30_000.
    */

@@ -210,7 +210,7 @@ When considering a defensive measure, give actual numbers. "Zero with current ad
 
 ### 12. Assertions are for bugs
 
-An `assert*` function throws only when an internal invariant is violated — a state the phase graph does not allow, a handle that cannot be null there. Its error says "this is a bug; please report it." Expected runtime conditions — the client is closed, a send is already in flight, the remote refused — are ordinary control flow at the call site, throwing the typed public error directly. Validating an option a caller passed is the one `assert*` that throws a public error: it runs before anything happens, and an out-of-range option is a caller bug. Never route a runtime condition through an `assert*` helper, and never let an `assert*` helper stand in as a middleman that builds a public error from placeholders.
+An `assert*` function throws only when an internal invariant is violated — a state the phase graph does not allow, a handle that cannot be null there. Its error says "this is a bug; please report it." Expected runtime conditions — the client is closed, the remote refused — are ordinary control flow at the call site, throwing the typed public error directly. Validating an option a caller passed is the one `assert*` that throws a public error: it runs before anything happens, and an out-of-range option is a caller bug. Never route a runtime condition through an `assert*` helper, and never let an `assert*` helper stand in as a middleman that builds a public error from placeholders.
 
 **Anti-pattern from real work**: `assertReadyToSend(state)` that threw `MllpAlreadySendingError` and `MllpClientClosedError` for normal states, next to a genuine bug guard for impossible ones. The two runtime throws belong in `send()`; only the impossible-state branch is an assertion.
 
@@ -301,7 +301,7 @@ Steps 1 and 2 correspond to the "Mutation testing" comment CI posts on the PR; t
 
 - **Vitest**, base config in `tools/testing/src/vitest.config.ts` (`@glion/testing`).
 - Test files: `**/*.test.ts`, `**/*.test.tsx`.
-- Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier.
+- Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier. The one exception is `tests/regressions/`, one file per bug, `<issue>-<symptom>.test.ts`, with the header CONTRIBUTING describes.
 - Each package has its own `vitest.config.ts` for package-specific settings, and a `tests/tsconfig.json` so tests are type-checked by `pnpm check-types` (CI runs it).
 - Coverage reporters: text, html, json.
 - `expect()` inside `it()` / `test()` blocks.
