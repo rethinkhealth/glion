@@ -1,6 +1,6 @@
 {
   "name": "@glion/util-uid",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "Time-ordered unique IDs for HL7v2 — the ULID idea resized to a 20-character default that fits MSH-10 and other ST identifier fields",
   "keywords": [
     "health",
@@ -36,7 +36,7 @@
   },
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

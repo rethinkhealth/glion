@@ -1,5 +1,9 @@
 # Glion Documentation Framework
 
+## Status
+
+Accepted
+
 This is the canonical reference for how we write documentation across `glion.dev`. Anyone (human or agent) authoring or editing a documentation page should read this once before starting and consult the relevant section while writing.
 
 It exists because the most expensive documentation mistakes are structural — putting content in the wrong section, blending two user needs into one page, drifting from voice — and these mistakes compound. Catching them at write-time is cheap; catching them after the IA has solidified is not.

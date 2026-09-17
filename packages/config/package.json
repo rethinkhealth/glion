@@ -1,6 +1,6 @@
 {
   "name": "@glion/config",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "Configuration schema and loader for hl7v2",
   "keywords": [
     "config",
@@ -36,7 +36,7 @@
   "scripts": {
     "build": "tsdown && tsc --emitDeclarationOnly && pnpm build:schema",
     "build:schema": "node --input-type=module -e \"import{writeFileSync}from'fs';import{jsonSchema}from'./dist/json-schema.js';writeFileSync('schema.json',JSON.stringify(jsonSchema,null,2));\"",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@glion/utils": "workspace:*",
-    "cosmiconfig": "9.0.1",
+    "cosmiconfig": "10.0.1",
     "unified": "11.0.5",
     "zod": "3.25.76"
   },
@@ -62,7 +62,7 @@
     "zod-to-json-schema": "3.25.0"
   },
   "engines": {
-    "node": ">=22"
+    "node": "^22.18 || >=24"
   },
   "packageManager": "pnpm@10.14.0"
 }

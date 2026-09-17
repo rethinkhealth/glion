@@ -38,7 +38,8 @@ const nak: SendNakOutcome = {
 };
 
 const transport: SendTransportOutcome = {
-  code: "CONNECT_FAILED",
+  code: "CONNECTION_FAILED",
+  delivery: "not-sent",
   kind: "transport",
   message: "connection refused",
   target: TARGET,
@@ -128,7 +129,7 @@ describe("renderHuman", () => {
       const out = renderHuman(transport);
       expect(out).not.toContain("\n");
       expect(out).toContain("127.0.0.1:2575");
-      expect(out).toContain("CONNECT_FAILED");
+      expect(out).toContain("CONNECTION_FAILED");
       expect(out).toContain("connection refused");
     });
   });
@@ -208,7 +209,8 @@ describe("renderJson", () => {
     it("carries ok:false, kind:transport, code, and message", () => {
       const json = JSON.parse(renderJson(transport));
       expect(json).toEqual({
-        code: "CONNECT_FAILED",
+        code: "CONNECTION_FAILED",
+        delivery: "not-sent",
         host: "127.0.0.1",
         kind: "transport",
         message: "connection refused",

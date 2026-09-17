@@ -1,9 +1,6 @@
 /**
- * Node runtime adapter for `MllpClient`.
- *
- * Opens a `net.Socket` and ends it the way Node expects — gracefully first,
- * then forced after a short grace period, so closing always resolves in
- * bounded time. Framing and stream ownership belong to the layer above.
+ * Node runtime adapter for `MllpClient`: one `net.Socket`, ended gracefully
+ * first and forced after a grace period. Closing resolves in bounded time.
  *
  * @module
  */
@@ -32,8 +29,9 @@ export interface NodeSocketOptions {
    */
   readonly gracefulCloseMs?: number;
   /**
-   * Idle time before the first keepalive probe, in milliseconds. A silent NAT
-   * or firewall drop surfaces after this rather than at the next send.
+   * Idle time before the first keepalive probe, in milliseconds. Once the
+   * probes fail, the OS ends the socket, and the next send fails at once with
+   * `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`.
    *
    * @default 30_000.
    */

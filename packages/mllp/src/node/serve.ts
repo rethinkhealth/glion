@@ -327,19 +327,8 @@ function handleConnection(
             const text = decodeBytes(payload);
             response = await app.handle(text, payload, connection);
           } catch (messageError) {
-            // A decode failure is the server's own error — translated into an
-            // MllpServerError so we never leak the codec's CharsetError to
-            // onError (the CharsetError is kept on `cause`). A handler/middleware
-            // throw is the consumer's own error and passes through unchanged.
-            // The connection survives either way.
-            const error =
-              messageError instanceof CharsetError
-                ? new MllpServerError(
-                    MllpServerErrorCode.INCOMPATIBLE_CHARSET,
-                    "The inbound message is not valid UTF-8; only UTF-8 is supported.",
-                    { cause: messageError }
-                  )
-                : messageError;
+            // The connection survives a per-message error either way.
+            const error = toMessageError(messageError);
             await reportError(
               error,
               connection,
@@ -402,4 +391,20 @@ function handleConnection(
 
   // oxlint-disable-next-line no-void
   void processMessages();
+}
+
+/**
+ * A decode failure is the server's own error — translated into an
+ * MllpServerError so the codec's CharsetError never reaches onError (it is
+ * kept on `cause`). A handler or middleware throw is the consumer's own error
+ * and passes through unchanged.
+ */
+function toMessageError(error: unknown): unknown {
+  return error instanceof CharsetError
+    ? new MllpServerError(
+        MllpServerErrorCode.INCOMPATIBLE_CHARSET,
+        "The inbound message is not valid UTF-8; only UTF-8 is supported.",
+        { cause: error }
+      )
+    : error;
 }

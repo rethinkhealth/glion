@@ -56,6 +56,8 @@ These four are one architectural cluster. Shipping them separately churns the st
 
 ### T0-1. Send queue — replace `ALREADY_SENDING` with serialization
 
+_Superseded by ADR 0022 (#774): `send()` queues in call order and `ALREADY_SENDING` is gone; the queue is unbounded, with `client.pending` as the backlog measure. The bound and its typed error are #781._
+
 **Gap.** A second concurrent `send()` throws `MllpAlreadySendingError`. Every consumer with more than one producer (an HTTP gateway — #658 — a worker pool, a fan-in router) must therefore build its own mutex, and get its backpressure and ordering right, before it can use the client at all.
 
 **Why it is table stakes.** ioredis's offline queue and pg's pool queue exist precisely because "you called while I was busy" is not an answer a client may give. No mainstream client makes the caller serialise.
@@ -163,5 +165,5 @@ The package is pre-1.0 and already shipped one breaking rewrite (#669, #691). Th
 
 ## Related
 
-- ADR 0020 (`docs/adr/0020-mllp-client-architecture.md`), ADR 0018, ADR 0019
+- ADR 0020 (withdrawn 2026-09-10; the shipped design is recorded by the package itself, and reconnect by ADR 0021), ADR 0018, ADR 0019
 - Issues: #657 (TLS), #690 (idle drop), #646 (idempotency/retry), #470 (observability), #685 (parser injection), #668/#670 (ACK conformance), #658 (HTTP→MLLP gateway), #671/#662 (charset)

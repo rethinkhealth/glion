@@ -5,14 +5,15 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "outputLogs": "new-only"
     },
     "//#format": {},
     "//#lint": {
       "cache": false
     },
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": ["^build"]
     },
     "dev": {
       "cache": false,
@@ -23,15 +24,10 @@
       "cache": false
     },
     "test": {
-      "dependsOn": ["^build"]
-    },
-    "test:bun": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
     },
     "test:cf": {
-      "dependsOn": ["^build"]
-    },
-    "test:deno": {
       "dependsOn": ["^build"]
     },
     "check:readme": {
@@ -41,6 +37,10 @@
     "publint": {
       "dependsOn": ["build"],
       "outputs": []
+    },
+    "mutate": {
+      "dependsOn": ["^build"],
+      "cache": false
     }
   }
 }

@@ -4,7 +4,20 @@ import core from "ultracite/oxlint/core";
 export default defineConfig({
   extends: [core],
   ignorePatterns: ["**/*.hbs", ".agents/**", ".claude/**"],
+  jsPlugins: ["oxlint-plugin-complexity"],
+  overrides: [
+    {
+      // Test and bench bodies are sequential scenarios; their nesting is
+      // describe/it callbacks, not control flow worth capping.
+      files: ["**/tests/**", "benchmarks/**"],
+      rules: { "complexity/complexity": "off" },
+    },
+  ],
   rules: {
+    // The plugin below owns both complexity metrics; the built-in rule
+    // counts cyclomatic differently and would report the same functions twice.
+    complexity: "off",
+    "complexity/complexity": ["error", { cognitive: 15, cyclomatic: 20 }],
     "default-case": "off",
     "func-style": "off",
     "import/no-relative-parent-imports": "off",

@@ -22,7 +22,7 @@ The native `@glion/mllp-client` (branch `worktree-mllp-native`) is green (130 te
 - R3. **`connection.ts` rewritten on the inbox.** The waiter slot,
   `pendingError` stash, and `closingExplicit`/`dead` web are replaced by the
   inbox's single internal latch. Every behavior in the baseline regression
-  checklist (`docs/mllp-client-rewrite-baseline.md` §3) is preserved:
+  checklist (`docs/mllp-client-rewrite-baseline.md` (removed 2026-09-10) §3) is preserved:
   persistent read loop, late-ACK buffering + correlation rejection, flood cap,
   send-timeout-stays-connected, slowloris partial reset, single drop
   notification, write-failure semantics, close-mid-send, orphan-close contract.
@@ -78,7 +78,7 @@ The native `@glion/mllp-client` (branch `worktree-mllp-native`) is green (130 te
 
 ## Dependencies / Assumptions
 
-- The baseline doc (`docs/mllp-client-rewrite-baseline.md`) is the behavioral
+- The baseline doc (`docs/mllp-client-rewrite-baseline.md` (removed 2026-09-10)) is the behavioral
   contract of record; its §3 checklist defines "no regression".
 - PR #667 (XState reference) stays open per maintainer decision; unaffected.
 

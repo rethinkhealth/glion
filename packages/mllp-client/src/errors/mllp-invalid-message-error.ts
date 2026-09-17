@@ -1,4 +1,4 @@
-import { MllpClientError, MllpErrorCode, reasonOf } from "./base";
+import { MllpClientError, MllpErrorCode } from "./base";
 
 /**
  * The message cannot be sent as-is: it has no MSH-10 control ID, it could not
@@ -8,10 +8,11 @@ import { MllpClientError, MllpErrorCode, reasonOf } from "./base";
 export class MllpInvalidMessageError extends MllpClientError {
   override readonly name = "MllpInvalidMessageError";
   readonly code = MllpErrorCode.INVALID_MESSAGE;
+  readonly delivery = "not-sent";
 
   constructor(cause: unknown) {
     super(
-      `The message could not be prepared for sending; nothing was written: ${reasonOf(cause)}`,
+      "The message could not be prepared for sending; nothing was written.",
       { cause }
     );
   }

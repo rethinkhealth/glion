@@ -57,6 +57,21 @@ const refusingSocket: MllpSocket = {
   connect: () => Promise.reject(new Error("ECONNREFUSED")),
 };
 
+/** A socket refused `failures` times, then the one `fakeSocket` gives. */
+function flakySocket(failures: number, ack: Uint8Array): MllpSocket {
+  const open = fakeSocket(ack);
+  let dials = 0;
+  return {
+    close: open.close,
+    connect: (signal) => {
+      dials += 1;
+      return dials <= failures
+        ? Promise.reject(new Error("ECONNREFUSED"))
+        : open.connect(signal);
+    },
+  };
+}
+
 /** Capture stdout/stderr; `tty` makes stdout report as a TTY (human output). */
 function capture(tty = false) {
   const state = { err: "", out: "" };
@@ -139,6 +154,7 @@ describe("runSend (integration, fake socket)", () => {
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
       cwd: "/tmp",
+      reconnect: false,
       socket: refusingSocket,
       stderr,
       stdin: Readable.from(ADT),
@@ -149,6 +165,24 @@ describe("runSend (integration, fake socket)", () => {
     const json = JSON.parse(state.out);
     expect(json.ok).toBe(false);
     expect(json.kind).toBe("transport");
+  });
+
+  it("reconnects when the first dial is refused, and reports the accept", async () => {
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: "/tmp",
+      reconnect: { attempts: 1, delay: () => 0 },
+      socket: flakySocket(1, ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    expect(code).toBe(0);
+    const json = JSON.parse(state.out);
+    expect(json.ok).toBe(true);
+    expect(json.code).toBe("AA");
   });
 
   it("errors (exit 2) when no target is given", async () => {
@@ -244,7 +278,7 @@ describe("runSend (integration, fake socket)", () => {
     const json = JSON.parse(state.out);
     expect(json.kind).toBe("transport");
     expect(json.code).toBe("INVALID_MESSAGE");
-    expect(json.message).toContain("MSH-10");
+    expect(json.cause).toContain("MSH-10");
   });
 
   it("reports INVALID_MESSAGE (exit 2) when the message contains a reserved VT byte", async () => {
@@ -288,6 +322,7 @@ describe("runSend (integration, fake socket)", () => {
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
       cwd: "/tmp",
+      reconnect: false,
       socket: refusingSocket,
       stderr,
       stdin: Readable.from(ADT),

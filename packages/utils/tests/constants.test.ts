@@ -1,6 +1,6 @@
 import { DEFAULT_DELIMITERS } from "../src/constants";
 
-describe(DEFAULT_DELIMITERS, () => {
+describe("DEFAULT_DELIMITERS", () => {
   it("should be defined", () => {
     expect(DEFAULT_DELIMITERS).toBeDefined();
     expect(DEFAULT_DELIMITERS).toStrictEqual({

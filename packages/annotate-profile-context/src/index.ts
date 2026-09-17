@@ -123,6 +123,7 @@ function loadFields(
  * through composite datatypes to resolve component and subcomponent
  * datatypes (max 2 additional levels).
  */
+// oxlint-disable-next-line complexity/complexity -- cold-path profile loading: extracting the nested component scan regressed the cold-cache lint-profile bench 34% under CodSpeed, so it stays inline
 async function loadDatatypes(
   fields: Map<string, FieldDefinition>,
   version: string

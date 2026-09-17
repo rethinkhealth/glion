@@ -22,7 +22,10 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [I Want To Contribute](#i-want-to-contribute)
   - [Reporting Bugs](#reporting-bugs)
   - [Suggesting Enhancements](#suggesting-enhancements)
+- [Testing](#testing)
 - [Packaging Checks](#packaging-checks)
+- [Preview Releases](#preview-releases)
+- [Release Canary](#release-canary)
 
 ## Code of Conduct
 
@@ -113,6 +116,23 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/rethin
 
 <!-- omit in toc -->
 
+## Testing
+
+Every change is judged by the same automated gates whether a person or an agent wrote it: `pnpm check` (lint, formatting, complexity caps), `pnpm check-types` (source and tests), `pnpm test`, and patch coverage on the PR. Run the first three locally before pushing. Human review is reserved for design, HL7v2 semantics, and security, which is only possible when the gates carry everything else.
+
+What a change must bring with it:
+
+1. **Tests next to the code they prove.** Behaviour changes ship with tests in the owning package's `tests/` directory, mirroring the `src/` layout (`src/commands/send.ts` is tested by `tests/commands/send.test.ts`). Adapter behaviour is tested at the adapter, core behaviour at the core.
+2. **A round-trip property for every inverse pair.** A new encode/decode, frame/unframe, parse/format, or select/set pair ships with a [fast-check](https://fast-check.dev/) property asserting `decode(encode(x)) === x` over generated inputs. Example tests cover the cases you imagined; the property covers the empty string, the delimiter inside the data, and the chunk boundary you did not.
+3. **A failing test before a bug fix.** A bug fix lands the regression first, as its own file in the owning package's `tests/regressions/` for logic bugs or as a `qa/fixtures/` message for shape bugs, named after the symptom. The fix is proven by a test that failed on the parent commit. A regression file is `tests/regressions/<issue>-<symptom>.test.ts`, the one exception to the mirrored layout, and opens with a header giving the issue link, the date, the symptom, the cause, and the resolution, so the reader never needs the tracker. A bug found in review gets an issue before its regression file. A defect caught before it shipped is not a regression: its test goes in the feature's test file. The test asserts the contract the bug broke, not the mechanism of the fix. Regressions run with the package's ordinary `pnpm test`; to run them alone, `pnpm --filter @glion/<pkg> test regressions`, or `regressions/<issue>` for one file.
+4. **Mutation survivors triaged.** `pnpm mutate:changed` runs [Stryker](https://stryker-mutator.io/) on every changed package that opts in (today: `parser`, `to-hl7v2`, `mllp-codec`, `mllp-client`, `encode-escapes`, `decode-escapes`, `util-query`; each carries a `stryker.config.mjs` that calls `strykerConfig({ break })` from `@glion/testing/stryker`, so the shared settings live in one place). Run it after tests pass. Each surviving mutant gets either a test whose name states the HL7v2 or MLLP contract it protects, or a `// Stryker disable next-line <mutator>: <reason>` when the mutant is equivalent. Never a test named after the mutant, and never a lowered `break`. CI runs the same command on every PR and the full set weekly. Step by step: [How to run mutation testing and triage survivors](./docs/contributing/mutation-testing.md); the reasoning: [ADR 0022](./docs/adr/0022-mutation-testing.md).
+5. **Lint rules through the shared harness** (once it lands in `@glion/testing`). A lint rule's README Valid and Invalid examples are its test cases, so the two cannot drift.
+6. **A changeset** for any change to a published package (`pnpm changeset`).
+
+Where things live: `benchmarks/README.md` is the contract for performance work, `qa/README.md` describes the conformance, fuzz, and round-trip suites that run against the packages as a consumer would.
+
+<!-- omit in toc -->
+
 ## Packaging Checks
 
 Run `pnpm build && pnpm publint` locally before pushing. CI enforces the same check. See [ADR 0015](./docs/adr/0015-secure-publishing.md) for rationale.
@@ -122,6 +142,12 @@ Run `pnpm build && pnpm publint` locally before pushing. CI enforces the same ch
 ## Preview Releases
 
 Every PR and every commit on `main` publishes preview packages to [pkg.pr.new](https://pkg.pr.new) via `.github/workflows/preview.yml`. The pkg.pr.new bot posts install commands as a PR comment so reviewers and bug reporters can validate a change before it is released to npm. See [ADR 0016](./docs/adr/0016-continuous-preview-releases.md) for rationale.
+
+<!-- omit in toc -->
+
+## Release Canary
+
+`pnpm check:release` compares every public package's workspace version with the npm registry and fails when a version is missing or was published without a provenance attestation. It runs weekly, and on demand, from `.github/workflows/release-canary.yml`; a publish that fails is already reported by the release workflow itself. A new package fails it until a maintainer has published it once from their own account, because npm trusted publishing cannot create a package; see [ADR 0015](./docs/adr/0015-secure-publishing.md).
 
 <!-- omit in toc -->
 

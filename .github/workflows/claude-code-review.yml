@@ -10,8 +10,15 @@ on:
     #   - "src/**/*.js"
     #   - "src/**/*.jsx"
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   claude-review:
+    name: Claude Code Review
     # Optional: Filter by PR author
     if: |
       github.event.label.name == 'claude'
@@ -21,20 +28,21 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
-      id-token: write
+      contents: read # checkout
+      pull-requests: read # read the PR under review
+      issues: read # read linked issues
+      id-token: write # exchange OIDC for the Claude GitHub App token that posts comments
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 1
 
       - name: Run Claude Code Review
         id: claude-review
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@9cdae7f0d995e3ba7c33f226087fdf82a59cd520 # v1.0.223
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           track_progress: true # ✨ Enables tracking comments
@@ -47,6 +55,13 @@ jobs:
             - Potential bugs or issues
             - Security implications
             - Performance considerations
+            - Test strength: for packages with a stryker.config.mjs, the
+              "Mutation testing" comment on this PR lists surviving mutants.
+              Every survivor in a file this PR touches needs either a test
+              named after the HL7v2 or MLLP contract it protects, or a
+              `// Stryker disable next-line <Mutator>: <reason>` stating the
+              equivalence. Flag a test named after a mutant, and flag a
+              lowered `break` threshold; both are rejected.
 
             Provide detailed feedback using inline comments for specific issues.
 

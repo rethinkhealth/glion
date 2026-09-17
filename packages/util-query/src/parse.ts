@@ -110,7 +110,7 @@ export function parse(path: string): PathParts {
 /**
  * Internal implementation of path parsing.
  */
-// oxlint-disable-next-line complexity
+// oxlint-disable-next-line complexity/complexity -- path grammar: one branch per optional path part
 function parseImpl(path: string): PathParts {
   if (!path || typeof path !== "string") {
     throw new Error(`Path must be a non-empty string, got: ${path}`);

@@ -8,10 +8,6 @@ import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 
 // ── For adapter authors ──────────────────────────────────────────────
-//
-// An adapter implements one runtime's transport and nothing else: open a
-// socket, expose it as byte streams, and end it. MLLP framing and stream
-// ownership are handled above, so an adapter never sees a frame.
 
 /** The byte streams an open socket carries. */
 export interface MllpStreams {
@@ -41,7 +37,7 @@ export interface MllpSocket {
 
 // ── For application authors ──────────────────────────────────────────
 
-/** The client's connection phase. */
+/** The client's phase. */
 export type MllpClientState =
   | "closed"
   | "closing"
@@ -49,6 +45,22 @@ export type MllpClientState =
   | "connecting"
   | "idle"
   | "sending";
+
+export interface MllpReconnectOptions {
+  /**
+   * Attempts after a failed one before the client closes. `Infinity` for no
+   * limit.
+   *
+   * @default 5
+   */
+  readonly attempts?: number;
+  /**
+   * Time to wait before `attempt` in milliseconds.
+   *
+   * @default full-jitter exponential backoff from 1 s, capped at 30 s
+   */
+  readonly delay?: (attempt: number) => number;
+}
 
 export interface MllpSendOptions {
   /** Overrides the default send deadline: write plus acknowledgment wait. */
@@ -58,15 +70,32 @@ export interface MllpSendOptions {
 export interface MllpClientOptions {
   /** Runtime adapter; e.g. `nodeSocket` from `@glion/mllp-client/node`. */
   readonly socket: MllpSocket;
-  /** Time to wait for the connection to open. Default 10 000 ms. */
+  /**
+   * Time to wait for the connection to open, in milliseconds.
+   *
+   * @default 10_000
+   */
   readonly connectTimeoutMs?: number;
-  /** Time to wait for an acknowledgment after sending. Default 30 000 ms. */
+  /**
+   * Time to wait for an acknowledgment after sending, in milliseconds.
+   *
+   * @default 30_000
+   */
   readonly sendTimeoutMs?: number;
   /**
    * Maximum bytes buffered while receiving one message. A remote system that
-   * never finishes one is dropped once it exceeds this. Default 16 MiB.
+   * never finishes one is dropped once it exceeds this.
+   *
+   * @default 16 MiB
    */
   readonly maxBufferedBytes?: number;
+  /**
+   * How the client dials again after a connection attempt fails. `false`: it
+   * dials once.
+   *
+   * @default 5 attempts with full-jitter backoff, about 30 seconds in all
+   */
+  readonly reconnect?: MllpReconnectOptions | false;
 }
 
 /**
@@ -77,20 +106,13 @@ export interface MllpClientOptions {
  */
 export interface MllpClientResponse {
   /**
-   * MSH-10 of the acknowledgment itself: the receiver's own identifier for
-   * this reply, which it will have logged under. Useful for tracing a message
-   * across both systems; never useful for correlation — see `controlId`.
+   * MSH-10 of the acknowledgment itself, for tracing. MUST NOT be used for
+   * correlation; see `controlId`.
    */
   readonly id: string;
   /**
-   * MSA-2, which HL7v2 also calls the Message Control ID: the MSH-10 of the
-   * message this one answers.
-   *
-   * The standard gives MSH-10 and MSA-2 the same field name, and that is not
-   * an accident — MSA-2 *contains* the other message's MSH-10. Which is why
-   * `id` and this are both control IDs and mean opposite things: `id` is who
-   * this acknowledgment is, `controlId` is who it is about. MSA-2 is the only
-   * back-reference HL7v2 provides, and so the only thing correlation can use.
+   * MSA-2: the MSH-10 of the message this one answers. HL7v2 names both
+   * fields Message Control ID. The only field correlation may use.
    */
   readonly controlId: string;
   /** The acknowledgment, parsed. */

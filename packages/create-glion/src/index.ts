@@ -84,6 +84,37 @@ function extractPickerFlag(args: string[]): {
   return { args: out, wantsPicker };
 }
 
+async function chooseExample(
+  requested: string | undefined,
+  wantsPicker: boolean
+): Promise<ExampleId> {
+  if (requested !== undefined) {
+    if (!isExampleId(requested)) {
+      p.cancel(
+        `Unknown example: ${requested}. Available: ${EXAMPLES.map((e) => e.value).join(", ")}`
+      );
+      process.exit(1);
+    }
+    return requested;
+  }
+  if (!wantsPicker) {
+    return DEFAULT_EXAMPLE;
+  }
+  const choice = await p.select<ExampleId>({
+    initialValue: DEFAULT_EXAMPLE,
+    message: "Choose an example",
+    options: EXAMPLES.map((e) => ({
+      hint: e.hint,
+      label: e.label,
+      value: e.value,
+    })),
+  });
+  if (p.isCancel(choice)) {
+    abort();
+  }
+  return choice;
+}
+
 async function run(): Promise<void> {
   const { args: cleanArgs, wantsPicker } = extractPickerFlag(
     process.argv.slice(2)
@@ -129,33 +160,7 @@ async function run(): Promise<void> {
     }
   }
 
-  let example = values.example;
-  if (example && !isExampleId(example)) {
-    p.cancel(
-      `Unknown example: ${example}. Available: ${EXAMPLES.map((e) => e.value).join(", ")}`
-    );
-    process.exit(1);
-  }
-
-  if (!example) {
-    if (wantsPicker) {
-      const choice = await p.select({
-        initialValue: DEFAULT_EXAMPLE,
-        message: "Choose an example",
-        options: EXAMPLES.map((e) => ({
-          hint: e.hint,
-          label: e.label,
-          value: e.value,
-        })),
-      });
-      if (p.isCancel(choice)) {
-        abort();
-      }
-      example = choice;
-    } else {
-      example = DEFAULT_EXAMPLE;
-    }
-  }
+  const example = await chooseExample(values.example, wantsPicker);
 
   const spinner = p.spinner();
   spinner.start(`Downloading example: ${example}`);

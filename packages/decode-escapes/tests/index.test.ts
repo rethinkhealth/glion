@@ -1,4 +1,4 @@
-import type { Segment } from "@glion/ast";
+import type { Delimiters, Segment } from "@glion/ast";
 import { f, m, s } from "@glion/builder";
 import { unified } from "unified";
 

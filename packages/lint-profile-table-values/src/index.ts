@@ -30,6 +30,24 @@ function normalizeTableId(tableRef: string): string {
  *   unified().use(hl7v2LintTableValues);
  *   ```;
  */
+function resolveHl7Table(
+  ctx: ProfileContext,
+  segmentName: string,
+  sequence: number
+) {
+  const fieldProfile = ctx.fields.get(segmentName)?.bySequence.get(sequence);
+  if (!fieldProfile?.table) {
+    return;
+  }
+  const tableId = normalizeTableId(fieldProfile.table);
+  const tableDef = ctx.tables.get(tableId);
+  // Only HL7-defined tables are validated; user tables hold site-specific codes.
+  if (tableDef?.type !== "hl7") {
+    return;
+  }
+  return { fieldProfile, tableDef, tableId };
+}
+
 const hl7v2LintTableValues = lintRule<Root>(
   { origin: "hl7v2-lint:table-values" },
   (tree, file) => {
@@ -49,26 +67,11 @@ const hl7v2LintTableValues = lintRule<Root>(
         return SKIP;
       }
 
-      const fieldDef = ctx.fields.get(segment.name);
-      if (!fieldDef) {
+      const resolved = resolveHl7Table(ctx, segment.name, info.sequence);
+      if (!resolved) {
         return SKIP;
       }
-
-      const fieldProfile = fieldDef.bySequence.get(info.sequence);
-      if (!fieldProfile?.table) {
-        return SKIP;
-      }
-
-      const tableId = normalizeTableId(fieldProfile.table);
-      const tableDef = ctx.tables.get(tableId);
-      if (!tableDef) {
-        return SKIP;
-      }
-
-      // Only validate HL7-defined tables
-      if (tableDef.type !== "hl7") {
-        return SKIP;
-      }
+      const { fieldProfile, tableId, tableDef } = resolved;
 
       // Check each repetition's coded value against the table
       for (const repetition of fieldNode.children) {

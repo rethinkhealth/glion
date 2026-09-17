@@ -57,7 +57,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
   }
 
-  // oxlint-disable-next-line complexity
+  // oxlint-disable-next-line complexity/complexity -- tokenizer hot path: one branch per delimiter class, kept flat for speed
   next(): Token | null {
     const s = this.input;
     const n = s.length;
