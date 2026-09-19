@@ -1,7 +1,21 @@
 import { defineConfig } from "tsdown";
 
+// Manifests and event maps load at import, so they match neither pattern:
+// a chunk holding one would load at import with all the data beside it.
+const VERSION_DATA =
+  /[\\/]src[\\/]profiles[\\/](v[^\\/]+)[\\/](datatypes|events|fields|tables|segments)(?:[\\/](?!manifest\.)|\.ts$)/;
+const UTG_DATA = /[\\/]src[\\/]profiles[\\/]utg[\\/](?!manifest\.)/;
+
+const dataChunk = (id: string): string | null => {
+  const match = VERSION_DATA.exec(id);
+  if (match) {
+    const [, version, kind] = match;
+    return `${kind}-${version}`;
+  }
+  return UTG_DATA.test(id) ? "utg" : null;
+};
+
 export default defineConfig({
-  clean: false,
   dts: false,
   entry: {
     "event-maps": "src/event-maps.ts",
@@ -12,14 +26,7 @@ export default defineConfig({
   hash: false,
   outputOptions: {
     codeSplitting: {
-      groups: [
-        {
-          maxSize: 250_000,
-          minSize: 100_000,
-          name: "profiles",
-          test: /src\/profiles\//,
-        },
-      ],
+      groups: [{ name: dataChunk }],
     },
   },
   report: false,

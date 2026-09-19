@@ -1,7 +1,6 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  clean: false,
   deps: { neverBundle: ["cloudflare:sockets"] },
   dts: false,
   entry: {
