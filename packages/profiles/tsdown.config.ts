@@ -16,7 +16,6 @@ const dataChunk = (id: string): string | null => {
 };
 
 export default defineConfig({
-  clean: false,
   dts: false,
   entry: {
     "event-maps": "src/event-maps.ts",
