@@ -108,6 +108,23 @@ export function makeGlionConfigSchema(ctx: SchemaContext) {
             .positive()
             .max(MAX_TIMEOUT_MS)
             .optional(),
+          // `nodeSocket`'s `tls`, with file paths where Node takes contents.
+          tls: z
+            .union([
+              z.boolean(),
+              z
+                .object({
+                  ca: z.string().min(1).transform(rel).optional(),
+                  cert: z.string().min(1).transform(rel).optional(),
+                  key: z.string().min(1).transform(rel).optional(),
+                  passphrase: z.string().optional(),
+                  pfx: z.string().min(1).transform(rel).optional(),
+                  rejectUnauthorized: z.boolean().optional(),
+                  servername: z.string().min(1).optional(),
+                })
+                .strict(),
+            ])
+            .optional(),
         })
         .strict()
         .optional(),

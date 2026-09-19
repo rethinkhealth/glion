@@ -275,12 +275,27 @@ function quote(text: string): string {
   return `"${text}"`;
 }
 
-/** The `== connected <host:port> <duration>` line: the connection is open. */
+/** How the connection is secured, for the `== connected` line. */
+export type ConnectionSecurity = "plain" | "tls" | "tls-unverified";
+
+/**
+ * The `== connected <host:port> [TLS] <duration>` line: the connection is
+ * open, marked `TLS` when it is encrypted and `TLS unverified` when
+ * `rejectUnauthorized: false` turned certificate verification off — the line
+ * never claims a certificate was checked when it was not.
+ */
 export function renderConnected(
   target: SendTarget,
-  durationMs: number
+  durationMs: number,
+  security: ConnectionSecurity
 ): string {
-  return `== connected  ${target.host}:${target.port}  ${fmtMs(durationMs)}`;
+  const where = `${target.host}:${target.port}`;
+  const marks: Record<ConnectionSecurity, string> = {
+    plain: "",
+    tls: "  TLS",
+    "tls-unverified": "  TLS unverified",
+  };
+  return `== connected  ${where}${marks[security]}  ${fmtMs(durationMs)}`;
 }
 
 /**

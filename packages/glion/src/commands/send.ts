@@ -16,6 +16,7 @@ import {
 } from "@glion/mllp-client";
 import type { MllpSocket } from "@glion/mllp-client";
 import { nodeSocket } from "@glion/mllp-client/node";
+import type { NodeSocketOptions } from "@glion/mllp-client/node";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
@@ -27,6 +28,7 @@ import {
   renderJson,
 } from "./send-render";
 import type {
+  ConnectionSecurity,
   SendOutcome,
   SendRequestSummary,
   SendTarget,
@@ -206,15 +208,16 @@ Options:
   --json                 print one JSON line instead of the human exchange view
   -h, --help             show this help
 
-Timeouts and the dial policy come from \`client\` in glion.config.ts:
-  client: { connectTimeoutMs, sendTimeoutMs, reconnect: { attempts, delay } | false }
+Timeouts, the dial policy, and TLS come from \`client\` in glion.config.ts:
+  client: { connectTimeoutMs, sendTimeoutMs, reconnect: { attempts, delay } | false,
+            tls: true | { ca, cert, key, passphrase, pfx, servername, rejectUnauthorized } }
+Name the authority that signed the receiver's certificate with client.tls.ca,
+or its own certificate when it signed itself, as a development server does.
 
 Exit codes:
   0  the peer accepted the message (AA/CA)
   1  the peer rejected the message (NAK: AE/AR/CE/CR)
   2  the message could not be delivered (transport, validation, or usage error)
-
-TLS targets are not supported yet.
 `;
 
 export interface RunSendOptions {
@@ -275,20 +278,38 @@ function readMessageText(
 }
 
 /**
+ * How `tls` secures the connection: not at all, encrypted with the peer's
+ * certificate verified, or encrypted with verification turned off.
+ */
+function securityOf(tls: NodeSocketOptions["tls"]): ConnectionSecurity {
+  if (tls === undefined || tls === false) {
+    return "plain";
+  }
+  if (tls !== true && tls.rejectUnauthorized === false) {
+    return "tls-unverified";
+  }
+  return "tls";
+}
+
+/**
  * Writes the connection's facts to `sink` as the client reports them: the
- * line for the connection opening, with the time since the dial began, and
- * the line for a connection that was open closing on a failure.
+ * line for the connection opening, how it is secured, with the time since the
+ * dial began, and the line for a connection that was open closing on a
+ * failure.
  */
 function reportConnection(
   client: MllpClient,
   target: SendTarget,
+  tls: NodeSocketOptions["tls"],
   sink: NodeJS.WritableStream
 ): void {
+  const security = securityOf(tls);
   const dialedAt = performance.now();
   let opened = false;
   client.on("connect", () => {
     opened = true;
-    sink.write(`${renderConnected(target, performance.now() - dialedAt)}\n`);
+    const durationMs = performance.now() - dialedAt;
+    sink.write(`${renderConnected(target, durationMs, security)}\n`);
   });
   client.on("close", (error) => {
     if (opened && error !== null) {
@@ -376,9 +397,13 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
 
   const project = await resolveProject(args, opts.cwd);
   if (!project.ok) {
-    return emit({ kind: "invalid", message: project.reason });
+    return emit({
+      kind: "invalid",
+      message: project.reason,
+      target: project.target,
+    });
   }
-  const { config, target } = project;
+  const { client: clientSettings, target, tls } = project;
 
   let text: string;
   try {
@@ -408,11 +433,12 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   // accepts, so the constructor rejecting one here would be a bug, not a
   // report: it stays outside the try that reports the exchange.
   const client = new MllpClient({
-    ...config?.client,
-    socket: opts.socket ?? nodeSocket({ host: target.host, port: target.port }),
+    ...clientSettings,
+    socket:
+      opts.socket ?? nodeSocket({ host: target.host, port: target.port, tls }),
   });
   if (!useJson) {
-    reportConnection(client, target, stderr);
+    reportConnection(client, target, tls, stderr);
   }
 
   let startedAt = performance.now();

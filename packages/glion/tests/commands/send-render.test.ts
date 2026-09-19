@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { renderHuman, renderJson } from "../../src/commands/send-render";
+import {
+  renderConnected,
+  renderHuman,
+  renderJson,
+} from "../../src/commands/send-render";
 import type {
   SendAcceptOutcome,
   SendInvalidOutcome,
@@ -162,6 +166,22 @@ describe("renderHuman", () => {
         "x  INVALID_MESSAGE  Not an HL7v2 message: it must begin with an MSH segment."
       );
     });
+  });
+});
+
+describe("renderConnected", () => {
+  it("marks a plain connection, a verified one, and an unverified one", () => {
+    expect(renderConnected(TARGET, 12, "plain")).toBe(
+      "== connected  127.0.0.1:2575  12.00ms"
+    );
+    expect(renderConnected(TARGET, 12, "tls")).toBe(
+      "== connected  127.0.0.1:2575  TLS  12.00ms"
+    );
+    // `rejectUnauthorized: false` means no certificate was checked, so the
+    // line must not claim one was.
+    expect(renderConnected(TARGET, 12, "tls-unverified")).toBe(
+      "== connected  127.0.0.1:2575  TLS unverified  12.00ms"
+    );
   });
 });
 

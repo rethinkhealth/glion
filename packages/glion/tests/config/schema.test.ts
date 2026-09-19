@@ -93,6 +93,47 @@ describe("makeGlionConfigSchema", () => {
       ).toBe(true);
     });
 
+    it("accepts client.tls as a boolean, and resolves its file paths against the config", () => {
+      expect(
+        schema.safeParse({ client: { tls: true }, entry: "./a.ts" }).success
+      ).toBe(true);
+      const result = schema.safeParse({
+        client: {
+          tls: {
+            ca: "./certs/ca.pem",
+            cert: "./certs/c.pem",
+            key: "./certs/c.key",
+            passphrase: "p",
+            pfx: "./certs/c.pfx",
+            rejectUnauthorized: false,
+            servername: "mllp.test",
+          },
+        },
+        entry: "./a.ts",
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.client?.tls).toEqual({
+          ca: "/test/certs/ca.pem",
+          cert: "/test/certs/c.pem",
+          key: "/test/certs/c.key",
+          passphrase: "p",
+          pfx: "/test/certs/c.pfx",
+          rejectUnauthorized: false,
+          servername: "mllp.test",
+        });
+      }
+    });
+
+    it("rejects an unknown client.tls key", () => {
+      expect(
+        schema.safeParse({
+          client: { tls: { checkServerIdentity: true } },
+          entry: "./a.ts",
+        }).success
+      ).toBe(false);
+    });
+
     it("rejects a zero timeout, a non-function delay, and an unknown key", () => {
       expect(
         schema.safeParse({ client: { sendTimeoutMs: 0 }, entry: "./a.ts" })
