@@ -8,5 +8,5 @@
     "types": ["node", "vitest/globals"]
   },
   "include": [".", "../src"],
-  "exclude": ["../src/profiles/v*", "../src/profiles/utg"]
+  "exclude": ["../src/profiles/v*", "../src/profiles/utg", "bundle"]
 }
