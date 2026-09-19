@@ -1,4 +1,4 @@
-import { c, f, m, s } from "@glion/builder";
+import { c, f, g, m, s } from "@glion/builder";
 import type { Definition } from "@glion/profiles";
 import { profiles } from "@glion/profiles";
 import { unified } from "unified";
@@ -69,6 +69,33 @@ describe("hl7v2LintSegmentOrder", () => {
         .run(tree, file);
 
       expect(file.messages).toHaveLength(0);
+    });
+  });
+
+  describe("grouped messages", () => {
+    it("validates segments nested in groups in document order", async () => {
+      const tree = m(s("MSH"), g("PATIENT", s("PID"), g("VISIT", s("PV1"))));
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, { definition: threeSegmentDef() })
+        .run(tree, file);
+
+      expect(file.messages).toHaveLength(0);
+    });
+
+    it("reports an unexpected segment nested in a group", async () => {
+      const tree = m(s("MSH"), g("PATIENT", s("PV1"), s("PID")));
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, { definition: threeSegmentDef() })
+        .run(tree, file);
+
+      expect(file.messages).toHaveLength(1);
+      expect(file.messages[0]?.message).toBe(
+        "Unexpected segment 'PV1'. Expected: PID"
+      );
     });
   });
 

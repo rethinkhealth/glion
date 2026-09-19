@@ -1,5 +1,5 @@
 import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
-import { c, f, m, s } from "@glion/builder";
+import { c, f, g, m, s } from "@glion/builder";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -62,6 +62,24 @@ describe("hl7v2LintRequiredFields", () => {
     const pid3Error = errors.find((msg) => msg.message.includes("PID-3"));
     expect(pid3Error).toBeDefined();
     expect(pid3Error?.source).toBe("hl7v2-lint");
+  });
+
+  it("reports a missing required field in a segment nested in a group", async () => {
+    const tree = m(
+      msh("2.5"),
+      g("PATIENT", s("PID", f("1"), f(""), f(""), f(""), f("Doe")))
+    );
+    const file = new VFile();
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintRequiredFields)
+      .run(tree, file);
+
+    const errors = file.messages.filter(
+      (msg) => msg.ruleId === "required-fields"
+    );
+    expect(errors.some((msg) => msg.message.includes("PID-3"))).toBe(true);
   });
 
   it("reports when segment is too short for required fields", async () => {
