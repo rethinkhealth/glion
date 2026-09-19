@@ -40,6 +40,9 @@ pnpm bench                    # CodSpeed regression suite (benchmarks/suites/)
 pnpm --filter @glion/benchmarks bench:lab   # Local-only workload sweeps (benchmarks/lab/)
 pnpm --filter @glion/benchmarks test        # Canaries proving suites measure real work
 
+# Bundle size
+pnpm size                     # Check the size budgets in .size-limit.json (needs a build)
+
 # Dependencies
 pnpm install                  # Install all
 pnpm syncpack                 # Check version alignment across packages
