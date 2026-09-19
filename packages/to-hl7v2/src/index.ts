@@ -3,6 +3,7 @@ import type {
   Delimiters,
   Field,
   FieldRepetition,
+  Group,
   Nodes,
   Root,
   Segment,
@@ -89,19 +90,23 @@ export function toHl7v2(
     return tail.length ? `MSH${d.field}${tail}` : `MSH${d.field}`;
   };
 
-  const root = (r: Root): string =>
-    (r.children as Segment[])
-      .map((seg) => (seg.name === "MSH" ? msh(seg) : segment(seg)))
-      .join(d.segment);
+  const line = (seg: Segment): string =>
+    seg.name === "MSH" ? msh(seg) : segment(seg);
+
+  const lines = (nodes: readonly (Segment | Group)[]): string[] =>
+    nodes.flatMap((child) =>
+      child.type === "group" ? lines(child.children) : [line(child)]
+    );
 
   // -- dispatch ----------------------------------------------------------
 
   switch (node.type) {
-    case "root": {
-      return root(node);
+    case "root":
+    case "group": {
+      return lines(node.children as (Segment | Group)[]).join(d.segment);
     }
     case "segment": {
-      return node.name === "MSH" ? msh(node) : segment(node);
+      return line(node);
     }
     case "field": {
       return field(node);
@@ -116,9 +121,8 @@ export function toHl7v2(
       return sub(node);
     }
     default: {
-      // @ts-expect-error – ensure exhaustiveness
-      (() => node satisfies never)();
-      throw new Error(`Unsupported node type: ${(node as Node).type}`);
+      const unsupported: never = node;
+      throw new Error(`Unsupported node type: ${(unsupported as Node).type}`);
     }
   }
 }

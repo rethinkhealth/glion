@@ -166,6 +166,18 @@ describe(toHl7v2, () => {
 });
 
 describe("toHl7v2 with individual node types", () => {
+  it("serializes a segment the parser could not name as its fields alone", () => {
+    expect(toHl7v2(s("", f("A"), f("B")))).toBe("A|B");
+  });
+
+  it("serializes an MSH holding only its field separator as MSH and the separator", () => {
+    expect(toHl7v2(s("MSH", f("|")))).toBe("MSH|");
+  });
+
+  it("serializes a subcomponent without a value as empty", () => {
+    expect(toHl7v2({ type: "subcomponent" } as Subcomponent)).toBe("");
+  });
+
   it("converts individual segments", () => {
     const segmentNode = s("PID", f("12345"), f("DOE", "JOHN"));
 
