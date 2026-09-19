@@ -1,5 +1,16 @@
 # @rethinkhealth/hl7v2-lint-profile-events-segments-order
 
+## 0.20.0
+
+### Patch Changes
+
+- [#819](https://github.com/rethinkhealth/glion/pull/819) [`e375eab`](https://github.com/rethinkhealth/glion/commit/e375eabe0c28623e12e0c73ad3636c9e582dad5f) Thanks [@meleksomai](https://github.com/meleksomai)! - Stop descending into fields, components, and subcomponents after checking a segment. Both rules read only segment names and a segment's fields, so the messages they report are unchanged; segments nested in groups are still checked.
+- Updated dependencies []:
+  - @glion/profiles@0.20.0
+  - @glion/util-query@0.20.0
+  - @glion/util-visit@0.20.0
+  - @glion/ast@0.20.0
+
 ## 0.19.0
 
 ### Patch Changes
