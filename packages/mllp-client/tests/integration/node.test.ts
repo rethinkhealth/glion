@@ -4,16 +4,18 @@
  */
 
 import { setTimeout as sleep } from "node:timers/promises";
+import type { TLSSocket } from "node:tls";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, inject, it } from "vitest";
 
 import { MllpClient } from "../../src/index";
 import { DEFAULT_GRACEFUL_CLOSE_MS, nodeSocket } from "../../src/runtime/node";
+import { silence } from "../answers";
 import { adtA01 } from "../fixtures";
-import { silence } from "../remote";
 import { describeMllpClientScenarios } from "./conformance/client-scenarios";
 import { describeMllpSocketContract } from "./conformance/socket-contract";
-import { listen } from "./remote-tcp";
+import { acknowledgment, listen } from "./remote-tcp";
+import type { Address } from "./remote-tcp";
 
 /** Slack on top of the grace window for the destroy to be observed. */
 const CLOSE_SLACK_MS = 500;
@@ -21,11 +23,31 @@ const CLOSE_SLACK_MS = 500;
 /** Time for the remote system to observe the client's close. */
 const SETTLE_MS = 50;
 
+/** Send deadline when the remote system refuses the client certificate silently. */
+const REFUSED_SEND_TIMEOUT_MS = 1000;
+
+const { pki, tcp, tls } = inject("fixtures");
+
+/** `nodeSocket` over TLS, trusting the test CA. */
+const overTls = (address: Address) =>
+  nodeSocket({
+    ...address,
+    tls: { ca: pki.ca, servername: pki.servername },
+  });
+
 describeMllpSocketContract("nodeSocket", nodeSocket, {
   closeBoundMs: DEFAULT_GRACEFUL_CLOSE_MS + CLOSE_SLACK_MS,
+  remotes: tcp,
 });
 
-describeMllpClientScenarios("nodeSocket", nodeSocket);
+describeMllpClientScenarios("nodeSocket", nodeSocket, tcp);
+
+describeMllpSocketContract("nodeSocket over TLS", overTls, {
+  closeBoundMs: DEFAULT_GRACEFUL_CLOSE_MS + CLOSE_SLACK_MS,
+  remotes: tls,
+});
+
+describeMllpClientScenarios("nodeSocket over TLS", overTls, tls);
 
 describe("nodeSocket over net.Socket", () => {
   it("does not dial when the signal is already aborted", async () => {
@@ -75,5 +97,141 @@ describe("nodeSocket over net.Socket", () => {
 
     expect(elapsed).toBeGreaterThanOrEqual(180);
     expect(elapsed).toBeLessThan(200 + CLOSE_SLACK_MS);
+  });
+});
+
+describe("nodeSocket over tls.TLSSocket", () => {
+  const { acknowledging } = tls;
+
+  it("rejects CONNECTION_FAILED when the certificate is not from a trusted CA", async () => {
+    const client = new MllpClient({
+      reconnect: false,
+      socket: nodeSocket({ ...acknowledging, tls: true }),
+    });
+
+    await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+      cause: { code: "UNABLE_TO_VERIFY_LEAF_SIGNATURE" },
+      code: "CONNECTION_FAILED",
+      delivery: "not-sent",
+    });
+  });
+
+  it("rejects CONNECTION_FAILED when the certificate does not list the host", async () => {
+    const client = new MllpClient({
+      reconnect: false,
+      socket: nodeSocket({ ...acknowledging, tls: { ca: pki.ca } }),
+    });
+
+    await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+      cause: { code: "ERR_TLS_CERT_ALTNAME_INVALID" },
+      code: "CONNECTION_FAILED",
+    });
+  });
+
+  it("sends without verifying the certificate when rejectUnauthorized is false", async () => {
+    const client = new MllpClient({
+      socket: nodeSocket({
+        ...acknowledging,
+        tls: { rejectUnauthorized: false },
+      }),
+    });
+
+    await expect(client.send(adtA01().tree)).resolves.toMatchObject({
+      code: "AA",
+    });
+    await client.close();
+  });
+
+  it("sends host as the TLS server name", async () => {
+    const servernames: unknown[] = [];
+    await using remote = await listen({
+      answer: (message, socket) => {
+        servernames.push((socket as TLSSocket).servername);
+        return acknowledgment(message);
+      },
+      host: pki.servername,
+      tls: { cert: pki.serverCert, key: pki.serverKey },
+    });
+    const client = new MllpClient({
+      socket: nodeSocket({
+        host: pki.servername,
+        port: remote.port,
+        tls: { ca: pki.ca },
+      }),
+    });
+
+    await client.send(adtA01().tree);
+    await client.close();
+
+    expect(servernames).toEqual([pki.servername]);
+  });
+
+  it("sends no server name when host is an IP address", async () => {
+    const servernames: unknown[] = [];
+    await using remote = await listen({
+      answer: (message, socket) => {
+        servernames.push((socket as TLSSocket).servername);
+        return acknowledgment(message);
+      },
+      tls: { cert: pki.serverCert, key: pki.serverKey },
+    });
+    const client = new MllpClient({
+      // The certificate lists `localhost` only, and an IP address is not a
+      // server name, so the dial is unverified to reach the answer.
+      socket: nodeSocket({ ...remote, tls: { rejectUnauthorized: false } }),
+    });
+
+    await client.send(adtA01().tree);
+    await client.close();
+
+    // Each runtime spells "no server name" its own way: `false` on Node,
+    // `undefined` on Bun, `null` on Deno.
+    expect(servernames.map(Boolean)).toEqual([false]);
+  });
+
+  it("presents the client certificate to a remote system that requires one", async () => {
+    const client = new MllpClient({
+      socket: nodeSocket({
+        ...tls.requiringClientCertificate,
+        tls: {
+          ca: pki.ca,
+          cert: pki.cert,
+          key: pki.key,
+          servername: pki.servername,
+        },
+      }),
+    });
+
+    await expect(client.send(adtA01().tree)).resolves.toMatchObject({
+      code: "AA",
+    });
+    await client.close();
+  });
+
+  it("fails the first send, delivery unknown, when the remote system requires a client certificate and none is given", async () => {
+    const client = new MllpClient({
+      reconnect: false,
+      sendTimeoutMs: REFUSED_SEND_TIMEOUT_MS,
+      socket: overTls(tls.requiringClientCertificate),
+    });
+    await client.connect();
+
+    await expect(client.send(adtA01().tree)).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+      delivery: "unknown",
+    });
+  });
+
+  it("ends with FIN, not RST, when close() follows an exchange", async () => {
+    await using remote = await listen({
+      tls: { cert: pki.serverCert, key: pki.serverKey },
+    });
+    const client = new MllpClient({ socket: overTls(remote) });
+
+    await client.send(adtA01().tree);
+    await client.close();
+    await sleep(SETTLE_MS);
+
+    expect(remote.closes).toEqual(["end"]);
   });
 });

@@ -41,5 +41,13 @@
     "keywords"
   ],
   "source": [],
-  "versionGroups": []
+  "versionGroups": [
+    {
+      "label": "a consumer picks its own @types/node; the peer range stays broad",
+      "packages": ["**"],
+      "dependencyTypes": ["peer"],
+      "dependencies": ["@types/node"],
+      "isIgnored": true
+    }
+  ]
 }
