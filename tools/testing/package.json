@@ -25,7 +25,7 @@
     "tsdown": "0.21.10",
     "tsx": "4.23.13",
     "typescript": "6.0.3",
-    "vite": "7.3.6",
+    "vite": "8.3.0",
     "vitest": "4.1.11"
   },
   "peerDependencies": {
