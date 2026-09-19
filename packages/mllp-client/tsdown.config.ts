@@ -12,6 +12,9 @@ export default defineConfig({
   fixedExtension: false,
   format: "esm",
   hash: false,
+  // A shared chunk named after a source module, such as `errors.js`, shadows
+  // that module's declaration directory for TypeScript.
+  outputOptions: { chunkFileNames: "chunks/[name].js" },
   sourcemap: true,
   target: "es2022",
 });

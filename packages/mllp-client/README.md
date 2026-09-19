@@ -6,10 +6,8 @@ An HL7v2 MLLP client for Node.js, Bun, Deno, and Cloudflare Workers.
 - 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, connection attempts retried with backoff, TCP keepalive by default, and explicit states you can read.
 - ⚡ **Thin over TCP.** One socket, one message on the wire at a time. Further sends queue in call order. No worker threads, no polling.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
-- 🧩 **Any transport.** TCP on Node.js, Bun, Deno, and Cloudflare Workers included. TLS or an in-memory socket plug in behind the same two-method interface.
+- 🧩 **Any transport.** TCP and TLS on Node.js, Bun, Deno, and Cloudflare Workers included. An in-memory or custom socket plugs in behind the same two-method interface.
 - 🔤 **Typed end to end.** TypeScript throughout, with parsed HL7v2 going in and coming out.
-
-> TLS is not bundled yet; it is tracked in [#657](https://github.com/rethinkhealth/glion/issues/657).
 
 ## Install
 
@@ -299,14 +297,14 @@ client
 
 The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#custom-socket) — two methods — so supporting a runtime means an adapter, not a fork of the client.
 
-| Runtime            | Adapter                                | Import                       | TLS                                                       | Proven by                                 |
-| ------------------ | -------------------------------------- | ---------------------------- | --------------------------------------------------------- | ----------------------------------------- |
-| Node.js ≥ 22       | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Node 22 and 24   |
-| Bun                | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Bun 1.4          |
-| Deno               | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [#657](https://github.com/rethinkhealth/glion/issues/657) | Conformance suite in CI, Deno 2.9         |
-| Cloudflare Workers | [`workersSocket`](#cloudflare-workers) | `@glion/mllp-client/workers` | [#657](https://github.com/rethinkhealth/glion/issues/657) | Integration suite in CI, inside `workerd` |
+| Runtime            | Adapter                                | Import                       | TLS                                         | Proven by                                                                                                                               |
+| ------------------ | -------------------------------------- | ---------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Node.js ≥ 22       | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Node 22 and 24                                                                                                 |
+| Bun                | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Bun 1.4                                                                                                        |
+| Deno               | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Deno 2.9                                                                                                       |
+| Cloudflare Workers | [`workersSocket`](#cloudflare-workers) | `@glion/mllp-client/workers` | Public trust store only                     | Integration suite in CI, inside `workerd`; TCP only, TLS handshake untested ([#626](https://github.com/rethinkhealth/glion/issues/626)) |
 
-Every adapter runs the same conformance suite: the [`MllpSocket` contract](#custom-socket) case by case, and the client's behaviour over a real socket scenario by scenario. A custom socket can run it too; see `tests/integration/conformance/` in the package source.
+Every adapter runs the same conformance suite: the [`MllpSocket` contract](#custom-socket) case by case, and the client's behaviour over a real socket scenario by scenario. On Node.js, Bun, and Deno it runs twice, over TCP and over TLS. A custom socket can run it too; see `tests/integration/conformance/` in the package source.
 
 ### Node.js
 
@@ -316,14 +314,15 @@ import { nodeSocket } from "@glion/mllp-client/node";
 nodeSocket(options: NodeSocketOptions): MllpSocket
 ```
 
-Plain TCP over `net.Socket`. The same adapter runs on Bun and Deno through their `node:net` compatibility; no separate import is needed there.
+TCP over `net.Socket`, or TLS over `tls.TLSSocket` when `tls` is set. The same adapter runs on Bun and Deno through their `node:net` and `node:tls` compatibility; no separate import is needed there.
 
-| Option            | Type     | Default  | Description                                                                                                                                                                              |
-| ----------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `host`            | `string` | required | Host name or address of the receiver.                                                                                                                                                    |
-| `port`            | `number` | required | TCP port of the receiver.                                                                                                                                                                |
-| `gracefulCloseMs` | `number` | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                                                                                                            |
-| `keepAliveIdleMs` | `number` | `30000`  | Idle time before the first keepalive probe. Once the probes fail, the OS ends the socket, and the next send fails at once with `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`. |
+| Option            | Type                        | Default  | Description                                                                                                                                                                              |
+| ----------------- | --------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `host`            | `string`                    | required | Host name or address of the receiver.                                                                                                                                                    |
+| `port`            | `number`                    | required | TCP port of the receiver.                                                                                                                                                                |
+| `tls`             | `boolean \| NodeTlsOptions` | `false`  | TLS for the connection. See [TLS](#tls).                                                                                                                                                 |
+| `gracefulCloseMs` | `number`                    | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                                                                                                            |
+| `keepAliveIdleMs` | `number`                    | `30000`  | Idle time before the first keepalive probe. Once the probes fail, the OS ends the socket, and the next send fails at once with `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`. |
 
 `TCP_NODELAY` is set, so a message goes out immediately rather than waiting on Nagle's algorithm. On Bun and Deno the keepalive delay is passed through to the runtime; whether the runtime honours it is not verified.
 
@@ -335,6 +334,49 @@ const client = new MllpClient({
 
 Deno needs `--allow-net` for the receiver's host and port.
 
+#### TLS
+
+`tls: true` verifies the receiver's certificate against the runtime's trusted CAs, for `host`, and needs no certificate files. `host` is sent as the server name (SNI) unless it is an IP address.
+
+```ts
+nodeSocket({ host: "hl7.example.org", port: 2575, tls: true });
+```
+
+An object passes Node's `tls.connect()` options:
+
+| Option               | Type                        | Default                      | Description                                                                                      |
+| -------------------- | --------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ca`                 | `string \| Buffer \| Array` | Runtime CAs                  | CA certificates that issued the receiver's certificate, PEM. Replaces the runtime's trusted CAs. |
+| `cert`               | `string \| Buffer \| Array` | none                         | Client certificate chain for mutual TLS, PEM.                                                    |
+| `key`                | `string \| Buffer \| Array` | none                         | Private key for `cert`, PEM.                                                                     |
+| `passphrase`         | `string`                    | none                         | Passphrase for an encrypted `key` or `pfx`.                                                      |
+| `pfx`                | `string \| Buffer \| Array` | none                         | Client certificate and key as PKCS#12.                                                           |
+| `servername`         | `string`                    | `host`, unless an IP address | Name the receiver's certificate is verified against, and the SNI name.                           |
+| `rejectUnauthorized` | `boolean`                   | `true`                       | `false` accepts any certificate, including one presented by an attacker.                         |
+
+```ts
+import { readFileSync } from "node:fs";
+
+nodeSocket({
+  host: "10.20.0.15",
+  port: 2575,
+  tls: {
+    ca: readFileSync("hospital-ca.pem"),
+    cert: readFileSync("client.pem"),
+    key: readFileSync("client-key.pem"),
+    servername: "hl7.hospital.internal",
+  },
+});
+```
+
+A receiver dialed by IP address must present a certificate that lists that address, or `servername` must name one the certificate lists.
+
+A handshake that fails rejects with [`CONNECTION_FAILED`](#connection_failed), with Node's TLS error on `cause`: for example `UNABLE_TO_VERIFY_LEAF_SIGNATURE` or `ERR_TLS_CERT_ALTNAME_INVALID`.
+
+A receiver that refuses the client certificate over TLS 1.2 fails the handshake: [`CONNECTION_FAILED`](#connection_failed), nothing sent. Over TLS 1.3 it refuses after the handshake, so the connection opens and the first `send()` rejects with `CONNECTION_LOST`, delivery `unknown`.
+
+On Deno, a wrong `passphrase` does not fail the handshake; the connection opens without the client certificate and fails as a refused client certificate.
+
 ### Cloudflare Workers
 
 ```ts
@@ -343,12 +385,13 @@ import { workersSocket } from "@glion/mllp-client/workers";
 workersSocket(options: WorkersSocketOptions): MllpSocket
 ```
 
-Plain TCP over `cloudflare:sockets`. The module resolves only inside the Workers runtime; import it from the `./workers` subpath, never from `.`.
+TCP or TLS over `cloudflare:sockets`. The module resolves only inside the Workers runtime; import it from the `./workers` subpath, never from `.`.
 
-| Option | Type     | Default  | Description                           |
-| ------ | -------- | -------- | ------------------------------------- |
-| `host` | `string` | required | Host name or address of the receiver. |
-| `port` | `number` | required | TCP port of the receiver.             |
+| Option | Type      | Default  | Description                                                                                   |
+| ------ | --------- | -------- | --------------------------------------------------------------------------------------------- |
+| `host` | `string`  | required | Host name or address of the receiver.                                                         |
+| `port` | `number`  | required | TCP port of the receiver.                                                                     |
+| `tls`  | `boolean` | `false`  | `true` verifies the receiver's certificate against the public CAs Workers trusts, for `host`. |
 
 ```ts
 import { MllpClient } from "@glion/mllp-client";
@@ -370,7 +413,9 @@ What differs from Node:
 - A Worker reaches only endpoints routable from Cloudflare's network. A receiver on a private network needs a publicly reachable endpoint in front of it.
 - `close()` resolves as soon as the runtime has ended the socket; there is no grace window.
 - Locally, under Miniflare (`wrangler dev` or the Vitest integration), connections go through a proxy, so `MllpConnectionFailedError.cause` carries the proxy's message rather than a socket error code. `code` is the same in both.
+- Locally, under Miniflare, a `tls: true` connection fails with the proxy's message, whatever certificate the receiver presents. TLS to a receiver works only when the Worker runs on Cloudflare.
 - Cloudflare blocks some destination ports.
+- `tls` takes no CA, client certificate, or server name. The receiver must present a publicly trusted certificate for `host`, so dial a host name rather than an address. Any value other than a boolean throws `MllpInvalidOptionError`.
 
 ### Custom Socket
 
@@ -436,7 +481,7 @@ The four failures of the wire — `CONNECTION_FAILED`, `CONNECTION_TIMEOUT`, `SE
 
 `MllpInvalidOptionError` · delivery `not-sent`
 
-A constructor option or a per-send `timeoutMs` is out of range — a timeout that is not a positive number of milliseconds, a `maxBufferedBytes` that is not a positive integer, or a `reconnect.attempts` that is not a non-negative integer or `Infinity`. The message names which one.
+A constructor option or a per-send `timeoutMs` is out of range — a timeout that is not a positive number of milliseconds, a `maxBufferedBytes` that is not a positive integer, or a `reconnect.attempts` that is not a non-negative integer or `Infinity`. `workersSocket()` also throws it for a `tls` that is not a boolean. The message names which one.
 
 Thrown before anything is opened or sent. A configuration bug, not a runtime condition.
 
@@ -460,9 +505,9 @@ A client closes once. Construct a new one to send again. When the client closed 
 
 `MllpConnectionFailedError` · delivery `not-sent` · field: `cause`
 
-The socket could not be opened. `cause` carries the underlying error — `ECONNREFUSED`, `ENOTFOUND`, `EHOSTUNREACH` and the like.
+The socket could not be opened. `cause` carries the underlying error — `ECONNREFUSED`, `ENOTFOUND`, `EHOSTUNREACH`, or a TLS error such as `UNABLE_TO_VERIFY_LEAF_SIGNATURE`.
 
-Check host, port, and whether a firewall allows the route. Nothing was opened, so there is nothing to close.
+Check host, port, whether a firewall allows the route, and, over TLS, the certificate the receiver presents. Nothing was opened, so there is nothing to close.
 
 ### `CONNECTION_TIMEOUT`
 
@@ -470,7 +515,7 @@ Check host, port, and whether a firewall allows the route. Nothing was opened, s
 
 The receiver did not accept the connection within `connectTimeoutMs`.
 
-Typically a packet-dropping firewall rather than a refused connection — a refusal arrives fast and surfaces as `CONNECTION_FAILED`.
+Typically a packet-dropping firewall rather than a refused connection — a refusal arrives fast and surfaces as `CONNECTION_FAILED`. With `tls` set, also a receiver that speaks plain TCP and never answers the TLS handshake.
 
 ### `SEND_TIMEOUT`
 

@@ -16,6 +16,8 @@ import { vi } from "vitest";
 
 import { MllpClient } from "../src/index";
 import type { MllpClientOptions, MllpSocket, MllpStreams } from "../src/index";
+import { acknowledging } from "./answers";
+import type { Reply } from "./answers";
 import { ack, controlIdOf } from "./fixtures";
 
 /** How a socket answers `connect()`. */
@@ -127,22 +129,6 @@ export function memorySocket(opening: Opening = accepts) {
 
 // ── The remote system ────────────────────────────────────────────────
 
-/**
- * How the remote system answers one message: the text of a reply, framed on
- * the way out; raw bytes, sent as they are; or `undefined` for no reply.
- */
-export type Answer = (
-  message: string
-) => string | Uint8Array | undefined | Promise<string | Uint8Array | undefined>;
-
-/** Acknowledges every message with an MSA-1 of `code`, `msa3` in MSA-3. */
-export function acknowledging(code: string, msa3 = ""): Answer {
-  return (message) => ack(code, { controlId: controlIdOf(message), msa3 }).text;
-}
-
-/** Never answers. */
-export const silence: Answer = () => {};
-
 /** One accepted connection, as the remote system holds it. */
 interface Connection {
   readonly messages: ReadableStreamDefaultReader<Uint8Array>;
@@ -161,7 +147,7 @@ interface Connection {
 export function remoteSystem(opening: Opening = accepts) {
   const received: string[] = [];
   let waiting: ((message: string) => void)[] = [];
-  let answer: Answer = acknowledging("AA");
+  let answer: Reply = acknowledging("AA");
   let current: Connection | null = null;
   let opened = 0;
   let closed = 0;
@@ -234,7 +220,7 @@ export function remoteSystem(opening: Opening = accepts) {
 
   return {
     /** How each message is answered from now on. */
-    answers(next: Answer): void {
+    answers(next: Reply): void {
       answer = next;
     },
     /** How many times the client closed the socket. */

@@ -19,13 +19,9 @@ import {
   MllpInvalidOptionError,
   MllpSendTimeoutError,
 } from "../src/index";
+import { acknowledging, silence } from "./answers";
 import { ack, adtA01, controlIdOf } from "./fixtures";
-import {
-  acknowledging,
-  connectedClient,
-  remoteSystem,
-  silence,
-} from "./remote";
+import { connectedClient, remoteSystem } from "./remote";
 import type { Opening } from "./remote";
 
 /** A socket the remote system refuses with `error`. */

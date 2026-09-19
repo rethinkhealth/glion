@@ -1,5 +1,5 @@
 /**
- * A remote system over TCP: reads the frames a client writes and
+ * A remote system over TCP or TLS: reads the frames a client writes and
  * answers each one through an `Answer`. Node only.
  *
  * @module
@@ -9,12 +9,15 @@ import { once } from "node:events";
 import { createServer } from "node:net";
 import type { AddressInfo, Socket } from "node:net";
 import { Readable } from "node:stream";
+import { createServer as createTlsServer } from "node:tls";
+import type { TlsOptions } from "node:tls";
 
 import { frame, unframe } from "@glion/mllp-codec";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
 
+import { acknowledging } from "../answers";
+import type { Reply } from "../answers";
 import { ack, controlIdOf } from "../fixtures";
-import { acknowledging } from "../remote";
 
 export interface Address {
   readonly host: string;
@@ -26,16 +29,17 @@ export interface Address {
  * the way out; raw bytes, sent as they are; or `undefined` for no reply.
  * `socket` is the connection the message arrived on.
  */
-export type Answer = (
-  message: string,
-  socket: Socket
-) => string | Uint8Array | undefined | Promise<string | Uint8Array | undefined>;
+export type Answer = (message: string, socket: Socket) => ReturnType<Reply>;
 
 export interface ListenOptions {
   /** Default: acknowledges every message with `AA`. */
   readonly answer?: Answer;
   /** Keep this side open after the client's FIN. Default `false`. */
   readonly allowHalfOpen?: boolean;
+  /** Serve TLS with these options. Default: plain TCP. */
+  readonly tls?: TlsOptions;
+  /** Host to bind. Default `127.0.0.1`. */
+  readonly host?: string;
 }
 
 export interface Remote extends Address, AsyncDisposable {
@@ -54,18 +58,6 @@ export function acknowledgment(message: string, code = "AA"): Uint8Array {
   return frame(
     encodeBytes(ack(code, { controlId: controlIdOf(message) }).text)
   );
-}
-
-/** Answers the first message on each connection with `AE`, the rest with `AA`. */
-export function rejectingFirst(): Answer {
-  const rejected = new WeakSet<Socket>();
-  return (message, socket) => {
-    if (rejected.has(socket)) {
-      return acknowledging("AA")(message);
-    }
-    rejected.add(socket);
-    return acknowledging("AE", "Application error")(message);
-  };
 }
 
 /** Starts a remote system on 127.0.0.1, on a port the OS picks. */
@@ -97,23 +89,24 @@ export async function listen(options: ListenOptions = {}): Promise<Remote> {
     }
   };
 
-  const server = createServer(
-    { allowHalfOpen: options.allowHalfOpen ?? false },
-    (socket) => {
-      connections += 1;
-      sockets.add(socket);
-      // MLLP servers disable Nagle; with it on, a large reply stalls once per
-      // segment against the client's delayed ACK.
-      socket.setNoDelay(true);
-      socket.on("close", () => sockets.delete(socket));
-      socket.on("end", () => closes.push("end"));
-      socket.on("error", (error: NodeJS.ErrnoException) => {
-        closes.push(error.code ?? error.message);
-      });
-      void serve(socket);
-    }
-  );
-  server.listen(0, "127.0.0.1");
+  const accept = (socket: Socket) => {
+    connections += 1;
+    sockets.add(socket);
+    // MLLP servers disable Nagle; with it on, a large reply stalls once per
+    // segment against the client's delayed ACK.
+    socket.setNoDelay(true);
+    socket.on("close", () => sockets.delete(socket));
+    socket.on("end", () => closes.push("end"));
+    socket.on("error", (error: NodeJS.ErrnoException) => {
+      closes.push(error.code ?? error.message);
+    });
+    void serve(socket);
+  };
+  const allowHalfOpen = options.allowHalfOpen ?? false;
+  const server = options.tls
+    ? createTlsServer({ ...options.tls, allowHalfOpen }, accept)
+    : createServer({ allowHalfOpen }, accept);
+  server.listen(0, options.host ?? "127.0.0.1");
   await once(server, "listening");
   const { address: host, port } = server.address() as AddressInfo;
 

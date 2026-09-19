@@ -6,12 +6,13 @@
  */
 
 import { AckApplicationError } from "@glion/ack";
-import { describe, expect, inject, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { MllpClient } from "../../../src/index";
 import type { MllpClientOptions, MllpSocket } from "../../../src/index";
 import { adtA01 } from "../../fixtures";
 import type { Address } from "../remote-tcp";
+import type { Remotes } from "../remotes";
 import { BLACKHOLE } from "./socket-contract";
 
 const SHORT_TIMEOUT_MS = 300;
@@ -21,13 +22,12 @@ const DEADLINE_SLACK_MS = 3000;
 
 const ownerClosed = ["connect", "close:null"];
 
-/** Registers the scenarios for the adapter `name`. */
+/** Registers the scenarios for the adapter `name`, dialing `remotes`. */
 export function describeMllpClientScenarios(
   name: string,
-  open: (address: Address) => MllpSocket
+  open: (address: Address) => MllpSocket,
+  remotes: Remotes
 ): void {
-  const remotes = () => inject("remotes");
-
   /** A client that dials `address` once, with its events recorded. */
   function connectTo(
     address: Address,
@@ -47,7 +47,7 @@ export function describeMllpClientScenarios(
 
   describe(`${name}: MllpClient over a real socket`, () => {
     it("sends three messages on one connection", async () => {
-      const { client, events } = connectTo(remotes().acknowledging);
+      const { client, events } = connectTo(remotes.acknowledging);
 
       for (let i = 0; i < 3; i += 1) {
         const { controlId, tree } = adtA01();
@@ -64,7 +64,7 @@ export function describeMllpClientScenarios(
     });
 
     it("reads an acknowledgment split across two chunks", async () => {
-      const { client } = connectTo(remotes().splitting);
+      const { client } = connectTo(remotes.splitting);
 
       await expect(client.send(adtA01().tree)).resolves.toMatchObject({
         code: "AA",
@@ -73,7 +73,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects SEND_TIMEOUT and closes when the receiver stays silent", async () => {
-      const { client, events } = connectTo(remotes().silent, {
+      const { client, events } = connectTo(remotes.silent, {
         sendTimeoutMs: SHORT_TIMEOUT_MS,
       });
 
@@ -87,7 +87,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects CONNECTION_LOST and closes when the receiver drops after reading", async () => {
-      const { client, events } = connectTo(remotes().dropping);
+      const { client, events } = connectTo(remotes.dropping);
 
       await expect(client.send(adtA01().tree)).rejects.toMatchObject({
         code: "CONNECTION_LOST",
@@ -98,7 +98,7 @@ export function describeMllpClientScenarios(
     });
 
     it("reads the acknowledgment a one-shot receiver sends with its FIN, then loses the connection", async () => {
-      const { client, events } = connectTo(remotes().acknowledgingThenEnding);
+      const { client, events } = connectTo(remotes.acknowledgingThenEnding);
 
       await expect(client.send(adtA01().tree)).resolves.toMatchObject({
         code: "AA",
@@ -111,7 +111,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects CONNECTION_FAILED when nothing is listening", async () => {
-      const { client, events } = connectTo(remotes().refused);
+      const { client, events } = connectTo(remotes.refused);
 
       await expect(client.send(adtA01().tree)).rejects.toMatchObject({
         code: "CONNECTION_FAILED",
@@ -137,7 +137,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects with the NAK and keeps the connection", async () => {
-      const { client, events } = connectTo(remotes().rejectingFirst);
+      const { client, events } = connectTo(remotes.rejectingFirst);
 
       await expect(client.send(adtA01().tree)).rejects.toBeInstanceOf(
         AckApplicationError
@@ -152,7 +152,7 @@ export function describeMllpClientScenarios(
     });
 
     it("rejects SEND_ABORTED for the send destroy() interrupts", async () => {
-      const { client, events } = connectTo(remotes().silent);
+      const { client, events } = connectTo(remotes.silent);
       await client.connect();
 
       const sending = client.send(adtA01().tree);
@@ -167,7 +167,7 @@ export function describeMllpClientScenarios(
     });
 
     it("closes from connected with no error", async () => {
-      const { client, events } = connectTo(remotes().acknowledging);
+      const { client, events } = connectTo(remotes.acknowledging);
       await client.connect();
 
       await client.close();
@@ -177,7 +177,7 @@ export function describeMllpClientScenarios(
     });
 
     it("dials again under the reconnect policy, then gives up", async () => {
-      const { client, events } = connectTo(remotes().refused, {
+      const { client, events } = connectTo(remotes.refused, {
         reconnect: { attempts: 1, delay: () => 0 },
       });
 
