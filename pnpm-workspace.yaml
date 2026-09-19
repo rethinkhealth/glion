@@ -3,3 +3,11 @@ packages:
   - "packages/*"
   - "qa"
   - "tools/*"
+
+overrides:
+  axios@1: ^1.18.0
+  brace-expansion@5: ^5.0.7
+  form-data@4: ^4.0.6
+  nanoid@3: ^3.3.12
+  postcss@8: ^8.5.23
+  qs@6: ^6.16.0
