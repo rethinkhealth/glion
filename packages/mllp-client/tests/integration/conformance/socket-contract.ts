@@ -13,7 +13,7 @@ import { describe, expect, it } from "vitest";
 import type { MllpSocket } from "../../../src/index";
 import { adtA01 } from "../../fixtures";
 import type { Address } from "../remote-tcp";
-import type { Remotes } from "../setup";
+import type { Remotes } from "../remotes";
 
 /** TEST-NET-1 (RFC 5737): never routed, so a SYN there is never answered. */
 export const BLACKHOLE: Address = { host: "192.0.2.1", port: 65_535 };

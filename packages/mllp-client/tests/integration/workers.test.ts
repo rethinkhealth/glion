@@ -19,10 +19,14 @@ const CLOSE_BOUND_MS = 500;
 
 describeMllpSocketContract("workersSocket", workersSocket, {
   closeBoundMs: CLOSE_BOUND_MS,
-  remotes: inject("remotes"),
+  remotes: inject("fixtures").tcp,
 });
 
-describeMllpClientScenarios("workersSocket", workersSocket, inject("remotes"));
+describeMllpClientScenarios(
+  "workersSocket",
+  workersSocket,
+  inject("fixtures").tcp
+);
 
 describe("workersSocket over TLS", () => {
   it("throws INVALID_OPTION for TLS settings Workers cannot apply", () => {
@@ -40,7 +44,10 @@ describe("workersSocket over TLS", () => {
   it("does not dial plain TCP when tls is true", async () => {
     const client = new MllpClient({
       reconnect: false,
-      socket: workersSocket({ ...inject("remotes").acknowledging, tls: true }),
+      socket: workersSocket({
+        ...inject("fixtures").tcp.acknowledging,
+        tls: true,
+      }),
     });
 
     await expect(client.send(adtA01().tree)).rejects.toMatchObject({
