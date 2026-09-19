@@ -1,0 +1,244 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "RPA_I08",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "RF1",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "AUTHORIZATION",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "AUT",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "CTD",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "PROVIDER",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PRD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "CTD",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "PID",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "NK1",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "GT1",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "INSURANCE",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "IN1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IN2",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IN3",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "ACC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "DG1",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "DRG",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "AL1",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "PROCEDURE",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PR1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "AUTHORIZATION2",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "AUT",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "CTD",
+              "optional": true,
+              "repeating": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "OBSERVATION",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "OBR",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "RESULTS",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "OBX",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "VISIT",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PV1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PV2",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "NTE",
+      "optional": true,
+      "repeating": true
+    }
+  ]
+}

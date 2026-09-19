@@ -1,0 +1,74 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "DOC_T12",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QRD",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "RESULT",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "EVN",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PV1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "TXA",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "OBX",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}

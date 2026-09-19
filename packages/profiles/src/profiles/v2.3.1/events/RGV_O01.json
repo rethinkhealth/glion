@@ -1,0 +1,204 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "RGV_O01",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "NTE",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "PATIENT",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "AL1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "PATIENT_VISIT",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PV1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PV2",
+              "optional": true,
+              "repeating": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "ORDER",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "ORC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "ORDER_DETAIL",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "RXO",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "ORDER_DETAIL_SUPPLEMENT",
+              "optional": true,
+              "repeating": false,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": false,
+                  "repeating": true
+                },
+                {
+                  "type": "segment",
+                  "name": "RXR",
+                  "optional": false,
+                  "repeating": true
+                },
+                {
+                  "type": "group",
+                  "name": "COMPONENTS",
+                  "optional": true,
+                  "repeating": false,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "RXC",
+                      "optional": false,
+                      "repeating": true
+                    },
+                    {
+                      "type": "segment",
+                      "name": "NTE",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "ENCODING",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "RXE",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "RXR",
+              "optional": false,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "RXC",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "GIVE",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "RXG",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "RXR",
+              "optional": false,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "RXC",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "group",
+              "name": "OBSERVATION",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "OBX",
+                  "optional": true,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

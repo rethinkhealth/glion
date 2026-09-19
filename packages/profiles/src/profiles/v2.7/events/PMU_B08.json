@@ -1,0 +1,48 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "PMU_B08",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "EVN",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "STF",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PRA",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "CER",
+      "optional": true,
+      "repeating": true
+    }
+  ]
+}

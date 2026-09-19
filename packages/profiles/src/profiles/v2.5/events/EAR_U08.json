@@ -1,0 +1,70 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "EAR_U08",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "EQU",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "COMMAND_RESPONSE",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "ECD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "SPECIMEN_CONTAINER",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "SAC",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "SPM",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "ECR",
+          "optional": false,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "ROL",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}
