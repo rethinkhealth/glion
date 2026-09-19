@@ -1,7 +1,7 @@
 // oxlint-disable-next-line no-unused-vars -- triggers VFile DataMap augmentation
 import type { ProfileContext } from "@glion/annotate-profile-context";
 import type { Root } from "@glion/ast";
-import { visit } from "@glion/util-visit";
+import { SKIP, visit } from "@glion/util-visit";
 import { isEmptyNode } from "@glion/utils";
 import { lintRule } from "unified-lint-rule";
 
@@ -32,7 +32,7 @@ const hl7v2LintRequiredFields = lintRule<Root>(
     visit(tree, "segment", (node, parents) => {
       const fieldDef = ctx.fields.get(node.name);
       if (!fieldDef) {
-        return;
+        return SKIP;
       }
 
       for (const sequence of fieldDef.requiredSequences) {
@@ -50,6 +50,8 @@ const hl7v2LintRequiredFields = lintRule<Root>(
           );
         }
       }
+
+      return SKIP;
     });
   }
 );
