@@ -15,8 +15,8 @@ import type { TlsOptions } from "node:tls";
 import { frame, unframe } from "@glion/mllp-codec";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
 
+import { acknowledging } from "../answers";
 import { ack, controlIdOf } from "../fixtures";
-import { acknowledging } from "../remote";
 
 export interface Address {
   readonly host: string;
@@ -58,18 +58,6 @@ export function acknowledgment(message: string, code = "AA"): Uint8Array {
   return frame(
     encodeBytes(ack(code, { controlId: controlIdOf(message) }).text)
   );
-}
-
-/** Answers the first message on each connection with `AE`, the rest with `AA`. */
-export function rejectingFirst(): Answer {
-  const rejected = new WeakSet<Socket>();
-  return (message, socket) => {
-    if (rejected.has(socket)) {
-      return acknowledging("AA")(message);
-    }
-    rejected.add(socket);
-    return acknowledging("AE", "Application error")(message);
-  };
 }
 
 /** Starts a remote system on 127.0.0.1, on a port the OS picks. */

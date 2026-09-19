@@ -12,7 +12,7 @@ import { MllpClient } from "../../../src/index";
 import type { MllpClientOptions, MllpSocket } from "../../../src/index";
 import { adtA01 } from "../../fixtures";
 import type { Address } from "../remote-tcp";
-import type { Remotes } from "../setup";
+import type { Remotes } from "../remotes";
 import { BLACKHOLE } from "./socket-contract";
 
 const SHORT_TIMEOUT_MS = 300;

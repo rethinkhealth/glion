@@ -10,8 +10,8 @@ import { describe, expect, inject, it } from "vitest";
 
 import { MllpClient } from "../../src/index";
 import { DEFAULT_GRACEFUL_CLOSE_MS, nodeSocket } from "../../src/runtime/node";
+import { silence } from "../answers";
 import { adtA01 } from "../fixtures";
-import { silence } from "../remote";
 import { describeMllpClientScenarios } from "./conformance/client-scenarios";
 import { describeMllpSocketContract } from "./conformance/socket-contract";
 import { acknowledgment, listen } from "./remote-tcp";
@@ -26,7 +26,7 @@ const SETTLE_MS = 50;
 /** Send deadline when the remote system refuses the client certificate silently. */
 const REFUSED_SEND_TIMEOUT_MS = 1000;
 
-const pki = inject("pki");
+const { pki, tcp, tls } = inject("fixtures");
 
 /** `nodeSocket` over TLS, trusting the test CA. */
 const overTls = (address: Address) =>
@@ -37,21 +37,17 @@ const overTls = (address: Address) =>
 
 describeMllpSocketContract("nodeSocket", nodeSocket, {
   closeBoundMs: DEFAULT_GRACEFUL_CLOSE_MS + CLOSE_SLACK_MS,
-  remotes: inject("remotes"),
+  remotes: tcp,
 });
 
-describeMllpClientScenarios("nodeSocket", nodeSocket, inject("remotes"));
+describeMllpClientScenarios("nodeSocket", nodeSocket, tcp);
 
 describeMllpSocketContract("nodeSocket over TLS", overTls, {
   closeBoundMs: DEFAULT_GRACEFUL_CLOSE_MS + CLOSE_SLACK_MS,
-  remotes: inject("remotesOverTls"),
+  remotes: tls,
 });
 
-describeMllpClientScenarios(
-  "nodeSocket over TLS",
-  overTls,
-  inject("remotesOverTls")
-);
+describeMllpClientScenarios("nodeSocket over TLS", overTls, tls);
 
 describe("nodeSocket over net.Socket", () => {
   it("does not dial when the signal is already aborted", async () => {
@@ -105,7 +101,7 @@ describe("nodeSocket over net.Socket", () => {
 });
 
 describe("nodeSocket over tls.TLSSocket", () => {
-  const { acknowledging } = inject("remotesOverTls");
+  const { acknowledging } = tls;
 
   it("rejects CONNECTION_FAILED when the certificate is not from a trusted CA", async () => {
     const client = new MllpClient({
@@ -172,7 +168,7 @@ describe("nodeSocket over tls.TLSSocket", () => {
   it("presents the client certificate to a remote system that requires one", async () => {
     const client = new MllpClient({
       socket: nodeSocket({
-        ...pki.requiringClientCertificate,
+        ...tls.requiringClientCertificate,
         tls: {
           ca: pki.ca,
           cert: pki.cert,
@@ -192,7 +188,7 @@ describe("nodeSocket over tls.TLSSocket", () => {
     const client = new MllpClient({
       reconnect: false,
       sendTimeoutMs: REFUSED_SEND_TIMEOUT_MS,
-      socket: overTls(pki.requiringClientCertificate),
+      socket: overTls(tls.requiringClientCertificate),
     });
     await client.connect();
 

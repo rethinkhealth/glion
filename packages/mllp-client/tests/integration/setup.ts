@@ -1,8 +1,10 @@
 /**
- * Starts the remote systems the integration suites dial, once, in Node, and
- * provides their addresses to every test project, whichever runtime runs it.
- * Every remote runs twice: over TCP, and over TLS with certificates a test CA
- * issues at startup.
+ * Starts every remote in `remotes.ts`, once, in Node, and provides where they
+ * are listening to each test project, whichever runtime runs it. Each remote
+ * runs twice: over TCP, and over TLS with certificates a test CA issues here.
+ *
+ * Only the addresses and the certificates cross into the test process, so a
+ * test that observes a remote's own side starts its own with `listen()`.
  *
  * @module
  */
@@ -12,68 +14,52 @@ import type { TlsOptions } from "node:tls";
 import { generate } from "selfsigned";
 import type { TestProject } from "vitest/node";
 
-import { acknowledging, silence } from "../remote";
-import { acknowledgment, listen, rejectingFirst, released } from "./remote-tcp";
-import type { Address, Answer, Remote } from "./remote-tcp";
+import { listen, released } from "./remote-tcp";
+import type { Address, Remote } from "./remote-tcp";
+import { REMOTES } from "./remotes";
+import type { Remotes } from "./remotes";
 
-const SPLIT_DELAY_MS = 40;
-
-export interface Remotes {
-  /** Answers every message with `AA`. */
-  readonly acknowledging: Address;
-  /** Answers `AA` and sends FIN in the same write. */
-  readonly acknowledgingThenEnding: Address;
-  /** Reads one message, then resets the connection. */
-  readonly dropping: Address;
-  /** Answers every message with the message itself. */
-  readonly echoing: Address;
-  /** Reads one message, then sends FIN without answering. */
-  readonly ending: Address;
-  /** Accepts, never writes, and never answers a FIN. */
-  readonly holdingOpen: Address;
-  /** Nothing listens here. */
-  readonly refused: Address;
-  /** Answers the first message on a connection with `AE`, the rest with `AA`. */
-  readonly rejectingFirst: Address;
-  /** Accepts and never writes. */
-  readonly silent: Address;
-  /** Answers `AA` in two writes 40 ms apart. */
-  readonly splitting: Address;
-}
-
-/** The test CA, and what it issued. */
-export interface TestPki {
-  /** The CA certificate, PEM. Trusts every certificate below. */
-  readonly ca: string;
-  /** A client certificate, PEM. */
-  readonly cert: string;
-  /** The client certificate's private key, PEM. */
-  readonly key: string;
-  /** The TLS remotes' certificate, PEM. Lists `localhost` only. */
-  readonly serverCert: string;
-  /** The TLS remotes' private key, PEM. */
-  readonly serverKey: string;
-  /** The one name `serverCert` lists. */
-  readonly servername: string;
-  /** Answers `AA` over TLS, and only to a client certificate the CA issued. */
-  readonly requiringClientCertificate: Address;
-}
-
-declare module "vitest" {
-  export interface ProvidedContext {
-    readonly remotes: Remotes;
-    readonly remotesOverTls: Remotes;
-    readonly pki: TestPki;
-  }
-}
-
+/** The one name the TLS remotes' certificate lists. */
 const SERVERNAME = "localhost";
 
 /** X.509 GeneralName tag for a DNS name (RFC 5280 §4.2.1.6). */
 const DNS_NAME = 2;
 
+/** A test CA, and the certificates it issued. PEM throughout. */
+export interface Pki {
+  /** Trusts every certificate below. */
+  readonly ca: string;
+  /** A client certificate, for mutual TLS. */
+  readonly cert: string;
+  /** The private key for `cert`. */
+  readonly key: string;
+  /** The TLS remotes' certificate. Lists {@link Pki.servername} only. */
+  readonly serverCert: string;
+  /** The private key for `serverCert`. */
+  readonly serverKey: string;
+  /** The one name `serverCert` lists. */
+  readonly servername: string;
+}
+
+export interface Fixtures {
+  /** Every remote in `remotes.ts`, over TCP. */
+  readonly tcp: Remotes;
+  /**
+   * Every remote in `remotes.ts`, over TLS, plus one that answers `AA` only to
+   * a client certificate {@link Fixtures.pki} issued.
+   */
+  readonly tls: Remotes & { readonly requiringClientCertificate: Address };
+  readonly pki: Pki;
+}
+
+declare module "vitest" {
+  export interface ProvidedContext {
+    readonly fixtures: Fixtures;
+  }
+}
+
 /** A CA, a server certificate for `localhost`, and a client certificate. */
-async function issue() {
+async function issue(): Promise<Pki> {
   const ca = await generate([{ name: "commonName", value: "glion test CA" }], {
     algorithm: "sha256",
     extensions: [
@@ -100,64 +86,51 @@ async function issue() {
       extensions: [{ clientAuth: true, name: "extKeyUsage" }],
     }),
   ]);
-  return { ca: ca.cert, client, server };
+  return {
+    ca: ca.cert,
+    cert: client.cert,
+    key: client.private,
+    serverCert: server.cert,
+    serverKey: server.private,
+    servername: SERVERNAME,
+  };
 }
 
 export default async function setup(project: TestProject) {
   const started: Remote[] = [];
-  const { ca, client, server } = await issue();
-  const serverTls: TlsOptions = { cert: server.cert, key: server.private };
+  const pki = await issue();
+  const serverTls: TlsOptions = { cert: pki.serverCert, key: pki.serverKey };
 
-  const remotes = async (tls?: TlsOptions): Promise<Remotes> => {
-    const start = async (
-      answer: Answer,
-      allowHalfOpen = false
-    ): Promise<Address> => {
-      const remote = await listen({ allowHalfOpen, answer, tls });
-      started.push(remote);
-      return { host: remote.host, port: remote.port };
-    };
-
-    return {
-      acknowledging: await start(acknowledging("AA")),
-      acknowledgingThenEnding: await start((message, socket) => {
-        socket.end(acknowledgment(message));
-      }),
-      dropping: await start((_message, socket) => {
-        socket.destroy();
-      }),
-      echoing: await start((message) => message),
-      ending: await start((_message, socket) => {
-        socket.end();
-      }),
-      holdingOpen: await start(silence, true),
-      refused: await released(),
-      rejectingFirst: await start(rejectingFirst()),
-      silent: await start(silence),
-      splitting: await start((message, socket) => {
-        const bytes = acknowledgment(message);
-        const mid = Math.floor(bytes.length / 2);
-        socket.write(bytes.subarray(0, mid));
-        setTimeout(() => socket.write(bytes.subarray(mid)), SPLIT_DELAY_MS);
-      }),
-    };
+  const start = async (options: Parameters<typeof listen>[0]) => {
+    const remote = await listen(options);
+    started.push(remote);
+    return { host: remote.host, port: remote.port };
   };
 
-  const mutual = await listen({
-    tls: { ...serverTls, ca, rejectUnauthorized: true, requestCert: true },
-  });
-  started.push(mutual);
+  /** Every remote in the catalogue, over `tls` when given. */
+  const startAll = async (tls?: TlsOptions): Promise<Remotes> => {
+    const addresses: Record<string, Address> = {};
+    for (const [name, spec] of Object.entries(REMOTES)) {
+      addresses[name] = spec ? await start({ ...spec, tls }) : await released();
+    }
+    return addresses as Remotes;
+  };
 
-  project.provide("remotes", await remotes());
-  project.provide("remotesOverTls", await remotes(serverTls));
-  project.provide("pki", {
-    ca,
-    cert: client.cert,
-    key: client.private,
-    requiringClientCertificate: { host: mutual.host, port: mutual.port },
-    serverCert: server.cert,
-    serverKey: server.private,
-    servername: SERVERNAME,
+  const tcp = await startAll();
+  const tls = await startAll(serverTls);
+  const requiringClientCertificate = await start({
+    tls: {
+      ...serverTls,
+      ca: pki.ca,
+      rejectUnauthorized: true,
+      requestCert: true,
+    },
+  });
+
+  project.provide("fixtures", {
+    pki,
+    tcp,
+    tls: { ...tls, requiringClientCertificate },
   });
 
   return async () => {
