@@ -12,7 +12,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@codspeed/vitest-plugin": "^5.4.0",
+    "@codspeed/vitest-plugin": "^5.7.1",
     "@glion/annotate-profile-context": "workspace:*",
     "@glion/annotate-profile-datatypes": "workspace:*",
     "@glion/annotate-profile-fields": "workspace:*",
