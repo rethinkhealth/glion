@@ -8,7 +8,7 @@
 
 import { connect } from "cloudflare:sockets";
 
-import { MllpInvalidOptionError } from "../errors";
+import { MllpInvalidOptionError } from "../errors/mllp-invalid-option-error";
 import type { MllpSocket, MllpStreams } from "../types";
 
 type Socket = ReturnType<typeof connect>;
@@ -41,7 +41,7 @@ export function workersSocket(opts: WorkersSocketOptions): MllpSocket {
   const { tls = false } = opts;
   if (typeof tls !== "boolean") {
     throw new MllpInvalidOptionError(
-      "tls must be true or false on Workers: it takes no CA, client certificate, or server name. Give the remote system a publicly trusted certificate for its host name."
+      "tls must be true or false on Workers, which applies no CA, client certificate, or server name."
     );
   }
   let open: Socket | undefined;

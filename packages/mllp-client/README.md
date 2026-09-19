@@ -373,7 +373,7 @@ A receiver dialed by IP address must present a certificate that lists that addre
 
 A handshake that fails rejects with [`CONNECTION_FAILED`](#connection_failed), with Node's TLS error on `cause`: for example `UNABLE_TO_VERIFY_LEAF_SIGNATURE` or `ERR_TLS_CERT_ALTNAME_INVALID`.
 
-A receiver that refuses the client certificate over TLS 1.2 fails the handshake: [`CONNECTION_FAILED`](#connection_failed), nothing sent. Over TLS 1.3 it refuses after the handshake, so the connection opens and the first `send()` rejects with delivery `unknown`: `CONNECTION_LOST` on Node.js and Deno, `SEND_TIMEOUT` on Bun.
+A receiver that refuses the client certificate over TLS 1.2 fails the handshake: [`CONNECTION_FAILED`](#connection_failed), nothing sent. Over TLS 1.3 it refuses after the handshake, so the connection opens and the first `send()` rejects with `CONNECTION_LOST`, delivery `unknown`.
 
 On Deno, a wrong `passphrase` does not fail the handshake; the connection opens without the client certificate and fails as a refused client certificate.
 

@@ -17,16 +17,14 @@ import { describeMllpSocketContract } from "./conformance/socket-contract";
 /** Workerd resolves `close()` at once; nothing waits for the remote system. */
 const CLOSE_BOUND_MS = 500;
 
+const { tcp } = inject("fixtures");
+
 describeMllpSocketContract("workersSocket", workersSocket, {
   closeBoundMs: CLOSE_BOUND_MS,
-  remotes: inject("fixtures").tcp,
+  remotes: tcp,
 });
 
-describeMllpClientScenarios(
-  "workersSocket",
-  workersSocket,
-  inject("fixtures").tcp
-);
+describeMllpClientScenarios("workersSocket", workersSocket, tcp);
 
 describe("workersSocket over TLS", () => {
   it("throws INVALID_OPTION for TLS settings Workers cannot apply", () => {

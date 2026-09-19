@@ -12,6 +12,7 @@ import { Duplex } from "node:stream";
 import { connect as connectTls } from "node:tls";
 import type { ConnectionOptions } from "node:tls";
 
+import { MllpInvalidOptionError } from "../errors/mllp-invalid-option-error";
 import type { MllpSocket, MllpStreams } from "../types";
 
 /** Default time a socket gets to end gracefully before it is destroyed. */
@@ -147,16 +148,37 @@ function end(socket: Socket, gracefulCloseMs: number): Promise<void> {
 }
 
 /**
+ * The TLS settings `dial` applies, or `undefined` for plain TCP.
+ *
+ * @throws {MllpInvalidOptionError} `tls` is neither a boolean nor an object.
+ */
+function tlsSettings(
+  tls: NodeSocketOptions["tls"]
+): NodeTlsOptions | undefined {
+  if (tls === undefined || typeof tls === "boolean") {
+    return tls === true ? {} : undefined;
+  }
+  if (typeof tls !== "object" || tls === null) {
+    throw new MllpInvalidOptionError(
+      "tls must be true, false, or an object of TLS settings."
+    );
+  }
+  return tls;
+}
+
+/**
  * A TCP socket to one remote system, over Node's `net` module, or its `tls`
  * module when `tls` is set.
  *
  * Each `connect()` dials a fresh socket: Node cannot reconnect one that has
  * been destroyed.
+ *
+ * @throws {MllpInvalidOptionError} `tls` is neither a boolean nor an object.
  */
 export function nodeSocket(opts: NodeSocketOptions): MllpSocket {
   const gracefulCloseMs = opts.gracefulCloseMs ?? DEFAULT_GRACEFUL_CLOSE_MS;
   const keepAliveIdleMs = opts.keepAliveIdleMs ?? DEFAULT_KEEPALIVE_IDLE_MS;
-  const tls = opts.tls === true ? {} : opts.tls || undefined;
+  const tls = tlsSettings(opts.tls);
   /** Ends whatever `connect()` last opened. Nothing is open to begin with. */
   let closeOpen = (): Promise<void> => Promise.resolve();
 

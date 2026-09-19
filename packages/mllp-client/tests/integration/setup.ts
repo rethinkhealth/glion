@@ -107,17 +107,21 @@ export default async function setup(project: TestProject) {
     return { host: remote.host, port: remote.port };
   };
 
-  /** Every remote in the catalogue, over `tls` when given. */
-  const startAll = async (tls?: TlsOptions): Promise<Remotes> => {
+  /** The listening remotes of the catalogue, over `tls` when given. */
+  const startListening = async (
+    tls?: TlsOptions
+  ): Promise<Record<string, Address>> => {
     const addresses: Record<string, Address> = {};
     for (const [name, spec] of Object.entries(REMOTES)) {
-      addresses[name] = spec ? await start({ ...spec, tls }) : await released();
+      if (spec) {
+        addresses[name] = await start({ ...spec, tls });
+      }
     }
-    return addresses as Remotes;
+    return addresses;
   };
 
-  const tcp = await startAll();
-  const tls = await startAll(serverTls);
+  const tcp = await startListening();
+  const tls = await startListening(serverTls);
   const requiringClientCertificate = await start({
     tls: {
       ...serverTls,
@@ -127,10 +131,20 @@ export default async function setup(project: TestProject) {
     },
   });
 
+  // Last, so nothing binds a released port afterwards. One address serves both
+  // transports: nothing listens on it either way.
+  for (const [name, spec] of Object.entries(REMOTES)) {
+    if (spec === null) {
+      const address = await released();
+      tcp[name] = address;
+      tls[name] = address;
+    }
+  }
+
   project.provide("fixtures", {
     pki,
-    tcp,
-    tls: { ...tls, requiringClientCertificate },
+    tcp: tcp as Remotes,
+    tls: { ...(tls as Remotes), requiringClientCertificate },
   });
 
   return async () => {

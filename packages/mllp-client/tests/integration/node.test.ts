@@ -149,6 +149,7 @@ describe("nodeSocket over tls.TLSSocket", () => {
         servernames.push((socket as TLSSocket).servername);
         return acknowledgment(message);
       },
+      host: pki.servername,
       tls: { cert: pki.serverCert, key: pki.serverKey },
     });
     const client = new MllpClient({
@@ -163,6 +164,29 @@ describe("nodeSocket over tls.TLSSocket", () => {
     await client.close();
 
     expect(servernames).toEqual([pki.servername]);
+  });
+
+  it("sends no server name when host is an IP address", async () => {
+    const servernames: unknown[] = [];
+    await using remote = await listen({
+      answer: (message, socket) => {
+        servernames.push((socket as TLSSocket).servername);
+        return acknowledgment(message);
+      },
+      tls: { cert: pki.serverCert, key: pki.serverKey },
+    });
+    const client = new MllpClient({
+      // The certificate lists `localhost` only, and an IP address is not a
+      // server name, so the dial is unverified to reach the answer.
+      socket: nodeSocket({ ...remote, tls: { rejectUnauthorized: false } }),
+    });
+
+    await client.send(adtA01().tree);
+    await client.close();
+
+    // Each runtime spells "no server name" its own way: `false` on Node,
+    // `undefined` on Bun, `null` on Deno.
+    expect(servernames.map(Boolean)).toEqual([false]);
   });
 
   it("presents the client certificate to a remote system that requires one", async () => {
@@ -193,7 +217,7 @@ describe("nodeSocket over tls.TLSSocket", () => {
     await client.connect();
 
     await expect(client.send(adtA01().tree)).rejects.toMatchObject({
-      code: expect.stringMatching(/^(CONNECTION_LOST|SEND_TIMEOUT)$/),
+      code: "CONNECTION_LOST",
       delivery: "unknown",
     });
   });

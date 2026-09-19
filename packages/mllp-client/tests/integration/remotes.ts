@@ -15,7 +15,7 @@ import type { Address, Answer } from "./remote-tcp";
 /** Milliseconds between the two halves `splitting` writes. */
 const SPLIT_DELAY_MS = 40;
 
-/** One remote system. `null` starts nothing, so the port refuses. */
+/** One remote system, as `setup.ts` starts it. */
 export interface RemoteSpec {
   /** How it answers each message it reads. */
   readonly answer: Answer;
@@ -35,6 +35,10 @@ function rejectingFirst(): Answer {
   };
 }
 
+/**
+ * Every remote the suites dial. A `null` entry starts nothing: the port
+ * refuses.
+ */
 export const REMOTES = {
   /** Answers every message with `AA`. */
   acknowledging: { answer: acknowledging("AA") },
