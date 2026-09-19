@@ -44,7 +44,7 @@ That runs `glion send samples/adt-a01.hl7 --local` — `--local` reads the host 
 ← ACK   AA  MSA-2 MSG001  3.1ms
 ```
 
-Note the `send` script runs `glion send` on **Node** (no `bun --bun`), unlike `dev`/`start`: `glion send` uses the MLLP client, which runs on Node and Cloudflare Workers, not Bun. The Bun server still receives the message normally — only the sending process is Node.
+Note the `send` script runs `glion send` on **Node** (no `bun --bun`), unlike `dev`/`start`: without `--bun`, the bin's `node` shebang wins. The Bun server still receives the message normally — only the sending process is Node.
 
 `glion send` exits `0` on accept (`AA`/`CA`), `1` on a NAK, and `2` when the message could not be delivered. The `ORU^R01` route throws a typed NAK, so sending the bundled `oru-r01` sample shows the rejection path end to end:
 
