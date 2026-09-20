@@ -1,6 +1,5 @@
+import { ANY_SEGMENT } from "./constants";
 import type { Runner, RunnerEvent, StructureProgram } from "./types";
-
-const ANY_SEGMENT = "Hxx";
 
 /**
  * Creates a runner that validates segment order against `program`, one

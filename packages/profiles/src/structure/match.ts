@@ -1,6 +1,6 @@
+import { ANY_SEGMENT } from "./constants";
 import type { StructureMatch, StructureProgram } from "./types";
 
-const ANY_SEGMENT = "Hxx";
 const SEGMENT = 0;
 
 type Log = Readonly<{ action: number; previous: Log | undefined }>;

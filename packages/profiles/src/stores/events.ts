@@ -9,19 +9,14 @@ import type {
 /** A bundled message structure file. */
 export type StructureModule = Readonly<{ default: MessageStructure }>;
 
-const STRUCTURE_PATH = /^\.\.\/profiles\/(v[^/]+)\/events\/([^/]+)\.json$/;
-
-/** Lazy loaders for the bundled message structures, keyed `v<version>/<id>`. */
+/** Lazy loaders for the bundled message structures, keyed by file path. */
 export const structureImports: Readonly<
   Record<string, () => Promise<StructureModule>>
-> = Object.fromEntries(
-  Object.entries(
-    import.meta.glob<StructureModule>("../profiles/v*/events/*.json")
-  ).map(([path, load]) => {
-    const [, version, id] = STRUCTURE_PATH.exec(path) as RegExpExecArray;
-    return [`${version}/${id}`, load];
-  })
-);
+> = import.meta.glob<StructureModule>("../profiles/v*/events/*.json");
+
+/** The path `structureImports` keys a structure by. */
+export const structurePath = (version: string, id: string): string =>
+  `../profiles/v${version}/events/${id}.json`;
 
 /** Store configuration for event (message structure) profiles. */
 export const eventsConfig: ProfileStoreConfig<
@@ -33,6 +28,7 @@ export const eventsConfig: ProfileStoreConfig<
     structure,
   }),
   manifest: structureImports,
+  manifestKey: structurePath,
   namespace: "events",
   resolveId: (version, id) => eventMaps[version]?.[id],
 };

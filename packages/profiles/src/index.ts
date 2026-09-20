@@ -59,7 +59,8 @@ export type {
 // Event maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
 export { eventMaps } from "./profiles/event-map-manifest";
 
-// Resolution utility
+// Resolution utilities
+export { loadMessageStructure } from "./load-message-structure";
 export { resolveMessageStructure } from "./resolve-message-structure";
 
 // Profiles API types
