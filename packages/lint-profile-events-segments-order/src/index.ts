@@ -1,7 +1,7 @@
 import type { Root } from "@glion/ast";
 import type { Definition } from "@glion/profiles";
 import { runner } from "@glion/profiles";
-import { EXIT, visit } from "@glion/util-visit";
+import { EXIT, SKIP, visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
 
 import { resolveDefinition } from "./resolve";
@@ -93,6 +93,8 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
         );
         return EXIT;
       }
+
+      return SKIP;
     });
 
     // After consuming all segments, check if the automaton reached a final

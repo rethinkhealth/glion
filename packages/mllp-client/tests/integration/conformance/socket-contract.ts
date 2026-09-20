@@ -1,18 +1,19 @@
 /**
  * The `MllpSocket` contract as a vitest suite an adapter instantiates.
  * Runtime-neutral: the tests touch Web Streams, timers, and `AbortSignal`
- * only, and dial the remote systems `../setup.ts` provides.
+ * only, and dial the remote systems they are given.
  *
  * @module
  */
 
 import { frame } from "@glion/mllp-codec";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
-import { describe, expect, inject, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import type { MllpSocket } from "../../../src/index";
 import { adtA01 } from "../../fixtures";
 import type { Address } from "../remote-tcp";
+import type { Remotes } from "../remotes";
 
 /** TEST-NET-1 (RFC 5737): never routed, so a SYN there is never answered. */
 export const BLACKHOLE: Address = { host: "192.0.2.1", port: 65_535 };
@@ -22,12 +23,14 @@ const PROMPT_MS = 100;
 
 const ONE_MIB = 1024 * 1024;
 
-export interface SocketContractBounds {
+export interface SocketContractOptions {
   /**
    * Upper bound on `close()` when the remote system never answers the FIN,
    * in milliseconds.
    */
   readonly closeBoundMs: number;
+  /** The remote systems `open` dials. */
+  readonly remotes: Remotes;
 }
 
 const noSignal = () => new AbortController().signal;
@@ -68,10 +71,8 @@ async function readAll(
 export function describeMllpSocketContract(
   name: string,
   open: (address: Address) => MllpSocket,
-  { closeBoundMs }: SocketContractBounds
+  { closeBoundMs, remotes }: SocketContractOptions
 ): void {
-  const remotes = () => inject("remotes");
-
   /** An open socket to `address`, with its streams locked for the test. */
   async function opened(address: Address) {
     const socket = open(address);
@@ -101,19 +102,19 @@ export function describeMllpSocketContract(
         const reason = new Error("the caller gave up");
 
         await expect(
-          open(remotes().acknowledging).connect(AbortSignal.abort(reason))
+          open(remotes.acknowledging).connect(AbortSignal.abort(reason))
         ).rejects.toBe(reason);
       });
 
       it("rejects when nothing is listening, leaving nothing open", async () => {
-        const socket = open(remotes().refused);
+        const socket = open(remotes.refused);
 
         await expect(socket.connect(noSignal())).rejects.toThrow();
         await expect(elapsed(socket.close())).resolves.toBeLessThan(PROMPT_MS);
       });
 
       it("opens a fresh socket after close()", async () => {
-        const socket = open(remotes().acknowledging);
+        const socket = open(remotes.acknowledging);
         await socket.connect(noSignal());
         await socket.close();
 
@@ -131,7 +132,7 @@ export function describeMllpSocketContract(
 
     describe("close()", () => {
       it("never rejects, however many times it is called", async () => {
-        const socket = open(remotes().acknowledging);
+        const socket = open(remotes.acknowledging);
         await socket.connect(noSignal());
 
         await expect(
@@ -141,7 +142,7 @@ export function describeMllpSocketContract(
       });
 
       it("is bounded when the remote system never answers the FIN", async () => {
-        const socket = open(remotes().holdingOpen);
+        const socket = open(remotes.holdingOpen);
         await socket.connect(noSignal());
 
         await expect(elapsed(socket.close())).resolves.toBeLessThan(
@@ -150,7 +151,7 @@ export function describeMllpSocketContract(
       });
 
       it("resolves after the remote system has dropped", async () => {
-        const { reader, socket, writer } = await opened(remotes().dropping);
+        const { reader, socket, writer } = await opened(remotes.dropping);
         await writer.write(frame(encodeBytes(adtA01().text)));
         await Promise.allSettled([reader.read()]);
         reader.releaseLock();
@@ -160,7 +161,7 @@ export function describeMllpSocketContract(
       });
 
       it("resolves while the streams are locked", async () => {
-        const { socket } = await opened(remotes().acknowledging);
+        const { socket } = await opened(remotes.acknowledging);
 
         await expect(elapsed(socket.close())).resolves.toBeLessThan(
           closeBoundMs
@@ -170,7 +171,7 @@ export function describeMllpSocketContract(
 
     describe("readable", () => {
       it("settles a pending read when the remote system resets", async () => {
-        const { reader, socket, writer } = await opened(remotes().dropping);
+        const { reader, socket, writer } = await opened(remotes.dropping);
         await writer.write(frame(encodeBytes(adtA01().text)));
 
         const [read] = await Promise.allSettled([reader.read()]);
@@ -182,7 +183,7 @@ export function describeMllpSocketContract(
       });
 
       it("ends a pending read when the remote system sends FIN", async () => {
-        const { reader, socket, writer } = await opened(remotes().ending);
+        const { reader, socket, writer } = await opened(remotes.ending);
         await writer.write(frame(encodeBytes(adtA01().text)));
 
         await expect(reader.read()).resolves.toMatchObject({ done: true });
@@ -193,7 +194,7 @@ export function describeMllpSocketContract(
 
       it("delivers bytes sent before a clean close ahead of end-of-stream", async () => {
         const { reader, socket, writer } = await opened(
-          remotes().acknowledgingThenEnding
+          remotes.acknowledgingThenEnding
         );
         await writer.write(frame(encodeBytes(adtA01().text)));
 
@@ -207,7 +208,7 @@ export function describeMllpSocketContract(
       });
 
       it("round-trips a 1 MiB message", async () => {
-        const { reader, socket, writer } = await opened(remotes().echoing);
+        const { reader, socket, writer } = await opened(remotes.echoing);
         const text = `${adtA01().text}\rOBX|1|TX|||${"x".repeat(ONE_MIB)}`;
         const sent = frame(encodeBytes(text));
 

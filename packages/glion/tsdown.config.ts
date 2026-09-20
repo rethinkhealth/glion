@@ -7,7 +7,6 @@ const pkg = JSON.parse(readFileSync("./package.json", "utf8")) as {
 };
 
 export default defineConfig({
-  clean: false,
   define: {
     __GLION_VERSION__: JSON.stringify(pkg.version),
   },

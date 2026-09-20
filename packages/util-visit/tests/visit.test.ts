@@ -1,8 +1,8 @@
 import type { Group, Nodes, Segment } from "@glion/ast";
 import { c, f, g, m, s } from "@glion/builder";
 
-import type { VisitInfo } from "..";
-import { EXIT, SKIP, visit } from "..";
+import type { VisitInfo } from "../src";
+import { EXIT, SKIP, visit } from "../src";
 
 describe("visit", () => {
   it("should visit all nodes in order", () => {

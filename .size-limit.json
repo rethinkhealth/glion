@@ -1,0 +1,20 @@
+[
+  {
+    "name": "@glion/profiles: import { profiles }",
+    "path": "packages/profiles/dist/index.js",
+    "import": "{ profiles }",
+    "limit": "45 kB"
+  },
+  {
+    "name": "@glion/profiles/event-maps: import { eventMaps }",
+    "path": "packages/profiles/dist/event-maps.js",
+    "import": "{ eventMaps }",
+    "limit": "3 kB"
+  },
+  {
+    "name": "@glion/profiles: largest events chunk",
+    "path": "packages/profiles/dist/events-v2.8.2.js",
+    "webpack": false,
+    "limit": "75 kB"
+  }
+]
