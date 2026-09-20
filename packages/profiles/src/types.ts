@@ -5,7 +5,7 @@ import type {
   FieldDefinition,
   TableDefinition,
 } from "./stores/types";
-import type { MessageStructureDefinition } from "./structure/types";
+import type { MessageStructure } from "./structure/types";
 
 // ---------------------------------------------------------------------------
 // Load options
@@ -47,7 +47,7 @@ export type EventProfileStore = Readonly<{
     version: string,
     id: string,
     options?: EventLoadOptions
-  ): Promise<MessageStructureDefinition>;
+  ): Promise<MessageStructure>;
   /** Check whether a profile is in the cache. */
   has(version: string, id: string): boolean;
   /** Remove a single entry from the cache. */

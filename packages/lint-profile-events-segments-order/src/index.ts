@@ -1,31 +1,46 @@
 import type { Root } from "@glion/ast";
-import type { StructureProgram } from "@glion/profiles";
+import type { MessageStructure } from "@glion/profiles";
 import { loadMessageStructure, runner } from "@glion/profiles";
 import { EXIT, SKIP, visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
+import type { VFile } from "vfile";
+
+/** The message a `definition` function chooses a message structure for. */
+export interface SegmentOrderContext {
+  tree: Root;
+  file: VFile;
+}
 
 /**
  * Options for the segment order lint rule.
  */
 export interface SegmentOrderOptions {
   /**
-   * The message structure to validate against, compiled with
-   * `compileStructure`. When provided, the rule does not resolve one from
-   * MSH-9.
+   * The message structure to validate against, or a function that returns the
+   * one to use for a message. Default: the structure MSH-9 names.
+   *
+   * When the function returns `undefined`, the rule reports nothing for that
+   * message.
    */
-  program?: StructureProgram;
+  definition?:
+    | MessageStructure
+    | ((
+        context: SegmentOrderContext
+      ) =>
+        | MessageStructure
+        | undefined
+        | Promise<MessageStructure | undefined>);
 }
 
 /**
  * Lint rule that validates HL7v2 segment order against message structure
  * profiles.
  *
- * Runs the message structure's program over the segment sequence and verifies
- * each segment appears in the order the structure defines.
+ * Verifies each segment appears in the order the message structure defines.
  *
- * **Resolution**: If no `program` is provided, the rule resolves the structure
- * from MSH-12 (version) and MSH-9.3 (message structure), or MSH-9.1 and
- * MSH-9.2 when MSH-9.3 is empty. If the structure is unavailable, the rule
+ * **Resolution**: If no `definition` is provided, the rule resolves the
+ * structure from MSH-12 (version) and MSH-9.3 (message structure), or MSH-9.1
+ * and MSH-9.2 when MSH-9.3 is empty. If the structure is unavailable, the rule
  * reports nothing.
  *
  * **Behavior**: Reports at most one order error per message: the first segment
@@ -36,15 +51,22 @@ export interface SegmentOrderOptions {
  *   // With the structure MSH-9 names:
  *   unified().use(hl7v2LintSegmentOrder);
  *
- *   // With an explicit structure:
- *   const program = compileStructure({
- *     elements: [
- *       { name: "MSH", optional: false, repeating: false, type: "segment" },
- *       { name: "PID", optional: false, repeating: false, type: "segment" },
- *     ],
- *     id: "ADT_SITE",
+ *   // With a structure of your own:
+ *   unified().use(hl7v2LintSegmentOrder, {
+ *     definition: {
+ *       elements: [
+ *         { name: "MSH", optional: false, repeating: false, type: "segment" },
+ *         { name: "PID", optional: false, repeating: false, type: "segment" },
+ *       ],
+ *       id: "ADT_SITE",
+ *     },
  *   });
- *   unified().use(hl7v2LintSegmentOrder, { program });
+ *
+ *   // With a structure chosen per message:
+ *   unified().use(hl7v2LintSegmentOrder, {
+ *     definition: ({ tree }) =>
+ *       isSiteMessage(tree) ? SITE_STRUCTURE : loadMessageStructure(tree),
+ *   });
  *   ```;
  */
 const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
@@ -52,16 +74,17 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
     origin: "hl7v2-lint:segment-order",
   },
   async (tree, file, options) => {
-    const definition = options?.program
-      ? undefined
-      : await loadMessageStructure(tree);
-    const program = options?.program ?? definition?.program;
+    const definition = options?.definition;
+    const structure =
+      typeof definition === "function"
+        ? await definition({ file, tree })
+        : (definition ?? (await loadMessageStructure(tree)));
 
-    if (!program) {
+    if (!structure) {
       return;
     }
 
-    const automaton = runner(program);
+    const automaton = runner(structure);
 
     // A message with an order error is not also reported as ended early.
     let aborted = false;

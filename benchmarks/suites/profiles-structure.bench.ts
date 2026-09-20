@@ -1,11 +1,11 @@
 /**
  * Message structure matching benchmarks — the per-message cost of grouping
- * segments by their message structure (Pike VM over the compiled program).
+ * segments by their message structure.
  *
  * Uses the same three ORU_R01 inputs as `profiles-runner.bench.ts`.
  */
 import { parseHL7v2 } from "@glion/parser";
-import { compileStructure, matchStructure, profiles } from "@glion/profiles";
+import { matchStructure, profiles } from "@glion/profiles";
 import { bench, describe } from "vitest";
 
 import {
@@ -22,7 +22,7 @@ const symbols = (message: string): string[] =>
     node.type === "segment" ? node.name : ""
   );
 
-const { program, structure } = await profiles.events.load("2.5.1", "ORU_R01");
+const structure = await profiles.events.load("2.5.1", "ORU_R01");
 
 describe("profiles-structure", () => {
   const medium = symbols(ORU_R01_MEDIUM);
@@ -30,18 +30,20 @@ describe("profiles-structure", () => {
   const orders = symbols(ORU_R01_LARGE);
 
   bench("profiles-structure: match ORU_R01 (14 segments)", () => {
-    matchStructure(program, medium);
+    matchStructure(structure, medium);
   });
 
   bench("profiles-structure: match ORU_R01 (105 segments, 100 OBX)", () => {
-    matchStructure(program, observations);
+    matchStructure(structure, observations);
   });
 
   bench("profiles-structure: match ORU_R01 (102 segments, 50 orders)", () => {
-    matchStructure(program, orders);
+    matchStructure(structure, orders);
   });
 
-  bench("profiles-structure: compile ORU_R01", () => {
-    compileStructure(structure);
+  // A structure is compiled the first time it is used, per structure object:
+  // the copy makes every iteration a first use.
+  bench("profiles-structure: first use of ORU_R01", () => {
+    matchStructure({ ...structure }, ["MSH"]);
   });
 });

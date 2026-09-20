@@ -5,17 +5,16 @@ import { runner } from "../src/structure/runner";
 
 describe("createProfiles", () => {
   describe("events", () => {
-    it("loads a message structure and its compiled program by version and id", async () => {
+    it("loads a message structure by version and id", async () => {
       const profiles = createProfiles();
       const def = await profiles.events.load("2.5", "ADT_A01");
-      expect(def.structure.id).toBe("ADT_A01");
-      expect(def.structure.elements[0]).toEqual({
+      expect(def.id).toBe("ADT_A01");
+      expect(def.elements[0]).toEqual({
         name: "MSH",
         optional: false,
         repeating: false,
         type: "segment",
       });
-      expect(def.program.segments).toContain("PID");
     });
 
     it("resolves event aliases transparently", async () => {
@@ -32,10 +31,10 @@ describe("createProfiles", () => {
       ).rejects.toThrow();
     });
 
-    it("returns a program the runner validates against", async () => {
+    it("returns a structure the runner validates against", async () => {
       const profiles = createProfiles();
       const def = await profiles.events.load("2.5", "ADT_A01");
-      const r = runner(def.program);
+      const r = runner(def);
       r.consume("MSH");
       r.consume("EVN");
       r.consume("PID");
@@ -62,9 +61,9 @@ describe("createProfiles", () => {
       const v21 = await profiles.events.load("2.1", "ADT_A01");
       const v25 = await profiles.events.load("2.5", "ADT_A01");
       const v282 = await profiles.events.load("2.8.2", "ADT_A01");
-      expect(v21.structure.id).toBe("ADT_A01");
-      expect(v25.structure.id).toBe("ADT_A01");
-      expect(v282.structure.id).toBe("ADT_A01");
+      expect(v21.id).toBe("ADT_A01");
+      expect(v25.id).toBe("ADT_A01");
+      expect(v282.id).toBe("ADT_A01");
     });
   });
 
@@ -229,14 +228,14 @@ describe("createProfiles", () => {
     it("accepts cache: false to disable caching", async () => {
       const profiles = createProfiles({ cache: false });
       const def = await profiles.events.load("2.5", "ACK");
-      expect(def.structure.id).toBe("ACK");
+      expect(def.id).toBe("ACK");
       expect(profiles.events.has("2.5", "ACK")).toBe(false);
     });
 
     it("accepts CacheOptions for built-in LRU", async () => {
       const profiles = createProfiles({ cache: { maxEntries: 5 } });
       const def = await profiles.events.load("2.5", "ACK");
-      expect(def.structure.id).toBe("ACK");
+      expect(def.id).toBe("ACK");
     });
 
     it("accepts a custom Cache implementation", async () => {

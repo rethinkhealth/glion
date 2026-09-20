@@ -1,10 +1,7 @@
 import { eventMaps } from "../profiles/event-map-manifest";
 import type { ProfileStoreConfig } from "../store";
-import { compileStructure } from "../structure/compile";
-import type {
-  MessageStructure,
-  MessageStructureDefinition,
-} from "../structure/types";
+import { programOf } from "../structure/compile";
+import type { MessageStructure } from "../structure/types";
 
 /** A bundled message structure file. */
 export type StructureModule = Readonly<{ default: MessageStructure }>;
@@ -21,12 +18,14 @@ export const structurePath = (version: string, id: string): string =>
 /** Store configuration for event (message structure) profiles. */
 export const eventsConfig: ProfileStoreConfig<
   StructureModule,
-  MessageStructureDefinition
+  MessageStructure
 > = {
-  compile: ({ default: structure }) => ({
-    program: compileStructure(structure),
-    structure,
-  }),
+  // Compiling on load makes an invalid structure fail the load, not a later
+  // runner() or matchStructure() call.
+  compile: ({ default: structure }) => {
+    programOf(structure);
+    return structure;
+  },
   manifest: structureImports,
   manifestKey: structurePath,
   namespace: "events",

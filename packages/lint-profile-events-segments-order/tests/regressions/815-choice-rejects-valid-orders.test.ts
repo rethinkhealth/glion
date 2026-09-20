@@ -10,8 +10,8 @@
  * segments; it read `xsd:choice` blocks as sequences. 108 bundled structures
  * were affected.
  * Resolution: the generator writes each message structure as data, with a
- * choice as a `choice` element, and `compileStructure` compiles a choice as
- * exactly one of its alternatives.
+ * choice as a `choice` element, and the engine reads a choice as exactly one
+ * of its alternatives.
  */
 
 import { parseHL7v2 } from "@glion/parser";

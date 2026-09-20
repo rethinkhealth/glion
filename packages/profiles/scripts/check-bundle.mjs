@@ -15,7 +15,7 @@
  * backtracking parser over the structure data that shares no code with the
  * compiler or the VM. It defines the answer the engine is held to: a
  * disagreement is a bug in one of them, so decide which before changing
- * either. Changing the priorities in `compileStructure` means changing both.
+ * either. Changing the engine's priorities means changing both.
  *
  * The engine's tests import `referenceMatch` and the message generators from
  * this file; the check itself runs only when the file is executed.
@@ -25,8 +25,6 @@
  * @typedef {import("../src/structure/types").StructureElement} StructureElement
  *
  * @typedef {import("../src/structure/types").StructureMatch} StructureMatch
- *
- * @typedef {import("../src/structure/types").StructureProgram} StructureProgram
  *
  * @typedef {() => number} Random
  */
@@ -337,8 +335,8 @@ async function problemsInBundle() {
   const { eventMaps, matchStructure, profiles, runner } =
     await import("../dist/index.js");
 
-  const accepts = (program, input) => {
-    const automaton = runner(program);
+  const accepts = (structure, input) => {
+    const automaton = runner(structure);
     return (
       input.every((name) => automaton.consume(name).type === "step") &&
       automaton.accepted
@@ -382,7 +380,7 @@ async function problemsInBundle() {
 
   // 3 and 4. The engine runs every structure as the reference does.
   for (const { id, version } of bundled) {
-    const { program, structure } = await profiles.events.load(version, id, {
+    const structure = await profiles.events.load(version, id, {
       resolve: false,
     });
     const random = seeded(version.length * 31 + id.length);
@@ -391,9 +389,9 @@ async function problemsInBundle() {
     for (let n = 0; n < MESSAGES_PER_STRUCTURE; n += 1) {
       const valid = validMessage(structure, random);
       const miss = nearMiss(valid, names, random);
-      const matched = matchStructure(program, valid);
+      const matched = matchStructure(structure, valid);
 
-      if (!accepts(program, valid) || matched === undefined) {
+      if (!accepts(structure, valid) || matched === undefined) {
         problems.push(`v${version}/${id} rejects ${valid.join(" ")}`);
       } else if (
         JSON.stringify(matched) !==
@@ -404,8 +402,8 @@ async function problemsInBundle() {
         );
       }
       if (
-        accepts(program, miss) !==
-        (matchStructure(program, miss) !== undefined)
+        accepts(structure, miss) !==
+        (matchStructure(structure, miss) !== undefined)
       ) {
         problems.push(`v${version}/${id} disagrees on ${miss.join(" ")}`);
       }

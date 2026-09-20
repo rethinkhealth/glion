@@ -133,3 +133,20 @@ export function compileStructure(
   const [start, final] = sequence(structure.elements);
   return { edges, final, groups, segments, start };
 }
+
+const programs = new WeakMap<MessageStructure, StructureProgram>();
+
+/**
+ * The program of `structure`, compiled on first use and cached by the
+ * structure object.
+ *
+ * @throws {Error} When `structure` is invalid.
+ */
+export const programOf = (structure: MessageStructure): StructureProgram => {
+  let program = programs.get(structure);
+  if (!program) {
+    program = compileStructure(structure);
+    programs.set(structure, program);
+  }
+  return program;
+};

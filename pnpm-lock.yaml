@@ -1153,15 +1153,15 @@ importers:
       '@glion/profiles':
         specifier: workspace:*
         version: link:../profiles
-      '@glion/util-query':
-        specifier: workspace:*
-        version: link:../util-query
       '@glion/util-visit':
         specifier: workspace:*
         version: link:../util-visit
       unified-lint-rule:
         specifier: 3.0.1
         version: 3.0.1
+      vfile:
+        specifier: 6.0.3
+        version: 6.0.3
     devDependencies:
       '@glion/builder':
         specifier: workspace:*
@@ -1196,9 +1196,6 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      vfile:
-        specifier: ^6.0.3
-        version: 6.0.3
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@25.6.0)(@vitest/coverage-v8@4.1.11)(vite@7.3.6(@types/node@25.6.0)(jiti@2.6.1)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))

@@ -25,10 +25,10 @@ const symbols = (message: string): string[] =>
     node.type === "segment" ? node.name : ""
   );
 
-const { program } = await profiles.events.load("2.5.1", "ORU_R01");
+const structure = await profiles.events.load("2.5.1", "ORU_R01");
 
 const consumeAll = (input: readonly string[]): void => {
-  const automaton = runner(program);
+  const automaton = runner(structure);
   for (const symbol of input) {
     automaton.consume(symbol);
   }
