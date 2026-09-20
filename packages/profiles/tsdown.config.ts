@@ -1,3 +1,4 @@
+import { importGlobPlugin } from "rolldown/experimental";
 import { defineConfig } from "tsdown";
 
 // Manifests and event maps load at import, so they match neither pattern:
@@ -29,6 +30,7 @@ export default defineConfig({
       groups: [{ name: dataChunk }],
     },
   },
+  plugins: [importGlobPlugin()],
   report: false,
   sourcemap: true,
   target: "es2022",

@@ -22,7 +22,8 @@
     "directory": "packages/profiles"
   },
   "files": [
-    "dist"
+    "dist",
+    "src/profiles/message-structure.schema.json"
   ],
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -34,27 +35,31 @@
     "./event-maps": {
       "types": "./dist/event-maps.d.ts",
       "default": "./dist/event-maps.js"
-    }
+    },
+    "./message-structure.schema.json": "./src/profiles/message-structure.schema.json"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly && tsc --noEmit -p checks/tsconfig.json && pnpm check:bundle",
     "check-types": "tsc -p tsconfig.build.json --noEmit && tsc --noEmit -p tests/tsconfig.json",
+    "check:bundle": "node --experimental-strip-types checks/bundle.ts",
     "check:readme": "glion-check-readme",
+    "publint": "publint --strict",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest",
-    "publint": "publint --strict"
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@glion/ast": "workspace:*",
+    "@glion/util-query": "workspace:*",
     "@glion/utils": "workspace:*",
     "lru-cache": "11.2.7",
     "unified": "11.0.5"
   },
   "devDependencies": {
-    "@glion/ast": "workspace:*",
+    "@glion/builder": "workspace:*",
     "@glion/check-readme": "workspace:*",
     "@glion/config": "workspace:*",
     "@glion/testing": "workspace:*",
@@ -62,7 +67,9 @@
     "@types/node": "25.6.0",
     "@types/unist": "^3.0.3",
     "@vitest/coverage-v8": "4.1.11",
+    "ajv": "8.20.0",
     "publint": "0.3.18",
+    "rolldown": "1.0.0-rc.17",
     "tsdown": "0.21.10",
     "typescript": "6.0.3",
     "unist": "^0.0.1",
