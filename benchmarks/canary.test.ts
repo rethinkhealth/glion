@@ -36,9 +36,9 @@ describe("canary — suites measure real work", () => {
   });
 
   it("profiles-runner: ORU_R01 fixtures are accepted", async () => {
-    const { program } = await profiles.events.load("2.5.1", "ORU_R01");
+    const structure = await profiles.events.load("2.5.1", "ORU_R01");
     for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
-      const automaton = runner(program);
+      const automaton = runner(structure);
       for (const node of parseHL7v2(message).children) {
         automaton.consume(node.type === "segment" ? node.name : "");
       }
@@ -47,12 +47,12 @@ describe("canary — suites measure real work", () => {
   });
 
   it("profiles-structure: ORU_R01 fixtures group into ORDER_OBSERVATION", async () => {
-    const { program } = await profiles.events.load("2.5.1", "ORU_R01");
+    const structure = await profiles.events.load("2.5.1", "ORU_R01");
     for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
       const names = parseHL7v2(message).children.map((node) =>
         node.type === "segment" ? node.name : ""
       );
-      const match = matchStructure(program, names);
+      const match = matchStructure(structure, names);
       expect(JSON.stringify(match)).toContain('"name":"ORDER_OBSERVATION"');
     }
   });

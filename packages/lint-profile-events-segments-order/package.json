@@ -44,9 +44,9 @@
   "dependencies": {
     "@glion/ast": "workspace:*",
     "@glion/profiles": "workspace:*",
-    "@glion/util-query": "workspace:*",
     "@glion/util-visit": "workspace:*",
-    "unified-lint-rule": "3.0.1"
+    "unified-lint-rule": "3.0.1",
+    "vfile": "6.0.3"
   },
   "devDependencies": {
     "@glion/builder": "workspace:*",
@@ -60,7 +60,6 @@
     "tsdown": "0.21.10",
     "typescript": "6.0.3",
     "unified": "^11.0.5",
-    "vfile": "^6.0.3",
     "vitest": "4.1.11"
   },
   "engines": {

@@ -4,7 +4,7 @@ Lint rule that validates HL7v2 segment order against the message structure defin
 
 ## What it does
 
-Walks the parsed tree segment-by-segment, feeding each segment name to a runner over the message structure from `@glion/profiles`. Reports one message for the first segment that is not valid at its position, or for a message that ends before the structure is complete. When no `program` is given, the rule resolves the structure from MSH-9 and MSH-12.
+Walks the parsed tree segment-by-segment, feeding each segment name to a runner over the message structure from `@glion/profiles`. Reports one message for the first segment that is not valid at its position, or for a message that ends before the structure is complete. When no `definition` is given, the rule resolves the structure from MSH-9 and MSH-12.
 
 ## Install
 
@@ -34,14 +34,14 @@ const file = await unified()
 console.error(reporter([file]));
 ```
 
-With a message structure of your own (skips resolution):
+With a message structure of your own:
 
 ```ts
 import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
-import { compileStructure } from "@glion/profiles";
+import type { MessageStructure } from "@glion/profiles";
 import { unified } from "unified";
 
-const program = compileStructure({
+const ADT_A01_SITE: MessageStructure = {
   id: "ADT_A01_SITE",
   elements: [
     { type: "segment", name: "MSH", optional: false, repeating: false },
@@ -49,9 +49,27 @@ const program = compileStructure({
     { type: "segment", name: "PID", optional: false, repeating: false },
     { type: "segment", name: "ZPD", optional: true, repeating: false },
   ],
-});
+};
 
-const processor = unified().use(hl7v2LintSegmentOrder, { program });
+const processor = unified().use(hl7v2LintSegmentOrder, {
+  definition: ADT_A01_SITE,
+});
+```
+
+With a structure chosen per message:
+
+```ts
+import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
+import { loadMessageStructure } from "@glion/profiles";
+import { value } from "@glion/util-query";
+import { unified } from "unified";
+
+const processor = unified().use(hl7v2LintSegmentOrder, {
+  definition: ({ tree }) =>
+    value(tree, "MSH-4")?.value === "SITE_A"
+      ? ADT_A01_SITE
+      : loadMessageStructure(tree),
+});
 ```
 
 ## API
@@ -63,15 +81,30 @@ A `unified` lint rule plugin.
 ```ts
 import type { Plugin } from "unified";
 import type { Root } from "@glion/ast";
-import type { StructureProgram } from "@glion/profiles";
+import type { MessageStructure } from "@glion/profiles";
+import type { VFile } from "vfile";
+
+export interface SegmentOrderContext {
+  tree: Root;
+  file: VFile;
+}
 
 export interface SegmentOrderOptions {
   /**
-   * The message structure to validate against, compiled with
-   * `compileStructure`. When provided, the rule does not resolve one from
-   * MSH-9.
+   * The message structure to validate against, or a function that returns the
+   * one to use for a message. Default: the structure MSH-9 names.
+   *
+   * When the function returns `undefined`, the rule reports nothing for that
+   * message.
    */
-  program?: StructureProgram;
+  definition?:
+    | MessageStructure
+    | ((
+        context: SegmentOrderContext
+      ) =>
+        | MessageStructure
+        | undefined
+        | Promise<MessageStructure | undefined>);
 }
 
 declare const hl7v2LintSegmentOrder: Plugin<[SegmentOrderOptions?], Root>;
@@ -142,7 +175,7 @@ Indicates a malformed tree.
 
 ### No structure
 
-When no `program` is given and MSH-9 and MSH-12 do not name a bundled structure, the rule reports nothing.
+When no `definition` is given and MSH-9 and MSH-12 do not name a bundled structure, or when a `definition` function returns `undefined`, the rule reports nothing.
 
 ## Part of Glion
 

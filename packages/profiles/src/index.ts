@@ -1,7 +1,6 @@
 /** Biome-ignore-all lint/performance/noBarrelFile: public API surface */
 
 // Message structures
-export { compileStructure } from "./structure/compile";
 export { matchStructure } from "./structure/match";
 export { runner } from "./structure/runner";
 export type {
@@ -9,17 +8,14 @@ export type {
   GroupElement,
   GroupMatch,
   MessageStructure,
-  MessageStructureDefinition,
   Occurrence,
   Runner,
   RunnerEvent,
   RunnerInvalidEvent,
   RunnerStepEvent,
   SegmentElement,
-  StructureEdge,
   StructureElement,
   StructureMatch,
-  StructureProgram,
 } from "./structure/types";
 
 // Cache

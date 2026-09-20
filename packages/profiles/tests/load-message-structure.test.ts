@@ -24,28 +24,27 @@ const message = (version: string, messageType = f(c("ADT"), c("A01"))) =>
 
 describe(loadMessageStructure, () => {
   it("loads the structure MSH-9.3 names", async () => {
-    const definition = await loadMessageStructure(
+    const structure = await loadMessageStructure(
       message("2.5", f(c("ADT"), c("A01"), c("ADT_A01")))
     );
 
-    expect(definition?.structure.id).toBe("ADT_A01");
-    expect(definition?.program.groups).toContain("PROCEDURE");
+    expect(structure?.id).toBe("ADT_A01");
   });
 
   it("resolves the structure from MSH-9.1 and MSH-9.2 when MSH-9.3 is empty", async () => {
-    const definition = await loadMessageStructure(
+    const structure = await loadMessageStructure(
       message("2.5", f(c("ADT"), c("A04")))
     );
 
-    expect(definition?.structure.id).toBe("ADT_A01");
+    expect(structure?.id).toBe("ADT_A01");
   });
 
   it("loads the ACK structure for a general acknowledgment", async () => {
-    const definition = await loadMessageStructure(
+    const structure = await loadMessageStructure(
       message("2.5", f(c("ACK"), c("A01"), c("ACK")))
     );
 
-    expect(definition?.structure.id).toBe("ACK");
+    expect(structure?.id).toBe("ACK");
   });
 
   it("returns nothing when the event maps to a structure the version does not define", async () => {

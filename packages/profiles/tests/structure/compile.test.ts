@@ -1,20 +1,9 @@
 import { compileStructure } from "../../src/structure/compile";
 import { matchStructure } from "../../src/structure/match";
-import { CSU_C09_V2_5, ORU_R01_V2_5 } from "./fixtures";
+import type { MessageStructure } from "../../src/structure/types";
+import { ORU_R01_V2_5 } from "./fixtures";
 
 describe("compileStructure", () => {
-  it("compiles to plain data that matches the same after a JSON round trip", () => {
-    const program = compileStructure(CSU_C09_V2_5);
-    const text = JSON.stringify(program);
-    const emitted = JSON.parse(text);
-    const input = "MSH PID CSR ORC OBR OBX ORC RXA RXR".split(" ");
-
-    expect(emitted).toEqual(program);
-    expect(matchStructure(emitted, input)).toEqual(
-      matchStructure(program, input)
-    );
-  });
-
   it("rejects a choice whose alternative can match no segment", () => {
     expect(() =>
       compileStructure({
@@ -88,7 +77,7 @@ describe("compileStructure", () => {
   });
 
   it("accepts a choice whose alternative is a group with a required segment", () => {
-    const program = compileStructure({
+    const structure: MessageStructure = {
       elements: [
         {
           alternatives: [
@@ -120,9 +109,9 @@ describe("compileStructure", () => {
         },
       ],
       id: "ZZZ_Z03",
-    });
+    };
 
-    expect(matchStructure(program, ["OBR", "NTE"])).toEqual([
+    expect(matchStructure(structure, ["OBR", "NTE"])).toEqual([
       { children: [0, 1], name: "ORDER" },
     ]);
   });

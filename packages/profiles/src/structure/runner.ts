@@ -1,16 +1,20 @@
+import { programOf } from "./compile";
 import { ANY_SEGMENT } from "./constants";
-import type { Runner, RunnerEvent, StructureProgram } from "./types";
+import type { MessageStructure, Runner, RunnerEvent } from "./types";
 
 /**
- * Creates a runner that validates segment order against `program`, one
+ * Creates a runner that validates segment order against `structure`, one
  * segment at a time.
  *
  * A runner is single-use: create one per message. After the first `invalid`
  * event every later `consume()` returns `invalid` with an empty `expected`.
  * `expected` lists segment names in sorted order; `Hxx` stands for any
  * segment.
+ *
+ * @throws {Error} When `structure` is invalid: see {@link matchStructure}.
  */
-export function runner(program: StructureProgram): Runner {
+export function runner(structure: MessageStructure): Runner {
+  const program = programOf(structure);
   const { edges, final, segments } = program;
   const visited = new Int32Array(segments.length).fill(-1);
   let generation = 0;

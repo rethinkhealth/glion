@@ -4,7 +4,6 @@ import {
   seeded,
   validMessage,
 } from "../../scripts/check-bundle.mjs";
-import { compileStructure } from "../../src/structure/compile";
 import { matchStructure } from "../../src/structure/match";
 import type {
   MessageStructure,
@@ -26,7 +25,7 @@ const g = (name: string, ...children: StructureMatch[]) => ({
 });
 
 const match = (structure: MessageStructure, message: string) =>
-  matchStructure(compileStructure(structure), message.split(" "));
+  matchStructure(structure, message.split(" "));
 
 describe("matchStructure", () => {
   it("nests each group inside the group that contains it", () => {
@@ -140,7 +139,7 @@ describe("matchStructure", () => {
   });
 
   it("returns undefined for an empty message", () => {
-    expect(matchStructure(compileStructure(ORU_R01_V2_5), [])).toBeUndefined();
+    expect(matchStructure(ORU_R01_V2_5, [])).toBeUndefined();
   });
 
   it("returns undefined for a segment the structure does not allow there", () => {
@@ -162,7 +161,6 @@ describe("matchStructure agrees with the reference parser", () => {
 
   for (const structure of structures) {
     it(`on valid messages and near misses for ${structure.id}`, () => {
-      const program = compileStructure(structure);
       const random = seeded(structure.id.length * 7919);
       const names = [...new Set(validMessage(structure, random)), "ZZ1"];
 
@@ -170,11 +168,11 @@ describe("matchStructure agrees with the reference parser", () => {
         const valid = validMessage(structure, random);
         const miss = nearMiss(valid, names, random);
 
-        expect(matchStructure(program, valid)).toEqual(
+        expect(matchStructure(structure, valid)).toEqual(
           referenceMatch(structure, valid)
         );
-        expect(matchStructure(program, valid)).toBeDefined();
-        expect(matchStructure(program, miss)).toEqual(
+        expect(matchStructure(structure, valid)).toBeDefined();
+        expect(matchStructure(structure, miss)).toEqual(
           referenceMatch(structure, miss)
         );
       }

@@ -45,8 +45,8 @@ export type ChoiceElement = Occurrence &
   }>;
 
 /**
- * A message structure compiled for `runner()` and `matchStructure()`. Plain
- * data: it survives `JSON.stringify`.
+ * A message structure compiled for `runner()` and `matchStructure()`.
+ * Internal to the package.
  *
  * States are numbered from `0`. A state with a non-null entry in `segments`
  * consumes that segment and moves to the next state number; every other state
@@ -77,15 +77,6 @@ export type GroupMatch = Readonly<{
 
 /** A segment's index in the matched input, or a group occurrence. */
 export type StructureMatch = number | GroupMatch;
-
-/**
- * A message structure as `profiles.events.load()` returns it: the structure
- * and its compiled program.
- */
-export type MessageStructureDefinition = Readonly<{
-  structure: MessageStructure;
-  program: StructureProgram;
-}>;
 
 /** Emitted when the runner accepts a segment. */
 export type RunnerStepEvent = Readonly<{
