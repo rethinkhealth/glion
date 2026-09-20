@@ -1,0 +1,48 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "UDM_Q05",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "URD",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "URS",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "DSP",
+      "optional": false,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}

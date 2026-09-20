@@ -1,0 +1,92 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "RSP_K32",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QAK",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QPD",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "QUERY_RESPONSE",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PD1",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NK1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "PV1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PV2",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "QRI",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}

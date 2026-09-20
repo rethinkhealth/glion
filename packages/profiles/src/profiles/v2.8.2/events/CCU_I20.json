@@ -1,0 +1,746 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "CCU_I20",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "RF1",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "PROVIDER_CONTACT",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PRD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "CTD",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "PATIENT",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PD1",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "NK1",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "INSURANCE",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "IN1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IN2",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IN3",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "APPOINTMENT_HISTORY",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "SCH",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "RESOURCES",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "RGS",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "RESOURCE_DETAIL",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "choice",
+                  "optional": false,
+                  "repeating": false,
+                  "alternatives": [
+                    {
+                      "type": "segment",
+                      "name": "AIS",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "AIG",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "AIL",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "AIP",
+                      "optional": false,
+                      "repeating": false
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "RESOURCE_OBSERVATION",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "OBX",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "PRT",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "CLINICAL_HISTORY",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "ORC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "CLINICAL_HISTORY_DETAIL",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "choice",
+              "optional": false,
+              "repeating": false,
+              "alternatives": [
+                {
+                  "type": "segment",
+                  "name": "OBR",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "ODS",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PR1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "RF1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "AL1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "IAM",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "ACC",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "RMI",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "DB1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "DG1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "DRG",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PDA",
+                  "optional": false,
+                  "repeating": false
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "CLINICAL_HISTORY_OBSERVATION",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "OBX",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PRT",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "ROLE_CLINICAL_HISTORY",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "choice",
+              "optional": false,
+              "repeating": false,
+              "alternatives": [
+                {
+                  "type": "segment",
+                  "name": "ROL",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PRD",
+                  "optional": false,
+                  "repeating": false
+                }
+              ]
+            },
+            {
+              "type": "segment",
+              "name": "VAR",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "CTI",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "PATIENT_VISITS",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PV1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PV2",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "MEDICATION_HISTORY",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "ORC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "MEDICATION_ORDER_DETAIL",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "RXO",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "RXR",
+              "optional": false,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "RXC",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "group",
+              "name": "MEDICATION_ORDER_OBSERVATION",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "OBX",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PRT",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "MEDICATION_ENCODING_DETAIL",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "RXE",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "RXR",
+              "optional": false,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "RXC",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "group",
+              "name": "MEDICATION_ENCODING_OBSERVATION",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "OBX",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PRT",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "MEDICATION_ADMINISTRATION_DETAIL",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "RXA",
+              "optional": false,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "RXR",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "MEDICATION_ADMINISTRATION_OBSERVATION",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "OBX",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PRT",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "CTI",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "PROBLEM",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PRB",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "VAR",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "ROLE_PROBLEM",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "choice",
+              "optional": false,
+              "repeating": false,
+              "alternatives": [
+                {
+                  "type": "segment",
+                  "name": "ROL",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PRD",
+                  "optional": false,
+                  "repeating": false
+                }
+              ]
+            },
+            {
+              "type": "segment",
+              "name": "VAR",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "PROBLEM_OBSERVATION",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "OBX",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PRT",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "GOAL",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "GOL",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "VAR",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "ROLE_GOAL",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "choice",
+              "optional": false,
+              "repeating": false,
+              "alternatives": [
+                {
+                  "type": "segment",
+                  "name": "ROL",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PRD",
+                  "optional": false,
+                  "repeating": false
+                }
+              ]
+            },
+            {
+              "type": "segment",
+              "name": "VAR",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "GOAL_OBSERVATION",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "OBX",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PRT",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "PATHWAY",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PTH",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "VAR",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "ROLE_PATHWAY",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "choice",
+              "optional": false,
+              "repeating": false,
+              "alternatives": [
+                {
+                  "type": "segment",
+                  "name": "ROL",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PRD",
+                  "optional": false,
+                  "repeating": false
+                }
+              ]
+            },
+            {
+              "type": "segment",
+              "name": "VAR",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "PATHWAY_OBSERVATION",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "OBX",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PRT",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "REL",
+      "optional": true,
+      "repeating": true
+    }
+  ]
+}

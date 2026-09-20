@@ -1,0 +1,127 @@
+{
+  "$id": "https://glion.dev/schemas/message-structure/v1.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/MessageStructure",
+  "definitions": {
+    "MessageStructure": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON Schema the structure conforms to."
+        },
+        "id": {
+          "type": "string",
+          "description": "The message structure ID, as carried in MSH-9.3.",
+          "minLength": 1
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StructureElement"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["id", "elements"],
+      "additionalProperties": false,
+      "description": "A message structure, such as `ORU_R01`, as the HL7v2 standard defines it."
+    },
+    "StructureElement": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/SegmentElement"
+        },
+        {
+          "$ref": "#/definitions/GroupElement"
+        },
+        {
+          "$ref": "#/definitions/ChoiceElement"
+        }
+      ],
+      "description": "One element of a message structure, in the standard's order."
+    },
+    "SegmentElement": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "segment"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "The standard's `[ ]`."
+        },
+        "repeating": {
+          "type": "boolean",
+          "description": "The standard's `{ }`."
+        }
+      },
+      "required": ["type", "name", "optional", "repeating"],
+      "additionalProperties": false,
+      "description": "A segment, such as `PID`. The name `Hxx` stands for any segment."
+    },
+    "GroupElement": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "group"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "The standard's `[ ]`."
+        },
+        "repeating": {
+          "type": "boolean",
+          "description": "The standard's `{ }`."
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StructureElement"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "name", "optional", "repeating", "elements"],
+      "additionalProperties": false,
+      "description": "A segment group, such as `PATIENT_RESULT`."
+    },
+    "ChoiceElement": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "choice"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "The standard's `[ ]`."
+        },
+        "repeating": {
+          "type": "boolean",
+          "description": "The standard's `{ }`."
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StructureElement"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "optional", "repeating", "alternatives"],
+      "additionalProperties": false,
+      "description": "A choice, the standard's `< A | B >`: exactly one alternative per occurrence. Every alternative MUST match at least one segment."
+    }
+  }
+}

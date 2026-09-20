@@ -1,0 +1,248 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "CSU_C09",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "PATIENT",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PD1",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PRT",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "ARV",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "VISIT",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PV1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PV2",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PRT",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "CSR",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "STUDY_PHASE",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "CSP",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "STUDY_SCHEDULE",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "CSS",
+                  "optional": true,
+                  "repeating": false
+                },
+                {
+                  "type": "group",
+                  "name": "STUDY_OBSERVATION",
+                  "optional": false,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "group",
+                      "name": "STUDY_OBSERVATION_ORDER",
+                      "optional": true,
+                      "repeating": false,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "ORC",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "PRT",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    },
+                    {
+                      "type": "segment",
+                      "name": "OBR",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "PRT",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "group",
+                      "name": "TIMING_QTY",
+                      "optional": true,
+                      "repeating": true,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "TQ1",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "TQ2",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    },
+                    {
+                      "type": "segment",
+                      "name": "OBX",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "PRT",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "STUDY_PHARM",
+                  "optional": false,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "group",
+                      "name": "COMMON_ORDER",
+                      "optional": true,
+                      "repeating": false,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "ORC",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "PRT",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    },
+                    {
+                      "type": "group",
+                      "name": "RX_ADMIN",
+                      "optional": false,
+                      "repeating": true,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "RXA",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "RXR",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "PRT",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

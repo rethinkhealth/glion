@@ -1,0 +1,42 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "ORA_R41",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "PRT",
+      "optional": true,
+      "repeating": true
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "MFN_M12",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MFI",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "MF_OBS_ATTRIBUTES",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "MFE",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "OM1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "OM7",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "QVR_Q17",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "QPD",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "QBP",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "Hxx",
+          "optional": false,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "RCP",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}

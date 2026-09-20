@@ -1,0 +1,80 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "BAR_P01",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "EVN",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PID",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "VISIT",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PV1",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "DG1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "PR1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "GT1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "NK1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "IN1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "ACC",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "UB1",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    }
+  ]
+}

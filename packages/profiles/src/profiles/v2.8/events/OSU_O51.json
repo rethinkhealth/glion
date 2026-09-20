@@ -1,0 +1,74 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "OSU_O51",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "NTE",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "PID",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ARV",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "ORDER_STATUS",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "ORC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PRT",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    }
+  ]
+}

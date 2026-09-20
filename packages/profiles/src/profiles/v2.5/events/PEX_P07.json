@@ -1,0 +1,288 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "PEX_P07",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "EVN",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PID",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PD1",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "NTE",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "VISIT",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PV1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PV2",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "EXPERIENCE",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PES",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "PEX_OBSERVATION",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PEO",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "PEX_CAUSE",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "PCR",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "group",
+                  "name": "RX_ORDER",
+                  "optional": true,
+                  "repeating": false,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "RXE",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "group",
+                      "name": "TIMING_QTY",
+                      "optional": false,
+                      "repeating": true,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "TQ1",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "TQ2",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    },
+                    {
+                      "type": "segment",
+                      "name": "RXR",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "RX_ADMINISTRATION",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "RXA",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "RXR",
+                      "optional": true,
+                      "repeating": false
+                    }
+                  ]
+                },
+                {
+                  "type": "segment",
+                  "name": "PRB",
+                  "optional": true,
+                  "repeating": true
+                },
+                {
+                  "type": "segment",
+                  "name": "OBX",
+                  "optional": true,
+                  "repeating": true
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                },
+                {
+                  "type": "group",
+                  "name": "ASSOCIATED_PERSON",
+                  "optional": true,
+                  "repeating": false,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "NK1",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "group",
+                      "name": "ASSOCIATED_RX_ORDER",
+                      "optional": true,
+                      "repeating": false,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "RXE",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "group",
+                          "name": "NK1_TIMING_QTY",
+                          "optional": false,
+                          "repeating": true,
+                          "elements": [
+                            {
+                              "type": "segment",
+                              "name": "TQ1",
+                              "optional": false,
+                              "repeating": false
+                            },
+                            {
+                              "type": "segment",
+                              "name": "TQ2",
+                              "optional": true,
+                              "repeating": true
+                            }
+                          ]
+                        },
+                        {
+                          "type": "segment",
+                          "name": "RXR",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    },
+                    {
+                      "type": "group",
+                      "name": "ASSOCIATED_RX_ADMIN",
+                      "optional": true,
+                      "repeating": true,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "RXA",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "RXR",
+                          "optional": true,
+                          "repeating": false
+                        }
+                      ]
+                    },
+                    {
+                      "type": "segment",
+                      "name": "PRB",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "segment",
+                      "name": "OBX",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "STUDY",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "CSR",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "CSP",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

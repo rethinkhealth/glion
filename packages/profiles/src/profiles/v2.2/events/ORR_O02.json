@@ -1,0 +1,115 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "ORR_O02",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "NTE",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "PATIENT",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "ORDER",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "ORC",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "ORDER_DETAIL",
+              "optional": true,
+              "repeating": false,
+              "elements": [
+                {
+                  "type": "choice",
+                  "optional": false,
+                  "repeating": false,
+                  "alternatives": [
+                    {
+                      "type": "segment",
+                      "name": "OBR",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "RQD",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "RQ1",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "RXO",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "ODS",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "ODT",
+                      "optional": false,
+                      "repeating": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

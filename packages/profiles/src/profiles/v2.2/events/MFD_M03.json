@@ -1,0 +1,24 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "MFD_M03",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MFI",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MFA",
+      "optional": true,
+      "repeating": true
+    }
+  ]
+}

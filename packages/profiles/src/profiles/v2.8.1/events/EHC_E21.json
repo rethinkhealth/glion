@@ -1,0 +1,56 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "EHC_E21",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "IVC",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "PSL_ITEM_INFO",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PSL",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "AUT",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    }
+  ]
+}

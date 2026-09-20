@@ -1,0 +1,44 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "MFN_M04",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MFI",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "MF_CDM",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "MFE",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "CDM",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PRC",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    }
+  ]
+}
