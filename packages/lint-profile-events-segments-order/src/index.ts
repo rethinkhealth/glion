@@ -1,49 +1,47 @@
 import type { Root } from "@glion/ast";
-import type { Definition } from "@glion/profiles";
-import { runner } from "@glion/profiles";
+import type { StructureProgram } from "@glion/profiles";
+import { loadMessageStructure, runner } from "@glion/profiles";
 import { EXIT, SKIP, visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
-
-import { resolveDefinition } from "./resolve";
-
-export type { ResolveResult } from "./resolve";
 
 /**
  * Options for the segment order lint rule.
  */
 export interface SegmentOrderOptions {
   /**
-   * Pre-loaded DFA definition for the message structure.
-   *
-   * When provided, the rule uses this definition directly and skips
-   * automatic resolution from tree metadata or MSH fields.
+   * The message structure to validate against, compiled with
+   * `compileStructure`. When provided, the rule does not resolve one from
+   * MSH-9.
    */
-  definition?: Definition;
+  program?: StructureProgram;
 }
 
 /**
  * Lint rule that validates HL7v2 segment order against message structure
  * profiles.
  *
- * Uses a DFA (Deterministic Finite Automaton) runner to walk the segment
- * sequence and verify each segment appears in the order defined by the
- * profile.
+ * Runs the message structure's program over the segment sequence and verifies
+ * each segment appears in the order the structure defines.
  *
- * **Resolution**: If no `definition` is provided, the rule resolves it from
- * MSH-9.3 (message structure) and MSH-12 (version) directly from the AST. No
- * compensation — if the structure is unavailable, the rule reports and bails.
+ * **Resolution**: If no `program` is provided, the rule resolves the structure
+ * from MSH-12 (version) and MSH-9.3 (message structure), or MSH-9.1 and
+ * MSH-9.2 when MSH-9.3 is empty. If the structure is unavailable, the rule
+ * reports nothing.
  *
- * **Behavior**: Stops at the first error. The DFA cannot recover from an
- * invalid transition, so subsequent segments would produce misleading errors.
+ * **Behavior**: Reports at most one order error per message: the first segment
+ * the structure does not allow.
  *
  * @example
  *   ```typescript
- *   // With automatic resolution (requires annotator or MSH-9.3):
+ *   // With the structure MSH-9 names:
  *   unified().use(hl7v2LintSegmentOrder);
  *
- *   // With explicit definition:
- *   const definition = await profiles.events.load("2.5", "ADT_A01");
- *   unified().use(hl7v2LintSegmentOrder, { definition });
+ *   // With an explicit structure:
+ *   const program = compileStructure({
+ *     elements: [segment("MSH"), segment("EVN"), segment("PID")],
+ *     id: "ADT_SITE",
+ *   });
+ *   unified().use(hl7v2LintSegmentOrder, { program });
  *   ```;
  */
 const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
@@ -51,28 +49,23 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
     origin: "hl7v2-lint:segment-order",
   },
   async (tree, file, options) => {
-    // Resolve the DFA definition: explicit option → MSH fields
-    let definition = options?.definition;
+    const definition = options?.program
+      ? undefined
+      : await loadMessageStructure(tree);
+    const program = options?.program ?? definition?.program;
 
-    if (!definition) {
-      const result = await resolveDefinition(tree);
-      if (!result.ok) {
-        return;
-      }
-      definition = result.definition;
+    if (!program) {
+      return;
     }
 
-    const automaton = runner(definition);
+    const automaton = runner(program);
 
-    // Track whether validation was aborted early (EXIT). When aborted,
-    // the automaton is in an undefined state, so the `accepted` check
-    // below would produce a spurious "message ended prematurely" error.
+    // A message with an order error is not also reported as ended early.
     let aborted = false;
 
     visit(tree, "segment", (node, parents) => {
       const symbol = node.name;
 
-      // A segment without a name is malformed — report and stop.
       if (!symbol) {
         aborted = true;
         file.message("Segment has empty segment name at this position", {
@@ -84,7 +77,6 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
 
       const result = automaton.consume(symbol);
 
-      // The DFA rejected this segment — it's not valid in the current state.
       if (result.type === "invalid") {
         aborted = true;
         file.message(
@@ -97,9 +89,6 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
       return SKIP;
     });
 
-    // After consuming all segments, check if the automaton reached a final
-    // (accepting) state. If not, the message ended before all required
-    // segments were present. Only check when validation wasn't aborted.
     if (!aborted && !automaton.accepted) {
       file.message(
         `Message ended prematurely. Expected: ${automaton.expected.join(", ")}`,
