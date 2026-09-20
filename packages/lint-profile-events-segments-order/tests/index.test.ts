@@ -1,5 +1,5 @@
 import { c, f, g, m, s } from "@glion/builder";
-import { compileStructure, profiles, segment } from "@glion/profiles";
+import { compileStructure, profiles } from "@glion/profiles";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -8,12 +8,22 @@ import hl7v2LintSegmentOrder from "../src";
 
 /** MSH, then PID, both required. */
 const simpleProgram = () =>
-  compileStructure({ elements: [segment("MSH"), segment("PID")], id: "TEST" });
+  compileStructure({
+    elements: [
+      { name: "MSH", optional: false, repeating: false, type: "segment" },
+      { name: "PID", optional: false, repeating: false, type: "segment" },
+    ],
+    id: "TEST",
+  });
 
 /** MSH, PID, then PV1, all required. */
 const threeSegmentProgram = () =>
   compileStructure({
-    elements: [segment("MSH"), segment("PID"), segment("PV1")],
+    elements: [
+      { name: "MSH", optional: false, repeating: false, type: "segment" },
+      { name: "PID", optional: false, repeating: false, type: "segment" },
+      { name: "PV1", optional: false, repeating: false, type: "segment" },
+    ],
     id: "TEST",
   });
 
@@ -33,9 +43,9 @@ describe("hl7v2LintSegmentOrder", () => {
     it("accepts repeating segments", async () => {
       const program = compileStructure({
         elements: [
-          segment("MSH"),
-          segment("OBX", { optional: true, repeating: true }),
-          segment("END"),
+          { name: "MSH", optional: false, repeating: false, type: "segment" },
+          { name: "OBX", optional: true, repeating: true, type: "segment" },
+          { name: "END", optional: false, repeating: false, type: "segment" },
         ],
         id: "TEST",
       });
