@@ -1,8 +1,6 @@
 /** Biome-ignore-all lint/performance/noBarrelFile: public API surface */
 
 // Message structures
-export type { OccurrenceOptions } from "./structure/build";
-export { choice, group, segment } from "./structure/build";
 export { compileStructure } from "./structure/compile";
 export { matchStructure } from "./structure/match";
 export { runner } from "./structure/runner";

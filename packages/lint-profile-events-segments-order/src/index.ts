@@ -38,7 +38,10 @@ export interface SegmentOrderOptions {
  *
  *   // With an explicit structure:
  *   const program = compileStructure({
- *     elements: [segment("MSH"), segment("EVN"), segment("PID")],
+ *     elements: [
+ *       { name: "MSH", optional: false, repeating: false, type: "segment" },
+ *       { name: "PID", optional: false, repeating: false, type: "segment" },
+ *     ],
  *     id: "ADT_SITE",
  *   });
  *   unified().use(hl7v2LintSegmentOrder, { program });
