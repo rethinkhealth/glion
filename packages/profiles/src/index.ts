@@ -1,18 +1,28 @@
 /** Biome-ignore-all lint/performance/noBarrelFile: public API surface */
 
-// Automata engine (unchanged)
-export { runner } from "./automata/runner";
+// Message structures
+export type { OccurrenceOptions } from "./structure/build";
+export { choice, group, segment } from "./structure/build";
+export { compileStructure } from "./structure/compile";
+export { matchStructure } from "./structure/match";
+export { runner } from "./structure/runner";
 export type {
-  Definition,
-  Effects,
-  NFA,
+  ChoiceElement,
+  GroupElement,
+  GroupMatch,
+  MessageStructure,
+  MessageStructureDefinition,
+  Occurrence,
   Runner,
   RunnerEvent,
   RunnerInvalidEvent,
   RunnerStepEvent,
-  TransitionMap,
-} from "./automata/types";
-export { RunnerState } from "./automata/types";
+  SegmentElement,
+  StructureEdge,
+  StructureElement,
+  StructureMatch,
+  StructureProgram,
+} from "./structure/types";
 
 // Cache
 export { createLruCache } from "./cache/lru";
