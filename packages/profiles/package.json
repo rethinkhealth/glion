@@ -42,9 +42,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly && tsc --noEmit -p checks/tsconfig.json && pnpm check:bundle",
+    "build": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly && pnpm check:bundle",
     "check-types": "tsc -p tsconfig.build.json --noEmit && tsc --noEmit -p tests/tsconfig.json",
-    "check:bundle": "node --experimental-strip-types checks/bundle.ts",
+    "check:bundle": "node scripts/check-bundle.mjs",
     "check:readme": "glion-check-readme",
     "publint": "publint --strict",
     "test": "vitest run",

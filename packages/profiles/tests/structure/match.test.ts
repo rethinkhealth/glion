@@ -1,5 +1,9 @@
-import { nearMiss, seeded, validMessage } from "../../checks/messages";
-import { referenceMatch } from "../../checks/reference";
+import {
+  nearMiss,
+  referenceMatch,
+  seeded,
+  validMessage,
+} from "../../scripts/check-bundle.mjs";
 import { compileStructure } from "../../src/structure/compile";
 import { matchStructure } from "../../src/structure/match";
 import type {

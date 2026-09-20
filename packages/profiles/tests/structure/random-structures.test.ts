@@ -1,6 +1,10 @@
-import type { Random } from "../../checks/messages";
-import { nearMiss, seeded, validMessage } from "../../checks/messages";
-import { referenceMatch } from "../../checks/reference";
+import type { Random } from "../../scripts/check-bundle.mjs";
+import {
+  nearMiss,
+  referenceMatch,
+  seeded,
+  validMessage,
+} from "../../scripts/check-bundle.mjs";
 import { compileStructure } from "../../src/structure/compile";
 import { matchStructure } from "../../src/structure/match";
 import type {
