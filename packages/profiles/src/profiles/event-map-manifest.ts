@@ -1,30 +1,17 @@
 // Generated root event map manifest
 
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_1 } from "./v2.1/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_2 } from "./v2.2/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_3_1 } from "./v2.3.1/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_3 } from "./v2.3/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_4 } from "./v2.4/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_5_1 } from "./v2.5.1/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_5 } from "./v2.5/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_6 } from "./v2.6/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_7_1 } from "./v2.7.1/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_7 } from "./v2.7/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_8_1 } from "./v2.8.1/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_8_2 } from "./v2.8.2/structure-map/structure-map";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { structureMap as v2_8 } from "./v2.8/structure-map/structure-map";
 
 export const eventMaps: Record<string, Record<string, string>> = {
