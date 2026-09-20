@@ -85,27 +85,28 @@ const definition = await loadMessageStructure(parseHL7v2(message));
 // definition?.structure.id === "ADT_A01"
 ```
 
-### `segment(name, occurrence?)`, `group(name, elements, occurrence?)`, `choice(alternatives, occurrence?)`
+### A message structure of your own
 
-Build a `MessageStructure`, for a structure the bundled profiles do not define. `occurrence` is `{ optional?, repeating? }`, the standard's `[ ]` and `{ }`; both default to `false`.
+A `MessageStructure` is plain data, the shape `message-structure.schema.json` describes: `segment`, `group`, and `choice` elements, each with `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). `compileStructure` validates and compiles it.
 
 ```ts
-import { choice, compileStructure, group, segment } from "@glion/profiles";
+import { compileStructure } from "@glion/profiles";
 
 const program = compileStructure({
   id: "ADT_A01_SITE",
   elements: [
-    segment("MSH"),
-    segment("EVN"),
-    segment("PID"),
-    group(
-      "VISIT",
-      [segment("PV1"), segment("ZPV", { optional: true, repeating: true })],
-      {
-        optional: true,
-      }
-    ),
-    choice([segment("OBX"), segment("NTE")], { optional: true }),
+    { type: "segment", name: "MSH", optional: false, repeating: false },
+    { type: "segment", name: "PID", optional: false, repeating: false },
+    {
+      type: "group",
+      name: "VISIT",
+      optional: true,
+      repeating: false,
+      elements: [
+        { type: "segment", name: "PV1", optional: false, repeating: false },
+        { type: "segment", name: "ZPV", optional: true, repeating: true },
+      ],
+    },
   ],
 });
 ```

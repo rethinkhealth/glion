@@ -38,18 +38,16 @@ With a message structure of your own (skips resolution):
 
 ```ts
 import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
-import { compileStructure, group, segment } from "@glion/profiles";
+import { compileStructure } from "@glion/profiles";
 import { unified } from "unified";
 
 const program = compileStructure({
   id: "ADT_A01_SITE",
   elements: [
-    segment("MSH"),
-    segment("EVN"),
-    segment("PID"),
-    group("VISIT", [segment("PV1"), segment("ZPV", { optional: true })], {
-      optional: true,
-    }),
+    { type: "segment", name: "MSH", optional: false, repeating: false },
+    { type: "segment", name: "EVN", optional: false, repeating: false },
+    { type: "segment", name: "PID", optional: false, repeating: false },
+    { type: "segment", name: "ZPD", optional: true, repeating: false },
   ],
 });
 

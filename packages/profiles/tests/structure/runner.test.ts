@@ -1,4 +1,3 @@
-import { choice, group, segment } from "../../src/structure/build";
 import { compileStructure } from "../../src/structure/compile";
 import { runner } from "../../src/structure/runner";
 import type { StructureElement } from "../../src/structure/types";
@@ -11,7 +10,12 @@ const consumeAll = (automaton: ReturnType<typeof runner>, ...names: string[]) =>
 
 describe("runner", () => {
   it("steps through segments in the order the structure defines", () => {
-    const automaton = runner(program(segment("MSH"), segment("PID")));
+    const automaton = runner(
+      program(
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "PID", optional: false, repeating: false, type: "segment" }
+      )
+    );
 
     expect(consumeAll(automaton, "MSH", "PID")).toEqual([
       { type: "step" },
@@ -23,9 +27,9 @@ describe("runner", () => {
   it("rejects a segment the structure does not allow there and lists the expected ones", () => {
     const automaton = runner(
       program(
-        segment("MSH"),
-        segment("EVN"),
-        segment("SFT", { optional: true })
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "EVN", optional: false, repeating: false, type: "segment" },
+        { name: "SFT", optional: true, repeating: false, type: "segment" }
       )
     );
     automaton.consume("MSH");
@@ -39,7 +43,12 @@ describe("runner", () => {
   });
 
   it("rejects every segment after the first rejection, with nothing expected", () => {
-    const automaton = runner(program(segment("MSH"), segment("PID")));
+    const automaton = runner(
+      program(
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "PID", optional: false, repeating: false, type: "segment" }
+      )
+    );
 
     automaton.consume("PV1");
 
@@ -52,7 +61,12 @@ describe("runner", () => {
   });
 
   it("keeps the expected segments of the last accepted position after a rejection", () => {
-    const automaton = runner(program(segment("MSH"), segment("PID")));
+    const automaton = runner(
+      program(
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "PID", optional: false, repeating: false, type: "segment" }
+      )
+    );
 
     consumeAll(automaton, "MSH", "PV1");
 
@@ -60,7 +74,12 @@ describe("runner", () => {
   });
 
   it("is not accepted before the structure's required segments have all arrived", () => {
-    const automaton = runner(program(segment("MSH"), segment("PID")));
+    const automaton = runner(
+      program(
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "PID", optional: false, repeating: false, type: "segment" }
+      )
+    );
 
     automaton.consume("MSH");
 
@@ -69,7 +88,14 @@ describe("runner", () => {
   });
 
   it("does not accept an empty message when the structure requires a segment", () => {
-    const automaton = runner(program(segment("MSH")));
+    const automaton = runner(
+      program({
+        name: "MSH",
+        optional: false,
+        repeating: false,
+        type: "segment",
+      })
+    );
 
     expect(automaton.accepted).toBe(false);
     expect(automaton.expected).toEqual(["MSH"]);
@@ -77,7 +103,10 @@ describe("runner", () => {
 
   it("accepts a repeating segment any number of times", () => {
     const automaton = runner(
-      program(segment("MSH"), segment("OBX", { repeating: true }))
+      program(
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "OBX", optional: false, repeating: true, type: "segment" }
+      )
     );
 
     consumeAll(automaton, "MSH", "OBX", "OBX", "OBX");
@@ -88,9 +117,9 @@ describe("runner", () => {
 
   it("accepts a message with or without an optional segment", () => {
     const structure = program(
-      segment("MSH"),
-      segment("SFT", { optional: true }),
-      segment("EVN")
+      { name: "MSH", optional: false, repeating: false, type: "segment" },
+      { name: "SFT", optional: true, repeating: false, type: "segment" },
+      { name: "EVN", optional: false, repeating: false, type: "segment" }
     );
 
     const without = runner(structure);
@@ -105,12 +134,19 @@ describe("runner", () => {
   it("lists every segment that can come next, across optional elements and groups, sorted", () => {
     const automaton = runner(
       program(
-        segment("MSH"),
-        segment("SFT", { optional: true, repeating: true }),
-        group("VISIT", [segment("PV1"), segment("PV2", { optional: true })], {
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "SFT", optional: true, repeating: true, type: "segment" },
+        {
+          elements: [
+            { name: "PV1", optional: false, repeating: false, type: "segment" },
+            { name: "PV2", optional: true, repeating: false, type: "segment" },
+          ],
+          name: "VISIT",
           optional: true,
-        }),
-        segment("DG1")
+          repeating: false,
+          type: "group",
+        },
+        { name: "DG1", optional: false, repeating: false, type: "segment" }
       )
     );
 
@@ -121,8 +157,16 @@ describe("runner", () => {
 
   it("accepts exactly one alternative of a choice", () => {
     const structure = program(
-      segment("ORC"),
-      choice([segment("OBR"), segment("RXO")])
+      { name: "ORC", optional: false, repeating: false, type: "segment" },
+      {
+        alternatives: [
+          { name: "OBR", optional: false, repeating: false, type: "segment" },
+          { name: "RXO", optional: false, repeating: false, type: "segment" },
+        ],
+        optional: false,
+        repeating: false,
+        type: "choice",
+      }
     );
 
     const lab = runner(structure);
@@ -139,9 +183,9 @@ describe("runner", () => {
 
   it("accepts any segment in an Hxx position, including one the structure names elsewhere", () => {
     const structure = program(
-      segment("MSH"),
-      segment("Hxx", { optional: true }),
-      segment("RCP")
+      { name: "MSH", optional: false, repeating: false, type: "segment" },
+      { name: "Hxx", optional: true, repeating: false, type: "segment" },
+      { name: "RCP", optional: false, repeating: false, type: "segment" }
     );
 
     const named = runner(structure);
@@ -156,9 +200,9 @@ describe("runner", () => {
   it("lists Hxx among the expected segments", () => {
     const automaton = runner(
       program(
-        segment("MSH"),
-        segment("Hxx", { optional: true }),
-        segment("RCP")
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "Hxx", optional: true, repeating: false, type: "segment" },
+        { name: "RCP", optional: false, repeating: false, type: "segment" }
       )
     );
 
@@ -168,7 +212,10 @@ describe("runner", () => {
   });
 
   it("gives each runner its own position", () => {
-    const structure = program(segment("MSH"), segment("PID"));
+    const structure = program(
+      { name: "MSH", optional: false, repeating: false, type: "segment" },
+      { name: "PID", optional: false, repeating: false, type: "segment" }
+    );
     const first = runner(structure);
     const second = runner(structure);
 
