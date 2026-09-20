@@ -34,8 +34,8 @@ Message structures use the same API:
 
 ```ts
 const adt = await profiles.events.load("2.5", "ADT_A01");
-// adt.structure — the structure as the standard defines it
-// adt.program — the structure compiled for runner() and matchStructure()
+// adt.id       === "ADT_A01"
+// adt.elements — the segments, groups, and choices, as the standard defines them
 ```
 
 ## API
@@ -58,14 +58,14 @@ const store = createProfiles({
 
 ### Loaders on each store
 
-| Method                                      | Returns                      |
-| ------------------------------------------- | ---------------------------- |
-| `segments.load(version, segmentId)`         | `SegmentDefinition`          |
-| `fields.load(version, segmentId, position)` | `FieldProfile`               |
-| `datatypes.load(version, datatypeId)`       | `DatatypeDefinition`         |
-| `tables.load(version, tableId)`             | `Table`                      |
-| `events.load(version, structureId)`         | `MessageStructureDefinition` |
-| `codeSystems.load(version, codeSystemId)`   | `CodeSystemDefinition`       |
+| Method                                      | Returns                |
+| ------------------------------------------- | ---------------------- |
+| `segments.load(version, segmentId)`         | `SegmentDefinition`    |
+| `fields.load(version, segmentId, position)` | `FieldProfile`         |
+| `datatypes.load(version, datatypeId)`       | `DatatypeDefinition`   |
+| `tables.load(version, tableId)`             | `Table`                |
+| `events.load(version, structureId)`         | `MessageStructure`     |
+| `codeSystems.load(version, codeSystemId)`   | `CodeSystemDefinition` |
 
 ### `loadSegments(version)`
 
@@ -75,24 +75,24 @@ Standalone helper that loads every segment definition for a given version in one
 
 ### `loadMessageStructure(tree)`
 
-Returns the message structure a parsed message names, with its compiled program, or `undefined` when MSH-12 or MSH-9 is missing or the version defines no such structure. Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty.
+Returns the message structure a parsed message names, or `undefined` when MSH-12 or MSH-9 is missing or the version defines no such structure. Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty.
 
 ```ts
 import { loadMessageStructure } from "@glion/profiles";
 import { parseHL7v2 } from "@glion/parser";
 
-const definition = await loadMessageStructure(parseHL7v2(message));
-// definition?.structure.id === "ADT_A01"
+const structure = await loadMessageStructure(parseHL7v2(message));
+// structure?.id === "ADT_A01"
 ```
 
 ### A message structure of your own
 
-A `MessageStructure` is plain data, the shape `message-structure.schema.json` describes: `segment`, `group`, and `choice` elements, each with `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). `compileStructure` validates and compiles it.
+A `MessageStructure` is plain data, the shape `message-structure.schema.json` describes: `segment`, `group`, and `choice` elements, each with `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). `runner` and `matchStructure` take it as they take a bundled one.
 
 ```ts
-import { compileStructure } from "@glion/profiles";
+import type { MessageStructure } from "@glion/profiles";
 
-const program = compileStructure({
+const structure: MessageStructure = {
   id: "ADT_A01_SITE",
   elements: [
     { type: "segment", name: "MSH", optional: false, repeating: false },
@@ -108,20 +108,20 @@ const program = compileStructure({
       ],
     },
   ],
-});
+};
 ```
 
-A compiled program works wherever a bundled one does: `runner`, `matchStructure`, and the `program` option of `@glion/lint-profile-events-segments-order`.
+A structure of your own works wherever a bundled one does: `runner`, `matchStructure`, and the `definition` option of `@glion/lint-profile-events-segments-order`. Both functions throw when the structure has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
 
-### `runner(program)`
+### `runner(structure)`
 
 Returns a single-use runner that validates segment order against a message structure, one segment at a time.
 
 ```ts
 import { profiles, runner } from "@glion/profiles";
 
-const { program } = await profiles.events.load("2.5", "ADT_A01");
-const automaton = runner(program);
+const structure = await profiles.events.load("2.5", "ADT_A01");
+const automaton = runner(structure);
 automaton.consume("MSH"); // { type: "step" }
 automaton.consume("ZZZ"); // { type: "invalid", symbol: "ZZZ", expected: ["EVN", "SFT"] }
 automaton.accepted; // false
@@ -129,26 +129,22 @@ automaton.accepted; // false
 
 `expected` lists segment names sorted; `Hxx` stands for any segment. After the first `invalid` event every later `consume()` returns `invalid` with an empty `expected`.
 
-### `matchStructure(program, segmentNames)`
+### `matchStructure(structure, segmentNames)`
 
 Returns the segment indexes nested in the groups the message structure defines, or `undefined` when the segments do not fit the structure.
 
 ```ts
 import { matchStructure, profiles } from "@glion/profiles";
 
-const { program } = await profiles.events.load("2.5", "ORU_R01");
-matchStructure(program, ["MSH", "PID", "OBR", "OBX"]);
+const structure = await profiles.events.load("2.5", "ORU_R01");
+matchStructure(structure, ["MSH", "PID", "OBR", "OBX"]);
 // [0, { name: "PATIENT_RESULT", children: [
 //   { name: "PATIENT", children: [1] },
 //   { name: "ORDER_OBSERVATION", children: [2, { name: "OBSERVATION", children: [3] }] },
 // ] }]
 ```
 
-Where the structure admits more than one grouping, the match enters an optional element rather than skip it, repeats an element rather than leave it, and takes the earlier alternative of a choice. A group occurrence that holds no segment is left out. `Hxx` in a structure matches any segment. Runs in time proportional to the number of segments times the size of the program.
-
-### `compileStructure(structure)`
-
-Returns the `StructureProgram` for a `MessageStructure`: plain data that survives `JSON.stringify`. `events.load` compiles each structure once and caches the result. Throws when the structure has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
+Where the structure admits more than one grouping, the match enters an optional element rather than skip it, repeats an element rather than leave it, and takes the earlier alternative of a choice. A group occurrence that holds no segment is left out. `Hxx` in a structure matches any segment. Runs in time proportional to the number of segments times the size of the structure.
 
 ## Profile data format
 
@@ -217,7 +213,7 @@ type StructureElement =
 
 ### Message structure JSON Schema
 
-`@glion/profiles/message-structure.schema.json` is the JSON Schema (draft-07) of a message structure, with `$id` `https://glion.dev/schemas/message-structure/v1.json`. Every bundled structure names it by that `$id` in `$schema` and conforms to it. The schema checks the shape; `compileStructure` also checks that every choice alternative matches at least one segment.
+`@glion/profiles/message-structure.schema.json` is the JSON Schema (draft-07) of a message structure, with `$id` `https://glion.dev/schemas/message-structure/v1.json`. Every bundled structure names it by that `$id` in `$schema` and conforms to it. The schema checks the shape; `runner` and `matchStructure` also require that every choice alternative matches at least one segment.
 
 ```ts
 import schema from "@glion/profiles/message-structure.schema.json" with { type: "json" };

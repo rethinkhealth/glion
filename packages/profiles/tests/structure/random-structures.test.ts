@@ -5,7 +5,6 @@ import {
   seeded,
   validMessage,
 } from "../../scripts/check-bundle.mjs";
-import { compileStructure } from "../../src/structure/compile";
 import { matchStructure } from "../../src/structure/match";
 import type {
   MessageStructure,
@@ -84,12 +83,11 @@ describe("matchStructure on random structures", () => {
         continue;
       }
       compared += 1;
-      const program = compileStructure(structure);
 
       for (let n = 0; n < MESSAGES_PER_STRUCTURE; n += 1) {
         const valid = validMessage(structure, random).slice(0, 14);
         for (const input of [valid, nearMiss(valid, NAMES, random)]) {
-          const got = JSON.stringify(matchStructure(program, input));
+          const got = JSON.stringify(matchStructure(structure, input));
           const want = JSON.stringify(referenceMatch(structure, input));
           if (got !== want && disagreements.length < 5) {
             disagreements.push(

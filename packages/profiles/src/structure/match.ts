@@ -1,5 +1,6 @@
+import { programOf } from "./compile";
 import { ANY_SEGMENT } from "./constants";
-import type { StructureMatch, StructureProgram } from "./types";
+import type { MessageStructure, StructureMatch } from "./types";
 
 const SEGMENT = 0;
 
@@ -11,21 +12,27 @@ interface OpenGroup {
 }
 
 /**
- * Matches the segment names in `input` against `program` and returns the
- * segments grouped as the message structure defines them, or `undefined` when
- * `input` does not fit the structure.
+ * Matches the segment names in `input` against `structure` and returns the
+ * segments grouped as the structure defines them, or `undefined` when `input`
+ * does not fit it.
  *
- * Where the structure admits more than one grouping, the match follows the
- * program's priorities (see `compileStructure()`). A group occurrence that
- * holds no segment is left out of the match. A segment named `Hxx` in the
+ * Where the structure admits more than one grouping, the match prefers, in
+ * order: entering an optional element over skipping it, repeating an element
+ * over leaving it, and the earlier alternative of a choice. A group occurrence
+ * that holds no segment is left out of the match. A segment named `Hxx` in the
  * structure matches any segment name.
  *
- * Runs in time proportional to the input length times the program size.
+ * Runs in time proportional to the input length times the structure size.
+ *
+ * @throws {Error} When `structure` has no elements, a segment or group has no
+ *   name, a group has no elements, a choice has no alternatives, or a choice
+ *   alternative can match no segment.
  */
 export function matchStructure(
-  program: StructureProgram,
+  structure: MessageStructure,
   input: readonly string[]
 ): readonly StructureMatch[] | undefined {
+  const program = programOf(structure);
   const { edges, final, segments } = program;
   const visited = new Int32Array(segments.length).fill(-1);
   let generation = 0;

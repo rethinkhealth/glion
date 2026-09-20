@@ -26,7 +26,7 @@ const ENGINE_SIZES = [10, 30, 100, 300, 1000, 3000, 10_000, 30_000, 100_000];
 const TREE_SIZES = [10, 30, 100, 300, 1000, 3000, 10_000, 30_000];
 const PIPELINE_SIZES = [10, 30, 100, 300, 1000, 3000];
 
-const { program } = await profiles.events.load("2.5.1", "ORU_R01");
+const structure = await profiles.events.load("2.5.1", "ORU_R01");
 
 const shapes = {
   orders: (n: number) =>
@@ -66,7 +66,7 @@ for (const [shape, build] of Object.entries(shapes)) {
       bench(
         `runner | ${label}`,
         () => {
-          const automaton = runner(program);
+          const automaton = runner(structure);
           for (const name of input) {
             automaton.consume(name);
           }
@@ -77,7 +77,7 @@ for (const [shape, build] of Object.entries(shapes)) {
       bench(
         `matchStructure | ${label}`,
         () => {
-          matchStructure(program, input);
+          matchStructure(structure, input);
         },
         options(n)
       );
@@ -87,7 +87,9 @@ for (const [shape, build] of Object.entries(shapes)) {
       const text = build(n);
       const tree = parseHL7v2(text);
       const label = `${shape} n=${tree.children.length} bytes=${text.length}`;
-      const lint = unified().use(hl7v2LintSegmentOrder, { program });
+      const lint = unified().use(hl7v2LintSegmentOrder, {
+        definition: structure,
+      });
 
       bench(
         `parse | ${label}`,
