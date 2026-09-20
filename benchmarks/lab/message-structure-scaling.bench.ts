@@ -18,9 +18,10 @@
  * 2. Tree: parsing, and the segment-order lint over a parsed tree.
  * 3. Pipeline: every profile lint rule, and the full `@glion/hl7v2` pipeline.
  *
- * Reading the output: every bench is named `<stage> | <shape> n=<segments>
- * bytes=<message size>`. Compare one stage across sizes for the scaling curve,
- * and the stages at one size for what share of the pipeline the engine is.
+ * Reading the output: there is one table per shape and stage, and every bench
+ * is named `<stage> | <shape> n=<segments> bytes=<message size>`. Read a table
+ * top to bottom for that stage's scaling curve; compare the same size across
+ * tables for what share of the pipeline the engine is.
  *
  * Two ORU_R01 v2.5.1 shapes, from 10 to 100,000 segments:
  *
@@ -83,85 +84,99 @@ const names = (text: string) =>
 const options = (n: number) =>
   n >= 10_000 ? { iterations: 3, time: 0, warmupIterations: 1 } : { time: 200 };
 
-for (const [shape, build] of Object.entries(shapes)) {
-  describe(`scaling: ${shape}`, () => {
-    // Tier 1: the engine alone, on segment names.
-    for (const n of ENGINE_SIZES) {
-      const text = build(n);
+// One entry per stage: the sizes it runs at, and how to turn a message into
+// the function to measure. Anything done in `prepare` is outside the
+// measurement.
+const stages: {
+  name: string;
+  sizes: number[];
+  prepare: (text: string) => () => void | Promise<void>;
+}[] = [
+  // Tier 1: the engine alone, on segment names. A runner is single-use, so
+  // creating it is part of the per-message cost.
+  {
+    name: "runner",
+    prepare: (text) => {
       const input = names(text);
-      const label = `${shape} n=${input.length} bytes=${text.length}`;
-
-      // A runner is single-use, so creating it is part of the per-message cost.
-      bench(
-        `runner | ${label}`,
-        () => {
-          const automaton = runner(structure);
-          for (const name of input) {
-            automaton.consume(name);
-          }
-        },
-        options(n)
-      );
-
-      bench(
-        `matchStructure | ${label}`,
-        () => {
-          matchStructure(structure, input);
-        },
-        options(n)
-      );
-    }
-
-    // Tier 2: parsing, and the lint over a tree parsed outside the bench. The
-    // lint is given the structure, so resolving it from MSH-9 is not measured.
-    for (const n of TREE_SIZES) {
-      const text = build(n);
+      return () => {
+        const automaton = runner(structure);
+        for (const name of input) {
+          automaton.consume(name);
+        }
+      };
+    },
+    sizes: ENGINE_SIZES,
+  },
+  {
+    name: "matchStructure",
+    prepare: (text) => {
+      const input = names(text);
+      return () => {
+        matchStructure(structure, input);
+      };
+    },
+    sizes: ENGINE_SIZES,
+  },
+  // Tier 2: parsing, and the lint over a tree parsed outside the measurement.
+  // The lint is given the structure, so resolving it from MSH-9 is not
+  // measured.
+  {
+    name: "parse",
+    prepare: (text) => () => {
+      parseHL7v2(text);
+    },
+    sizes: TREE_SIZES,
+  },
+  {
+    name: "segment-order lint",
+    prepare: (text) => {
       const tree = parseHL7v2(text);
-      const label = `${shape} n=${tree.children.length} bytes=${text.length}`;
       const lint = unified().use(hl7v2LintSegmentOrder, {
         definition: structure,
       });
-
-      bench(
-        `parse | ${label}`,
-        () => {
-          parseHL7v2(text);
-        },
-        options(n)
-      );
-
-      bench(
-        `segment-order lint | ${label}`,
-        async () => {
-          await lint.run(tree, new VFile());
-        },
-        options(n)
-      );
-    }
-
-    // Tier 3: what a caller pays. The preset runs every profile lint rule on a
-    // parsed tree; the pipeline also parses, decodes escapes, and serializes.
-    for (const n of PIPELINE_SIZES) {
-      const text = build(n);
+      return async () => {
+        await lint.run(tree, new VFile());
+      };
+    },
+    sizes: TREE_SIZES,
+  },
+  // Tier 3: what a caller pays. The preset runs every profile lint rule on a
+  // parsed tree; the pipeline also parses, decodes escapes, and serializes.
+  {
+    name: "lint-profile preset",
+    prepare: (text) => {
       const tree = parseHL7v2(text);
-      const label = `${shape} n=${tree.children.length} bytes=${text.length}`;
       const preset = unified().use(hl7v2PresetLintProfileRecommended);
+      return async () => {
+        await preset.run(tree, new VFile());
+      };
+    },
+    sizes: PIPELINE_SIZES,
+  },
+  {
+    name: "hl7v2 pipeline",
+    prepare: (text) => async () => {
+      await pipeline.process(text);
+    },
+    sizes: PIPELINE_SIZES,
+  },
+];
 
-      bench(
-        `lint-profile preset | ${label}`,
-        async () => {
-          await preset.run(tree, new VFile());
-        },
-        options(n)
-      );
+// One table per shape and stage, so a table reads top to bottom as that
+// stage's scaling curve.
+for (const [shape, build] of Object.entries(shapes)) {
+  for (const { name, prepare, sizes } of stages) {
+    describe(`scaling: ${shape} | ${name}`, () => {
+      for (const n of sizes) {
+        const text = build(n);
+        const segments = names(text).length;
 
-      bench(
-        `hl7v2 pipeline | ${label}`,
-        async () => {
-          await pipeline.process(text);
-        },
-        options(n)
-      );
-    }
-  });
+        bench(
+          `${name} | ${shape} n=${segments} bytes=${text.length}`,
+          prepare(text),
+          options(n)
+        );
+      }
+    });
+  }
 }
