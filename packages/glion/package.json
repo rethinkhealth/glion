@@ -60,7 +60,7 @@
     "@glion/parser": "workspace:*",
     "@glion/to-hl7v2": "workspace:*",
     "@glion/util-query": "workspace:*",
-    "rolldown": "1.0.0-rc.14",
+    "rolldown": "1.0.0-rc.17",
     "zod": "3.25.76"
   },
   "devDependencies": {
