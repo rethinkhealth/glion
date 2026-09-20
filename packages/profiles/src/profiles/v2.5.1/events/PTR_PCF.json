@@ -1,0 +1,327 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "PTR_PCF",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "QAK",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QRD",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "PATIENT",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "PATIENT_VISIT",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PV1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PV2",
+              "optional": true,
+              "repeating": false
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "PATHWAY",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PTH",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "VAR",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "group",
+              "name": "PATHWAY_ROLE",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "ROL",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "VAR",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "PROBLEM",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "PRB",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                },
+                {
+                  "type": "segment",
+                  "name": "VAR",
+                  "optional": true,
+                  "repeating": true
+                },
+                {
+                  "type": "group",
+                  "name": "PROBLEM_ROLE",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "ROL",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "VAR",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "PROBLEM_OBSERVATION",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "OBX",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "NTE",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "GOAL",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "GOL",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "NTE",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "segment",
+                      "name": "VAR",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "group",
+                      "name": "GOAL_ROLE",
+                      "optional": true,
+                      "repeating": true,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "ROL",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "VAR",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    },
+                    {
+                      "type": "group",
+                      "name": "GOAL_OBSERVATION",
+                      "optional": true,
+                      "repeating": true,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "OBX",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "NTE",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "ORDER",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "ORC",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "group",
+                      "name": "ORDER_DETAIL",
+                      "optional": true,
+                      "repeating": false,
+                      "elements": [
+                        {
+                          "type": "choice",
+                          "optional": false,
+                          "repeating": false,
+                          "alternatives": [
+                            {
+                              "type": "segment",
+                              "name": "OBR",
+                              "optional": false,
+                              "repeating": false
+                            }
+                          ]
+                        },
+                        {
+                          "type": "segment",
+                          "name": "NTE",
+                          "optional": true,
+                          "repeating": true
+                        },
+                        {
+                          "type": "segment",
+                          "name": "VAR",
+                          "optional": true,
+                          "repeating": true
+                        },
+                        {
+                          "type": "group",
+                          "name": "ORDER_OBSERVATION",
+                          "optional": true,
+                          "repeating": true,
+                          "elements": [
+                            {
+                              "type": "segment",
+                              "name": "OBX",
+                              "optional": false,
+                              "repeating": false
+                            },
+                            {
+                              "type": "segment",
+                              "name": "NTE",
+                              "optional": true,
+                              "repeating": true
+                            },
+                            {
+                              "type": "segment",
+                              "name": "VAR",
+                              "optional": true,
+                              "repeating": true
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

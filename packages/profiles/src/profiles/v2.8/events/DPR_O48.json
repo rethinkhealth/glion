@@ -1,0 +1,154 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "DPR_O48",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "DONOR",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PD1",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "OBX",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "AL1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "ARV",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "DONOR_REGISTRATION",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PV1",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "DONATION_ORDER",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "OBR",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "DONATION",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "DON",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "OBX",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "BLOOD_UNIT",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "BUI",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

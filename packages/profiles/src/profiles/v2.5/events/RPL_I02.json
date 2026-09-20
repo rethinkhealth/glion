@@ -1,0 +1,62 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "RPL_I02",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "PROVIDER",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PRD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "CTD",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "NTE",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "DSP",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}

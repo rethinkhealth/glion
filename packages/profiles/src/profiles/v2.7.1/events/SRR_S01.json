@@ -1,0 +1,176 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "SRR_S01",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "SCHEDULE",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "SCH",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "TQ1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "PATIENT",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PID",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PV1",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PV2",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "DG1",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "RESOURCE",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "RGS",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "SERVICE",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "AIS",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "GENERAL_RESOURCE",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "AIG",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "LOCATION_RESOURCE",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "AIL",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "PERSONNEL_RESOURCE",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "AIP",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

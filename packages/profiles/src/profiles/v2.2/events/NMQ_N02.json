@@ -1,0 +1,58 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "NMQ_N02",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "QRY_WITH_DETAIL",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "QRD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "QRF",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "CLOCK_AND_STATISTICS",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "NCK",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NST",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NSC",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "SUR_P09",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "FACILITY",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "FAC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "PRODUCT",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PSH",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PDC",
+              "optional": false,
+              "repeating": false
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "PSH",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "FACILITY_DETAIL",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "FAC",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PDC",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": false,
+              "repeating": false
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "ED",
+          "optional": false,
+          "repeating": false
+        }
+      ]
+    }
+  ]
+}

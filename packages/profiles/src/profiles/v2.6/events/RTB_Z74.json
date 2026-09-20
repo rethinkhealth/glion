@@ -1,0 +1,74 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "RTB_Z74",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QAK",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QPD",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "ROW_DEFINITION",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "RDF",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "RDT",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}
