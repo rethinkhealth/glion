@@ -42,6 +42,7 @@ pnpm --filter @glion/benchmarks test        # Canaries proving suites measure re
 
 # Bundle size
 pnpm size                     # Check the size budgets in .size-limit.json (needs a build)
+pnpm --filter @glion/profiles check:bundle   # Check the bundled message structures (runs in its build)
 
 # Dependencies
 pnpm install                  # Install all
