@@ -18,11 +18,11 @@ The generated profiles carried a DFA per structure for segment-order validation 
 
 Checking the DFA against the structure it came from also exposed two defects in it: the generator read `xsd:choice` blocks as sequences (108 structures; #815), and compiled `Hxx`, "any segment", so that a named segment could not fill it (32 structures; #816).
 
-The schemas are not always right about choices either. In 18 groups of the chapter 16 and 17 structures (`EHC_*`, `QBP_E03`, `QBP_E22`, `RSP_E03`, `RSP_E22`, `SDR_S31`, `SDR_S32`), both the XML schemas and the normative database flag a sequence as a choice: `EHC_E01`'s `INVOICE_INFORMATION` is `IVC [PYE] [{CTD}] … {PRODUCT_SERVICE_SECTION}`, not one of those. HAPI, generated from the database's structure notation, reads them as sequences. No field in the schema or the database separates them from genuine choices such as `CCI_I22`'s `<OBR | ODS | … | PDA>`.
+Whether the schemas are always right about choices is an open question. In 18 groups of the chapter 16 and 17 structures (`EHC_*`, `QBP_E03`, `QBP_E22`, `RSP_E03`, `RSP_E22`, `SDR_S31`, `SDR_S32`), the XML schemas and the normative database flag a group as a choice, while HAPI, generated from the database's structure notation, reads it as a sequence: `EHC_E01`'s `INVOICE_INFORMATION` is `<IVC | [PYE] | [{CTD}] … {PRODUCT_SERVICE_SECTION}>` in the schema and `IVC [PYE] [{CTD}] … {PRODUCT_SERVICE_SECTION}` in HAPI. No field in the schema or the database separates these from genuine choices such as `CCI_I22`'s `<OBR | ODS | … | PDA>`, and the standard's text has not been checked (#838).
 
 ## Decision
 
-1. **The message structure is the contract and the only bundled data.** Each structure is one JSON file, `src/profiles/v<version>/events/<id>.json`: `segment`, `group`, and `choice` elements, each `optional` and `repeating`. The generator parses the HL7 v2 XML schemas into it and emits nothing else. It reads an `xsd:choice` as a choice, except for an errata table of the 18 groups above, each checked against HAPI, whose members it inlines as a sequence. Every choice alternative matches at least one segment.
+1. **The message structure is the contract and the only bundled data.** Each structure is one JSON file, `src/profiles/v<version>/events/<id>.json`: `segment`, `group`, and `choice` elements, each `optional` and `repeating`. The generator parses the HL7 v2 XML schemas into it and emits nothing else. It reads every `xsd:choice` as a choice, by one rule and with no per-structure exception: a member with `minOccurs="0"` makes the choice optional and the member required, which accepts the same messages (`<A? | B>` and `[<A | B>]` admit the same input) and keeps every alternative matching at least one segment. The 18 groups above therefore ship as the schemas encode them until #838 settles what the standard says; an exception for a group is added only once it is agreed and documented.
 
 2. **One compiler, one engine.** An internal compiler turns a structure into a Thompson NFA whose epsilon edges are ordered by priority and carry group open and close actions. Two functions run it:
    - `runner(structure)` validates order one segment at a time, following every state the program can be in; it replaces the DFA runner with the same interface (`consume`, `accepted`, `expected`).
@@ -56,7 +56,7 @@ The schemas are not always right about choices either. In 18 groups of the chapt
 - **Keep the DFA for order validation beside the structure.** Two representations of every structure, two engines, and a test whose only job is to prove they agree, for a speed difference under 1 % of the pipeline.
 - **Generate the DFA or the programs at build time.** Keeps the data single-sourced, but emits 2.4 MB (programs) or 4.9 MB (DFAs) to save 7 µs per structure per process.
 - **A backtracking parser in production.** The reference the tests use, but exponential without memoization on structures such as ORU_R01 v2.1 (`OBSERVATION` required, all its segments optional).
-- **A rule instead of an errata table for the mis-flagged choices** ("a choice whose alternatives are optional is a sequence"). It catches 13 of the 18 groups; `QBP_E03`'s `<QPD | RCP>` and `EHC_E15`'s `<PMT | PYE>` are indistinguishable from genuine choices without the standard's text.
+- **An errata table for the 18 groups HAPI reads as sequences.** The first version of this work inlined them as sequences, on HAPI's evidence alone. Dropped so that the data follows one rule; a group is corrected once the standard's text confirms it (#838).
 
 ## Related
 
