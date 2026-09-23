@@ -1,5 +1,4 @@
 import { profiles } from "../../src/profiles";
-import { matchStructure } from "../../src/structure/match";
 import { runner } from "../../src/structure/runner";
 import type { MessageStructure } from "../../src/structure/types";
 
@@ -12,25 +11,15 @@ const accepts = (structure: MessageStructure, input: readonly string[]) => {
 };
 
 describe("bundled message structures", () => {
-  it("reads the invoice groups the XML schemas encode as choices as sequences", async () => {
+  it("reads a choice with optional members as the XML schemas encode it (#838)", async () => {
+    // EHC_E01 v2.6 INVOICE_INFORMATION is an xsd:choice whose members PYE,
+    // CTD, AUT, LOC, and ROL are optional: one member per message, or none.
     const ehc = await profiles.events.load("2.6", "EHC_E01");
 
-    expect(accepts(ehc, ["MSH", "IVC", "PYE", "PSS", "PSG", "PSL"])).toBe(true);
-    expect(accepts(ehc, ["MSH", "IVC"])).toBe(false);
-    expect(matchStructure(ehc, ["MSH", "IVC", "PSS", "PSG", "PSL"])).toEqual([
-      0,
-      1,
-      {
-        children: [
-          2,
-          {
-            children: [3, { children: [4], name: "PRODUCT_SERVICE_LINE_ITEM" }],
-            name: "PRODUCT_SERVICE_GROUP",
-          },
-        ],
-        name: "PRODUCT_SERVICE_SECTION",
-      },
-    ]);
+    expect(accepts(ehc, ["MSH", "IVC"])).toBe(true);
+    expect(accepts(ehc, ["MSH", "PYE"])).toBe(true);
+    expect(accepts(ehc, ["MSH"])).toBe(true);
+    expect(accepts(ehc, ["MSH", "IVC", "PYE"])).toBe(false);
   });
 
   it("reads a choice as exactly one of its alternatives", async () => {
