@@ -21,16 +21,23 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "QPD",
+      "type": "choice",
       "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "RCP",
-      "optional": false,
-      "repeating": false
+      "repeating": false,
+      "alternatives": [
+        {
+          "type": "segment",
+          "name": "QPD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "RCP",
+          "optional": false,
+          "repeating": false
+        }
+      ]
     }
   ]
 }

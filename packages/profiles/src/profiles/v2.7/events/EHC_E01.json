@@ -21,183 +21,68 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "IVC",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "PYE",
+      "type": "choice",
       "optional": true,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "CTD",
-      "optional": true,
-      "repeating": true
-    },
-    {
-      "type": "segment",
-      "name": "AUT",
-      "optional": true,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "LOC",
-      "optional": true,
-      "repeating": true
-    },
-    {
-      "type": "segment",
-      "name": "ROL",
-      "optional": true,
-      "repeating": true
-    },
-    {
-      "type": "group",
-      "name": "PRODUCT_SERVICE_SECTION",
-      "optional": false,
-      "repeating": true,
-      "elements": [
+      "repeating": false,
+      "alternatives": [
         {
           "type": "segment",
-          "name": "PSS",
+          "name": "IVC",
           "optional": false,
           "repeating": false
         },
         {
+          "type": "segment",
+          "name": "PYE",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "CTD",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "AUT",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "LOC",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "ROL",
+          "optional": false,
+          "repeating": true
+        },
+        {
           "type": "group",
-          "name": "PRODUCT_SERVICE_GROUP",
+          "name": "PRODUCT_SERVICE_SECTION",
           "optional": false,
           "repeating": true,
           "elements": [
             {
               "type": "segment",
-              "name": "PSG",
+              "name": "PSS",
               "optional": false,
               "repeating": false
             },
             {
-              "type": "segment",
-              "name": "LOC",
-              "optional": true,
-              "repeating": true
-            },
-            {
-              "type": "segment",
-              "name": "ROL",
-              "optional": true,
-              "repeating": true
-            },
-            {
               "type": "group",
-              "name": "PATIENT_INFO",
-              "optional": true,
-              "repeating": true,
-              "elements": [
-                {
-                  "type": "segment",
-                  "name": "PID",
-                  "optional": false,
-                  "repeating": false
-                },
-                {
-                  "type": "segment",
-                  "name": "PV1",
-                  "optional": true,
-                  "repeating": false
-                },
-                {
-                  "type": "segment",
-                  "name": "PV2",
-                  "optional": true,
-                  "repeating": false
-                },
-                {
-                  "type": "segment",
-                  "name": "ACC",
-                  "optional": true,
-                  "repeating": true
-                },
-                {
-                  "type": "group",
-                  "name": "INSURANCE",
-                  "optional": false,
-                  "repeating": true,
-                  "elements": [
-                    {
-                      "type": "segment",
-                      "name": "IN1",
-                      "optional": false,
-                      "repeating": false
-                    },
-                    {
-                      "type": "segment",
-                      "name": "IN2",
-                      "optional": true,
-                      "repeating": false
-                    }
-                  ]
-                },
-                {
-                  "type": "group",
-                  "name": "DIAGNOSIS",
-                  "optional": true,
-                  "repeating": true,
-                  "elements": [
-                    {
-                      "type": "segment",
-                      "name": "DG1",
-                      "optional": false,
-                      "repeating": false
-                    },
-                    {
-                      "type": "segment",
-                      "name": "NTE",
-                      "optional": true,
-                      "repeating": true
-                    }
-                  ]
-                },
-                {
-                  "type": "segment",
-                  "name": "OBX",
-                  "optional": true,
-                  "repeating": true
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "name": "PRODUCT_SERVICE_LINE_ITEM",
+              "name": "PRODUCT_SERVICE_GROUP",
               "optional": false,
               "repeating": true,
               "elements": [
                 {
                   "type": "segment",
-                  "name": "PSL",
+                  "name": "PSG",
                   "optional": false,
-                  "repeating": false
-                },
-                {
-                  "type": "segment",
-                  "name": "NTE",
-                  "optional": true,
-                  "repeating": true
-                },
-                {
-                  "type": "segment",
-                  "name": "ADJ",
-                  "optional": true,
-                  "repeating": true
-                },
-                {
-                  "type": "segment",
-                  "name": "AUT",
-                  "optional": true,
                   "repeating": false
                 },
                 {
@@ -211,46 +96,168 @@
                   "name": "ROL",
                   "optional": true,
                   "repeating": true
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "name": "PROCEDURE",
-              "optional": true,
-              "repeating": true,
-              "elements": [
-                {
-                  "type": "segment",
-                  "name": "PR1",
-                  "optional": false,
-                  "repeating": false
                 },
                 {
-                  "type": "segment",
-                  "name": "NTE",
+                  "type": "group",
+                  "name": "PATIENT_INFO",
                   "optional": true,
-                  "repeating": true
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "PID",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "PV1",
+                      "optional": true,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "PV2",
+                      "optional": true,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "ACC",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "group",
+                      "name": "INSURANCE",
+                      "optional": false,
+                      "repeating": true,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "IN1",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "IN2",
+                          "optional": true,
+                          "repeating": false
+                        }
+                      ]
+                    },
+                    {
+                      "type": "group",
+                      "name": "DIAGNOSIS",
+                      "optional": true,
+                      "repeating": true,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "DG1",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "NTE",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    },
+                    {
+                      "type": "segment",
+                      "name": "OBX",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
                 },
                 {
-                  "type": "segment",
-                  "name": "ROL",
-                  "optional": true,
-                  "repeating": true
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "name": "INVOICE_PROCESSING",
-              "optional": true,
-              "repeating": true,
-              "elements": [
-                {
-                  "type": "segment",
-                  "name": "IPR",
+                  "type": "group",
+                  "name": "PRODUCT_SERVICE_LINE_ITEM",
                   "optional": false,
-                  "repeating": false
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "PSL",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "NTE",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "segment",
+                      "name": "ADJ",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "segment",
+                      "name": "AUT",
+                      "optional": true,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "LOC",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "segment",
+                      "name": "ROL",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "PROCEDURE",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "PR1",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "NTE",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "segment",
+                      "name": "ROL",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "INVOICE_PROCESSING",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "IPR",
+                      "optional": false,
+                      "repeating": false
+                    }
+                  ]
                 }
               ]
             }

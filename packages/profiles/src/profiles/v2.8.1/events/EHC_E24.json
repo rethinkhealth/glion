@@ -33,34 +33,41 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "IVC",
+      "type": "choice",
       "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "group",
-      "name": "PSL_ITEM_INFO",
-      "optional": false,
-      "repeating": true,
-      "elements": [
+      "repeating": false,
+      "alternatives": [
         {
           "type": "segment",
-          "name": "PSL",
+          "name": "IVC",
           "optional": false,
           "repeating": false
         },
         {
-          "type": "segment",
-          "name": "AUT",
-          "optional": true,
-          "repeating": false
-        },
-        {
-          "type": "segment",
-          "name": "ADJ",
-          "optional": true,
-          "repeating": true
+          "type": "group",
+          "name": "PSL_ITEM_INFO",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PSL",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "AUT",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "ADJ",
+              "optional": true,
+              "repeating": true
+            }
+          ]
         }
       ]
     }

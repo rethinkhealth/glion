@@ -21,16 +21,23 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "PMT",
+      "type": "choice",
       "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "PYE",
-      "optional": false,
-      "repeating": false
+      "repeating": false,
+      "alternatives": [
+        {
+          "type": "segment",
+          "name": "PMT",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PYE",
+          "optional": false,
+          "repeating": false
+        }
+      ]
     },
     {
       "type": "group",

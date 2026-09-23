@@ -33,28 +33,35 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "QAK",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "QPD",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "group",
-      "name": "INVOICE_PROCESSING_RESULTS_INFO",
+      "type": "choice",
       "optional": true,
-      "repeating": true,
-      "elements": [
+      "repeating": false,
+      "alternatives": [
         {
           "type": "segment",
-          "name": "IPR",
+          "name": "QAK",
           "optional": false,
           "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "QPD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "INVOICE_PROCESSING_RESULTS_INFO",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "IPR",
+              "optional": false,
+              "repeating": false
+            }
+          ]
         }
       ]
     }

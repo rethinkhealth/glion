@@ -33,40 +33,47 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "IVC",
+      "type": "choice",
       "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "group",
-      "name": "PSL_ITEM_INFO",
-      "optional": false,
-      "repeating": true,
-      "elements": [
+      "repeating": false,
+      "alternatives": [
         {
           "type": "segment",
-          "name": "PSL",
+          "name": "IVC",
           "optional": false,
           "repeating": false
         },
         {
-          "type": "segment",
-          "name": "AUT",
-          "optional": true,
-          "repeating": false
-        },
-        {
           "type": "group",
-          "name": "PAYER_ADJUSTMENT",
-          "optional": true,
+          "name": "PSL_ITEM_INFO",
+          "optional": false,
           "repeating": true,
           "elements": [
             {
               "type": "segment",
-              "name": "ADJ",
+              "name": "PSL",
               "optional": false,
               "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "AUT",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "PAYER_ADJUSTMENT",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "ADJ",
+                  "optional": false,
+                  "repeating": false
+                }
+              ]
             }
           ]
         }
