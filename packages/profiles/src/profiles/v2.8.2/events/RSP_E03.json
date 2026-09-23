@@ -33,22 +33,29 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "QAK",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "QPD",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "IPR",
+      "type": "choice",
       "optional": true,
-      "repeating": true
+      "repeating": false,
+      "alternatives": [
+        {
+          "type": "segment",
+          "name": "QAK",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "QPD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IPR",
+          "optional": false,
+          "repeating": true
+        }
+      ]
     }
   ]
 }

@@ -21,76 +21,109 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "IVC",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "CTD",
-      "optional": false,
-      "repeating": true
-    },
-    {
-      "type": "segment",
-      "name": "LOC",
+      "type": "choice",
       "optional": true,
-      "repeating": true
-    },
-    {
-      "type": "segment",
-      "name": "ROL",
-      "optional": true,
-      "repeating": true
-    },
-    {
-      "type": "group",
-      "name": "PAT_INFO",
-      "optional": false,
-      "repeating": true,
-      "elements": [
+      "repeating": false,
+      "alternatives": [
         {
           "type": "segment",
-          "name": "PID",
+          "name": "IVC",
           "optional": false,
           "repeating": false
         },
         {
           "type": "segment",
-          "name": "ACC",
-          "optional": true,
+          "name": "CTD",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "LOC",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "ROL",
+          "optional": false,
           "repeating": true
         },
         {
           "type": "group",
-          "name": "INSURANCE",
+          "name": "PAT_INFO",
           "optional": false,
           "repeating": true,
           "elements": [
             {
               "type": "segment",
-              "name": "IN1",
+              "name": "PID",
               "optional": false,
               "repeating": false
             },
             {
               "type": "segment",
-              "name": "IN2",
+              "name": "ACC",
               "optional": true,
-              "repeating": false
+              "repeating": true
+            },
+            {
+              "type": "group",
+              "name": "INSURANCE",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "IN1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "IN2",
+                  "optional": true,
+                  "repeating": false
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "DIAGNOSIS",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "DG1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "segment",
+              "name": "OBX",
+              "optional": true,
+              "repeating": true
             }
           ]
         },
         {
           "type": "group",
-          "name": "DIAGNOSIS",
-          "optional": true,
+          "name": "PSL_ITEM_INFO",
+          "optional": false,
           "repeating": true,
           "elements": [
             {
               "type": "segment",
-              "name": "DG1",
+              "name": "PSL",
               "optional": false,
               "repeating": false
             },
@@ -99,58 +132,32 @@
               "name": "NTE",
               "optional": true,
               "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "ADJ",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "LOC",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "PRT",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "ROL",
+              "optional": true,
+              "repeating": true
             }
           ]
-        },
-        {
-          "type": "segment",
-          "name": "OBX",
-          "optional": true,
-          "repeating": true
-        }
-      ]
-    },
-    {
-      "type": "group",
-      "name": "PSL_ITEM_INFO",
-      "optional": false,
-      "repeating": true,
-      "elements": [
-        {
-          "type": "segment",
-          "name": "PSL",
-          "optional": false,
-          "repeating": false
-        },
-        {
-          "type": "segment",
-          "name": "NTE",
-          "optional": true,
-          "repeating": true
-        },
-        {
-          "type": "segment",
-          "name": "ADJ",
-          "optional": true,
-          "repeating": true
-        },
-        {
-          "type": "segment",
-          "name": "LOC",
-          "optional": true,
-          "repeating": true
-        },
-        {
-          "type": "segment",
-          "name": "PRT",
-          "optional": true,
-          "repeating": true
-        },
-        {
-          "type": "segment",
-          "name": "ROL",
-          "optional": true,
-          "repeating": true
         }
       ]
     }

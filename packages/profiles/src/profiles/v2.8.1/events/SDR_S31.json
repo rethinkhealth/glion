@@ -21,16 +21,23 @@
       "repeating": false
     },
     {
-      "type": "segment",
-      "name": "SDD",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "SCD",
+      "type": "choice",
       "optional": true,
-      "repeating": true
+      "repeating": false,
+      "alternatives": [
+        {
+          "type": "segment",
+          "name": "SDD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "SCD",
+          "optional": false,
+          "repeating": true
+        }
+      ]
     }
   ]
 }

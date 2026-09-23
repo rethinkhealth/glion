@@ -33,46 +33,53 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "QAK",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "QPD",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "group",
-      "name": "AUTHORIZATION_INFO",
+      "type": "choice",
       "optional": true,
       "repeating": false,
-      "elements": [
+      "alternatives": [
         {
           "type": "segment",
-          "name": "IVC",
+          "name": "QAK",
           "optional": false,
           "repeating": false
         },
         {
           "type": "segment",
-          "name": "PSG",
+          "name": "QPD",
           "optional": false,
           "repeating": false
         },
         {
           "type": "group",
-          "name": "PSL_ITEM_INFO",
+          "name": "AUTHORIZATION_INFO",
           "optional": false,
-          "repeating": true,
+          "repeating": false,
           "elements": [
             {
               "type": "segment",
-              "name": "PSL",
+              "name": "IVC",
               "optional": false,
               "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PSG",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "PSL_ITEM_INFO",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "PSL",
+                  "optional": false,
+                  "repeating": false
+                }
+              ]
             }
           ]
         }

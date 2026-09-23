@@ -21,46 +21,53 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "IVC",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "NTE",
+      "type": "choice",
       "optional": true,
-      "repeating": true
-    },
-    {
-      "type": "group",
-      "name": "PRODUCT_SERVICE_SECTION",
-      "optional": true,
-      "repeating": true,
-      "elements": [
+      "repeating": false,
+      "alternatives": [
         {
           "type": "segment",
-          "name": "PSS",
+          "name": "IVC",
           "optional": false,
           "repeating": false
         },
         {
+          "type": "segment",
+          "name": "NTE",
+          "optional": false,
+          "repeating": true
+        },
+        {
           "type": "group",
-          "name": "PRODUCT_SERVICE_GROUP",
-          "optional": true,
+          "name": "PRODUCT_SERVICE_SECTION",
+          "optional": false,
           "repeating": true,
           "elements": [
             {
               "type": "segment",
-              "name": "PSG",
+              "name": "PSS",
               "optional": false,
               "repeating": false
             },
             {
-              "type": "segment",
-              "name": "PSL",
+              "type": "group",
+              "name": "PRODUCT_SERVICE_GROUP",
               "optional": true,
-              "repeating": true
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "PSG",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PSL",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
             }
           ]
         }

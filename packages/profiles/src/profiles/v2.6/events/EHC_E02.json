@@ -21,58 +21,65 @@
       "repeating": true
     },
     {
-      "type": "segment",
-      "name": "IVC",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "PYE",
-      "optional": false,
-      "repeating": false
-    },
-    {
-      "type": "segment",
-      "name": "CTD",
+      "type": "choice",
       "optional": true,
-      "repeating": true
-    },
-    {
-      "type": "segment",
-      "name": "NTE",
-      "optional": true,
-      "repeating": true
-    },
-    {
-      "type": "group",
-      "name": "PRODUCT_SERVICE_SECTION",
-      "optional": true,
-      "repeating": true,
-      "elements": [
+      "repeating": false,
+      "alternatives": [
         {
           "type": "segment",
-          "name": "PSS",
+          "name": "IVC",
           "optional": false,
           "repeating": false
         },
         {
+          "type": "segment",
+          "name": "PYE",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "CTD",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": false,
+          "repeating": true
+        },
+        {
           "type": "group",
-          "name": "PSG",
-          "optional": true,
+          "name": "PRODUCT_SERVICE_SECTION",
+          "optional": false,
           "repeating": true,
           "elements": [
             {
               "type": "segment",
-              "name": "PSG",
+              "name": "PSS",
               "optional": false,
               "repeating": false
             },
             {
-              "type": "segment",
-              "name": "PSL",
+              "type": "group",
+              "name": "PSG",
               "optional": true,
-              "repeating": true
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "PSG",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PSL",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
             }
           ]
         }
