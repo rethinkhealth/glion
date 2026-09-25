@@ -1,26 +1,27 @@
-import { runner } from "../src/automata/runner";
 import { createLruCache } from "../src/cache/lru";
 import { createProfiles } from "../src/profiles";
 import { loadSegments } from "../src/stores/segments";
+import { runner } from "../src/structure/runner";
 
 describe("createProfiles", () => {
   describe("events", () => {
-    it("loads a DFA definition by version and id", async () => {
+    it("loads a message structure by version and id", async () => {
       const profiles = createProfiles();
       const def = await profiles.events.load("2.5", "ADT_A01");
-      expect(def).toBeDefined();
-      expect(def.start).toBe(0);
-      expect(def.finals).toBeInstanceOf(Set);
-      expect(def.transitions).toBeInstanceOf(Map);
-      expect(def.alphabet?.has("MSH")).toBe(true);
+      expect(def.id).toBe("ADT_A01");
+      expect(def.elements[0]).toEqual({
+        name: "MSH",
+        optional: false,
+        repeating: false,
+        type: "segment",
+      });
     });
 
     it("resolves event aliases transparently", async () => {
       const profiles = createProfiles();
       const alias = await profiles.events.load("2.5", "ADT_A04");
       const canonical = await profiles.events.load("2.5", "ADT_A01");
-      expect(alias.start).toBe(canonical.start);
-      expect(alias.alphabet).toEqual(canonical.alphabet);
+      expect(alias).toBe(canonical);
     });
 
     it("supports resolve: false to skip alias resolution", async () => {
@@ -30,7 +31,7 @@ describe("createProfiles", () => {
       ).rejects.toThrow();
     });
 
-    it("returns a Definition compatible with the runner", async () => {
+    it("returns a structure the runner validates against", async () => {
       const profiles = createProfiles();
       const def = await profiles.events.load("2.5", "ADT_A01");
       const r = runner(def);
@@ -60,9 +61,9 @@ describe("createProfiles", () => {
       const v21 = await profiles.events.load("2.1", "ADT_A01");
       const v25 = await profiles.events.load("2.5", "ADT_A01");
       const v282 = await profiles.events.load("2.8.2", "ADT_A01");
-      expect(v21.start).toBe(0);
-      expect(v25.start).toBe(0);
-      expect(v282.start).toBe(0);
+      expect(v21.id).toBe("ADT_A01");
+      expect(v25.id).toBe("ADT_A01");
+      expect(v282.id).toBe("ADT_A01");
     });
   });
 
@@ -130,7 +131,7 @@ describe("createProfiles", () => {
       expect(msh1?.datatype).toBeDefined();
       // maxLength is now enriched from HL7DB
       expect(msh1?.maxLength).toBeDefined();
-      expectTypeOf(msh1?.maxLength).toBeNumber();
+      expect(typeof msh1?.maxLength).toBe("number");
     });
 
     it("loads fields across versions", async () => {
@@ -227,14 +228,14 @@ describe("createProfiles", () => {
     it("accepts cache: false to disable caching", async () => {
       const profiles = createProfiles({ cache: false });
       const def = await profiles.events.load("2.5", "ACK");
-      expect(def.start).toBe(0);
+      expect(def.id).toBe("ACK");
       expect(profiles.events.has("2.5", "ACK")).toBe(false);
     });
 
     it("accepts CacheOptions for built-in LRU", async () => {
       const profiles = createProfiles({ cache: { maxEntries: 5 } });
       const def = await profiles.events.load("2.5", "ACK");
-      expect(def.start).toBe(0);
+      expect(def.id).toBe("ACK");
     });
 
     it("accepts a custom Cache implementation", async () => {

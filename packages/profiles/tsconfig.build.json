@@ -1,7 +1,6 @@
 {
   "extends": "@glion/tsconfig/library.json",
   "compilerOptions": {
-    "noResolve": true,
     "types": ["node"]
   },
   "exclude": ["src/profiles/v*", "src/profiles/utg"]

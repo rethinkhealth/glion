@@ -12,6 +12,7 @@ import { MllpClient } from "@glion/mllp-client";
 import { frame, unframe } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetLintProfileRecommended from "@glion/preset-lint-profile-recommended";
+import { matchStructure, profiles, runner } from "@glion/profiles";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -22,6 +23,8 @@ import {
   hl7,
   hl7File,
   ADT_A01_MINIMAL,
+  ORU_R01_LARGE,
+  ORU_R01_MEDIUM,
   obxCodedLine,
 } from "./fixtures/messages";
 import { source } from "./fixtures/streams";
@@ -30,6 +33,28 @@ describe("canary — suites measure real work", () => {
   it("parser: ADT_A01_SMALL parses to 3 segments", () => {
     const tree = parseHL7v2(ADT_A01_SMALL);
     expect(tree.children).toHaveLength(3);
+  });
+
+  it("profiles-runner: ORU_R01 fixtures are accepted", async () => {
+    const structure = await profiles.events.load("2.5.1", "ORU_R01");
+    for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
+      const automaton = runner(structure);
+      for (const node of parseHL7v2(message).children) {
+        automaton.consume(node.type === "segment" ? node.name : "");
+      }
+      expect(automaton.accepted).toBe(true);
+    }
+  });
+
+  it("profiles-structure: ORU_R01 fixtures group into ORDER_OBSERVATION", async () => {
+    const structure = await profiles.events.load("2.5.1", "ORU_R01");
+    for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
+      const names = parseHL7v2(message).children.map((node) =>
+        node.type === "segment" ? node.name : ""
+      );
+      const match = matchStructure(structure, names);
+      expect(JSON.stringify(match)).toContain('"name":"ORDER_OBSERVATION"');
+    }
   });
 
   it("lint-profile: the violations fixture yields messages", async () => {

@@ -19,6 +19,7 @@
     "@glion/annotate-profile-fields-code-systems": "workspace:*",
     "@glion/builder": "workspace:*",
     "@glion/hl7v2": "workspace:*",
+    "@glion/lint-profile-events-segments-order": "workspace:*",
     "@glion/mllp": "workspace:*",
     "@glion/mllp-client": "workspace:*",
     "@glion/mllp-codec": "workspace:*",

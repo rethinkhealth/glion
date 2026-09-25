@@ -1,5 +1,5 @@
 import { c, f, g, m, s } from "@glion/builder";
-import type { Definition } from "@glion/profiles";
+import type { MessageStructure } from "@glion/profiles";
 import { profiles } from "@glion/profiles";
 import { unified } from "unified";
 import { VFile } from "vfile";
@@ -7,30 +7,24 @@ import { describe, expect, it } from "vitest";
 
 import hl7v2LintSegmentOrder from "../src";
 
-/** Simple definition: MSH -> PID (both required) */
-function simpleDef(): Definition {
-  return {
-    finals: new Set([2]),
-    start: 0,
-    transitions: new Map([
-      [0, new Map([["MSH", 1]])],
-      [1, new Map([["PID", 2]])],
-    ]),
-  };
-}
+/** MSH, then PID, both required. */
+const MSH_PID: MessageStructure = {
+  elements: [
+    { name: "MSH", optional: false, repeating: false, type: "segment" },
+    { name: "PID", optional: false, repeating: false, type: "segment" },
+  ],
+  id: "TEST",
+};
 
-/** Definition: MSH -> PID -> PV1 (all required) */
-function threeSegmentDef(): Definition {
-  return {
-    finals: new Set([3]),
-    start: 0,
-    transitions: new Map([
-      [0, new Map([["MSH", 1]])],
-      [1, new Map([["PID", 2]])],
-      [2, new Map([["PV1", 3]])],
-    ]),
-  };
-}
+/** MSH, PID, then PV1, all required. */
+const MSH_PID_PV1: MessageStructure = {
+  elements: [
+    { name: "MSH", optional: false, repeating: false, type: "segment" },
+    { name: "PID", optional: false, repeating: false, type: "segment" },
+    { name: "PV1", optional: false, repeating: false, type: "segment" },
+  ],
+  id: "TEST",
+};
 
 describe("hl7v2LintSegmentOrder", () => {
   describe("valid messages", () => {
@@ -39,26 +33,20 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: simpleDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(0);
     });
 
     it("accepts repeating segments", async () => {
-      const definition: Definition = {
-        finals: new Set([2]),
-        start: 0,
-        transitions: new Map([
-          [0, new Map([["MSH", 1]])],
-          [
-            1,
-            new Map([
-              ["OBX", 1],
-              ["END", 2],
-            ]),
-          ],
-        ]),
+      const definition: MessageStructure = {
+        elements: [
+          { name: "MSH", optional: false, repeating: false, type: "segment" },
+          { name: "OBX", optional: true, repeating: true, type: "segment" },
+          { name: "END", optional: false, repeating: false, type: "segment" },
+        ],
+        id: "TEST",
       };
 
       const tree = m(s("MSH"), s("OBX"), s("OBX"), s("OBX"), s("END"));
@@ -78,7 +66,7 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: threeSegmentDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID_PV1 })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(0);
@@ -89,7 +77,7 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: threeSegmentDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID_PV1 })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
@@ -99,13 +87,61 @@ describe("hl7v2LintSegmentOrder", () => {
     });
   });
 
+  describe("definition function", () => {
+    it("validates against the structure the function returns for the message", async () => {
+      const tree = m(s("MSH"), s("PV1"));
+      const file = new VFile();
+      const seen: unknown[] = [];
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, {
+          definition: (context) => {
+            seen.push(context.tree, context.file);
+            return MSH_PID;
+          },
+        })
+        .run(tree, file);
+
+      expect(seen).toEqual([tree, file]);
+      expect(file.messages.map((message) => message.reason)).toEqual([
+        "Unexpected segment 'PV1'. Expected: PID",
+      ]);
+    });
+
+    it("awaits a structure the function resolves asynchronously", async () => {
+      const tree = m(s("MSH"), s("PV1"));
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, {
+          definition: () => profiles.events.load("2.5", "ADT_A01"),
+        })
+        .run(tree, file);
+
+      expect(file.messages.map((message) => message.reason)).toEqual([
+        expect.stringMatching(/^Unexpected segment 'PV1'\. Expected: /),
+      ]);
+    });
+
+    it("reports nothing when the function returns no structure", async () => {
+      const tree = m(s("MSH"), s("PV1"));
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, { definition: () => {} })
+        .run(tree, file);
+
+      expect(file.messages).toHaveLength(0);
+    });
+  });
+
   describe("invalid segment order", () => {
     it("reports unexpected segment", async () => {
       const tree = m(s("MSH"), s("INVALID"));
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: simpleDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
@@ -121,7 +157,7 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: simpleDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
@@ -142,7 +178,7 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: simpleDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
@@ -158,7 +194,7 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: threeSegmentDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID_PV1 })
         .run(tree, file);
 
       // Only reports the first invalid segment
@@ -173,7 +209,7 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: simpleDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
@@ -189,7 +225,7 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: simpleDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
@@ -217,7 +253,7 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: simpleDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
@@ -232,7 +268,7 @@ describe("hl7v2LintSegmentOrder", () => {
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: simpleDef() })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
@@ -274,14 +310,10 @@ describe("hl7v2LintSegmentOrder", () => {
 
       await unified().use(hl7v2LintSegmentOrder).run(tree, file);
 
-      // Should resolve ADT_A01 via event map and validate — no resolution errors
-      const resolutionErrors = file.messages.filter(
-        (msg) =>
-          msg.message.includes("missing version") ||
-          msg.message.includes("unable to determine") ||
-          msg.message.includes("no profile found")
-      );
-      expect(resolutionErrors).toHaveLength(0);
+      // ADT_A01 requires PV1 after PID: the report proves the structure loaded.
+      expect(file.messages.map((message) => message.reason)).toEqual([
+        expect.stringMatching(/^Message ended prematurely\. Expected: .*PV1/),
+      ]);
     });
 
     it("silently skips when MSH-9 components are all missing", async () => {
@@ -380,13 +412,10 @@ describe("hl7v2LintSegmentOrder", () => {
 
       await unified().use(hl7v2LintSegmentOrder).run(tree, file);
 
-      // Should load profile from MSH fields — no resolution errors
-      const resolutionErrors = file.messages.filter(
-        (msg) =>
-          msg.message.includes("missing version") ||
-          msg.message.includes("no profile found")
-      );
-      expect(resolutionErrors).toHaveLength(0);
+      // ADT_A01 requires PV1 after PID: the report proves the structure loaded.
+      expect(file.messages.map((message) => message.reason)).toEqual([
+        expect.stringMatching(/^Message ended prematurely\. Expected: .*PV1/),
+      ]);
     });
   });
 

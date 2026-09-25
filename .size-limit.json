@@ -15,6 +15,6 @@
     "name": "@glion/profiles: largest events chunk",
     "path": "packages/profiles/dist/events-v2.8.2.js",
     "webpack": false,
-    "limit": "75 kB"
+    "limit": "20 kB"
   }
 ]
