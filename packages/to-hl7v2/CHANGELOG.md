@@ -1,5 +1,13 @@
 # @rethinkhealth/hl7v2-to-hl7v2
 
+## 0.20.0
+
+### Patch Changes
+
+- [#820](https://github.com/rethinkhealth/glion/pull/820) [`003907b`](https://github.com/rethinkhealth/glion/commit/003907bfe239970a5d333e47bc9d5e82ca750c51) Thanks [@meleksomai](https://github.com/meleksomai)! - `toHl7v2` serializes segment groups: a grouped tree produces the same text as its flat segments, and a `Group` node on its own serializes as its segments. A root holding groups used to drop every segment inside a group and write only the group's name ([#817](https://github.com/rethinkhealth/glion/issues/817)).
+- Updated dependencies []:
+  - @glion/utils@0.20.0
+
 ## 0.19.0
 
 ### Patch Changes

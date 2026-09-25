@@ -1,5 +1,15 @@
 # @rethinkhealth/hl7v2-annotate-profile-context
 
+## 0.20.0
+
+### Patch Changes
+
+- Updated dependencies [[`84ed35f`](https://github.com/rethinkhealth/glion/commit/84ed35fcaccc89dad7b658e7543ce6be792f731a)]:
+  - @glion/profiles@0.20.0
+  - @glion/util-query@0.20.0
+  - @glion/util-visit@0.20.0
+  - @glion/ast@0.20.0
+
 ## 0.19.0
 
 ### Patch Changes

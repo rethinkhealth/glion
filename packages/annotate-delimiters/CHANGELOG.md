@@ -1,5 +1,13 @@
 # @rethinkhealth/hl7v2-annotate-delimiters
 
+## 0.20.0
+
+### Patch Changes
+
+- [#783](https://github.com/rethinkhealth/glion/pull/783) [`9c589be`](https://github.com/rethinkhealth/glion/commit/9c589bee3406d77786d490d50dd67dc3da16518f) Thanks [@meleksomai](https://github.com/meleksomai)! - Declare the MIT license in `package.json`; it was the only published package without a `license` field.
+- Updated dependencies []:
+  - @glion/util-query@0.20.0
+
 ## 0.19.0
 
 ### Patch Changes
