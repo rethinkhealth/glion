@@ -4,6 +4,82 @@ import type { MessageStructure } from "../../src/structure/types";
 import { ORU_R01_V2_5 } from "./fixtures";
 
 describe("compileStructure", () => {
+  it("rejects a structure with no elements", () => {
+    expect(() => compileStructure({ elements: [], id: "ZZZ_Z10" })).toThrow(
+      "Invalid message structure ZZZ_Z10: it has no elements"
+    );
+  });
+
+  it("rejects a segment with no name", () => {
+    expect(() =>
+      compileStructure({
+        elements: [
+          { name: "", optional: false, repeating: false, type: "segment" },
+        ],
+        id: "ZZZ_Z11",
+      })
+    ).toThrow("Invalid message structure ZZZ_Z11: a segment has no name");
+  });
+
+  it("rejects a group with no name", () => {
+    expect(() =>
+      compileStructure({
+        elements: [
+          {
+            elements: [
+              {
+                name: "PID",
+                optional: false,
+                repeating: false,
+                type: "segment",
+              },
+            ],
+            name: "",
+            optional: false,
+            repeating: false,
+            type: "group",
+          },
+        ],
+        id: "ZZZ_Z12",
+      })
+    ).toThrow("Invalid message structure ZZZ_Z12: a group has no name");
+  });
+
+  it("rejects a group with no elements", () => {
+    expect(() =>
+      compileStructure({
+        elements: [
+          {
+            elements: [],
+            name: "VISIT",
+            optional: false,
+            repeating: false,
+            type: "group",
+          },
+        ],
+        id: "ZZZ_Z13",
+      })
+    ).toThrow("Invalid message structure ZZZ_Z13: group VISIT has no elements");
+  });
+
+  it("rejects a choice with no alternatives", () => {
+    expect(() =>
+      compileStructure({
+        elements: [
+          {
+            alternatives: [],
+            optional: false,
+            repeating: false,
+            type: "choice",
+          },
+        ],
+        id: "ZZZ_Z14",
+      })
+    ).toThrow(
+      "Invalid message structure ZZZ_Z14: a choice has no alternatives"
+    );
+  });
+
   it("rejects a choice whose alternative can match no segment", () => {
     expect(() =>
       compileStructure({
