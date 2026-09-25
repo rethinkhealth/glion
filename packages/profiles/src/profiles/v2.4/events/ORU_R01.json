@@ -1,0 +1,142 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "ORU_R01",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "PATIENT_RESULT",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "group",
+          "name": "PATIENT",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PID",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PD1",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NK1",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "group",
+              "name": "VISIT",
+              "optional": true,
+              "repeating": false,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "PV1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PV2",
+                  "optional": true,
+                  "repeating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "ORDER_OBSERVATION",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "ORC",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "OBR",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "CTD",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "OBSERVATION",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "OBX",
+                  "optional": true,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "segment",
+              "name": "FT1",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "CTI",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}

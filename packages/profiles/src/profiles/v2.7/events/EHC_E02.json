@@ -1,0 +1,89 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "EHC_E02",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "choice",
+      "optional": true,
+      "repeating": false,
+      "alternatives": [
+        {
+          "type": "segment",
+          "name": "IVC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PYE",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "CTD",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "PRODUCT_SERVICE_SECTION",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PSS",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "PSG",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "PSG",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PSL",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

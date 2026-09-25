@@ -1,0 +1,120 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "MDM_T02",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "EVN",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PID",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PV1",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "COMMON_ORDER",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "ORC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "TIMING",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "TQ1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "TQ2",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "OBR",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "TXA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "CON",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "OBSERVATION",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "OBX",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    }
+  ]
+}

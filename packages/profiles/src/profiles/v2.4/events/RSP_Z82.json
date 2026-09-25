@@ -1,0 +1,240 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "RSP_Z82",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QAK",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QPD",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "RCP",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "QUERY_RESPONSE",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "group",
+          "name": "PATIENT",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PID",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PD1",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "group",
+              "name": "VISIT",
+              "optional": true,
+              "repeating": false,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "AL1",
+                  "optional": false,
+                  "repeating": true
+                },
+                {
+                  "type": "group",
+                  "name": "PATIENT_VISIT",
+                  "optional": true,
+                  "repeating": false,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "PV1",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "PV2",
+                      "optional": true,
+                      "repeating": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "COMMON_ORDER",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "ORC",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "group",
+                  "name": "ORDER_DETAIL",
+                  "optional": true,
+                  "repeating": false,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "RXO",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "NTE",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "segment",
+                      "name": "RXR",
+                      "optional": false,
+                      "repeating": true
+                    },
+                    {
+                      "type": "group",
+                      "name": "TREATMENT",
+                      "optional": true,
+                      "repeating": false,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "RXC",
+                          "optional": false,
+                          "repeating": true
+                        },
+                        {
+                          "type": "segment",
+                          "name": "NTE",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "ENCODED_ORDER",
+                  "optional": true,
+                  "repeating": false,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "RXE",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "RXR",
+                      "optional": false,
+                      "repeating": true
+                    },
+                    {
+                      "type": "segment",
+                      "name": "RXC",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                },
+                {
+                  "type": "segment",
+                  "name": "RXD",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "RXR",
+                  "optional": false,
+                  "repeating": true
+                },
+                {
+                  "type": "segment",
+                  "name": "RXC",
+                  "optional": true,
+                  "repeating": true
+                },
+                {
+                  "type": "group",
+                  "name": "OBSERVATION",
+                  "optional": false,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "OBX",
+                      "optional": true,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "NTE",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}

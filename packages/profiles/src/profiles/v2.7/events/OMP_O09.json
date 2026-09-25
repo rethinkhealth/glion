@@ -1,0 +1,250 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "OMP_O09",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "NTE",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "PATIENT",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "ADDITIONAL_DEMOGRAPHICS",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PD1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PRT",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "PATIENT_VISIT",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PV1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PV2",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PRT",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "INSURANCE",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "IN1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "IN2",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "IN3",
+              "optional": true,
+              "repeating": false
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "GT1",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "AL1",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "ORDER",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "ORC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "TIMING",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "TQ1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "TQ2",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "RXO",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PRT",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "RXR",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "COMPONENT",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "RXC",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "OBSERVATION",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "OBX",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "PRT",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "FT1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "BLG",
+          "optional": true,
+          "repeating": false
+        }
+      ]
+    }
+  ]
+}

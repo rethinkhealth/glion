@@ -1,0 +1,50 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "TCU_U10",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "EQU",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "TEST_CONFIGURATION",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "SPM",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "TCC",
+          "optional": false,
+          "repeating": true
+        }
+      ]
+    }
+  ]
+}

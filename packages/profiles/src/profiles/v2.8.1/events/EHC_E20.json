@@ -1,0 +1,165 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "EHC_E20",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "choice",
+      "optional": true,
+      "repeating": false,
+      "alternatives": [
+        {
+          "type": "segment",
+          "name": "IVC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "CTD",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "LOC",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "ROL",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "PAT_INFO",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PID",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "ACC",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "group",
+              "name": "INSURANCE",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "IN1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "IN2",
+                  "optional": true,
+                  "repeating": false
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "DIAGNOSIS",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "DG1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "segment",
+              "name": "OBX",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "PSL_ITEM_INFO",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PSL",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "ADJ",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "LOC",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "PRT",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "ROL",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

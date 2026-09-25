@@ -1,0 +1,176 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "ORL_O36",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "NTE",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "RESPONSE",
+      "optional": true,
+      "repeating": false,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "PID",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PRT",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "SPECIMEN",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "SPM",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "SPECIMEN_OBSERVATION",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "OBX",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "PRT",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "group",
+              "name": "SPECIMEN_CONTAINER",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "SAC",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "group",
+                  "name": "ORDER",
+                  "optional": true,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "ORC",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "PRT",
+                      "optional": true,
+                      "repeating": true
+                    },
+                    {
+                      "type": "group",
+                      "name": "TIMING",
+                      "optional": true,
+                      "repeating": true,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "TQ1",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "TQ2",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    },
+                    {
+                      "type": "group",
+                      "name": "OBSERVATION_REQUEST",
+                      "optional": true,
+                      "repeating": false,
+                      "elements": [
+                        {
+                          "type": "segment",
+                          "name": "OBR",
+                          "optional": false,
+                          "repeating": false
+                        },
+                        {
+                          "type": "segment",
+                          "name": "PRT",
+                          "optional": true,
+                          "repeating": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

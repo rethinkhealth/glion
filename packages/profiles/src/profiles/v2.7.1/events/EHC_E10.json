@@ -1,0 +1,128 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "EHC_E10",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "INVOICE_PROCESSING_RESULTS_INFO",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "IPR",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "PYE",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IN1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IN2",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IVC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "PRODUCT_SERVICE_SECTION",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PSS",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "PRODUCT_SERVICE_GROUP",
+              "optional": false,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "PSG",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "group",
+                  "name": "PRODUCT_SERVICE_LINE_INFO",
+                  "optional": false,
+                  "repeating": true,
+                  "elements": [
+                    {
+                      "type": "segment",
+                      "name": "PSL",
+                      "optional": false,
+                      "repeating": false
+                    },
+                    {
+                      "type": "segment",
+                      "name": "ADJ",
+                      "optional": true,
+                      "repeating": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
