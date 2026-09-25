@@ -1,59 +1,52 @@
-// Validates a message's segment order against its structure, one segment at a
-// time. `@glion/lint-profile-events-segments-order` drives it: feed it each
-// segment name, ask afterwards whether the message was complete.
+// Checks a message's segment order against its structure, one segment at a
+// time. @glion/lint-profile-events-segments-order feeds it each segment name,
+// then reads `accepted` to see whether the message was complete.
 //
-// The idea
-// --------
-// A structure rarely pins down one reading. After `MSH` in `MSH [{NTE}] PID`,
-// the message may continue with an `NTE` or go straight to `PID`; after an
-// `NTE`, another `NTE` or `PID`. A backtracking parser would guess and undo.
-// This runner never guesses: it holds *every* position the structure could be
-// in at once, and narrows that set with each segment. A segment is valid when
-// at least one position accepts it; the message is complete when one of the
-// surviving positions is the end.
+// The model
 //
-// That set is `live`, and it holds only states that consume a segment (plus
-// `final`). A state that consumes nothing is never a resting place: `follow()`
-// walks past it to the states that do.
+// A structure often allows more than one reading. In `MSH [{NTE}] PID`, the
+// segment after MSH can be NTE or PID, and the segment after an NTE can be
+// another NTE or PID. The runner keeps every position the structure could be
+// in as a set of states, `live`, and replaces that set with each segment it
+// consumes. A segment is valid when at least one position accepts it. The
+// message is complete when `final` is one of the positions.
 //
-// A worked example
-// ----------------
-// `MSH [{NTE}] PID` compiles to (see compile.ts for the layout; `->` is an
-// edge, and a segment state moves to the next state number implicitly):
+// `live` holds only states that consume a segment, plus `final`. follow()
+// walks past the states that consume nothing.
+//
+// Example
+//
+// `MSH [{NTE}] PID` compiles to these states. compile.ts explains the layout;
+// a segment state moves to the next state number without an edge.
 //
 //   0 -> 1        1 MSH       2 -> 5        3 NTE
 //   4 -> 3, 6     5 -> 3, 6   6 -> 7        7 PID     8 final
 //
-//   live {1}       expected [MSH]        from follow(0): past 0 to MSH
-//   consume MSH -> follow(2): 2 -> 5 -> 3 and 6 -> 7
-//   live {3,7}     expected [NTE, PID]   both continuations, held together
-//   consume NTE -> follow(4): 4 -> 3 (again) and 6 -> 7
-//   live {3,7}     expected [NTE, PID]   the repeat and the way out
-//   consume PID -> follow(8)
-//   live {8}       expected []           accepted: 8 is final
-//
-// Nothing above is a guess that might be revisited. `live` is every reading,
-// carried forward together.
+//   live {1}      expected [MSH]
+//   consume MSH   follow(2) reaches 3 and 7
+//   live {3,7}    expected [NTE, PID]
+//   consume NTE   follow(4) reaches 3 and 7
+//   live {3,7}    expected [NTE, PID]
+//   consume PID   follow(8)
+//   live {8}      expected [], accepted
 //
 // Cost
-// ----
-// `visited` and `generation` make each state and each edge visited at most
-// once per segment, so a segment costs at most the size of the program and a
-// message costs that times its segment count. `generation` is a stamp rather
-// than a cleared array: bumping one integer resets the marks in O(1), which
-// matters because the reset happens per segment.
 //
-// The guard is also what makes cycles safe. A repeating element whose body can
-// match nothing is a loop of edges that consume nothing; `follow()` recurses
-// into it and the stamp stops it on the second visit.
+// `visited` and `generation` limit each consume() to one visit per state and
+// per edge, so a segment costs the size of the program, and a message costs
+// that times its segment count. `generation` is a counter rather than an array
+// to clear, which keeps the per-segment reset at one assignment.
 //
-// What this runner does not do
-// ----------------------------
-// It answers "is any reading possible?", not "which reading is it". It never
-// looks at edge priorities and never records group boundaries, which is why
-// `live` can be a plain list of state numbers. `matchStructure()` answers the
-// other question, and pays for it: a thread per reading, each carrying its
-// group actions.
+// The same guard ends cycles. A repeating element whose body matches nothing
+// forms a loop of edges that consume nothing, and the second visit to a state
+// in that loop returns.
+//
+// Scope
+//
+// The runner reports whether a reading exists, not which reading it is. It
+// ignores edge priority and records no group boundaries, so `live` is a list
+// of state numbers. matchStructure() answers the second question and carries
+// one thread per reading.
 
 import { programOf } from "./compile";
 import { ANY_SEGMENT } from "./constants";
@@ -74,47 +67,45 @@ export function runner(structure: MessageStructure): Runner {
   const program = programOf(structure);
   const { edges, final, segments } = program;
 
-  // `visited[state]` is the generation that last reached `state`. A generation
-  // is one call to consume(); -1 is "never reached".
+  // `visited[state]` is the generation that last reached `state`. One
+  // generation is one call to consume(). -1 means no call has reached it.
   const visited = new Int32Array(segments.length).fill(-1);
   let generation = 0;
 
-  // Every position the structure could be in, after the segments so far. Each
-  // entry either consumes a segment next or is `final`.
+  // The positions the structure could be in after the segments so far. Each
+  // entry consumes a segment next, or is `final`.
   let live: number[] = [];
 
-  // Latched by the first rejected segment. From then on `live` holds the
-  // positions from *before* that segment, kept only so the caller can still
-  // read what had been expected.
+  // Set by the first rejected segment. After that, `live` holds the positions
+  // from before that segment, so the caller can still read `expected`.
   let failed = false;
 
-  // Walks from `state` across every edge that consumes nothing, and collects
-  // into `live` the states reached that do consume a segment (or are `final`).
-  // The NFA term is the epsilon closure; here it answers "having arrived at
-  // this point in the structure, what could the message say next?".
+  // Walks from `state` across the edges that consume nothing and adds to
+  // `live` the states it reaches that consume a segment, plus `final`. The NFA
+  // term is the epsilon closure. It gives the segments the message can carry
+  // next from this point in the structure.
   const follow = (state: number): void => {
-    // Reached already in this generation, by another route. Its closure is
-    // in `live` and re-walking it would repeat work, or spin on a cycle.
+    // Another route reached this state in this generation. Its closure is in
+    // `live`; walking it again would repeat the work or spin on a cycle.
     if (visited[state] === generation) {
       return;
     }
     visited[state] = generation;
 
-    // A resting place: it consumes a segment, or it is the end of the message.
+    // The walk stops here: the state consumes a segment, or ends the message.
     if (segments[state] !== null || state === final) {
       live.push(state);
     }
 
-    // Otherwise keep walking. Edge order carries priority for matchStructure();
-    // here every edge is followed, so the order makes no difference.
+    // Keep walking. Edge order sets priority for matchStructure(). The runner
+    // follows every edge, so the order changes nothing here.
     for (const [target] of edges[state] ?? []) {
       follow(target);
     }
   };
 
   // The segment names `states` can consume, deduplicated and sorted, for the
-  // `expected` list in a report. `final` contributes nothing, and `Hxx` is
-  // listed as itself.
+  // `expected` list in a report. `final` adds nothing. `Hxx` is listed as Hxx.
   const names = (states: readonly number[]): string[] => {
     const found = new Set<string>();
     for (const state of states) {
@@ -126,23 +117,23 @@ export function runner(structure: MessageStructure): Runner {
     return [...found].toSorted((a, b) => a.localeCompare(b));
   };
 
-  // Before any segment: everything the message could open with.
+  // Before the first segment: what the message can open with.
   follow(program.start);
 
   const consume = (symbol: string): RunnerEvent => {
-    // Already failed. The positions are stale, so there is nothing to expect.
+    // A segment was already rejected, so the positions are stale.
     if (failed) {
       return { expected: [], symbol, type: "invalid" };
     }
 
-    // Swap in a fresh set and bump the generation, which clears `visited`.
+    // Start a new set, and raise the generation to clear `visited`.
     const current = live;
     live = [];
     generation += 1;
 
-    // Advance every position that accepts this segment. `state + 1` is the
-    // state after consuming it: the compiler lays a segment's exit state
-    // immediately after it, so the move needs no edge (see compile.ts).
+    // Advance the positions that accept this segment. `state + 1` is the state
+    // after consuming it, because the compiler puts a segment's exit state
+    // next in the numbering. See compile.ts.
     for (const state of current) {
       const name = segments[state];
       if (name === symbol || name === ANY_SEGMENT) {
@@ -150,8 +141,8 @@ export function runner(structure: MessageStructure): Runner {
       }
     }
 
-    // No position accepted it: the segment cannot appear here. Restore the
-    // previous positions so the report can say what was expected instead.
+    // No position accepted the segment, so it cannot appear here. Restore the
+    // previous positions for the `expected` list in the report.
     if (live.length === 0) {
       failed = true;
       live = current;
@@ -162,10 +153,10 @@ export function runner(structure: MessageStructure): Runner {
   };
 
   return {
-    // Complete when one surviving position is the end of the structure. Other
-    // positions may survive alongside it: after `MSH NTE` in `MSH [{NTE}]`,
-    // `accepted` is true and `expected` is still `[NTE]`, because the message
-    // may end there or carry another note.
+    // Complete when one surviving position is the end of the structure. Others
+    // can survive with it: after `MSH NTE` in `MSH [{NTE}]`, `accepted` is
+    // true and `expected` is `[NTE]`, because the message can end there or
+    // carry another note.
     get accepted() {
       return !failed && live.includes(final);
     },
