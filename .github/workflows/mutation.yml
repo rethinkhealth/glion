@@ -67,7 +67,7 @@ jobs:
           cat mutation-report.md >> "$GITHUB_STEP_SUMMARY"
       - name: Comment scores on the pull request
         if: always() && github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: gh pr comment "$PR_NUMBER" --body-file mutation-report.md --edit-last --create-if-none
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: mutation-report
+          path: mutation-report.md
