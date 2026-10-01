@@ -3,7 +3,7 @@
     "name": "@glion/profiles: import { loadFields }",
     "path": "packages/profiles/dist/index.js",
     "import": "{ loadFields }",
-    "limit": "45 kB"
+    "limit": "6 kB"
   },
   {
     "name": "@glion/profiles/event-maps: import { eventMaps }",
@@ -12,9 +12,9 @@
     "limit": "3 kB"
   },
   {
-    "name": "@glion/profiles: largest events chunk",
-    "path": "packages/profiles/dist/events-v2.8.2.js",
+    "name": "@glion/profiles: largest structures chunk",
+    "path": "packages/profiles/dist/structures-v2.8.2.js",
     "webpack": false,
-    "limit": "20 kB"
+    "limit": "9 kB"
   }
 ]

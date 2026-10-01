@@ -45,6 +45,16 @@ Each loader resolves a `ReadonlyMap` of every profile of its kind in a version, 
 
 UTG code systems are not versioned by HL7v2 version.
 
+### `eventMaps`
+
+`ReadonlyMap<string, ReadonlyMap<string, string>>`: by HL7v2 version, the structure ID each trigger event and each structure ID maps to. Synchronous; also exported from `@glion/profiles/event-maps`.
+
+```ts
+import { eventMaps } from "@glion/profiles";
+
+eventMaps.get("2.5")?.get("ADT_A04"); // => "ADT_A01"
+```
+
 ### `loadMessageStructure(tree)`
 
 Returns the message structure a parsed message names, or `undefined` when MSH-12 or MSH-9 is missing or the version defines no such structure. Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty.
@@ -195,7 +205,7 @@ type StructureElement =
 
 ### Message structure JSON Schema
 
-`@glion/profiles/message-structure.schema.json` is the JSON Schema (draft-07) of a message structure, with `$id` `https://glion.dev/schemas/message-structure/v1.json`. Every bundled structure names it by that `$id` in `$schema` and conforms to it. The schema checks the shape; `runner` and `matchStructure` also require that every choice alternative matches at least one segment.
+`@glion/profiles/message-structure.schema.json` is the JSON Schema (draft-07) of a message structure, with `$id` `https://glion.dev/schemas/message-structure/v1.json`. Every bundled structure conforms to it. The schema checks the shape; `runner` and `matchStructure` also require that every choice alternative matches at least one segment.
 
 ```ts
 import schema from "@glion/profiles/message-structure.schema.json" with { type: "json" };

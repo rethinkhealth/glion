@@ -1,51 +1,36 @@
-import { utgCodeSystemImports } from "../profiles/utg/manifest";
-import { compileAll } from "./load";
-import type {
-  CodeSystemDefinition,
-  UtgCodeEntry,
-  UtgCodeSystemModule,
-} from "./types";
+import type { CodeSystemDefinition, CodeSystemEntry } from "./types";
 
-/** Compile raw UTG code system module into indexed definition. */
-const compileCodeSystem = (raw: UtgCodeSystemModule): CodeSystemDefinition => {
-  const codes = new Map<string, UtgCodeEntry>();
+const compileCodeSystem = ({
+  codes,
+  ...identity
+}: CodeSystemEntry): CodeSystemDefinition => ({
+  ...identity,
+  codes: new Map(codes.map((code) => [code.code, code])),
+});
 
-  for (const code of raw.codes) {
-    codes.set(code.code, code);
-  }
+const files = import.meta.glob<readonly CodeSystemEntry[]>(
+  "../profiles/utg/code-systems.json",
+  { import: "default" }
+);
 
-  const result: CodeSystemDefinition = {
-    codes,
-    id: raw.id,
-    name: raw.name,
-    title: raw.title,
-    url: raw.url,
-  };
-
-  if (raw.oid !== undefined) {
-    return { ...result, oid: raw.oid };
-  }
-
-  return result;
-};
-
-const UTG_KEY_PREFIX = "vutg/";
-
-let codeSystems: Promise<ReadonlyMap<string, CodeSystemDefinition>> | undefined;
+let codeSystems: ReadonlyMap<string, CodeSystemDefinition> | undefined;
 
 /**
  * The UTG code systems, by code system ID such as `"v2-0001"`.
  *
- * Loads and compiles once; later calls return the same map.
+ * Loads and compiles once; later calls resolve the same map.
  */
-export const loadCodeSystems = (): Promise<
+export const loadCodeSystems = async (): Promise<
   ReadonlyMap<string, CodeSystemDefinition>
 > => {
-  codeSystems ??= compileAll(
-    Object.entries(utgCodeSystemImports).map(
-      ([key, load]) => [key.slice(UTG_KEY_PREFIX.length), load] as const
-    ),
-    compileCodeSystem
+  if (codeSystems) {
+    return codeSystems;
+  }
+  const [entries = []] = await Promise.all(
+    Object.values(files).map((load) => load())
+  );
+  codeSystems ??= new Map(
+    entries.map((codeSystem) => [codeSystem.id, compileCodeSystem(codeSystem)])
   );
   return codeSystems;
 };

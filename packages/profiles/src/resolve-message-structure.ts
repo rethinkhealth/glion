@@ -1,4 +1,4 @@
-import { eventMaps } from "./profiles/event-map-manifest";
+import { eventMaps } from "./event-maps";
 
 /**
  * The message structure ID the event maps give `messageCode` and
@@ -15,5 +15,5 @@ export const resolveMessageStructure = (
   triggerEvent: string
 ): string | undefined => {
   const candidate = `${messageCode}_${triggerEvent}`;
-  return eventMaps[version]?.[candidate];
+  return eventMaps.get(version)?.get(candidate);
 };

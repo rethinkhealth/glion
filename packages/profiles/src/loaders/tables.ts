@@ -1,22 +1,17 @@
-import { tableImports } from "../profiles/table-manifest";
-import { loaderByVersion, versionAndId } from "./load";
-import type { TableCodeEntry, TableDefinition, TableModule } from "./types";
+import { loaderByVersion } from "./load";
+import type { TableDefinition, TableEntry } from "./types";
 
-/** Compile raw table module into indexed definition. */
-const compileTables = (raw: TableModule): TableDefinition => {
-  const codes = new Map<string, TableCodeEntry>();
-
-  for (const code of raw.codes) {
-    codes.set(code.name, code);
-  }
-
-  return {
-    codes,
-    description: raw.description,
-    id: raw.id,
-    type: raw.type as "user" | "hl7",
-  };
-};
+const compileTable = ({
+  id,
+  description,
+  type,
+  codes,
+}: TableEntry): TableDefinition => ({
+  codes: new Map(codes.map((code) => [code.name, code])),
+  description,
+  id,
+  type,
+});
 
 /**
  * The tables of an HL7v2 version, by table number such as `"0001"`, or
@@ -25,4 +20,9 @@ const compileTables = (raw: TableModule): TableDefinition => {
 export const loadTables: (
   version: string
 ) => Promise<ReadonlyMap<string, TableDefinition> | undefined> =
-  loaderByVersion(tableImports, versionAndId, compileTables);
+  loaderByVersion(
+    import.meta.glob<readonly TableEntry[]>("../profiles/v*/tables.json", {
+      import: "default",
+    }),
+    (tables) => new Map(tables.map((table) => [table.id, compileTable(table)]))
+  );

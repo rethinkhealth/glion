@@ -1,0 +1,4209 @@
+[
+  {
+    "id": "0001",
+    "description": "SEX",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "F",
+        "description": "Female"
+      },
+      {
+        "name": "M",
+        "description": "Male"
+      },
+      {
+        "name": "O",
+        "description": "Other"
+      },
+      {
+        "name": "U",
+        "description": "Unknown"
+      }
+    ]
+  },
+  {
+    "id": "0002",
+    "description": "MARITAL STATUS",
+    "type": "user",
+    "codes": [
+      {
+        "name": "A",
+        "description": "Separated"
+      },
+      {
+        "name": "D",
+        "description": "Divorced"
+      },
+      {
+        "name": "M",
+        "description": "Married"
+      },
+      {
+        "name": "S",
+        "description": "Single"
+      },
+      {
+        "name": "W",
+        "description": "Widowed"
+      }
+    ]
+  },
+  {
+    "id": "0003",
+    "description": "EVENT TYPE CODE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "A01",
+        "description": "Admit a patient"
+      },
+      {
+        "name": "A02",
+        "description": "Transfer a patient"
+      },
+      {
+        "name": "A03",
+        "description": "Discharge a patient"
+      },
+      {
+        "name": "A04",
+        "description": "Register a patient"
+      },
+      {
+        "name": "A05",
+        "description": "Pre-admit a Patient"
+      },
+      {
+        "name": "A06",
+        "description": "Transfer an outpatient to inpatient"
+      },
+      {
+        "name": "A07",
+        "description": "Transfer an inpatient to outpatient"
+      },
+      {
+        "name": "A08",
+        "description": "Update patient information"
+      },
+      {
+        "name": "A09",
+        "description": "Patient departing"
+      },
+      {
+        "name": "A10",
+        "description": "Patient arriving"
+      },
+      {
+        "name": "A11",
+        "description": "Cancel admit"
+      },
+      {
+        "name": "A12",
+        "description": "Cancel transfer"
+      },
+      {
+        "name": "A13",
+        "description": "Cancel discharge"
+      },
+      {
+        "name": "A14",
+        "description": "Pending admit"
+      },
+      {
+        "name": "A15",
+        "description": "Pending transfer"
+      },
+      {
+        "name": "A16",
+        "description": "Pending discharge"
+      },
+      {
+        "name": "A17",
+        "description": "Swap patients"
+      },
+      {
+        "name": "A18",
+        "description": "Merge patient information"
+      },
+      {
+        "name": "A19",
+        "description": "Patient query"
+      },
+      {
+        "name": "A20",
+        "description": "Bed Status Update"
+      },
+      {
+        "name": "A21",
+        "description": "Leave of absence - out (leaving)"
+      },
+      {
+        "name": "A22",
+        "description": "Leave of absence - in (returning)"
+      },
+      {
+        "name": "A23",
+        "description": "Delete a patient record"
+      },
+      {
+        "name": "A24",
+        "description": "Link patient information"
+      },
+      {
+        "name": "A25",
+        "description": "Cancel pending discharge"
+      },
+      {
+        "name": "A26",
+        "description": "Cancel pending transfer"
+      },
+      {
+        "name": "A27",
+        "description": "Cancel pending admit"
+      },
+      {
+        "name": "A28",
+        "description": "Add person information"
+      },
+      {
+        "name": "A29",
+        "description": "Delete person information"
+      },
+      {
+        "name": "A30",
+        "description": "Merge Patient information"
+      },
+      {
+        "name": "A31",
+        "description": "Update person information"
+      },
+      {
+        "name": "A32",
+        "description": "Cancel patient arriving"
+      },
+      {
+        "name": "A33",
+        "description": "Cancel patient departing"
+      },
+      {
+        "name": "A34",
+        "description": "Merge patient information - patient ID only"
+      },
+      {
+        "name": "A35",
+        "description": "Merge patient information - account number only"
+      },
+      {
+        "name": "A36",
+        "description": "Merge patient information - patient ID and account number"
+      },
+      {
+        "name": "A37",
+        "description": "Unlink patient information"
+      },
+      {
+        "name": "M01",
+        "description": "Master file not otherwise specified (for backwards compatibility only)"
+      },
+      {
+        "name": "M02",
+        "description": "Master file - Staff Practioner"
+      },
+      {
+        "name": "M03",
+        "description": "Master file - test / observation"
+      },
+      {
+        "name": "O01",
+        "description": "Order message"
+      },
+      {
+        "name": "O02",
+        "description": "Order response"
+      },
+      {
+        "name": "P01",
+        "description": "Add and Update Patient Accounts"
+      },
+      {
+        "name": "P02",
+        "description": "Purge Patient Accounts"
+      },
+      {
+        "name": "P03",
+        "description": "Post detail financial transaction"
+      },
+      {
+        "name": "P04",
+        "description": "Generate bill and accounts receivable statements"
+      },
+      {
+        "name": "Q01",
+        "description": "Immediate access"
+      },
+      {
+        "name": "Q02",
+        "description": "Deferred access"
+      },
+      {
+        "name": "Q03",
+        "description": "Deferred response to query"
+      },
+      {
+        "name": "Q05",
+        "description": "Unsolicited display update"
+      },
+      {
+        "name": "R01",
+        "description": "Unsolicited transmission of requested observation"
+      },
+      {
+        "name": "R02",
+        "description": "Query for results of observation"
+      },
+      {
+        "name": "R03",
+        "description": "Display-oriented results (query / unsolicited update)"
+      },
+      {
+        "name": "R04",
+        "description": "Response to query / transmission of requested observation"
+      }
+    ]
+  },
+  {
+    "id": "0004",
+    "description": "PATIENT CLASS",
+    "type": "user",
+    "codes": [
+      {
+        "name": "B",
+        "description": "Obstetrics"
+      },
+      {
+        "name": "E",
+        "description": "Emergency"
+      },
+      {
+        "name": "I",
+        "description": "Inpatient"
+      },
+      {
+        "name": "O",
+        "description": "Outpatient"
+      },
+      {
+        "name": "P",
+        "description": "Preadmit"
+      },
+      {
+        "name": "R",
+        "description": "Recurring Patient"
+      }
+    ]
+  },
+  {
+    "id": "0005",
+    "description": "RACE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0006",
+    "description": "RELIGION",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0007",
+    "description": "ADMISSION TYPE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "A",
+        "description": "Accident"
+      },
+      {
+        "name": "E",
+        "description": "Emergency"
+      },
+      {
+        "name": "L",
+        "description": "Labor and Delivery"
+      },
+      {
+        "name": "R",
+        "description": "Routine"
+      }
+    ]
+  },
+  {
+    "id": "0008",
+    "description": "ACKNOWLEDGMENT CODE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "AA",
+        "description": "Application accept (original mode) / Application acknowledgement: accept (enhanced mode)"
+      },
+      {
+        "name": "AE",
+        "description": "Application error (original mode) / Application acknowledgement: error (enhanced mode)"
+      },
+      {
+        "name": "AR",
+        "description": "Application reject (original mode) / Application acknowledgement: reject (enhanced mode)"
+      },
+      {
+        "name": "CA",
+        "description": "Enhanced mode:  Application acknowledgement:  Commit Accept"
+      },
+      {
+        "name": "CE",
+        "description": "Enhanced mode:  Application acknowledgement:  Commit Error"
+      },
+      {
+        "name": "CR",
+        "description": "Enhanced mode:  Application acknowledgement:  Commit Reject"
+      }
+    ]
+  },
+  {
+    "id": "0009",
+    "description": "AMBULATORY STATUS",
+    "type": "user",
+    "codes": [
+      {
+        "name": "A0",
+        "description": "No functional limitations"
+      },
+      {
+        "name": "A1",
+        "description": "Ambulates with assistive device"
+      },
+      {
+        "name": "A2",
+        "description": "Wheelchair / stretcher bound"
+      },
+      {
+        "name": "A3",
+        "description": "Comatose; non-responsive"
+      },
+      {
+        "name": "A4",
+        "description": "Disoriented"
+      },
+      {
+        "name": "A5",
+        "description": "Vision impaired"
+      },
+      {
+        "name": "A6",
+        "description": "Hearing impaired"
+      },
+      {
+        "name": "A7",
+        "description": "Speech impaired"
+      },
+      {
+        "name": "A8",
+        "description": "Nonenglish speaking"
+      },
+      {
+        "name": "A9",
+        "description": "Functional level unknown"
+      },
+      {
+        "name": "B1",
+        "description": "Oxygen Therapy"
+      },
+      {
+        "name": "B2",
+        "description": "Special equipment (tubes, Ivs, catheters)"
+      },
+      {
+        "name": "B3",
+        "description": "Amputee"
+      },
+      {
+        "name": "B4",
+        "description": "Mastectomy"
+      },
+      {
+        "name": "B5",
+        "description": "Paraplegic"
+      },
+      {
+        "name": "B6",
+        "description": "Pregnant"
+      }
+    ]
+  },
+  {
+    "id": "0010",
+    "description": "PHYSICIAN ID",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0011",
+    "description": "CHARGING SYSTEM",
+    "type": "user",
+    "codes": [
+      {
+        "name": "R",
+        "description": "System that received and processed the order"
+      },
+      {
+        "name": "S",
+        "description": "System that sent the order"
+      }
+    ]
+  },
+  {
+    "id": "0012",
+    "description": "STOCK LOCATION",
+    "type": "user",
+    "codes": [
+      {
+        "name": "AN",
+        "description": "Filled from ancillary department stock"
+      },
+      {
+        "name": "FL",
+        "description": "Filled from floor stock"
+      }
+    ]
+  },
+  {
+    "id": "0016",
+    "description": "ISOLATION",
+    "type": "user",
+    "codes": [
+      {
+        "name": "0",
+        "description": "Antibiotic Resistance Precautions"
+      },
+      {
+        "name": "1",
+        "description": "Blood and Needle Precautions"
+      },
+      {
+        "name": "2",
+        "description": "Enteric Precautions"
+      },
+      {
+        "name": "3",
+        "description": "Neutropenic Precautions"
+      },
+      {
+        "name": "4",
+        "description": "Pregnant Women Precautions"
+      },
+      {
+        "name": "5",
+        "description": "Respiratory Isolation"
+      },
+      {
+        "name": "6",
+        "description": "Secretion / Excretion Precautions"
+      },
+      {
+        "name": "7",
+        "description": "Strict Isolation"
+      },
+      {
+        "name": "8",
+        "description": "Wound and skin Precautions"
+      },
+      {
+        "name": "9",
+        "description": "Precautions"
+      }
+    ]
+  },
+  {
+    "id": "0017",
+    "description": "TRANSACTION TYPE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0018",
+    "description": "PATIENT TYPE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0019",
+    "description": "ANESTHESIA CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0020",
+    "description": "UNUSED TABLE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "1",
+        "description": "Asymptomatic Manifestation"
+      },
+      {
+        "name": "2",
+        "description": "Moderate Manifestation"
+      },
+      {
+        "name": "3",
+        "description": "Major Manifestation"
+      },
+      {
+        "name": "4",
+        "description": "Catastrophic Manifestation"
+      }
+    ]
+  },
+  {
+    "id": "0021",
+    "description": "BAD DEBT AGENCY CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0022",
+    "description": "BILLING STATUS",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0023",
+    "description": "ADMIT SOURCE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0024",
+    "description": "FEE SCHEDULE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "...",
+        "description": "..."
+      }
+    ]
+  },
+  {
+    "id": "0027",
+    "description": "PRIORITY (COMPONENT 6 QTY/TIMING[735])",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "A",
+        "description": "As soon as possible (a priority lower than stat)"
+      },
+      {
+        "name": "P",
+        "description": "Preoperative (to be done prior to surgery)"
+      },
+      {
+        "name": "R",
+        "description": "Routine (default)"
+      },
+      {
+        "name": "S",
+        "description": "Stat (do immediately)"
+      },
+      {
+        "name": "T",
+        "description": "Timing critical (do as near as possible to requested time)"
+      }
+    ]
+  },
+  {
+    "id": "0032",
+    "description": "CHARGE/PRICE INDICATOR",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0033",
+    "description": "ROUTE",
+    "type": "hl7",
+    "codes": []
+  },
+  {
+    "id": "0034",
+    "description": "SITE ADMINISTERED",
+    "type": "hl7",
+    "codes": []
+  },
+  {
+    "id": "0036",
+    "description": "UNITS OF MEASURE - ISO528,1977",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "BT",
+        "description": "Bottle"
+      },
+      {
+        "name": "EA",
+        "description": "Each"
+      },
+      {
+        "name": "GM",
+        "description": "Grams"
+      },
+      {
+        "name": "KG",
+        "description": "Kilograms"
+      },
+      {
+        "name": "LB",
+        "description": "Pounds"
+      },
+      {
+        "name": "MEQ",
+        "description": "Milliequivalent"
+      },
+      {
+        "name": "MG",
+        "description": "Milligrams"
+      },
+      {
+        "name": "ML",
+        "description": "Milliliters"
+      },
+      {
+        "name": "OZ",
+        "description": "Ounces"
+      },
+      {
+        "name": "SC",
+        "description": "Square centimeters"
+      },
+      {
+        "name": "TB",
+        "description": "Tablet"
+      },
+      {
+        "name": "VL",
+        "description": "Vial"
+      }
+    ]
+  },
+  {
+    "id": "0038",
+    "description": "ORDER STATUS",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "CA",
+        "description": "Order was canceled"
+      },
+      {
+        "name": "CM",
+        "description": "Order is completed"
+      },
+      {
+        "name": "DC",
+        "description": "Order was discontinued"
+      },
+      {
+        "name": "ER",
+        "description": "Error - order not found"
+      },
+      {
+        "name": "HD",
+        "description": "Order is on hold"
+      },
+      {
+        "name": "IP",
+        "description": "In process - unspecified"
+      },
+      {
+        "name": "RP",
+        "description": "Order has been replaced"
+      },
+      {
+        "name": "SC",
+        "description": "In process - scheduled"
+      }
+    ]
+  },
+  {
+    "id": "0042",
+    "description": "INS. COMPANY PLAN CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0043",
+    "description": "CONDITION CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0044",
+    "description": "CONTRACT CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0045",
+    "description": "COURTESY CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0046",
+    "description": "CREDIT RATING",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0048",
+    "description": "WHAT SUBJECT FILTER",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "ADV",
+        "description": "Advice / diagnosis"
+      },
+      {
+        "name": "ANU",
+        "description": "Nursing unit lookup (returns patients in beds, excluding empty beds)"
+      },
+      {
+        "name": "APA",
+        "description": "Account number query, return matching visit"
+      },
+      {
+        "name": "APM",
+        "description": "Medical record number query, returns visits for a medical record number"
+      },
+      {
+        "name": "APN",
+        "description": "Patient name lookup"
+      },
+      {
+        "name": "APP",
+        "description": "Physician lookup"
+      },
+      {
+        "name": "ARN",
+        "description": "Nursing unit lookup (returns patients in beds, including empty beds)"
+      },
+      {
+        "name": "CAN",
+        "description": "Cancel (used to cancel a query)"
+      },
+      {
+        "name": "DEM",
+        "description": "Demographics"
+      },
+      {
+        "name": "FIN",
+        "description": "Financial"
+      },
+      {
+        "name": "MFQ",
+        "description": "Master file query"
+      },
+      {
+        "name": "MRI",
+        "description": "Most recent inpatient"
+      },
+      {
+        "name": "MRO",
+        "description": "Most recent outpatient"
+      },
+      {
+        "name": "NCK",
+        "description": "Network clock"
+      },
+      {
+        "name": "NSC",
+        "description": "Network status change"
+      },
+      {
+        "name": "NST",
+        "description": "Network statistic"
+      },
+      {
+        "name": "ORD",
+        "description": "Order"
+      },
+      {
+        "name": "OTH",
+        "description": "Other"
+      },
+      {
+        "name": "PRO",
+        "description": "Procedure"
+      },
+      {
+        "name": "RAR",
+        "description": "Pharmacy administration information"
+      },
+      {
+        "name": "RDR",
+        "description": "Pharmacy dispense information"
+      },
+      {
+        "name": "RER",
+        "description": "Pharmacy encoded order information"
+      },
+      {
+        "name": "RES",
+        "description": "Result"
+      },
+      {
+        "name": "RGR",
+        "description": "Pharmacy give information"
+      },
+      {
+        "name": "ROR",
+        "description": "Pharmacy prescription information"
+      },
+      {
+        "name": "STA",
+        "description": "Status"
+      }
+    ]
+  },
+  {
+    "id": "0049",
+    "description": "DEPARTMENT CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0050",
+    "description": "ACCIDENT CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0051",
+    "description": "DIAGNOSIS CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0052",
+    "description": "DIAGNOSIS TYPE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0053",
+    "description": "DIAGNOSIS CODING METHOD",
+    "type": "user",
+    "codes": [
+      {
+        "name": "I9",
+        "description": "ICD9"
+      }
+    ]
+  },
+  {
+    "id": "0055",
+    "description": "DRG CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0056",
+    "description": "DRG GROUPER REVIEW CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0059",
+    "description": "CONSENT CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0060",
+    "description": "ERROR CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0061",
+    "description": "CHECK DIGIT SCHEME",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "M10",
+        "description": "Mod 10 algorithm"
+      },
+      {
+        "name": "M11",
+        "description": "Mod 11 algorithm"
+      }
+    ]
+  },
+  {
+    "id": "0062",
+    "description": "EVENT REASON",
+    "type": "user",
+    "codes": [
+      {
+        "name": "01",
+        "description": "Patient request"
+      },
+      {
+        "name": "02",
+        "description": "Physician order"
+      },
+      {
+        "name": "03",
+        "description": "Census management"
+      }
+    ]
+  },
+  {
+    "id": "0063",
+    "description": "RELATIONSHIP",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0064",
+    "description": "FINANCIAL CLASS",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0065",
+    "description": "ACTION CODE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "A",
+        "description": "Add ordered tests to the existing specimen"
+      },
+      {
+        "name": "G",
+        "description": "Generated order / reflex order"
+      },
+      {
+        "name": "L",
+        "description": "Lab to obtain specimen from patient"
+      },
+      {
+        "name": "O",
+        "description": "Specimen obtained by service other than Lab"
+      },
+      {
+        "name": "P",
+        "description": "Pending specimen - order sent prior to delivery"
+      },
+      {
+        "name": "R",
+        "description": "Revised order"
+      },
+      {
+        "name": "S",
+        "description": "Schedule the tests specified below"
+      }
+    ]
+  },
+  {
+    "id": "0066",
+    "description": "EMPLOYMENT STATUS",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0068",
+    "description": "GUARANTOR TYPE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0069",
+    "description": "HOSPITAL SERVICE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0070",
+    "description": "SOURCE OF SPECIMEN",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "ABLD",
+        "description": "Arterial blood"
+      },
+      {
+        "name": "ABS",
+        "description": "Abcess"
+      },
+      {
+        "name": "AMN",
+        "description": "Amniotic fluid"
+      },
+      {
+        "name": "ASP",
+        "description": "Aspirate"
+      },
+      {
+        "name": "BBL",
+        "description": "Blood bag"
+      },
+      {
+        "name": "BDY",
+        "description": "Whole body"
+      },
+      {
+        "name": "BLD",
+        "description": "Whole blood"
+      },
+      {
+        "name": "BON",
+        "description": "Bone"
+      },
+      {
+        "name": "BPH",
+        "description": "Basophils"
+      },
+      {
+        "name": "BRN",
+        "description": "Burn"
+      },
+      {
+        "name": "BRO",
+        "description": "Bronchial"
+      },
+      {
+        "name": "BRTH",
+        "description": "Breath (use EXHLD)"
+      },
+      {
+        "name": "CALC",
+        "description": "Calculus (=Stone)"
+      },
+      {
+        "name": "CBLD",
+        "description": "Cord blood"
+      },
+      {
+        "name": "CDM",
+        "description": "Cardiac muscle"
+      },
+      {
+        "name": "CNJT",
+        "description": "Conjunctiva"
+      },
+      {
+        "name": "CNL",
+        "description": "Cannula"
+      },
+      {
+        "name": "COL",
+        "description": "Colostrum"
+      },
+      {
+        "name": "CSF",
+        "description": "Cerebral spinal fluid"
+      },
+      {
+        "name": "CTP",
+        "description": "Catheter tip"
+      },
+      {
+        "name": "CUR",
+        "description": "Curettage"
+      },
+      {
+        "name": "CVM",
+        "description": "Cervical mucus"
+      },
+      {
+        "name": "CVX",
+        "description": "Cervix"
+      },
+      {
+        "name": "CYST",
+        "description": "Cyst"
+      },
+      {
+        "name": "DRN",
+        "description": "Drain"
+      },
+      {
+        "name": "EAR",
+        "description": "Ear"
+      },
+      {
+        "name": "ELT",
+        "description": "Electrode"
+      },
+      {
+        "name": "ENDC",
+        "description": "Endocardium"
+      },
+      {
+        "name": "ENDM",
+        "description": "Endometrium"
+      },
+      {
+        "name": "EOS",
+        "description": "Eosinophils"
+      },
+      {
+        "name": "FIB",
+        "description": "Fibroblasts"
+      },
+      {
+        "name": "FIST",
+        "description": "Fistula"
+      },
+      {
+        "name": "FLT",
+        "description": "Filter"
+      },
+      {
+        "name": "FLU",
+        "description": "Body fluid, unsp"
+      },
+      {
+        "name": "GAST",
+        "description": "Gastric fluid/contents"
+      },
+      {
+        "name": "GEN",
+        "description": "Genital"
+      },
+      {
+        "name": "GENC",
+        "description": "Genital cervix"
+      },
+      {
+        "name": "GENL",
+        "description": "Genital lochia"
+      },
+      {
+        "name": "GENV",
+        "description": "Genital vaginal"
+      },
+      {
+        "name": "HAR",
+        "description": "Hair"
+      },
+      {
+        "name": "IT",
+        "description": "Intubation tube"
+      },
+      {
+        "name": "LAM",
+        "description": "Lamella"
+      },
+      {
+        "name": "LN",
+        "description": "Line"
+      },
+      {
+        "name": "LNA",
+        "description": "Line arterial"
+      },
+      {
+        "name": "LNV",
+        "description": "Line venous"
+      },
+      {
+        "name": "LYM",
+        "description": "Lymphocytes"
+      },
+      {
+        "name": "MAC",
+        "description": "Macrophages"
+      },
+      {
+        "name": "MAR",
+        "description": "Marrow"
+      },
+      {
+        "name": "MBLD",
+        "description": "Menstrual blood"
+      },
+      {
+        "name": "MEC",
+        "description": "Meconium"
+      },
+      {
+        "name": "MILK",
+        "description": "Breast milk"
+      },
+      {
+        "name": "MLK",
+        "description": "Milk"
+      },
+      {
+        "name": "NAIL",
+        "description": "Nail"
+      },
+      {
+        "name": "NOS",
+        "description": "Nose (nasal passage)"
+      },
+      {
+        "name": "ORH",
+        "description": "Other"
+      },
+      {
+        "name": "PER",
+        "description": "Peritoneum"
+      },
+      {
+        "name": "PLAS",
+        "description": "Plasma"
+      },
+      {
+        "name": "PLB",
+        "description": "Plasma bag"
+      },
+      {
+        "name": "PLC",
+        "description": "Placenta"
+      },
+      {
+        "name": "PLR",
+        "description": "Pleural fluid (thoracentesis fld)"
+      },
+      {
+        "name": "PMN",
+        "description": "Polymorphonuclear neutrophils"
+      },
+      {
+        "name": "PRT",
+        "description": "Peritoneal fluid / ascites"
+      },
+      {
+        "name": "PUS",
+        "description": "Pus"
+      },
+      {
+        "name": "RBC",
+        "description": "Erythrocytes"
+      },
+      {
+        "name": "SAL",
+        "description": "Saliva"
+      },
+      {
+        "name": "SEM",
+        "description": "Seminal fluid"
+      },
+      {
+        "name": "SER",
+        "description": "Serum"
+      },
+      {
+        "name": "SKM",
+        "description": "Skeletal muscle"
+      },
+      {
+        "name": "SKN",
+        "description": "Skin"
+      },
+      {
+        "name": "SNV",
+        "description": "Synovial fluid (Joint fluid)"
+      },
+      {
+        "name": "SPRM",
+        "description": "Spermatozoa"
+      },
+      {
+        "name": "SPT",
+        "description": "Sputum"
+      },
+      {
+        "name": "SPTC",
+        "description": "Sputum - coughed"
+      },
+      {
+        "name": "SPTT",
+        "description": "Sputum - tracheal aspirate"
+      },
+      {
+        "name": "STL",
+        "description": "Stool"
+      },
+      {
+        "name": "STON",
+        "description": "Stone (use CALC)"
+      },
+      {
+        "name": "SWT",
+        "description": "Sweat"
+      },
+      {
+        "name": "TEAR",
+        "description": "Tears"
+      },
+      {
+        "name": "THRB",
+        "description": "Thrombocyte (platelet)"
+      },
+      {
+        "name": "THRT",
+        "description": "Throat"
+      },
+      {
+        "name": "TISB",
+        "description": "Tissue bone marrow"
+      },
+      {
+        "name": "TISC",
+        "description": "Tissue curettage"
+      },
+      {
+        "name": "TISG",
+        "description": "Tissue gall bladder"
+      },
+      {
+        "name": "TISL",
+        "description": "Tissue lung"
+      },
+      {
+        "name": "TISP",
+        "description": "Tissue peritoneum"
+      },
+      {
+        "name": "TISPL",
+        "description": "Tissue placenta"
+      },
+      {
+        "name": "TISS",
+        "description": "Tissue"
+      },
+      {
+        "name": "TISU",
+        "description": "Tissue ulcer"
+      },
+      {
+        "name": "ULC",
+        "description": "Ulcer"
+      },
+      {
+        "name": "UMB",
+        "description": "Umbilical Blood"
+      },
+      {
+        "name": "UR",
+        "description": "Urine"
+      },
+      {
+        "name": "URC",
+        "description": "Urine clean catch"
+      },
+      {
+        "name": "URT",
+        "description": "Urine catheter"
+      },
+      {
+        "name": "URTH",
+        "description": "Urethra"
+      },
+      {
+        "name": "VOM",
+        "description": "Vomitus"
+      },
+      {
+        "name": "WBC",
+        "description": "Leukocytes"
+      },
+      {
+        "name": "WICK",
+        "description": "Wick"
+      },
+      {
+        "name": "WND",
+        "description": "Wound"
+      },
+      {
+        "name": "WNDA",
+        "description": "Wound abscess"
+      },
+      {
+        "name": "WNDD",
+        "description": "Wound drainage"
+      },
+      {
+        "name": "WNDE",
+        "description": "Wound exudate"
+      }
+    ]
+  },
+  {
+    "id": "0072",
+    "description": "INS. PLAN ID",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0073",
+    "description": "INTEREST RATE CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0074",
+    "description": "DIAGNOSTIC SERVICE SECTION ID",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "AU",
+        "description": "Audiology"
+      },
+      {
+        "name": "BG",
+        "description": "Blood gases"
+      },
+      {
+        "name": "BLB",
+        "description": "Blood bank"
+      },
+      {
+        "name": "CH",
+        "description": "Chemistry"
+      },
+      {
+        "name": "CP",
+        "description": "Cytopathology"
+      },
+      {
+        "name": "CT",
+        "description": "CAT scan"
+      },
+      {
+        "name": "CTH",
+        "description": "Cardiac catheterization"
+      },
+      {
+        "name": "CUS",
+        "description": "Cardiac Ultrasound"
+      },
+      {
+        "name": "EC",
+        "description": "Electrocardiac (e.g., EKG, EEC, Holter)"
+      },
+      {
+        "name": "EN",
+        "description": "Electroneuro (EEG, EMG)"
+      },
+      {
+        "name": "HM",
+        "description": "Hematology"
+      },
+      {
+        "name": "IMM",
+        "description": "Immunology"
+      },
+      {
+        "name": "MB",
+        "description": "Microbiology"
+      },
+      {
+        "name": "MCB",
+        "description": "Mycobacteriology"
+      },
+      {
+        "name": "MYC",
+        "description": "Mycology"
+      },
+      {
+        "name": "NMR",
+        "description": "Nuclear magnetic resonance"
+      },
+      {
+        "name": "NMS",
+        "description": "Nuclear medicine scan"
+      },
+      {
+        "name": "NRS",
+        "description": "Nursing service measures"
+      },
+      {
+        "name": "OSL",
+        "description": "Outside Lab"
+      },
+      {
+        "name": "OT",
+        "description": "Occupational therapy"
+      },
+      {
+        "name": "OTH",
+        "description": "Other"
+      },
+      {
+        "name": "OUS",
+        "description": "OB Ultrasound"
+      },
+      {
+        "name": "PF",
+        "description": "Pulmonary function"
+      },
+      {
+        "name": "PHR",
+        "description": "Pharmacy"
+      },
+      {
+        "name": "PHY",
+        "description": "Physician (Hx, Dx, admission note, etc.)"
+      },
+      {
+        "name": "PT",
+        "description": "Physical therapy"
+      },
+      {
+        "name": "RC",
+        "description": "Respiratory care (therapy)"
+      },
+      {
+        "name": "RT",
+        "description": "Radiation therapy"
+      },
+      {
+        "name": "RUS",
+        "description": "Radiology ultrasound"
+      },
+      {
+        "name": "RX",
+        "description": "Radiograph"
+      },
+      {
+        "name": "SP",
+        "description": "Surgical Pathology"
+      },
+      {
+        "name": "SR",
+        "description": "Serology"
+      },
+      {
+        "name": "TX",
+        "description": "Toxicology"
+      },
+      {
+        "name": "VR",
+        "description": "Virology"
+      },
+      {
+        "name": "VUS",
+        "description": "Vascular Ultrasound"
+      },
+      {
+        "name": "XRC",
+        "description": "Cineradiograph"
+      }
+    ]
+  },
+  {
+    "id": "0075",
+    "description": "REPORT TYPES",
+    "type": "hl7",
+    "codes": []
+  },
+  {
+    "id": "0076",
+    "description": "MESSAGE TYPE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "ACK",
+        "description": "General acknowledgement message"
+      },
+      {
+        "name": "ADR",
+        "description": "ADT response"
+      },
+      {
+        "name": "ADT",
+        "description": "ADT message"
+      },
+      {
+        "name": "ARD",
+        "description": "Ancillary report (display)"
+      },
+      {
+        "name": "BAR",
+        "description": "Add / change billing account"
+      },
+      {
+        "name": "DFT",
+        "description": "Detail financial transaction"
+      },
+      {
+        "name": "DSR",
+        "description": "Display response"
+      },
+      {
+        "name": "MCF",
+        "description": "Delayed acknowledgement"
+      },
+      {
+        "name": "MFD",
+        "description": "Master files delayed application acknowledgement"
+      },
+      {
+        "name": "MFK",
+        "description": "Master file application acknowledgement"
+      },
+      {
+        "name": "MFN",
+        "description": "Master files notification"
+      },
+      {
+        "name": "MFR",
+        "description": "Master files response"
+      },
+      {
+        "name": "NMD",
+        "description": "Network management data"
+      },
+      {
+        "name": "NMQ",
+        "description": "Network management query"
+      },
+      {
+        "name": "NMR",
+        "description": "Network management response"
+      },
+      {
+        "name": "ORF",
+        "description": "Observational result (record response)"
+      },
+      {
+        "name": "ORM",
+        "description": "Order message"
+      },
+      {
+        "name": "ORR",
+        "description": "Order acknowledgement message"
+      },
+      {
+        "name": "ORU",
+        "description": "Observational result (unsolicited)"
+      },
+      {
+        "name": "OSQ",
+        "description": "Order status query"
+      },
+      {
+        "name": "QRY",
+        "description": "Query"
+      },
+      {
+        "name": "RAR",
+        "description": "Pharmacy administration information"
+      },
+      {
+        "name": "RAS",
+        "description": "Pharmacy administration message"
+      },
+      {
+        "name": "RDE",
+        "description": "Pharmacy encoded order message"
+      },
+      {
+        "name": "RDR",
+        "description": "Pharmacy dispense information"
+      },
+      {
+        "name": "RDS",
+        "description": "Pharmacy dispense message"
+      },
+      {
+        "name": "RER",
+        "description": "Pharmacy encoded order information"
+      },
+      {
+        "name": "RGR",
+        "description": "Pharmacy dose information"
+      },
+      {
+        "name": "RGV",
+        "description": "Pharmacy give message"
+      },
+      {
+        "name": "ROR",
+        "description": "Pharmacy prescription order response"
+      },
+      {
+        "name": "RRA",
+        "description": "Pharmacy administration acknowledgment"
+      },
+      {
+        "name": "RRD",
+        "description": "Pharmacy dispense acknowledgment"
+      },
+      {
+        "name": "RRE",
+        "description": "Pharmacy encoded order acknowledgment"
+      },
+      {
+        "name": "RRG",
+        "description": "Pharmacy give acknowledgment"
+      },
+      {
+        "name": "UDM",
+        "description": "Unsolicited display message"
+      }
+    ]
+  },
+  {
+    "id": "0078",
+    "description": "ABNORMAL FLAGS",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "<",
+        "description": "Below absolute low-off instrument scale"
+      },
+      {
+        "name": ">",
+        "description": "Above absolute high-off instrument scale"
+      },
+      {
+        "name": "A",
+        "description": "Abnormal (applies to non-numeric results)"
+      },
+      {
+        "name": "AA",
+        "description": "Very abnormal (applies to non-numeric units, analogous to panic limits for numerics limits)"
+      },
+      {
+        "name": "B",
+        "description": "Better (use when direction not relevant)"
+      },
+      {
+        "name": "D",
+        "description": "Significant change down"
+      },
+      {
+        "name": "H",
+        "description": "Above high normal"
+      },
+      {
+        "name": "HH",
+        "description": "Above upper panic limits"
+      },
+      {
+        "name": "I",
+        "description": "Intermediate"
+      },
+      {
+        "name": "L",
+        "description": "Below low normal"
+      },
+      {
+        "name": "LL",
+        "description": "Below lower panic limits"
+      },
+      {
+        "name": "MS",
+        "description": "Moderately sensitive"
+      },
+      {
+        "name": "N",
+        "description": "Normal (applies to non-numeric results)"
+      },
+      {
+        "name": "null",
+        "description": "No range defined, or normal ranges don't apply"
+      },
+      {
+        "name": "R",
+        "description": "Resistant"
+      },
+      {
+        "name": "S",
+        "description": "Sensitive"
+      },
+      {
+        "name": "U",
+        "description": "Significant change up"
+      },
+      {
+        "name": "VS",
+        "description": "Very sensitive"
+      },
+      {
+        "name": "W",
+        "description": "Worse (use when direction not relevant)"
+      }
+    ]
+  },
+  {
+    "id": "0079",
+    "description": "LOCATION",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0080",
+    "description": "NATURE OF ABNORMAL TESTING",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "A",
+        "description": "An age-based population"
+      },
+      {
+        "name": "N",
+        "description": "None - generic normal range"
+      },
+      {
+        "name": "R",
+        "description": "A race-based population"
+      },
+      {
+        "name": "S",
+        "description": "A sex-based population"
+      }
+    ]
+  },
+  {
+    "id": "0083",
+    "description": "OUTLIER TYPE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0084",
+    "description": "PERFORMED BY",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0085",
+    "description": "OBSERVATION RESULT STATUS CODES INTERPRETATION",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "C",
+        "description": "Record coming over is a correction and thus replaces a result"
+      },
+      {
+        "name": "D",
+        "description": "Deletes the OBX record"
+      },
+      {
+        "name": "F",
+        "description": "Final results (can only be changed with a corrected result)"
+      },
+      {
+        "name": "I",
+        "description": "Specimen in lab - results pending"
+      },
+      {
+        "name": "P",
+        "description": "Preliminary results"
+      },
+      {
+        "name": "R",
+        "description": "Results entered - not verified"
+      },
+      {
+        "name": "S",
+        "description": "Partial results"
+      },
+      {
+        "name": "U",
+        "description": "Results status change to Final - results did not change ( don't transmit test)"
+      },
+      {
+        "name": "X",
+        "description": "Results cannot be obtained for this observation"
+      }
+    ]
+  },
+  {
+    "id": "0086",
+    "description": "INS. PLAN TYPE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0087",
+    "description": "PRE-ADMIT TESTING",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0088",
+    "description": "PROCEDURE CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0089",
+    "description": "PROCEDURE CODING METHOD",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0090",
+    "description": "PROCEDURE TYPE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0091",
+    "description": "QUERY PRIORITY",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "D",
+        "description": "Deferred"
+      },
+      {
+        "name": "I",
+        "description": "Immediate"
+      }
+    ]
+  },
+  {
+    "id": "0092",
+    "description": "RE-ADMISSION INDICATOR",
+    "type": "user",
+    "codes": [
+      {
+        "name": "R",
+        "description": "Readmission"
+      }
+    ]
+  },
+  {
+    "id": "0093",
+    "description": "RELEASE OF INFORMATION",
+    "type": "user",
+    "codes": [
+      {
+        "name": "N",
+        "description": "No"
+      },
+      {
+        "name": "Y",
+        "description": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "0094",
+    "description": "REPORT OF ELIGIBILITY",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0098",
+    "description": "TYPE OF AGREEMENT CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0099",
+    "description": "VIP INDICATOR",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0100",
+    "description": "WHEN TO CHARGE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "D",
+        "description": "On discharge"
+      },
+      {
+        "name": "O",
+        "description": "On receipt of order"
+      },
+      {
+        "name": "R",
+        "description": "At time service is completed"
+      },
+      {
+        "name": "S",
+        "description": "At time service is started"
+      },
+      {
+        "name": "T",
+        "description": "At a designated date / time"
+      }
+    ]
+  },
+  {
+    "id": "0101",
+    "description": "DISPLAY LEVEL",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0102",
+    "description": "DELAYED ACKNOWLEDGMENT TYPE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "D",
+        "description": "Message Received, stored for later processing"
+      },
+      {
+        "name": "F",
+        "description": "Acknowledgement after processing"
+      }
+    ]
+  },
+  {
+    "id": "0103",
+    "description": "PROCESSING ID",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "D",
+        "description": "Debugging"
+      },
+      {
+        "name": "P",
+        "description": "Production"
+      },
+      {
+        "name": "T",
+        "description": "Training"
+      }
+    ]
+  },
+  {
+    "id": "0104",
+    "description": "VERSION ID",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "2.0",
+        "description": "Version 2.0, September 1988"
+      },
+      {
+        "name": "2.0D",
+        "description": "Demo    2.0  October 1988"
+      },
+      {
+        "name": "2.1",
+        "description": "Release 2.1  March 1990"
+      },
+      {
+        "name": "2.2",
+        "description": "Release 2.2  December 1994"
+      }
+    ]
+  },
+  {
+    "id": "0105",
+    "description": "SOURCE OF COMMENT",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "L",
+        "description": "Ancillary (filler) department is source of comment"
+      },
+      {
+        "name": "O",
+        "description": "Other system is source of comment"
+      },
+      {
+        "name": "P",
+        "description": "Orderer (placer) is source of comment"
+      }
+    ]
+  },
+  {
+    "id": "0106",
+    "description": "QUERY FORMAT CODE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "D",
+        "description": "Response is in display format"
+      },
+      {
+        "name": "R",
+        "description": "Response is in record-oriented format"
+      }
+    ]
+  },
+  {
+    "id": "0107",
+    "description": "DEFERRED RESPONSE TYPE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "B",
+        "description": "Before the date / time specified"
+      },
+      {
+        "name": "L",
+        "description": "Later than the date / time specified"
+      }
+    ]
+  },
+  {
+    "id": "0108",
+    "description": "QUERY RESULTS LEVEL",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "O",
+        "description": "Order plus order status"
+      },
+      {
+        "name": "R",
+        "description": "Results without bulk text"
+      },
+      {
+        "name": "S",
+        "description": "Status only"
+      },
+      {
+        "name": "T",
+        "description": "Full results"
+      }
+    ]
+  },
+  {
+    "id": "0109",
+    "description": "REPORT PRIORITY",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "R",
+        "description": "Routine"
+      },
+      {
+        "name": "S",
+        "description": "Stat"
+      }
+    ]
+  },
+  {
+    "id": "0110",
+    "description": "TRANSFER TO BAD DEBT CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0111",
+    "description": "DELETE ACCOUNT CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0112",
+    "description": "DISCHARGE DISPOSITION",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0113",
+    "description": "DISCHARGED TO LOCATION",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0114",
+    "description": "DIET TYPE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0115",
+    "description": "SERVICING FACILITY",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0116",
+    "description": "BED STATUS",
+    "type": "user",
+    "codes": [
+      {
+        "name": "C",
+        "description": "Closed"
+      },
+      {
+        "name": "H",
+        "description": "Housekeeping"
+      },
+      {
+        "name": "I",
+        "description": "Isolated"
+      },
+      {
+        "name": "K",
+        "description": "Contaminated"
+      },
+      {
+        "name": "O",
+        "description": "Occupied"
+      },
+      {
+        "name": "U",
+        "description": "Unoccupied"
+      }
+    ]
+  },
+  {
+    "id": "0117",
+    "description": "ACCOUNT STATUS",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0118",
+    "description": "MAJOR DIAGNOSTIC CATEGORY",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0119",
+    "description": "ORDER CONTROL",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "CA",
+        "description": "Cancel order request"
+      },
+      {
+        "name": "CH",
+        "description": "Child order"
+      },
+      {
+        "name": "CN",
+        "description": "Combined result"
+      },
+      {
+        "name": "CR",
+        "description": "Canceled as requested"
+      },
+      {
+        "name": "DC",
+        "description": "Discontinue order request"
+      },
+      {
+        "name": "DE",
+        "description": "Data Errors"
+      },
+      {
+        "name": "DR",
+        "description": "Discontinued as requested"
+      },
+      {
+        "name": "HD",
+        "description": "Hold order request"
+      },
+      {
+        "name": "HR",
+        "description": "On hold as requested"
+      },
+      {
+        "name": "NA",
+        "description": "Number assigned"
+      },
+      {
+        "name": "NW",
+        "description": "New Order"
+      },
+      {
+        "name": "OC",
+        "description": "Order canceled"
+      },
+      {
+        "name": "OD",
+        "description": "Order discontinued"
+      },
+      {
+        "name": "OH",
+        "description": "Order held"
+      },
+      {
+        "name": "OK",
+        "description": "Order accepted and OK"
+      },
+      {
+        "name": "OR",
+        "description": "Released as requested"
+      },
+      {
+        "name": "PA",
+        "description": "Parent order"
+      },
+      {
+        "name": "RE",
+        "description": "Observations to follow"
+      },
+      {
+        "name": "RL",
+        "description": "Release previous hold"
+      },
+      {
+        "name": "RO",
+        "description": "Replacement order"
+      },
+      {
+        "name": "RP",
+        "description": "Order replace request"
+      },
+      {
+        "name": "RQ",
+        "description": "Replaced as requested"
+      },
+      {
+        "name": "RR",
+        "description": "Request received"
+      },
+      {
+        "name": "RU",
+        "description": "Replaced unsolicited"
+      },
+      {
+        "name": "SC",
+        "description": "Status changed"
+      },
+      {
+        "name": "SN",
+        "description": "Send order number"
+      },
+      {
+        "name": "SR",
+        "description": "Response to send order status request"
+      },
+      {
+        "name": "SS",
+        "description": "Send order status request"
+      },
+      {
+        "name": "UC",
+        "description": "Unable to cancel"
+      },
+      {
+        "name": "UD",
+        "description": "Unable to discontinue"
+      },
+      {
+        "name": "UH",
+        "description": "Unable to put on hold"
+      },
+      {
+        "name": "UM",
+        "description": "Unable to replace"
+      },
+      {
+        "name": "UR",
+        "description": "Unable to release"
+      },
+      {
+        "name": "UX",
+        "description": "Unable to change"
+      },
+      {
+        "name": "XO",
+        "description": "Change order request"
+      },
+      {
+        "name": "XR",
+        "description": "Changed as requested"
+      },
+      {
+        "name": "XX",
+        "description": "Order changed, unsolicited"
+      }
+    ]
+  },
+  {
+    "id": "0121",
+    "description": "RESPONSE FLAG",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "D",
+        "description": "Same as R, also other associated segments"
+      },
+      {
+        "name": "E",
+        "description": "Report exceptions only"
+      },
+      {
+        "name": "F",
+        "description": "Same as D, plus confirmations explicitly"
+      },
+      {
+        "name": "N",
+        "description": "Only the MSA segment is returned"
+      },
+      {
+        "name": "R",
+        "description": "Same as E, also Replacement and Parent-Child"
+      }
+    ]
+  },
+  {
+    "id": "0122",
+    "description": "CHARGE TYPE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "CH",
+        "description": "Charge"
+      },
+      {
+        "name": "CO",
+        "description": "Contract"
+      },
+      {
+        "name": "CR",
+        "description": "Credit"
+      },
+      {
+        "name": "DP",
+        "description": "Department"
+      },
+      {
+        "name": "GR",
+        "description": "Grant"
+      },
+      {
+        "name": "NC",
+        "description": "No Charge"
+      },
+      {
+        "name": "PC",
+        "description": "Professional"
+      },
+      {
+        "name": "RS",
+        "description": "Research"
+      }
+    ]
+  },
+  {
+    "id": "0123",
+    "description": "RESULT STATUS - OBR",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "C",
+        "description": "Correction to results"
+      },
+      {
+        "name": "F",
+        "description": "Final results - results stored & verified"
+      },
+      {
+        "name": "I",
+        "description": "Specimen in lab, not yet processed."
+      },
+      {
+        "name": "O",
+        "description": "Order received; specimen not yet received"
+      },
+      {
+        "name": "P",
+        "description": "Preliminary: A verified early result is available, final results not yet obtained"
+      },
+      {
+        "name": "R",
+        "description": "Results stored; not yet verified"
+      },
+      {
+        "name": "S",
+        "description": "No results available; procedure scheduled, but not done"
+      },
+      {
+        "name": "X",
+        "description": "No results available; Order canceled."
+      },
+      {
+        "name": "Y",
+        "description": "No order on record for this test.  (Used only on queries)"
+      },
+      {
+        "name": "Z",
+        "description": "No record of this patient. (Used only on queries)"
+      }
+    ]
+  },
+  {
+    "id": "0124",
+    "description": "TRANSPORTATION MODE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "CART",
+        "description": "Cart - patient travels on cart or gurney"
+      },
+      {
+        "name": "PORT",
+        "description": "The examining device goes to patient's location"
+      },
+      {
+        "name": "WALK",
+        "description": "Patient walks to diagnostic service"
+      },
+      {
+        "name": "WHLC",
+        "description": "Wheelchair"
+      }
+    ]
+  },
+  {
+    "id": "0125",
+    "description": "VALUE TYPE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "AD",
+        "description": "Address"
+      },
+      {
+        "name": "CE",
+        "description": "Coded element"
+      },
+      {
+        "name": "CF",
+        "description": "Coded element with formatted values"
+      },
+      {
+        "name": "CK",
+        "description": "Composite ID with check digit"
+      },
+      {
+        "name": "CM",
+        "description": "Composite"
+      },
+      {
+        "name": "CN",
+        "description": "Composite ID and name"
+      },
+      {
+        "name": "CQ",
+        "description": "Composite quantity with units"
+      },
+      {
+        "name": "DT",
+        "description": "Date"
+      },
+      {
+        "name": "FT",
+        "description": "Formatted text (display)"
+      },
+      {
+        "name": "ID",
+        "description": "Coded value"
+      },
+      {
+        "name": "MO",
+        "description": "Money"
+      },
+      {
+        "name": "NM",
+        "description": "Numeric"
+      },
+      {
+        "name": "PN",
+        "description": "Person name"
+      },
+      {
+        "name": "RP",
+        "description": "Reference pointer"
+      },
+      {
+        "name": "SI",
+        "description": "Sequence ID"
+      },
+      {
+        "name": "ST",
+        "description": "String data"
+      },
+      {
+        "name": "TM",
+        "description": "Time"
+      },
+      {
+        "name": "TN",
+        "description": "Telephone number"
+      },
+      {
+        "name": "TQ",
+        "description": "Timing / quantity"
+      },
+      {
+        "name": "TS",
+        "description": "Time stamp ( date & time)"
+      },
+      {
+        "name": "TX",
+        "description": "Text data (display)"
+      }
+    ]
+  },
+  {
+    "id": "0126",
+    "description": "QUANTITY LIMITED REQUEST",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "CH",
+        "description": "Characters"
+      },
+      {
+        "name": "LI",
+        "description": "Lines"
+      },
+      {
+        "name": "PG",
+        "description": "Pages"
+      },
+      {
+        "name": "RD",
+        "description": "Records"
+      },
+      {
+        "name": "ZO",
+        "description": "Locally defined"
+      }
+    ]
+  },
+  {
+    "id": "0127",
+    "description": "ALLERGY TYPE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "DA",
+        "description": "Drug Allergy"
+      },
+      {
+        "name": "FA",
+        "description": "Food Allergy"
+      },
+      {
+        "name": "MA",
+        "description": "Miscellaneous Allergy"
+      },
+      {
+        "name": "MC",
+        "description": "Miscellaneous Contraindication"
+      }
+    ]
+  },
+  {
+    "id": "0128",
+    "description": "ALLERGY SEVERITY",
+    "type": "user",
+    "codes": [
+      {
+        "name": "MI",
+        "description": "Mild"
+      },
+      {
+        "name": "MO",
+        "description": "Moderate"
+      },
+      {
+        "name": "SV",
+        "description": "Severe"
+      }
+    ]
+  },
+  {
+    "id": "0129",
+    "description": "ACCOMODATION CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0130",
+    "description": "VISIT USER CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0131",
+    "description": "CONTRACT ROLE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0132",
+    "description": "TRANSACTION CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0133",
+    "description": "PROCEDURE PRACTITIONER TYPE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "AN",
+        "description": "Anesthesiologist"
+      },
+      {
+        "name": "CM",
+        "description": "Certified Nurse Midwife"
+      },
+      {
+        "name": "NP",
+        "description": "Nurse Practitioner"
+      },
+      {
+        "name": "PR",
+        "description": "Procedure MD (surgeon)"
+      },
+      {
+        "name": "RD",
+        "description": "Radiologist"
+      },
+      {
+        "name": "RS",
+        "description": "Resident"
+      }
+    ]
+  },
+  {
+    "id": "0135",
+    "description": "ASSIGNMENT OF BENEFITS",
+    "type": "user",
+    "codes": [
+      {
+        "name": "M",
+        "description": "Modified assignment"
+      },
+      {
+        "name": "N",
+        "description": "No"
+      },
+      {
+        "name": "Y",
+        "description": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "0136",
+    "description": "Y/N Indicator",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "N",
+        "description": "No"
+      },
+      {
+        "name": "Y",
+        "description": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "0137",
+    "description": "MAIL CLAIM PARTY",
+    "type": "user",
+    "codes": [
+      {
+        "name": "E",
+        "description": "Employer"
+      },
+      {
+        "name": "G",
+        "description": "Guarantor"
+      },
+      {
+        "name": "I",
+        "description": "Insurance Company"
+      },
+      {
+        "name": "O",
+        "description": "Other"
+      },
+      {
+        "name": "P",
+        "description": "Patient"
+      }
+    ]
+  },
+  {
+    "id": "0139",
+    "description": "EMPLOYER INFORMATION DATA",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0140",
+    "description": "CHAMPUS SERVICE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0141",
+    "description": "CHAMPUS RANK/GRADE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0142",
+    "description": "CHAMPUS STATE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0143",
+    "description": "NON-COVEREDINSURANCE CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0144",
+    "description": "ELIGIBILITY SOURCE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "1",
+        "description": "Insurance Company"
+      },
+      {
+        "name": "2",
+        "description": "Employer"
+      },
+      {
+        "name": "3",
+        "description": "Insured Presented Policy"
+      },
+      {
+        "name": "4",
+        "description": "Insured Presented Card"
+      },
+      {
+        "name": "5",
+        "description": "Signed Statement on File"
+      },
+      {
+        "name": "6",
+        "description": "Verbal Information"
+      },
+      {
+        "name": "7",
+        "description": "None"
+      }
+    ]
+  },
+  {
+    "id": "0145",
+    "description": "Room Type",
+    "type": "user",
+    "codes": [
+      {
+        "name": "2ICU",
+        "description": "Second Intensive Care Unit"
+      },
+      {
+        "name": "2PRI",
+        "description": "Second Private Room"
+      },
+      {
+        "name": "2SPR",
+        "description": "Second Semi-private Room"
+      },
+      {
+        "name": "ICU",
+        "description": "Intensive Care Unit"
+      },
+      {
+        "name": "PRI",
+        "description": "Private Room"
+      },
+      {
+        "name": "SPR",
+        "description": "Semi-private Room"
+      }
+    ]
+  },
+  {
+    "id": "0146",
+    "description": "AMOUNT TYPE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "DF",
+        "description": "Differential"
+      },
+      {
+        "name": "LM",
+        "description": "Limit"
+      },
+      {
+        "name": "PC",
+        "description": "Percentage"
+      },
+      {
+        "name": "RT",
+        "description": "Rate"
+      },
+      {
+        "name": "UL",
+        "description": "Unlimited"
+      }
+    ]
+  },
+  {
+    "id": "0147",
+    "description": "POLICY TYPE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "2ANC",
+        "description": "Second Ancillary"
+      },
+      {
+        "name": "2MMD",
+        "description": "Second Major Medical"
+      },
+      {
+        "name": "3MMD",
+        "description": "Third Major Medical"
+      },
+      {
+        "name": "ANC",
+        "description": "Ancillary"
+      },
+      {
+        "name": "MMD",
+        "description": "Major Medical"
+      }
+    ]
+  },
+  {
+    "id": "0148",
+    "description": "PENALTY TYPE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "AT",
+        "description": "Currency Amount"
+      },
+      {
+        "name": "PC",
+        "description": "Percentage"
+      }
+    ]
+  },
+  {
+    "id": "0149",
+    "description": "DAY TYPE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "AP",
+        "description": "Approved"
+      },
+      {
+        "name": "DE",
+        "description": "Denied"
+      },
+      {
+        "name": "PE",
+        "description": "Pending"
+      }
+    ]
+  },
+  {
+    "id": "0150",
+    "description": "PRECERTIFICATION PATIENT TYPE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "ER",
+        "description": "Emergency"
+      },
+      {
+        "name": "IPE",
+        "description": "Inpatient elective"
+      },
+      {
+        "name": "OPE",
+        "description": "Outpatient elective"
+      },
+      {
+        "name": "UR",
+        "description": "Urgent"
+      }
+    ]
+  },
+  {
+    "id": "0151",
+    "description": "SECOND OPINION STATUS",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0152",
+    "description": "SECOND OPINION DOCUMENTATION RECEIVED",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0153",
+    "description": "VALUE CODE",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0155",
+    "description": "ACCEPT/APPLICATION ACKNOWLEDGEMENT CONDITIONS",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "AL",
+        "description": "Always"
+      },
+      {
+        "name": "ER",
+        "description": "Error / reject conditions only"
+      },
+      {
+        "name": "NE",
+        "description": "Never"
+      },
+      {
+        "name": "SU",
+        "description": "Successful completion only"
+      }
+    ]
+  },
+  {
+    "id": "0156",
+    "description": "DATE/TIME QUALIFIER",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "ANY",
+        "description": "Any date / time within a range"
+      },
+      {
+        "name": "CAN",
+        "description": "Cancellation date / time"
+      },
+      {
+        "name": "COL",
+        "description": "Collection date / time (equivalent to film or sample collection date / time)"
+      },
+      {
+        "name": "ORD",
+        "description": "Order date / time"
+      },
+      {
+        "name": "RCT",
+        "description": "Specimen receipt date / time (receipt of specimen in filling ancillary (lab))"
+      },
+      {
+        "name": "REP",
+        "description": "Report date / time (report date / time at filling ancillary (i.e., lab))"
+      },
+      {
+        "name": "SCHED",
+        "description": "Schedule date / time"
+      }
+    ]
+  },
+  {
+    "id": "0157",
+    "description": "WHIHC DATE/TIME STATUS QUALIFIER",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "ANY",
+        "description": "Any status"
+      },
+      {
+        "name": "CFN",
+        "description": "Current final value (whether final or corrected)"
+      },
+      {
+        "name": "COR",
+        "description": "Corrected only (no final with corrections)"
+      },
+      {
+        "name": "FIN",
+        "description": "Final only (no corrections)"
+      },
+      {
+        "name": "PRE",
+        "description": "Preliminary"
+      },
+      {
+        "name": "REP",
+        "description": "Report completion date / time"
+      }
+    ]
+  },
+  {
+    "id": "0158",
+    "description": "DATE/TIME SELECTION QUALIFIER",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "1ST",
+        "description": "First value within range"
+      },
+      {
+        "name": "ALL",
+        "description": "All values within the range"
+      },
+      {
+        "name": "LST",
+        "description": "Last value within the range"
+      },
+      {
+        "name": "REV",
+        "description": "All values within the range returned in reverse chronological order"
+      }
+    ]
+  },
+  {
+    "id": "0159",
+    "description": "DIET TYPE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "D",
+        "description": "Diet"
+      },
+      {
+        "name": "P",
+        "description": "Preference"
+      },
+      {
+        "name": "S",
+        "description": "Supplement"
+      }
+    ]
+  },
+  {
+    "id": "0160",
+    "description": "TRAY TYPE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "EARLY",
+        "description": "Early tray"
+      },
+      {
+        "name": "GUEST",
+        "description": "Guest tray"
+      },
+      {
+        "name": "LATE",
+        "description": "Late tray"
+      },
+      {
+        "name": "MSG",
+        "description": "Tray message only"
+      },
+      {
+        "name": "NO",
+        "description": "No tray"
+      }
+    ]
+  },
+  {
+    "id": "0161",
+    "description": "ALLOW SUBSTITUTION",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "G",
+        "description": "Allow generic substitutions"
+      },
+      {
+        "name": "N",
+        "description": "Substitutions are not authorized"
+      },
+      {
+        "name": "T",
+        "description": "Allow therapeutic substitutions"
+      }
+    ]
+  },
+  {
+    "id": "0162",
+    "description": "ROUTE OF ADMINISTRATION",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "AP",
+        "description": "Apply Externally"
+      },
+      {
+        "name": "B",
+        "description": "Buccal"
+      },
+      {
+        "name": "DT",
+        "description": "Dental"
+      },
+      {
+        "name": "GTT",
+        "description": "Gastronomy Tube"
+      },
+      {
+        "name": "GU",
+        "description": "Magenspülung"
+      },
+      {
+        "name": "IA",
+        "description": "Intra-arterial"
+      },
+      {
+        "name": "IC",
+        "description": "Intracardiac"
+      },
+      {
+        "name": "ID",
+        "description": "Intradermal"
+      },
+      {
+        "name": "IH",
+        "description": "Inhalation"
+      },
+      {
+        "name": "IM",
+        "description": "Intramuscular"
+      },
+      {
+        "name": "IN",
+        "description": "Intranasal"
+      },
+      {
+        "name": "IO",
+        "description": "Intraocular"
+      },
+      {
+        "name": "IP",
+        "description": "Intraperitoneal"
+      },
+      {
+        "name": "IS",
+        "description": "Intrasynovial"
+      },
+      {
+        "name": "IT",
+        "description": "Intrathecal"
+      },
+      {
+        "name": "IV",
+        "description": "Intravenous"
+      },
+      {
+        "name": "NG",
+        "description": "Nasogastric"
+      },
+      {
+        "name": "NS",
+        "description": "Nasal"
+      },
+      {
+        "name": "OP",
+        "description": "Ophthalmic"
+      },
+      {
+        "name": "OT",
+        "description": "Otic"
+      },
+      {
+        "name": "PO",
+        "description": "Oral"
+      },
+      {
+        "name": "PR",
+        "description": "Rectal"
+      },
+      {
+        "name": "SC",
+        "description": "Subcutaneous"
+      },
+      {
+        "name": "SL",
+        "description": "Sublingual"
+      },
+      {
+        "name": "TD",
+        "description": "Transdermal"
+      },
+      {
+        "name": "TL",
+        "description": "Translingual"
+      },
+      {
+        "name": "TP",
+        "description": "Topical"
+      },
+      {
+        "name": "UR",
+        "description": "Urethral"
+      },
+      {
+        "name": "VG",
+        "description": "Vaginal"
+      }
+    ]
+  },
+  {
+    "id": "0163",
+    "description": "ADMINISTRIVE SITE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "BE",
+        "description": "Bilateral Ears"
+      },
+      {
+        "name": "BN",
+        "description": "Bilateral Nares"
+      },
+      {
+        "name": "BU",
+        "description": "Buttock"
+      },
+      {
+        "name": "CT",
+        "description": "Tubus"
+      },
+      {
+        "name": "LA",
+        "description": "Left arm"
+      },
+      {
+        "name": "LAC",
+        "description": "Left Anterior Chest"
+      },
+      {
+        "name": "LACF",
+        "description": "Left Antecubital Fossa"
+      },
+      {
+        "name": "LD",
+        "description": "Left Deltoid"
+      },
+      {
+        "name": "LE",
+        "description": "Left Ear"
+      },
+      {
+        "name": "LEJ",
+        "description": "Left External Jugular"
+      },
+      {
+        "name": "LF",
+        "description": "Left Foot"
+      },
+      {
+        "name": "LG",
+        "description": "Left Gluteus Medius"
+      },
+      {
+        "name": "LH",
+        "description": "Left Hand"
+      },
+      {
+        "name": "LIJ",
+        "description": "Left Internal Jugular"
+      },
+      {
+        "name": "LLAQ",
+        "description": "Left Lower Abd Quadrant"
+      },
+      {
+        "name": "LLFA",
+        "description": "Left Lower Forearm"
+      },
+      {
+        "name": "LMFA",
+        "description": "Left Mid Forearm"
+      },
+      {
+        "name": "LN",
+        "description": "Left Naris"
+      },
+      {
+        "name": "LPC",
+        "description": "Left Posterior Chest"
+      },
+      {
+        "name": "LSC",
+        "description": "Left Subclavian"
+      },
+      {
+        "name": "LT",
+        "description": "Left Thigh"
+      },
+      {
+        "name": "LUA",
+        "description": "Left Upper Arm"
+      },
+      {
+        "name": "LUAQ",
+        "description": "Left Upper Abd Quadrant"
+      },
+      {
+        "name": "LUFA",
+        "description": "Left Upper Forearm"
+      },
+      {
+        "name": "LVG",
+        "description": "Left Ventragluteal"
+      },
+      {
+        "name": "LVL",
+        "description": "Left Vastus Lateralis"
+      },
+      {
+        "name": "NB",
+        "description": "Nebulized"
+      },
+      {
+        "name": "OD",
+        "description": "Right Eye"
+      },
+      {
+        "name": "OS",
+        "description": "Left Eye"
+      },
+      {
+        "name": "OU",
+        "description": "Bilateral Eyes"
+      },
+      {
+        "name": "PA",
+        "description": "Perianal"
+      },
+      {
+        "name": "PERIN",
+        "description": "Perineal"
+      },
+      {
+        "name": "RA",
+        "description": "Right Arm"
+      },
+      {
+        "name": "RAC",
+        "description": "Right Anterior Chest"
+      },
+      {
+        "name": "RACF",
+        "description": "Right Antecubital Fossa"
+      },
+      {
+        "name": "RD",
+        "description": "Right Deltoid"
+      },
+      {
+        "name": "RE",
+        "description": "Right Ear"
+      },
+      {
+        "name": "REJ",
+        "description": "Right External Jugular"
+      },
+      {
+        "name": "RF",
+        "description": "Right Foot"
+      },
+      {
+        "name": "RG",
+        "description": "Right Gluteus Medius"
+      },
+      {
+        "name": "RH",
+        "description": "Right Hand"
+      },
+      {
+        "name": "RIJ",
+        "description": "Right Internal Jugular"
+      },
+      {
+        "name": "RLAQ",
+        "description": "Rt Lower Abd Quadrant"
+      },
+      {
+        "name": "RLFA",
+        "description": "Right Lower Forearm"
+      },
+      {
+        "name": "RMFA",
+        "description": "Right Mid Forearm"
+      },
+      {
+        "name": "RN",
+        "description": "Right Naris"
+      },
+      {
+        "name": "RPC",
+        "description": "Right Posterior Chest"
+      },
+      {
+        "name": "RSC",
+        "description": "Right Subclavian"
+      },
+      {
+        "name": "RT",
+        "description": "Right Thigh"
+      },
+      {
+        "name": "RUA",
+        "description": "Right Upper Arm"
+      },
+      {
+        "name": "RUAQ",
+        "description": "Right Upper Abd Quadrant"
+      },
+      {
+        "name": "RUFA",
+        "description": "Right Upper Forearm"
+      },
+      {
+        "name": "RVG",
+        "description": "Right Ventragluteal"
+      },
+      {
+        "name": "RVL",
+        "description": "Right Vastus Lateralis"
+      }
+    ]
+  },
+  {
+    "id": "0164",
+    "description": "ADMINISTRATION DEVICE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "AP",
+        "description": "Applicator"
+      },
+      {
+        "name": "BT",
+        "description": "Buretrol"
+      },
+      {
+        "name": "HL",
+        "description": "Heparin Lock"
+      },
+      {
+        "name": "IPPB",
+        "description": "IPPB"
+      },
+      {
+        "name": "IVP",
+        "description": "IV Pump"
+      },
+      {
+        "name": "IVS",
+        "description": "IV Soluset"
+      },
+      {
+        "name": "MI",
+        "description": "Metered Inhaler"
+      },
+      {
+        "name": "NEB",
+        "description": "Nebulizer"
+      },
+      {
+        "name": "PCA",
+        "description": "PCA Pump"
+      }
+    ]
+  },
+  {
+    "id": "0165",
+    "description": "ADMINISTRATION METHOD",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "CH",
+        "description": "Chew"
+      },
+      {
+        "name": "DI",
+        "description": "Dissolve"
+      },
+      {
+        "name": "DU",
+        "description": "Dust"
+      },
+      {
+        "name": "IF",
+        "description": "Inflitrate"
+      },
+      {
+        "name": "IR",
+        "description": "Irrigate"
+      },
+      {
+        "name": "IS",
+        "description": "Insert"
+      },
+      {
+        "name": "IVP",
+        "description": "IV Push"
+      },
+      {
+        "name": "IVPB",
+        "description": "IV Piggyback"
+      },
+      {
+        "name": "NB",
+        "description": "Nebulized"
+      },
+      {
+        "name": "PF",
+        "description": "Perfuse"
+      },
+      {
+        "name": "PT",
+        "description": "Pain"
+      },
+      {
+        "name": "SH",
+        "description": "Shampoo"
+      },
+      {
+        "name": "SO",
+        "description": "Soak"
+      },
+      {
+        "name": "WA",
+        "description": "Wash"
+      },
+      {
+        "name": "WI",
+        "description": "Wipe"
+      }
+    ]
+  },
+  {
+    "id": "0166",
+    "description": "RX COMPONENT TYPE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "A",
+        "description": "Additive"
+      },
+      {
+        "name": "B",
+        "description": "Base"
+      }
+    ]
+  },
+  {
+    "id": "0167",
+    "description": "SUBSTITUTION STATUS",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "G",
+        "description": "A generic substitution was dispensed"
+      },
+      {
+        "name": "N",
+        "description": "No substitute was dispensed"
+      },
+      {
+        "name": "T",
+        "description": "A therapeutic substitution was dispensed"
+      }
+    ]
+  },
+  {
+    "id": "0168",
+    "description": "PROCESSING PRIORITY",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "A",
+        "description": "As soon as possible (a priority lower than stat)"
+      },
+      {
+        "name": "B",
+        "description": "Do at bedside or portable (may be used with other codes)"
+      },
+      {
+        "name": "C",
+        "description": "Measure continously (e.g., arterial line blood pressure)"
+      },
+      {
+        "name": "P",
+        "description": "Preoperative (to be done prior to surgery)"
+      },
+      {
+        "name": "R",
+        "description": "Routine"
+      },
+      {
+        "name": "S",
+        "description": "Stat (do immediately)"
+      },
+      {
+        "name": "T",
+        "description": "Timing critical (do as near as possible to requested time)"
+      }
+    ]
+  },
+  {
+    "id": "0169",
+    "description": "REPORTIN PRIORITY",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "C",
+        "description": "Call back results"
+      },
+      {
+        "name": "R",
+        "description": "Rush reporting"
+      }
+    ]
+  },
+  {
+    "id": "0170",
+    "description": "DERIVED SPECIMEN",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "C",
+        "description": "Child observation"
+      },
+      {
+        "name": "N",
+        "description": "Not applicable"
+      },
+      {
+        "name": "P",
+        "description": "Parent observation"
+      }
+    ]
+  },
+  {
+    "id": "0171",
+    "description": "Country Code",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0172",
+    "description": "VETERANS MILITARY STATUS",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0173",
+    "description": "COORDINATION OF BENEFITS",
+    "type": "user",
+    "codes": [
+      {
+        "name": "CO",
+        "description": "Coordination"
+      },
+      {
+        "name": "IN",
+        "description": "Independent"
+      }
+    ]
+  },
+  {
+    "id": "0174",
+    "description": "NATURE OF TEST/OBSERVATION",
+    "type": "user",
+    "codes": [
+      {
+        "name": "A",
+        "description": "Atomic test/observation (test code or treatment code)"
+      },
+      {
+        "name": "C",
+        "description": "Single observation calculated via a rule or formula from other independent observations (e.g., Alveolar--arterial ratio, cardiac output)"
+      },
+      {
+        "name": "F",
+        "description": "Functional procedure that may consist of one or more interrelated measures (e.g., glucose tolerance test, creatine clearance), usually done at different times and/or on different specimens"
+      },
+      {
+        "name": "P",
+        "description": "Profile or battery consisting of many independent atomic observations (e.g., SMA12, electrolytes), usually done at one instrument on one specimen"
+      },
+      {
+        "name": "S",
+        "description": "Superset--a set of batteries or procedures ordered under a single code unit but processed as separate batteries (e.g., routines = CBC, UA, electrolytes)"
+      }
+    ]
+  },
+  {
+    "id": "0175",
+    "description": "MASTER FILE IDENTIFIER CODE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "CDM",
+        "description": "Charge description master file (see chapter 6, appendix)"
+      },
+      {
+        "name": "OM1",
+        "description": "Observation text master file (i.e., Lab) (see Chapter 7, Appendix)"
+      },
+      {
+        "name": "OM2",
+        "description": "Observation text master file (i.e., Lab) (see Chapter 7, Appendix)"
+      },
+      {
+        "name": "OM3",
+        "description": "Observation text master file (i.e., Lab) (see Chapter 7, Appendix)"
+      },
+      {
+        "name": "OM4",
+        "description": "Observation text master file (i.e., Lab) (see Chapter 7, Appendix)"
+      },
+      {
+        "name": "OM5",
+        "description": "Observation text master file (i.e., Lab) (see Chapter 7, Appendix)"
+      },
+      {
+        "name": "OM6",
+        "description": "Observation text master file (i.e., Lab) (see Chapter 7, Appendix)"
+      },
+      {
+        "name": "PRA",
+        "description": "Practitioner master file (see chapter 8, appendix)"
+      },
+      {
+        "name": "STF",
+        "description": "Staff master file (see chapter 8, Appendix)"
+      }
+    ]
+  },
+  {
+    "id": "0176",
+    "description": "MASTER FILE APPLICATION IDENTIFIER",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0177",
+    "description": "CONFIDENTIALITY CODE",
+    "type": "user",
+    "codes": [
+      {
+        "name": "AID",
+        "description": "AIDS patient"
+      },
+      {
+        "name": "EMP",
+        "description": "Employee"
+      },
+      {
+        "name": "ETH",
+        "description": "Alcohol / drug treatment patient"
+      },
+      {
+        "name": "HIV",
+        "description": "HIV(+) patient"
+      },
+      {
+        "name": "PSY",
+        "description": "Psychiatric patient"
+      },
+      {
+        "name": "R",
+        "description": "Restricted"
+      },
+      {
+        "name": "U",
+        "description": "Usual control"
+      },
+      {
+        "name": "UWM",
+        "description": "Unwed mother"
+      },
+      {
+        "name": "V",
+        "description": "Very restricted"
+      },
+      {
+        "name": "VIP",
+        "description": "Very important person or celebrity"
+      }
+    ]
+  },
+  {
+    "id": "0178",
+    "description": "FILE-LEVEL EVENT CODE",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "REP",
+        "description": "Replace current version of this master file with the version contained in this message"
+      },
+      {
+        "name": "UPD",
+        "description": "Change file records as defined in the record level event codes for each record that follows"
+      }
+    ]
+  },
+  {
+    "id": "0179",
+    "description": "Response Level",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "AL",
+        "description": "Always. All MFA segments (whether denoting errors or not) must be returned via the application level acknowledgement message"
+      },
+      {
+        "name": "ER",
+        "description": "Error/Reject conditions only. Only MFA segments denoting errors must be returned via the application level acknowledgement for this message"
+      },
+      {
+        "name": "NE",
+        "description": "Never. no application level response needed"
+      },
+      {
+        "name": "SU",
+        "description": "Success. Only MFA segments denoting success must be returned via the application level acknowledgement for this message"
+      }
+    ]
+  },
+  {
+    "id": "0180",
+    "description": "REcord Level Event Code",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "MAC",
+        "description": "Reactivate deactivated record"
+      },
+      {
+        "name": "MAD",
+        "description": "Add record to master file"
+      },
+      {
+        "name": "MDC",
+        "description": "Deactivate - discontinue using record in master file, but do not delete from database"
+      },
+      {
+        "name": "MDL",
+        "description": "Delete record from master file"
+      },
+      {
+        "name": "MUP",
+        "description": "Update record for master file"
+      }
+    ]
+  },
+  {
+    "id": "0181",
+    "description": "MFN Recode-Level Error Return",
+    "type": "user",
+    "codes": [
+      {
+        "name": "S",
+        "description": "Successful posting of the record defined by the MFE segment"
+      },
+      {
+        "name": "U",
+        "description": "Unsuccessful posting of the record defined by the MFE segment"
+      }
+    ]
+  },
+  {
+    "id": "0182",
+    "description": "Staff Type",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0183",
+    "description": "Active/Inactive",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "A",
+        "description": "Active staff"
+      },
+      {
+        "name": "I",
+        "description": "Inactive staff"
+      }
+    ]
+  },
+  {
+    "id": "0184",
+    "description": "Department",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0185",
+    "description": "Preferred Method Of Contrct",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "B",
+        "description": "Beeper number"
+      },
+      {
+        "name": "C",
+        "description": "Cellular phone number"
+      },
+      {
+        "name": "E",
+        "description": "E-mail address (not in TN format)"
+      },
+      {
+        "name": "F",
+        "description": "Fax number"
+      },
+      {
+        "name": "H",
+        "description": "Home phone number"
+      },
+      {
+        "name": "O",
+        "description": "Office phone number"
+      }
+    ]
+  },
+  {
+    "id": "0186",
+    "description": "Practioner Category",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0187",
+    "description": "Provider billing",
+    "type": "user",
+    "codes": [
+      {
+        "name": "I",
+        "description": "Institution bills for provider"
+      },
+      {
+        "name": "P",
+        "description": "Provider does own billing"
+      }
+    ]
+  },
+  {
+    "id": "0188",
+    "description": "Operator ID",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0189",
+    "description": "Ethnic Group",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0190",
+    "description": "Adress Type",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "B",
+        "description": "Business"
+      },
+      {
+        "name": "C",
+        "description": "Current or Temporary"
+      },
+      {
+        "name": "H",
+        "description": "Home"
+      },
+      {
+        "name": "M",
+        "description": "Mailing"
+      },
+      {
+        "name": "O",
+        "description": "Office"
+      },
+      {
+        "name": "P",
+        "description": "Permanent"
+      }
+    ]
+  },
+  {
+    "id": "0191",
+    "description": "Type Of Data",
+    "type": "hl7",
+    "codes": [
+      {
+        "name": "FT",
+        "description": "Formatted Text"
+      },
+      {
+        "name": "NS",
+        "description": "Non-scanned Image"
+      },
+      {
+        "name": "SD",
+        "description": "Scanned Document"
+      },
+      {
+        "name": "SI",
+        "description": "Scanned Image"
+      },
+      {
+        "name": "TX",
+        "description": "Machine Readable Text Document"
+      }
+    ]
+  },
+  {
+    "id": "0192",
+    "description": "Visit Id type",
+    "type": "user",
+    "codes": []
+  },
+  {
+    "id": "0193",
+    "description": "Amount Class",
+    "type": "user",
+    "codes": [
+      {
+        "name": "AT",
+        "description": "Amount"
+      },
+      {
+        "name": "LM",
+        "description": "Limit"
+      },
+      {
+        "name": "PC",
+        "description": "Percentage"
+      },
+      {
+        "name": "UL",
+        "description": "Unlimited"
+      }
+    ]
+  }
+]

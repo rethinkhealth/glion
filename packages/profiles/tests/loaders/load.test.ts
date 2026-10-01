@@ -1,46 +1,70 @@
-import { loaderByVersion, versionAndId } from "../../src/loaders/load";
+import { loaderByVersion, versionOf } from "../../src/loaders/load";
 
-const manifest = {
-  "v2.5/BAR": () => Promise.resolve("bar"),
-  "v2.5/FOO": () => Promise.resolve("foo"),
-  "v2.6/FOO": () => Promise.resolve("foo 2.6"),
+// A module is evaluated once, so every import of a file resolves the same data.
+const v25 = ["foo"];
+const v251 = ["foo 2.5.1"];
+const files = {
+  "../profiles/v2.5.1/fields.json": () => Promise.resolve(v251),
+  "../profiles/v2.5/fields.json": () => Promise.resolve(v25),
 };
 
 describe("loaderByVersion", () => {
-  it("compiles every profile of the version, by id", async () => {
-    const load = loaderByVersion(manifest, versionAndId, (raw: string) =>
-      raw.toUpperCase()
+  it("compiles the file of the version", async () => {
+    const load = loaderByVersion(files, (raw: readonly string[]) =>
+      raw.map((value) => value.toUpperCase())
     );
 
-    expect(await load("2.5")).toEqual(
-      new Map([
-        ["BAR", "BAR"],
-        ["FOO", "FOO"],
-      ])
+    await expect(load("2.5")).resolves.toEqual(["FOO"]);
+    await expect(load("2.5.1")).resolves.toEqual(["FOO 2.5.1"]);
+  });
+
+  it("resolves undefined for a version no file is bundled for", async () => {
+    const load = loaderByVersion(files, (raw: readonly string[]) => raw);
+
+    await expect(load("2.7")).resolves.toBeUndefined();
+    await expect(load("__proto__")).resolves.toBeUndefined();
+  });
+
+  it("does not keep a failed import", async () => {
+    let attempts = 0;
+    const load = loaderByVersion(
+      {
+        "../profiles/v2.5/fields.json": () => {
+          attempts += 1;
+          return attempts === 1
+            ? Promise.reject(new Error("chunk failed to load"))
+            : Promise.resolve(v25);
+        },
+      },
+      (raw: readonly string[]) => raw
     );
-    expect(await load("2.6")).toEqual(new Map([["FOO", "FOO 2.6"]]));
+
+    await expect(load("2.5")).rejects.toThrow("chunk failed to load");
+    await expect(load("2.5")).resolves.toBe(v25);
   });
 
-  it("resolves undefined for a version the manifest holds nothing for", async () => {
-    const load = loaderByVersion(manifest, versionAndId, (raw: string) => raw);
-
-    expect(await load("2.7")).toBeUndefined();
-  });
-
-  it("compiles each version once", async () => {
-    const compile = vi.fn((raw: string) => raw);
-    const load = loaderByVersion(manifest, versionAndId, compile);
+  it("compiles each file once, even for concurrent loads", async () => {
+    const compile = vi.fn((raw: readonly string[]) => [...raw]);
+    const load = loaderByVersion(files, compile);
 
     const [first, second] = await Promise.all([load("2.5"), load("2.5")]);
+    const third = await load("2.5");
 
     expect(first).toBe(second);
-    expect(compile).toHaveBeenCalledTimes(2);
+    expect(third).toBe(first);
+    expect(compile).toHaveBeenCalledTimes(1);
   });
 });
 
-describe("versionAndId", () => {
-  it("reads the version and id of a manifest key", () => {
-    expect(versionAndId("v2.3.1/PID")).toEqual(["2.3.1", "PID"]);
-    expect(versionAndId("vutg/v2-0001")).toEqual(["utg", "v2-0001"]);
+describe("versionOf", () => {
+  it("reads the version of a bundled profile path", () => {
+    expect(versionOf("../profiles/v2.3.1/tables.json")).toBe("2.3.1");
+    expect(versionOf("./profiles/v2.8.2/event-map.json")).toBe("2.8.2");
+  });
+
+  it("throws for a path that names no version", () => {
+    expect(() => versionOf("../profiles/utg/code-systems.json")).toThrow(
+      "This is a bug."
+    );
   });
 });

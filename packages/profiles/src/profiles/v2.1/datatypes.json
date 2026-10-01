@@ -1,0 +1,157 @@
+[
+  {
+    "id": "AD",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "address",
+    "components": []
+  },
+  {
+    "id": "CE",
+    "version": "2.1",
+    "kind": "composite",
+    "title": "coded element",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "identifier",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "name of coding system",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "alternate identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "alternate text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "name of alternate coding system",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CK",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "composite ID with check digit",
+    "components": []
+  },
+  {
+    "id": "CM",
+    "version": "2.1",
+    "kind": "primitive",
+    "components": []
+  },
+  {
+    "id": "CN",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "composite ID number and name",
+    "components": []
+  },
+  {
+    "id": "CQ",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "composite quantity with units",
+    "components": []
+  },
+  {
+    "id": "DT",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "DATE",
+    "components": []
+  },
+  {
+    "id": "FT",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "formatted text data",
+    "components": []
+  },
+  {
+    "id": "ID",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "CODED VALUE",
+    "components": []
+  },
+  {
+    "id": "NM",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "numeric",
+    "components": []
+  },
+  {
+    "id": "PN",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "person name",
+    "components": []
+  },
+  {
+    "id": "SI",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "SET ID",
+    "components": []
+  },
+  {
+    "id": "ST",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "string data",
+    "components": []
+  },
+  {
+    "id": "TM",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "time",
+    "components": []
+  },
+  {
+    "id": "TN",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "telephone number",
+    "components": []
+  },
+  {
+    "id": "TS",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "time stamp",
+    "components": []
+  },
+  {
+    "id": "TX",
+    "version": "2.1",
+    "kind": "primitive",
+    "title": "text data",
+    "components": []
+  }
+]

@@ -1,70 +1,58 @@
-/** A lazy import of one bundled profile file. */
-export type ProfileImport<TRaw> = () => Promise<TRaw>;
-
-/** The profiles `imports` lists, compiled, by id. */
-export const compileAll = async <TRaw, T>(
-  imports: readonly (readonly [id: string, load: ProfileImport<TRaw>])[],
-  compile: (raw: TRaw) => T
-): Promise<ReadonlyMap<string, T>> =>
-  new Map(
-    await Promise.all(
-      imports.map(async ([id, load]) => [id, compile(await load())] as const)
-    )
-  );
+const VERSION_IN_PATH = /\/v(\d+(?:\.\d+)+)\//;
 
 /**
- * A loader of every profile `manifest` holds for one HL7v2 version, compiled,
- * by id.
+ * The HL7v2 version a bundled profile path names as a `v{version}` directory,
+ * such as `"2.5.1"`.
  *
- * Each version loads and compiles once; later calls return the same map. The
- * loader resolves `undefined` for a version `manifest` holds nothing for.
- *
- * @param manifest - Lazy imports, by manifest key.
- * @param keyOf - The version and id a manifest key names.
- * @param compile - The profile a raw module holds.
+ * @throws {Error} When `path` names no version, which is a bug.
  */
-export const loaderByVersion = <TRaw, T>(
-  manifest: Readonly<Record<string, ProfileImport<TRaw>>>,
-  keyOf: (key: string) => readonly [version: string, id: string],
-  compile: (raw: TRaw) => T
-): ((version: string) => Promise<ReadonlyMap<string, T> | undefined>) => {
-  let imports:
-    | Map<string, (readonly [string, ProfileImport<TRaw>])[]>
-    | undefined;
-  const loaded = new Map<string, Promise<ReadonlyMap<string, T>>>();
-
-  const importsOf = (version: string) => {
-    if (!imports) {
-      imports = new Map();
-      for (const [key, load] of Object.entries(manifest)) {
-        const [keyVersion, id] = keyOf(key);
-        let entries = imports.get(keyVersion);
-        if (!entries) {
-          entries = [];
-          imports.set(keyVersion, entries);
-        }
-        entries.push([id, load]);
-      }
-    }
-    return imports.get(version);
-  };
-
-  return async (version) => {
-    let profiles = loaded.get(version);
-    if (!profiles) {
-      const entries = importsOf(version);
-      if (!entries) {
-        return;
-      }
-      profiles = compileAll(entries, compile);
-      loaded.set(version, profiles);
-    }
-    return await profiles;
-  };
+export const versionOf = (path: string): string => {
+  const version = VERSION_IN_PATH.exec(path)?.[1];
+  if (version === undefined) {
+    throw new Error(
+      `Bundled profile path names no version: ${path}. This is a bug.`
+    );
+  }
+  return version;
 };
 
-/** The version and id a `v{version}/{id}` manifest key names. */
-export const versionAndId = (key: string): readonly [string, string] => {
-  const slash = key.indexOf("/");
-  return [key.slice(1, slash), key.slice(slash + 1)];
+/**
+ * A loader of one bundled profile file per HL7v2 version.
+ *
+ * The loader resolves the compiled file of `version`, or `undefined` for a
+ * version no file is bundled for. Each file compiles once; later calls
+ * resolve the same value.
+ *
+ * @param files - Lazy imports of the files, by path; each path names its
+ *   version as a `v{version}` directory.
+ * @param compile - The value a file's data compiles to.
+ */
+export const loaderByVersion = <TRaw, T>(
+  files: Readonly<Record<string, () => Promise<TRaw>>>,
+  compile: (raw: TRaw) => T
+): ((version: string) => Promise<T | undefined>) => {
+  const imports = new Map(
+    Object.entries(files).map(([path, load]) => [versionOf(path), load])
+  );
+  const compiled = new Map<string, T>();
+
+  return async (version) => {
+    const cached = compiled.get(version);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const load = imports.get(version);
+    if (!load) {
+      return;
+    }
+    const raw = await load();
+    // A concurrent first load of the same version may have compiled it while
+    // this one awaited the import.
+    let value = compiled.get(version);
+    if (value === undefined) {
+      value = compile(raw);
+      compiled.set(version, value);
+    }
+    return value;
+  };
 };

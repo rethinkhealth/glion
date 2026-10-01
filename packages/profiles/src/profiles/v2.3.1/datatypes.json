@@ -1,0 +1,3030 @@
+[
+  {
+    "id": "AD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "address",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "street address",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "other designation",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "city",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "state or province",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "zip or postal code",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "country",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "address type",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "other geographic designation",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "AUI",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "authorization information",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "authorization number",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "date",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "source",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CCD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "charge time",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "when to charge code",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "date/time",
+        "datatypeId": "TS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CCP",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "channel calibration parameters",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "channel calibration sensitivity correction factor",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "channel calibration baseline",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "channel calibration time skew",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "channel definition",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "channel identifier",
+        "datatypeId": "WVI",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "electrode names",
+        "datatypeId": "WVS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "channel sensitivity/units",
+        "datatypeId": "CSU",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "calibration parameters",
+        "datatypeId": "CCP",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "sampling frequency",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "minimum/maximum data values",
+        "datatypeId": "NR",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CE",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "coded element",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "name of coding system",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "alternate identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "alternate text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "name of alternate coding system",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CF",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "coded element with formatted values",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "formatted text",
+        "datatypeId": "FT",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "name of coding system",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "alternate identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "alternate formatted text",
+        "datatypeId": "FT",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "name of alternate coding system",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CK",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "composite ID with check digit",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "ID number (NM)",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "check digit",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "code identifying the check digit scheme employed",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "assigning authority",
+        "datatypeId": "HD",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "composite ID number and name",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "ID number (ST)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "family name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "given name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "middle initial or name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "suffix (e.g., JR or III)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "prefix (e.g., DR)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "degree (e.g., MD)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "source table",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "assigning authority",
+        "datatypeId": "HD",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CNE",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "coded with no exceptions",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "name of coding system",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "alternate identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "alternate text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "name of alternate coding system",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "coding system version ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "alternate coding system version ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "original text",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CNS",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Composite ID number and Name simplified",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "ID number (ST)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "family name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "given name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "second and further given names or initials thereof",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "suffix (e.g., JR or III)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "prefix (e.g., DR)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "degree (e.g., MD)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "source table",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "assigning authority namespace ID",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 10,
+        "name": "assigning authority universal ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 11,
+        "name": "assigning authority universal ID type",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CP",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "composite price",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "price",
+        "datatypeId": "MO",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "price type",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "from value",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "to value",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "range units",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "range type",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CQ",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "composite quantity with units",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "quantity",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "units",
+        "datatypeId": "CE",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CSU",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "channel sensitivity/units",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "channel sensitivity",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "unit of measure identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "unit of measure description",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "unit of measure coding system",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "alternate unit of measure identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "alternate unit of measure description",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "alternate unit of measure coding system",
+        "datatypeId": "IS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CWE",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "coded with exceptions",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "name of coding system",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "alternate identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "alternate text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "name of alternate coding system",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "coding system version ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "alternate coding system version ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "original text",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CX",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "extended composite ID with check digit",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "check digit",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "code identifying the check digit scheme employed",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "assigning authority",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "identifier type code",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "assigning facility",
+        "datatypeId": "HD",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "DDI",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "daily deductible",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "delay days",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "amount",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "number of days",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "DIN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "activation date",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "date",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "institution name",
+        "datatypeId": "CE",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "DLD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "discharge location",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "discharge location",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "effective date",
+        "datatypeId": "TS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "DLN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "driver's license number",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "Driver´s License Number",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "Issuing State, province, country",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "expiration date",
+        "datatypeId": "DT",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "DLT",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "delta check",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "Range",
+        "datatypeId": "NR",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "numeric threshold",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "change computation",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "length of time-days",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "DR",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "date/time range",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "range start date/time",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "range end date/time",
+        "datatypeId": "TS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "DT",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "date",
+    "components": []
+  },
+  {
+    "id": "DTN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Day Type and Number",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "day type",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "number of days",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "ED",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "encapsulated data",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "source application",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "type of data",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "data",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "encoding",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "data",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "EI",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "entity identifier",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "entity identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "namespace ID",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "universal ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "universal ID type",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "EIP",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "parent order",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "parent´s placer order number",
+        "datatypeId": "EI",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "parent´s filler order number",
+        "datatypeId": "EI",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "ELD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "error",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "segment ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "sequence",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "field position",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "code identifying error",
+        "datatypeId": "CE",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "FC",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "financial class",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "Financial Class",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "Effective Date",
+        "datatypeId": "TS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "FN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "family + last name prefix",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "family name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "last name prefix",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "FT",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "formatted text data",
+    "components": []
+  },
+  {
+    "id": "HD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "hierarchic designator",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "namespace ID",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "universal ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "universal ID type",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "ID",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "coded value for HL7 defined tables",
+    "components": []
+  },
+  {
+    "id": "IS",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "coded value for user-defined tables",
+    "components": []
+  },
+  {
+    "id": "JCC",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "job code/class",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "job code",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "job class",
+        "datatypeId": "IS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "LA1",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Location with address information (variant 1)",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "point of care (IS)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "room",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "bed",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "facility (HD)",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "location status",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "person location type",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "building",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "floor",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "address",
+        "datatypeId": "AD",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "LA2",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Location with address information (variant 2)",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "point of care (IS)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "room",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "bed",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "facility (HD)",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "location status",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "person location type",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "building",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "floor",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "street address",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 10,
+        "name": "other designation",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 11,
+        "name": "city",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 12,
+        "name": "state or province",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 13,
+        "name": "zip or postal code",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 14,
+        "name": "country",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 15,
+        "name": "address type",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 16,
+        "name": "other geographic designation",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "MA",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "multiplexed array",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "sample 1 from channel 1",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "sample 1 from channel 2",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "sample 1 from channel 3",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "sample 2 from channel 1",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "sample 2 from channel 2",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "sample 2 from channel 3",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "MO",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "money",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "quantity",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "denomination",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "MOC",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Charge To Practise",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "dollar amount",
+        "datatypeId": "MO",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "charge code",
+        "datatypeId": "CE",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "MOP",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "money or percentage",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "money or percentage indicator",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "money or percentage quantity",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "MSG",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Message Type",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "message type",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "trigger event",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "message structure",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "NA",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "numeric array",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "value1",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "value2",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "value3",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "value4",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "NDL",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "observing practitioner",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "name",
+        "datatypeId": "CN",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "start date/time",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "end date/time",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "point of care (IS)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "room",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "bed",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "facility (HD)",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "location status",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "person location type",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 10,
+        "name": "building",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 11,
+        "name": "floor",
+        "datatypeId": "IS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "NM",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "numeric",
+    "components": []
+  },
+  {
+    "id": "NR",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Numeric Range",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "Low Value",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "High Value",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "OCD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "occurence",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "occurrence code",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "occurrence date",
+        "datatypeId": "DT",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "OSD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "order sequence",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "sequence/results flag",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "placer order number: entity identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "placer order number: namespace ID",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "filler order number: entity identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "filler order number: namespace ID",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "sequence condition value",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "maximum number of repeats",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "placer order number: universal ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "placer order number; universal ID type",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 10,
+        "name": "filler order number: universal ID",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 11,
+        "name": "filler order number: universal ID type",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "OSP",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "occurence span",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "occurrence span code",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "occurrence span start date",
+        "datatypeId": "DT",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "occurrence span stop date",
+        "datatypeId": "DT",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PCF",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Pre-certification required",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "pre-certification patient type",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "pre-certification required",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "pre-certification window",
+        "datatypeId": "TS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PI",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "person identifier",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "ID number (ST)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "type of ID number (IS)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "other qualifying info",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PIP",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Privileges",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "privilege",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "privilege class",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "expiration date",
+        "datatypeId": "DT",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "activation date",
+        "datatypeId": "DT",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "facility (EI)",
+        "datatypeId": "EI",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PL",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "person location",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "point of care",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "room",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "bed",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "facility (HD)",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "location status",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "person location type",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "building",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "floor",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "Location description",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PLN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Practitioner ID Numbers",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "ID number (ST)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "type of ID number (IS)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "state/other qualifying info",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "expiration date",
+        "datatypeId": "DT",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "person name",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "family+last name",
+        "datatypeId": "FN",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "given name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "middle initial or name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "suffix (e.g., JR or III)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "prefix (e.g., DR)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "degree (e.g., MD)",
+        "datatypeId": "IS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PPN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "performing person time stamp",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "ID number (ST)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "family+last name",
+        "datatypeId": "FN",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "given name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "middle initial or name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "suffix (e.g., JR or III)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "prefix (e.g., DR)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "degree (e.g., MD)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "source table",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "assigning authority",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 10,
+        "name": "name type code",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 11,
+        "name": "identifier check digit",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 12,
+        "name": "code identifying the check digit scheme employed",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 13,
+        "name": "identifier type code",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 14,
+        "name": "assigning facility",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 15,
+        "name": "Date/Time Action Performed",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 16,
+        "name": "Name Representation code",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PRL",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "parent result link",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "OBX-3 observation identifier of parent result",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "OBX-4 sub-ID of parent result",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "part of OBX-5 observation result from parent",
+        "datatypeId": "TX",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PT",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "processing type",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "processing ID",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "processing mode",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "PTA",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Policy Type",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "policy type",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "amount class",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "amount",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "QIP",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "query input parameter list",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "field name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "value1&amp;value2&amp;value3",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "QSC",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "query selection criteria",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "segment field name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "relational operator",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "Value",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "relational conjunction",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "RCD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "row column definition",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "segment field name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "HL7 date type",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "maximum column width",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "RFR",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "reference range",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "numeric range",
+        "datatypeId": "NR",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "administrative sex",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "age range",
+        "datatypeId": "NR",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "gestational age range",
+        "datatypeId": "NR",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "species",
+        "datatypeId": "TX",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "race/subspecies",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "conditions",
+        "datatypeId": "TX",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "RI",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "repeat interval",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "repeat pattern",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "explicit time interval",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "RMC",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Room Coverage",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "room type",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "amount type",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "coverage amount",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "RP",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "reference pointer",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "pointer",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "application ID",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "type of data",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "subtype",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "SCV",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "scheduling class value pair",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "parameter class",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "parameter value",
+        "datatypeId": "IS",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "SI",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "sequence ID",
+    "components": []
+  },
+  {
+    "id": "SN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "structured numeric",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "comparator",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "num1",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "separator or suffix",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "num2",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "SPD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Specialty",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "specialty name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "governing board",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "eligible or certified",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "date of certification",
+        "datatypeId": "DT",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "SPS",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "specimen source",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "specimen source name or code",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "additives",
+        "datatypeId": "TX",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "freetext",
+        "datatypeId": "TX",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "body site",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "site modifier",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "collection modifier method code",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "specimen role",
+        "datatypeId": "CE",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "ST",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "string data",
+    "components": []
+  },
+  {
+    "id": "TM",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "time",
+    "components": []
+  },
+  {
+    "id": "TN",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "telephone number",
+    "components": []
+  },
+  {
+    "id": "TQ",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "timing quantity",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "quantity",
+        "datatypeId": "CQ",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "interval",
+        "datatypeId": "RI",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "duration",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "start date/time",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "end date/time",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "priority",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "condition",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "conjunction",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 10,
+        "name": "order sequencing",
+        "datatypeId": "OSD",
+        "required": false
+      },
+      {
+        "sequence": 11,
+        "name": "occurrence duration",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 12,
+        "name": "total occurences",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "TS",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "time stamp",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "time of an event",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "degree of precision",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "TX",
+    "version": "2.3.1",
+    "kind": "primitive",
+    "title": "text data",
+    "components": []
+  },
+  {
+    "id": "UVC",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "Value code and amount",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "value code",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "value amount",
+        "datatypeId": "NM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "VH",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "visiting hours",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "start day range",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "end day range",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "start hour range",
+        "datatypeId": "TM",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "end hour range",
+        "datatypeId": "TM",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "VID",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "version identifier",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "version ID",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "internationalization code",
+        "datatypeId": "CE",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "international version ID",
+        "datatypeId": "CE",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "VR",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "value qualifier",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "first data code value",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "Last data code calue",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "WVI",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "channel identifier",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "Channel Number",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "Channel Name",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "WVS",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "wavefrom source",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "source name 1",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "source name 2",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "XAD",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "extended address",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "street address",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "other designation",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "city",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "state or province",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "zip or postal code",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "country",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "address type",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "other geographic designation",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "county/parish code",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 10,
+        "name": "census tract",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 11,
+        "name": "address representation code",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "XCN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "extended composite ID number and name for persons",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "ID number (ST)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "family+last name",
+        "datatypeId": "FN",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "given name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "middle initial or name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "suffix (e.g., JR or III)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "prefix (e.g., DR)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "degree (e.g., MD)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "source table",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "assigning authority",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 10,
+        "name": "name type code",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 11,
+        "name": "identifier check digit",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 12,
+        "name": "code identifying the check digit scheme employed",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 13,
+        "name": "identifier type code",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 14,
+        "name": "assigning facility",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 15,
+        "name": "Name Representation code",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "XON",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "extended composite name and identification number for organizations",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "organization name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "organization name type code",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "ID number (NM)",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "check digit",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "code identifying the check digit scheme employed",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "assigning authority",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "identifier type code",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "assigning facility ID",
+        "datatypeId": "HD",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "Name Representation code",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "XPN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "extended person name",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "family+last name",
+        "datatypeId": "FN",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "given name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "middle initial or name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "suffix (e.g., JR or III)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "prefix (e.g., DR)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "degree (e.g., MD)",
+        "datatypeId": "IS",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "name type code",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "Name Representation code",
+        "datatypeId": "ID",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "XTN",
+    "version": "2.3.1",
+    "kind": "composite",
+    "title": "extended telecommunication number",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "[(999)] 999-9999 [X99999][C any text]",
+        "datatypeId": "TN",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "telecommunication use code",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "telecommunication equipment type (ID)",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "Email address",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "Country Code",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "Area/city code",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "Phone number",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "Extension",
+        "datatypeId": "NM",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "any text",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  }
+]

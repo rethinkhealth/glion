@@ -1,25 +1,16 @@
-import { fieldImports } from "../profiles/field-manifest";
-import { loaderByVersion, versionAndId } from "./load";
-import type { FieldDefinition, FieldModule } from "./types";
+import { loaderByVersion } from "./load";
+import type { FieldDefinition, SegmentFieldsEntry } from "./types";
 
-/** Compile raw field module into indexed definition. */
-const compileFields = (raw: FieldModule): FieldDefinition => {
-  const bySequence = new Map<number, (typeof raw.fields)[number]>();
-  const requiredSequences = new Set<number>();
-
-  for (const field of raw.fields) {
-    bySequence.set(field.sequence, field);
-    if (field.required) {
-      requiredSequences.add(field.sequence);
-    }
-  }
-
-  return {
-    bySequence,
-    requiredSequences,
-    segmentId: raw.segmentId,
-  };
-};
+const compileSegment = ({
+  segmentId,
+  fields,
+}: SegmentFieldsEntry): FieldDefinition => ({
+  bySequence: new Map(fields.map((field) => [field.sequence, field])),
+  requiredSequences: new Set(
+    fields.filter((field) => field.required).map((field) => field.sequence)
+  ),
+  segmentId,
+});
 
 /**
  * The field definitions of every segment in an HL7v2 version, by segment ID,
@@ -28,4 +19,13 @@ const compileFields = (raw: FieldModule): FieldDefinition => {
 export const loadFields: (
   version: string
 ) => Promise<ReadonlyMap<string, FieldDefinition> | undefined> =
-  loaderByVersion(fieldImports, versionAndId, compileFields);
+  loaderByVersion(
+    import.meta.glob<readonly SegmentFieldsEntry[]>(
+      "../profiles/v*/fields.json",
+      { import: "default" }
+    ),
+    (segments) =>
+      new Map(
+        segments.map((segment) => [segment.segmentId, compileSegment(segment)])
+      )
+  );

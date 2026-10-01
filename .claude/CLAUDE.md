@@ -118,7 +118,7 @@ Each package uses a **dual build**:
 - **tsdown** — bundles ESM JavaScript (Rolldown-based, `format: "esm"`, target `es2022`).
 - **tsc** — generates TypeScript declarations with source maps for IDE go-to-definition.
 
-`@glion/profiles` uses tsdown's `codeSplitting` to merge ~10,800 profile files into ~170 chunks for install/runtime performance.
+`@glion/profiles` bundles one JSON file per HL7v2 version and kind; tsdown's `codeSplitting` puts each in its own lazy chunk, as `JSON.parse` of a minified string.
 
 Each package's `package.json`:
 

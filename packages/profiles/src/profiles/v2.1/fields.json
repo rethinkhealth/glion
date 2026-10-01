@@ -1,0 +1,4649 @@
+[
+  {
+    "segmentId": "ACC",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ACC-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "ACCIDENT DATE/TIME",
+        "item": "182"
+      },
+      {
+        "sequence": 2,
+        "id": "ACC-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70050",
+        "name": "ACCIDENT CODE",
+        "item": "184"
+      },
+      {
+        "sequence": 3,
+        "id": "ACC-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "ACCIDENT LOCATION",
+        "item": "185"
+      }
+    ]
+  },
+  {
+    "segmentId": "ADD",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ADD-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "ADDENDUM CONTINUATION POINTER",
+        "item": "641"
+      }
+    ]
+  },
+  {
+    "segmentId": "BHS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "BHS-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 1,
+        "name": "BATCH FIELD SEPARATOR",
+        "item": "685"
+      },
+      {
+        "sequence": 2,
+        "id": "BHS-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "BATCH ENCODING CHARACTERS",
+        "item": "686"
+      },
+      {
+        "sequence": 3,
+        "id": "BHS-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "BATCH SENDING APPLICATION",
+        "item": "687"
+      },
+      {
+        "sequence": 4,
+        "id": "BHS-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "BATCH SENDING FACILITY",
+        "item": "688"
+      },
+      {
+        "sequence": 5,
+        "id": "BHS-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "BATCH RECEIVING APPLICATION",
+        "item": "689"
+      },
+      {
+        "sequence": 6,
+        "id": "BHS-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "BATCH RECEIVING FACILITY",
+        "item": "690"
+      },
+      {
+        "sequence": 7,
+        "id": "BHS-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "BATCH CREATION DATE/TIME",
+        "item": "655"
+      },
+      {
+        "sequence": 8,
+        "id": "BHS-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "BATCH SECURITY",
+        "item": "691"
+      },
+      {
+        "sequence": 9,
+        "id": "BHS-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "BATCH NAME/ID/TYPE",
+        "item": "656"
+      },
+      {
+        "sequence": 10,
+        "id": "BHS-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "BATCH COMMENT",
+        "item": "657"
+      },
+      {
+        "sequence": 11,
+        "id": "BHS-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "BATCH CONTROL ID",
+        "item": "658"
+      },
+      {
+        "sequence": 12,
+        "id": "BHS-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "REFERENCE BATCH CONTROL ID",
+        "item": "659"
+      }
+    ]
+  },
+  {
+    "segmentId": "BLG",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "BLG-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 15,
+        "table": "HL70100",
+        "name": "WHEN TO CHARGE",
+        "item": "66"
+      },
+      {
+        "sequence": 2,
+        "id": "BLG-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 50,
+        "table": "HL70122",
+        "name": "CHARGE TYPE",
+        "item": "729"
+      },
+      {
+        "sequence": 3,
+        "id": "BLG-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 100,
+        "name": "ACCOUNT ID",
+        "item": "730"
+      }
+    ]
+  },
+  {
+    "segmentId": "BTS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "BTS-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 10,
+        "name": "BATCH MESSAGE COUNT",
+        "item": "664"
+      },
+      {
+        "sequence": 2,
+        "id": "BTS-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "BATCH COMMENT",
+        "item": "665"
+      },
+      {
+        "sequence": 3,
+        "id": "BTS-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 100,
+        "name": "BATCH TOTALS",
+        "item": "666"
+      }
+    ]
+  },
+  {
+    "segmentId": "DG1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "DG1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - DIAGNOSIS",
+        "item": "506"
+      },
+      {
+        "sequence": 2,
+        "id": "DG1-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70053",
+        "name": "DIAGNOSIS CODING METHOD",
+        "item": "394"
+      },
+      {
+        "sequence": 3,
+        "id": "DG1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70051",
+        "name": "DIAGNOSIS CODE",
+        "item": "293"
+      },
+      {
+        "sequence": 4,
+        "id": "DG1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "DIAGNOSIS DESCRIPTION",
+        "item": "294"
+      },
+      {
+        "sequence": 5,
+        "id": "DG1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "DIAGNOSIS DATE/TIME",
+        "item": "295"
+      },
+      {
+        "sequence": 6,
+        "id": "DG1-6",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70052",
+        "name": "DIAGNOSIS/DRG TYPE",
+        "item": "297"
+      },
+      {
+        "sequence": 7,
+        "id": "DG1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 4,
+        "table": "HL70118",
+        "name": "MAJOR DIAGNOSTIC CATEGORY",
+        "item": "298"
+      },
+      {
+        "sequence": 8,
+        "id": "DG1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 4,
+        "table": "HL70055",
+        "name": "DIAGNOSTIC RELATED GROUP",
+        "item": "299"
+      },
+      {
+        "sequence": 9,
+        "id": "DG1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "DRG APPROVAL INDICATOR",
+        "item": "373"
+      },
+      {
+        "sequence": 10,
+        "id": "DG1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70056",
+        "name": "DRG GROUPER REVIEW CODE",
+        "item": "374"
+      },
+      {
+        "sequence": 11,
+        "id": "DG1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70083",
+        "name": "OUTLIER TYPE",
+        "item": "375"
+      },
+      {
+        "sequence": 12,
+        "id": "DG1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "OUTLIER DAYS",
+        "item": "300"
+      },
+      {
+        "sequence": 13,
+        "id": "DG1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "OUTLIER COST",
+        "item": "376"
+      },
+      {
+        "sequence": 14,
+        "id": "DG1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 4,
+        "name": "GROUPER VERSION AND TYPE",
+        "item": "781"
+      }
+    ]
+  },
+  {
+    "segmentId": "DSC",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "DSC-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "CONTINUATION POINTER",
+        "item": "167"
+      }
+    ]
+  },
+  {
+    "segmentId": "DSP",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "DSP-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - DISPLAY DATA",
+        "item": "570"
+      },
+      {
+        "sequence": 2,
+        "id": "DSP-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "DISPLAY LEVEL",
+        "item": "571"
+      },
+      {
+        "sequence": 3,
+        "id": "DSP-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 300,
+        "name": "DATA LINE",
+        "item": "153"
+      },
+      {
+        "sequence": 4,
+        "id": "DSP-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "LOGICAL BREAK POINT",
+        "item": "154"
+      },
+      {
+        "sequence": 5,
+        "id": "DSP-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 20,
+        "name": "RESULT ID",
+        "item": "599"
+      }
+    ]
+  },
+  {
+    "segmentId": "ERR",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ERR-1",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 80,
+        "table": "HL70060",
+        "name": "ERROR CODE AND LOCATION",
+        "item": "80"
+      }
+    ]
+  },
+  {
+    "segmentId": "EVN",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "EVN-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70003",
+        "name": "EVENT TYPE CODE",
+        "item": "29"
+      },
+      {
+        "sequence": 2,
+        "id": "EVN-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "DATE/TIME OF EVENT",
+        "item": "30"
+      },
+      {
+        "sequence": 3,
+        "id": "EVN-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "DATE/TIME PLANNED EVENT",
+        "item": "32"
+      },
+      {
+        "sequence": 4,
+        "id": "EVN-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70062",
+        "name": "EVENT REASON CODE",
+        "item": "369"
+      }
+    ]
+  },
+  {
+    "segmentId": "FHS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "FHS-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 1,
+        "name": "FILE FIELD SEPARATOR",
+        "item": "692"
+      },
+      {
+        "sequence": 2,
+        "id": "FHS-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 4,
+        "name": "FILE ENCODING CHARACTERS",
+        "item": "693"
+      },
+      {
+        "sequence": 3,
+        "id": "FHS-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "FILE SENDING APPLICATION",
+        "item": "694"
+      },
+      {
+        "sequence": 4,
+        "id": "FHS-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "FILE SENDING FACILITY",
+        "item": "695"
+      },
+      {
+        "sequence": 5,
+        "id": "FHS-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "FILE RECEIVING APPLICATION",
+        "item": "696"
+      },
+      {
+        "sequence": 6,
+        "id": "FHS-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "FILE RECEIVING FACILITY",
+        "item": "697"
+      },
+      {
+        "sequence": 7,
+        "id": "FHS-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "DATE/TIME OF FILE CREATION",
+        "item": "660"
+      },
+      {
+        "sequence": 8,
+        "id": "FHS-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "FILE SECURITY",
+        "item": "698"
+      },
+      {
+        "sequence": 9,
+        "id": "FHS-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "FILE NAME/ID",
+        "item": "661"
+      },
+      {
+        "sequence": 10,
+        "id": "FHS-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "FILE HEADER COMMENT",
+        "item": "662"
+      },
+      {
+        "sequence": 11,
+        "id": "FHS-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "FILE CONTROL ID",
+        "item": "663"
+      },
+      {
+        "sequence": 12,
+        "id": "FHS-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "REFERENCE FILE CONTROL ID",
+        "item": "768"
+      }
+    ]
+  },
+  {
+    "segmentId": "FT1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "FT1-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - FINANCIAL TRANSACTION",
+        "item": "507"
+      },
+      {
+        "sequence": 2,
+        "id": "FT1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 12,
+        "name": "TRANSACTION ID",
+        "item": "366"
+      },
+      {
+        "sequence": 3,
+        "id": "FT1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 5,
+        "name": "TRANSACTION BATCH ID",
+        "item": "503"
+      },
+      {
+        "sequence": 4,
+        "id": "FT1-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "TRANSACTION DATE",
+        "item": "351"
+      },
+      {
+        "sequence": 5,
+        "id": "FT1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "TRANSACTION POSTING DATE",
+        "item": "352"
+      },
+      {
+        "sequence": 6,
+        "id": "FT1-6",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70017",
+        "name": "TRANSACTION TYPE",
+        "item": "353"
+      },
+      {
+        "sequence": 7,
+        "id": "FT1-7",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 20,
+        "table": "HL70096",
+        "name": "TRANSACTION CODE",
+        "item": "354"
+      },
+      {
+        "sequence": 8,
+        "id": "FT1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "TRANSACTION DESCRIPTION",
+        "item": "356"
+      },
+      {
+        "sequence": 9,
+        "id": "FT1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "TRANSACTION DESCRIPTION - ALT",
+        "item": "706"
+      },
+      {
+        "sequence": 10,
+        "id": "FT1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "TRANSACTION AMOUNT - EXTENDED",
+        "item": "358"
+      },
+      {
+        "sequence": 11,
+        "id": "FT1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "TRANSACTION QUANTITY",
+        "item": "357"
+      },
+      {
+        "sequence": 12,
+        "id": "FT1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "TRANSACTION AMOUNT - UNIT",
+        "item": "782"
+      },
+      {
+        "sequence": 13,
+        "id": "FT1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 16,
+        "table": "HL70049",
+        "name": "DEPARTMENT CODE",
+        "item": "355"
+      },
+      {
+        "sequence": 14,
+        "id": "FT1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70072",
+        "name": "INSURANCE PLAN ID",
+        "item": "359"
+      },
+      {
+        "sequence": 15,
+        "id": "FT1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "INSURANCE AMOUNT",
+        "item": "360"
+      },
+      {
+        "sequence": 16,
+        "id": "FT1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "PATIENT LOCATION",
+        "item": "361"
+      },
+      {
+        "sequence": 17,
+        "id": "FT1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70024",
+        "name": "FEE SCHEDULE",
+        "item": "362"
+      },
+      {
+        "sequence": 18,
+        "id": "FT1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70018",
+        "name": "PATIENT TYPE",
+        "item": "363"
+      },
+      {
+        "sequence": 19,
+        "id": "FT1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70051",
+        "name": "DIAGNOSIS CODE",
+        "item": "364"
+      },
+      {
+        "sequence": 20,
+        "id": "FT1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70084",
+        "name": "PERFORMED BY CODE",
+        "item": "377"
+      },
+      {
+        "sequence": 21,
+        "id": "FT1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "ORDERED BY CODE",
+        "item": "783"
+      },
+      {
+        "sequence": 22,
+        "id": "FT1-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "UNIT COST",
+        "item": "784"
+      }
+    ]
+  },
+  {
+    "segmentId": "FTS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "FTS-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 10,
+        "name": "FILE BATCH COUNT",
+        "item": "667"
+      },
+      {
+        "sequence": 2,
+        "id": "FTS-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "FILE TRAILER COMMENT",
+        "item": "668"
+      }
+    ]
+  },
+  {
+    "segmentId": "GT1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "GT1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - GUARANTOR",
+        "item": "321"
+      },
+      {
+        "sequence": 2,
+        "id": "GT1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 20,
+        "name": "GUARANTOR NUMBER",
+        "item": "322"
+      },
+      {
+        "sequence": 3,
+        "id": "GT1-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "GUARANTOR NAME",
+        "item": "323"
+      },
+      {
+        "sequence": 4,
+        "id": "GT1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "GUARANTOR SPOUSE NAME",
+        "item": "707"
+      },
+      {
+        "sequence": 5,
+        "id": "GT1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "GUARANTOR ADDRESS",
+        "item": "324"
+      },
+      {
+        "sequence": 6,
+        "id": "GT1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "GUARANTOR PH. NUM.- HOME",
+        "item": "329"
+      },
+      {
+        "sequence": 7,
+        "id": "GT1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "GUARANTOR PH. NUM-BUSINESS",
+        "item": "330"
+      },
+      {
+        "sequence": 8,
+        "id": "GT1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "GUARANTOR DATE OF BIRTH",
+        "item": "331"
+      },
+      {
+        "sequence": 9,
+        "id": "GT1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70001",
+        "name": "GUARANTOR SEX",
+        "item": "332"
+      },
+      {
+        "sequence": 10,
+        "id": "GT1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70068",
+        "name": "GUARANTOR TYPE",
+        "item": "333"
+      },
+      {
+        "sequence": 11,
+        "id": "GT1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70063",
+        "name": "GUARANTOR RELATIONSHIP",
+        "item": "334"
+      },
+      {
+        "sequence": 12,
+        "id": "GT1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 11,
+        "name": "GUARANTOR SSN",
+        "item": "335"
+      },
+      {
+        "sequence": 13,
+        "id": "GT1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "GUARANTOR DATE - BEGIN",
+        "item": "338"
+      },
+      {
+        "sequence": 14,
+        "id": "GT1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "GUARANTOR DATE - END",
+        "item": "339"
+      },
+      {
+        "sequence": 15,
+        "id": "GT1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "GUARANTOR PRIORITY",
+        "item": "340"
+      },
+      {
+        "sequence": 16,
+        "id": "GT1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 45,
+        "name": "GUARANTOR EMPLOYER NAME",
+        "item": "341"
+      },
+      {
+        "sequence": 17,
+        "id": "GT1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "GUARANTOR EMPLOYER ADDRESS",
+        "item": "342"
+      },
+      {
+        "sequence": 18,
+        "id": "GT1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "GUARANTOR EMPLOY PHONE #",
+        "item": "347"
+      },
+      {
+        "sequence": 19,
+        "id": "GT1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "GUARANTOR EMPLOYEE ID NUM",
+        "item": "391"
+      },
+      {
+        "sequence": 20,
+        "id": "GT1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70066",
+        "name": "GUARANTOR EMPLOYMENT STATUS",
+        "item": "392"
+      }
+    ]
+  },
+  {
+    "segmentId": "IN1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "IN1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - INSURANCE",
+        "item": "234"
+      },
+      {
+        "sequence": 2,
+        "id": "IN1-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70072",
+        "name": "INSURANCE PLAN ID",
+        "item": "378"
+      },
+      {
+        "sequence": 3,
+        "id": "IN1-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 6,
+        "name": "INSURANCE COMPANY ID",
+        "item": "235"
+      },
+      {
+        "sequence": 4,
+        "id": "IN1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 45,
+        "name": "INSURANCE COMPANY NAME",
+        "item": "236"
+      },
+      {
+        "sequence": 5,
+        "id": "IN1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "INSURANCE COMPANY ADDRESS",
+        "item": "237"
+      },
+      {
+        "sequence": 6,
+        "id": "IN1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "INSURANCE CO. CONTACT PERS",
+        "item": "242"
+      },
+      {
+        "sequence": 7,
+        "id": "IN1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "INSURANCE CO PHONE NUMBER",
+        "item": "243"
+      },
+      {
+        "sequence": 8,
+        "id": "IN1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 12,
+        "name": "GROUP NUMBER",
+        "item": "248"
+      },
+      {
+        "sequence": 9,
+        "id": "IN1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 35,
+        "name": "GROUP NAME",
+        "item": "249"
+      },
+      {
+        "sequence": 10,
+        "id": "IN1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 12,
+        "name": "INSURED&apos;S GROUP EMP. ID",
+        "item": "250"
+      },
+      {
+        "sequence": 11,
+        "id": "IN1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 45,
+        "name": "INSURED&apos;S GROUP EMP. NAME",
+        "item": "251"
+      },
+      {
+        "sequence": 12,
+        "id": "IN1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "PLAN EFFECTIVE DATE",
+        "item": "252"
+      },
+      {
+        "sequence": 13,
+        "id": "IN1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "PLAN EXPIRATION DATE",
+        "item": "253"
+      },
+      {
+        "sequence": 14,
+        "id": "IN1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 55,
+        "name": "AUTHORIZATION INFORMATION",
+        "item": "254"
+      },
+      {
+        "sequence": 15,
+        "id": "IN1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70086",
+        "name": "PLAN TYPE",
+        "item": "260"
+      },
+      {
+        "sequence": 16,
+        "id": "IN1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "NAME OF INSURED",
+        "item": "261"
+      },
+      {
+        "sequence": 17,
+        "id": "IN1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70063",
+        "name": "INSURED&apos;S RELATIONSHIP TO PATIENT",
+        "item": "262"
+      },
+      {
+        "sequence": 18,
+        "id": "IN1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "INSURED&apos;S DATE OF BIRTH",
+        "item": "708"
+      },
+      {
+        "sequence": 19,
+        "id": "IN1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "INSURED&apos;S ADDRESS",
+        "item": "709"
+      },
+      {
+        "sequence": 20,
+        "id": "IN1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "ASSIGNMENT OF BENEFITS",
+        "item": "263"
+      },
+      {
+        "sequence": 21,
+        "id": "IN1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "COORDINATION OF BENEFITS",
+        "item": "264"
+      },
+      {
+        "sequence": 22,
+        "id": "IN1-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "COORD OF BEN. PRIORITY",
+        "item": "265"
+      },
+      {
+        "sequence": 23,
+        "id": "IN1-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70081",
+        "name": "NOTICE OF ADMISSION CODE",
+        "item": "266"
+      },
+      {
+        "sequence": 24,
+        "id": "IN1-24",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "NOTICE OF ADMISSION DATE",
+        "item": "267"
+      },
+      {
+        "sequence": 25,
+        "id": "IN1-25",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70094",
+        "name": "RPT OF ELIGIBILITY CODE",
+        "item": "268"
+      },
+      {
+        "sequence": 26,
+        "id": "IN1-26",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "RPT OF ELIGIBILITY DATE",
+        "item": "269"
+      },
+      {
+        "sequence": 27,
+        "id": "IN1-27",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70093",
+        "name": "RELEASE INFORMATION CODE",
+        "item": "270"
+      },
+      {
+        "sequence": 28,
+        "id": "IN1-28",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "PRE-ADMIT CERT. (PAC)",
+        "item": "271"
+      },
+      {
+        "sequence": 29,
+        "id": "IN1-29",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "VERIFICATION DATE",
+        "item": "272"
+      },
+      {
+        "sequence": 30,
+        "id": "IN1-30",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 60,
+        "name": "VERIFICATION BY",
+        "item": "273"
+      },
+      {
+        "sequence": 31,
+        "id": "IN1-31",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70098",
+        "name": "TYPE OF AGREEMENT CODE",
+        "item": "277"
+      },
+      {
+        "sequence": 32,
+        "id": "IN1-32",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70022",
+        "name": "BILLING STATUS",
+        "item": "278"
+      },
+      {
+        "sequence": 33,
+        "id": "IN1-33",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "LIFETIME RESERVE DAYS",
+        "item": "280"
+      },
+      {
+        "sequence": 34,
+        "id": "IN1-34",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "DELAY BEFORE L. R. DAY",
+        "item": "281"
+      },
+      {
+        "sequence": 35,
+        "id": "IN1-35",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 8,
+        "table": "HL70042",
+        "name": "COMPANY PLAN CODE",
+        "item": "282"
+      },
+      {
+        "sequence": 36,
+        "id": "IN1-36",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "POLICY NUMBER",
+        "item": "283"
+      },
+      {
+        "sequence": 37,
+        "id": "IN1-37",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "POLICY DEDUCTIBLE",
+        "item": "284"
+      },
+      {
+        "sequence": 38,
+        "id": "IN1-38",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "POLICY LIMIT - AMOUNT",
+        "item": "285"
+      },
+      {
+        "sequence": 39,
+        "id": "IN1-39",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "POLICY LIMIT - DAYS",
+        "item": "286"
+      },
+      {
+        "sequence": 40,
+        "id": "IN1-40",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "ROOM RATE - SEMI-PRIVATE",
+        "item": "287"
+      },
+      {
+        "sequence": 41,
+        "id": "IN1-41",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "ROOM RATE - PRIVATE",
+        "item": "288"
+      },
+      {
+        "sequence": 42,
+        "id": "IN1-42",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70066",
+        "name": "INSURED&apos;S EMPLOYMENT STATUS",
+        "item": "710"
+      },
+      {
+        "sequence": 43,
+        "id": "IN1-43",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70001",
+        "name": "INSURED&apos;S SEX",
+        "item": "711"
+      },
+      {
+        "sequence": 44,
+        "id": "IN1-44",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "INSURED&apos;S EMPLOYER ADDRESS",
+        "item": "713"
+      }
+    ]
+  },
+  {
+    "segmentId": "MRG",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "MRG-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 16,
+        "table": "HL70061",
+        "name": "PRIOR PATIENT ID - INTERNAL",
+        "item": "576"
+      },
+      {
+        "sequence": 2,
+        "id": "MRG-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 16,
+        "table": "HL70061",
+        "name": "PRIOR ALTERNATE PATIENT ID",
+        "item": "577"
+      },
+      {
+        "sequence": 3,
+        "id": "MRG-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 20,
+        "table": "HL70061",
+        "name": "PRIOR PATIENT ACCOUNT NUMBER",
+        "item": "578"
+      }
+    ]
+  },
+  {
+    "segmentId": "MSA",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "MSA-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70008",
+        "name": "ACKNOWLEDGMENT CODE",
+        "item": "2"
+      },
+      {
+        "sequence": 2,
+        "id": "MSA-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "MESSAGE CONTROL ID",
+        "item": "3"
+      },
+      {
+        "sequence": 3,
+        "id": "MSA-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "TEXT MESSAGE",
+        "item": "4"
+      },
+      {
+        "sequence": 4,
+        "id": "MSA-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 15,
+        "name": "EXPECTED SEQUENCE NUMBER",
+        "item": "598"
+      },
+      {
+        "sequence": 5,
+        "id": "MSA-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70102",
+        "name": "DELAYED ACKNOWLEDGMENT TYPE",
+        "item": "632"
+      }
+    ]
+  },
+  {
+    "segmentId": "MSH",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "MSH-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 1,
+        "name": "FIELD SEPARATOR",
+        "item": "5"
+      },
+      {
+        "sequence": 2,
+        "id": "MSH-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 4,
+        "name": "ENCODING CHARACTERS",
+        "item": "509"
+      },
+      {
+        "sequence": 3,
+        "id": "MSH-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "SENDING APPLICATION",
+        "item": "6"
+      },
+      {
+        "sequence": 4,
+        "id": "MSH-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "SENDING FACILITY",
+        "item": "512"
+      },
+      {
+        "sequence": 5,
+        "id": "MSH-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "RECEIVING APPLICATION",
+        "item": "9"
+      },
+      {
+        "sequence": 6,
+        "id": "MSH-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "RECEIVING FACILITY",
+        "item": "513"
+      },
+      {
+        "sequence": 7,
+        "id": "MSH-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "DATE/TIME OF MESSAGE",
+        "item": "10"
+      },
+      {
+        "sequence": 8,
+        "id": "MSH-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "Security",
+        "item": "8"
+      },
+      {
+        "sequence": 9,
+        "id": "MSH-9",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 7,
+        "table": "HL70076",
+        "name": "MESSAGE TYPE",
+        "item": "12"
+      },
+      {
+        "sequence": 10,
+        "id": "MSH-10",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "MESSAGE CONTROL ID",
+        "item": "13"
+      },
+      {
+        "sequence": 11,
+        "id": "MSH-11",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70103",
+        "name": "PROCESSING ID",
+        "item": "14"
+      },
+      {
+        "sequence": 12,
+        "id": "MSH-12",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 8,
+        "table": "HL70104",
+        "name": "VERSION ID",
+        "item": "15"
+      },
+      {
+        "sequence": 13,
+        "id": "MSH-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 15,
+        "name": "SEQUENCE NUMBER",
+        "item": "633"
+      },
+      {
+        "sequence": 14,
+        "id": "MSH-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 180,
+        "name": "CONTINUATION POINTER",
+        "item": "699"
+      }
+    ]
+  },
+  {
+    "segmentId": "NCK",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NCK-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "SYSTEM DATE/TIME",
+        "item": "742"
+      }
+    ]
+  },
+  {
+    "segmentId": "NK1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NK1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - NEXT OF KIN",
+        "item": "712"
+      },
+      {
+        "sequence": 2,
+        "id": "NK1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "NEXT OF KIN NAME",
+        "item": "48"
+      },
+      {
+        "sequence": 3,
+        "id": "NK1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "table": "HL70063",
+        "name": "NEXT OF KIN RELATIONSHIP",
+        "item": "47"
+      },
+      {
+        "sequence": 4,
+        "id": "NK1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "NEXT OF KIN - ADDRESS",
+        "item": "225"
+      },
+      {
+        "sequence": 5,
+        "id": "NK1-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "NEXT OF KIN - PHONE NUMBER",
+        "item": "230"
+      }
+    ]
+  },
+  {
+    "segmentId": "NPU",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NPU-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "BED LOCATION",
+        "item": "785"
+      },
+      {
+        "sequence": 2,
+        "id": "NPU-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70116",
+        "name": "BED STATUS",
+        "item": "671"
+      }
+    ]
+  },
+  {
+    "segmentId": "NSC",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NSC-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 4,
+        "name": "NETWORK CHANGE TYPE",
+        "item": "758"
+      },
+      {
+        "sequence": 2,
+        "id": "NSC-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "CURRENT CPU",
+        "item": "759"
+      },
+      {
+        "sequence": 3,
+        "id": "NSC-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "CURRENT FILESERVER",
+        "item": "760"
+      },
+      {
+        "sequence": 4,
+        "id": "NSC-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "CURRENT APPLICATION",
+        "item": "761"
+      },
+      {
+        "sequence": 5,
+        "id": "NSC-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "CURRENT FACILITY",
+        "item": "762"
+      },
+      {
+        "sequence": 6,
+        "id": "NSC-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "NEW CPU",
+        "item": "763"
+      },
+      {
+        "sequence": 7,
+        "id": "NSC-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "NEW FILESERVER",
+        "item": "764"
+      },
+      {
+        "sequence": 8,
+        "id": "NSC-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "NEW APPLICATION",
+        "item": "765"
+      },
+      {
+        "sequence": 9,
+        "id": "NSC-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "NEW FACILITY",
+        "item": "766"
+      }
+    ]
+  },
+  {
+    "segmentId": "NST",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NST-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "STATISTICS AVAILABLE",
+        "item": "743"
+      },
+      {
+        "sequence": 2,
+        "id": "NST-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "SOURCE IDENTIFIER",
+        "item": "744"
+      },
+      {
+        "sequence": 3,
+        "id": "NST-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "name": "SOURCE TYPE",
+        "item": "745"
+      },
+      {
+        "sequence": 4,
+        "id": "NST-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "STATISTICS START",
+        "item": "746"
+      },
+      {
+        "sequence": 5,
+        "id": "NST-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "STATISTICS END",
+        "item": "747"
+      },
+      {
+        "sequence": 6,
+        "id": "NST-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "RECEIVE CHARACTER COUNT",
+        "item": "748"
+      },
+      {
+        "sequence": 7,
+        "id": "NST-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "SEND CHARACTER COUNT",
+        "item": "749"
+      },
+      {
+        "sequence": 8,
+        "id": "NST-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "MESSAGES RECEIVED",
+        "item": "750"
+      },
+      {
+        "sequence": 9,
+        "id": "NST-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "MESSAGES SENT",
+        "item": "751"
+      },
+      {
+        "sequence": 10,
+        "id": "NST-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "CHECKSUM ERRORS RECEIVED",
+        "item": "752"
+      },
+      {
+        "sequence": 11,
+        "id": "NST-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "LENGTH ERRORS RECEIVED",
+        "item": "753"
+      },
+      {
+        "sequence": 12,
+        "id": "NST-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "OTHER ERRORS RECEIVED",
+        "item": "754"
+      },
+      {
+        "sequence": 13,
+        "id": "NST-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "CONNECT TIMEOUTS",
+        "item": "755"
+      },
+      {
+        "sequence": 14,
+        "id": "NST-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "RECEIVE TIMEOUTS",
+        "item": "756"
+      },
+      {
+        "sequence": 15,
+        "id": "NST-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "NETWORK ERRORS",
+        "item": "757"
+      }
+    ]
+  },
+  {
+    "segmentId": "NTE",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NTE-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - NOTES AND COMMENTS",
+        "item": "573"
+      },
+      {
+        "sequence": 2,
+        "id": "NTE-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70105",
+        "name": "SOURCE OF COMMENT",
+        "item": "574"
+      },
+      {
+        "sequence": 3,
+        "id": "NTE-3",
+        "required": true,
+        "repeatable": true,
+        "datatype": "TX",
+        "maxLength": 120,
+        "name": "COMMENT",
+        "item": "575"
+      }
+    ]
+  },
+  {
+    "segmentId": "OBR",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OBR-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - OBSERVATION REQUEST",
+        "item": "520"
+      },
+      {
+        "sequence": 2,
+        "id": "OBR-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "PLACER ORDER #",
+        "item": "732"
+      },
+      {
+        "sequence": 3,
+        "id": "OBR-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "FILLER ORDER #",
+        "item": "733"
+      },
+      {
+        "sequence": 4,
+        "id": "OBR-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "UNIVERSAL SERVICE IDENT.",
+        "item": "523"
+      },
+      {
+        "sequence": 5,
+        "id": "OBR-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "PRIORITY",
+        "item": "524"
+      },
+      {
+        "sequence": 6,
+        "id": "OBR-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "REQUESTED DATE-TIME",
+        "item": "529"
+      },
+      {
+        "sequence": 7,
+        "id": "OBR-7",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "OBSERVATION DATE/TIME",
+        "item": "530"
+      },
+      {
+        "sequence": 8,
+        "id": "OBR-8",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "OBSERVATION END DATE/TIME",
+        "item": "531"
+      },
+      {
+        "sequence": 9,
+        "id": "OBR-9",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 20,
+        "table": "HL70036",
+        "name": "COLLECTION VOLUME",
+        "item": "532"
+      },
+      {
+        "sequence": 10,
+        "id": "OBR-10",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "COLLECTOR IDENTIFIER",
+        "item": "533"
+      },
+      {
+        "sequence": 11,
+        "id": "OBR-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 1,
+        "table": "HL70065",
+        "name": "SPECIMEN ACTION CODE",
+        "item": "534"
+      },
+      {
+        "sequence": 12,
+        "id": "OBR-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 60,
+        "table": "HL70047",
+        "name": "DANGER CODE",
+        "item": "535"
+      },
+      {
+        "sequence": 13,
+        "id": "OBR-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 300,
+        "name": "RELEVANT CLINICAL INFO.",
+        "item": "536"
+      },
+      {
+        "sequence": 14,
+        "id": "OBR-14",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "SPECIMEN RECEIVED DATE/TIME",
+        "item": "537"
+      },
+      {
+        "sequence": 15,
+        "id": "OBR-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 300,
+        "table": "HL70070",
+        "name": "SPECIMEN SOURCE",
+        "item": "538"
+      },
+      {
+        "sequence": 16,
+        "id": "OBR-16",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "ORDERING PROVIDER",
+        "item": "539"
+      },
+      {
+        "sequence": 17,
+        "id": "OBR-17",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "ORDER CALL-BACK PHONE NUM",
+        "item": "540"
+      },
+      {
+        "sequence": 18,
+        "id": "OBR-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "PLACERS FIELD #1",
+        "item": "541"
+      },
+      {
+        "sequence": 19,
+        "id": "OBR-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "PLACERS FIELD #2",
+        "item": "542"
+      },
+      {
+        "sequence": 20,
+        "id": "OBR-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "FILLERS FIELD #1",
+        "item": "543"
+      },
+      {
+        "sequence": 21,
+        "id": "OBR-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "FILLERS FIELD #2",
+        "item": "544"
+      },
+      {
+        "sequence": 22,
+        "id": "OBR-22",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "RESULTS RPT/STATUS CHNG - DATE/T",
+        "item": "546"
+      },
+      {
+        "sequence": 23,
+        "id": "OBR-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 40,
+        "name": "CHARGE TO PRACTICE",
+        "item": "547"
+      },
+      {
+        "sequence": 24,
+        "id": "OBR-24",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 10,
+        "table": "HL70074",
+        "name": "DIAGNOSTIC SERV SECT ID",
+        "item": "548"
+      },
+      {
+        "sequence": 25,
+        "id": "OBR-25",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70123",
+        "name": "RESULT STATUS",
+        "item": "734"
+      },
+      {
+        "sequence": 26,
+        "id": "OBR-26",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "LINKED RESULTS",
+        "item": "550"
+      },
+      {
+        "sequence": 27,
+        "id": "OBR-27",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 200,
+        "name": "QUANTITY/TIMING",
+        "item": "735"
+      },
+      {
+        "sequence": 28,
+        "id": "OBR-28",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "RESULT COPIES TO",
+        "item": "551"
+      },
+      {
+        "sequence": 29,
+        "id": "OBR-29",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 150,
+        "name": "PARENT ACCESSION #",
+        "item": "737"
+      },
+      {
+        "sequence": 30,
+        "id": "OBR-30",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 20,
+        "table": "HL70124",
+        "name": "TRANSPORTATION MODE",
+        "item": "625"
+      },
+      {
+        "sequence": 31,
+        "id": "OBR-31",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 300,
+        "name": "REASON FOR STUDY",
+        "item": "626"
+      },
+      {
+        "sequence": 32,
+        "id": "OBR-32",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "PRINCIPAL RESULT INTERPRETER",
+        "item": "627"
+      },
+      {
+        "sequence": 33,
+        "id": "OBR-33",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "ASSISTANT RESULT INTERPRETER",
+        "item": "628"
+      },
+      {
+        "sequence": 34,
+        "id": "OBR-34",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "TECHNICIAN",
+        "item": "630"
+      },
+      {
+        "sequence": 35,
+        "id": "OBR-35",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "TRANSCRIPTIONIST",
+        "item": "629"
+      },
+      {
+        "sequence": 36,
+        "id": "OBR-36",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "SCHEDULED - DATE/TIME",
+        "item": "736"
+      }
+    ]
+  },
+  {
+    "segmentId": "OBX",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OBX-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - OBSERVATION SIMPLE",
+        "item": "559"
+      },
+      {
+        "sequence": 2,
+        "id": "OBX-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70125",
+        "name": "VALUE TYPE",
+        "item": "676"
+      },
+      {
+        "sequence": 3,
+        "id": "OBX-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 80,
+        "name": "OBSERVATION IDENTIFIER",
+        "item": "560"
+      },
+      {
+        "sequence": 4,
+        "id": "OBX-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "OBSERVATION SUB-ID",
+        "item": "769"
+      },
+      {
+        "sequence": 5,
+        "id": "OBX-5",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 65,
+        "name": "OBSERVATION RESULTS",
+        "item": "561"
+      },
+      {
+        "sequence": 6,
+        "id": "OBX-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 20,
+        "name": "UNITS",
+        "item": "562"
+      },
+      {
+        "sequence": 7,
+        "id": "OBX-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "REFERENCES RANGE",
+        "item": "563"
+      },
+      {
+        "sequence": 8,
+        "id": "OBX-8",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 10,
+        "table": "HL70078",
+        "name": "ABNORMAL FLAGS",
+        "item": "564"
+      },
+      {
+        "sequence": 9,
+        "id": "OBX-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 5,
+        "name": "PROBABILITY",
+        "item": "639"
+      },
+      {
+        "sequence": 10,
+        "id": "OBX-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 5,
+        "table": "HL70080",
+        "name": "NATURE OF ABNORMAL TEST",
+        "item": "565"
+      },
+      {
+        "sequence": 11,
+        "id": "OBX-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70085",
+        "name": "OBSERV RESULT STATUS",
+        "item": "566"
+      },
+      {
+        "sequence": 12,
+        "id": "OBX-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "DATE LAST OBS NORMAL VALUES",
+        "item": "567"
+      }
+    ]
+  },
+  {
+    "segmentId": "ORC",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ORC-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "table": "HL70119",
+        "name": "ORDER CONTROL",
+        "item": "714"
+      },
+      {
+        "sequence": 2,
+        "id": "ORC-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "PLACER ORDER #",
+        "item": "715"
+      },
+      {
+        "sequence": 3,
+        "id": "ORC-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "FILLER ORDER #",
+        "item": "716"
+      },
+      {
+        "sequence": 4,
+        "id": "ORC-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "PLACER GROUP #",
+        "item": "717"
+      },
+      {
+        "sequence": 5,
+        "id": "ORC-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "table": "HL70038",
+        "name": "ORDER STATUS",
+        "item": "718"
+      },
+      {
+        "sequence": 6,
+        "id": "ORC-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 1,
+        "table": "HL70121",
+        "name": "RESPONSE FLAG",
+        "item": "719"
+      },
+      {
+        "sequence": 7,
+        "id": "ORC-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 200,
+        "name": "TIMING/QUANTITY",
+        "item": "720"
+      },
+      {
+        "sequence": 8,
+        "id": "ORC-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 200,
+        "name": "PARENT",
+        "item": "721"
+      },
+      {
+        "sequence": 9,
+        "id": "ORC-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "DATE/TIME OF TRANSACTION",
+        "item": "722"
+      },
+      {
+        "sequence": 10,
+        "id": "ORC-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "ENTERED BY",
+        "item": "723"
+      },
+      {
+        "sequence": 11,
+        "id": "ORC-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "VERIFIED BY",
+        "item": "724"
+      },
+      {
+        "sequence": 12,
+        "id": "ORC-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "ORDERING PROVIDER",
+        "item": "725"
+      },
+      {
+        "sequence": 13,
+        "id": "ORC-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 80,
+        "name": "ENTERER&apos;S LOCATION",
+        "item": "726"
+      },
+      {
+        "sequence": 14,
+        "id": "ORC-14",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "CALL BACK PHONE NUMBER",
+        "item": "727"
+      }
+    ]
+  },
+  {
+    "segmentId": "ORO",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ORO-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "ORDER ITEM ID",
+        "item": "731"
+      },
+      {
+        "sequence": 2,
+        "id": "ORO-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "SUBSTITUTE ALLOWED",
+        "item": "120"
+      },
+      {
+        "sequence": 3,
+        "id": "ORO-3",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "RESULTS COPIES TO",
+        "item": "586"
+      },
+      {
+        "sequence": 4,
+        "id": "ORO-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70012",
+        "name": "STOCK LOCATION",
+        "item": "68"
+      }
+    ]
+  },
+  {
+    "segmentId": "PID",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "PID-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - PATIENT ID",
+        "item": "572"
+      },
+      {
+        "sequence": 2,
+        "id": "PID-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 16,
+        "table": "HL70061",
+        "name": "PATIENT ID EXTERNAL (EXTERNAL ID)",
+        "item": "581"
+      },
+      {
+        "sequence": 3,
+        "id": "PID-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 16,
+        "table": "HL70061",
+        "name": "PATIENT ID INTERNAL (INTERNAL ID)",
+        "item": "34"
+      },
+      {
+        "sequence": 4,
+        "id": "PID-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 12,
+        "name": "ALTERNATE PATIENT ID",
+        "item": "38"
+      },
+      {
+        "sequence": 5,
+        "id": "PID-5",
+        "required": true,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "PATIENT NAME",
+        "item": "41"
+      },
+      {
+        "sequence": 6,
+        "id": "PID-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "MOTHER&apos;S MAIDEN NAME",
+        "item": "582"
+      },
+      {
+        "sequence": 7,
+        "id": "PID-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "DATE OF BIRTH",
+        "item": "43"
+      },
+      {
+        "sequence": 8,
+        "id": "PID-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70001",
+        "name": "SEX",
+        "item": "42"
+      },
+      {
+        "sequence": 9,
+        "id": "PID-9",
+        "required": false,
+        "repeatable": true,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "PATIENT ALIAS",
+        "item": "597"
+      },
+      {
+        "sequence": 10,
+        "id": "PID-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70005",
+        "name": "ETHNIC GROUP",
+        "item": "44"
+      },
+      {
+        "sequence": 11,
+        "id": "PID-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "PATIENT ADDRESS",
+        "item": "20"
+      },
+      {
+        "sequence": 12,
+        "id": "PID-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 4,
+        "name": "COUNTY CODE",
+        "item": "26"
+      },
+      {
+        "sequence": 13,
+        "id": "PID-13",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "PHONE NUMBER - HOME",
+        "item": "49"
+      },
+      {
+        "sequence": 14,
+        "id": "PID-14",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "PHONE NUMBER - BUSINESS",
+        "item": "50"
+      },
+      {
+        "sequence": 15,
+        "id": "PID-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "LANGUAGE - PATIENT",
+        "item": "464"
+      },
+      {
+        "sequence": 16,
+        "id": "PID-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70002",
+        "name": "MARITAL STATUS",
+        "item": "46"
+      },
+      {
+        "sequence": 17,
+        "id": "PID-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70006",
+        "name": "RELIGION",
+        "item": "45"
+      },
+      {
+        "sequence": 18,
+        "id": "PID-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 20,
+        "table": "HL70061",
+        "name": "PATIENT ACCOUNT NUMBER",
+        "item": "35"
+      },
+      {
+        "sequence": 19,
+        "id": "PID-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 16,
+        "name": "SSN NUMBER - PATIENT",
+        "item": "457"
+      },
+      {
+        "sequence": 20,
+        "id": "PID-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 25,
+        "name": "DRIVER&apos;S LIC NUM - PATIENT",
+        "item": "453"
+      }
+    ]
+  },
+  {
+    "segmentId": "PR1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "PR1-1",
+        "required": true,
+        "repeatable": true,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - PROCEDURE",
+        "item": "304"
+      },
+      {
+        "sequence": 2,
+        "id": "PR1-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70089",
+        "name": "PROCEDURE CODING METHOD.",
+        "item": "393"
+      },
+      {
+        "sequence": 3,
+        "id": "PR1-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 10,
+        "table": "HL70088",
+        "name": "PROCEDURE CODE",
+        "item": "305"
+      },
+      {
+        "sequence": 4,
+        "id": "PR1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "PROCEDURE DESCRIPTION",
+        "item": "306"
+      },
+      {
+        "sequence": 5,
+        "id": "PR1-5",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "PROCEDURE DATE/TIME",
+        "item": "307"
+      },
+      {
+        "sequence": 6,
+        "id": "PR1-6",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70090",
+        "name": "PROCEDURE TYPE",
+        "item": "309"
+      },
+      {
+        "sequence": 7,
+        "id": "PR1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "PROCEDURE MINUTES",
+        "item": "310"
+      },
+      {
+        "sequence": 8,
+        "id": "PR1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "ANESTHESIOLOGIST",
+        "item": "311"
+      },
+      {
+        "sequence": 9,
+        "id": "PR1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70019",
+        "name": "ANESTHESIA CODE",
+        "item": "313"
+      },
+      {
+        "sequence": 10,
+        "id": "PR1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "ANESTHESIA MINUTES",
+        "item": "314"
+      },
+      {
+        "sequence": 11,
+        "id": "PR1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "SURGEON",
+        "item": "315"
+      },
+      {
+        "sequence": 12,
+        "id": "PR1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "RESIDENT CODE",
+        "item": "318"
+      },
+      {
+        "sequence": 13,
+        "id": "PR1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70059",
+        "name": "CONSENT CODE",
+        "item": "317"
+      }
+    ]
+  },
+  {
+    "segmentId": "PV1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "PV1-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - PATIENT VISIT",
+        "item": "458"
+      },
+      {
+        "sequence": 2,
+        "id": "PV1-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70004",
+        "name": "PATIENT CLASS",
+        "item": "52"
+      },
+      {
+        "sequence": 3,
+        "id": "PV1-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "ASSIGNED PATIENT LOCATION",
+        "item": "53"
+      },
+      {
+        "sequence": 4,
+        "id": "PV1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70007",
+        "name": "ADMISSION TYPE",
+        "item": "218"
+      },
+      {
+        "sequence": 5,
+        "id": "PV1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "PRE-ADMIT NUMBER",
+        "item": "219"
+      },
+      {
+        "sequence": 6,
+        "id": "PV1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "PRIOR PATIENT LOCATION",
+        "item": "56"
+      },
+      {
+        "sequence": 7,
+        "id": "PV1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "ATTENDING DOCTOR",
+        "item": "57"
+      },
+      {
+        "sequence": 8,
+        "id": "PV1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "REFERRING DOCTOR",
+        "item": "579"
+      },
+      {
+        "sequence": 9,
+        "id": "PV1-9",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "CONSULTING DOCTOR",
+        "item": "580"
+      },
+      {
+        "sequence": 10,
+        "id": "PV1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70069",
+        "name": "HOSPITAL SERVICE",
+        "item": "59"
+      },
+      {
+        "sequence": 11,
+        "id": "PV1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "TEMPORARY LOCATION",
+        "item": "60"
+      },
+      {
+        "sequence": 12,
+        "id": "PV1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70087",
+        "name": "PRE-ADMIT TEST INDICATOR",
+        "item": "220"
+      },
+      {
+        "sequence": 13,
+        "id": "PV1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70092",
+        "name": "RE-ADMISSION INDICATOR",
+        "item": "221"
+      },
+      {
+        "sequence": 14,
+        "id": "PV1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70023",
+        "name": "ADMIT SOURCE",
+        "item": "63"
+      },
+      {
+        "sequence": 15,
+        "id": "PV1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70009",
+        "name": "AMBULATORY STATUS",
+        "item": "64"
+      },
+      {
+        "sequence": 16,
+        "id": "PV1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70099",
+        "name": "VIP INDICATOR",
+        "item": "193"
+      },
+      {
+        "sequence": 17,
+        "id": "PV1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "ADMITTING DOCTOR",
+        "item": "189"
+      },
+      {
+        "sequence": 18,
+        "id": "PV1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70018",
+        "name": "PATIENT TYPE",
+        "item": "191"
+      },
+      {
+        "sequence": 19,
+        "id": "PV1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "VISIT NUMBER",
+        "item": "194"
+      },
+      {
+        "sequence": 20,
+        "id": "PV1-20",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 11,
+        "table": "HL70064",
+        "name": "FINANCIAL CLASS",
+        "item": "195"
+      },
+      {
+        "sequence": 21,
+        "id": "PV1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70032",
+        "name": "CHARGE PRICE INDICATOR",
+        "item": "199"
+      },
+      {
+        "sequence": 22,
+        "id": "PV1-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70045",
+        "name": "COURTESY CODE",
+        "item": "386"
+      },
+      {
+        "sequence": 23,
+        "id": "PV1-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70046",
+        "name": "CREDIT RATING",
+        "item": "200"
+      },
+      {
+        "sequence": 24,
+        "id": "PV1-24",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70044",
+        "name": "CONTRACT CODE",
+        "item": "201"
+      },
+      {
+        "sequence": 25,
+        "id": "PV1-25",
+        "required": false,
+        "repeatable": true,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "CONTRACT EFFECTIVE DATE",
+        "item": "202"
+      },
+      {
+        "sequence": 26,
+        "id": "PV1-26",
+        "required": false,
+        "repeatable": true,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "CONTRACT AMOUNT",
+        "item": "203"
+      },
+      {
+        "sequence": 27,
+        "id": "PV1-27",
+        "required": false,
+        "repeatable": true,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "CONTRACT PERIOD",
+        "item": "204"
+      },
+      {
+        "sequence": 28,
+        "id": "PV1-28",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70073",
+        "name": "INTEREST CODE",
+        "item": "387"
+      },
+      {
+        "sequence": 29,
+        "id": "PV1-29",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70110",
+        "name": "TRANSFER TO BAD DEBT CODE",
+        "item": "205"
+      },
+      {
+        "sequence": 30,
+        "id": "PV1-30",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "TRANSFER TO BAD DEBT DATE",
+        "item": "388"
+      },
+      {
+        "sequence": 31,
+        "id": "PV1-31",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 10,
+        "table": "HL70021",
+        "name": "BAD DEBT AGENCY CODE",
+        "item": "206"
+      },
+      {
+        "sequence": 32,
+        "id": "PV1-32",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "BAD DEBT TRANSFER AMOUNT",
+        "item": "389"
+      },
+      {
+        "sequence": 33,
+        "id": "PV1-33",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "BAD DEBT RECOVERY AMOUNT",
+        "item": "390"
+      },
+      {
+        "sequence": 34,
+        "id": "PV1-34",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70111",
+        "name": "DELETE ACCOUNT INDICATOR",
+        "item": "207"
+      },
+      {
+        "sequence": 35,
+        "id": "PV1-35",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "DELETE ACCOUNT DATE",
+        "item": "208"
+      },
+      {
+        "sequence": 36,
+        "id": "PV1-36",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70112",
+        "name": "DISCHARGE DISPOSITION",
+        "item": "613"
+      },
+      {
+        "sequence": 37,
+        "id": "PV1-37",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70113",
+        "name": "DISCHARGED TO LOCATION",
+        "item": "614"
+      },
+      {
+        "sequence": 38,
+        "id": "PV1-38",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70114",
+        "name": "DIET TYPE",
+        "item": "615"
+      },
+      {
+        "sequence": 39,
+        "id": "PV1-39",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70115",
+        "name": "SERVICING FACILITY",
+        "item": "616"
+      },
+      {
+        "sequence": 40,
+        "id": "PV1-40",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70116",
+        "name": "BED STATUS",
+        "item": "617"
+      },
+      {
+        "sequence": 41,
+        "id": "PV1-41",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70117",
+        "name": "ACCOUNT STATUS",
+        "item": "703"
+      },
+      {
+        "sequence": 42,
+        "id": "PV1-42",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "PENDING LOCATION",
+        "item": "704"
+      },
+      {
+        "sequence": 43,
+        "id": "PV1-43",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "PRIOR TEMPORARY LOCATION",
+        "item": "705"
+      },
+      {
+        "sequence": 44,
+        "id": "PV1-44",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "ADMIT DATE/TIME",
+        "item": "775"
+      },
+      {
+        "sequence": 45,
+        "id": "PV1-45",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "DISCHARGE DATE/TIME",
+        "item": "776"
+      },
+      {
+        "sequence": 46,
+        "id": "PV1-46",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "CURRENT PATIENT BALANCE",
+        "item": "777"
+      },
+      {
+        "sequence": 47,
+        "id": "PV1-47",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "TOTAL CHARGES",
+        "item": "778"
+      },
+      {
+        "sequence": 48,
+        "id": "PV1-48",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "TOTAL ADJUSTMENTS",
+        "item": "779"
+      },
+      {
+        "sequence": 49,
+        "id": "PV1-49",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "TOTAL PAYMENTS",
+        "item": "780"
+      }
+    ]
+  },
+  {
+    "segmentId": "QRD",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "QRD-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "QUERY DATE/TIME",
+        "item": "156"
+      },
+      {
+        "sequence": 2,
+        "id": "QRD-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70106",
+        "name": "QUERY FORMAT CODE",
+        "item": "158"
+      },
+      {
+        "sequence": 3,
+        "id": "QRD-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70091",
+        "name": "QUERY PRIORITY",
+        "item": "159"
+      },
+      {
+        "sequence": 4,
+        "id": "QRD-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 10,
+        "name": "QUERY ID",
+        "item": "160"
+      },
+      {
+        "sequence": 5,
+        "id": "QRD-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70107",
+        "name": "DEFERRED RESPONSE TYPE",
+        "item": "161"
+      },
+      {
+        "sequence": 6,
+        "id": "QRD-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "DEFERRED RESPONSE DATE/TIME",
+        "item": "162"
+      },
+      {
+        "sequence": 7,
+        "id": "QRD-7",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 5,
+        "table": "HL70126",
+        "name": "QUANTITY LIMITED REQUEST",
+        "item": "164"
+      },
+      {
+        "sequence": 8,
+        "id": "QRD-8",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "WHO SUBJECT FILTER",
+        "item": "168"
+      },
+      {
+        "sequence": 9,
+        "id": "QRD-9",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70048",
+        "name": "WHAT SUBJECT FILTER",
+        "item": "169"
+      },
+      {
+        "sequence": 10,
+        "id": "QRD-10",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "WHAT DEPARTMENT DATA CODE",
+        "item": "170"
+      },
+      {
+        "sequence": 11,
+        "id": "QRD-11",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "WHAT DATA CODE VALUE QUAL.",
+        "item": "171"
+      },
+      {
+        "sequence": 12,
+        "id": "QRD-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70108",
+        "name": "QUERY RESULTS LEVEL",
+        "item": "701"
+      }
+    ]
+  },
+  {
+    "segmentId": "QRF",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "QRF-1",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "WHERE SUBJECT FILTER",
+        "item": "173"
+      },
+      {
+        "sequence": 2,
+        "id": "QRF-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "WHEN DATA START DATE/TIME",
+        "item": "174"
+      },
+      {
+        "sequence": 3,
+        "id": "QRF-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "WHEN DATA END DATE/TIME",
+        "item": "176"
+      },
+      {
+        "sequence": 4,
+        "id": "QRF-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "WHAT USER QUALIFIER",
+        "item": "178"
+      },
+      {
+        "sequence": 5,
+        "id": "QRF-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "OTHER QRY SUBJECT FILTER",
+        "item": "179"
+      }
+    ]
+  },
+  {
+    "segmentId": "RX1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RX1-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "name": "UNUSED",
+        "item": "770"
+      },
+      {
+        "sequence": 2,
+        "id": "RX1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "name": "UNUSED",
+        "item": "771"
+      },
+      {
+        "sequence": 3,
+        "id": "RX1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 8,
+        "table": "HL70033",
+        "name": "ROUTE",
+        "item": "129"
+      },
+      {
+        "sequence": 4,
+        "id": "RX1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "table": "HL70034",
+        "name": "SITE ADMINISTERED",
+        "item": "130"
+      },
+      {
+        "sequence": 5,
+        "id": "RX1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 10,
+        "name": "IV SOLUTION RATE",
+        "item": "131"
+      },
+      {
+        "sequence": 6,
+        "id": "RX1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 14,
+        "name": "DRUG STRENGTH",
+        "item": "133"
+      },
+      {
+        "sequence": 7,
+        "id": "RX1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "FINAL CONCENTRATION",
+        "item": "137"
+      },
+      {
+        "sequence": 8,
+        "id": "RX1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "FINAL VOLUME IN ML.",
+        "item": "138"
+      },
+      {
+        "sequence": 9,
+        "id": "RX1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 10,
+        "name": "DRUG DOSE",
+        "item": "135"
+      },
+      {
+        "sequence": 10,
+        "id": "RX1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "DRUG ROLE",
+        "item": "139"
+      },
+      {
+        "sequence": 11,
+        "id": "RX1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "PRESCRIPTION SEQUENCE #",
+        "item": "469"
+      },
+      {
+        "sequence": 12,
+        "id": "RX1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 4,
+        "name": "QUANTITY DISPENSED",
+        "item": "470"
+      },
+      {
+        "sequence": 13,
+        "id": "RX1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "name": "UNUSED",
+        "item": "772"
+      },
+      {
+        "sequence": 14,
+        "id": "RX1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 5,
+        "table": "HL70057",
+        "name": "DRUG ID",
+        "item": "473"
+      },
+      {
+        "sequence": 15,
+        "id": "RX1-15",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 5,
+        "name": "COMPONENT DRUG IDS",
+        "item": "474"
+      },
+      {
+        "sequence": 16,
+        "id": "RX1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "PRESCRIPTION TYPE",
+        "item": "479"
+      },
+      {
+        "sequence": 17,
+        "id": "RX1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "SUBSTITUTION STATUS",
+        "item": "480"
+      },
+      {
+        "sequence": 18,
+        "id": "RX1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70038",
+        "name": "RX ORDER STATUS",
+        "item": "588"
+      },
+      {
+        "sequence": 19,
+        "id": "RX1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "NUMBER OF REFILLS",
+        "item": "481"
+      },
+      {
+        "sequence": 20,
+        "id": "RX1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "name": "UNUSED",
+        "item": "773"
+      },
+      {
+        "sequence": 21,
+        "id": "RX1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "REFILLS REMAINING",
+        "item": "482"
+      },
+      {
+        "sequence": 22,
+        "id": "RX1-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 5,
+        "name": "DEA CLASS",
+        "item": "619"
+      },
+      {
+        "sequence": 23,
+        "id": "RX1-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "ORDERING MD&apos;S DEA NUMBER",
+        "item": "620"
+      },
+      {
+        "sequence": 24,
+        "id": "RX1-24",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "name": "UNUSED",
+        "item": "774"
+      },
+      {
+        "sequence": 25,
+        "id": "RX1-25",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "LAST REFILL DATE/TIME",
+        "item": "483"
+      },
+      {
+        "sequence": 26,
+        "id": "RX1-26",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "RX NUMBER",
+        "item": "596"
+      },
+      {
+        "sequence": 27,
+        "id": "RX1-27",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 5,
+        "name": "PRN STATUS",
+        "item": "621"
+      },
+      {
+        "sequence": 28,
+        "id": "RX1-28",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TX",
+        "maxLength": 80,
+        "name": "PHARMACY INSTRUCTIONS",
+        "item": "484"
+      },
+      {
+        "sequence": 29,
+        "id": "RX1-29",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TX",
+        "maxLength": 80,
+        "name": "PATIENT INSTRUCTIONS",
+        "item": "489"
+      },
+      {
+        "sequence": 30,
+        "id": "RX1-30",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TX",
+        "maxLength": 500,
+        "name": "INSTRUCTIONS (SIG)",
+        "item": "618"
+      }
+    ]
+  },
+  {
+    "segmentId": "UB1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "UB1-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "SET ID - UB82",
+        "item": "459"
+      },
+      {
+        "sequence": 2,
+        "id": "UB1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 1,
+        "name": "BLOOD DEDUCTIBLE",
+        "item": "279"
+      },
+      {
+        "sequence": 3,
+        "id": "UB1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "BLOOD FURN.-PINTS OF (40)",
+        "item": "396"
+      },
+      {
+        "sequence": 4,
+        "id": "UB1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "BLOOD REPLACED-PINTS (41)",
+        "item": "397"
+      },
+      {
+        "sequence": 5,
+        "id": "UB1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "BLOOD NOT RPLCD-PINTS(42)",
+        "item": "398"
+      },
+      {
+        "sequence": 6,
+        "id": "UB1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "CO-INSURANCE DAYS (25)",
+        "item": "399"
+      },
+      {
+        "sequence": 7,
+        "id": "UB1-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70043",
+        "name": "CONDITION CODE",
+        "item": "400"
+      },
+      {
+        "sequence": 8,
+        "id": "UB1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "COVERED DAYS - (23)",
+        "item": "405"
+      },
+      {
+        "sequence": 9,
+        "id": "UB1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "NON COVERED DAYS - (24)",
+        "item": "406"
+      },
+      {
+        "sequence": 10,
+        "id": "UB1-10",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "VALUE AMOUNT &amp; CODE",
+        "item": "407"
+      },
+      {
+        "sequence": 11,
+        "id": "UB1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "NUMBER OF GRACE DAYS (90)",
+        "item": "424"
+      },
+      {
+        "sequence": 12,
+        "id": "UB1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "SPEC. PROG. INDICATOR(44)",
+        "item": "425"
+      },
+      {
+        "sequence": 13,
+        "id": "UB1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "PSRO/UR APPROVAL IND. (87)",
+        "item": "426"
+      },
+      {
+        "sequence": 14,
+        "id": "UB1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "PSRO/UR APRVD STAY-FM(88)",
+        "item": "427"
+      },
+      {
+        "sequence": 15,
+        "id": "UB1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "PSRO/UR APRVD STAY-TO(89)",
+        "item": "428"
+      },
+      {
+        "sequence": 16,
+        "id": "UB1-16",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 20,
+        "name": "OCCURRENCE (28-32)",
+        "item": "429"
+      },
+      {
+        "sequence": 17,
+        "id": "UB1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "OCCURRENCE SPAN (33)",
+        "item": "435"
+      },
+      {
+        "sequence": 18,
+        "id": "UB1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "OCCURRENCE SPAN START DATE(33)",
+        "item": "446"
+      },
+      {
+        "sequence": 19,
+        "id": "UB1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "OCCUR. SPAN END DATE (33)",
+        "item": "447"
+      },
+      {
+        "sequence": 20,
+        "id": "UB1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "UB-82 LOCATOR 2",
+        "item": "448"
+      },
+      {
+        "sequence": 21,
+        "id": "UB1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 7,
+        "name": "UB-82 LOCATOR 9",
+        "item": "449"
+      },
+      {
+        "sequence": 22,
+        "id": "UB1-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 8,
+        "name": "UB-82 LOCATOR 27",
+        "item": "450"
+      },
+      {
+        "sequence": 23,
+        "id": "UB1-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 17,
+        "name": "UB-82 LOCATOR 45",
+        "item": "451"
+      }
+    ]
+  },
+  {
+    "segmentId": "URD",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "URD-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "R/U DATE/TIME",
+        "item": "600"
+      },
+      {
+        "sequence": 2,
+        "id": "URD-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70109",
+        "name": "REPORT PRIORITY",
+        "item": "601"
+      },
+      {
+        "sequence": 3,
+        "id": "URD-3",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U WHO SUBJECT DEFINITION",
+        "item": "602"
+      },
+      {
+        "sequence": 4,
+        "id": "URD-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70048",
+        "name": "R/U WHAT SUBJECT DEFINITION",
+        "item": "603"
+      },
+      {
+        "sequence": 5,
+        "id": "URD-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U WHAT DEPARTMENT CODE",
+        "item": "605"
+      },
+      {
+        "sequence": 6,
+        "id": "URD-6",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U DISPLAY/PRINT LOCATIONS",
+        "item": "607"
+      },
+      {
+        "sequence": 7,
+        "id": "URD-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70108",
+        "name": "R/U RESULTS LEVEL",
+        "item": "702"
+      }
+    ]
+  },
+  {
+    "segmentId": "URS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "URS-1",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U WHERE SUBJECT DEFINITION",
+        "item": "608"
+      },
+      {
+        "sequence": 2,
+        "id": "URS-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "R/U WHEN DATA START DATE/TIME",
+        "item": "609"
+      },
+      {
+        "sequence": 3,
+        "id": "URS-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 19,
+        "name": "R/U WHEN DATA END DATE/TIME",
+        "item": "610"
+      },
+      {
+        "sequence": 4,
+        "id": "URS-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U WHAT USER QUALIFIER",
+        "item": "611"
+      },
+      {
+        "sequence": 5,
+        "id": "URS-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U OTHER RESULTS SUBJECT DEFINI",
+        "item": "612"
+      }
+    ]
+  }
+]

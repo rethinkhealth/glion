@@ -3,8 +3,8 @@
  *
  * Runs as the last step of `pnpm build`, so what is checked is what ships:
  *
- * 1. Every structure file matches `message-structure.schema.json` and names it in
- *    `$schema`.
+ * 1. Every structure in every `structures.json` matches
+ *    `message-structure.schema.json`, and its ID is unique in the version.
  * 2. Every event map entry names a bundled structure, and every bundled structure
  *    maps to itself.
  * 3. Every structure loads, compiles, and accepts messages generated from it.
@@ -317,16 +317,11 @@ const readJson = (url) => JSON.parse(readFileSync(url, "utf8"));
 const bundledStructures = () =>
   readdirSync(PROFILES)
     .filter((entry) => entry.startsWith("v2"))
-    .flatMap((version) => {
-      const events = new URL(`${version}/events/`, PROFILES);
-      return readdirSync(events)
-        .filter((file) => file.endsWith(".json"))
-        .map((file) => ({
-          id: file.slice(0, -".json".length),
-          url: new URL(file, events),
-          version: version.slice(1),
-        }));
-    });
+    .flatMap((directory) =>
+      readJson(new URL(`${directory}/structures.json`, PROFILES)).map(
+        (structure) => ({ structure, version: directory.slice(1) })
+      )
+    );
 
 /** The problems found in the bundle; empty when there are none. */
 // oxlint-disable-next-line complexity/complexity -- four independent checks over the same file list, each a loop with its own failure branches
@@ -347,24 +342,25 @@ async function problemsInBundle() {
   /** @type {string[]} */
   const problems = [];
 
-  // 1. The structure files match the schema they name.
+  // 1. The structures match the schema, and each ID is unique in its version.
   const schema = readJson(new URL("message-structure.schema.json", PROFILES));
   const validate = new Ajv({ allErrors: true }).compile(schema);
+  const ids = new Set();
 
-  for (const { id, url, version } of bundled) {
-    const structure = readJson(url);
+  for (const { structure, version } of bundled) {
+    const key = `v${version}/${structure.id}`;
     if (!validate(structure)) {
-      problems.push(`v${version}/${id} does not match the schema`);
-    } else if (structure.$schema !== schema.$id) {
-      problems.push(`v${version}/${id} names ${structure.$schema} in $schema`);
+      problems.push(`${key} does not match the schema`);
     }
+    if (ids.has(key)) {
+      problems.push(`${key} is bundled twice`);
+    }
+    ids.add(key);
   }
 
-  // 2. The event maps and the structure files agree.
-  const ids = new Set(bundled.map(({ id, version }) => `v${version}/${id}`));
-
-  for (const [version, map] of Object.entries(eventMaps)) {
-    for (const [event, id] of Object.entries(map)) {
+  // 2. The event maps and the structures agree.
+  for (const [version, map] of eventMaps) {
+    for (const [event, id] of map) {
       if (!ids.has(`v${version}/${id}`)) {
         problems.push(
           `v${version}/${event} maps to ${id}, which is not bundled`
@@ -372,14 +368,20 @@ async function problemsInBundle() {
       }
     }
   }
-  for (const { id, version } of bundled) {
-    if (eventMaps[version]?.[id] !== id) {
+  for (const {
+    structure: { id },
+    version,
+  } of bundled) {
+    if (eventMaps.get(version)?.get(id) !== id) {
       problems.push(`v${version}/${id} is bundled but maps to itself nowhere`);
     }
   }
 
   // 3 and 4. The engine runs every structure as the reference does.
-  for (const { id, version } of bundled) {
+  for (const {
+    structure: { id },
+    version,
+  } of bundled) {
     const structures = await loadMessageStructures(version);
     const structure = structures?.get(id);
     if (!structure) {

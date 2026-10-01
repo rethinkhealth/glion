@@ -2,8 +2,8 @@
 // Fields
 // ---------------------------------------------------------------------------
 
-/** Raw shape exported by generated field modules. */
-export type FieldModule = Readonly<{
+/** A segment's entry in a bundled `fields.json`. */
+export type SegmentFieldsEntry = Readonly<{
   segmentId: string;
   fields: readonly FieldProfile[];
 }>;
@@ -37,8 +37,8 @@ export type FieldDefinition = Readonly<{
 // Datatypes
 // ---------------------------------------------------------------------------
 
-/** Raw shape exported by generated datatype modules. */
-export type DatatypeModule = Readonly<{
+/** A datatype's entry in a bundled `datatypes.json`. */
+export type DatatypeEntry = Readonly<{
   id: string;
   version: string;
   kind: string;
@@ -74,11 +74,11 @@ export type DatatypeDefinition = Readonly<{
 // Tables
 // ---------------------------------------------------------------------------
 
-/** Raw shape exported by generated table modules. */
-export type TableModule = Readonly<{
+/** A table's entry in a bundled `tables.json`. */
+export type TableEntry = Readonly<{
   id: string;
   description: string;
-  type: string;
+  type: "user" | "hl7";
   codes: readonly TableCodeEntry[];
 }>;
 
@@ -104,11 +104,6 @@ export type TableDefinition = Readonly<{
 // Segments
 // ---------------------------------------------------------------------------
 
-/** Raw shape exported by generated segment modules. */
-export type SegmentModule = Readonly<{
-  segments: readonly SegmentProfile[];
-}>;
-
 /** Segment metadata from the HL7v2 specification. */
 export type SegmentProfile = Readonly<{
   id: string;
@@ -128,8 +123,8 @@ export type SegmentDefinition = Readonly<{
 // UTG Code Systems
 // ---------------------------------------------------------------------------
 
-/** Raw shape exported by generated UTG code system modules. */
-export type UtgCodeSystemModule = Readonly<{
+/** A code system's entry in the bundled `code-systems.json`. */
+export type CodeSystemEntry = Readonly<{
   id: string;
   url: string;
   oid?: string;

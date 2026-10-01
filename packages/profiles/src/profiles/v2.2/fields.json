@@ -1,0 +1,8169 @@
+[
+  {
+    "segmentId": "ACC",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ACC-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Accident date / time",
+        "item": "527"
+      },
+      {
+        "sequence": 2,
+        "id": "ACC-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70050",
+        "name": "Accident code",
+        "item": "528"
+      },
+      {
+        "sequence": 3,
+        "id": "ACC-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "Accident location",
+        "item": "529"
+      }
+    ]
+  },
+  {
+    "segmentId": "ADD",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ADD-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 65536,
+        "name": "Addendum Continuation Pointer",
+        "item": "66"
+      }
+    ]
+  },
+  {
+    "segmentId": "AL1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "AL1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - Allergy",
+        "item": "203"
+      },
+      {
+        "sequence": 2,
+        "id": "AL1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70127",
+        "name": "Allergy Type",
+        "item": "204"
+      },
+      {
+        "sequence": 3,
+        "id": "AL1-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Allergy code / mnemonic / description",
+        "item": "205"
+      },
+      {
+        "sequence": 4,
+        "id": "AL1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70128",
+        "name": "Allergy Severity",
+        "item": "206"
+      },
+      {
+        "sequence": 5,
+        "id": "AL1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "Allergy Reaction",
+        "item": "207"
+      },
+      {
+        "sequence": 6,
+        "id": "AL1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Identification Date",
+        "item": "208"
+      }
+    ]
+  },
+  {
+    "segmentId": "BHS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "BHS-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 1,
+        "name": "Batch Field Separator",
+        "item": "81"
+      },
+      {
+        "sequence": 2,
+        "id": "BHS-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 4,
+        "name": "Batch Encoding Characters",
+        "item": "82"
+      },
+      {
+        "sequence": 3,
+        "id": "BHS-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "Batch Sending Application",
+        "item": "83"
+      },
+      {
+        "sequence": 4,
+        "id": "BHS-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Batch Sending Facility",
+        "item": "84"
+      },
+      {
+        "sequence": 5,
+        "id": "BHS-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Batch Receiving Application",
+        "item": "85"
+      },
+      {
+        "sequence": 6,
+        "id": "BHS-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Batch Receiving Facility",
+        "item": "86"
+      },
+      {
+        "sequence": 7,
+        "id": "BHS-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Batch creation date / time",
+        "item": "87"
+      },
+      {
+        "sequence": 8,
+        "id": "BHS-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "Batch Security",
+        "item": "88"
+      },
+      {
+        "sequence": 9,
+        "id": "BHS-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Batch name / ID / type",
+        "item": "89"
+      },
+      {
+        "sequence": 10,
+        "id": "BHS-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "Batch Comment",
+        "item": "90"
+      },
+      {
+        "sequence": 11,
+        "id": "BHS-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Batch Control ID",
+        "item": "91"
+      },
+      {
+        "sequence": 12,
+        "id": "BHS-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Reference Batch Control ID",
+        "item": "92"
+      }
+    ]
+  },
+  {
+    "segmentId": "BLG",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "BLG-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 15,
+        "table": "HL70100",
+        "name": "When to Charge",
+        "item": "234"
+      },
+      {
+        "sequence": 2,
+        "id": "BLG-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 50,
+        "table": "HL70122",
+        "name": "Charge Type",
+        "item": "235"
+      },
+      {
+        "sequence": 3,
+        "id": "BLG-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 100,
+        "name": "Account ID",
+        "item": "236"
+      }
+    ]
+  },
+  {
+    "segmentId": "BTS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "BTS-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 10,
+        "name": "Batch Message Count",
+        "item": "93"
+      },
+      {
+        "sequence": 2,
+        "id": "BTS-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "Batch Comment",
+        "item": "94"
+      },
+      {
+        "sequence": 3,
+        "id": "BTS-3",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 100,
+        "name": "Batch Totals",
+        "item": "95"
+      }
+    ]
+  },
+  {
+    "segmentId": "DG1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "DG1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - diagnosis",
+        "item": "375"
+      },
+      {
+        "sequence": 2,
+        "id": "DG1-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70053",
+        "name": "Diagnosis coding method",
+        "item": "376"
+      },
+      {
+        "sequence": 3,
+        "id": "DG1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70051",
+        "name": "Diagnosis code",
+        "item": "377"
+      },
+      {
+        "sequence": 4,
+        "id": "DG1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "Diagnosis description",
+        "item": "378"
+      },
+      {
+        "sequence": 5,
+        "id": "DG1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Diagnosis date / time",
+        "item": "379"
+      },
+      {
+        "sequence": 6,
+        "id": "DG1-6",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70052",
+        "name": "Diagnosis / DRG type",
+        "item": "380"
+      },
+      {
+        "sequence": 7,
+        "id": "DG1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70118",
+        "name": "Major diagnostic category",
+        "item": "381"
+      },
+      {
+        "sequence": 8,
+        "id": "DG1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 4,
+        "table": "HL70055",
+        "name": "Diagnostic related group",
+        "item": "382"
+      },
+      {
+        "sequence": 9,
+        "id": "DG1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "DRG approval indicator",
+        "item": "383"
+      },
+      {
+        "sequence": 10,
+        "id": "DG1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70056",
+        "name": "DRG grouper review code",
+        "item": "384"
+      },
+      {
+        "sequence": 11,
+        "id": "DG1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 60,
+        "table": "HL70083",
+        "name": "Outlier type",
+        "item": "385"
+      },
+      {
+        "sequence": 12,
+        "id": "DG1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "Outlier days",
+        "item": "386"
+      },
+      {
+        "sequence": 13,
+        "id": "DG1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Outlier cost",
+        "item": "387"
+      },
+      {
+        "sequence": 14,
+        "id": "DG1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 4,
+        "name": "Grouper version and type",
+        "item": "388"
+      },
+      {
+        "sequence": 15,
+        "id": "DG1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "Diagnosis / DRG priority",
+        "item": "389"
+      },
+      {
+        "sequence": 16,
+        "id": "DG1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Diagnosing clinician",
+        "item": "390"
+      }
+    ]
+  },
+  {
+    "segmentId": "DSC",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "DSC-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 180,
+        "name": "Continuation Pointer",
+        "item": "60"
+      }
+    ]
+  },
+  {
+    "segmentId": "DSP",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "DSP-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - Display Data",
+        "item": "61"
+      },
+      {
+        "sequence": 2,
+        "id": "DSP-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Display Level",
+        "item": "62"
+      },
+      {
+        "sequence": 3,
+        "id": "DSP-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 300,
+        "name": "Data Line",
+        "item": "63"
+      },
+      {
+        "sequence": 4,
+        "id": "DSP-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "Logical Break Point",
+        "item": "64"
+      },
+      {
+        "sequence": 5,
+        "id": "DSP-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 20,
+        "name": "Result ID",
+        "item": "65"
+      }
+    ]
+  },
+  {
+    "segmentId": "ERR",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ERR-1",
+        "required": true,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 80,
+        "table": "HL70060",
+        "name": "Error Code and Location",
+        "item": "24"
+      }
+    ]
+  },
+  {
+    "segmentId": "EVN",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "EVN-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70003",
+        "name": "Event Type Code",
+        "item": "99"
+      },
+      {
+        "sequence": 2,
+        "id": "EVN-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / time of event",
+        "item": "100"
+      },
+      {
+        "sequence": 3,
+        "id": "EVN-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / time planned event",
+        "item": "101"
+      },
+      {
+        "sequence": 4,
+        "id": "EVN-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70062",
+        "name": "Event Reason Code",
+        "item": "102"
+      },
+      {
+        "sequence": 5,
+        "id": "EVN-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 5,
+        "table": "HL70188",
+        "name": "Operator ID",
+        "item": "103"
+      }
+    ]
+  },
+  {
+    "segmentId": "FHS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "FHS-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 1,
+        "name": "File Field Separator",
+        "item": "67"
+      },
+      {
+        "sequence": 2,
+        "id": "FHS-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 4,
+        "name": "File Encoding Characters",
+        "item": "68"
+      },
+      {
+        "sequence": 3,
+        "id": "FHS-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "File Sending Application",
+        "item": "69"
+      },
+      {
+        "sequence": 4,
+        "id": "FHS-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "File Sending Facility",
+        "item": "70"
+      },
+      {
+        "sequence": 5,
+        "id": "FHS-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "File Receiving Application",
+        "item": "71"
+      },
+      {
+        "sequence": 6,
+        "id": "FHS-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "File Receiving Facility",
+        "item": "72"
+      },
+      {
+        "sequence": 7,
+        "id": "FHS-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "File creation date / time",
+        "item": "73"
+      },
+      {
+        "sequence": 8,
+        "id": "FHS-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "File Security",
+        "item": "74"
+      },
+      {
+        "sequence": 9,
+        "id": "FHS-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "File name / ID",
+        "item": "75"
+      },
+      {
+        "sequence": 10,
+        "id": "FHS-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "File Header Comment",
+        "item": "76"
+      },
+      {
+        "sequence": 11,
+        "id": "FHS-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "File Control ID",
+        "item": "77"
+      },
+      {
+        "sequence": 12,
+        "id": "FHS-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Reference File Control ID",
+        "item": "78"
+      }
+    ]
+  },
+  {
+    "segmentId": "FT1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "FT1-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - financial transaction",
+        "item": "355"
+      },
+      {
+        "sequence": 2,
+        "id": "FT1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 12,
+        "name": "Transaction ID",
+        "item": "356"
+      },
+      {
+        "sequence": 3,
+        "id": "FT1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 10,
+        "name": "Transaction batch ID",
+        "item": "357"
+      },
+      {
+        "sequence": 4,
+        "id": "FT1-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Transaction date",
+        "item": "358"
+      },
+      {
+        "sequence": 5,
+        "id": "FT1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Transaction posting date",
+        "item": "359"
+      },
+      {
+        "sequence": 6,
+        "id": "FT1-6",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70017",
+        "name": "Transaction type",
+        "item": "360"
+      },
+      {
+        "sequence": 7,
+        "id": "FT1-7",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 20,
+        "table": "HL70132",
+        "name": "Transaction code",
+        "item": "361"
+      },
+      {
+        "sequence": 8,
+        "id": "FT1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "Transaction description",
+        "item": "362"
+      },
+      {
+        "sequence": 9,
+        "id": "FT1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "Transaction description - alternate",
+        "item": "363"
+      },
+      {
+        "sequence": 10,
+        "id": "FT1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Transaction quantity",
+        "item": "364"
+      },
+      {
+        "sequence": 11,
+        "id": "FT1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Transaction amount - extended",
+        "item": "365"
+      },
+      {
+        "sequence": 12,
+        "id": "FT1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Transaction amount - unit",
+        "item": "366"
+      },
+      {
+        "sequence": 13,
+        "id": "FT1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70049",
+        "name": "Department code",
+        "item": "367"
+      },
+      {
+        "sequence": 14,
+        "id": "FT1-14",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70072",
+        "name": "Insurance plan ID",
+        "item": "368"
+      },
+      {
+        "sequence": 15,
+        "id": "FT1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Insurance amount",
+        "item": "369"
+      },
+      {
+        "sequence": 16,
+        "id": "FT1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "Assigned Patient Location",
+        "item": "133"
+      },
+      {
+        "sequence": 17,
+        "id": "FT1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70024",
+        "name": "Fee schedule",
+        "item": "370"
+      },
+      {
+        "sequence": 18,
+        "id": "FT1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70018",
+        "name": "Patient type",
+        "item": "148"
+      },
+      {
+        "sequence": 19,
+        "id": "FT1-19",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 8,
+        "table": "HL70051",
+        "name": "Diagnosis code",
+        "item": "371"
+      },
+      {
+        "sequence": 20,
+        "id": "FT1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70084",
+        "name": "Performed by code",
+        "item": "372"
+      },
+      {
+        "sequence": 21,
+        "id": "FT1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Ordered by code",
+        "item": "373"
+      },
+      {
+        "sequence": 22,
+        "id": "FT1-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Unit cost",
+        "item": "374"
+      },
+      {
+        "sequence": 23,
+        "id": "FT1-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "Filler Order Number",
+        "item": "217"
+      }
+    ]
+  },
+  {
+    "segmentId": "FTS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "FTS-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "File Batch Count",
+        "item": "79"
+      },
+      {
+        "sequence": 2,
+        "id": "FTS-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "File Trailer Comment",
+        "item": "80"
+      }
+    ]
+  },
+  {
+    "segmentId": "GT1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "GT1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - guarantor",
+        "item": "405"
+      },
+      {
+        "sequence": 2,
+        "id": "GT1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 20,
+        "name": "Guarantor number",
+        "item": "406"
+      },
+      {
+        "sequence": 3,
+        "id": "GT1-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Guarantor name",
+        "item": "407"
+      },
+      {
+        "sequence": 4,
+        "id": "GT1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Guarantor spouse name",
+        "item": "408"
+      },
+      {
+        "sequence": 5,
+        "id": "GT1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "Guarantor address",
+        "item": "409"
+      },
+      {
+        "sequence": 6,
+        "id": "GT1-6",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Guarantor phone number - home",
+        "item": "410"
+      },
+      {
+        "sequence": 7,
+        "id": "GT1-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Guarantor phone number - business",
+        "item": "411"
+      },
+      {
+        "sequence": 8,
+        "id": "GT1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Guarantor date of birth",
+        "item": "412"
+      },
+      {
+        "sequence": 9,
+        "id": "GT1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70001",
+        "name": "Guarantor sex",
+        "item": "413"
+      },
+      {
+        "sequence": 10,
+        "id": "GT1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70068",
+        "name": "Guarantor type",
+        "item": "414"
+      },
+      {
+        "sequence": 11,
+        "id": "GT1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70063",
+        "name": "Guarantor relationship",
+        "item": "415"
+      },
+      {
+        "sequence": 12,
+        "id": "GT1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 11,
+        "name": "Guarantor social security number",
+        "item": "416"
+      },
+      {
+        "sequence": 13,
+        "id": "GT1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Guarantor date - begin",
+        "item": "417"
+      },
+      {
+        "sequence": 14,
+        "id": "GT1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Guarantor date - end",
+        "item": "418"
+      },
+      {
+        "sequence": 15,
+        "id": "GT1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "Guarantor priority",
+        "item": "419"
+      },
+      {
+        "sequence": 16,
+        "id": "GT1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 45,
+        "name": "Guarantor employer name",
+        "item": "420"
+      },
+      {
+        "sequence": 17,
+        "id": "GT1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "Guarantor employer address",
+        "item": "421"
+      },
+      {
+        "sequence": 18,
+        "id": "GT1-18",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Guarantor employ phone number",
+        "item": "422"
+      },
+      {
+        "sequence": 19,
+        "id": "GT1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Guarantor employee ID number",
+        "item": "423"
+      },
+      {
+        "sequence": 20,
+        "id": "GT1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70066",
+        "name": "Guarantor employment status",
+        "item": "424"
+      },
+      {
+        "sequence": 21,
+        "id": "GT1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "Guarantor organization",
+        "item": "425"
+      }
+    ]
+  },
+  {
+    "segmentId": "IN1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "IN1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - insurance",
+        "item": "426"
+      },
+      {
+        "sequence": 2,
+        "id": "IN1-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70072",
+        "name": "Insurance plan ID",
+        "item": "368"
+      },
+      {
+        "sequence": 3,
+        "id": "IN1-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 9,
+        "name": "Insurance company ID",
+        "item": "428"
+      },
+      {
+        "sequence": 4,
+        "id": "IN1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 45,
+        "name": "Insurance company name",
+        "item": "429"
+      },
+      {
+        "sequence": 5,
+        "id": "IN1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "Insurance company address",
+        "item": "430"
+      },
+      {
+        "sequence": 6,
+        "id": "IN1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Insurance company contact pers",
+        "item": "431"
+      },
+      {
+        "sequence": 7,
+        "id": "IN1-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Insurance company phone number",
+        "item": "432"
+      },
+      {
+        "sequence": 8,
+        "id": "IN1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 12,
+        "name": "Group number",
+        "item": "433"
+      },
+      {
+        "sequence": 9,
+        "id": "IN1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 35,
+        "name": "Group name",
+        "item": "434"
+      },
+      {
+        "sequence": 10,
+        "id": "IN1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 12,
+        "name": "Insured&apos;s group employer ID",
+        "item": "435"
+      },
+      {
+        "sequence": 11,
+        "id": "IN1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 45,
+        "name": "Insured&apos;s group employer name",
+        "item": "436"
+      },
+      {
+        "sequence": 12,
+        "id": "IN1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Plan effective date",
+        "item": "437"
+      },
+      {
+        "sequence": 13,
+        "id": "IN1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Plan expiration date",
+        "item": "438"
+      },
+      {
+        "sequence": 14,
+        "id": "IN1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 55,
+        "name": "Authorization information",
+        "item": "439"
+      },
+      {
+        "sequence": 15,
+        "id": "IN1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 5,
+        "table": "HL70086",
+        "name": "Plan type",
+        "item": "440"
+      },
+      {
+        "sequence": 16,
+        "id": "IN1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Name of insured",
+        "item": "441"
+      },
+      {
+        "sequence": 17,
+        "id": "IN1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70063",
+        "name": "Insured&apos;s relationship to patient",
+        "item": "442"
+      },
+      {
+        "sequence": 18,
+        "id": "IN1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Insured&apos;s date of birth",
+        "item": "443"
+      },
+      {
+        "sequence": 19,
+        "id": "IN1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "Insured&apos;s address",
+        "item": "444"
+      },
+      {
+        "sequence": 20,
+        "id": "IN1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70135",
+        "name": "Assignment of benefits",
+        "item": "445"
+      },
+      {
+        "sequence": 21,
+        "id": "IN1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70173",
+        "name": "Coordination of benefits",
+        "item": "446"
+      },
+      {
+        "sequence": 22,
+        "id": "IN1-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "Coordination of benefits - priority",
+        "item": "447"
+      },
+      {
+        "sequence": 23,
+        "id": "IN1-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70136",
+        "name": "Notice of admission code",
+        "item": "448"
+      },
+      {
+        "sequence": 24,
+        "id": "IN1-24",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Notice of admission date",
+        "item": "449"
+      },
+      {
+        "sequence": 25,
+        "id": "IN1-25",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 4,
+        "name": "Report of eligibility code",
+        "item": "450"
+      },
+      {
+        "sequence": 26,
+        "id": "IN1-26",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Report of eligibility date",
+        "item": "451"
+      },
+      {
+        "sequence": 27,
+        "id": "IN1-27",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70093",
+        "name": "Release information code",
+        "item": "452"
+      },
+      {
+        "sequence": 28,
+        "id": "IN1-28",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "Pre-admit certification (PAC)",
+        "item": "453"
+      },
+      {
+        "sequence": 29,
+        "id": "IN1-29",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Verification date / time",
+        "item": "454"
+      },
+      {
+        "sequence": 30,
+        "id": "IN1-30",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Verification by",
+        "item": "455"
+      },
+      {
+        "sequence": 31,
+        "id": "IN1-31",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70098",
+        "name": "Type of agreement code",
+        "item": "456"
+      },
+      {
+        "sequence": 32,
+        "id": "IN1-32",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70022",
+        "name": "Billing status",
+        "item": "457"
+      },
+      {
+        "sequence": 33,
+        "id": "IN1-33",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Lifetime reserve days",
+        "item": "458"
+      },
+      {
+        "sequence": 34,
+        "id": "IN1-34",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Delay before lifetime reserve days",
+        "item": "459"
+      },
+      {
+        "sequence": 35,
+        "id": "IN1-35",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70042",
+        "name": "Company plan code",
+        "item": "460"
+      },
+      {
+        "sequence": 36,
+        "id": "IN1-36",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "Policy number",
+        "item": "461"
+      },
+      {
+        "sequence": 37,
+        "id": "IN1-37",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Policy deductible",
+        "item": "462"
+      },
+      {
+        "sequence": 38,
+        "id": "IN1-38",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Policy limit - amount",
+        "item": "463"
+      },
+      {
+        "sequence": 39,
+        "id": "IN1-39",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Policy limit - days",
+        "item": "464"
+      },
+      {
+        "sequence": 40,
+        "id": "IN1-40",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Room rate - semi-private",
+        "item": "465"
+      },
+      {
+        "sequence": 41,
+        "id": "IN1-41",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Room rate - private",
+        "item": "466"
+      },
+      {
+        "sequence": 42,
+        "id": "IN1-42",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70066",
+        "name": "Insured&apos;s employment status",
+        "item": "467"
+      },
+      {
+        "sequence": 43,
+        "id": "IN1-43",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70001",
+        "name": "Insured&apos;s sex",
+        "item": "468"
+      },
+      {
+        "sequence": 44,
+        "id": "IN1-44",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "Insured&apos;s employer address",
+        "item": "469"
+      },
+      {
+        "sequence": 45,
+        "id": "IN1-45",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "Verification status",
+        "item": "470"
+      },
+      {
+        "sequence": 46,
+        "id": "IN1-46",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70072",
+        "name": "Prior insurance plan ID",
+        "item": "471"
+      }
+    ]
+  },
+  {
+    "segmentId": "IN2",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "IN2-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "Insured&apos;s employee ID",
+        "item": "472"
+      },
+      {
+        "sequence": 2,
+        "id": "IN2-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 9,
+        "name": "Insured&apos;s social security number",
+        "item": "473"
+      },
+      {
+        "sequence": 3,
+        "id": "IN2-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Insured&apos;s employer name",
+        "item": "474"
+      },
+      {
+        "sequence": 4,
+        "id": "IN2-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70139",
+        "name": "Employer information data",
+        "item": "475"
+      },
+      {
+        "sequence": 5,
+        "id": "IN2-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70137",
+        "name": "Mail claim party",
+        "item": "476"
+      },
+      {
+        "sequence": 6,
+        "id": "IN2-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 15,
+        "name": "Medicare health insurance card number",
+        "item": "477"
+      },
+      {
+        "sequence": 7,
+        "id": "IN2-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Medicaid case name",
+        "item": "478"
+      },
+      {
+        "sequence": 8,
+        "id": "IN2-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 15,
+        "name": "Medicaid case number",
+        "item": "479"
+      },
+      {
+        "sequence": 9,
+        "id": "IN2-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Champus sponsor name",
+        "item": "480"
+      },
+      {
+        "sequence": 10,
+        "id": "IN2-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Champus ID number",
+        "item": "481"
+      },
+      {
+        "sequence": 11,
+        "id": "IN2-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "Dependent of champus recipient",
+        "item": "482"
+      },
+      {
+        "sequence": 12,
+        "id": "IN2-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "Champus organization",
+        "item": "483"
+      },
+      {
+        "sequence": 13,
+        "id": "IN2-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "Champus station",
+        "item": "484"
+      },
+      {
+        "sequence": 14,
+        "id": "IN2-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 14,
+        "table": "HL70140",
+        "name": "Champus service",
+        "item": "485"
+      },
+      {
+        "sequence": 15,
+        "id": "IN2-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70141",
+        "name": "Champus rank / grade",
+        "item": "486"
+      },
+      {
+        "sequence": 16,
+        "id": "IN2-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70142",
+        "name": "Champus status",
+        "item": "487"
+      },
+      {
+        "sequence": 17,
+        "id": "IN2-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Champus retire date",
+        "item": "488"
+      },
+      {
+        "sequence": 18,
+        "id": "IN2-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Champus non-availability certification on file",
+        "item": "489"
+      },
+      {
+        "sequence": 19,
+        "id": "IN2-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Baby coverage",
+        "item": "490"
+      },
+      {
+        "sequence": 20,
+        "id": "IN2-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Combine baby bill",
+        "item": "491"
+      },
+      {
+        "sequence": 21,
+        "id": "IN2-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 1,
+        "name": "Blood deductible",
+        "item": "531"
+      },
+      {
+        "sequence": 22,
+        "id": "IN2-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Special coverage approval name",
+        "item": "493"
+      },
+      {
+        "sequence": 23,
+        "id": "IN2-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Special coverage approval title",
+        "item": "494"
+      },
+      {
+        "sequence": 24,
+        "id": "IN2-24",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70143",
+        "name": "Non-covered insurance code",
+        "item": "495"
+      },
+      {
+        "sequence": 25,
+        "id": "IN2-25",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 6,
+        "name": "Payor ID",
+        "item": "496"
+      },
+      {
+        "sequence": 26,
+        "id": "IN2-26",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 6,
+        "name": "Payor subscriber ID",
+        "item": "497"
+      },
+      {
+        "sequence": 27,
+        "id": "IN2-27",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70144",
+        "name": "Eligibility source",
+        "item": "498"
+      },
+      {
+        "sequence": 28,
+        "id": "IN2-28",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 25,
+        "table": "HL70145",
+        "name": "Room coverage type / amount",
+        "item": "499"
+      },
+      {
+        "sequence": 29,
+        "id": "IN2-29",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 25,
+        "table": "HL70147",
+        "name": "Policy type / amount",
+        "item": "500"
+      },
+      {
+        "sequence": 30,
+        "id": "IN2-30",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 25,
+        "name": "Daily deductible",
+        "item": "501"
+      }
+    ]
+  },
+  {
+    "segmentId": "IN3",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "IN3-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - insurance certification",
+        "item": "502"
+      },
+      {
+        "sequence": 2,
+        "id": "IN3-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "Certification number",
+        "item": "503"
+      },
+      {
+        "sequence": 3,
+        "id": "IN3-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Certified by",
+        "item": "504"
+      },
+      {
+        "sequence": 4,
+        "id": "IN3-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Certification required",
+        "item": "505"
+      },
+      {
+        "sequence": 5,
+        "id": "IN3-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 10,
+        "table": "HL70148",
+        "name": "Penalty",
+        "item": "506"
+      },
+      {
+        "sequence": 6,
+        "id": "IN3-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Certification date / time",
+        "item": "507"
+      },
+      {
+        "sequence": 7,
+        "id": "IN3-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Certification modify date / time",
+        "item": "508"
+      },
+      {
+        "sequence": 8,
+        "id": "IN3-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Operator",
+        "item": "509"
+      },
+      {
+        "sequence": 9,
+        "id": "IN3-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Certification begin date",
+        "item": "510"
+      },
+      {
+        "sequence": 10,
+        "id": "IN3-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Certification end date",
+        "item": "511"
+      },
+      {
+        "sequence": 11,
+        "id": "IN3-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 3,
+        "table": "HL70149",
+        "name": "Days",
+        "item": "512"
+      },
+      {
+        "sequence": 12,
+        "id": "IN3-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Non-concur code / description",
+        "item": "513"
+      },
+      {
+        "sequence": 13,
+        "id": "IN3-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Non-concur effective date / time",
+        "item": "514"
+      },
+      {
+        "sequence": 14,
+        "id": "IN3-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Physician reviewer",
+        "item": "515"
+      },
+      {
+        "sequence": 15,
+        "id": "IN3-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 48,
+        "name": "Certification contact",
+        "item": "516"
+      },
+      {
+        "sequence": 16,
+        "id": "IN3-16",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Certification contact phone number",
+        "item": "517"
+      },
+      {
+        "sequence": 17,
+        "id": "IN3-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Appeal reason",
+        "item": "518"
+      },
+      {
+        "sequence": 18,
+        "id": "IN3-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Certification agency",
+        "item": "519"
+      },
+      {
+        "sequence": 19,
+        "id": "IN3-19",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Certification agency phone number",
+        "item": "520"
+      },
+      {
+        "sequence": 20,
+        "id": "IN3-20",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 40,
+        "table": "HL70150",
+        "name": "Pre-certification required / window",
+        "item": "521"
+      },
+      {
+        "sequence": 21,
+        "id": "IN3-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 48,
+        "name": "Case manager",
+        "item": "522"
+      },
+      {
+        "sequence": 22,
+        "id": "IN3-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Second opinion date",
+        "item": "523"
+      },
+      {
+        "sequence": 23,
+        "id": "IN3-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70151",
+        "name": "Second opinion status",
+        "item": "524"
+      },
+      {
+        "sequence": 24,
+        "id": "IN3-24",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70152",
+        "name": "Second opinion documentation received",
+        "item": "525"
+      },
+      {
+        "sequence": 25,
+        "id": "IN3-25",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Second opinion practitioner",
+        "item": "526"
+      }
+    ]
+  },
+  {
+    "segmentId": "MFA",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "MFA-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70180",
+        "name": "Record-level event code",
+        "item": "664"
+      },
+      {
+        "sequence": 2,
+        "id": "MFA-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "MFN control ID",
+        "item": "665"
+      },
+      {
+        "sequence": 3,
+        "id": "MFA-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Event completion date / time",
+        "item": "668"
+      },
+      {
+        "sequence": 4,
+        "id": "MFA-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70181",
+        "name": "Error return code and/or text",
+        "item": "669"
+      },
+      {
+        "sequence": 5,
+        "id": "MFA-5",
+        "required": true,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Primary key value",
+        "item": "667"
+      }
+    ]
+  },
+  {
+    "segmentId": "MFE",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "MFE-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70180",
+        "name": "Record-level event code",
+        "item": "664"
+      },
+      {
+        "sequence": 2,
+        "id": "MFE-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "MFN control ID",
+        "item": "665"
+      },
+      {
+        "sequence": 3,
+        "id": "MFE-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Effective date / time",
+        "item": "662"
+      },
+      {
+        "sequence": 4,
+        "id": "MFE-4",
+        "required": true,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Primary key value",
+        "item": "667"
+      }
+    ]
+  },
+  {
+    "segmentId": "MFI",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "MFI-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70175",
+        "name": "Master file identifier",
+        "item": "658"
+      },
+      {
+        "sequence": 2,
+        "id": "MFI-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 6,
+        "table": "HL70176",
+        "name": "Master file application identifier",
+        "item": "659"
+      },
+      {
+        "sequence": 3,
+        "id": "MFI-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70178",
+        "name": "File-level event code",
+        "item": "660"
+      },
+      {
+        "sequence": 4,
+        "id": "MFI-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Entered date / time",
+        "item": "661"
+      },
+      {
+        "sequence": 5,
+        "id": "MFI-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Effective date / time",
+        "item": "662"
+      },
+      {
+        "sequence": 6,
+        "id": "MFI-6",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70179",
+        "name": "Response level code",
+        "item": "663"
+      }
+    ]
+  },
+  {
+    "segmentId": "MRG",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "MRG-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 20,
+        "name": "Prior Patient ID - Internal",
+        "item": "211"
+      },
+      {
+        "sequence": 2,
+        "id": "MRG-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 16,
+        "name": "Prior Alternate Patient ID",
+        "item": "212"
+      },
+      {
+        "sequence": 3,
+        "id": "MRG-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 20,
+        "name": "Prior Patient Account Number",
+        "item": "213"
+      },
+      {
+        "sequence": 4,
+        "id": "MRG-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 16,
+        "name": "Prior Patient ID - External",
+        "item": "214"
+      }
+    ]
+  },
+  {
+    "segmentId": "MSA",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "MSA-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70008",
+        "name": "Acknowledgement code",
+        "item": "18"
+      },
+      {
+        "sequence": 2,
+        "id": "MSA-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Message Control ID",
+        "item": "10"
+      },
+      {
+        "sequence": 3,
+        "id": "MSA-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "Text Message",
+        "item": "20"
+      },
+      {
+        "sequence": 4,
+        "id": "MSA-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 15,
+        "name": "Expected Sequence Number",
+        "item": "21"
+      },
+      {
+        "sequence": 5,
+        "id": "MSA-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70102",
+        "name": "Delayed Acknowledgement type",
+        "item": "22"
+      },
+      {
+        "sequence": 6,
+        "id": "MSA-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 100,
+        "name": "Error Condition",
+        "item": "23"
+      }
+    ]
+  },
+  {
+    "segmentId": "MSH",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "MSH-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 1,
+        "name": "Field separator",
+        "item": "1"
+      },
+      {
+        "sequence": 2,
+        "id": "MSH-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 4,
+        "name": "Encoding characters",
+        "item": "2"
+      },
+      {
+        "sequence": 3,
+        "id": "MSH-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 15,
+        "name": "Sending application",
+        "item": "3"
+      },
+      {
+        "sequence": 4,
+        "id": "MSH-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Sending facility",
+        "item": "4"
+      },
+      {
+        "sequence": 5,
+        "id": "MSH-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Receiving application",
+        "item": "5"
+      },
+      {
+        "sequence": 6,
+        "id": "MSH-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Receiving facility",
+        "item": "6"
+      },
+      {
+        "sequence": 7,
+        "id": "MSH-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / Time of message",
+        "item": "7"
+      },
+      {
+        "sequence": 8,
+        "id": "MSH-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "Security",
+        "item": "8"
+      },
+      {
+        "sequence": 9,
+        "id": "MSH-9",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 7,
+        "table": "HL70076",
+        "name": "Message type",
+        "item": "9"
+      },
+      {
+        "sequence": 10,
+        "id": "MSH-10",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Message Control ID",
+        "item": "10"
+      },
+      {
+        "sequence": 11,
+        "id": "MSH-11",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70103",
+        "name": "Processing ID",
+        "item": "11"
+      },
+      {
+        "sequence": 12,
+        "id": "MSH-12",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70104",
+        "name": "Version ID",
+        "item": "12"
+      },
+      {
+        "sequence": 13,
+        "id": "MSH-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 15,
+        "name": "Sequence number",
+        "item": "13"
+      },
+      {
+        "sequence": 14,
+        "id": "MSH-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 180,
+        "name": "Continuation pointer",
+        "item": "14"
+      },
+      {
+        "sequence": 15,
+        "id": "MSH-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70155",
+        "name": "Accept acknowledgement type",
+        "item": "15"
+      },
+      {
+        "sequence": 16,
+        "id": "MSH-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70155",
+        "name": "Application acknowledgement type",
+        "item": "16"
+      },
+      {
+        "sequence": 17,
+        "id": "MSH-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "Country code",
+        "item": "17"
+      }
+    ]
+  },
+  {
+    "segmentId": "NCK",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NCK-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "System Date/Time",
+        "item": "742"
+      }
+    ]
+  },
+  {
+    "segmentId": "NK1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NK1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - Next of Kin",
+        "item": "190"
+      },
+      {
+        "sequence": 2,
+        "id": "NK1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Name",
+        "item": "191"
+      },
+      {
+        "sequence": 3,
+        "id": "NK1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70063",
+        "name": "Relationship",
+        "item": "192"
+      },
+      {
+        "sequence": 4,
+        "id": "NK1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "Address",
+        "item": "193"
+      },
+      {
+        "sequence": 5,
+        "id": "NK1-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Phone Number",
+        "item": "194"
+      },
+      {
+        "sequence": 6,
+        "id": "NK1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Business Phone Number",
+        "item": "195"
+      },
+      {
+        "sequence": 7,
+        "id": "NK1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70131",
+        "name": "Contact Role",
+        "item": "196"
+      },
+      {
+        "sequence": 8,
+        "id": "NK1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Start Date",
+        "item": "197"
+      },
+      {
+        "sequence": 9,
+        "id": "NK1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "End Date",
+        "item": "198"
+      },
+      {
+        "sequence": 10,
+        "id": "NK1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "Next of Kin",
+        "item": "199"
+      },
+      {
+        "sequence": 11,
+        "id": "NK1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 60,
+        "name": "Next of kin job code / class",
+        "item": "200"
+      },
+      {
+        "sequence": 12,
+        "id": "NK1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Next of Kin Employee Number",
+        "item": "201"
+      },
+      {
+        "sequence": 13,
+        "id": "NK1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "Organization Name",
+        "item": "202"
+      }
+    ]
+  },
+  {
+    "segmentId": "NPU",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NPU-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "Bed Location",
+        "item": "209"
+      },
+      {
+        "sequence": 2,
+        "id": "NPU-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70116",
+        "name": "Bed Status",
+        "item": "170"
+      }
+    ]
+  },
+  {
+    "segmentId": "NSC",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NSC-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 4,
+        "name": "Network Change Type",
+        "item": "758"
+      },
+      {
+        "sequence": 2,
+        "id": "NSC-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Current CPU",
+        "item": "759"
+      },
+      {
+        "sequence": 3,
+        "id": "NSC-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Current Fileserver",
+        "item": "760"
+      },
+      {
+        "sequence": 4,
+        "id": "NSC-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Current Application",
+        "item": "761"
+      },
+      {
+        "sequence": 5,
+        "id": "NSC-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Current Facility",
+        "item": "762"
+      },
+      {
+        "sequence": 6,
+        "id": "NSC-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "New CPU",
+        "item": "763"
+      },
+      {
+        "sequence": 7,
+        "id": "NSC-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "New Fileserver",
+        "item": "764"
+      },
+      {
+        "sequence": 8,
+        "id": "NSC-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "New Application",
+        "item": "765"
+      },
+      {
+        "sequence": 9,
+        "id": "NSC-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "New Facility",
+        "item": "766"
+      }
+    ]
+  },
+  {
+    "segmentId": "NST",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NST-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Statistics Available",
+        "item": "743"
+      },
+      {
+        "sequence": 2,
+        "id": "NST-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Source Identifier",
+        "item": "744"
+      },
+      {
+        "sequence": 3,
+        "id": "NST-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "name": "Source Type",
+        "item": "745"
+      },
+      {
+        "sequence": 4,
+        "id": "NST-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Statistics Start",
+        "item": "746"
+      },
+      {
+        "sequence": 5,
+        "id": "NST-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Statistics End",
+        "item": "747"
+      },
+      {
+        "sequence": 6,
+        "id": "NST-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Receive Character Count",
+        "item": "748"
+      },
+      {
+        "sequence": 7,
+        "id": "NST-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Send Character Count",
+        "item": "749"
+      },
+      {
+        "sequence": 8,
+        "id": "NST-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Message Received",
+        "item": "750"
+      },
+      {
+        "sequence": 9,
+        "id": "NST-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Message Sent",
+        "item": "751"
+      },
+      {
+        "sequence": 10,
+        "id": "NST-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Checksum Errors Received",
+        "item": "752"
+      },
+      {
+        "sequence": 11,
+        "id": "NST-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Length Errors Received",
+        "item": "753"
+      },
+      {
+        "sequence": 12,
+        "id": "NST-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Other Errors Received",
+        "item": "754"
+      },
+      {
+        "sequence": 13,
+        "id": "NST-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Connect Timeouts",
+        "item": "755"
+      },
+      {
+        "sequence": 14,
+        "id": "NST-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Receive Timeouts",
+        "item": "756"
+      },
+      {
+        "sequence": 15,
+        "id": "NST-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Network Errors",
+        "item": "757"
+      }
+    ]
+  },
+  {
+    "segmentId": "NTE",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "NTE-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - Notes and Comments",
+        "item": "96"
+      },
+      {
+        "sequence": 2,
+        "id": "NTE-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 8,
+        "table": "HL70105",
+        "name": "Source of Comment",
+        "item": "97"
+      },
+      {
+        "sequence": 3,
+        "id": "NTE-3",
+        "required": false,
+        "repeatable": true,
+        "datatype": "FT",
+        "maxLength": 65536,
+        "name": "Comment",
+        "item": "98"
+      }
+    ]
+  },
+  {
+    "segmentId": "OBR",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OBR-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - Observation Request",
+        "item": "237"
+      },
+      {
+        "sequence": 2,
+        "id": "OBR-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "Placer Order Number",
+        "item": "216"
+      },
+      {
+        "sequence": 3,
+        "id": "OBR-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "Filler Order Number",
+        "item": "217"
+      },
+      {
+        "sequence": 4,
+        "id": "OBR-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Universal Service ID",
+        "item": "238"
+      },
+      {
+        "sequence": 5,
+        "id": "OBR-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "Priority (not used)",
+        "item": "239"
+      },
+      {
+        "sequence": 6,
+        "id": "OBR-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Requested date / time (not used)",
+        "item": "240"
+      },
+      {
+        "sequence": 7,
+        "id": "OBR-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Observation date / time",
+        "item": "241"
+      },
+      {
+        "sequence": 8,
+        "id": "OBR-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Observation end date / time",
+        "item": "242"
+      },
+      {
+        "sequence": 9,
+        "id": "OBR-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 20,
+        "name": "Collection Volume",
+        "item": "243"
+      },
+      {
+        "sequence": 10,
+        "id": "OBR-10",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Collector Identifier",
+        "item": "244"
+      },
+      {
+        "sequence": 11,
+        "id": "OBR-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70065",
+        "name": "Specimen action code",
+        "item": "245"
+      },
+      {
+        "sequence": 12,
+        "id": "OBR-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Danger Code",
+        "item": "246"
+      },
+      {
+        "sequence": 13,
+        "id": "OBR-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 300,
+        "name": "Relevant clinical information",
+        "item": "247"
+      },
+      {
+        "sequence": 14,
+        "id": "OBR-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Specimen received date / time",
+        "item": "248"
+      },
+      {
+        "sequence": 15,
+        "id": "OBR-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 300,
+        "table": "HL70070",
+        "name": "Specimen source",
+        "item": "249"
+      },
+      {
+        "sequence": 16,
+        "id": "OBR-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "Ordering Provider",
+        "item": "226"
+      },
+      {
+        "sequence": 17,
+        "id": "OBR-17",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Order Callback Phone Number",
+        "item": "250"
+      },
+      {
+        "sequence": 18,
+        "id": "OBR-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "Placer field 1",
+        "item": "251"
+      },
+      {
+        "sequence": 19,
+        "id": "OBR-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "Placer field 2",
+        "item": "252"
+      },
+      {
+        "sequence": 20,
+        "id": "OBR-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "Filler Field 1",
+        "item": "253"
+      },
+      {
+        "sequence": 21,
+        "id": "OBR-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "Filler Field 2",
+        "item": "254"
+      },
+      {
+        "sequence": 22,
+        "id": "OBR-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Results report / status change - date / time",
+        "item": "255"
+      },
+      {
+        "sequence": 23,
+        "id": "OBR-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 40,
+        "name": "Charge to Practice",
+        "item": "256"
+      },
+      {
+        "sequence": 24,
+        "id": "OBR-24",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 10,
+        "table": "HL70074",
+        "name": "Diagnostic service section ID",
+        "item": "257"
+      },
+      {
+        "sequence": 25,
+        "id": "OBR-25",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70123",
+        "name": "Result Status",
+        "item": "258"
+      },
+      {
+        "sequence": 26,
+        "id": "OBR-26",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 200,
+        "name": "Parent Result",
+        "item": "259"
+      },
+      {
+        "sequence": 27,
+        "id": "OBR-27",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TQ",
+        "maxLength": 200,
+        "name": "Quantity / timing",
+        "item": "221"
+      },
+      {
+        "sequence": 28,
+        "id": "OBR-28",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CN",
+        "maxLength": 150,
+        "name": "Result Copies To",
+        "item": "260"
+      },
+      {
+        "sequence": 29,
+        "id": "OBR-29",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 150,
+        "name": "Parent Number",
+        "item": "261"
+      },
+      {
+        "sequence": 30,
+        "id": "OBR-30",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 20,
+        "table": "HL70124",
+        "name": "Transportation Mode",
+        "item": "262"
+      },
+      {
+        "sequence": 31,
+        "id": "OBR-31",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 300,
+        "name": "Reason for Study",
+        "item": "263"
+      },
+      {
+        "sequence": 32,
+        "id": "OBR-32",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 60,
+        "name": "Principal Result Interpreter",
+        "item": "264"
+      },
+      {
+        "sequence": 33,
+        "id": "OBR-33",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 60,
+        "name": "Assistant Result Interpreter",
+        "item": "265"
+      },
+      {
+        "sequence": 34,
+        "id": "OBR-34",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 60,
+        "name": "Technician",
+        "item": "266"
+      },
+      {
+        "sequence": 35,
+        "id": "OBR-35",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 60,
+        "name": "Transcriptionist",
+        "item": "267"
+      },
+      {
+        "sequence": 36,
+        "id": "OBR-36",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Scheduled date / time",
+        "item": "268"
+      }
+    ]
+  },
+  {
+    "segmentId": "OBX",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OBX-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - Observational Simple",
+        "item": "569"
+      },
+      {
+        "sequence": 2,
+        "id": "OBX-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70125",
+        "name": "Value Type",
+        "item": "570"
+      },
+      {
+        "sequence": 3,
+        "id": "OBX-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 80,
+        "name": "Observation Identifier",
+        "item": "571"
+      },
+      {
+        "sequence": 4,
+        "id": "OBX-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Observation Sub-ID",
+        "item": "572"
+      },
+      {
+        "sequence": 5,
+        "id": "OBX-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "*",
+        "maxLength": 65536,
+        "name": "Observation Value",
+        "item": "573"
+      },
+      {
+        "sequence": 6,
+        "id": "OBX-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Units",
+        "item": "574"
+      },
+      {
+        "sequence": 7,
+        "id": "OBX-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "References Range",
+        "item": "575"
+      },
+      {
+        "sequence": 8,
+        "id": "OBX-8",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 10,
+        "table": "HL70078",
+        "name": "Abnormal Flags",
+        "item": "576"
+      },
+      {
+        "sequence": 9,
+        "id": "OBX-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 5,
+        "name": "Probability",
+        "item": "577"
+      },
+      {
+        "sequence": 10,
+        "id": "OBX-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 5,
+        "table": "HL70080",
+        "name": "Nature of Abnormal Test",
+        "item": "578"
+      },
+      {
+        "sequence": 11,
+        "id": "OBX-11",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70085",
+        "name": "Observation result status",
+        "item": "579"
+      },
+      {
+        "sequence": 12,
+        "id": "OBX-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Effective date last observation normal values",
+        "item": "580"
+      },
+      {
+        "sequence": 13,
+        "id": "OBX-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "User Defined Access Checks",
+        "item": "581"
+      },
+      {
+        "sequence": 14,
+        "id": "OBX-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / time of the observation",
+        "item": "582"
+      },
+      {
+        "sequence": 15,
+        "id": "OBX-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Producer&apos;s ID",
+        "item": "583"
+      },
+      {
+        "sequence": 16,
+        "id": "OBX-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Responsible Observer",
+        "item": "584"
+      }
+    ]
+  },
+  {
+    "segmentId": "ODS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ODS-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70159",
+        "name": "Type",
+        "item": "269"
+      },
+      {
+        "sequence": 2,
+        "id": "ODS-2",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Service Period",
+        "item": "270"
+      },
+      {
+        "sequence": 3,
+        "id": "ODS-3",
+        "required": true,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Diet, Supplement, or Preference Code",
+        "item": "271"
+      },
+      {
+        "sequence": 4,
+        "id": "ODS-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "Text Instruction",
+        "item": "272"
+      }
+    ]
+  },
+  {
+    "segmentId": "ODT",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ODT-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70160",
+        "name": "Tray Type",
+        "item": "273"
+      },
+      {
+        "sequence": 2,
+        "id": "ODT-2",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Service Period",
+        "item": "270"
+      },
+      {
+        "sequence": 3,
+        "id": "ODT-3",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "Text Instruction",
+        "item": "272"
+      }
+    ]
+  },
+  {
+    "segmentId": "OM1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OM1-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "Segment Type ID",
+        "item": "585"
+      },
+      {
+        "sequence": 2,
+        "id": "OM1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Sequence Number - Test/ Observation Master File",
+        "item": "586"
+      },
+      {
+        "sequence": 3,
+        "id": "OM1-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Producer&apos;s test / observation ID",
+        "item": "587"
+      },
+      {
+        "sequence": 4,
+        "id": "OM1-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70125",
+        "name": "Permitted Data Types",
+        "item": "588"
+      },
+      {
+        "sequence": 5,
+        "id": "OM1-5",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Specimen Required",
+        "item": "589"
+      },
+      {
+        "sequence": 6,
+        "id": "OM1-6",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Producer ID",
+        "item": "590"
+      },
+      {
+        "sequence": 7,
+        "id": "OM1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 200,
+        "name": "Observation Description",
+        "item": "591"
+      },
+      {
+        "sequence": 8,
+        "id": "OM1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Other test / observation IDs for the observation",
+        "item": "592"
+      },
+      {
+        "sequence": 9,
+        "id": "OM1-9",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 200,
+        "name": "Other Names",
+        "item": "593"
+      },
+      {
+        "sequence": 10,
+        "id": "OM1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Preferred Report Name for the Observation",
+        "item": "594"
+      },
+      {
+        "sequence": 11,
+        "id": "OM1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 8,
+        "name": "Preferred Short Name or Mnemonic for Observation",
+        "item": "595"
+      },
+      {
+        "sequence": 12,
+        "id": "OM1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 200,
+        "name": "Preferred Long Name for the Observation",
+        "item": "596"
+      },
+      {
+        "sequence": 13,
+        "id": "OM1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Orderability",
+        "item": "597"
+      },
+      {
+        "sequence": 14,
+        "id": "OM1-14",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Identity of instrument used to perform this study",
+        "item": "598"
+      },
+      {
+        "sequence": 15,
+        "id": "OM1-15",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Coded Representation of Method",
+        "item": "599"
+      },
+      {
+        "sequence": 16,
+        "id": "OM1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Portable",
+        "item": "600"
+      },
+      {
+        "sequence": 17,
+        "id": "OM1-17",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "Observation producing department / section",
+        "item": "601"
+      },
+      {
+        "sequence": 18,
+        "id": "OM1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Telephone Number of Section",
+        "item": "602"
+      },
+      {
+        "sequence": 19,
+        "id": "OM1-19",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70174",
+        "name": "Nature of test / observation",
+        "item": "603"
+      },
+      {
+        "sequence": 20,
+        "id": "OM1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Report Subheader",
+        "item": "604"
+      },
+      {
+        "sequence": 21,
+        "id": "OM1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Report Display Order",
+        "item": "605"
+      },
+      {
+        "sequence": 22,
+        "id": "OM1-22",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / time stamp for any change in definition for obs",
+        "item": "606"
+      },
+      {
+        "sequence": 23,
+        "id": "OM1-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Effective date / time of change",
+        "item": "607"
+      },
+      {
+        "sequence": 24,
+        "id": "OM1-24",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Typical Turn-around Time",
+        "item": "608"
+      },
+      {
+        "sequence": 25,
+        "id": "OM1-25",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Processing Time",
+        "item": "609"
+      },
+      {
+        "sequence": 26,
+        "id": "OM1-26",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 40,
+        "table": "HL70168",
+        "name": "Processing Priority",
+        "item": "610"
+      },
+      {
+        "sequence": 27,
+        "id": "OM1-27",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 5,
+        "table": "HL70169",
+        "name": "Reporting Priority",
+        "item": "611"
+      },
+      {
+        "sequence": 28,
+        "id": "OM1-28",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Outside Site(s) Where Observation may be Performed",
+        "item": "612"
+      },
+      {
+        "sequence": 29,
+        "id": "OM1-29",
+        "required": false,
+        "repeatable": true,
+        "datatype": "AD",
+        "maxLength": 1000,
+        "name": "Address of Outside Site(s)",
+        "item": "613"
+      },
+      {
+        "sequence": 30,
+        "id": "OM1-30",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 400,
+        "name": "Phone Number of Outside Site",
+        "item": "614"
+      },
+      {
+        "sequence": 31,
+        "id": "OM1-31",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70177",
+        "name": "Confidentiality Code",
+        "item": "615"
+      },
+      {
+        "sequence": 32,
+        "id": "OM1-32",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Observations required to interpret the observation",
+        "item": "616"
+      },
+      {
+        "sequence": 33,
+        "id": "OM1-33",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 65536,
+        "name": "Interpretation of Observations",
+        "item": "617"
+      },
+      {
+        "sequence": 34,
+        "id": "OM1-34",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 65536,
+        "name": "Contraindications to Observations",
+        "item": "618"
+      },
+      {
+        "sequence": 35,
+        "id": "OM1-35",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Reflex tests / observations",
+        "item": "619"
+      },
+      {
+        "sequence": 36,
+        "id": "OM1-36",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 80,
+        "name": "Rules that Trigger Reflex Testing",
+        "item": "620"
+      },
+      {
+        "sequence": 37,
+        "id": "OM1-37",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 65536,
+        "name": "Fixed Canned Message",
+        "item": "621"
+      },
+      {
+        "sequence": 38,
+        "id": "OM1-38",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 200,
+        "name": "Patient Preparation",
+        "item": "622"
+      },
+      {
+        "sequence": 39,
+        "id": "OM1-39",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Procedure Medication",
+        "item": "623"
+      },
+      {
+        "sequence": 40,
+        "id": "OM1-40",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 200,
+        "name": "Factors that may affect the observation",
+        "item": "624"
+      },
+      {
+        "sequence": 41,
+        "id": "OM1-41",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "Test / observation performance schedule",
+        "item": "625"
+      },
+      {
+        "sequence": 42,
+        "id": "OM1-42",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 65536,
+        "name": "Description of Test Methods",
+        "item": "626"
+      }
+    ]
+  },
+  {
+    "segmentId": "OM2",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OM2-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "Segment Type ID",
+        "item": "585"
+      },
+      {
+        "sequence": 2,
+        "id": "OM2-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Sequence Number - Test/ Observation Master File",
+        "item": "586"
+      },
+      {
+        "sequence": 3,
+        "id": "OM2-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Units of Measure",
+        "item": "627"
+      },
+      {
+        "sequence": 4,
+        "id": "OM2-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 10,
+        "name": "Range of Decimal Precision",
+        "item": "628"
+      },
+      {
+        "sequence": 5,
+        "id": "OM2-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Corresponding SI Units of Measure",
+        "item": "629"
+      },
+      {
+        "sequence": 6,
+        "id": "OM2-6",
+        "required": true,
+        "repeatable": true,
+        "datatype": "TX",
+        "maxLength": 20,
+        "name": "SI Conversion Factor",
+        "item": "630"
+      },
+      {
+        "sequence": 7,
+        "id": "OM2-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 200,
+        "name": "Reference (normal) range - ordinal &amp; continuous observations",
+        "item": "631"
+      },
+      {
+        "sequence": 8,
+        "id": "OM2-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 200,
+        "name": "Critical range for ordinal and continuous observations",
+        "item": "632"
+      },
+      {
+        "sequence": 9,
+        "id": "OM2-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 200,
+        "name": "Absolute range for ordinal and continuous observations",
+        "item": "633"
+      },
+      {
+        "sequence": 10,
+        "id": "OM2-10",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 200,
+        "name": "Delta Check Criteria",
+        "item": "634"
+      },
+      {
+        "sequence": 11,
+        "id": "OM2-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Minimum Meaningful Increments",
+        "item": "635"
+      }
+    ]
+  },
+  {
+    "segmentId": "OM3",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OM3-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "Segment Type ID",
+        "item": "585"
+      },
+      {
+        "sequence": 2,
+        "id": "OM3-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Sequence Number - Test/ Observation Master File",
+        "item": "586"
+      },
+      {
+        "sequence": 3,
+        "id": "OM3-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 5,
+        "name": "Preferred Coding System",
+        "item": "636"
+      },
+      {
+        "sequence": 4,
+        "id": "OM3-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Valid coded answers",
+        "item": "637"
+      },
+      {
+        "sequence": 5,
+        "id": "OM3-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Normal test codes for categorical observations",
+        "item": "638"
+      },
+      {
+        "sequence": 6,
+        "id": "OM3-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Abnormal test codes for categorical observations",
+        "item": "639"
+      },
+      {
+        "sequence": 7,
+        "id": "OM3-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Critical test codes for categorical observations",
+        "item": "640"
+      },
+      {
+        "sequence": 8,
+        "id": "OM3-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "Data Type",
+        "item": "641"
+      }
+    ]
+  },
+  {
+    "segmentId": "OM4",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OM4-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "Segment Type ID",
+        "item": "585"
+      },
+      {
+        "sequence": 2,
+        "id": "OM4-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Sequence Number - Test/ Observation Master File",
+        "item": "586"
+      },
+      {
+        "sequence": 3,
+        "id": "OM4-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70170",
+        "name": "Derived Specimen",
+        "item": "642"
+      },
+      {
+        "sequence": 4,
+        "id": "OM4-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 60,
+        "name": "Container Description",
+        "item": "643"
+      },
+      {
+        "sequence": 5,
+        "id": "OM4-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Container Volume",
+        "item": "644"
+      },
+      {
+        "sequence": 6,
+        "id": "OM4-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Container Units",
+        "item": "645"
+      },
+      {
+        "sequence": 7,
+        "id": "OM4-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Specimen",
+        "item": "646"
+      },
+      {
+        "sequence": 8,
+        "id": "OM4-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Additive",
+        "item": "647"
+      },
+      {
+        "sequence": 9,
+        "id": "OM4-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 10240,
+        "name": "Preparation",
+        "item": "648"
+      },
+      {
+        "sequence": 10,
+        "id": "OM4-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 10240,
+        "name": "Special Handling Requirements",
+        "item": "649"
+      },
+      {
+        "sequence": 11,
+        "id": "OM4-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 20,
+        "name": "Normal Collection Volume",
+        "item": "650"
+      },
+      {
+        "sequence": 12,
+        "id": "OM4-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 20,
+        "name": "Minimum Collection Volume",
+        "item": "651"
+      },
+      {
+        "sequence": 13,
+        "id": "OM4-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 10240,
+        "name": "Specimen Requirements",
+        "item": "652"
+      },
+      {
+        "sequence": 14,
+        "id": "OM4-14",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 60,
+        "table": "HL70027",
+        "name": "Specimen Priorities",
+        "item": "653"
+      },
+      {
+        "sequence": 15,
+        "id": "OM4-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 20,
+        "name": "Specimen Retention Time",
+        "item": "654"
+      }
+    ]
+  },
+  {
+    "segmentId": "OM5",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OM5-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "Segment Type ID",
+        "item": "585"
+      },
+      {
+        "sequence": 2,
+        "id": "OM5-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Sequence Number - Test/ Observation Master File",
+        "item": "586"
+      },
+      {
+        "sequence": 3,
+        "id": "OM5-3",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Tests / observations included within an ordered test battery",
+        "item": "655"
+      },
+      {
+        "sequence": 4,
+        "id": "OM5-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 200,
+        "name": "Observation ID Suffixes",
+        "item": "656"
+      }
+    ]
+  },
+  {
+    "segmentId": "OM6",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "OM6-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "Segment Type ID",
+        "item": "585"
+      },
+      {
+        "sequence": 2,
+        "id": "OM6-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Sequence Number - Test/ Observation Master File",
+        "item": "586"
+      },
+      {
+        "sequence": 3,
+        "id": "OM6-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TX",
+        "maxLength": 10240,
+        "name": "Derivation Rule",
+        "item": "657"
+      }
+    ]
+  },
+  {
+    "segmentId": "ORC",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "ORC-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70119",
+        "name": "Order Control",
+        "item": "215"
+      },
+      {
+        "sequence": 2,
+        "id": "ORC-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "Placer Order Number",
+        "item": "216"
+      },
+      {
+        "sequence": 3,
+        "id": "ORC-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "Filler Order Number",
+        "item": "217"
+      },
+      {
+        "sequence": 4,
+        "id": "ORC-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 75,
+        "name": "Placer Group Number",
+        "item": "218"
+      },
+      {
+        "sequence": 5,
+        "id": "ORC-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70038",
+        "name": "Order Status",
+        "item": "219"
+      },
+      {
+        "sequence": 6,
+        "id": "ORC-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70121",
+        "name": "Response Flag",
+        "item": "220"
+      },
+      {
+        "sequence": 7,
+        "id": "ORC-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TQ",
+        "maxLength": 200,
+        "name": "Quantity / timing",
+        "item": "221"
+      },
+      {
+        "sequence": 8,
+        "id": "ORC-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 200,
+        "name": "Parent",
+        "item": "222"
+      },
+      {
+        "sequence": 9,
+        "id": "ORC-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / time of transaction",
+        "item": "223"
+      },
+      {
+        "sequence": 10,
+        "id": "ORC-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "Entered By",
+        "item": "224"
+      },
+      {
+        "sequence": 11,
+        "id": "ORC-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "Verified By",
+        "item": "225"
+      },
+      {
+        "sequence": 12,
+        "id": "ORC-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "Ordering Provider",
+        "item": "226"
+      },
+      {
+        "sequence": 13,
+        "id": "ORC-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 80,
+        "name": "Enterer&apos;s Location",
+        "item": "227"
+      },
+      {
+        "sequence": 14,
+        "id": "ORC-14",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Call Back Phone Number",
+        "item": "228"
+      },
+      {
+        "sequence": 15,
+        "id": "ORC-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Order effective date / time",
+        "item": "229"
+      },
+      {
+        "sequence": 16,
+        "id": "ORC-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Order Control Code Reason",
+        "item": "230"
+      },
+      {
+        "sequence": 17,
+        "id": "ORC-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Entering Organization",
+        "item": "231"
+      },
+      {
+        "sequence": 18,
+        "id": "ORC-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Entering Device",
+        "item": "232"
+      },
+      {
+        "sequence": 19,
+        "id": "ORC-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 80,
+        "name": "Action by",
+        "item": "233"
+      }
+    ]
+  },
+  {
+    "segmentId": "PID",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "PID-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - Patient ID",
+        "item": "104"
+      },
+      {
+        "sequence": 2,
+        "id": "PID-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 16,
+        "name": "Patient ID (External ID)",
+        "item": "105"
+      },
+      {
+        "sequence": 3,
+        "id": "PID-3",
+        "required": true,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 20,
+        "name": "Patient ID (Internal ID)",
+        "item": "106"
+      },
+      {
+        "sequence": 4,
+        "id": "PID-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 12,
+        "name": "Alternate Patient ID",
+        "item": "107"
+      },
+      {
+        "sequence": 5,
+        "id": "PID-5",
+        "required": true,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Patient Name",
+        "item": "108"
+      },
+      {
+        "sequence": 6,
+        "id": "PID-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "Mother&apos;s Maiden Name",
+        "item": "109"
+      },
+      {
+        "sequence": 7,
+        "id": "PID-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date of Birth",
+        "item": "110"
+      },
+      {
+        "sequence": 8,
+        "id": "PID-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70001",
+        "name": "Sex",
+        "item": "111"
+      },
+      {
+        "sequence": 9,
+        "id": "PID-9",
+        "required": false,
+        "repeatable": true,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Patient Alias",
+        "item": "112"
+      },
+      {
+        "sequence": 10,
+        "id": "PID-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70005",
+        "name": "Race",
+        "item": "113"
+      },
+      {
+        "sequence": 11,
+        "id": "PID-11",
+        "required": false,
+        "repeatable": true,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "Patient Address",
+        "item": "114"
+      },
+      {
+        "sequence": 12,
+        "id": "PID-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 4,
+        "name": "County code",
+        "item": "115"
+      },
+      {
+        "sequence": 13,
+        "id": "PID-13",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Phone Number - Home",
+        "item": "116"
+      },
+      {
+        "sequence": 14,
+        "id": "PID-14",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Phone Number - Business",
+        "item": "117"
+      },
+      {
+        "sequence": 15,
+        "id": "PID-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "Language - Patient",
+        "item": "118"
+      },
+      {
+        "sequence": 16,
+        "id": "PID-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70002",
+        "name": "Marital Status",
+        "item": "119"
+      },
+      {
+        "sequence": 17,
+        "id": "PID-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70006",
+        "name": "Religion",
+        "item": "120"
+      },
+      {
+        "sequence": 18,
+        "id": "PID-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 20,
+        "name": "Patient Account Number",
+        "item": "121"
+      },
+      {
+        "sequence": 19,
+        "id": "PID-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 16,
+        "name": "Social security number - patient",
+        "item": "122"
+      },
+      {
+        "sequence": 20,
+        "id": "PID-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 25,
+        "name": "Driver&apos;s license number - patient",
+        "item": "123"
+      },
+      {
+        "sequence": 21,
+        "id": "PID-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CK",
+        "maxLength": 20,
+        "name": "Mother&apos;s Identifier",
+        "item": "124"
+      },
+      {
+        "sequence": 22,
+        "id": "PID-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70189",
+        "name": "Ethnic Group",
+        "item": "125"
+      },
+      {
+        "sequence": 23,
+        "id": "PID-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "Birth Place",
+        "item": "126"
+      },
+      {
+        "sequence": 24,
+        "id": "PID-24",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "Multiple Birth Indicator",
+        "item": "127"
+      },
+      {
+        "sequence": 25,
+        "id": "PID-25",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "Birth Order",
+        "item": "128"
+      },
+      {
+        "sequence": 26,
+        "id": "PID-26",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70171",
+        "name": "Citizenship",
+        "item": "129"
+      },
+      {
+        "sequence": 27,
+        "id": "PID-27",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 60,
+        "name": "Veterans Military Status",
+        "item": "130"
+      }
+    ]
+  },
+  {
+    "segmentId": "PR1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "PR1-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - procedure",
+        "item": "391"
+      },
+      {
+        "sequence": 2,
+        "id": "PR1-2",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70089",
+        "name": "Procedure coding method",
+        "item": "392"
+      },
+      {
+        "sequence": 3,
+        "id": "PR1-3",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 10,
+        "table": "HL70088",
+        "name": "Procedure code",
+        "item": "393"
+      },
+      {
+        "sequence": 4,
+        "id": "PR1-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "Procedure description",
+        "item": "394"
+      },
+      {
+        "sequence": 5,
+        "id": "PR1-5",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Procedure date / time",
+        "item": "395"
+      },
+      {
+        "sequence": 6,
+        "id": "PR1-6",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70090",
+        "name": "Procedure type",
+        "item": "396"
+      },
+      {
+        "sequence": 7,
+        "id": "PR1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Procedure minutes",
+        "item": "397"
+      },
+      {
+        "sequence": 8,
+        "id": "PR1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "Anesthesiologist",
+        "item": "398"
+      },
+      {
+        "sequence": 9,
+        "id": "PR1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70019",
+        "name": "Anesthesia code",
+        "item": "399"
+      },
+      {
+        "sequence": 10,
+        "id": "PR1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Anesthesia minutes",
+        "item": "400"
+      },
+      {
+        "sequence": 11,
+        "id": "PR1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "Surgeon",
+        "item": "401"
+      },
+      {
+        "sequence": 12,
+        "id": "PR1-12",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "Procedure Practitioner",
+        "item": "402"
+      },
+      {
+        "sequence": 13,
+        "id": "PR1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70059",
+        "name": "Consent code",
+        "item": "403"
+      },
+      {
+        "sequence": 14,
+        "id": "PR1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "Procedure priority",
+        "item": "404"
+      }
+    ]
+  },
+  {
+    "segmentId": "PRA",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "PRA-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "PRA - primary key value",
+        "item": "685"
+      },
+      {
+        "sequence": 2,
+        "id": "PRA-2",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Practitioner group",
+        "item": "686"
+      },
+      {
+        "sequence": 3,
+        "id": "PRA-3",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70186",
+        "name": "Practitioner Category",
+        "item": "687"
+      },
+      {
+        "sequence": 4,
+        "id": "PRA-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70187",
+        "name": "Provider Billing",
+        "item": "688"
+      },
+      {
+        "sequence": 5,
+        "id": "PRA-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 100,
+        "name": "Specialty",
+        "item": "689"
+      },
+      {
+        "sequence": 6,
+        "id": "PRA-6",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 100,
+        "name": "Practitioner ID Numbers",
+        "item": "690"
+      },
+      {
+        "sequence": 7,
+        "id": "PRA-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 20,
+        "name": "Privileges",
+        "item": "691"
+      }
+    ]
+  },
+  {
+    "segmentId": "PV1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "PV1-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - Patient Visit",
+        "item": "131"
+      },
+      {
+        "sequence": 2,
+        "id": "PV1-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70004",
+        "name": "Patient Class",
+        "item": "132"
+      },
+      {
+        "sequence": 3,
+        "id": "PV1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "Assigned Patient Location",
+        "item": "133"
+      },
+      {
+        "sequence": 4,
+        "id": "PV1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70007",
+        "name": "Admission Type",
+        "item": "134"
+      },
+      {
+        "sequence": 5,
+        "id": "PV1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Preadmit Number",
+        "item": "135"
+      },
+      {
+        "sequence": 6,
+        "id": "PV1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "Prior Patient Location",
+        "item": "136"
+      },
+      {
+        "sequence": 7,
+        "id": "PV1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "Attending Doctor",
+        "item": "137"
+      },
+      {
+        "sequence": 8,
+        "id": "PV1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "Referring Doctor",
+        "item": "138"
+      },
+      {
+        "sequence": 9,
+        "id": "PV1-9",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "Consulting Doctor",
+        "item": "139"
+      },
+      {
+        "sequence": 10,
+        "id": "PV1-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70069",
+        "name": "Hospital Service",
+        "item": "140"
+      },
+      {
+        "sequence": 11,
+        "id": "PV1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "table": "HL70079",
+        "name": "Temporary Location",
+        "item": "141"
+      },
+      {
+        "sequence": 12,
+        "id": "PV1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70087",
+        "name": "Preadmit Test Indicator",
+        "item": "142"
+      },
+      {
+        "sequence": 13,
+        "id": "PV1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70092",
+        "name": "Readmission indicator",
+        "item": "143"
+      },
+      {
+        "sequence": 14,
+        "id": "PV1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70023",
+        "name": "Admit Source",
+        "item": "144"
+      },
+      {
+        "sequence": 15,
+        "id": "PV1-15",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70009",
+        "name": "Ambulatory Status",
+        "item": "145"
+      },
+      {
+        "sequence": 16,
+        "id": "PV1-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70099",
+        "name": "VIP Indicator",
+        "item": "146"
+      },
+      {
+        "sequence": 17,
+        "id": "PV1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "table": "HL70010",
+        "name": "Admitting Doctor",
+        "item": "147"
+      },
+      {
+        "sequence": 18,
+        "id": "PV1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70018",
+        "name": "Patient type",
+        "item": "148"
+      },
+      {
+        "sequence": 19,
+        "id": "PV1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 15,
+        "name": "Visit Number",
+        "item": "149"
+      },
+      {
+        "sequence": 20,
+        "id": "PV1-20",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 50,
+        "table": "HL70064",
+        "name": "Financial Class",
+        "item": "150"
+      },
+      {
+        "sequence": 21,
+        "id": "PV1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70032",
+        "name": "Charge Price Indicator",
+        "item": "151"
+      },
+      {
+        "sequence": 22,
+        "id": "PV1-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70045",
+        "name": "Courtesy Code",
+        "item": "152"
+      },
+      {
+        "sequence": 23,
+        "id": "PV1-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70046",
+        "name": "Credit Rating",
+        "item": "153"
+      },
+      {
+        "sequence": 24,
+        "id": "PV1-24",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70044",
+        "name": "Contract Code",
+        "item": "154"
+      },
+      {
+        "sequence": 25,
+        "id": "PV1-25",
+        "required": false,
+        "repeatable": true,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Contract Effective Date",
+        "item": "155"
+      },
+      {
+        "sequence": 26,
+        "id": "PV1-26",
+        "required": false,
+        "repeatable": true,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Contract Amount",
+        "item": "156"
+      },
+      {
+        "sequence": 27,
+        "id": "PV1-27",
+        "required": false,
+        "repeatable": true,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "Contract Period",
+        "item": "157"
+      },
+      {
+        "sequence": 28,
+        "id": "PV1-28",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70073",
+        "name": "Interest Code",
+        "item": "158"
+      },
+      {
+        "sequence": 29,
+        "id": "PV1-29",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70110",
+        "name": "Transfer to bad debt - code",
+        "item": "159"
+      },
+      {
+        "sequence": 30,
+        "id": "PV1-30",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Transfer to bad debt - date",
+        "item": "160"
+      },
+      {
+        "sequence": 31,
+        "id": "PV1-31",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 10,
+        "table": "HL70021",
+        "name": "Bad Debt Agency Code",
+        "item": "161"
+      },
+      {
+        "sequence": 32,
+        "id": "PV1-32",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Bad Debt Transfer Amount",
+        "item": "162"
+      },
+      {
+        "sequence": 33,
+        "id": "PV1-33",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Bad Debt Recovery Amount",
+        "item": "163"
+      },
+      {
+        "sequence": 34,
+        "id": "PV1-34",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70111",
+        "name": "Delete Account Indicator",
+        "item": "164"
+      },
+      {
+        "sequence": 35,
+        "id": "PV1-35",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Delete Account Date",
+        "item": "165"
+      },
+      {
+        "sequence": 36,
+        "id": "PV1-36",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70112",
+        "name": "Discharge Disposition",
+        "item": "166"
+      },
+      {
+        "sequence": 37,
+        "id": "PV1-37",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 25,
+        "table": "HL70113",
+        "name": "Discharged to Location",
+        "item": "167"
+      },
+      {
+        "sequence": 38,
+        "id": "PV1-38",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70114",
+        "name": "Diet Type",
+        "item": "168"
+      },
+      {
+        "sequence": 39,
+        "id": "PV1-39",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 4,
+        "table": "HL70115",
+        "name": "Servicing Facility",
+        "item": "169"
+      },
+      {
+        "sequence": 40,
+        "id": "PV1-40",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70116",
+        "name": "Bed Status",
+        "item": "170"
+      },
+      {
+        "sequence": 41,
+        "id": "PV1-41",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70117",
+        "name": "Account Status",
+        "item": "171"
+      },
+      {
+        "sequence": 42,
+        "id": "PV1-42",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "Pending Location",
+        "item": "172"
+      },
+      {
+        "sequence": 43,
+        "id": "PV1-43",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "Prior Temporary Location",
+        "item": "173"
+      },
+      {
+        "sequence": 44,
+        "id": "PV1-44",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Admit date / time",
+        "item": "174"
+      },
+      {
+        "sequence": 45,
+        "id": "PV1-45",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Discharge date / time",
+        "item": "175"
+      },
+      {
+        "sequence": 46,
+        "id": "PV1-46",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Current Patient Balance",
+        "item": "176"
+      },
+      {
+        "sequence": 47,
+        "id": "PV1-47",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Total Charges",
+        "item": "177"
+      },
+      {
+        "sequence": 48,
+        "id": "PV1-48",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Total Adjustments",
+        "item": "178"
+      },
+      {
+        "sequence": 49,
+        "id": "PV1-49",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 12,
+        "name": "Total Payments",
+        "item": "179"
+      },
+      {
+        "sequence": 50,
+        "id": "PV1-50",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 20,
+        "name": "Alternate Visit ID",
+        "item": "180"
+      }
+    ]
+  },
+  {
+    "segmentId": "PV2",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "PV2-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "Prior Pending Location",
+        "item": "181"
+      },
+      {
+        "sequence": 2,
+        "id": "PV2-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70129",
+        "name": "Accommodation Code",
+        "item": "182"
+      },
+      {
+        "sequence": 3,
+        "id": "PV2-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Admit Reason",
+        "item": "183"
+      },
+      {
+        "sequence": 4,
+        "id": "PV2-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Transfer Reason",
+        "item": "184"
+      },
+      {
+        "sequence": 5,
+        "id": "PV2-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "Patient Valuables",
+        "item": "185"
+      },
+      {
+        "sequence": 6,
+        "id": "PV2-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 25,
+        "name": "Patient Valuables Location",
+        "item": "186"
+      },
+      {
+        "sequence": 7,
+        "id": "PV2-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70130",
+        "name": "Visit User Code",
+        "item": "187"
+      },
+      {
+        "sequence": 8,
+        "id": "PV2-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Expected Admit Date",
+        "item": "188"
+      },
+      {
+        "sequence": 9,
+        "id": "PV2-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Expected Discharge Date",
+        "item": "189"
+      }
+    ]
+  },
+  {
+    "segmentId": "QRD",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "QRD-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Query date / time",
+        "item": "25"
+      },
+      {
+        "sequence": 2,
+        "id": "QRD-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70106",
+        "name": "Query Format Code",
+        "item": "26"
+      },
+      {
+        "sequence": 3,
+        "id": "QRD-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70091",
+        "name": "Query Priority",
+        "item": "27"
+      },
+      {
+        "sequence": 4,
+        "id": "QRD-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 10,
+        "name": "Query ID",
+        "item": "28"
+      },
+      {
+        "sequence": 5,
+        "id": "QRD-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70107",
+        "name": "Deferred Response Type",
+        "item": "29"
+      },
+      {
+        "sequence": 6,
+        "id": "QRD-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Deferred response date / time",
+        "item": "30"
+      },
+      {
+        "sequence": 7,
+        "id": "QRD-7",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 10,
+        "table": "HL70126",
+        "name": "Quantity Limited Request",
+        "item": "31"
+      },
+      {
+        "sequence": 8,
+        "id": "QRD-8",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Who Subject Filter",
+        "item": "32"
+      },
+      {
+        "sequence": 9,
+        "id": "QRD-9",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70048",
+        "name": "What Subject Filter",
+        "item": "33"
+      },
+      {
+        "sequence": 10,
+        "id": "QRD-10",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "What Department Data Code",
+        "item": "34"
+      },
+      {
+        "sequence": 11,
+        "id": "QRD-11",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 20,
+        "name": "What data code value qualifier",
+        "item": "35"
+      },
+      {
+        "sequence": 12,
+        "id": "QRD-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70108",
+        "name": "Query Results Level",
+        "item": "36"
+      }
+    ]
+  },
+  {
+    "segmentId": "QRF",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "QRF-1",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Where Subject Filter",
+        "item": "37"
+      },
+      {
+        "sequence": 2,
+        "id": "QRF-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "When data start date / time",
+        "item": "38"
+      },
+      {
+        "sequence": 3,
+        "id": "QRF-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "When data end date / time",
+        "item": "39"
+      },
+      {
+        "sequence": 4,
+        "id": "QRF-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "What User Qualifier",
+        "item": "40"
+      },
+      {
+        "sequence": 5,
+        "id": "QRF-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Other QRY Subject Filter",
+        "item": "41"
+      },
+      {
+        "sequence": 6,
+        "id": "QRF-6",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70156",
+        "name": "Which date / time qualifier",
+        "item": "42"
+      },
+      {
+        "sequence": 7,
+        "id": "QRF-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70157",
+        "name": "Which date / time status qualifier",
+        "item": "43"
+      },
+      {
+        "sequence": 8,
+        "id": "QRF-8",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70158",
+        "name": "Date / time selection qualifier",
+        "item": "44"
+      }
+    ]
+  },
+  {
+    "segmentId": "RQ1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RQ1-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 10,
+        "name": "Anticipated Price",
+        "item": "285"
+      },
+      {
+        "sequence": 2,
+        "id": "RQ1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Manufacturer ID",
+        "item": "286"
+      },
+      {
+        "sequence": 3,
+        "id": "RQ1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 16,
+        "name": "Manufacturer&apos;s Catalog",
+        "item": "287"
+      },
+      {
+        "sequence": 4,
+        "id": "RQ1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Vendor ID",
+        "item": "288"
+      },
+      {
+        "sequence": 5,
+        "id": "RQ1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 16,
+        "name": "Vendor Catalog",
+        "item": "289"
+      },
+      {
+        "sequence": 6,
+        "id": "RQ1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Taxable",
+        "item": "290"
+      },
+      {
+        "sequence": 7,
+        "id": "RQ1-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Substitute Allowed",
+        "item": "291"
+      }
+    ]
+  },
+  {
+    "segmentId": "RQD",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RQD-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Requisition Line Number",
+        "item": "275"
+      },
+      {
+        "sequence": 2,
+        "id": "RQD-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Item Code - Internal",
+        "item": "276"
+      },
+      {
+        "sequence": 3,
+        "id": "RQD-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Item Code - External",
+        "item": "277"
+      },
+      {
+        "sequence": 4,
+        "id": "RQD-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Hospital Item Code",
+        "item": "278"
+      },
+      {
+        "sequence": 5,
+        "id": "RQD-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 6,
+        "name": "Requisition Quantity",
+        "item": "279"
+      },
+      {
+        "sequence": 6,
+        "id": "RQD-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Requisition Unit of measure",
+        "item": "280"
+      },
+      {
+        "sequence": 7,
+        "id": "RQD-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 30,
+        "name": "Department cost center",
+        "item": "281"
+      },
+      {
+        "sequence": 8,
+        "id": "RQD-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 30,
+        "name": "Item Natural Account Code",
+        "item": "282"
+      },
+      {
+        "sequence": 9,
+        "id": "RQD-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Deliver-to ID",
+        "item": "283"
+      },
+      {
+        "sequence": 10,
+        "id": "RQD-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Date Needed",
+        "item": "284"
+      }
+    ]
+  },
+  {
+    "segmentId": "RXA",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RXA-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Give Sub-ID Counter",
+        "item": "342"
+      },
+      {
+        "sequence": 2,
+        "id": "RXA-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Administration Sub-ID Counter",
+        "item": "344"
+      },
+      {
+        "sequence": 3,
+        "id": "RXA-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / time start of administration",
+        "item": "345"
+      },
+      {
+        "sequence": 4,
+        "id": "RXA-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / time end of administration",
+        "item": "346"
+      },
+      {
+        "sequence": 5,
+        "id": "RXA-5",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 100,
+        "name": "Administered Code",
+        "item": "347"
+      },
+      {
+        "sequence": 6,
+        "id": "RXA-6",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Administered Amount",
+        "item": "348"
+      },
+      {
+        "sequence": 7,
+        "id": "RXA-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Administered Units",
+        "item": "349"
+      },
+      {
+        "sequence": 8,
+        "id": "RXA-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Administered Dosage Form",
+        "item": "350"
+      },
+      {
+        "sequence": 9,
+        "id": "RXA-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 200,
+        "name": "Administration Notes",
+        "item": "351"
+      },
+      {
+        "sequence": 10,
+        "id": "RXA-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 200,
+        "name": "Administering Provider",
+        "item": "352"
+      },
+      {
+        "sequence": 11,
+        "id": "RXA-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "Administered-at Location",
+        "item": "353"
+      },
+      {
+        "sequence": 12,
+        "id": "RXA-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Administered Per (Time Unit)",
+        "item": "354"
+      }
+    ]
+  },
+  {
+    "segmentId": "RXC",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RXC-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70166",
+        "name": "RX Component Type",
+        "item": "313"
+      },
+      {
+        "sequence": 2,
+        "id": "RXC-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 100,
+        "name": "Component Code",
+        "item": "314"
+      },
+      {
+        "sequence": 3,
+        "id": "RXC-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Component Amount",
+        "item": "315"
+      },
+      {
+        "sequence": 4,
+        "id": "RXC-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 20,
+        "name": "Component Units",
+        "item": "316"
+      }
+    ]
+  },
+  {
+    "segmentId": "RXD",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RXD-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Dispense Sub-ID Counter",
+        "item": "334"
+      },
+      {
+        "sequence": 2,
+        "id": "RXD-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 100,
+        "name": "Dispense / give code",
+        "item": "335"
+      },
+      {
+        "sequence": 3,
+        "id": "RXD-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / time dispensed",
+        "item": "336"
+      },
+      {
+        "sequence": 4,
+        "id": "RXD-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Actual Dispense Amount",
+        "item": "337"
+      },
+      {
+        "sequence": 5,
+        "id": "RXD-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Actual Dispense Units",
+        "item": "338"
+      },
+      {
+        "sequence": 6,
+        "id": "RXD-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Actual Dosage Form",
+        "item": "339"
+      },
+      {
+        "sequence": 7,
+        "id": "RXD-7",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Prescription Number",
+        "item": "325"
+      },
+      {
+        "sequence": 8,
+        "id": "RXD-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Number of Refills Remaining",
+        "item": "326"
+      },
+      {
+        "sequence": 9,
+        "id": "RXD-9",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 200,
+        "name": "Dispense Notes",
+        "item": "340"
+      },
+      {
+        "sequence": 10,
+        "id": "RXD-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 200,
+        "name": "Dispensing Provider",
+        "item": "341"
+      },
+      {
+        "sequence": 11,
+        "id": "RXD-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70167",
+        "name": "Substitution Status",
+        "item": "322"
+      },
+      {
+        "sequence": 12,
+        "id": "RXD-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 10,
+        "name": "Total Daily Dose",
+        "item": "329"
+      },
+      {
+        "sequence": 13,
+        "id": "RXD-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "Deliver-to location",
+        "item": "299"
+      },
+      {
+        "sequence": 14,
+        "id": "RXD-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "Needs Human Review",
+        "item": "307"
+      },
+      {
+        "sequence": 15,
+        "id": "RXD-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Pharmacy Special Dispensing Instructions",
+        "item": "330"
+      }
+    ]
+  },
+  {
+    "segmentId": "RXE",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RXE-1",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TQ",
+        "maxLength": 200,
+        "name": "Quantity / timing",
+        "item": "221"
+      },
+      {
+        "sequence": 2,
+        "id": "RXE-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 100,
+        "name": "Give Code",
+        "item": "317"
+      },
+      {
+        "sequence": 3,
+        "id": "RXE-3",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Give Amount - Minimum",
+        "item": "318"
+      },
+      {
+        "sequence": 4,
+        "id": "RXE-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Give Amount - Maximum",
+        "item": "319"
+      },
+      {
+        "sequence": 5,
+        "id": "RXE-5",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Give Units",
+        "item": "320"
+      },
+      {
+        "sequence": 6,
+        "id": "RXE-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Give Dosage Form",
+        "item": "321"
+      },
+      {
+        "sequence": 7,
+        "id": "RXE-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Provider&apos;s Administration Instructions",
+        "item": "298"
+      },
+      {
+        "sequence": 8,
+        "id": "RXE-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "Deliver-to location",
+        "item": "299"
+      },
+      {
+        "sequence": 9,
+        "id": "RXE-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70167",
+        "name": "Substitution Status",
+        "item": "322"
+      },
+      {
+        "sequence": 10,
+        "id": "RXE-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Dispense Amount",
+        "item": "323"
+      },
+      {
+        "sequence": 11,
+        "id": "RXE-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Dispense Units",
+        "item": "324"
+      },
+      {
+        "sequence": 12,
+        "id": "RXE-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "Number of Refills",
+        "item": "304"
+      },
+      {
+        "sequence": 13,
+        "id": "RXE-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Ordering Provider&apos;s DEA Number",
+        "item": "305"
+      },
+      {
+        "sequence": 14,
+        "id": "RXE-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Pharmacist Verifier ID",
+        "item": "306"
+      },
+      {
+        "sequence": 15,
+        "id": "RXE-15",
+        "required": true,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Prescription Number",
+        "item": "325"
+      },
+      {
+        "sequence": 16,
+        "id": "RXE-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Number of Refills Remaining",
+        "item": "326"
+      },
+      {
+        "sequence": 17,
+        "id": "RXE-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Number of refills / doses dispensed",
+        "item": "327"
+      },
+      {
+        "sequence": 18,
+        "id": "RXE-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date / time of most recent refill or dose dispensed",
+        "item": "328"
+      },
+      {
+        "sequence": 19,
+        "id": "RXE-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CQ",
+        "maxLength": 10,
+        "name": "Total Daily Dose",
+        "item": "329"
+      },
+      {
+        "sequence": 20,
+        "id": "RXE-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "Needs Human Review",
+        "item": "307"
+      },
+      {
+        "sequence": 21,
+        "id": "RXE-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Pharmacy Special Dispensing Instructions",
+        "item": "330"
+      },
+      {
+        "sequence": 22,
+        "id": "RXE-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Give Per (Time Unit)",
+        "item": "331"
+      },
+      {
+        "sequence": 23,
+        "id": "RXE-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 6,
+        "name": "Give Rate Amount",
+        "item": "332"
+      },
+      {
+        "sequence": 24,
+        "id": "RXE-24",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Give Rate Units",
+        "item": "333"
+      }
+    ]
+  },
+  {
+    "segmentId": "RXG",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RXG-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Give Sub-ID Counter",
+        "item": "342"
+      },
+      {
+        "sequence": 2,
+        "id": "RXG-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 4,
+        "name": "Dispense Sub-ID Counter",
+        "item": "334"
+      },
+      {
+        "sequence": 3,
+        "id": "RXG-3",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TQ",
+        "maxLength": 200,
+        "name": "Quantity / timing",
+        "item": "221"
+      },
+      {
+        "sequence": 4,
+        "id": "RXG-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 100,
+        "name": "Give Code",
+        "item": "317"
+      },
+      {
+        "sequence": 5,
+        "id": "RXG-5",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Give Amount - Minimum",
+        "item": "318"
+      },
+      {
+        "sequence": 6,
+        "id": "RXG-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Give Amount - Maximum",
+        "item": "319"
+      },
+      {
+        "sequence": 7,
+        "id": "RXG-7",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Give Units",
+        "item": "320"
+      },
+      {
+        "sequence": 8,
+        "id": "RXG-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Give Dosage Form",
+        "item": "321"
+      },
+      {
+        "sequence": 9,
+        "id": "RXG-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 200,
+        "name": "Administration Notes",
+        "item": "351"
+      },
+      {
+        "sequence": 10,
+        "id": "RXG-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70167",
+        "name": "Substitution Status",
+        "item": "322"
+      },
+      {
+        "sequence": 11,
+        "id": "RXG-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "Deliver-to location",
+        "item": "299"
+      },
+      {
+        "sequence": 12,
+        "id": "RXG-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "Needs Human Review",
+        "item": "307"
+      },
+      {
+        "sequence": 13,
+        "id": "RXG-13",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Pharmacy Special Administration Instructions",
+        "item": "343"
+      },
+      {
+        "sequence": 14,
+        "id": "RXG-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Give Per (Time Unit)",
+        "item": "331"
+      },
+      {
+        "sequence": 15,
+        "id": "RXG-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 6,
+        "name": "Give Rate Amount",
+        "item": "332"
+      },
+      {
+        "sequence": 16,
+        "id": "RXG-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Give Rate Units",
+        "item": "333"
+      }
+    ]
+  },
+  {
+    "segmentId": "RXO",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RXO-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 100,
+        "name": "Requested Give Code",
+        "item": "292"
+      },
+      {
+        "sequence": 2,
+        "id": "RXO-2",
+        "required": true,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Requested Give Amount - Minimum",
+        "item": "293"
+      },
+      {
+        "sequence": 3,
+        "id": "RXO-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Requested Give Amount - Maximum",
+        "item": "294"
+      },
+      {
+        "sequence": 4,
+        "id": "RXO-4",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Requested Give Units",
+        "item": "295"
+      },
+      {
+        "sequence": 5,
+        "id": "RXO-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Requested Dosage Form",
+        "item": "296"
+      },
+      {
+        "sequence": 6,
+        "id": "RXO-6",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Provider&apos;s Pharmacy Instructions",
+        "item": "297"
+      },
+      {
+        "sequence": 7,
+        "id": "RXO-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Provider&apos;s Administration Instructions",
+        "item": "298"
+      },
+      {
+        "sequence": 8,
+        "id": "RXO-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CM",
+        "maxLength": 12,
+        "name": "Deliver-to location",
+        "item": "299"
+      },
+      {
+        "sequence": 9,
+        "id": "RXO-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70161",
+        "name": "Allow Substitutions",
+        "item": "300"
+      },
+      {
+        "sequence": 10,
+        "id": "RXO-10",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 100,
+        "name": "Requested Dispense Code",
+        "item": "301"
+      },
+      {
+        "sequence": 11,
+        "id": "RXO-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 20,
+        "name": "Requested Dispense Amount",
+        "item": "302"
+      },
+      {
+        "sequence": 12,
+        "id": "RXO-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Requested Dispense Units",
+        "item": "303"
+      },
+      {
+        "sequence": 13,
+        "id": "RXO-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "Number of Refills",
+        "item": "304"
+      },
+      {
+        "sequence": 14,
+        "id": "RXO-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Ordering Provider&apos;s DEA Number",
+        "item": "305"
+      },
+      {
+        "sequence": 15,
+        "id": "RXO-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CN",
+        "maxLength": 60,
+        "name": "Pharmacist Verifier ID",
+        "item": "306"
+      },
+      {
+        "sequence": 16,
+        "id": "RXO-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "Needs Human Review",
+        "item": "307"
+      },
+      {
+        "sequence": 17,
+        "id": "RXO-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "Requested Give Per (Time Unit)",
+        "item": "308"
+      }
+    ]
+  },
+  {
+    "segmentId": "RXR",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "RXR-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70162",
+        "name": "Route",
+        "item": "309"
+      },
+      {
+        "sequence": 2,
+        "id": "RXR-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70163",
+        "name": "Site",
+        "item": "310"
+      },
+      {
+        "sequence": 3,
+        "id": "RXR-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70164",
+        "name": "Administration Device",
+        "item": "311"
+      },
+      {
+        "sequence": 4,
+        "id": "RXR-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "table": "HL70165",
+        "name": "Administration Method",
+        "item": "312"
+      }
+    ]
+  },
+  {
+    "segmentId": "STF",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "STF-1",
+        "required": true,
+        "repeatable": false,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "STF - primary key value",
+        "item": "671"
+      },
+      {
+        "sequence": 2,
+        "id": "STF-2",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Staff ID Code",
+        "item": "672"
+      },
+      {
+        "sequence": 3,
+        "id": "STF-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "PN",
+        "maxLength": 48,
+        "name": "Staff Name",
+        "item": "673"
+      },
+      {
+        "sequence": 4,
+        "id": "STF-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70182",
+        "name": "Staff Type",
+        "item": "674"
+      },
+      {
+        "sequence": 5,
+        "id": "STF-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70001",
+        "name": "Sex",
+        "item": "111"
+      },
+      {
+        "sequence": 6,
+        "id": "STF-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "Date of Birth",
+        "item": "110"
+      },
+      {
+        "sequence": 7,
+        "id": "STF-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70183",
+        "name": "Active / inactive",
+        "item": "675"
+      },
+      {
+        "sequence": 8,
+        "id": "STF-8",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "table": "HL70184",
+        "name": "Department",
+        "item": "676"
+      },
+      {
+        "sequence": 9,
+        "id": "STF-9",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 200,
+        "name": "Service",
+        "item": "677"
+      },
+      {
+        "sequence": 10,
+        "id": "STF-10",
+        "required": false,
+        "repeatable": true,
+        "datatype": "TN",
+        "maxLength": 40,
+        "name": "Phone",
+        "item": "678"
+      },
+      {
+        "sequence": 11,
+        "id": "STF-11",
+        "required": false,
+        "repeatable": true,
+        "datatype": "AD",
+        "maxLength": 106,
+        "name": "Office / home address",
+        "item": "679"
+      },
+      {
+        "sequence": 12,
+        "id": "STF-12",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 19,
+        "name": "Activation Date",
+        "item": "680"
+      },
+      {
+        "sequence": 13,
+        "id": "STF-13",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 19,
+        "name": "Inactivation Date",
+        "item": "681"
+      },
+      {
+        "sequence": 14,
+        "id": "STF-14",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CE",
+        "maxLength": 60,
+        "name": "Backup Person ID",
+        "item": "682"
+      },
+      {
+        "sequence": 15,
+        "id": "STF-15",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 40,
+        "name": "E-mail Address",
+        "item": "683"
+      },
+      {
+        "sequence": 16,
+        "id": "STF-16",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70185",
+        "name": "Preferred method of Contact",
+        "item": "684"
+      }
+    ]
+  },
+  {
+    "segmentId": "UB1",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "UB1-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - UB82",
+        "item": "530"
+      },
+      {
+        "sequence": 2,
+        "id": "UB1-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 1,
+        "table": "HL70136",
+        "name": "Blood deductible (43)",
+        "item": "492"
+      },
+      {
+        "sequence": 3,
+        "id": "UB1-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "Blood furnished pints of (40)",
+        "item": "532"
+      },
+      {
+        "sequence": 4,
+        "id": "UB1-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "Blood replaced pints (41)",
+        "item": "533"
+      },
+      {
+        "sequence": 5,
+        "id": "UB1-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "Blood not replaced pints (42)",
+        "item": "534"
+      },
+      {
+        "sequence": 6,
+        "id": "UB1-6",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "Co-insurance days (25)",
+        "item": "535"
+      },
+      {
+        "sequence": 7,
+        "id": "UB1-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70043",
+        "name": "Condition code (35-39)",
+        "item": "536"
+      },
+      {
+        "sequence": 8,
+        "id": "UB1-8",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "Covered days (23)",
+        "item": "537"
+      },
+      {
+        "sequence": 9,
+        "id": "UB1-9",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 3,
+        "name": "Non-covered days (24)",
+        "item": "538"
+      },
+      {
+        "sequence": 10,
+        "id": "UB1-10",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 12,
+        "table": "HL70153",
+        "name": "Value amount and code (46-49)",
+        "item": "539"
+      },
+      {
+        "sequence": 11,
+        "id": "UB1-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "NM",
+        "maxLength": 2,
+        "name": "Number of grace days (90)",
+        "item": "540"
+      },
+      {
+        "sequence": 12,
+        "id": "UB1-12",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "Special program indicator (44)",
+        "item": "541"
+      },
+      {
+        "sequence": 13,
+        "id": "UB1-13",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "name": "PSRO / UR approval indicator (87)",
+        "item": "542"
+      },
+      {
+        "sequence": 14,
+        "id": "UB1-14",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "PSRO / UR approved stay - from (88)",
+        "item": "543"
+      },
+      {
+        "sequence": 15,
+        "id": "UB1-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "PSRO / UR approved stay - to (89)",
+        "item": "544"
+      },
+      {
+        "sequence": 16,
+        "id": "UB1-16",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 20,
+        "name": "Occurrence (28-32)",
+        "item": "545"
+      },
+      {
+        "sequence": 17,
+        "id": "UB1-17",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 2,
+        "name": "Occurrence span (33)",
+        "item": "546"
+      },
+      {
+        "sequence": 18,
+        "id": "UB1-18",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Occurrence span start date (33)",
+        "item": "547"
+      },
+      {
+        "sequence": 19,
+        "id": "UB1-19",
+        "required": false,
+        "repeatable": false,
+        "datatype": "DT",
+        "maxLength": 8,
+        "name": "Occurrence span end date (33)",
+        "item": "548"
+      },
+      {
+        "sequence": 20,
+        "id": "UB1-20",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 30,
+        "name": "UB-82 locator 2",
+        "item": "549"
+      },
+      {
+        "sequence": 21,
+        "id": "UB1-21",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 7,
+        "name": "UB-82 locator 9",
+        "item": "550"
+      },
+      {
+        "sequence": 22,
+        "id": "UB1-22",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 8,
+        "name": "UB-82 locator 27",
+        "item": "551"
+      },
+      {
+        "sequence": 23,
+        "id": "UB1-23",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 17,
+        "name": "UB-82 locator 45",
+        "item": "552"
+      }
+    ]
+  },
+  {
+    "segmentId": "UB2",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "UB2-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "SI",
+        "maxLength": 4,
+        "name": "Set ID - UB92",
+        "item": "553"
+      },
+      {
+        "sequence": 2,
+        "id": "UB2-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "Co-insurance days (9)",
+        "item": "554"
+      },
+      {
+        "sequence": 3,
+        "id": "UB2-3",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 2,
+        "table": "HL70043",
+        "name": "Condition code (24-30)",
+        "item": "555"
+      },
+      {
+        "sequence": 4,
+        "id": "UB2-4",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 3,
+        "name": "Covered days (7)",
+        "item": "556"
+      },
+      {
+        "sequence": 5,
+        "id": "UB2-5",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 4,
+        "name": "Non-covered days (8)",
+        "item": "557"
+      },
+      {
+        "sequence": 6,
+        "id": "UB2-6",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 11,
+        "name": "Value amount and code (39-41)",
+        "item": "558"
+      },
+      {
+        "sequence": 7,
+        "id": "UB2-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 11,
+        "name": "Occurrence code and date (32-35)",
+        "item": "559"
+      },
+      {
+        "sequence": 8,
+        "id": "UB2-8",
+        "required": false,
+        "repeatable": true,
+        "datatype": "CM",
+        "maxLength": 28,
+        "name": "Occurrence span code / dates (36)",
+        "item": "560"
+      },
+      {
+        "sequence": 9,
+        "id": "UB2-9",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 29,
+        "name": "UB92 locator 2 (state)",
+        "item": "561"
+      },
+      {
+        "sequence": 10,
+        "id": "UB2-10",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 12,
+        "name": "UB92 locator 11 (state)",
+        "item": "562"
+      },
+      {
+        "sequence": 11,
+        "id": "UB2-11",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 5,
+        "name": "UB92 locator 31 (national)",
+        "item": "563"
+      },
+      {
+        "sequence": 12,
+        "id": "UB2-12",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 23,
+        "name": "Document control number (37)",
+        "item": "564"
+      },
+      {
+        "sequence": 13,
+        "id": "UB2-13",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 4,
+        "name": "UB92 locator 49 (national)",
+        "item": "565"
+      },
+      {
+        "sequence": 14,
+        "id": "UB2-14",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 14,
+        "name": "UB92 locator 56 (state)",
+        "item": "566"
+      },
+      {
+        "sequence": 15,
+        "id": "UB2-15",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ST",
+        "maxLength": 27,
+        "name": "UB92 locator 57 (national)",
+        "item": "567"
+      },
+      {
+        "sequence": 16,
+        "id": "UB2-16",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 2,
+        "name": "UB92 Locator 78 (state)",
+        "item": "568"
+      }
+    ]
+  },
+  {
+    "segmentId": "URD",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "URD-1",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "R/U date / time",
+        "item": "45"
+      },
+      {
+        "sequence": 2,
+        "id": "URD-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70109",
+        "name": "Report Priority",
+        "item": "46"
+      },
+      {
+        "sequence": 3,
+        "id": "URD-3",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U Who Subject Definition",
+        "item": "47"
+      },
+      {
+        "sequence": 4,
+        "id": "URD-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 3,
+        "table": "HL70048",
+        "name": "R/U What Subject Definition",
+        "item": "48"
+      },
+      {
+        "sequence": 5,
+        "id": "URD-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U What Department Code",
+        "item": "49"
+      },
+      {
+        "sequence": 6,
+        "id": "URD-6",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U display / print locations",
+        "item": "50"
+      },
+      {
+        "sequence": 7,
+        "id": "URD-7",
+        "required": false,
+        "repeatable": false,
+        "datatype": "ID",
+        "maxLength": 1,
+        "table": "HL70108",
+        "name": "R/U Results Level",
+        "item": "51"
+      }
+    ]
+  },
+  {
+    "segmentId": "URS",
+    "fields": [
+      {
+        "sequence": 1,
+        "id": "URS-1",
+        "required": true,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U Where Subject Definition",
+        "item": "52"
+      },
+      {
+        "sequence": 2,
+        "id": "URS-2",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "R/U when data start date / time",
+        "item": "53"
+      },
+      {
+        "sequence": 3,
+        "id": "URS-3",
+        "required": false,
+        "repeatable": false,
+        "datatype": "TS",
+        "maxLength": 26,
+        "name": "R/U when data end date / time",
+        "item": "54"
+      },
+      {
+        "sequence": 4,
+        "id": "URS-4",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U What User Qualifier",
+        "item": "55"
+      },
+      {
+        "sequence": 5,
+        "id": "URS-5",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ST",
+        "maxLength": 20,
+        "name": "R/U Other Results Subject Definition",
+        "item": "56"
+      },
+      {
+        "sequence": 6,
+        "id": "URS-6",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70156",
+        "name": "R/U which date / time qualifier",
+        "item": "57"
+      },
+      {
+        "sequence": 7,
+        "id": "URS-7",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70157",
+        "name": "R/U which date / time status qualifier",
+        "item": "58"
+      },
+      {
+        "sequence": 8,
+        "id": "URS-8",
+        "required": false,
+        "repeatable": true,
+        "datatype": "ID",
+        "maxLength": 12,
+        "table": "HL70158",
+        "name": "R/U date / time selection qualifier",
+        "item": "59"
+      }
+    ]
+  }
+]

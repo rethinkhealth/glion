@@ -1,0 +1,325 @@
+[
+  {
+    "id": "AD",
+    "version": "2.2",
+    "kind": "composite",
+    "title": "address",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "street address",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "other designation",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "city",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "state or province",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "zip or postal code",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "country",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "type",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "other geographic designation",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CE",
+    "version": "2.2",
+    "kind": "composite",
+    "title": "coded element",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "identifier",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "name of coding system",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "alternate identifier",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "alternate text",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "name of alternate coding system",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "CF",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "coded element with formatted values",
+    "components": []
+  },
+  {
+    "id": "CK",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "composite ID with check digit",
+    "components": []
+  },
+  {
+    "id": "DT",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "DATE",
+    "components": []
+  },
+  {
+    "id": "FT",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "formatted text data",
+    "components": []
+  },
+  {
+    "id": "ID",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "CODED VALUE",
+    "components": []
+  },
+  {
+    "id": "MO",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "money",
+    "components": []
+  },
+  {
+    "id": "NM",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "numeric",
+    "components": []
+  },
+  {
+    "id": "PN",
+    "version": "2.2",
+    "kind": "composite",
+    "title": "person name",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "familiy name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "given name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "middle initial or name",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "suffix (e.g. JR or III)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "prefix (e.g. DR)",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "degree (e.g. MD)",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "RP",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "reference pointer",
+    "components": []
+  },
+  {
+    "id": "SI",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "SEQUENCE ID",
+    "components": []
+  },
+  {
+    "id": "ST",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "string data",
+    "components": []
+  },
+  {
+    "id": "TM",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "time",
+    "components": []
+  },
+  {
+    "id": "TN",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "telephone number",
+    "components": []
+  },
+  {
+    "id": "TQ",
+    "version": "2.2",
+    "kind": "composite",
+    "title": "timing quantity",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "Quantity",
+        "datatypeId": "CQ",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "interval",
+        "datatypeId": "CM",
+        "required": false
+      },
+      {
+        "sequence": 3,
+        "name": "duration",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 4,
+        "name": "start date/time",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 5,
+        "name": "end date/time",
+        "datatypeId": "TS",
+        "required": false
+      },
+      {
+        "sequence": 6,
+        "name": "priority",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 7,
+        "name": "condition",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 8,
+        "name": "text (TX)",
+        "datatypeId": "TX",
+        "required": false
+      },
+      {
+        "sequence": 9,
+        "name": "conjunction",
+        "datatypeId": "ID",
+        "required": false
+      },
+      {
+        "sequence": 10,
+        "name": "order sequencing",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "TS",
+    "version": "2.2",
+    "kind": "composite",
+    "title": "time stamp",
+    "components": [
+      {
+        "sequence": 1,
+        "name": "time of an event",
+        "datatypeId": "ST",
+        "required": false
+      },
+      {
+        "sequence": 2,
+        "name": "degree of precision",
+        "datatypeId": "ST",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "TX",
+    "version": "2.2",
+    "kind": "primitive",
+    "title": "text data",
+    "components": []
+  }
+]
