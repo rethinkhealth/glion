@@ -1,5 +1,5 @@
 import { datatypeImports } from "../profiles/datatype-manifest";
-import type { ProfileStoreConfig } from "../store";
+import { loaderByVersion, versionAndId } from "./load";
 import type {
   ComponentProfile,
   DatatypeDefinition,
@@ -28,12 +28,11 @@ const compileDatatypes = (raw: DatatypeModule): DatatypeDefinition => {
   };
 };
 
-/** Store configuration for datatype profiles. */
-export const datatypesConfig: ProfileStoreConfig<
-  DatatypeModule,
-  DatatypeDefinition
-> = {
-  compile: compileDatatypes,
-  manifest: datatypeImports,
-  namespace: "datatypes",
-};
+/**
+ * The datatype definitions of an HL7v2 version, by datatype ID, or `undefined`
+ * for a version not bundled.
+ */
+export const loadDatatypes: (
+  version: string
+) => Promise<ReadonlyMap<string, DatatypeDefinition> | undefined> =
+  loaderByVersion(datatypeImports, versionAndId, compileDatatypes);

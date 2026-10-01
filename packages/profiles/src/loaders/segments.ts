@@ -41,23 +41,26 @@ const compile = (raw: SegmentModule): SegmentDefinition => {
 // Loader
 // ---------------------------------------------------------------------------
 
+const loaded = new Map<string, Promise<SegmentDefinition>>();
+
 /**
- * Load and compile all segment definitions for an HL7v2 version.
+ * The segment definitions of an HL7v2 version, or `undefined` for a version
+ * not bundled.
  *
- * Segment definitions are small (just id + title per segment) and are
- * loaded all-at-once per version via a single lazy import. The ES module
- * runtime caches the dynamic import, so repeated calls for the same
- * version don't re-fetch the module.
- *
- * @throws When the version is not in the manifest.
+ * Each version loads and compiles once; later calls return the same
+ * definition.
  */
 export const loadSegments = async (
   version: string
-): Promise<SegmentDefinition> => {
-  const factory = manifest[`v${version}`];
-  if (!factory) {
-    throw new Error(`Unknown segments profile: v${version}`);
+): Promise<SegmentDefinition | undefined> => {
+  let segments = loaded.get(version);
+  if (!segments) {
+    const factory = manifest[`v${version}`];
+    if (!factory) {
+      return undefined;
+    }
+    segments = (async () => compile(await factory()))();
+    loaded.set(version, segments);
   }
-  const raw = await factory();
-  return compile(raw);
+  return await segments;
 };

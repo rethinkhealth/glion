@@ -2,10 +2,8 @@ import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
 import type { Field, FieldRepetition, Root } from "@glion/ast";
 import { c, f, m, r, s } from "@glion/builder";
-import { profiles } from "@glion/profiles";
 import { unified } from "unified";
-import { VFile } from "vfile";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { hl7v2AnnotateProfileFieldsCodeSystems } from "../src";
 
@@ -197,37 +195,5 @@ describe("hl7v2AnnotateProfileFieldsCodeSystems", () => {
 
     await proc.run(tree);
     expect(JSON.stringify(tree)).toBe(first);
-  });
-
-  it("reports unexpected load errors as VFile messages", async () => {
-    const tree = m(
-      msh("2.5"),
-      s("PID", f("1"), f(""), f("12345"), f(""), f("Doe"), f(""), f(""), f("F"))
-    );
-    const file = new VFile();
-    await unified()
-      .use(hl7v2AnnotateProfileContext)
-      .use(hl7v2AnnotateProfileFields)
-      .run(tree, file);
-
-    const loadError = new TypeError("Dynamic import failed");
-    const spy = vi
-      .spyOn(profiles.codeSystems, "load")
-      .mockRejectedValue(loadError);
-
-    try {
-      await unified()
-        .use(hl7v2AnnotateProfileFieldsCodeSystems)
-        .run(tree, file);
-    } finally {
-      spy.mockRestore();
-    }
-
-    expect(getField(tree, "PID", 7).data?.codeSystem).toBeUndefined();
-    const msgs = file.messages.filter(
-      (msg) => msg.source === "hl7v2-annotate-profile-fields-code-systems"
-    );
-    expect(msgs.length).toBeGreaterThan(0);
-    expect(msgs[0]!.cause).toBe(loadError);
   });
 });

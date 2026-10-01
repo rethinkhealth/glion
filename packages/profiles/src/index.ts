@@ -18,18 +18,13 @@ export type {
   StructureMatch,
 } from "./structure/types";
 
-// Cache
-export { createLruCache } from "./cache/lru";
-export type { Cache, CacheOptions } from "./cache/types";
-
-// Profiles API
-export { createProfiles, profiles } from "./profiles";
-
-// Segment loader (standalone — not part of the store-based profiles API)
-export { loadSegments } from "./stores/segments";
-
-// Store types
-export type { ProfileStoreConfig } from "./store";
+// Loaders
+export { loadCodeSystems } from "./loaders/code-systems";
+export { loadDatatypes } from "./loaders/datatypes";
+export { loadFields } from "./loaders/fields";
+export { loadMessageStructures } from "./loaders/message-structures";
+export { loadSegments } from "./loaders/segments";
+export { loadTables } from "./loaders/tables";
 
 // Domain types
 export type {
@@ -48,7 +43,7 @@ export type {
   TableModule,
   UtgCodeEntry,
   UtgCodeSystemModule,
-} from "./stores/types";
+} from "./loaders/types";
 
 // Event maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
 export { eventMaps } from "./profiles/event-map-manifest";
@@ -56,13 +51,3 @@ export { eventMaps } from "./profiles/event-map-manifest";
 // Resolution utilities
 export { loadMessageStructure } from "./load-message-structure";
 export { resolveMessageStructure } from "./resolve-message-structure";
-
-// Profiles API types
-export type {
-  CodeSystemStore,
-  EventLoadOptions,
-  EventProfileStore,
-  ProfileStore,
-  Profiles,
-  ProfilesOptions,
-} from "./types";

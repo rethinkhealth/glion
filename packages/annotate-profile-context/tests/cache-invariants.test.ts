@@ -1,13 +1,13 @@
 /**
  * Cache and memory invariants of the profile context: per-file Maps hold
- * references into the shared LRU cache (never copies), sizes scale with
- * unique segment types, and a second run on the same file bails.
+ * references into the version maps the loaders return (never copies), sizes
+ * scale with unique segment types, and a second run on the same file bails.
  *
  * Converted from assertion-shaped "benchmarks" — these are behavioral
  * contracts, so they live here where failure is loud and attributable.
  */
 import { c, f, m, s } from "@glion/builder";
-import { profiles } from "@glion/profiles";
+import { loadDatatypes, loadFields, loadTables } from "@glion/profiles";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -59,30 +59,26 @@ function requireProfile(file: VFile): ProfileContext {
   return profile;
 }
 
-describe("shared references with the LRU cache", () => {
-  it("fields entries are the same objects as the cache's", async () => {
+describe("shared references with the loaded profiles", () => {
+  it("fields entries are the same objects the loader returns", async () => {
     const file = new VFile();
     await processor.run(m(msh(), pid()), file);
     const profile = requireProfile(file);
 
-    expect(profile.fields.get("MSH")).toBe(
-      await profiles.fields.load("2.5", "MSH")
-    );
-    expect(profile.fields.get("PID")).toBe(
-      await profiles.fields.load("2.5", "PID")
-    );
+    const fields = await loadFields("2.5");
+    expect(profile.fields.get("MSH")).toBe(fields?.get("MSH"));
+    expect(profile.fields.get("PID")).toBe(fields?.get("PID"));
   });
 
-  it("datatypes entries are the same objects as the cache's", async () => {
+  it("datatypes entries are the same objects the loader returns", async () => {
     const file = new VFile();
     await processor.run(m(msh(), pid()), file);
 
-    expect(requireProfile(file).datatypes.get("ST")).toBe(
-      await profiles.datatypes.load("2.5", "ST")
-    );
+    const datatypes = await loadDatatypes("2.5");
+    expect(requireProfile(file).datatypes.get("ST")).toBe(datatypes?.get("ST"));
   });
 
-  it("tables entries are the same objects as the cache's", async () => {
+  it("tables entries are the same objects the loader returns", async () => {
     const file = new VFile();
     await processor.run(m(msh(), pid()), file);
     const profile = requireProfile(file);
@@ -91,9 +87,8 @@ describe("shared references with the LRU cache", () => {
     if (firstTableId === undefined) {
       throw new Error("no tables were loaded");
     }
-    expect(profile.tables.get(firstTableId)).toBe(
-      await profiles.tables.load("2.5", firstTableId)
-    );
+    const tables = await loadTables("2.5");
+    expect(profile.tables.get(firstTableId)).toBe(tables?.get(firstTableId));
   });
 
   it("two messages share profile object references", async () => {

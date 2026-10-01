@@ -8,7 +8,7 @@
  * checking order with grouping on equal input.
  */
 import { parseHL7v2 } from "@glion/parser";
-import { matchStructure, profiles } from "@glion/profiles";
+import { loadMessageStructures, matchStructure } from "@glion/profiles";
 import { bench, describe } from "vitest";
 
 import {
@@ -26,8 +26,12 @@ const symbols = (message: string): string[] =>
     node.type === "segment" ? node.name : ""
   );
 
+const structures = await loadMessageStructures("2.5.1");
 // Loaded once: loading is not measured.
-const structure = await profiles.events.load("2.5.1", "ORU_R01");
+const structure = structures?.get("ORU_R01");
+if (!structure) {
+  throw new Error("v2.5.1 bundles no ORU_R01");
+}
 
 describe("profiles-structure", () => {
   const medium = symbols(ORU_R01_MEDIUM);

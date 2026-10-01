@@ -34,7 +34,7 @@ import { parseHL7v2 as pipeline } from "@glion/hl7v2";
 import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
 import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetLintProfileRecommended from "@glion/preset-lint-profile-recommended";
-import { matchStructure, profiles, runner } from "@glion/profiles";
+import { loadMessageStructures, matchStructure, runner } from "@glion/profiles";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { bench, describe } from "vitest";
@@ -48,9 +48,13 @@ const ENGINE_SIZES = [10, 30, 100, 300, 1000, 3000, 10_000, 30_000, 100_000];
 const TREE_SIZES = [10, 30, 100, 300, 1000, 3000, 10_000, 30_000];
 const PIPELINE_SIZES = [10, 30, 100, 300, 1000, 3000];
 
+const structures = await loadMessageStructures("2.5.1");
 // Loaded once, outside every bench: the sweep measures running a structure,
 // not loading it.
-const structure = await profiles.events.load("2.5.1", "ORU_R01");
+const structure = structures?.get("ORU_R01");
+if (!structure) {
+  throw new Error("v2.5.1 bundles no ORU_R01");
+}
 
 // A message of about `n` segments: many OBR/OBX pairs.
 const ordersMessage = (n: number): string =>

@@ -12,7 +12,7 @@ import { MllpClient } from "@glion/mllp-client";
 import { frame, unframe } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetLintProfileRecommended from "@glion/preset-lint-profile-recommended";
-import { matchStructure, profiles, runner } from "@glion/profiles";
+import { loadMessageStructures, matchStructure, runner } from "@glion/profiles";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -36,7 +36,11 @@ describe("canary — suites measure real work", () => {
   });
 
   it("profiles-runner: ORU_R01 fixtures are accepted", async () => {
-    const structure = await profiles.events.load("2.5.1", "ORU_R01");
+    const structures = await loadMessageStructures("2.5.1");
+    const structure = structures?.get("ORU_R01");
+    if (!structure) {
+      throw new Error("v2.5.1 bundles no ORU_R01");
+    }
     for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
       const automaton = runner(structure);
       for (const node of parseHL7v2(message).children) {
@@ -47,7 +51,11 @@ describe("canary — suites measure real work", () => {
   });
 
   it("profiles-structure: ORU_R01 fixtures group into ORDER_OBSERVATION", async () => {
-    const structure = await profiles.events.load("2.5.1", "ORU_R01");
+    const structures = await loadMessageStructures("2.5.1");
+    const structure = structures?.get("ORU_R01");
+    if (!structure) {
+      throw new Error("v2.5.1 bundles no ORU_R01");
+    }
     for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
       const names = parseHL7v2(message).children.map((node) =>
         node.type === "segment" ? node.name : ""

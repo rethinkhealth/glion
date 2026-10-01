@@ -1,5 +1,5 @@
 import { fieldImports } from "../profiles/field-manifest";
-import type { ProfileStoreConfig } from "../store";
+import { loaderByVersion, versionAndId } from "./load";
 import type { FieldDefinition, FieldModule } from "./types";
 
 /** Compile raw field module into indexed definition. */
@@ -21,9 +21,11 @@ const compileFields = (raw: FieldModule): FieldDefinition => {
   };
 };
 
-/** Store configuration for segment field profiles. */
-export const fieldsConfig: ProfileStoreConfig<FieldModule, FieldDefinition> = {
-  compile: compileFields,
-  manifest: fieldImports,
-  namespace: "fields",
-};
+/**
+ * The field definitions of every segment in an HL7v2 version, by segment ID,
+ * or `undefined` for a version not bundled.
+ */
+export const loadFields: (
+  version: string
+) => Promise<ReadonlyMap<string, FieldDefinition> | undefined> =
+  loaderByVersion(fieldImports, versionAndId, compileFields);

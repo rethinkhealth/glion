@@ -1,8 +1,8 @@
 [
   {
-    "name": "@glion/profiles: import { profiles }",
+    "name": "@glion/profiles: import { loadFields }",
     "path": "packages/profiles/dist/index.js",
-    "import": "{ profiles }",
+    "import": "{ loadFields }",
     "limit": "45 kB"
   },
   {

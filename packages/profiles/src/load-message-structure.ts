@@ -1,7 +1,7 @@
 import type { Root } from "@glion/ast";
 import { value } from "@glion/util-query";
 
-import { profiles } from "./profiles";
+import { loadMessageStructures } from "./loaders/message-structures";
 import { eventMaps } from "./profiles/event-map-manifest";
 import { resolveMessageStructure } from "./resolve-message-structure";
 import type { MessageStructure } from "./structure/types";
@@ -34,9 +34,11 @@ export const loadMessageStructure = async (
       value(tree, "MSH-9.2")?.value ?? ""
     );
 
-  if (!id || eventMaps[version]?.[id] === undefined) {
+  const structureId = id && eventMaps[version]?.[id];
+  if (!structureId) {
     return undefined;
   }
 
-  return await profiles.events.load(version, id);
+  const structures = await loadMessageStructures(version);
+  return structures?.get(structureId);
 };

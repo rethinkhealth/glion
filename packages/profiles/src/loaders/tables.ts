@@ -1,5 +1,5 @@
 import { tableImports } from "../profiles/table-manifest";
-import type { ProfileStoreConfig } from "../store";
+import { loaderByVersion, versionAndId } from "./load";
 import type { TableCodeEntry, TableDefinition, TableModule } from "./types";
 
 /** Compile raw table module into indexed definition. */
@@ -18,9 +18,11 @@ const compileTables = (raw: TableModule): TableDefinition => {
   };
 };
 
-/** Store configuration for table profiles. */
-export const tablesConfig: ProfileStoreConfig<TableModule, TableDefinition> = {
-  compile: compileTables,
-  manifest: tableImports,
-  namespace: "tables",
-};
+/**
+ * The tables of an HL7v2 version, by table number such as `"0001"`, or
+ * `undefined` for a version not bundled.
+ */
+export const loadTables: (
+  version: string
+) => Promise<ReadonlyMap<string, TableDefinition> | undefined> =
+  loaderByVersion(tableImports, versionAndId, compileTables);

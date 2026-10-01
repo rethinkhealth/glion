@@ -23,7 +23,7 @@ export type FieldProfile = Readonly<{
 
 /**
  * Compiled field definition for a segment.
- * Returned by `profiles.fields.load()`.
+ * Returned by `loadFields()`.
  */
 export type FieldDefinition = Readonly<{
   segmentId: string;
@@ -57,7 +57,7 @@ export type ComponentProfile = Readonly<{
 
 /**
  * Compiled datatype definition.
- * Returned by `profiles.datatypes.load()`.
+ * Returned by `loadDatatypes()`.
  */
 export type DatatypeDefinition = Readonly<{
   id: string;
@@ -90,7 +90,7 @@ export type TableCodeEntry = Readonly<{
 
 /**
  * Compiled table definition.
- * Returned by `profiles.tables.load()`.
+ * Returned by `loadTables()`.
  */
 export type TableDefinition = Readonly<{
   id: string;
@@ -117,7 +117,7 @@ export type SegmentProfile = Readonly<{
 
 /**
  * Compiled segment definition for a version.
- * Returned by `profiles.segments.load()`.
+ * Returned by `loadSegments()`.
  */
 export type SegmentDefinition = Readonly<{
   /** O(1) lookup of segment profile by segment ID (e.g., "MSH", "PID"). */
@@ -147,7 +147,7 @@ export type UtgCodeEntry = Readonly<{
 
 /**
  * Compiled UTG code system definition.
- * Returned by `profiles.codeSystems.load()`.
+ * Returned by `loadCodeSystems()`.
  */
 export type CodeSystemDefinition = Readonly<{
   id: string;

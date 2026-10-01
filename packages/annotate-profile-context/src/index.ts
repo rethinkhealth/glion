@@ -6,8 +6,10 @@ import type {
   TableDefinition,
 } from "@glion/profiles";
 import {
-  loadSegments as loadSegmentDefinitions,
-  profiles,
+  loadDatatypes,
+  loadFields,
+  loadSegments,
+  loadTables,
 } from "@glion/profiles";
 import { value } from "@glion/util-query";
 import { visit } from "@glion/util-visit";
@@ -36,7 +38,7 @@ declare module "vfile" {
 
 /**
  * Strip the "HL7" prefix from table IDs in field profiles.
- * Field profiles reference tables as "HL70001"; the tables store uses "0001".
+ * Field profiles reference tables as "HL70001"; `loadTables` keys them "0001".
  */
 function normalizeTableId(tableRef: string): string {
   return tableRef.replace(/^HL7/, "");
@@ -77,17 +79,26 @@ export const hl7v2AnnotateProfileContext: Plugin<[], Root, Root> =
       return tree;
     }
 
-    // Load fields and segments in parallel (segments don't depend on fields)
-    const [fields, segments] = await Promise.all([
-      loadFields(tree, version),
+    const [
+      fieldsOfVersion,
+      datatypesOfVersion,
+      tablesOfVersion,
+      segmentsOfVersion,
+    ] = await Promise.all([
+      loadFields(version),
+      loadDatatypes(version),
+      loadTables(version),
       loadSegments(version),
     ]);
 
-    // Derive datatype + table definitions from fields in parallel
-    const [datatypes, tables] = await Promise.all([
-      loadDatatypes(fields, version),
-      loadTables(fields, version),
-    ]);
+    const fields = pick(segmentNames(tree), fieldsOfVersion);
+    const datatypes = pick(
+      datatypeIds(fields, datatypesOfVersion),
+      datatypesOfVersion
+    );
+    const tables = pick(tableIds(fields), tablesOfVersion);
+
+    const segments = segmentsOfVersion ?? { byId: new Map() };
 
     file.data.profile = { datatypes, fields, segments, tables, version };
 
@@ -95,144 +106,79 @@ export const hl7v2AnnotateProfileContext: Plugin<[], Root, Root> =
   };
 
 // ---------------------------------------------------------------------------
-// Field loading
+// Referenced ids
 // ---------------------------------------------------------------------------
 
-/**
- * Collect unique segment names from the tree and load their field definitions.
- * Unknown segments (Z-segments, etc.) are silently omitted.
- */
-function loadFields(
-  tree: Root,
-  version: string
-): Promise<Map<string, FieldDefinition>> {
+/** The names of the segments in `tree`. */
+function segmentNames(tree: Root): Set<string> {
   const names = new Set<string>();
   visit(tree, "segment", (node) => {
     names.add(node.name);
   });
-
-  return resolveAll(names, (name) => profiles.fields.load(version, name));
+  return names;
 }
 
-// ---------------------------------------------------------------------------
-// Datatype loading (cascading resolution)
-// ---------------------------------------------------------------------------
-
 /**
- * Load all datatype definitions referenced by field profiles, cascading
- * through composite datatypes to resolve component and subcomponent
- * datatypes (max 2 additional levels).
+ * The datatypes the fields reference, cascading through composite datatypes
+ * to their component and subcomponent datatypes (2 levels).
  */
-// oxlint-disable-next-line complexity/complexity -- cold-path profile loading: extracting the nested component scan regressed the cold-cache lint-profile bench 34% under CodSpeed, so it stays inline
-async function loadDatatypes(
-  fields: Map<string, FieldDefinition>,
-  version: string
-): Promise<Map<string, DatatypeDefinition>> {
-  const datatypes = new Map<string, DatatypeDefinition>();
-  const load = (id: string) => profiles.datatypes.load(version, id);
-
-  // Level 1: field-level datatypes
-  const fieldDatatypeIds = new Set<string>();
+function datatypeIds(
+  fields: ReadonlyMap<string, FieldDefinition>,
+  datatypes: ReadonlyMap<string, DatatypeDefinition> | undefined
+): Set<string> {
+  const ids = new Set<string>();
   for (const def of fields.values()) {
     for (const field of def.bySequence.values()) {
-      fieldDatatypeIds.add(field.datatype);
+      ids.add(field.datatype);
     }
   }
-  merge(datatypes, await resolveAll(fieldDatatypeIds, load));
 
-  // Levels 2-3: component and subcomponent datatypes
+  const componentsOf = (id: string): string[] => {
+    const def = datatypes?.get(id);
+    return def?.kind === "composite"
+      ? [...def.componentsBySequence.values()].map((comp) => comp.datatypeId)
+      : [];
+  };
+
+  let level = [...ids];
   for (let depth = 0; depth < 2; depth++) {
-    const childIds = new Set<string>();
-    for (const dtDef of datatypes.values()) {
-      if (dtDef.kind !== "composite") {
-        continue;
-      }
-      for (const comp of dtDef.componentsBySequence.values()) {
-        if (!datatypes.has(comp.datatypeId)) {
-          childIds.add(comp.datatypeId);
-        }
-      }
+    level = [...new Set(level.flatMap(componentsOf))].filter(
+      (id) => !ids.has(id)
+    );
+    for (const id of level) {
+      ids.add(id);
     }
-    if (childIds.size === 0) {
-      break;
-    }
-    merge(datatypes, await resolveAll(childIds, load));
   }
 
-  return datatypes;
+  return ids;
 }
 
-// ---------------------------------------------------------------------------
-// Table loading
-// ---------------------------------------------------------------------------
-
-/**
- * Load all table definitions referenced by field profiles.
- * Table IDs are normalized by stripping the "HL7" prefix.
- */
-function loadTables(
-  fields: Map<string, FieldDefinition>,
-  version: string
-): Promise<Map<string, TableDefinition>> {
-  const tableIds = new Set<string>();
+/** The tables the fields reference, by `loadTables` key. */
+function tableIds(fields: ReadonlyMap<string, FieldDefinition>): Set<string> {
+  const ids = new Set<string>();
   for (const def of fields.values()) {
     for (const field of def.bySequence.values()) {
       if (field.table) {
-        tableIds.add(normalizeTableId(field.table));
+        ids.add(normalizeTableId(field.table));
       }
     }
   }
-
-  return resolveAll(tableIds, (id) => profiles.tables.load(version, id));
+  return ids;
 }
 
-// ---------------------------------------------------------------------------
-// Segment loading
-// ---------------------------------------------------------------------------
-
-/**
- * Load all segment definitions for a version.
- * Returns an empty definition if the version is unknown.
- */
-async function loadSegments(version: string): Promise<SegmentDefinition> {
-  try {
-    return await loadSegmentDefinitions(version);
-  } catch {
-    return { byId: new Map() };
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Load profiles in parallel. Unknown profiles (errors starting with "Unknown ")
- * are silently skipped. All other errors are also silently skipped per R4.
- */
-async function resolveAll<T>(
-  ids: Set<string>,
-  loader: (id: string) => Promise<T>
-): Promise<Map<string, T>> {
-  const entries = [...ids];
-  const results = await Promise.allSettled(entries.map(loader));
-  const resolved = new Map<string, T>();
-
-  for (let i = 0; i < results.length; i++) {
-    const result = results[i]!;
-    if (result.status === "fulfilled") {
-      resolved.set(entries[i]!, result.value);
+/** The entries of `profiles` for `ids`; ids it has no entry for are omitted. */
+function pick<T>(
+  ids: Iterable<string>,
+  profiles: ReadonlyMap<string, T> | undefined
+): Map<string, T> {
+  const picked = new Map<string, T>();
+  for (const id of ids) {
+    const profile = profiles?.get(id);
+    if (profile) {
+      picked.set(id, profile);
     }
   }
-
-  return resolved;
-}
-
-/** Merge source map entries into target. */
-function merge<K, V>(target: Map<K, V>, source: Map<K, V>): void {
-  for (const [key, val] of source) {
-    target.set(key, val);
-  }
+  return picked;
 }
 
 export default hl7v2AnnotateProfileContext;

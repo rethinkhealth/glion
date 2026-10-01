@@ -1,9 +1,8 @@
 import type { Field, Nodes, Root } from "@glion/ast";
 import type { CodeSystemDefinition } from "@glion/profiles";
-import { profiles } from "@glion/profiles";
+import { loadCodeSystems } from "@glion/profiles";
 import { SKIP, visit } from "@glion/util-visit";
 import type { Plugin } from "unified";
-import type { VFile } from "vfile";
 
 /** Visit predicate: only visit field nodes that have a table reference. */
 function isCodedField(node: Nodes): node is Field {
@@ -48,36 +47,19 @@ function tableIdToCodeSystemId(tableRef: string): string {
  * Requires the fields annotator to run first (preset guarantees ordering).
  */
 export const hl7v2AnnotateProfileFieldsCodeSystems: Plugin<[], Root, Root> =
-  () => async (tree: Root, file: VFile) => {
+  () => async (tree: Root) => {
     // Collect table references from field.data.table (set by fields annotator)
     const tableRefs = new Set<string>();
     visit(tree, isCodedField, (node) => {
       tableRefs.add((node.data as Record<string, unknown>).table as string);
     });
 
-    // Resolve UTG code systems in parallel
+    const utg = await loadCodeSystems();
     const codeSystems = new Map<string, CodeSystemDefinition>();
-    const entries = [...tableRefs].map(
-      (ref) => [ref, tableIdToCodeSystemId(ref)] as const
-    );
-    const results = await Promise.allSettled(
-      entries.map(([, csId]) => profiles.codeSystems.load(csId))
-    );
-
-    for (let i = 0; i < results.length; i++) {
-      const result = results[i]!;
-      const [tableRef] = entries[i]!;
-      if (result.status === "fulfilled") {
-        codeSystems.set(tableRef, result.value);
-      } else if (
-        !(result.reason instanceof Error) ||
-        !result.reason.message.startsWith("Unknown ")
-      ) {
-        const msg = file.message(
-          `Failed to load code system for table '${tableRef}'`
-        );
-        msg.source = "hl7v2-annotate-profile-fields-code-systems";
-        msg.cause = result.reason;
+    for (const ref of tableRefs) {
+      const codeSystem = utg.get(tableIdToCodeSystemId(ref));
+      if (codeSystem) {
+        codeSystems.set(ref, codeSystem);
       }
     }
 

@@ -55,7 +55,6 @@
     "@glion/ast": "workspace:*",
     "@glion/util-query": "workspace:*",
     "@glion/utils": "workspace:*",
-    "lru-cache": "11.2.7",
     "unified": "11.0.5"
   },
   "devDependencies": {

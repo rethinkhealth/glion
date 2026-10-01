@@ -1,10 +1,10 @@
 # @glion/profiles
 
-HL7v2 version-specific profile data — segments, fields, datatypes, and tables — with LRU-cached loaders.
+HL7v2 version-specific profile data — segments, fields, datatypes, tables, message structures, and UTG code systems — loaded per version.
 
 ## What it does
 
-`@glion/profiles` is the data source for Glion's profile-aware plugins. It provides structured HL7v2 profile definitions for every supported version (2.3 through 2.8), loaded on demand and cached in memory. The annotation plugins (`@glion/annotate-profile-*`) and the profile lint rules (`@glion/lint-profile-*`) read from this package to enrich and validate HL7v2 messages against the HL7-published specifications.
+`@glion/profiles` is the data source for Glion's profile-aware plugins. It provides structured HL7v2 profile definitions for every supported version (2.1 through 2.8.2). Each loader loads one kind of profile for one version on first use and returns the same map on every later call. The annotation plugins (`@glion/annotate-profile-*`) and the profile lint rules (`@glion/lint-profile-*`) read from this package to enrich and validate HL7v2 messages against the HL7-published specifications.
 
 ## Install
 
@@ -15,63 +15,35 @@ npm install @glion/profiles
 ## Use
 
 ```ts
-import { profiles } from "@glion/profiles";
+import { loadDatatypes, loadFields } from "@glion/profiles";
 
-const msh = await profiles.segments.load("2.5", "MSH");
-console.log(msh.fields.length); // => 21
+const fields = await loadFields("2.5");
+const msh9 = fields?.get("MSH")?.bySequence.get(9);
+console.log(msh9?.name); // => "Message Type"
+console.log(msh9?.datatype); // => "MSG"
 
-const field = await profiles.fields.load("2.5", "MSH", "9");
-console.log(field.name); // => "Message Type"
-console.log(field.required); // => true
-console.log(field.datatype); // => "MSG"
-
-const cx = await profiles.datatypes.load("2.5", "CX");
-console.log(cx.kind); // => "composite"
-console.log(cx.components.length); // => 10
-```
-
-Message structures use the same API:
-
-```ts
-const adt = await profiles.events.load("2.5", "ADT_A01");
-// adt.id       === "ADT_A01"
-// adt.elements — the segments, groups, and choices, as the standard defines them
+const datatypes = await loadDatatypes("2.5");
+console.log(datatypes?.get("CX")?.componentsBySequence.size); // => 10
 ```
 
 ## API
 
-### `profiles`
+### Loaders
 
-Shared singleton store (eager LRU cache, 100 entries per kind). Use this unless you need a bespoke cache configuration.
+Each loader resolves a `ReadonlyMap` of every profile of its kind in a version, or `undefined` for a version not bundled. A version loads once; later calls resolve the same map. Lookups on the map are synchronous.
 
-### `createProfiles(options)`
+| Loader                           | Resolves                                               | Keyed by                    |
+| -------------------------------- | ------------------------------------------------------ | --------------------------- |
+| `loadFields(version)`            | `ReadonlyMap<string, FieldDefinition> \| undefined`    | segment ID, `"PID"`         |
+| `loadDatatypes(version)`         | `ReadonlyMap<string, DatatypeDefinition> \| undefined` | datatype ID, `"CX"`         |
+| `loadTables(version)`            | `ReadonlyMap<string, TableDefinition> \| undefined`    | table number, `"0001"`      |
+| `loadMessageStructures(version)` | `ReadonlyMap<string, MessageStructure> \| undefined`   | structure ID, `"ADT_A01"`   |
+| `loadSegments(version)`          | `SegmentDefinition \| undefined`                       | segment ID, in `byId`       |
+| `loadCodeSystems()`              | `ReadonlyMap<string, CodeSystemDefinition>`            | code system ID, `"v2-0001"` |
 
-Construct a dedicated store with a custom cache size or eviction strategy.
+`loadMessageStructures` keys structures by structure ID. A trigger event such as `ADT_A04` maps to its structure through `resolveMessageStructure(version, messageCode, triggerEvent)` or `eventMaps`.
 
-```ts
-import { createLruCache, createProfiles } from "@glion/profiles";
-
-const store = createProfiles({
-  cache: createLruCache({ maxEntries: 500 }),
-});
-```
-
-### Loaders on each store
-
-| Method                                      | Returns                |
-| ------------------------------------------- | ---------------------- |
-| `segments.load(version, segmentId)`         | `SegmentDefinition`    |
-| `fields.load(version, segmentId, position)` | `FieldProfile`         |
-| `datatypes.load(version, datatypeId)`       | `DatatypeDefinition`   |
-| `tables.load(version, tableId)`             | `Table`                |
-| `events.load(version, structureId)`         | `MessageStructure`     |
-| `codeSystems.load(version, codeSystemId)`   | `CodeSystemDefinition` |
-
-### `loadSegments(version)`
-
-Standalone helper that loads every segment definition for a given version in one call. Used by batch-processing plugins.
-
-`events.load` resolves trigger-event aliases (`ADT_A04` → `ADT_A01`) unless called with `{ resolve: false }`.
+UTG code systems are not versioned by HL7v2 version.
 
 ### `loadMessageStructure(tree)`
 
@@ -118,9 +90,12 @@ A structure of your own works wherever a bundled one does: `runner`, `matchStruc
 Returns a single-use runner that validates segment order against a message structure, one segment at a time.
 
 ```ts
-import { profiles, runner } from "@glion/profiles";
+import { loadMessageStructures, runner } from "@glion/profiles";
 
-const structure = await profiles.events.load("2.5", "ADT_A01");
+const structures = await loadMessageStructures("2.5");
+const structure = structures?.get("ADT_A01");
+if (!structure) throw new Error("ADT_A01 is not bundled for 2.5");
+
 const automaton = runner(structure);
 automaton.consume("MSH"); // { type: "step" }
 automaton.consume("ZZZ"); // { type: "invalid", symbol: "ZZZ", expected: ["EVN", "SFT"] }
@@ -134,9 +109,12 @@ automaton.accepted; // false
 Returns the segment indexes nested in the groups the message structure defines, or `undefined` when the segments do not fit the structure.
 
 ```ts
-import { matchStructure, profiles } from "@glion/profiles";
+import { loadMessageStructures, matchStructure } from "@glion/profiles";
 
-const structure = await profiles.events.load("2.5", "ORU_R01");
+const structures = await loadMessageStructures("2.5");
+const structure = structures?.get("ORU_R01");
+if (!structure) throw new Error("ORU_R01 is not bundled for 2.5");
+
 matchStructure(structure, ["MSH", "PID", "OBR", "OBX"]);
 // [0, { name: "PATIENT_RESULT", children: [
 //   { name: "PATIENT", children: [1] },
@@ -148,25 +126,27 @@ Where the structure admits more than one grouping, the match enters an optional 
 
 ## Profile data format
 
-Each kind of profile is loaded on demand, the first time it is requested, and cached.
-
 ### Segments
 
 ```ts
 interface SegmentDefinition {
-  id: string; // "MSH", "PID", ...
-  name: string; // "Message Header"
-  fields: FieldProfile[]; // in positional order
+  byId: ReadonlyMap<string, { id: string; title: string }>; // "MSH" → { id: "MSH", title: "Message Header" }
 }
 ```
 
 ### Fields
 
 ```ts
+interface FieldDefinition {
+  segmentId: string; // "PID"
+  bySequence: ReadonlyMap<number, FieldProfile>;
+  requiredSequences: ReadonlySet<number>;
+}
+
 interface FieldProfile {
+  sequence: number; // 9
   id: string; // "MSH-9"
-  name: string; // "Message Type"
-  position: number; // 9
+  name?: string; // "Message Type"
   datatype: string; // "MSG"
   required: boolean;
   repeatable: boolean;
@@ -181,9 +161,11 @@ interface FieldProfile {
 ```ts
 interface DatatypeDefinition {
   id: string; // "CX"
-  kind: "primitive" | "composite";
-  title: string;
-  components?: ComponentProfile[]; // only for composite kind
+  version: string; // "2.5"
+  kind: string; // "primitive" or "composite"
+  title?: string;
+  componentsBySequence: ReadonlyMap<number, ComponentProfile>;
+  requiredSequences: ReadonlySet<number>;
 }
 ```
 
@@ -219,9 +201,29 @@ type StructureElement =
 import schema from "@glion/profiles/message-structure.schema.json" with { type: "json" };
 ```
 
-### Tables, code systems
+### Tables
 
-Same shape convention: each exposes its id, version, and the typed payload (value lists for tables, concept lists with displayNames for code systems).
+```ts
+interface TableDefinition {
+  id: string; // "0001"
+  description: string; // "Administrative Sex"
+  type: "user" | "hl7";
+  codes: ReadonlyMap<string, { name: string; description: string }>; // "F" → { name: "F", description: "Female" }
+}
+```
+
+### Code systems
+
+```ts
+interface CodeSystemDefinition {
+  id: string; // "v2-0001"
+  url: string; // "http://terminology.hl7.org/CodeSystem/v2-0001"
+  oid?: string;
+  name: string;
+  title: string;
+  codes: ReadonlyMap<string, { code: string; display: string; status: string }>;
+}
+```
 
 ## Part of Glion
 

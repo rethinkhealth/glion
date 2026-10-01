@@ -1,6 +1,6 @@
 import { c, f, g, m, s } from "@glion/builder";
 import type { MessageStructure } from "@glion/profiles";
-import { profiles } from "@glion/profiles";
+import { loadMessageStructures } from "@glion/profiles";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -114,7 +114,10 @@ describe("hl7v2LintSegmentOrder", () => {
 
       await unified()
         .use(hl7v2LintSegmentOrder, {
-          definition: () => profiles.events.load("2.5", "ADT_A01"),
+          definition: async () => {
+            const structures = await loadMessageStructures("2.5");
+            return structures?.get("ADT_A01");
+          },
         })
         .run(tree, file);
 
@@ -607,7 +610,11 @@ describe("hl7v2LintSegmentOrder", () => {
 
   describe("integration with real profiles", () => {
     it("validates ADT_A01 segment order", async () => {
-      const definition = await profiles.events.load("2.5", "ADT_A01");
+      const structures = await loadMessageStructures("2.5");
+      const definition = structures?.get("ADT_A01");
+      if (!definition) {
+        throw new Error("v2.5 bundles no ADT_A01");
+      }
 
       // Valid start of ADT_A01: MSH -> EVN -> PID
       const tree = m(s("MSH"), s("EVN"), s("PID"));
@@ -625,7 +632,11 @@ describe("hl7v2LintSegmentOrder", () => {
     });
 
     it("rejects wrong segment order in ADT_A01", async () => {
-      const definition = await profiles.events.load("2.5", "ADT_A01");
+      const structures = await loadMessageStructures("2.5");
+      const definition = structures?.get("ADT_A01");
+      if (!definition) {
+        throw new Error("v2.5 bundles no ADT_A01");
+      }
 
       // PID before EVN should be invalid in ADT_A01
       const tree = m(s("MSH"), s("PID"), s("EVN"));

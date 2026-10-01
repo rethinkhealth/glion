@@ -1,5 +1,5 @@
 import { utgCodeSystemImports } from "../profiles/utg/manifest";
-import type { ProfileStoreConfig } from "../store";
+import { compileAll } from "./load";
 import type {
   CodeSystemDefinition,
   UtgCodeEntry,
@@ -29,12 +29,23 @@ const compileCodeSystem = (raw: UtgCodeSystemModule): CodeSystemDefinition => {
   return result;
 };
 
-/** Store configuration for UTG code system profiles. */
-export const codeSystemsConfig: ProfileStoreConfig<
-  UtgCodeSystemModule,
-  CodeSystemDefinition
-> = {
-  compile: compileCodeSystem,
-  manifest: utgCodeSystemImports,
-  namespace: "codeSystems",
+const UTG_KEY_PREFIX = "vutg/";
+
+let codeSystems: Promise<ReadonlyMap<string, CodeSystemDefinition>> | undefined;
+
+/**
+ * The UTG code systems, by code system ID such as `"v2-0001"`.
+ *
+ * Loads and compiles once; later calls return the same map.
+ */
+export const loadCodeSystems = (): Promise<
+  ReadonlyMap<string, CodeSystemDefinition>
+> => {
+  codeSystems ??= compileAll(
+    Object.entries(utgCodeSystemImports).map(
+      ([key, load]) => [key.slice(UTG_KEY_PREFIX.length), load] as const
+    ),
+    compileCodeSystem
+  );
+  return codeSystems;
 };

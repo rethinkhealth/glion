@@ -332,7 +332,7 @@ const bundledStructures = () =>
 // oxlint-disable-next-line complexity/complexity -- four independent checks over the same file list, each a loop with its own failure branches
 async function problemsInBundle() {
   const { Ajv } = await import("ajv");
-  const { eventMaps, matchStructure, profiles, runner } =
+  const { eventMaps, loadMessageStructures, matchStructure, runner } =
     await import("../dist/index.js");
 
   const accepts = (structure, input) => {
@@ -380,9 +380,12 @@ async function problemsInBundle() {
 
   // 3 and 4. The engine runs every structure as the reference does.
   for (const { id, version } of bundled) {
-    const structure = await profiles.events.load(version, id, {
-      resolve: false,
-    });
+    const structures = await loadMessageStructures(version);
+    const structure = structures?.get(id);
+    if (!structure) {
+      problems.push(`v${version}/${id} does not load`);
+      continue;
+    }
     const random = seeded(version.length * 31 + id.length);
     const names = [...new Set(validMessage(structure, random))];
 
