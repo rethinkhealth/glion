@@ -1,0 +1,23 @@
+{
+  "id": "0538",
+  "description": "Institution Relationship Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CON",
+      "description": "Contractor"
+    },
+    {
+      "name": "CST",
+      "description": "Consultant"
+    },
+    {
+      "name": "EMP",
+      "description": "Employee"
+    },
+    {
+      "name": "VOL",
+      "description": "Volunteer"
+    }
+  ]
+}

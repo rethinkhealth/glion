@@ -1,0 +1,23 @@
+{
+  "id": "0916",
+  "description": "Relevant Clincial Information",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Patient was fasting prior to the procedure."
+    },
+    {
+      "name": "FNA",
+      "description": "Fasting not asked of the patient at time of procedure."
+    },
+    {
+      "name": "NF",
+      "description": "The patient indicated they did not fast prior to the procedure."
+    },
+    {
+      "name": "NG",
+      "description": "Not Given - Patient was not asked at the time of the procedure."
+    }
+  ]
+}

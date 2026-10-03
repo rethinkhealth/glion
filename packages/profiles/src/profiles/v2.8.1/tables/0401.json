@@ -1,0 +1,15 @@
+{
+  "id": "0401",
+  "description": "Government Reimbursement Program",
+  "type": "user",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Medi-Cal"
+    },
+    {
+      "name": "MM",
+      "description": "Medicare"
+    }
+  ]
+}

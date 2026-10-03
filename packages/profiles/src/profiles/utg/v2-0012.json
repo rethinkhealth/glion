@@ -1,0 +1,19 @@
+{
+  "id": "v2-0012",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0012",
+  "oid": "2.16.840.1.113883.18.12",
+  "name": "StockLocation",
+  "title": "stockLocation",
+  "codes": [
+    {
+      "code": "AN",
+      "display": "Filled from ancillary department stock",
+      "status": "active"
+    },
+    {
+      "code": "FL",
+      "display": "Filled from floor stock",
+      "status": "active"
+    }
+  ]
+}

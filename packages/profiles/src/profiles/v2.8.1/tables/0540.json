@@ -1,0 +1,19 @@
+{
+  "id": "0540",
+  "description": "Inactive Reason Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "L",
+      "description": "Leave of Absence"
+    },
+    {
+      "name": "R",
+      "description": "Retired"
+    },
+    {
+      "name": "T",
+      "description": "Termination"
+    }
+  ]
+}

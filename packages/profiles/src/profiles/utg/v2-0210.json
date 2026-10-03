@@ -1,0 +1,19 @@
+{
+  "id": "v2-0210",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0210",
+  "oid": "2.16.840.1.113883.18.115",
+  "name": "RelationalConjunction",
+  "title": "relationalConjunction",
+  "codes": [
+    {
+      "code": "AND",
+      "display": "Default",
+      "status": "active"
+    },
+    {
+      "code": "OR",
+      "display": "",
+      "status": "active"
+    }
+  ]
+}

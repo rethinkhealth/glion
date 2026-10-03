@@ -1,0 +1,19 @@
+{
+  "id": "0926",
+  "description": "Phlebotomy Status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "NDR",
+      "description": "Not Drawn"
+    },
+    {
+      "name": "SUC",
+      "description": "Successful"
+    },
+    {
+      "name": "UL5",
+      "description": "Unsuccessful Less than 50 ml drawn"
+    }
+  ]
+}

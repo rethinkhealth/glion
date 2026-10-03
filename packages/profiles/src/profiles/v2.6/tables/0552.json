@@ -1,0 +1,11 @@
+{
+  "id": "0552",
+  "description": "Advanced beneficiary notice override reason",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values."
+    }
+  ]
+}

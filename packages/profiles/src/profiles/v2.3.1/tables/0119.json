@@ -1,0 +1,195 @@
+{
+  "id": "0119",
+  "description": "Order control codes",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AF",
+      "description": "Order refill request approval (O02)"
+    },
+    {
+      "name": "CA",
+      "description": "Cancel order request (O01)"
+    },
+    {
+      "name": "CH",
+      "description": "Child order (O01/ORU)"
+    },
+    {
+      "name": "CN",
+      "description": "Combined result (R01)"
+    },
+    {
+      "name": "CR",
+      "description": "Canceled as requested (O02)"
+    },
+    {
+      "name": "DC",
+      "description": "Discontinue order request (O01)"
+    },
+    {
+      "name": "DE",
+      "description": "Data errors (O01/O02)"
+    },
+    {
+      "name": "DF",
+      "description": "Order refill request denied (O02)"
+    },
+    {
+      "name": "DR",
+      "description": "Discontinued as requested (O02)"
+    },
+    {
+      "name": "FU",
+      "description": "Order refilled, unsolicited (O01)"
+    },
+    {
+      "name": "HD",
+      "description": "Hold order request (O01)"
+    },
+    {
+      "name": "HR",
+      "description": "On hold as requested (O02)"
+    },
+    {
+      "name": "LI",
+      "description": "Link order to patient care problem or goal"
+    },
+    {
+      "name": "NA",
+      "description": "Number assigned (O02)"
+    },
+    {
+      "name": "NW",
+      "description": "New order (O01)"
+    },
+    {
+      "name": "OC",
+      "description": "Order canceled (O01)"
+    },
+    {
+      "name": "OD",
+      "description": "Order discontinued (O01)"
+    },
+    {
+      "name": "OE",
+      "description": "Order released (O01)"
+    },
+    {
+      "name": "OF",
+      "description": "Order refilled as requested (O02)"
+    },
+    {
+      "name": "OH",
+      "description": "Order held (O01)"
+    },
+    {
+      "name": "OK",
+      "description": "Order accepted & OK (O02)"
+    },
+    {
+      "name": "OR",
+      "description": "Released as requested"
+    },
+    {
+      "name": "PA",
+      "description": "Parent order (O01/ORU)"
+    },
+    {
+      "name": "RE",
+      "description": "Observations to follow (O01/R01)"
+    },
+    {
+      "name": "RF",
+      "description": "Refill order request (O01)"
+    },
+    {
+      "name": "RL",
+      "description": "Release previous hold (O01)"
+    },
+    {
+      "name": "RO",
+      "description": "Replacement order (O01)"
+    },
+    {
+      "name": "RP",
+      "description": "Order replace request (O01)"
+    },
+    {
+      "name": "RQ",
+      "description": "Replaced as requested (O02)"
+    },
+    {
+      "name": "RR",
+      "description": "Request received (O02)"
+    },
+    {
+      "name": "RU",
+      "description": "Replaced unsolicited (O01)"
+    },
+    {
+      "name": "SC",
+      "description": "Status changed (O01)"
+    },
+    {
+      "name": "SN",
+      "description": "Send order number (O01)"
+    },
+    {
+      "name": "SR",
+      "description": "Response to send order status request (O02(Q06)"
+    },
+    {
+      "name": "SS",
+      "description": "Send order status request (O01)"
+    },
+    {
+      "name": "UA",
+      "description": "Unable to accept order (O02/ORR)"
+    },
+    {
+      "name": "UC",
+      "description": "Unable to cancel (O02)"
+    },
+    {
+      "name": "UD",
+      "description": "Unable to discontinue (O02)"
+    },
+    {
+      "name": "UF",
+      "description": "Unable to refill (O02)"
+    },
+    {
+      "name": "UH",
+      "description": "Unable to put on hold (O02)"
+    },
+    {
+      "name": "UM",
+      "description": "Unable to replace (O02)"
+    },
+    {
+      "name": "UN",
+      "description": "Unlink order from patient care problem or goal"
+    },
+    {
+      "name": "UR",
+      "description": "Unable to release (O02)"
+    },
+    {
+      "name": "UX",
+      "description": "Unable to change (O02)"
+    },
+    {
+      "name": "XO",
+      "description": "Change order request (O01)"
+    },
+    {
+      "name": "XR",
+      "description": "Changed as requested (O02)"
+    },
+    {
+      "name": "XX",
+      "description": "Order changed, unsol. (O01)"
+    }
+  ]
+}

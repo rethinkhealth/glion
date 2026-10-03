@@ -1,0 +1,89 @@
+{
+  "id": "v2-0009",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0009",
+  "oid": "2.16.840.1.113883.18.11",
+  "name": "AmbulatoryStatus",
+  "title": "ambulatoryStatus",
+  "codes": [
+    {
+      "code": "A0",
+      "display": "No functional limitations",
+      "status": "active"
+    },
+    {
+      "code": "A1",
+      "display": "Ambulates with assistive device",
+      "status": "active"
+    },
+    {
+      "code": "A2",
+      "display": "Wheelchair/stretcher bound",
+      "status": "active"
+    },
+    {
+      "code": "A3",
+      "display": "Comatose; non-responsive",
+      "status": "active"
+    },
+    {
+      "code": "A4",
+      "display": "Disoriented",
+      "status": "active"
+    },
+    {
+      "code": "A5",
+      "display": "Vision impaired",
+      "status": "active"
+    },
+    {
+      "code": "A6",
+      "display": "Hearing impaired",
+      "status": "active"
+    },
+    {
+      "code": "A7",
+      "display": "Speech impaired",
+      "status": "active"
+    },
+    {
+      "code": "A8",
+      "display": "Non-English speaking",
+      "status": "active"
+    },
+    {
+      "code": "A9",
+      "display": "Functional level unknown",
+      "status": "active"
+    },
+    {
+      "code": "B1",
+      "display": "Oxygen therapy",
+      "status": "active"
+    },
+    {
+      "code": "B2",
+      "display": "Special equipment (tubes, IVs, catheters)",
+      "status": "active"
+    },
+    {
+      "code": "B3",
+      "display": "Amputee",
+      "status": "active"
+    },
+    {
+      "code": "B4",
+      "display": "Mastectomy",
+      "status": "active"
+    },
+    {
+      "code": "B5",
+      "display": "Paraplegic",
+      "status": "active"
+    },
+    {
+      "code": "B6",
+      "display": "Pregnant",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "segmentId": "AUT",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "AUT-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70072",
+      "name": "Authorizing Payor, Plan ID",
+      "item": "1146"
+    },
+    {
+      "sequence": 2,
+      "id": "AUT-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70285",
+      "name": "Authorizing Payor, Company ID",
+      "item": "1147"
+    },
+    {
+      "sequence": 3,
+      "id": "AUT-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 45,
+      "name": "Authorizing Payor, Company Name",
+      "item": "1148"
+    },
+    {
+      "sequence": 4,
+      "id": "AUT-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Authorization Effective Date",
+      "item": "1149"
+    },
+    {
+      "sequence": 5,
+      "id": "AUT-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Authorization Expiration Date",
+      "item": "1150"
+    },
+    {
+      "sequence": 6,
+      "id": "AUT-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 30,
+      "name": "Authorization Identifier",
+      "item": "1151"
+    },
+    {
+      "sequence": 7,
+      "id": "AUT-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CP",
+      "maxLength": 25,
+      "name": "Reimbursement Limit",
+      "item": "1152"
+    },
+    {
+      "sequence": 8,
+      "id": "AUT-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "Requested Number of Treatments",
+      "item": "1153"
+    },
+    {
+      "sequence": 9,
+      "id": "AUT-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "Authorized Number of Treatments",
+      "item": "1154"
+    },
+    {
+      "sequence": 10,
+      "id": "AUT-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Process Date",
+      "item": "1145"
+    }
+  ]
+}

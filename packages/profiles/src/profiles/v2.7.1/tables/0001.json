@@ -1,0 +1,31 @@
+{
+  "id": "0001",
+  "description": "Administrative Sex",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Ambiguous"
+    },
+    {
+      "name": "F",
+      "description": "Female"
+    },
+    {
+      "name": "M",
+      "description": "Male"
+    },
+    {
+      "name": "N",
+      "description": "Not applicable"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

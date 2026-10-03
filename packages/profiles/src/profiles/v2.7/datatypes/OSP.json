@@ -1,0 +1,26 @@
+{
+  "id": "OSP",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Occurrence Span Code and Date",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Occurrence Span Code",
+      "datatypeId": "CNE",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Occurrence Span Start Date",
+      "datatypeId": "DT",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Occurrence Span Stop Date",
+      "datatypeId": "DT",
+      "required": false
+    }
+  ]
+}

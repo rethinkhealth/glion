@@ -1,0 +1,29 @@
+{
+  "id": "v2-0749",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0749",
+  "oid": "2.16.840.1.113883.18.396",
+  "name": "DrgGroupingStatus",
+  "title": "drgGroupingStatus",
+  "codes": [
+    {
+      "code": "0",
+      "display": "Valid code; not used for grouping",
+      "status": "active"
+    },
+    {
+      "code": "1",
+      "display": "Valid code; used for grouping",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Invalid code; not used for grouping",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Invalid code; code is relevant for grouping",
+      "status": "active"
+    }
+  ]
+}

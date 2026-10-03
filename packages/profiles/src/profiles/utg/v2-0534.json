@@ -1,0 +1,34 @@
+{
+  "id": "v2-0534",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0534",
+  "oid": "2.16.840.1.113883.18.348",
+  "name": "ClergyNotificationType",
+  "title": "clergyNotificationType",
+  "codes": [
+    {
+      "code": "L",
+      "display": "Last Rites only",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "No",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    },
+    {
+      "code": "Y",
+      "display": "Yes",
+      "status": "active"
+    }
+  ]
+}

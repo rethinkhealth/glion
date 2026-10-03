@@ -1,0 +1,23 @@
+{
+  "id": "0017",
+  "description": "Transaction Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AJ",
+      "description": "Adjustment"
+    },
+    {
+      "name": "CD",
+      "description": "Credit"
+    },
+    {
+      "name": "CG",
+      "description": "Charge"
+    },
+    {
+      "name": "PY",
+      "description": "Payment"
+    }
+  ]
+}

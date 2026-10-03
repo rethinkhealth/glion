@@ -1,0 +1,56 @@
+{
+  "segmentId": "VTQ",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "VTQ-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 32,
+      "name": "Query Tag",
+      "item": "696"
+    },
+    {
+      "sequence": 2,
+      "id": "VTQ-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70106",
+      "name": "Query/ Response Format Code",
+      "item": "697"
+    },
+    {
+      "sequence": 3,
+      "id": "VTQ-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "VT Query Name",
+      "item": "698"
+    },
+    {
+      "sequence": 4,
+      "id": "VTQ-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Virtual Table Name",
+      "item": "699"
+    },
+    {
+      "sequence": 5,
+      "id": "VTQ-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "QSC",
+      "maxLength": 256,
+      "name": "Selection Criteria",
+      "item": "700"
+    }
+  ]
+}

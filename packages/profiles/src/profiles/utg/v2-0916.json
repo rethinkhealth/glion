@@ -1,0 +1,29 @@
+{
+  "id": "v2-0916",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0916",
+  "oid": "2.16.840.1.113883.18.422",
+  "name": "RelevantClincialInformation",
+  "title": "relevantClincialInformation",
+  "codes": [
+    {
+      "code": "F",
+      "display": "Patient was fasting prior to the procedure.",
+      "status": "active"
+    },
+    {
+      "code": "FNA",
+      "display": "Fasting not asked of the patient at time of procedure.",
+      "status": "active"
+    },
+    {
+      "code": "NF",
+      "display": "The patient indicated they did not fast prior to the procedure.",
+      "status": "active"
+    },
+    {
+      "code": "NG",
+      "display": "Not Given - Patient was not asked at the time of the procedure.",
+      "status": "active"
+    }
+  ]
+}

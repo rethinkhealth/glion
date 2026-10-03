@@ -1,0 +1,26 @@
+{
+  "id": "DLN",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Driver's License Number",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "License Number",
+      "datatypeId": "ST",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Issuing State, Province, Country",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Expiration Date",
+      "datatypeId": "DT",
+      "required": false
+    }
+  ]
+}

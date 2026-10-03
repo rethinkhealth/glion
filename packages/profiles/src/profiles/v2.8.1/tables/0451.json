@@ -1,0 +1,11 @@
+{
+  "id": "0451",
+  "description": "Substance Identifier",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ALL",
+      "description": "Used for query of all inventory items"
+    }
+  ]
+}

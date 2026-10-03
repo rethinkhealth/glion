@@ -1,0 +1,26 @@
+{
+  "id": "PTA",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "Policy Type",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "policy type",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "amount class",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "amount",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

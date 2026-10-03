@@ -1,0 +1,23 @@
+{
+  "id": "0206",
+  "description": "Segment action code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Add/Insert"
+    },
+    {
+      "name": "D",
+      "description": "Delete"
+    },
+    {
+      "name": "U",
+      "description": "Update"
+    },
+    {
+      "name": "X",
+      "description": "No change"
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "segmentId": "GOL",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "GOL-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70206",
+      "name": "Action Code",
+      "item": "816"
+    },
+    {
+      "sequence": 2,
+      "id": "GOL-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Action Date/Time",
+      "item": "817"
+    },
+    {
+      "sequence": 3,
+      "id": "GOL-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Goal ID",
+      "item": "818"
+    },
+    {
+      "sequence": 4,
+      "id": "GOL-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Goal Instance ID",
+      "item": "819"
+    },
+    {
+      "sequence": 5,
+      "id": "GOL-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Episode of Care ID",
+      "item": "820"
+    },
+    {
+      "sequence": 6,
+      "id": "GOL-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Goal List Priority",
+      "item": "821"
+    },
+    {
+      "sequence": 7,
+      "id": "GOL-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Goal Established Date/Time",
+      "item": "822"
+    },
+    {
+      "sequence": 8,
+      "id": "GOL-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Expected Goal Achieve Date/Time",
+      "item": "824"
+    },
+    {
+      "sequence": 9,
+      "id": "GOL-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Goal Classification",
+      "item": "825"
+    },
+    {
+      "sequence": 10,
+      "id": "GOL-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Goal Management Discipline",
+      "item": "826"
+    },
+    {
+      "sequence": 11,
+      "id": "GOL-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Current Goal Review Status",
+      "item": "827"
+    },
+    {
+      "sequence": 12,
+      "id": "GOL-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Current Goal Review Date/Time",
+      "item": "828"
+    },
+    {
+      "sequence": 13,
+      "id": "GOL-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Next Goal Review Date/Time",
+      "item": "829"
+    },
+    {
+      "sequence": 14,
+      "id": "GOL-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Previous Goal Review Date/Time",
+      "item": "830"
+    },
+    {
+      "sequence": 15,
+      "id": "GOL-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Goal Evaluation",
+      "item": "832"
+    },
+    {
+      "sequence": 16,
+      "id": "GOL-17",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "name": "Goal Evaluation Comment",
+      "item": "833"
+    },
+    {
+      "sequence": 17,
+      "id": "GOL-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Goal Life Cycle Status",
+      "item": "834"
+    },
+    {
+      "sequence": 18,
+      "id": "GOL-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Goal Life Cycle Status Date/Time",
+      "item": "835"
+    },
+    {
+      "sequence": 19,
+      "id": "GOL-20",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Goal Target Type",
+      "item": "836"
+    },
+    {
+      "sequence": 20,
+      "id": "GOL-21",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XPN",
+      "name": "Goal Target Name",
+      "item": "837"
+    },
+    {
+      "sequence": 21,
+      "id": "GOL-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70725",
+      "name": "Mood Code",
+      "item": "2182"
+    }
+  ]
+}

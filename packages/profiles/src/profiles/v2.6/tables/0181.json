@@ -1,0 +1,15 @@
+{
+  "id": "0181",
+  "description": "MFN record-level error return",
+  "type": "user",
+  "codes": [
+    {
+      "name": "S",
+      "description": "Successful posting of the record defined by the MFE segment"
+    },
+    {
+      "name": "U",
+      "description": "Unsuccessful posting of the record defined by the MFE segment"
+    }
+  ]
+}

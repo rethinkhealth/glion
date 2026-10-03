@@ -1,0 +1,20 @@
+{
+  "id": "EIP",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Entity Identifier Pair",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Placer Assigned Identifier",
+      "datatypeId": "EI",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Filler Assigned Identifier",
+      "datatypeId": "EI",
+      "required": false
+    }
+  ]
+}

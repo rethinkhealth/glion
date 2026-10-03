@@ -1,0 +1,26 @@
+{
+  "id": "RMC",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Room Coverage",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Room Type",
+      "datatypeId": "CWE",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Amount Type",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Money or Percentage",
+      "datatypeId": "MOP",
+      "required": true
+    }
+  ]
+}

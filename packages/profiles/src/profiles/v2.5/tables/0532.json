@@ -1,0 +1,43 @@
+{
+  "id": "0532",
+  "description": "Expanded yes/no indicator",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ASKU",
+      "description": "asked but unknown"
+    },
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "NA",
+      "description": "not applicable"
+    },
+    {
+      "name": "NASK",
+      "description": "not asked"
+    },
+    {
+      "name": "NAV",
+      "description": "temporarily unavailable"
+    },
+    {
+      "name": "NI",
+      "description": "No Information"
+    },
+    {
+      "name": "NP",
+      "description": "not present"
+    },
+    {
+      "name": "UNK",
+      "description": "unknown"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

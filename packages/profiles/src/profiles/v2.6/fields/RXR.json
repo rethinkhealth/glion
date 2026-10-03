@@ -1,0 +1,70 @@
+{
+  "segmentId": "RXR",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RXR-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70162",
+      "name": "Route",
+      "item": "309"
+    },
+    {
+      "sequence": 2,
+      "id": "RXR-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70550",
+      "name": "Administration Site",
+      "item": "310"
+    },
+    {
+      "sequence": 3,
+      "id": "RXR-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70164",
+      "name": "Administration Device",
+      "item": "311"
+    },
+    {
+      "sequence": 4,
+      "id": "RXR-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70165",
+      "name": "Administration Method",
+      "item": "312"
+    },
+    {
+      "sequence": 5,
+      "id": "RXR-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Routing Instruction",
+      "item": "1315"
+    },
+    {
+      "sequence": 6,
+      "id": "RXR-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70495",
+      "name": "Administration Site Modifier",
+      "item": "1670"
+    }
+  ]
+}

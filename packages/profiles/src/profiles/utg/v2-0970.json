@@ -1,0 +1,24 @@
+{
+  "id": "v2-0970",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0970",
+  "oid": "2.16.840.1.113883.18.453",
+  "name": "OnlineVerificationResult",
+  "title": "onlineVerificationResult",
+  "codes": [
+    {
+      "code": "1",
+      "display": "Update performed",
+      "status": "N"
+    },
+    {
+      "code": "2",
+      "display": "update not necessary",
+      "status": "N"
+    },
+    {
+      "code": "3",
+      "display": "Error",
+      "status": "N"
+    }
+  ]
+}

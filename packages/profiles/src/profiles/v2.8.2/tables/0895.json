@@ -1,0 +1,27 @@
+{
+  "id": "0895",
+  "description": "Present On Admission (POA) Indicator",
+  "type": "user",
+  "codes": [
+    {
+      "name": "E",
+      "description": "Exempt"
+    },
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    },
+    {
+      "name": "W",
+      "description": "Not applicable"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

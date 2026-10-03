@@ -1,0 +1,29 @@
+{
+  "id": "v2-0818",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0818",
+  "oid": "2.16.840.1.113883.18.407",
+  "name": "Package",
+  "title": "package",
+  "codes": [
+    {
+      "code": "BX",
+      "display": "Box",
+      "status": "active"
+    },
+    {
+      "code": "CS",
+      "display": "Case",
+      "status": "active"
+    },
+    {
+      "code": "EA",
+      "display": "Each",
+      "status": "active"
+    },
+    {
+      "code": "SET",
+      "display": "Set",
+      "status": "active"
+    }
+  ]
+}

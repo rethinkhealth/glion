@@ -1,0 +1,15 @@
+{
+  "id": "0102",
+  "description": "Delayed acknowledgment type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Message received, stored for later processing"
+    },
+    {
+      "name": "F",
+      "description": "acknowledgment after processing"
+    }
+  ]
+}

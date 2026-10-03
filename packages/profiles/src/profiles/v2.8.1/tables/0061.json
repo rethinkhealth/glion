@@ -1,0 +1,27 @@
+{
+  "id": "0061",
+  "description": "Check Digit Scheme",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "BCV",
+      "description": "Bank Card Validation Number"
+    },
+    {
+      "name": "ISO",
+      "description": "ISO 7064: 1983"
+    },
+    {
+      "name": "M10",
+      "description": "Mod 10 algorithm"
+    },
+    {
+      "name": "M11",
+      "description": "Mod 11 algorithm"
+    },
+    {
+      "name": "NPI",
+      "description": "Check digit algorithm in the US National Provider Identifier"
+    }
+  ]
+}

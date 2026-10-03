@@ -1,0 +1,83 @@
+{
+  "id": "0078",
+  "description": "Abnormal flags",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "<",
+      "description": "Below absolute low-off instrument scale"
+    },
+    {
+      "name": ">",
+      "description": "Above absolute high-off instrument scale"
+    },
+    {
+      "name": "A",
+      "description": "Abnormal (applies to non-numeric results)"
+    },
+    {
+      "name": "AA",
+      "description": "Very abnormal (applies to non-numeric units, analogous to panic limits for numeric units)"
+    },
+    {
+      "name": "B",
+      "description": "Better--use when direction not relevant"
+    },
+    {
+      "name": "D",
+      "description": "Significant change down"
+    },
+    {
+      "name": "H",
+      "description": "Above high normal"
+    },
+    {
+      "name": "HH",
+      "description": "Above upper panic limits"
+    },
+    {
+      "name": "I",
+      "description": "Intermediate*"
+    },
+    {
+      "name": "L",
+      "description": "Below low normal"
+    },
+    {
+      "name": "LL",
+      "description": "Below lower panic limits"
+    },
+    {
+      "name": "MS",
+      "description": "Moderately susceptible*"
+    },
+    {
+      "name": "N",
+      "description": "Normal (applies to non-numeric results)"
+    },
+    {
+      "name": "null",
+      "description": "No range defined, or normal ranges don't apply"
+    },
+    {
+      "name": "R",
+      "description": "Resistant*"
+    },
+    {
+      "name": "S",
+      "description": "Susceptible*"
+    },
+    {
+      "name": "U",
+      "description": "Significant change up"
+    },
+    {
+      "name": "VS",
+      "description": "Very susceptible*"
+    },
+    {
+      "name": "W",
+      "description": "Worse--use when direction not relevant"
+    }
+  ]
+}

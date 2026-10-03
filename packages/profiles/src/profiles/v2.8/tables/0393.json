@@ -1,0 +1,15 @@
+{
+  "id": "0393",
+  "description": "Match Algorithms",
+  "type": "user",
+  "codes": [
+    {
+      "name": "LINKSOFT_2.01",
+      "description": "Proprietary algorithm for LinkSoft v2.01"
+    },
+    {
+      "name": "MATCHWARE_1.2",
+      "description": "Proprietary algorithm for MatchWare v1.2"
+    }
+  ]
+}

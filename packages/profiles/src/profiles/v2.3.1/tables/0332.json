@@ -1,0 +1,15 @@
+{
+  "id": "0332",
+  "description": "Network source type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Accept"
+    },
+    {
+      "name": "I",
+      "description": "Initiate"
+    }
+  ]
+}

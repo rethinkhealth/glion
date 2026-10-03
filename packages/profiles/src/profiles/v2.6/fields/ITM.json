@@ -1,0 +1,313 @@
+{
+  "segmentId": "ITM",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "ITM-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 250,
+      "name": "Item Identifier",
+      "item": "2186"
+    },
+    {
+      "sequence": 2,
+      "id": "ITM-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 999,
+      "name": "Item Description",
+      "item": "2274"
+    },
+    {
+      "sequence": 3,
+      "id": "ITM-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70776",
+      "name": "Item Status",
+      "item": "2187"
+    },
+    {
+      "sequence": 4,
+      "id": "ITM-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70778",
+      "name": "Item Type",
+      "item": "2188"
+    },
+    {
+      "sequence": 5,
+      "id": "ITM-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Item Category",
+      "item": "2189"
+    },
+    {
+      "sequence": 6,
+      "id": "ITM-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Subject to Expiration Indicator",
+      "item": "2190"
+    },
+    {
+      "sequence": 7,
+      "id": "ITM-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 250,
+      "name": "Manufacturer Identifier",
+      "item": "2191"
+    },
+    {
+      "sequence": 8,
+      "id": "ITM-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 999,
+      "name": "Manufacturer Name",
+      "item": "2275"
+    },
+    {
+      "sequence": 9,
+      "id": "ITM-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Manufacturer Catalog Number",
+      "item": "2192"
+    },
+    {
+      "sequence": 10,
+      "id": "ITM-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 4,
+      "name": "Manufacturer Labeler Identification Code",
+      "item": "2193"
+    },
+    {
+      "sequence": 11,
+      "id": "ITM-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Patient Chargeable Indicator",
+      "item": "2070"
+    },
+    {
+      "sequence": 12,
+      "id": "ITM-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70132",
+      "name": "Transaction Code",
+      "item": "361"
+    },
+    {
+      "sequence": 13,
+      "id": "ITM-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CP",
+      "maxLength": 12,
+      "name": "Transaction amount - unit",
+      "item": "366"
+    },
+    {
+      "sequence": 14,
+      "id": "ITM-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Stocked Item Indicator",
+      "item": "2197"
+    },
+    {
+      "sequence": 15,
+      "id": "ITM-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70871",
+      "name": "Supply Risk Codes",
+      "item": "2266"
+    },
+    {
+      "sequence": 16,
+      "id": "ITM-16",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XON",
+      "maxLength": 250,
+      "table": "HL70790",
+      "name": "Approving Regulatory Agency",
+      "item": "2199"
+    },
+    {
+      "sequence": 17,
+      "id": "ITM-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Latex Indicator",
+      "item": "2200"
+    },
+    {
+      "sequence": 18,
+      "id": "ITM-18",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70793",
+      "name": "Ruling Act",
+      "item": "2201"
+    },
+    {
+      "sequence": 19,
+      "id": "ITM-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 30,
+      "table": "HL70320",
+      "name": "Item Natural Account Code",
+      "item": "282"
+    },
+    {
+      "sequence": 20,
+      "id": "ITM-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 6,
+      "name": "Approved To Buy Quantity",
+      "item": "2203"
+    },
+    {
+      "sequence": 21,
+      "id": "ITM-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "MO",
+      "maxLength": 10,
+      "name": "Approved To Buy Price",
+      "item": "2204"
+    },
+    {
+      "sequence": 22,
+      "id": "ITM-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Taxable Item Indicator",
+      "item": "2205"
+    },
+    {
+      "sequence": 23,
+      "id": "ITM-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Freight Charge Indicator",
+      "item": "2206"
+    },
+    {
+      "sequence": 24,
+      "id": "ITM-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Item Set Indicator",
+      "item": "2207"
+    },
+    {
+      "sequence": 25,
+      "id": "ITM-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 250,
+      "name": "Item Set Identifier",
+      "item": "2208"
+    },
+    {
+      "sequence": 26,
+      "id": "ITM-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Track Department Usage Indicator",
+      "item": "2209"
+    },
+    {
+      "sequence": 27,
+      "id": "ITM-27",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 705,
+      "table": "HL70088",
+      "name": "Procedure Code",
+      "item": "393"
+    },
+    {
+      "sequence": 28,
+      "id": "ITM-28",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CNE",
+      "maxLength": 705,
+      "table": "HL70340",
+      "name": "Procedure Code Modifier",
+      "item": "1316"
+    },
+    {
+      "sequence": 29,
+      "id": "ITM-29",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "table": "HL70376",
+      "name": "Special Handling Code",
+      "item": "1370"
+    }
+  ]
+}

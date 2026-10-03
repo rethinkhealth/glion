@@ -1,0 +1,39 @@
+{
+  "id": "0364",
+  "description": "Comment type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1R",
+      "description": "Primary Reason"
+    },
+    {
+      "name": "2R",
+      "description": "Secondary Reason"
+    },
+    {
+      "name": "AI",
+      "description": "Ancillary Instructions,"
+    },
+    {
+      "name": "DR",
+      "description": "Duplicate/Interaction Reason"
+    },
+    {
+      "name": "GI",
+      "description": "General Instructions"
+    },
+    {
+      "name": "GR",
+      "description": "General Reason"
+    },
+    {
+      "name": "PI",
+      "description": "Patient Instructions"
+    },
+    {
+      "name": "RE",
+      "description": "Remark"
+    }
+  ]
+}

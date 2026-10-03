@@ -1,0 +1,11 @@
+{
+  "id": "0452",
+  "description": "Health Care Provider Type Code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "SUGGESTION",
+      "description": "ANSI ASC X12 Health Care Provider Taxonomy, Level 1 - Type"
+    }
+  ]
+}

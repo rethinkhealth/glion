@@ -1,0 +1,47 @@
+{
+  "segmentId": "EVN",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "EVN-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70003",
+      "name": "EVENT TYPE CODE",
+      "item": "29"
+    },
+    {
+      "sequence": 2,
+      "id": "EVN-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "DATE/TIME OF EVENT",
+      "item": "30"
+    },
+    {
+      "sequence": 3,
+      "id": "EVN-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "DATE/TIME PLANNED EVENT",
+      "item": "32"
+    },
+    {
+      "sequence": 4,
+      "id": "EVN-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70062",
+      "name": "EVENT REASON CODE",
+      "item": "369"
+    }
+  ]
+}

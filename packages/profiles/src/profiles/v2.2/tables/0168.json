@@ -1,0 +1,35 @@
+{
+  "id": "0168",
+  "description": "PROCESSING PRIORITY",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "As soon as possible (a priority lower than stat)"
+    },
+    {
+      "name": "B",
+      "description": "Do at bedside or portable (may be used with other codes)"
+    },
+    {
+      "name": "C",
+      "description": "Measure continously (e.g., arterial line blood pressure)"
+    },
+    {
+      "name": "P",
+      "description": "Preoperative (to be done prior to surgery)"
+    },
+    {
+      "name": "R",
+      "description": "Routine"
+    },
+    {
+      "name": "S",
+      "description": "Stat (do immediately)"
+    },
+    {
+      "name": "T",
+      "description": "Timing critical (do as near as possible to requested time)"
+    }
+  ]
+}

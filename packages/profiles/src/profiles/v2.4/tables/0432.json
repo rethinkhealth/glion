@@ -1,0 +1,31 @@
+{
+  "id": "0432",
+  "description": "Admission level of care code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AC",
+      "description": "Acute"
+    },
+    {
+      "name": "CH",
+      "description": "Chronic"
+    },
+    {
+      "name": "CO",
+      "description": "Comatose"
+    },
+    {
+      "name": "CR",
+      "description": "Critical"
+    },
+    {
+      "name": "IM",
+      "description": "Improved"
+    },
+    {
+      "name": "MO",
+      "description": "Moribund"
+    }
+  ]
+}

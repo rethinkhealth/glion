@@ -1,0 +1,55 @@
+{
+  "id": "0384",
+  "description": "Substance type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CO",
+      "description": "Control"
+    },
+    {
+      "name": "DI",
+      "description": "Diluent"
+    },
+    {
+      "name": "LI",
+      "description": "Measurable Liquid Item"
+    },
+    {
+      "name": "LW",
+      "description": "Liquid Waste"
+    },
+    {
+      "name": "MR",
+      "description": "Multiple Test Reagent"
+    },
+    {
+      "name": "OT",
+      "description": "Other"
+    },
+    {
+      "name": "PT",
+      "description": "Pretreatment"
+    },
+    {
+      "name": "PW",
+      "description": "Purified Water"
+    },
+    {
+      "name": "RC",
+      "description": "Reagent Calibrator"
+    },
+    {
+      "name": "SC",
+      "description": "Countable Solid Item"
+    },
+    {
+      "name": "SR",
+      "description": "Single Test Reagent"
+    },
+    {
+      "name": "SW",
+      "description": "Solid Waste"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "0133",
+  "description": "PROCEDURE PRACTITIONER TYPE",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AN",
+      "description": "Anesthesiologist"
+    },
+    {
+      "name": "CM",
+      "description": "Certified Nurse Midwife"
+    },
+    {
+      "name": "NP",
+      "description": "Nurse Practitioner"
+    },
+    {
+      "name": "PR",
+      "description": "Procedure MD (surgeon)"
+    },
+    {
+      "name": "RD",
+      "description": "Radiologist"
+    },
+    {
+      "name": "RS",
+      "description": "Resident"
+    }
+  ]
+}

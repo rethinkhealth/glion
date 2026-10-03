@@ -1,0 +1,119 @@
+{
+  "id": "0335",
+  "description": "Repeat Pattern",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Ante (before)"
+    },
+    {
+      "name": "BID",
+      "description": "twice a day at institution-specified times"
+    },
+    {
+      "name": "C",
+      "description": "service is provided continuously between start time and stop time"
+    },
+    {
+      "name": "D",
+      "description": "Cibus Diurnus (lunch)"
+    },
+    {
+      "name": "I",
+      "description": "Inter"
+    },
+    {
+      "name": "M",
+      "description": "Cibus Matutinus (breakfast)"
+    },
+    {
+      "name": "Meal Related Timings",
+      "description": "<timing>C (\"cum\"\")<meal>\""
+    },
+    {
+      "name": "Once",
+      "description": "one time only."
+    },
+    {
+      "name": "P",
+      "description": "Post (after)"
+    },
+    {
+      "name": "PRN",
+      "description": "given as needed"
+    },
+    {
+      "name": "PRNxxx",
+      "description": "where xxx is some frequency code"
+    },
+    {
+      "name": "Q<integer>D",
+      "description": "every <integer> days"
+    },
+    {
+      "name": "Q<integer>H",
+      "description": "every <integer> hours"
+    },
+    {
+      "name": "Q<integer>J<day#>",
+      "description": "repeats on a particular day of the week,"
+    },
+    {
+      "name": "Q<integer>L",
+      "description": "every <integer> months (Lunar cycle)"
+    },
+    {
+      "name": "Q<integer>M",
+      "description": "every <integer> minutes"
+    },
+    {
+      "name": "Q<integer>S",
+      "description": "every <integer> seconds"
+    },
+    {
+      "name": "Q<integer>W",
+      "description": "every <integer> weeks"
+    },
+    {
+      "name": "QAM",
+      "description": "in the morning at institution-specified time"
+    },
+    {
+      "name": "QHS",
+      "description": "every day before the hour of sleep"
+    },
+    {
+      "name": "QID",
+      "description": "four times a day at institution-specified times"
+    },
+    {
+      "name": "QOD",
+      "description": "every other day"
+    },
+    {
+      "name": "QPM",
+      "description": "in the evening at institution-specified time"
+    },
+    {
+      "name": "QSHIFT",
+      "description": "during each of three eight-hour shifts at institution-specified times"
+    },
+    {
+      "name": "TID",
+      "description": "three times a day at institution-specified times"
+    },
+    {
+      "name": "U <spec>",
+      "description": "for future use, where <spec> is an interval specification as defined by the UNIX cron specification."
+    },
+    {
+      "name": "V",
+      "description": "Cibus Vespertinus (dinner)"
+    },
+    {
+      "name": "xID",
+      "description": " where X is a numeral 5 or greater.\""
+    }
+  ]
+}

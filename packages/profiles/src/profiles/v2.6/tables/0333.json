@@ -1,0 +1,11 @@
+{
+  "id": "0333",
+  "description": "Driver's license issuing authority",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

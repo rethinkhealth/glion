@@ -1,0 +1,55 @@
+{
+  "segmentId": "URS",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "URS-1",
+      "required": true,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U WHERE SUBJECT DEFINITION",
+      "item": "608"
+    },
+    {
+      "sequence": 2,
+      "id": "URS-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "R/U WHEN DATA START DATE/TIME",
+      "item": "609"
+    },
+    {
+      "sequence": 3,
+      "id": "URS-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "R/U WHEN DATA END DATE/TIME",
+      "item": "610"
+    },
+    {
+      "sequence": 4,
+      "id": "URS-4",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U WHAT USER QUALIFIER",
+      "item": "611"
+    },
+    {
+      "sequence": 5,
+      "id": "URS-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U OTHER RESULTS SUBJECT DEFINI",
+      "item": "612"
+    }
+  ]
+}

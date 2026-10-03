@@ -1,0 +1,19 @@
+{
+  "id": "0103",
+  "description": "Processing ID",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Debugging"
+    },
+    {
+      "name": "P",
+      "description": "Production"
+    },
+    {
+      "name": "T",
+      "description": "Training"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "0938",
+  "description": "Collection Event/Process Step Limit",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "DRW",
+      "description": "Collecting the specimen"
+    },
+    {
+      "name": "ORD",
+      "description": "Placing the order"
+    }
+  ]
+}

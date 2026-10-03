@@ -1,0 +1,35 @@
+{
+  "id": "0456",
+  "description": "Revenue code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": ""
+    },
+    {
+      "name": "260",
+      "description": "IV Therapy"
+    },
+    {
+      "name": "280",
+      "description": "Oncology"
+    },
+    {
+      "name": "301",
+      "description": "Lab/Chemistry"
+    },
+    {
+      "name": "991",
+      "description": "Cafeteria /Guest Tray"
+    },
+    {
+      "name": "993",
+      "description": "Telephone/Telegraph"
+    },
+    {
+      "name": "994",
+      "description": "TV/Radio"
+    }
+  ]
+}

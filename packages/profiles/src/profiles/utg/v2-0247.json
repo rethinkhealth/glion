@@ -1,0 +1,69 @@
+{
+  "id": "v2-0247",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0247",
+  "oid": "2.16.840.1.113883.18.143",
+  "name": "StatusOfEvaluation",
+  "title": "statusOfEvaluation",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Evaluation anticipated, but not yet begun",
+      "status": "active"
+    },
+    {
+      "code": "C",
+      "display": "Product received in condition which made analysis impossible",
+      "status": "active"
+    },
+    {
+      "code": "D",
+      "display": "Product discarded -- unable to follow up",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Product remains implanted -- unable to follow up",
+      "status": "active"
+    },
+    {
+      "code": "K",
+      "display": "Problem already known, no evaluation necessary",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Evaluation in progress",
+      "status": "active"
+    },
+    {
+      "code": "Q",
+      "display": "Product under quarantine -- unable to follow up",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Product under recall/corrective action",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Product unavailable for follow up investigation",
+      "status": "active"
+    },
+    {
+      "code": "X",
+      "display": "Product not made by company",
+      "status": "active"
+    },
+    {
+      "code": "Y",
+      "display": "Evaluation completed",
+      "status": "active"
+    }
+  ]
+}

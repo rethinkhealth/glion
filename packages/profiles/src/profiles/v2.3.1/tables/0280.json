@@ -1,0 +1,19 @@
+{
+  "id": "0280",
+  "description": "Referral priority",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "ASAP"
+    },
+    {
+      "name": "R",
+      "description": "Routine"
+    },
+    {
+      "name": "S",
+      "description": "STAT"
+    }
+  ]
+}

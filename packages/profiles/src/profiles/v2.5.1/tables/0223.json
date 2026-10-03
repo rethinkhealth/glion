@@ -1,0 +1,27 @@
+{
+  "id": "0223",
+  "description": "Living Dependency",
+  "type": "user",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Small Children Dependent"
+    },
+    {
+      "name": "M",
+      "description": "Medical Supervision Required"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "S",
+      "description": "Spouse Dependent"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

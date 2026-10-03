@@ -1,0 +1,38 @@
+{
+  "id": "ED",
+  "version": "2.8.2",
+  "kind": "composite",
+  "title": "Encapsulated Data",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Source Application",
+      "datatypeId": "HD",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Type of Data",
+      "datatypeId": "ID",
+      "required": true
+    },
+    {
+      "sequence": 3,
+      "name": "Data Subtype",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Encoding",
+      "datatypeId": "ID",
+      "required": true
+    },
+    {
+      "sequence": 5,
+      "name": "Data",
+      "datatypeId": "TX",
+      "required": true
+    }
+  ]
+}

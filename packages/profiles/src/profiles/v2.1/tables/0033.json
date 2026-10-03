@@ -1,0 +1,119 @@
+{
+  "id": "0033",
+  "description": "ROUTE",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AP",
+      "description": "Apply externally"
+    },
+    {
+      "name": "CH",
+      "description": "Chew"
+    },
+    {
+      "name": "DU",
+      "description": "Dust"
+    },
+    {
+      "name": "EA",
+      "description": "Ear"
+    },
+    {
+      "name": "EY",
+      "description": "Eye"
+    },
+    {
+      "name": "IA",
+      "description": "Intro-arterial"
+    },
+    {
+      "name": "ID",
+      "description": "Intra-dermal"
+    },
+    {
+      "name": "IF",
+      "description": "Infiltrate"
+    },
+    {
+      "name": "IH",
+      "description": "Inhalation"
+    },
+    {
+      "name": "IM",
+      "description": "Intra-muscular"
+    },
+    {
+      "name": "IN",
+      "description": "Intra-nasal"
+    },
+    {
+      "name": "IR",
+      "description": "Irrigate"
+    },
+    {
+      "name": "IS",
+      "description": "Inserted"
+    },
+    {
+      "name": "IT",
+      "description": "Intrathecal"
+    },
+    {
+      "name": "IV",
+      "description": "Intravenous"
+    },
+    {
+      "name": "NB",
+      "description": "Nebulized"
+    },
+    {
+      "name": "NG",
+      "description": "Nathogasic"
+    },
+    {
+      "name": "PA",
+      "description": "Peri-anally"
+    },
+    {
+      "name": "PT",
+      "description": "Paint"
+    },
+    {
+      "name": "PU",
+      "description": "IV push"
+    },
+    {
+      "name": "RC",
+      "description": "Rectally"
+    },
+    {
+      "name": "SH",
+      "description": "Shampoo"
+    },
+    {
+      "name": "SL",
+      "description": "Sublingual"
+    },
+    {
+      "name": "SO",
+      "description": "Soak"
+    },
+    {
+      "name": "SS",
+      "description": "IV soluset"
+    },
+    {
+      "name": "TP",
+      "description": "Topically"
+    },
+    {
+      "name": "WA",
+      "description": "Wash"
+    },
+    {
+      "name": "WI",
+      "description": "Wipe"
+    }
+  ]
+}

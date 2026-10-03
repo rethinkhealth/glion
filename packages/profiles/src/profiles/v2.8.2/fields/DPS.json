@@ -1,0 +1,53 @@
+{
+  "segmentId": "DPS",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "DPS-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70051",
+      "name": "Diagnosis Code - MCP",
+      "item": "3472"
+    },
+    {
+      "sequence": 2,
+      "id": "DPS-2",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70941",
+      "name": "Procedure Code",
+      "item": "3484"
+    },
+    {
+      "sequence": 3,
+      "id": "DPS-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Effective Date/Time",
+      "item": "662"
+    },
+    {
+      "sequence": 4,
+      "id": "DPS-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Expiration Date/Time",
+      "item": "3473"
+    },
+    {
+      "sequence": 5,
+      "id": "DPS-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70940",
+      "name": "Type of Limitation",
+      "item": "3474"
+    }
+  ]
+}

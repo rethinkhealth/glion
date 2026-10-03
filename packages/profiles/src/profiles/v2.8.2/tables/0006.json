@@ -1,0 +1,347 @@
+{
+  "id": "0006",
+  "description": "Religion",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ABC",
+      "description": "Christian: American Baptist Church"
+    },
+    {
+      "name": "AGN",
+      "description": "Agnostic"
+    },
+    {
+      "name": "AME",
+      "description": "Christian: African Methodist Episcopal Zion"
+    },
+    {
+      "name": "AMT",
+      "description": "Christian: African Methodist Episcopal"
+    },
+    {
+      "name": "ANG",
+      "description": "Christian: Anglican"
+    },
+    {
+      "name": "AOG",
+      "description": "Christian: Assembly of God"
+    },
+    {
+      "name": "ATH",
+      "description": "Atheist"
+    },
+    {
+      "name": "BAH",
+      "description": "Baha'i"
+    },
+    {
+      "name": "BAP",
+      "description": "Christian: Baptist"
+    },
+    {
+      "name": "BMA",
+      "description": "Buddhist: Mahayana"
+    },
+    {
+      "name": "BOT",
+      "description": "Buddhist: Other"
+    },
+    {
+      "name": "BRE",
+      "description": "Brethren"
+    },
+    {
+      "name": "BTA",
+      "description": "Buddhist: Tantrayana"
+    },
+    {
+      "name": "BTH",
+      "description": "Buddhist: Theravada"
+    },
+    {
+      "name": "BUD",
+      "description": "Buddhist"
+    },
+    {
+      "name": "CAT",
+      "description": "Christian: Roman Catholic"
+    },
+    {
+      "name": "CFR",
+      "description": "Chinese Folk Religionist"
+    },
+    {
+      "name": "CHR",
+      "description": "Christian"
+    },
+    {
+      "name": "CHS",
+      "description": "Christian: Christian Science"
+    },
+    {
+      "name": "CMA",
+      "description": "Christian: Christian Missionary Alliance"
+    },
+    {
+      "name": "CNF",
+      "description": "Confucian"
+    },
+    {
+      "name": "COC",
+      "description": "Christian: Church of Christ"
+    },
+    {
+      "name": "COG",
+      "description": "Christian: Church of God"
+    },
+    {
+      "name": "COI",
+      "description": "Christian: Church of God in Christ"
+    },
+    {
+      "name": "COL",
+      "description": "Christian: Congregational"
+    },
+    {
+      "name": "COM",
+      "description": "Christian: Community"
+    },
+    {
+      "name": "COP",
+      "description": "Christian: Other Pentecostal"
+    },
+    {
+      "name": "COT",
+      "description": "Christian: Other"
+    },
+    {
+      "name": "CRR",
+      "description": "Christian: Christian Reformed"
+    },
+    {
+      "name": "DOC",
+      "description": "Disciples of Christ"
+    },
+    {
+      "name": "EOT",
+      "description": "Christian: Eastern Orthodox"
+    },
+    {
+      "name": "EPI",
+      "description": "Christian: Episcopalian"
+    },
+    {
+      "name": "ERL",
+      "description": "Ethnic Religionist"
+    },
+    {
+      "name": "EVC",
+      "description": "Christian: Evangelical Church"
+    },
+    {
+      "name": "FRQ",
+      "description": "Christian: Friends"
+    },
+    {
+      "name": "FUL",
+      "description": "Christian: Full Gospel"
+    },
+    {
+      "name": "FWB",
+      "description": "Christian: Free Will Baptist"
+    },
+    {
+      "name": "GRE",
+      "description": "Christian: Greek Orthodox"
+    },
+    {
+      "name": "HIN",
+      "description": "Hindu"
+    },
+    {
+      "name": "HOT",
+      "description": "Hindu: Other"
+    },
+    {
+      "name": "HSH",
+      "description": "Hindu: Shaivites"
+    },
+    {
+      "name": "HVA",
+      "description": "Hindu: Vaishnavites"
+    },
+    {
+      "name": "JAI",
+      "description": "Jain"
+    },
+    {
+      "name": "JCO",
+      "description": "Jewish: Conservative"
+    },
+    {
+      "name": "JEW",
+      "description": "Jewish"
+    },
+    {
+      "name": "JOR",
+      "description": "Jewish: Orthodox"
+    },
+    {
+      "name": "JOT",
+      "description": "Jewish: Other"
+    },
+    {
+      "name": "JRC",
+      "description": "Jewish: Reconstructionist"
+    },
+    {
+      "name": "JRF",
+      "description": "Jewish: Reform"
+    },
+    {
+      "name": "JRN",
+      "description": "Jewish: Renewal"
+    },
+    {
+      "name": "JWN",
+      "description": "Christian: Jehovah's Witness"
+    },
+    {
+      "name": "LMS",
+      "description": "Christian: Lutheran Missouri Synod"
+    },
+    {
+      "name": "LUT",
+      "description": "Christian: Lutheran"
+    },
+    {
+      "name": "MEN",
+      "description": "Christian: Mennonite"
+    },
+    {
+      "name": "MET",
+      "description": "Christian: Methodist"
+    },
+    {
+      "name": "MOM",
+      "description": "Christian: Latter-day Saints"
+    },
+    {
+      "name": "MOS",
+      "description": "Muslim"
+    },
+    {
+      "name": "MOT",
+      "description": "Muslim: Other"
+    },
+    {
+      "name": "MSH",
+      "description": "Muslim: Shiite"
+    },
+    {
+      "name": "MSU",
+      "description": "Muslim: Sunni"
+    },
+    {
+      "name": "NAM",
+      "description": "Native American"
+    },
+    {
+      "name": "NAZ",
+      "description": "Christian: Church of the Nazarene"
+    },
+    {
+      "name": "NOE",
+      "description": "Nonreligious"
+    },
+    {
+      "name": "NRL",
+      "description": "New Religionist"
+    },
+    {
+      "name": "ORT",
+      "description": "Christian: Orthodox"
+    },
+    {
+      "name": "OTH",
+      "description": "Other"
+    },
+    {
+      "name": "PEN",
+      "description": "Christian: Pentecostal"
+    },
+    {
+      "name": "PRC",
+      "description": "Christian: Other Protestant"
+    },
+    {
+      "name": "PRE",
+      "description": "Christian: Presbyterian"
+    },
+    {
+      "name": "PRO",
+      "description": "Christian: Protestant"
+    },
+    {
+      "name": "REC",
+      "description": "Christian: Reformed Church"
+    },
+    {
+      "name": "REO",
+      "description": "Christian: Reorganized Church of Jesus Christ-LDS"
+    },
+    {
+      "name": "SAA",
+      "description": "Christian: Salvation Army"
+    },
+    {
+      "name": "SEV",
+      "description": "Christian: Seventh Day Adventist"
+    },
+    {
+      "name": "SHN",
+      "description": "Shintoist"
+    },
+    {
+      "name": "SIK",
+      "description": "Sikh"
+    },
+    {
+      "name": "SOU",
+      "description": "Christian: Southern Baptist"
+    },
+    {
+      "name": "SPI",
+      "description": "Spiritist"
+    },
+    {
+      "name": "UCC",
+      "description": "Christian: United Church of Christ"
+    },
+    {
+      "name": "UMD",
+      "description": "Christian: United Methodist"
+    },
+    {
+      "name": "UNI",
+      "description": "Christian: Unitarian"
+    },
+    {
+      "name": "UNU",
+      "description": "Christian: Unitarian Universalist"
+    },
+    {
+      "name": "VAR",
+      "description": "Unknown"
+    },
+    {
+      "name": "WES",
+      "description": "Christian: Wesleyan"
+    },
+    {
+      "name": "WMC",
+      "description": "Christian: Wesleyan Methodist"
+    }
+  ]
+}

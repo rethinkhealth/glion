@@ -1,0 +1,19 @@
+{
+  "id": "v2-0667",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0667",
+  "oid": "2.16.840.1.113883.18.384",
+  "name": "DeviceDataState",
+  "title": "deviceDataState",
+  "codes": [
+    {
+      "code": "0",
+      "display": "Real Time Values",
+      "status": "active"
+    },
+    {
+      "code": "1",
+      "display": "Historic Values",
+      "status": "active"
+    }
+  ]
+}

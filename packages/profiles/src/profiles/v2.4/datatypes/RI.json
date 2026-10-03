@@ -1,0 +1,20 @@
+{
+  "id": "RI",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "repeat interval",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "repeat pattern",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "explicit time interval",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

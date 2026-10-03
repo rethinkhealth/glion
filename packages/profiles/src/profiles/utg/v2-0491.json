@@ -1,0 +1,29 @@
+{
+  "id": "v2-0491",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0491",
+  "oid": "2.16.840.1.113883.18.315",
+  "name": "SpecimenQuality",
+  "title": "specimenQuality",
+  "codes": [
+    {
+      "code": "E",
+      "display": "Excellent",
+      "status": "active"
+    },
+    {
+      "code": "F",
+      "display": "Fair",
+      "status": "active"
+    },
+    {
+      "code": "G",
+      "display": "Good",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Poor",
+      "status": "active"
+    }
+  ]
+}

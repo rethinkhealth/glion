@@ -1,0 +1,19 @@
+{
+  "id": "0409",
+  "description": "Application Change Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "M",
+      "description": "Migrates to different CPU"
+    },
+    {
+      "name": "SD",
+      "description": "Shut down"
+    },
+    {
+      "name": "SU",
+      "description": "Start up"
+    }
+  ]
+}

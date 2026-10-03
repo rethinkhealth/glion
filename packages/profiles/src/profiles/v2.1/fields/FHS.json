@@ -1,0 +1,125 @@
+{
+  "segmentId": "FHS",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "FHS-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 1,
+      "name": "FILE FIELD SEPARATOR",
+      "item": "692"
+    },
+    {
+      "sequence": 2,
+      "id": "FHS-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 4,
+      "name": "FILE ENCODING CHARACTERS",
+      "item": "693"
+    },
+    {
+      "sequence": 3,
+      "id": "FHS-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 15,
+      "name": "FILE SENDING APPLICATION",
+      "item": "694"
+    },
+    {
+      "sequence": 4,
+      "id": "FHS-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "FILE SENDING FACILITY",
+      "item": "695"
+    },
+    {
+      "sequence": 5,
+      "id": "FHS-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 15,
+      "name": "FILE RECEIVING APPLICATION",
+      "item": "696"
+    },
+    {
+      "sequence": 6,
+      "id": "FHS-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "FILE RECEIVING FACILITY",
+      "item": "697"
+    },
+    {
+      "sequence": 7,
+      "id": "FHS-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "DATE/TIME OF FILE CREATION",
+      "item": "660"
+    },
+    {
+      "sequence": 8,
+      "id": "FHS-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 40,
+      "name": "FILE SECURITY",
+      "item": "698"
+    },
+    {
+      "sequence": 9,
+      "id": "FHS-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "FILE NAME/ID",
+      "item": "661"
+    },
+    {
+      "sequence": 10,
+      "id": "FHS-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 80,
+      "name": "FILE HEADER COMMENT",
+      "item": "662"
+    },
+    {
+      "sequence": 11,
+      "id": "FHS-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "FILE CONTROL ID",
+      "item": "663"
+    },
+    {
+      "sequence": 12,
+      "id": "FHS-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "REFERENCE FILE CONTROL ID",
+      "item": "768"
+    }
+  ]
+}

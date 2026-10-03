@@ -1,0 +1,15 @@
+{
+  "id": "0136",
+  "description": "Yes/no indicator",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

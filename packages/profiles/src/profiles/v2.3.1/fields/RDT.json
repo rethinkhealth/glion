@@ -1,0 +1,14 @@
+{
+  "segmentId": "RDT",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RDT-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "*",
+      "name": "Column Value",
+      "item": "703"
+    }
+  ]
+}

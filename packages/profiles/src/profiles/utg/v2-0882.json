@@ -1,0 +1,19 @@
+{
+  "id": "v2-0882",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0882",
+  "oid": "2.16.840.1.113883.18.412",
+  "name": "MedicalRoleExecutingPhysician",
+  "title": "medicalRoleExecutingPhysician",
+  "codes": [
+    {
+      "code": "E",
+      "display": "Employed",
+      "status": "active"
+    },
+    {
+      "code": "SE",
+      "display": "Self-employed",
+      "status": "active"
+    }
+  ]
+}

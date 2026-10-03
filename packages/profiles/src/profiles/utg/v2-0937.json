@@ -1,0 +1,79 @@
+{
+  "id": "v2-0937",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0937",
+  "oid": "2.16.840.1.113883.18.440",
+  "name": "ObservationSubtype",
+  "title": "observationSubtype",
+  "codes": [
+    {
+      "code": "AOE",
+      "display": "Ask at Order Entry",
+      "status": "active"
+    },
+    {
+      "code": "ASC",
+      "display": "Ask at Specimen Collection",
+      "status": "active"
+    },
+    {
+      "code": "MCS",
+      "display": "Micro Culture Status",
+      "status": "N"
+    },
+    {
+      "code": "MID",
+      "display": "Micro Isolate Descriptor",
+      "status": "N"
+    },
+    {
+      "code": "MIG",
+      "display": "Micro Isolate Growth Quantity",
+      "status": "N"
+    },
+    {
+      "code": "MIN",
+      "display": "Micro Isolate Name",
+      "status": "N"
+    },
+    {
+      "code": "MIR",
+      "display": "Micro Isolate Related",
+      "status": "deprecated"
+    },
+    {
+      "code": "MIRM",
+      "display": "Micro Isolate Related Modifier",
+      "status": "deprecated"
+    },
+    {
+      "code": "MNIR",
+      "display": "Micro Non-Isolate Related",
+      "status": "deprecated"
+    },
+    {
+      "code": "MOD",
+      "display": "Micro Other Descriptor",
+      "status": "N"
+    },
+    {
+      "code": "MSS",
+      "display": "Micro Sample Stain",
+      "status": "active"
+    },
+    {
+      "code": "SUP",
+      "display": "Supplemental Result",
+      "status": "active"
+    },
+    {
+      "code": "SUR",
+      "display": "Susceptibility Related",
+      "status": "active"
+    },
+    {
+      "code": "UNSP",
+      "display": "Unspecified",
+      "status": "active"
+    }
+  ]
+}

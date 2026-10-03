@@ -1,0 +1,39 @@
+{
+  "id": "v2-0367",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0367",
+  "oid": "2.16.840.1.113883.18.225",
+  "name": "AlertLevel",
+  "title": "alertLevel",
+  "codes": [
+    {
+      "code": "...",
+      "display": "(null) No level change",
+      "status": "deprecated"
+    },
+    {
+      "code": "&#x2026;",
+      "display": "(null) No level change",
+      "status": "deprecated"
+    },
+    {
+      "code": "C",
+      "display": "Critical",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "Normal",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "Serious",
+      "status": "active"
+    },
+    {
+      "code": "W",
+      "display": "Warning",
+      "status": "active"
+    }
+  ]
+}

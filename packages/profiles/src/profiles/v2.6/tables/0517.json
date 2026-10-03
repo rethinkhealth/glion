@@ -1,0 +1,23 @@
+{
+  "id": "0517",
+  "description": "Inform person code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "HD",
+      "description": "Inform help desk"
+    },
+    {
+      "name": "NPAT",
+      "description": "Do NOT inform patient"
+    },
+    {
+      "name": "PAT",
+      "description": "Inform patient"
+    },
+    {
+      "name": "USR",
+      "description": "Inform User"
+    }
+  ]
+}

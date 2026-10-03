@@ -1,0 +1,39 @@
+{
+  "id": "v2-0330",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0330",
+  "oid": "2.16.840.1.113883.18.201",
+  "name": "MarketingBasis",
+  "title": "marketingBasis",
+  "codes": [
+    {
+      "code": "510E",
+      "display": "510 (K) exempt",
+      "status": "active"
+    },
+    {
+      "code": "510K",
+      "display": "510 (K)",
+      "status": "active"
+    },
+    {
+      "code": "522S",
+      "display": "Post marketing study (522)",
+      "status": "active"
+    },
+    {
+      "code": "PMA",
+      "display": "Premarketing authorization",
+      "status": "active"
+    },
+    {
+      "code": "PRE",
+      "display": "Preamendment",
+      "status": "active"
+    },
+    {
+      "code": "TXN",
+      "display": "Transitional",
+      "status": "active"
+    }
+  ]
+}

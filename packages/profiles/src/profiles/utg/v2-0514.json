@@ -1,0 +1,104 @@
+{
+  "id": "v2-0514",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0514",
+  "oid": "2.16.840.1.113883.18.336",
+  "name": "TransfusionAdverseReaction",
+  "title": "transfusionAdverseReaction",
+  "codes": [
+    {
+      "code": "ABOINC",
+      "display": "ABO Incompatible Transfusion Reaction",
+      "status": "active"
+    },
+    {
+      "code": "ACUTHEHTR",
+      "display": "Acute Hemolytic Transfusion Reaction",
+      "status": "active"
+    },
+    {
+      "code": "ALLERGIC1",
+      "display": "Allergic Reaction - First",
+      "status": "active"
+    },
+    {
+      "code": "ALLERGIC2",
+      "display": "Allergic Reaction - Recurrent",
+      "status": "active"
+    },
+    {
+      "code": "ALLERGICR",
+      "display": "Allergic Reaction - Repeating",
+      "status": "active"
+    },
+    {
+      "code": "ANAPHYLAC",
+      "display": "Anaphylactic Reaction",
+      "status": "active"
+    },
+    {
+      "code": "BACTCONTAM",
+      "display": "Reaction to Bacterial Contamination",
+      "status": "active"
+    },
+    {
+      "code": "DELAYEDHTR",
+      "display": "Delayed Hemolytic Transfusion Reaction",
+      "status": "active"
+    },
+    {
+      "code": "DELAYEDSTR",
+      "display": "Delayed Serological Transfusion Reaction",
+      "status": "active"
+    },
+    {
+      "code": "GVHD",
+      "display": "Graft vs Host Disease - Transfusion - Associated",
+      "status": "active"
+    },
+    {
+      "code": "HYPOTENS",
+      "display": "Non-hemolytic Hypotensive Reaction",
+      "status": "active"
+    },
+    {
+      "code": "NONHTR1",
+      "display": "Non-Hemolytic Fever Chill Transfusion Reaction - First",
+      "status": "active"
+    },
+    {
+      "code": "NONHTR2",
+      "display": "Non-Hemolytic Fever Chill Transfusion Reaction - Recurrent",
+      "status": "active"
+    },
+    {
+      "code": "NONHTRREC",
+      "display": "Non-Hemolytic Fever Chill Transfusion Reaction - Repeating",
+      "status": "active"
+    },
+    {
+      "code": "NONIMMUNE",
+      "display": "Non-Immune Hemolysis",
+      "status": "active"
+    },
+    {
+      "code": "NONSPEC",
+      "display": "Non-Specific, Non-Hemolytic Transfusion Reaction",
+      "status": "active"
+    },
+    {
+      "code": "NORXN",
+      "display": "No Evidence of Transfusion Reaction",
+      "status": "active"
+    },
+    {
+      "code": "PTP",
+      "display": "Posttransfusion Purpura",
+      "status": "active"
+    },
+    {
+      "code": "VOLOVER",
+      "display": "Symptoms most likely due to volume overload",
+      "status": "active"
+    }
+  ]
+}

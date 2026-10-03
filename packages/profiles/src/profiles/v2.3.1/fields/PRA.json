@@ -1,0 +1,90 @@
+{
+  "segmentId": "PRA",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PRA-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Primary Key Value - PRA",
+      "item": "685"
+    },
+    {
+      "sequence": 2,
+      "id": "PRA-2",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 60,
+      "table": "HL70358",
+      "name": "Practitioner Group",
+      "item": "686"
+    },
+    {
+      "sequence": 3,
+      "id": "PRA-3",
+      "required": false,
+      "repeatable": true,
+      "datatype": "IS",
+      "maxLength": 3,
+      "table": "HL70186",
+      "name": "Practitioner Category",
+      "item": "687"
+    },
+    {
+      "sequence": 4,
+      "id": "PRA-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70187",
+      "name": "Provider Billing",
+      "item": "688"
+    },
+    {
+      "sequence": 5,
+      "id": "PRA-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "SPD",
+      "maxLength": 100,
+      "table": "HL70337",
+      "name": "Specialty",
+      "item": "689"
+    },
+    {
+      "sequence": 6,
+      "id": "PRA-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "PLN",
+      "maxLength": 100,
+      "table": "HL70338",
+      "name": "Practitioner ID Numbers",
+      "item": "690"
+    },
+    {
+      "sequence": 7,
+      "id": "PRA-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "PIP",
+      "maxLength": 200,
+      "name": "Privileges",
+      "item": "691"
+    },
+    {
+      "sequence": 8,
+      "id": "PRA-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "Date Entered Practice",
+      "item": "1296"
+    }
+  ]
+}

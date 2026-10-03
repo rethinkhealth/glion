@@ -1,0 +1,47 @@
+{
+  "id": "0365",
+  "description": "Equipment State",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "…",
+      "description": "(null) No state change"
+    },
+    {
+      "name": "CL",
+      "description": "Clearing"
+    },
+    {
+      "name": "CO",
+      "description": "Configuring"
+    },
+    {
+      "name": "ES",
+      "description": "E-stopped"
+    },
+    {
+      "name": "ID",
+      "description": "Idle"
+    },
+    {
+      "name": "IN",
+      "description": "Initializing"
+    },
+    {
+      "name": "OP",
+      "description": "Normal Operation"
+    },
+    {
+      "name": "PA",
+      "description": "Pausing"
+    },
+    {
+      "name": "PD",
+      "description": "Paused"
+    },
+    {
+      "name": "PU",
+      "description": "Powered Up"
+    }
+  ]
+}

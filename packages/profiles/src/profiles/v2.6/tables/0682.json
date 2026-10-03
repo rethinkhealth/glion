@@ -1,0 +1,15 @@
+{
+  "id": "0682",
+  "description": "Device Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "0",
+      "description": "Ready"
+    },
+    {
+      "name": "1",
+      "description": "Not Ready"
+    }
+  ]
+}

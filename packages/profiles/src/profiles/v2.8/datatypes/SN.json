@@ -1,0 +1,32 @@
+{
+  "id": "SN",
+  "version": "2.8",
+  "kind": "composite",
+  "title": "Structured Numeric",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Comparator",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Num1",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Separator/Suffix",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Num2",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

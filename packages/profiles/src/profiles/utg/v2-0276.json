@@ -1,0 +1,34 @@
+{
+  "id": "v2-0276",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0276",
+  "oid": "2.16.840.1.113883.18.169",
+  "name": "AppointmentReason",
+  "title": "appointmentReason",
+  "codes": [
+    {
+      "code": "CHECKUP",
+      "display": "A routine check-up, such as an annual physical",
+      "status": "active"
+    },
+    {
+      "code": "EMERGENCY",
+      "display": "Emergency appointment",
+      "status": "active"
+    },
+    {
+      "code": "FOLLOWUP",
+      "display": "A follow up visit from a previous appointment",
+      "status": "active"
+    },
+    {
+      "code": "ROUTINE",
+      "display": "Routine appointment - default if not valued",
+      "status": "active"
+    },
+    {
+      "code": "WALKIN",
+      "display": "A previously unscheduled walk-in visit",
+      "status": "active"
+    }
+  ]
+}

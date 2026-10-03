@@ -1,0 +1,127 @@
+{
+  "id": "0411",
+  "description": "Supplemental service information values",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1ST",
+      "description": "First"
+    },
+    {
+      "name": "2ND",
+      "description": "Second"
+    },
+    {
+      "name": "3RD",
+      "description": "Third"
+    },
+    {
+      "name": "4TH",
+      "description": "Fourth"
+    },
+    {
+      "name": "5TH",
+      "description": "Fifth"
+    },
+    {
+      "name": "A/P",
+      "description": "Anterior/Posterior"
+    },
+    {
+      "name": "ANT",
+      "description": "Anterior"
+    },
+    {
+      "name": "BLT",
+      "description": "Bilateral"
+    },
+    {
+      "name": "DEC",
+      "description": "Decubitus"
+    },
+    {
+      "name": "DST",
+      "description": "Distal"
+    },
+    {
+      "name": "LAT",
+      "description": "Lateral"
+    },
+    {
+      "name": "LFT",
+      "description": "Left"
+    },
+    {
+      "name": "LLQ",
+      "description": "Left Lower Quadrant"
+    },
+    {
+      "name": "LOW",
+      "description": "Lower"
+    },
+    {
+      "name": "LUQ",
+      "description": "Left Upper Quadrant"
+    },
+    {
+      "name": "MED",
+      "description": "Medial"
+    },
+    {
+      "name": "OR",
+      "description": "Operating Room"
+    },
+    {
+      "name": "PED",
+      "description": "Pediatric"
+    },
+    {
+      "name": "POS",
+      "description": "Posterior"
+    },
+    {
+      "name": "PRT",
+      "description": "Portable"
+    },
+    {
+      "name": "PRX",
+      "description": "Proximal"
+    },
+    {
+      "name": "REC",
+      "description": "Recumbent"
+    },
+    {
+      "name": "RGH",
+      "description": "Right"
+    },
+    {
+      "name": "RLQ",
+      "description": "Right Lower Quadrant"
+    },
+    {
+      "name": "RUQ",
+      "description": "Right Upper Quadrant"
+    },
+    {
+      "name": "UPP",
+      "description": "Upper"
+    },
+    {
+      "name": "UPR",
+      "description": "Upright"
+    },
+    {
+      "name": "WCT",
+      "description": "With Contrast"
+    },
+    {
+      "name": "WOC",
+      "description": "Without Contrast"
+    },
+    {
+      "name": "WSD",
+      "description": "With Sedation"
+    }
+  ]
+}

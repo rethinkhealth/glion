@@ -1,0 +1,64 @@
+{
+  "id": "v2-0510",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0510",
+  "oid": "2.16.840.1.113883.18.333",
+  "name": "BloodProductDispenseStatus",
+  "title": "bloodProductDispenseStatus",
+  "codes": [
+    {
+      "code": "CR",
+      "display": "Released into inventory for general availability",
+      "status": "active"
+    },
+    {
+      "code": "DS",
+      "display": "Dispensed to patient location",
+      "status": "active"
+    },
+    {
+      "code": "PT",
+      "display": "Presumed transfused (dispensed and not returned)",
+      "status": "active"
+    },
+    {
+      "code": "RA",
+      "display": "Returned unused/no longer needed",
+      "status": "active"
+    },
+    {
+      "code": "RD",
+      "display": "Reserved and ready to dispense",
+      "status": "active"
+    },
+    {
+      "code": "RE",
+      "display": "Released (no longer allocated for the patient)",
+      "status": "active"
+    },
+    {
+      "code": "RI",
+      "display": "Received into inventory (for specified patient)",
+      "status": "active"
+    },
+    {
+      "code": "RL",
+      "display": "Returned unused/keep linked to patient for possible use later",
+      "status": "active"
+    },
+    {
+      "code": "RQ",
+      "display": "Request to dispense blood product",
+      "status": "active"
+    },
+    {
+      "code": "RS",
+      "display": "Reserved (ordered and product allocated for the patient)",
+      "status": "active"
+    },
+    {
+      "code": "WA",
+      "display": "Wasted (product no longer viable)",
+      "status": "active"
+    }
+  ]
+}

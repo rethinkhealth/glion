@@ -1,0 +1,375 @@
+{
+  "id": "0292",
+  "description": "Vaccines administered",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "01",
+      "description": "DTP"
+    },
+    {
+      "name": "02",
+      "description": "OPV"
+    },
+    {
+      "name": "03",
+      "description": "MMR"
+    },
+    {
+      "name": "04",
+      "description": "M/R"
+    },
+    {
+      "name": "05",
+      "description": "Measles"
+    },
+    {
+      "name": "06",
+      "description": "Rubella"
+    },
+    {
+      "name": "07",
+      "description": "Mumps"
+    },
+    {
+      "name": "08",
+      "description": "Hep B, adolescent or pediatric"
+    },
+    {
+      "name": "09",
+      "description": "Td (Adult)"
+    },
+    {
+      "name": "10",
+      "description": "IPV"
+    },
+    {
+      "name": "11",
+      "description": "Pertussis"
+    },
+    {
+      "name": "12",
+      "description": "Diphtheria antitoxin"
+    },
+    {
+      "name": "13",
+      "description": "TIG"
+    },
+    {
+      "name": "14",
+      "description": "IG, NOS"
+    },
+    {
+      "name": "15",
+      "description": "Influenza—split (incl. purified surface antigen)"
+    },
+    {
+      "name": "16",
+      "description": "Influenza—whole"
+    },
+    {
+      "name": "17",
+      "description": "Hib,  NOS"
+    },
+    {
+      "name": "18",
+      "description": "Rabies, intramuscular injection"
+    },
+    {
+      "name": "19",
+      "description": "BCG"
+    },
+    {
+      "name": "20",
+      "description": "DTaP"
+    },
+    {
+      "name": "21",
+      "description": "Varicella"
+    },
+    {
+      "name": "22",
+      "description": "DTP-Hib"
+    },
+    {
+      "name": "23",
+      "description": "Plague"
+    },
+    {
+      "name": "24",
+      "description": "Anthrax"
+    },
+    {
+      "name": "25",
+      "description": "Typhoid—oral"
+    },
+    {
+      "name": "26",
+      "description": "Cholera"
+    },
+    {
+      "name": "27",
+      "description": "Botulinum antitoxin"
+    },
+    {
+      "name": "28",
+      "description": "DT(pediatric)"
+    },
+    {
+      "name": "29",
+      "description": "CMVIG"
+    },
+    {
+      "name": "30",
+      "description": "HBIG"
+    },
+    {
+      "name": "31",
+      "description": "Hep A, pediatric, NOS"
+    },
+    {
+      "name": "32",
+      "description": "Meningococcal"
+    },
+    {
+      "name": "33",
+      "description": "Pneumococcal"
+    },
+    {
+      "name": "34",
+      "description": "RIG"
+    },
+    {
+      "name": "35",
+      "description": "Tetanus toxoid"
+    },
+    {
+      "name": "36",
+      "description": "VZIG"
+    },
+    {
+      "name": "37",
+      "description": "Yellow fever"
+    },
+    {
+      "name": "38",
+      "description": "Rubella/Mumps"
+    },
+    {
+      "name": "39",
+      "description": "Japanese encephalitis"
+    },
+    {
+      "name": "40",
+      "description": "Rabies, intradermal injection"
+    },
+    {
+      "name": "41",
+      "description": "Typhoid—parenteral"
+    },
+    {
+      "name": "42",
+      "description": "Hep B, adolescent/high risk infant"
+    },
+    {
+      "name": "43",
+      "description": "Hep B, adult"
+    },
+    {
+      "name": "44",
+      "description": "Hep B, dialysis"
+    },
+    {
+      "name": "45",
+      "description": "Hep B,  NOS"
+    },
+    {
+      "name": "46",
+      "description": "Hib (PRP-D)"
+    },
+    {
+      "name": "47",
+      "description": "Hib (HbOC)"
+    },
+    {
+      "name": "48",
+      "description": "Hib (PRP-T)"
+    },
+    {
+      "name": "49",
+      "description": "Hib (PRP-OMP)"
+    },
+    {
+      "name": "50",
+      "description": "DtaP-Hib"
+    },
+    {
+      "name": "51",
+      "description": "Hib-Hep B"
+    },
+    {
+      "name": "52",
+      "description": "Hep A - adult"
+    },
+    {
+      "name": "53",
+      "description": "Typhoid, parenteral, AKD (U.S. military)"
+    },
+    {
+      "name": "54",
+      "description": "Adenovirus, type 4"
+    },
+    {
+      "name": "55",
+      "description": "Adenovirus, type 7"
+    },
+    {
+      "name": "56",
+      "description": "Dengue fever"
+    },
+    {
+      "name": "57",
+      "description": "Hantavirus"
+    },
+    {
+      "name": "58",
+      "description": "Hep C"
+    },
+    {
+      "name": "59",
+      "description": "Hep E"
+    },
+    {
+      "name": "60",
+      "description": "Herpes simplex 2"
+    },
+    {
+      "name": "61",
+      "description": "HIV"
+    },
+    {
+      "name": "62",
+      "description": "HPV"
+    },
+    {
+      "name": "63",
+      "description": "Junin virus"
+    },
+    {
+      "name": "64",
+      "description": "Leishmaniasis"
+    },
+    {
+      "name": "65",
+      "description": "Leprosy"
+    },
+    {
+      "name": "66",
+      "description": "Lyme disease"
+    },
+    {
+      "name": "67",
+      "description": "Malaria"
+    },
+    {
+      "name": "68",
+      "description": "Melanoma"
+    },
+    {
+      "name": "69",
+      "description": "Parainfluenza-3"
+    },
+    {
+      "name": "70",
+      "description": "Q fever"
+    },
+    {
+      "name": "71",
+      "description": "RSV-IGIV"
+    },
+    {
+      "name": "72",
+      "description": "Rheumatic fever"
+    },
+    {
+      "name": "73",
+      "description": "Rift Valley fever"
+    },
+    {
+      "name": "74",
+      "description": "Rotavirus"
+    },
+    {
+      "name": "75",
+      "description": "Smallpox"
+    },
+    {
+      "name": "76",
+      "description": "Staphylococcus bacterio lysate"
+    },
+    {
+      "name": "77",
+      "description": "Tick-borne encephalitis"
+    },
+    {
+      "name": "78",
+      "description": "Tularemia vaccine"
+    },
+    {
+      "name": "79",
+      "description": "Vaccinia immune globulin"
+    },
+    {
+      "name": "80",
+      "description": "VEE, live"
+    },
+    {
+      "name": "81",
+      "description": "VEE, inactivated"
+    },
+    {
+      "name": "82",
+      "description": "Adenovirus, NOS"
+    },
+    {
+      "name": "83",
+      "description": "Hep A, ped/adol, 2 dose"
+    },
+    {
+      "name": "84",
+      "description": "Hep A, ped/adol, 3 dose"
+    },
+    {
+      "name": "85",
+      "description": "Hep A, NOS"
+    },
+    {
+      "name": "86",
+      "description": "IG"
+    },
+    {
+      "name": "87",
+      "description": "IGIV"
+    },
+    {
+      "name": "88",
+      "description": "Influenza, NOS"
+    },
+    {
+      "name": "89",
+      "description": "Polio, NOS"
+    },
+    {
+      "name": "90",
+      "description": "Rabies, NOS"
+    },
+    {
+      "name": "91",
+      "description": "Typhoid, NOS"
+    },
+    {
+      "name": "92",
+      "description": "VEE, NOS"
+    }
+  ]
+}

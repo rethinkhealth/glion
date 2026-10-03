@@ -1,0 +1,20 @@
+{
+  "id": "MOP",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "money or percentage",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "money or percentage indicator",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "money or percentage quantity",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

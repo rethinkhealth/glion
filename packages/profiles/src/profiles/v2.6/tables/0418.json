@@ -1,0 +1,23 @@
+{
+  "id": "0418",
+  "description": "Procedure Priority",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "...",
+      "description": ""
+    },
+    {
+      "name": "0",
+      "description": "the admitting procedure"
+    },
+    {
+      "name": "1",
+      "description": "the primary procedure"
+    },
+    {
+      "name": "2",
+      "description": "for ranked secondary procedures"
+    }
+  ]
+}

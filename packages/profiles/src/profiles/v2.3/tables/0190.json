@@ -1,0 +1,35 @@
+{
+  "id": "0190",
+  "description": "Address Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Business"
+    },
+    {
+      "name": "C",
+      "description": "Current or Temporary"
+    },
+    {
+      "name": "F",
+      "description": "County of Origin"
+    },
+    {
+      "name": "H",
+      "description": "Home"
+    },
+    {
+      "name": "M",
+      "description": "Mailing"
+    },
+    {
+      "name": "O",
+      "description": "Office"
+    },
+    {
+      "name": "P",
+      "description": "Permanent"
+    }
+  ]
+}

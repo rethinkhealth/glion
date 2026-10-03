@@ -1,0 +1,24 @@
+{
+  "id": "v2-0170",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0170",
+  "oid": "2.16.840.1.113883.18.88",
+  "name": "DerivedSpecimen",
+  "title": "derivedSpecimen",
+  "codes": [
+    {
+      "code": "C",
+      "display": "Child Observation",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "Not Applicable",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Parent Observation",
+      "status": "active"
+    }
+  ]
+}

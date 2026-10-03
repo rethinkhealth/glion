@@ -1,0 +1,35 @@
+{
+  "id": "0325",
+  "description": "Location Relationship ID",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ALI",
+      "description": "Location alias(es)"
+    },
+    {
+      "name": "DTY",
+      "description": "Nearest Dietary"
+    },
+    {
+      "name": "LAB",
+      "description": "Nearest Lab"
+    },
+    {
+      "name": "LB2",
+      "description": "Second Lab"
+    },
+    {
+      "name": "PAR",
+      "description": "Parent location"
+    },
+    {
+      "name": "RX",
+      "description": "Nearest Pharmacy"
+    },
+    {
+      "name": "RX2",
+      "description": "Second Pharmacy"
+    }
+  ]
+}

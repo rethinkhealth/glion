@@ -1,0 +1,24 @@
+{
+  "id": "v2-0159",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0159",
+  "oid": "2.16.840.1.113883.18.77",
+  "name": "DietCodeSpecificationType",
+  "title": "dietCodeSpecificationType",
+  "codes": [
+    {
+      "code": "D",
+      "display": "Diet",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Preference",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "Supplement",
+      "status": "active"
+    }
+  ]
+}

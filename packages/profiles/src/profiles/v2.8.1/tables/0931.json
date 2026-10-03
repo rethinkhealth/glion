@@ -1,0 +1,15 @@
+{
+  "id": "0931",
+  "description": "Temperature Units",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "Cel",
+      "description": "Degrees Celsius"
+    },
+    {
+      "name": "degF",
+      "description": "Degrees Fahrenheit"
+    }
+  ]
+}

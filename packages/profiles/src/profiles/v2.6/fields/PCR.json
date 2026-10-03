@@ -1,0 +1,246 @@
+{
+  "segmentId": "PCR",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PCR-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Implicated Product",
+      "item": "1098"
+    },
+    {
+      "sequence": 2,
+      "id": "PCR-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 1,
+      "table": "HL70249",
+      "name": "Generic Product",
+      "item": "1099"
+    },
+    {
+      "sequence": 3,
+      "id": "PCR-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Product Class",
+      "item": "1100"
+    },
+    {
+      "sequence": 4,
+      "id": "PCR-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 500,
+      "name": "Total Duration Of Therapy",
+      "item": "1101"
+    },
+    {
+      "sequence": 5,
+      "id": "PCR-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Product Manufacture Date",
+      "item": "1102"
+    },
+    {
+      "sequence": 6,
+      "id": "PCR-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Product Expiration Date",
+      "item": "1103"
+    },
+    {
+      "sequence": 7,
+      "id": "PCR-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Product Implantation Date",
+      "item": "1104"
+    },
+    {
+      "sequence": 8,
+      "id": "PCR-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Product Explantation Date",
+      "item": "1105"
+    },
+    {
+      "sequence": 9,
+      "id": "PCR-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 8,
+      "table": "HL70244",
+      "name": "Single Use Device",
+      "item": "1106"
+    },
+    {
+      "sequence": 10,
+      "id": "PCR-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Indication For Product Use",
+      "item": "1107"
+    },
+    {
+      "sequence": 11,
+      "id": "PCR-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 8,
+      "table": "HL70245",
+      "name": "Product Problem",
+      "item": "1108"
+    },
+    {
+      "sequence": 12,
+      "id": "PCR-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 199,
+      "name": "Product Serial/Lot Number",
+      "item": "1109"
+    },
+    {
+      "sequence": 13,
+      "id": "PCR-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 1,
+      "table": "HL70246",
+      "name": "Product Available For Inspection",
+      "item": "1110"
+    },
+    {
+      "sequence": 14,
+      "id": "PCR-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Product Evaluation Performed",
+      "item": "1111"
+    },
+    {
+      "sequence": 15,
+      "id": "PCR-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "table": "HL70247",
+      "name": "Product Evaluation Status",
+      "item": "1112"
+    },
+    {
+      "sequence": 16,
+      "id": "PCR-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Product Evaluation Results",
+      "item": "1113"
+    },
+    {
+      "sequence": 17,
+      "id": "PCR-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 8,
+      "table": "HL70248",
+      "name": "Evaluated Product Source",
+      "item": "1114"
+    },
+    {
+      "sequence": 18,
+      "id": "PCR-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Date Product Returned To Manufacturer",
+      "item": "1115"
+    },
+    {
+      "sequence": 19,
+      "id": "PCR-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70242",
+      "name": "Device Operator Qualifications",
+      "item": "1116"
+    },
+    {
+      "sequence": 20,
+      "id": "PCR-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70250",
+      "name": "Relatedness Assessment",
+      "item": "1117"
+    },
+    {
+      "sequence": 21,
+      "id": "PCR-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70251",
+      "name": "Action Taken In Response To The Event",
+      "item": "1118"
+    },
+    {
+      "sequence": 22,
+      "id": "PCR-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70252",
+      "name": "Event Causality Observations",
+      "item": "1119"
+    },
+    {
+      "sequence": 23,
+      "id": "PCR-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70253",
+      "name": "Indirect Exposure Mechanism",
+      "item": "1120"
+    }
+  ]
+}

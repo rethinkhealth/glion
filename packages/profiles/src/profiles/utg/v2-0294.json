@@ -1,0 +1,99 @@
+{
+  "id": "v2-0294",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0294",
+  "oid": "2.16.840.1.113883.18.183",
+  "name": "TimeSelectionCriteriaParameterClass",
+  "title": "timeSelectionCriteriaParameterClass",
+  "codes": [
+    {
+      "code": "Fri",
+      "display": "An indicator that Friday is or is not preferred for the day on which the appointment will occur.",
+      "status": "active"
+    },
+    {
+      "code": "FRI",
+      "display": "An indicator that Friday is or is not preferred for the day on which the appointment will occur.  OK =  Preferred appointment day NO = Day is not preferred",
+      "status": "active"
+    },
+    {
+      "code": "Mon",
+      "display": "An indicator that Monday is or is not preferred for the day on which the appointment will occur.",
+      "status": "active"
+    },
+    {
+      "code": "MON",
+      "display": "An indicator that Monday is or is not preferred for the day on which the appointment will occur.  OK = Preferred appointment day NO = Day is not preferred",
+      "status": "active"
+    },
+    {
+      "code": "Prefend",
+      "display": "An indicator that there is a preferred end time for the appointment request, service or resource.",
+      "status": "active"
+    },
+    {
+      "code": "PREFEND",
+      "display": "The preferred end time for the appointment request, service or resource.  Any legal time specification in the format HHMM, using 24-hour clock notation",
+      "status": "active"
+    },
+    {
+      "code": "Prefstart",
+      "display": "An indicator that there is a preferred start time for the appointment request, service or resource.",
+      "status": "active"
+    },
+    {
+      "code": "PREFSTART",
+      "display": "The preferred start time for the appointment request, service or resource.   Any legal time specification in the format HHMM, using 24-hour clock notation",
+      "status": "active"
+    },
+    {
+      "code": "Sat",
+      "display": "An indicator that Saturday is or is not preferred for the day on which the appointment will occur.",
+      "status": "active"
+    },
+    {
+      "code": "SAT",
+      "display": "An indicator that Saturday is or is not preferred for the day on which the appointment will occur.  OK =  Preferred appointment day NO = Day is not preferred",
+      "status": "active"
+    },
+    {
+      "code": "Sun",
+      "display": "An indicator that Sunday is or is not preferred for the day on which the appointment will occur.",
+      "status": "active"
+    },
+    {
+      "code": "SUN",
+      "display": "An indicator that Sunday is or is not preferred for the day on which the appointment will occur.  OK = Preferred appointment day NO = Day is not preferred",
+      "status": "active"
+    },
+    {
+      "code": "Thu",
+      "display": "An indicator that Thursday is or is not preferred for the day on which the appointment will occur.",
+      "status": "active"
+    },
+    {
+      "code": "THU",
+      "display": "An indicator that Thursday is or is not preferred for the day on which the appointment will occur.  OK = Preferred appointment day NO = Day is not preferred",
+      "status": "active"
+    },
+    {
+      "code": "Tue",
+      "display": "An indicator that Tuesday is or is not preferred for the day on which the appointment will occur.",
+      "status": "active"
+    },
+    {
+      "code": "TUE",
+      "display": "An indicator that Tuesday is or is not preferred for the day on which the appointment will occur.  OK = Preferred appointment day NO = Day is not preferred",
+      "status": "active"
+    },
+    {
+      "code": "Wed",
+      "display": "An indicator that Wednesday is or is not preferred for the day on which the appointment will occur.",
+      "status": "active"
+    },
+    {
+      "code": "WED",
+      "display": "An indicator that Wednesday is or is not preferred for the day on which the appointment will occur. OK = Preferred appointment day NO = Day is not preferred",
+      "status": "active"
+    }
+  ]
+}

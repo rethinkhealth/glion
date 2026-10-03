@@ -1,0 +1,19 @@
+{
+  "id": "0159",
+  "description": "Diet code specification type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Diet"
+    },
+    {
+      "name": "P",
+      "description": "Preference"
+    },
+    {
+      "name": "S",
+      "description": "Supplement"
+    }
+  ]
+}

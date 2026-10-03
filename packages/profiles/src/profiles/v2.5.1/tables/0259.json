@@ -1,0 +1,111 @@
+{
+  "id": "0259",
+  "description": "Modality",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AS",
+      "description": "Angioscopy"
+    },
+    {
+      "name": "BS",
+      "description": "Biomagnetic imaging"
+    },
+    {
+      "name": "CD",
+      "description": "Color flow Doppler"
+    },
+    {
+      "name": "CP",
+      "description": "Colposcopy"
+    },
+    {
+      "name": "CR",
+      "description": "Computed radiography"
+    },
+    {
+      "name": "CS",
+      "description": "Cystoscopy"
+    },
+    {
+      "name": "CT",
+      "description": "Computed tomography"
+    },
+    {
+      "name": "DD",
+      "description": "Duplex Doppler"
+    },
+    {
+      "name": "DG",
+      "description": "Diapanography"
+    },
+    {
+      "name": "DM",
+      "description": "Digital microscopy"
+    },
+    {
+      "name": "EC",
+      "description": "Echocardiography"
+    },
+    {
+      "name": "ES",
+      "description": "Endoscopy"
+    },
+    {
+      "name": "FA",
+      "description": "Fluorescein angiography"
+    },
+    {
+      "name": "FS",
+      "description": "Fundoscopy"
+    },
+    {
+      "name": "LP",
+      "description": "Laparoscopy"
+    },
+    {
+      "name": "LS",
+      "description": "Laser surface scan"
+    },
+    {
+      "name": "MA",
+      "description": "Magnetic resonance angiography"
+    },
+    {
+      "name": "MS",
+      "description": "Magnetic resonance spectroscopy"
+    },
+    {
+      "name": "NM",
+      "description": "Nuclear Medicine (radioisotope study)"
+    },
+    {
+      "name": "OT",
+      "description": "Other"
+    },
+    {
+      "name": "PT",
+      "description": "Positron emission tomography (PET)"
+    },
+    {
+      "name": "RF",
+      "description": "Radio fluoroscopy"
+    },
+    {
+      "name": "ST",
+      "description": "Single photon emission computed tomography (SPECT)"
+    },
+    {
+      "name": "TG",
+      "description": "Thermography"
+    },
+    {
+      "name": "US",
+      "description": "Ultrasound"
+    },
+    {
+      "name": "XA",
+      "description": "X-ray Angiography"
+    }
+  ]
+}

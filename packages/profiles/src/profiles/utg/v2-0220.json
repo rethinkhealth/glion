@@ -1,0 +1,39 @@
+{
+  "id": "v2-0220",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0220",
+  "oid": "2.16.840.1.113883.18.122",
+  "name": "LivingArrangement",
+  "title": "livingArrangement",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Alone",
+      "status": "active"
+    },
+    {
+      "code": "F",
+      "display": "Family",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Institution",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Relative",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "Spouse Only",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    }
+  ]
+}

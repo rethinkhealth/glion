@@ -1,0 +1,26 @@
+{
+  "id": "RMC",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "Room Coverage",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "room type",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "amount type",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "coverage amount",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

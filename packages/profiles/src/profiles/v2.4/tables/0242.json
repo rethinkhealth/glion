@@ -1,0 +1,35 @@
+{
+  "id": "0242",
+  "description": "Primary observer's qualification",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Health care consumer/patient"
+    },
+    {
+      "name": "H",
+      "description": "Other health professional"
+    },
+    {
+      "name": "L",
+      "description": "Lawyer/attorney"
+    },
+    {
+      "name": "M",
+      "description": "Mid-level professional (nurse, nurse practitioner, physician's assistant)"
+    },
+    {
+      "name": "O",
+      "description": "Other non-health professional"
+    },
+    {
+      "name": "P",
+      "description": "Physician (osteopath, homeopath)"
+    },
+    {
+      "name": "R",
+      "description": "Pharmacist"
+    }
+  ]
+}

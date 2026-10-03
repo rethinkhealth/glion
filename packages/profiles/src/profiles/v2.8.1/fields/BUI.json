@@ -1,0 +1,118 @@
+{
+  "segmentId": "BUI",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "BUI-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - BUI",
+      "item": "3373"
+    },
+    {
+      "sequence": 2,
+      "id": "BUI-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Blood Unit Identifier",
+      "item": "3374"
+    },
+    {
+      "sequence": 3,
+      "id": "BUI-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70566",
+      "name": "Blood Unit Type",
+      "item": "3375"
+    },
+    {
+      "sequence": 4,
+      "id": "BUI-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Blood Unit Weight",
+      "item": "3376"
+    },
+    {
+      "sequence": 5,
+      "id": "BUI-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70929",
+      "name": "Weight Units",
+      "item": "3377"
+    },
+    {
+      "sequence": 6,
+      "id": "BUI-6",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Blood Unit Volume",
+      "item": "3378"
+    },
+    {
+      "sequence": 7,
+      "id": "BUI-7",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70930",
+      "name": "Volume Units",
+      "item": "3379"
+    },
+    {
+      "sequence": 8,
+      "id": "BUI-8",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Container Catalog Number",
+      "item": "3380"
+    },
+    {
+      "sequence": 9,
+      "id": "BUI-9",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Container Lot Number",
+      "item": "3381"
+    },
+    {
+      "sequence": 10,
+      "id": "BUI-10",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XON",
+      "name": "Container Manufacturer",
+      "item": "3382"
+    },
+    {
+      "sequence": 11,
+      "id": "BUI-11",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NR",
+      "name": "Transport Temperature",
+      "item": "3383"
+    },
+    {
+      "sequence": 12,
+      "id": "BUI-12",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70931",
+      "name": "Transport Temperature Units",
+      "item": "3384"
+    }
+  ]
+}

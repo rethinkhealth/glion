@@ -1,0 +1,15 @@
+{
+  "id": "0011",
+  "description": "CHARGING SYSTEM",
+  "type": "user",
+  "codes": [
+    {
+      "name": "R",
+      "description": "System that received and processed the order"
+    },
+    {
+      "name": "S",
+      "description": "System that sent the order"
+    }
+  ]
+}

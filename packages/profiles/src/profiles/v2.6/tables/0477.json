@@ -1,0 +1,31 @@
+{
+  "id": "0477",
+  "description": "Controlled Substance Schedule*",
+  "type": "user",
+  "codes": [
+    {
+      "name": "I",
+      "description": "Schedule I"
+    },
+    {
+      "name": "II",
+      "description": "Schedule II"
+    },
+    {
+      "name": "III",
+      "description": "Schedule III"
+    },
+    {
+      "name": "IV",
+      "description": "Schedule IV"
+    },
+    {
+      "name": "V",
+      "description": "Schedule V"
+    },
+    {
+      "name": "VI",
+      "description": "Schedule VI"
+    }
+  ]
+}

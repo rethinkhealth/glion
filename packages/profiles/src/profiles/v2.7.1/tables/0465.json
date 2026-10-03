@@ -1,0 +1,19 @@
+{
+  "id": "0465",
+  "description": "Name/Address Representation",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Alphabetic (i.e., Default or some single-byte)"
+    },
+    {
+      "name": "I",
+      "description": "Ideographic (i.e., Kanji)"
+    },
+    {
+      "name": "P",
+      "description": "Phonetic (i.e., ASCII, Katakana, Hiragana, etc.)"
+    }
+  ]
+}

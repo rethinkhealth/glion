@@ -1,0 +1,23 @@
+{
+  "id": "0207",
+  "description": "Processing Mode",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Archive"
+    },
+    {
+      "name": "I",
+      "description": "Initial Load"
+    },
+    {
+      "name": "Not present",
+      "description": "Not Present (the default, meaning current processing)"
+    },
+    {
+      "name": "R",
+      "description": "Restore from Archive"
+    }
+  ]
+}

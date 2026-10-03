@@ -1,0 +1,19 @@
+{
+  "id": "0277",
+  "description": "Appointment type codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "Complete",
+      "description": "A request to add a completed appointment, used to maintain records of completed appointments that did not appear in the schedule (e.g., STAT, walk-in, etc.)"
+    },
+    {
+      "name": "Normal",
+      "description": "Routine schedule request type - default if not valued"
+    },
+    {
+      "name": "Tentative",
+      "description": "A request for a tentative (e.g., \"penciled in\"\") appointment\""
+    }
+  ]
+}

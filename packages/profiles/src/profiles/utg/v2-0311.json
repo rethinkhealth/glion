@@ -1,0 +1,29 @@
+{
+  "id": "v2-0311",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0311",
+  "oid": "2.16.840.1.113883.18.189",
+  "name": "JobStatus",
+  "title": "jobStatus",
+  "codes": [
+    {
+      "code": "O",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Permanent",
+      "status": "active"
+    },
+    {
+      "code": "T",
+      "display": "Temporary",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    }
+  ]
+}

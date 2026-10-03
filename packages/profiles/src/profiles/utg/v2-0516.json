@@ -1,0 +1,29 @@
+{
+  "id": "v2-0516",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0516",
+  "oid": "2.16.840.1.113883.18.337",
+  "name": "ErrorSeverity",
+  "title": "errorSeverity",
+  "codes": [
+    {
+      "code": "E",
+      "display": "Error",
+      "status": "active"
+    },
+    {
+      "code": "F",
+      "display": "Fatal Error",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Information",
+      "status": "active"
+    },
+    {
+      "code": "W",
+      "display": "Warning",
+      "status": "active"
+    }
+  ]
+}

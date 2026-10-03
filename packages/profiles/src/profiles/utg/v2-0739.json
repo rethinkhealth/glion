@@ -1,0 +1,24 @@
+{
+  "id": "v2-0739",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0739",
+  "oid": "2.16.840.1.113883.18.394",
+  "name": "DrgStatusPatient",
+  "title": "drgStatusPatient",
+  "codes": [
+    {
+      "code": "1",
+      "display": "Normal length of stay",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Short length of stay",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Long length of stay",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "0202",
+  "description": "Telecommunication Equipment Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "BP",
+      "description": "Beeper"
+    },
+    {
+      "name": "CP",
+      "description": "Cellular or Mobile Phone"
+    },
+    {
+      "name": "FX",
+      "description": "Fax"
+    },
+    {
+      "name": "Internet",
+      "description": "Internet Address"
+    },
+    {
+      "name": "MD",
+      "description": "Modem"
+    },
+    {
+      "name": "PH",
+      "description": "Telephone"
+    },
+    {
+      "name": "SAT",
+      "description": "Satellite Phone"
+    },
+    {
+      "name": "TDD",
+      "description": "Telecommunications Device for the Deaf"
+    },
+    {
+      "name": "TTY",
+      "description": "Teletypewriter"
+    },
+    {
+      "name": "X.400",
+      "description": "X.400 email address"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "v2-0283",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0283",
+  "oid": "2.16.840.1.113883.18.176",
+  "name": "ReferralStatus",
+  "title": "referralStatus",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Accepted",
+      "status": "active"
+    },
+    {
+      "code": "E",
+      "display": "Expired",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Pending",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Rejected",
+      "status": "active"
+    }
+  ]
+}

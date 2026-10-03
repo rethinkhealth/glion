@@ -1,0 +1,54 @@
+{
+  "id": "v2-0240",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0240",
+  "oid": "2.16.840.1.113883.18.139",
+  "name": "EventConsequence",
+  "title": "eventConsequence",
+  "codes": [
+    {
+      "code": "C",
+      "display": "Congenital anomaly/birth defect",
+      "status": "active"
+    },
+    {
+      "code": "D",
+      "display": "Death",
+      "status": "active"
+    },
+    {
+      "code": "H",
+      "display": "Caused hospitalized",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Incapacity which is significant, persistent or permanent",
+      "status": "active"
+    },
+    {
+      "code": "J",
+      "display": "Disability which is significant, persistent or permanent",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Life threatening",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Prolonged hospitalization",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Required intervention to prevent permanent impairment/damage",
+      "status": "active"
+    }
+  ]
+}

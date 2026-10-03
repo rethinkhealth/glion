@@ -1,0 +1,64 @@
+{
+  "id": "v2-0252",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0252",
+  "oid": "2.16.840.1.113883.18.147",
+  "name": "CausalityObservations",
+  "title": "causalityObservations",
+  "codes": [
+    {
+      "code": "AW",
+      "display": "Abatement of event after product withdrawn",
+      "status": "active"
+    },
+    {
+      "code": "BE",
+      "display": "Event recurred after product reintroduced",
+      "status": "active"
+    },
+    {
+      "code": "DR",
+      "display": "Dose response observed",
+      "status": "active"
+    },
+    {
+      "code": "EX",
+      "display": "Alternative explanations for the event available",
+      "status": "active"
+    },
+    {
+      "code": "IN",
+      "display": "Event occurred after product introduced",
+      "status": "active"
+    },
+    {
+      "code": "LI",
+      "display": "Literature reports association of product with event",
+      "status": "active"
+    },
+    {
+      "code": "OE",
+      "display": "Occurrence of event was confirmed by objective evidence",
+      "status": "active"
+    },
+    {
+      "code": "OT",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "PL",
+      "display": "Effect observed when patient receives placebo",
+      "status": "active"
+    },
+    {
+      "code": "SE",
+      "display": "Similar events in past for this patient",
+      "status": "active"
+    },
+    {
+      "code": "TC",
+      "display": "Toxic levels of product documented in blood or body fluids",
+      "status": "active"
+    }
+  ]
+}

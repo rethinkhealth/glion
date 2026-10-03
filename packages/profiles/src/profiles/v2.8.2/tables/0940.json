@@ -1,0 +1,23 @@
+{
+  "id": "0940",
+  "description": "Limitation Type Codes",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "FLDP",
+      "description": "Frequency Limited Diagnostics Procedure"
+    },
+    {
+      "name": "LCP",
+      "description": "Limited Coverage Policy"
+    },
+    {
+      "name": "NFDA",
+      "description": "Non-FDA Approved Diagnositic Procedure"
+    },
+    {
+      "name": "NT",
+      "description": "New Test - Limited Diagnostic History"
+    }
+  ]
+}

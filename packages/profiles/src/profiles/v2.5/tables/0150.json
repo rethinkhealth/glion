@@ -1,0 +1,23 @@
+{
+  "id": "0150",
+  "description": "Certification patient type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ER",
+      "description": "Emergency"
+    },
+    {
+      "name": "IPE",
+      "description": "Inpatient elective"
+    },
+    {
+      "name": "OPE",
+      "description": "Outpatient elective"
+    },
+    {
+      "name": "UR",
+      "description": "Urgent"
+    }
+  ]
+}

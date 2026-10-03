@@ -1,0 +1,47 @@
+{
+  "id": "0016",
+  "description": "ISOLATION",
+  "type": "user",
+  "codes": [
+    {
+      "name": "0",
+      "description": "Antibiotic Resistance Precautions"
+    },
+    {
+      "name": "1",
+      "description": "Blood and Needle Precautions"
+    },
+    {
+      "name": "2",
+      "description": "Enteric Precautions"
+    },
+    {
+      "name": "3",
+      "description": "Neutropenic Precautions"
+    },
+    {
+      "name": "4",
+      "description": "Pregnant Women Precautions"
+    },
+    {
+      "name": "5",
+      "description": "Respiratory Isolation"
+    },
+    {
+      "name": "6",
+      "description": "Secretion / Excretion Precautions"
+    },
+    {
+      "name": "7",
+      "description": "Strict Isolation"
+    },
+    {
+      "name": "8",
+      "description": "Wound and skin Precautions"
+    },
+    {
+      "name": "9",
+      "description": "Precautions"
+    }
+  ]
+}

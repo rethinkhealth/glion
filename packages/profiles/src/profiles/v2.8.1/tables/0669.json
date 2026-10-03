@@ -1,0 +1,23 @@
+{
+  "id": "0669",
+  "description": "Load Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "LCC",
+      "description": "Load is Complete"
+    },
+    {
+      "name": "LCN",
+      "description": "Load Canceled"
+    },
+    {
+      "name": "LCP",
+      "description": "Load In Process"
+    },
+    {
+      "name": "LLD",
+      "description": "Building a Load"
+    }
+  ]
+}

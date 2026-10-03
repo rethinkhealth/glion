@@ -1,0 +1,15 @@
+{
+  "id": "0093",
+  "description": "Release information",
+  "type": "user",
+  "codes": [
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

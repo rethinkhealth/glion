@@ -1,0 +1,32 @@
+{
+  "id": "SPD",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Specialty Description",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Specialty Name",
+      "datatypeId": "ST",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Governing Board",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Eligible or Certified",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Date of Certification",
+      "datatypeId": "DT",
+      "required": false
+    }
+  ]
+}

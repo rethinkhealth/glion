@@ -1,0 +1,136 @@
+{
+  "segmentId": "AIG",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "AIG-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - AIG",
+      "item": "896"
+    },
+    {
+      "sequence": 2,
+      "id": "AIG-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70206",
+      "name": "Segment Action Code",
+      "item": "763"
+    },
+    {
+      "sequence": 3,
+      "id": "AIG-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Resource ID",
+      "item": "897"
+    },
+    {
+      "sequence": 4,
+      "id": "AIG-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Resource Type",
+      "item": "898"
+    },
+    {
+      "sequence": 5,
+      "id": "AIG-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Resource Group",
+      "item": "899"
+    },
+    {
+      "sequence": 6,
+      "id": "AIG-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Resource Quantity",
+      "item": "900"
+    },
+    {
+      "sequence": 7,
+      "id": "AIG-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "name": "Resource Quantity Units",
+      "item": "901"
+    },
+    {
+      "sequence": 8,
+      "id": "AIG-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Start Date/Time",
+      "item": "1202"
+    },
+    {
+      "sequence": 9,
+      "id": "AIG-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Start Date/Time Offset",
+      "item": "891"
+    },
+    {
+      "sequence": 10,
+      "id": "AIG-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "name": "Start Date/Time Offset Units",
+      "item": "892"
+    },
+    {
+      "sequence": 11,
+      "id": "AIG-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Duration",
+      "item": "893"
+    },
+    {
+      "sequence": 12,
+      "id": "AIG-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "name": "Duration Units",
+      "item": "894"
+    },
+    {
+      "sequence": 13,
+      "id": "AIG-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70279",
+      "name": "Allow Substitution Code",
+      "item": "895"
+    },
+    {
+      "sequence": 14,
+      "id": "AIG-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70278",
+      "name": "Filler Status Code",
+      "item": "889"
+    }
+  ]
+}

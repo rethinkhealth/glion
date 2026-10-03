@@ -1,0 +1,19 @@
+{
+  "id": "0149",
+  "description": "DAY TYPE",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AP",
+      "description": "Approved"
+    },
+    {
+      "name": "DE",
+      "description": "Denied"
+    },
+    {
+      "name": "PE",
+      "description": "Pending"
+    }
+  ]
+}

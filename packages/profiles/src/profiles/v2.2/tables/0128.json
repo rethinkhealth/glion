@@ -1,0 +1,19 @@
+{
+  "id": "0128",
+  "description": "ALLERGY SEVERITY",
+  "type": "user",
+  "codes": [
+    {
+      "name": "MI",
+      "description": "Mild"
+    },
+    {
+      "name": "MO",
+      "description": "Moderate"
+    },
+    {
+      "name": "SV",
+      "description": "Severe"
+    }
+  ]
+}

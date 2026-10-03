@@ -1,0 +1,27 @@
+{
+  "id": "0250",
+  "description": "Relatedness assessment",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "H",
+      "description": "Highly probable"
+    },
+    {
+      "name": "I",
+      "description": "Improbable"
+    },
+    {
+      "name": "M",
+      "description": "Moderately probable"
+    },
+    {
+      "name": "N",
+      "description": "Not related"
+    },
+    {
+      "name": "S",
+      "description": "Somewhat probable"
+    }
+  ]
+}

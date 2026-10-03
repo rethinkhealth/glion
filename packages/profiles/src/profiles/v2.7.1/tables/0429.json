@@ -1,0 +1,55 @@
+{
+  "id": "0429",
+  "description": "Production Class Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "BR",
+      "description": "Breeding/genetic stock"
+    },
+    {
+      "name": "DA",
+      "description": "Dairy"
+    },
+    {
+      "name": "DR",
+      "description": "Draft"
+    },
+    {
+      "name": "DU",
+      "description": "Dual Purpose"
+    },
+    {
+      "name": "LY",
+      "description": "Layer, Includes Multiplier flocks"
+    },
+    {
+      "name": "MT",
+      "description": "Meat"
+    },
+    {
+      "name": "NA",
+      "description": "Not Applicable"
+    },
+    {
+      "name": "OT",
+      "description": "Other"
+    },
+    {
+      "name": "PL",
+      "description": "Pleasure"
+    },
+    {
+      "name": "RA",
+      "description": "Racing"
+    },
+    {
+      "name": "SH",
+      "description": "Show"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

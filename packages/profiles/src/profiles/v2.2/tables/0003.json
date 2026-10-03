@@ -1,0 +1,223 @@
+{
+  "id": "0003",
+  "description": "EVENT TYPE CODE",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A01",
+      "description": "Admit a patient"
+    },
+    {
+      "name": "A02",
+      "description": "Transfer a patient"
+    },
+    {
+      "name": "A03",
+      "description": "Discharge a patient"
+    },
+    {
+      "name": "A04",
+      "description": "Register a patient"
+    },
+    {
+      "name": "A05",
+      "description": "Pre-admit a Patient"
+    },
+    {
+      "name": "A06",
+      "description": "Transfer an outpatient to inpatient"
+    },
+    {
+      "name": "A07",
+      "description": "Transfer an inpatient to outpatient"
+    },
+    {
+      "name": "A08",
+      "description": "Update patient information"
+    },
+    {
+      "name": "A09",
+      "description": "Patient departing"
+    },
+    {
+      "name": "A10",
+      "description": "Patient arriving"
+    },
+    {
+      "name": "A11",
+      "description": "Cancel admit"
+    },
+    {
+      "name": "A12",
+      "description": "Cancel transfer"
+    },
+    {
+      "name": "A13",
+      "description": "Cancel discharge"
+    },
+    {
+      "name": "A14",
+      "description": "Pending admit"
+    },
+    {
+      "name": "A15",
+      "description": "Pending transfer"
+    },
+    {
+      "name": "A16",
+      "description": "Pending discharge"
+    },
+    {
+      "name": "A17",
+      "description": "Swap patients"
+    },
+    {
+      "name": "A18",
+      "description": "Merge patient information"
+    },
+    {
+      "name": "A19",
+      "description": "Patient query"
+    },
+    {
+      "name": "A20",
+      "description": "Bed Status Update"
+    },
+    {
+      "name": "A21",
+      "description": "Leave of absence - out (leaving)"
+    },
+    {
+      "name": "A22",
+      "description": "Leave of absence - in (returning)"
+    },
+    {
+      "name": "A23",
+      "description": "Delete a patient record"
+    },
+    {
+      "name": "A24",
+      "description": "Link patient information"
+    },
+    {
+      "name": "A25",
+      "description": "Cancel pending discharge"
+    },
+    {
+      "name": "A26",
+      "description": "Cancel pending transfer"
+    },
+    {
+      "name": "A27",
+      "description": "Cancel pending admit"
+    },
+    {
+      "name": "A28",
+      "description": "Add person information"
+    },
+    {
+      "name": "A29",
+      "description": "Delete person information"
+    },
+    {
+      "name": "A30",
+      "description": "Merge Patient information"
+    },
+    {
+      "name": "A31",
+      "description": "Update person information"
+    },
+    {
+      "name": "A32",
+      "description": "Cancel patient arriving"
+    },
+    {
+      "name": "A33",
+      "description": "Cancel patient departing"
+    },
+    {
+      "name": "A34",
+      "description": "Merge patient information - patient ID only"
+    },
+    {
+      "name": "A35",
+      "description": "Merge patient information - account number only"
+    },
+    {
+      "name": "A36",
+      "description": "Merge patient information - patient ID and account number"
+    },
+    {
+      "name": "A37",
+      "description": "Unlink patient information"
+    },
+    {
+      "name": "M01",
+      "description": "Master file not otherwise specified (for backwards compatibility only)"
+    },
+    {
+      "name": "M02",
+      "description": "Master file - Staff Practioner"
+    },
+    {
+      "name": "M03",
+      "description": "Master file - test / observation"
+    },
+    {
+      "name": "O01",
+      "description": "Order message"
+    },
+    {
+      "name": "O02",
+      "description": "Order response"
+    },
+    {
+      "name": "P01",
+      "description": "Add and Update Patient Accounts"
+    },
+    {
+      "name": "P02",
+      "description": "Purge Patient Accounts"
+    },
+    {
+      "name": "P03",
+      "description": "Post detail financial transaction"
+    },
+    {
+      "name": "P04",
+      "description": "Generate bill and accounts receivable statements"
+    },
+    {
+      "name": "Q01",
+      "description": "Immediate access"
+    },
+    {
+      "name": "Q02",
+      "description": "Deferred access"
+    },
+    {
+      "name": "Q03",
+      "description": "Deferred response to query"
+    },
+    {
+      "name": "Q05",
+      "description": "Unsolicited display update"
+    },
+    {
+      "name": "R01",
+      "description": "Unsolicited transmission of requested observation"
+    },
+    {
+      "name": "R02",
+      "description": "Query for results of observation"
+    },
+    {
+      "name": "R03",
+      "description": "Display-oriented results (query / unsolicited update)"
+    },
+    {
+      "name": "R04",
+      "description": "Response to query / transmission of requested observation"
+    }
+  ]
+}

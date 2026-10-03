@@ -1,0 +1,59 @@
+{
+  "id": "v2-0734",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0734",
+  "oid": "2.16.840.1.113883.18.393",
+  "name": "GrouperStatus",
+  "title": "grouperStatus",
+  "codes": [
+    {
+      "code": "0",
+      "display": "Normal grouping",
+      "status": "active"
+    },
+    {
+      "code": "1",
+      "display": "Invalid or missing primary diagnosis",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Diagnosis is not allowed to be primary",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Data does not fulfill DRG criteria",
+      "status": "active"
+    },
+    {
+      "code": "4",
+      "display": "Invalid age, admission date, date of birth or discharge date",
+      "status": "active"
+    },
+    {
+      "code": "5",
+      "display": "Invalid gender",
+      "status": "active"
+    },
+    {
+      "code": "6",
+      "display": "Invalid discharge status",
+      "status": "active"
+    },
+    {
+      "code": "7",
+      "display": "Invalid weight ad admission",
+      "status": "active"
+    },
+    {
+      "code": "8",
+      "display": "Invalid length of stay",
+      "status": "active"
+    },
+    {
+      "code": "9",
+      "display": "Invalid field &quot;same day&quot;",
+      "status": "active"
+    }
+  ]
+}

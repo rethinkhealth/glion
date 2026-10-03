@@ -1,0 +1,289 @@
+{
+  "id": "v2-0163",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0163",
+  "oid": "2.16.840.1.113883.18.81",
+  "name": "BodySite",
+  "title": "bodySite",
+  "codes": [
+    {
+      "code": "BE",
+      "display": "Bilateral Ears",
+      "status": "active"
+    },
+    {
+      "code": "BN",
+      "display": "Bilateral Nares",
+      "status": "active"
+    },
+    {
+      "code": "BU",
+      "display": "Buttock",
+      "status": "active"
+    },
+    {
+      "code": "CT",
+      "display": "Chest Tube",
+      "status": "active"
+    },
+    {
+      "code": "LA",
+      "display": "Left Arm",
+      "status": "active"
+    },
+    {
+      "code": "LAC",
+      "display": "Left Anterior Chest",
+      "status": "active"
+    },
+    {
+      "code": "LACF",
+      "display": "Left Antecubital Fossa",
+      "status": "active"
+    },
+    {
+      "code": "LD",
+      "display": "Left Deltoid",
+      "status": "active"
+    },
+    {
+      "code": "LE",
+      "display": "Left Ear",
+      "status": "active"
+    },
+    {
+      "code": "LEJ",
+      "display": "Left External Jugular",
+      "status": "active"
+    },
+    {
+      "code": "LF",
+      "display": "Left Foot",
+      "status": "active"
+    },
+    {
+      "code": "LG",
+      "display": "Left Gluteus Medius",
+      "status": "active"
+    },
+    {
+      "code": "LH",
+      "display": "Left Hand",
+      "status": "active"
+    },
+    {
+      "code": "LIJ",
+      "display": "Left Internal Jugular",
+      "status": "active"
+    },
+    {
+      "code": "LLAQ",
+      "display": "Left Lower Abd Quadrant",
+      "status": "active"
+    },
+    {
+      "code": "LLFA",
+      "display": "Left Lower Forearm",
+      "status": "active"
+    },
+    {
+      "code": "LMFA",
+      "display": "Left Mid Forearm",
+      "status": "active"
+    },
+    {
+      "code": "LN",
+      "display": "Left Naris",
+      "status": "active"
+    },
+    {
+      "code": "LNB",
+      "display": "Nebulized",
+      "status": "deprecated"
+    },
+    {
+      "code": "LPC",
+      "display": "Left Posterior Chest",
+      "status": "active"
+    },
+    {
+      "code": "LSC",
+      "display": "Left Subclavian",
+      "status": "active"
+    },
+    {
+      "code": "LT",
+      "display": "Left Thigh",
+      "status": "active"
+    },
+    {
+      "code": "LUA",
+      "display": "Left Upper Arm",
+      "status": "active"
+    },
+    {
+      "code": "LUAQ",
+      "display": "Left Upper Abd Quadrant",
+      "status": "active"
+    },
+    {
+      "code": "LUFA",
+      "display": "Left Upper Forearm",
+      "status": "active"
+    },
+    {
+      "code": "LV",
+      "display": "Left Vastus Lateralis",
+      "status": "deprecated"
+    },
+    {
+      "code": "LVG",
+      "display": "Left Ventragluteal",
+      "status": "active"
+    },
+    {
+      "code": "LVL",
+      "display": "Left Vastus Lateralis",
+      "status": "active"
+    },
+    {
+      "code": "NB",
+      "display": "Nebulized",
+      "status": "active"
+    },
+    {
+      "code": "OD",
+      "display": "Right Eye",
+      "status": "active"
+    },
+    {
+      "code": "OS",
+      "display": "Left Eye",
+      "status": "active"
+    },
+    {
+      "code": "OU",
+      "display": "Bilateral Eyes",
+      "status": "active"
+    },
+    {
+      "code": "PA",
+      "display": "Perianal",
+      "status": "active"
+    },
+    {
+      "code": "PERIN",
+      "display": "Perineal",
+      "status": "active"
+    },
+    {
+      "code": "RA",
+      "display": "Right Arm",
+      "status": "active"
+    },
+    {
+      "code": "RAC",
+      "display": "Right Anterior Chest",
+      "status": "active"
+    },
+    {
+      "code": "RACF",
+      "display": "Right Antecubital Fossa",
+      "status": "active"
+    },
+    {
+      "code": "RD",
+      "display": "Right Deltoid",
+      "status": "active"
+    },
+    {
+      "code": "RE",
+      "display": "Right Ear",
+      "status": "active"
+    },
+    {
+      "code": "REJ",
+      "display": "Right External Jugular",
+      "status": "active"
+    },
+    {
+      "code": "RF",
+      "display": "Right Foot",
+      "status": "active"
+    },
+    {
+      "code": "RG",
+      "display": "Right Gluteus Medius",
+      "status": "active"
+    },
+    {
+      "code": "RH",
+      "display": "Right Hand",
+      "status": "active"
+    },
+    {
+      "code": "RIJ",
+      "display": "Right Internal Jugular",
+      "status": "active"
+    },
+    {
+      "code": "RLAQ",
+      "display": "Rt Lower Abd Quadrant",
+      "status": "active"
+    },
+    {
+      "code": "RLFA",
+      "display": "Right Lower Forearm",
+      "status": "active"
+    },
+    {
+      "code": "RMFA",
+      "display": "Right Mid Forearm",
+      "status": "active"
+    },
+    {
+      "code": "RN",
+      "display": "Right Naris",
+      "status": "active"
+    },
+    {
+      "code": "RPC",
+      "display": "Right Posterior Chest",
+      "status": "active"
+    },
+    {
+      "code": "RSC",
+      "display": "Right Subclavian",
+      "status": "active"
+    },
+    {
+      "code": "RT",
+      "display": "Right Thigh",
+      "status": "active"
+    },
+    {
+      "code": "RUA",
+      "display": "Right Upper Arm",
+      "status": "active"
+    },
+    {
+      "code": "RUAQ",
+      "display": "Right Upper Abd Quadrant",
+      "status": "active"
+    },
+    {
+      "code": "RUFA",
+      "display": "Right Upper Forearm",
+      "status": "active"
+    },
+    {
+      "code": "RVG",
+      "display": "Right Ventragluteal",
+      "status": "active"
+    },
+    {
+      "code": "RVL",
+      "display": "Right Vastus Lateralis",
+      "status": "active"
+    }
+  ]
+}

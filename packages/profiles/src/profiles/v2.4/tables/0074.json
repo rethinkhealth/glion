@@ -1,0 +1,179 @@
+{
+  "id": "0074",
+  "description": "Diagnostic service section ID",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AU",
+      "description": "Audiology"
+    },
+    {
+      "name": "BG",
+      "description": "Blood Gases"
+    },
+    {
+      "name": "BLB",
+      "description": "Blood Bank"
+    },
+    {
+      "name": "CH",
+      "description": "Chemistry"
+    },
+    {
+      "name": "CP",
+      "description": "Cytopathology"
+    },
+    {
+      "name": "CT",
+      "description": "CAT Scan"
+    },
+    {
+      "name": "CTH",
+      "description": "Cardiac Catheterization"
+    },
+    {
+      "name": "CUS",
+      "description": "Cardiac Ultrasound"
+    },
+    {
+      "name": "EC",
+      "description": "Electrocardiac (e.g., EKG,  EEC, Holter)"
+    },
+    {
+      "name": "EN",
+      "description": "Electroneuro (EEG, EMG,EP,PSG)"
+    },
+    {
+      "name": "HM",
+      "description": "Hematology"
+    },
+    {
+      "name": "ICU",
+      "description": "Bedside ICU Monitoring"
+    },
+    {
+      "name": "IMG",
+      "description": "Diagnostic Imaging"
+    },
+    {
+      "name": "IMM",
+      "description": "Immunology"
+    },
+    {
+      "name": "LAB",
+      "description": "Laboratory"
+    },
+    {
+      "name": "MB",
+      "description": "Microbiology"
+    },
+    {
+      "name": "MCB",
+      "description": "Mycobacteriology"
+    },
+    {
+      "name": "MYC",
+      "description": "Mycology"
+    },
+    {
+      "name": "NMR",
+      "description": "Nuclear Magnetic Resonance"
+    },
+    {
+      "name": "NMS",
+      "description": "Nuclear Medicine Scan"
+    },
+    {
+      "name": "NRS",
+      "description": "Nursing Service Measures"
+    },
+    {
+      "name": "OSL",
+      "description": "Outside Lab"
+    },
+    {
+      "name": "OT",
+      "description": "Occupational Therapy"
+    },
+    {
+      "name": "OTH",
+      "description": "Other"
+    },
+    {
+      "name": "OUS",
+      "description": "OB Ultrasound"
+    },
+    {
+      "name": "PAR",
+      "description": "Parasitology"
+    },
+    {
+      "name": "PAT",
+      "description": "Pathology (gross & histopath, not surgical)"
+    },
+    {
+      "name": "PF",
+      "description": "Pulmonary function"
+    },
+    {
+      "name": "PHR",
+      "description": "Pharmacy"
+    },
+    {
+      "name": "PHY",
+      "description": "Physician (Hx. Dx, admission note, etc.)"
+    },
+    {
+      "name": "PT",
+      "description": "Physical Therapy"
+    },
+    {
+      "name": "RAD",
+      "description": "Radiology"
+    },
+    {
+      "name": "RC",
+      "description": "Respiratory Care (therapy)"
+    },
+    {
+      "name": "RT",
+      "description": "Radiation therapy"
+    },
+    {
+      "name": "RUS",
+      "description": "Radiology ultrasound"
+    },
+    {
+      "name": "RX",
+      "description": "Radiograph"
+    },
+    {
+      "name": "SP",
+      "description": "Surgical Pathology"
+    },
+    {
+      "name": "SR",
+      "description": "Serology"
+    },
+    {
+      "name": "TX",
+      "description": "Toxicology"
+    },
+    {
+      "name": "URN",
+      "description": "Urinalysis"
+    },
+    {
+      "name": "VR",
+      "description": "Virology"
+    },
+    {
+      "name": "VUS",
+      "description": "Vascular Ultrasound"
+    },
+    {
+      "name": "XRC",
+      "description": "Cineradiograph"
+    }
+  ]
+}

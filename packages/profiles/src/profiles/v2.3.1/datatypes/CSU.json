@@ -1,0 +1,50 @@
+{
+  "id": "CSU",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "channel sensitivity/units",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "channel sensitivity",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "unit of measure identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "unit of measure description",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "unit of measure coding system",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "alternate unit of measure identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "alternate unit of measure description",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "alternate unit of measure coding system",
+      "datatypeId": "IS",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "0371",
+  "description": "Additive",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "BOR",
+      "description": "Borate"
+    },
+    {
+      "name": "C32",
+      "description": "3.2%  Citrate"
+    },
+    {
+      "name": "C38",
+      "description": "3.8% Citrate"
+    },
+    {
+      "name": "EDTK",
+      "description": "Potassium/K EDTA"
+    },
+    {
+      "name": "EDTN",
+      "description": "Sodium/Na EDTA"
+    },
+    {
+      "name": "HCL6",
+      "description": "6N HCL"
+    },
+    {
+      "name": "HEPL",
+      "description": "Lithium/Li  Heparin"
+    },
+    {
+      "name": "HEPN",
+      "description": "Sodium/Na  Heparin"
+    }
+  ]
+}

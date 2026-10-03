@@ -1,0 +1,370 @@
+{
+  "segmentId": "OBR",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "OBR-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - Observation Request",
+      "item": "237"
+    },
+    {
+      "sequence": 2,
+      "id": "OBR-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 75,
+      "name": "Placer Order Number",
+      "item": "216"
+    },
+    {
+      "sequence": 3,
+      "id": "OBR-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 75,
+      "name": "Filler Order Number",
+      "item": "217"
+    },
+    {
+      "sequence": 4,
+      "id": "OBR-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 200,
+      "name": "Universal Service ID",
+      "item": "238"
+    },
+    {
+      "sequence": 5,
+      "id": "OBR-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "name": "Priority (not used)",
+      "item": "239"
+    },
+    {
+      "sequence": 6,
+      "id": "OBR-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Requested date / time (not used)",
+      "item": "240"
+    },
+    {
+      "sequence": 7,
+      "id": "OBR-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Observation date / time",
+      "item": "241"
+    },
+    {
+      "sequence": 8,
+      "id": "OBR-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Observation end date / time",
+      "item": "242"
+    },
+    {
+      "sequence": 9,
+      "id": "OBR-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 20,
+      "name": "Collection Volume",
+      "item": "243"
+    },
+    {
+      "sequence": 10,
+      "id": "OBR-10",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CN",
+      "maxLength": 60,
+      "name": "Collector Identifier",
+      "item": "244"
+    },
+    {
+      "sequence": 11,
+      "id": "OBR-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70065",
+      "name": "Specimen action code",
+      "item": "245"
+    },
+    {
+      "sequence": 12,
+      "id": "OBR-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Danger Code",
+      "item": "246"
+    },
+    {
+      "sequence": 13,
+      "id": "OBR-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 300,
+      "name": "Relevant clinical information",
+      "item": "247"
+    },
+    {
+      "sequence": 14,
+      "id": "OBR-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Specimen received date / time",
+      "item": "248"
+    },
+    {
+      "sequence": 15,
+      "id": "OBR-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 300,
+      "table": "HL70070",
+      "name": "Specimen source",
+      "item": "249"
+    },
+    {
+      "sequence": 16,
+      "id": "OBR-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 80,
+      "name": "Ordering Provider",
+      "item": "226"
+    },
+    {
+      "sequence": 17,
+      "id": "OBR-17",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TN",
+      "maxLength": 40,
+      "name": "Order Callback Phone Number",
+      "item": "250"
+    },
+    {
+      "sequence": 18,
+      "id": "OBR-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 60,
+      "name": "Placer field 1",
+      "item": "251"
+    },
+    {
+      "sequence": 19,
+      "id": "OBR-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 60,
+      "name": "Placer field 2",
+      "item": "252"
+    },
+    {
+      "sequence": 20,
+      "id": "OBR-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 60,
+      "name": "Filler Field 1",
+      "item": "253"
+    },
+    {
+      "sequence": 21,
+      "id": "OBR-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 60,
+      "name": "Filler Field 2",
+      "item": "254"
+    },
+    {
+      "sequence": 22,
+      "id": "OBR-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Results report / status change - date / time",
+      "item": "255"
+    },
+    {
+      "sequence": 23,
+      "id": "OBR-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 40,
+      "name": "Charge to Practice",
+      "item": "256"
+    },
+    {
+      "sequence": 24,
+      "id": "OBR-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 10,
+      "table": "HL70074",
+      "name": "Diagnostic service section ID",
+      "item": "257"
+    },
+    {
+      "sequence": 25,
+      "id": "OBR-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70123",
+      "name": "Result Status",
+      "item": "258"
+    },
+    {
+      "sequence": 26,
+      "id": "OBR-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 200,
+      "name": "Parent Result",
+      "item": "259"
+    },
+    {
+      "sequence": 27,
+      "id": "OBR-27",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TQ",
+      "maxLength": 200,
+      "name": "Quantity / timing",
+      "item": "221"
+    },
+    {
+      "sequence": 28,
+      "id": "OBR-28",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CN",
+      "maxLength": 150,
+      "name": "Result Copies To",
+      "item": "260"
+    },
+    {
+      "sequence": 29,
+      "id": "OBR-29",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 150,
+      "name": "Parent Number",
+      "item": "261"
+    },
+    {
+      "sequence": 30,
+      "id": "OBR-30",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 20,
+      "table": "HL70124",
+      "name": "Transportation Mode",
+      "item": "262"
+    },
+    {
+      "sequence": 31,
+      "id": "OBR-31",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 300,
+      "name": "Reason for Study",
+      "item": "263"
+    },
+    {
+      "sequence": 32,
+      "id": "OBR-32",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 60,
+      "name": "Principal Result Interpreter",
+      "item": "264"
+    },
+    {
+      "sequence": 33,
+      "id": "OBR-33",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CM",
+      "maxLength": 60,
+      "name": "Assistant Result Interpreter",
+      "item": "265"
+    },
+    {
+      "sequence": 34,
+      "id": "OBR-34",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CM",
+      "maxLength": 60,
+      "name": "Technician",
+      "item": "266"
+    },
+    {
+      "sequence": 35,
+      "id": "OBR-35",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CM",
+      "maxLength": 60,
+      "name": "Transcriptionist",
+      "item": "267"
+    },
+    {
+      "sequence": 36,
+      "id": "OBR-36",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Scheduled date / time",
+      "item": "268"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "v2-0562",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0562",
+  "oid": "2.16.840.1.113883.18.365",
+  "name": "ProcessingConsideration",
+  "title": "processingConsideration",
+  "codes": [
+    {
+      "code": "DFADJ",
+      "display": "Deferred Adjudication Processing",
+      "status": "active"
+    },
+    {
+      "code": "EFORM",
+      "display": "Electronic form to follow",
+      "status": "active"
+    },
+    {
+      "code": "FAX",
+      "display": "Fax to follow",
+      "status": "active"
+    },
+    {
+      "code": "PAPER",
+      "display": "Paper documentation to follow",
+      "status": "active"
+    },
+    {
+      "code": "PYRDELAY",
+      "display": "Delayed by a Previous Payer",
+      "status": "active"
+    },
+    {
+      "code": "RTADJ",
+      "display": "Real Time Adjudication Processing",
+      "status": "active"
+    }
+  ]
+}

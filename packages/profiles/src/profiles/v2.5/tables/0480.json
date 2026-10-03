@@ -1,0 +1,19 @@
+{
+  "id": "0480",
+  "description": "Pharmacy Order Types",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "M",
+      "description": "Medication"
+    },
+    {
+      "name": "O",
+      "description": "Other solution as medication orders"
+    },
+    {
+      "name": "S",
+      "description": "IV Large Volume Solutions"
+    }
+  ]
+}

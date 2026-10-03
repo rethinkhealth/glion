@@ -1,0 +1,19 @@
+{
+  "id": "0167",
+  "description": "SUBSTITUTION STATUS",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "G",
+      "description": "A generic substitution was dispensed"
+    },
+    {
+      "name": "N",
+      "description": "No substitute was dispensed"
+    },
+    {
+      "name": "T",
+      "description": "A therapeutic substitution was dispensed"
+    }
+  ]
+}

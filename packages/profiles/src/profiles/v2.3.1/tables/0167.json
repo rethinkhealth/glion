@@ -1,0 +1,51 @@
+{
+  "id": "0167",
+  "description": "Substitution status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "0",
+      "description": "No product selection indicated"
+    },
+    {
+      "name": "1",
+      "description": "Substitution not allowed by prescriber"
+    },
+    {
+      "name": "2",
+      "description": "Substitution allowed - patient requested product dispensed"
+    },
+    {
+      "name": "3",
+      "description": "Substitution allowed - pharmacist selected product dispensed"
+    },
+    {
+      "name": "4",
+      "description": "Substitution allowed - generic drug not in stock"
+    },
+    {
+      "name": "5",
+      "description": "Substitution allowed - brand drug dispensed as a generic"
+    },
+    {
+      "name": "7",
+      "description": "Substitution not allowed - brand drug mandated by law"
+    },
+    {
+      "name": "8",
+      "description": "Substitution allowed - generic drug not available in marketplace"
+    },
+    {
+      "name": "G",
+      "description": "A generic substitution was dispensed."
+    },
+    {
+      "name": "N",
+      "description": "No substitute was dispensed.  This is equivalent to the default (null) value."
+    },
+    {
+      "name": "T",
+      "description": "A therapeutic substitution was dispensed."
+    }
+  ]
+}

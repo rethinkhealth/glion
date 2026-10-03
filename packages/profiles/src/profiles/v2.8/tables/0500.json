@@ -1,0 +1,19 @@
+{
+  "id": "0500",
+  "description": "Consent Disclosure Level",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Full Disclosure"
+    },
+    {
+      "name": "N",
+      "description": "No Disclosure"
+    },
+    {
+      "name": "P",
+      "description": "Partial Disclosure"
+    }
+  ]
+}

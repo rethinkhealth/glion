@@ -1,0 +1,27 @@
+{
+  "id": "0425",
+  "description": "Newborn Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Born in facility"
+    },
+    {
+      "name": "2",
+      "description": "Transfer in"
+    },
+    {
+      "name": "3",
+      "description": "Born en route"
+    },
+    {
+      "name": "4",
+      "description": "Other"
+    },
+    {
+      "name": "5",
+      "description": "Born at home"
+    }
+  ]
+}

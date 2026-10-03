@@ -1,0 +1,35 @@
+{
+  "id": "0007",
+  "description": "Admission type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Accident"
+    },
+    {
+      "name": "C",
+      "description": "Elective"
+    },
+    {
+      "name": "E",
+      "description": "Emergency"
+    },
+    {
+      "name": "L",
+      "description": "Labor and Delivery"
+    },
+    {
+      "name": "N",
+      "description": "Newborn (Birth in healthcare facility)"
+    },
+    {
+      "name": "R",
+      "description": "Routine"
+    },
+    {
+      "name": "U",
+      "description": "Urgent"
+    }
+  ]
+}

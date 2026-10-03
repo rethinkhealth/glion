@@ -1,0 +1,11 @@
+{
+  "id": "0143",
+  "description": "Non-covered Insurance Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

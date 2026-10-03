@@ -1,0 +1,29 @@
+{
+  "id": "v2-0949",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0949",
+  "oid": "2.16.840.1.113883.18.449",
+  "name": "OrderControlCodeReason",
+  "title": "orderControlCodeReason",
+  "codes": [
+    {
+      "code": "CO",
+      "display": "Cost",
+      "status": "N"
+    },
+    {
+      "code": "ST",
+      "display": "Specimen Type",
+      "status": "N"
+    },
+    {
+      "code": "SV",
+      "display": "Specimen Volume",
+      "status": "N"
+    },
+    {
+      "code": "UN",
+      "display": "Unavailable test",
+      "status": "N"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "0092",
+  "description": "Re-admission Indicator",
+  "type": "user",
+  "codes": [
+    {
+      "name": "R",
+      "description": "Readmission"
+    }
+  ]
+}

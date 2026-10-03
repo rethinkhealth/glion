@@ -1,0 +1,11 @@
+{
+  "id": "0022",
+  "description": "Billing Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

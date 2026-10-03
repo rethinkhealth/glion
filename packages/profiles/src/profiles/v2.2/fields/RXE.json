@@ -1,0 +1,246 @@
+{
+  "segmentId": "RXE",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RXE-1",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TQ",
+      "maxLength": 200,
+      "name": "Quantity / timing",
+      "item": "221"
+    },
+    {
+      "sequence": 2,
+      "id": "RXE-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 100,
+      "name": "Give Code",
+      "item": "317"
+    },
+    {
+      "sequence": 3,
+      "id": "RXE-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Give Amount - Minimum",
+      "item": "318"
+    },
+    {
+      "sequence": 4,
+      "id": "RXE-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Give Amount - Maximum",
+      "item": "319"
+    },
+    {
+      "sequence": 5,
+      "id": "RXE-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Give Units",
+      "item": "320"
+    },
+    {
+      "sequence": 6,
+      "id": "RXE-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Give Dosage Form",
+      "item": "321"
+    },
+    {
+      "sequence": 7,
+      "id": "RXE-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 200,
+      "name": "Provider&apos;s Administration Instructions",
+      "item": "298"
+    },
+    {
+      "sequence": 8,
+      "id": "RXE-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 12,
+      "name": "Deliver-to location",
+      "item": "299"
+    },
+    {
+      "sequence": 9,
+      "id": "RXE-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70167",
+      "name": "Substitution Status",
+      "item": "322"
+    },
+    {
+      "sequence": 10,
+      "id": "RXE-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Dispense Amount",
+      "item": "323"
+    },
+    {
+      "sequence": 11,
+      "id": "RXE-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Dispense Units",
+      "item": "324"
+    },
+    {
+      "sequence": 12,
+      "id": "RXE-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 3,
+      "name": "Number of Refills",
+      "item": "304"
+    },
+    {
+      "sequence": 13,
+      "id": "RXE-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 60,
+      "name": "Ordering Provider&apos;s DEA Number",
+      "item": "305"
+    },
+    {
+      "sequence": 14,
+      "id": "RXE-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 60,
+      "name": "Pharmacist Verifier ID",
+      "item": "306"
+    },
+    {
+      "sequence": 15,
+      "id": "RXE-15",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Prescription Number",
+      "item": "325"
+    },
+    {
+      "sequence": 16,
+      "id": "RXE-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Number of Refills Remaining",
+      "item": "326"
+    },
+    {
+      "sequence": 17,
+      "id": "RXE-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Number of refills / doses dispensed",
+      "item": "327"
+    },
+    {
+      "sequence": 18,
+      "id": "RXE-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Date / time of most recent refill or dose dispensed",
+      "item": "328"
+    },
+    {
+      "sequence": 19,
+      "id": "RXE-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 10,
+      "name": "Total Daily Dose",
+      "item": "329"
+    },
+    {
+      "sequence": 20,
+      "id": "RXE-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "name": "Needs Human Review",
+      "item": "307"
+    },
+    {
+      "sequence": 21,
+      "id": "RXE-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 200,
+      "name": "Pharmacy Special Dispensing Instructions",
+      "item": "330"
+    },
+    {
+      "sequence": 22,
+      "id": "RXE-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Give Per (Time Unit)",
+      "item": "331"
+    },
+    {
+      "sequence": 23,
+      "id": "RXE-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 6,
+      "name": "Give Rate Amount",
+      "item": "332"
+    },
+    {
+      "sequence": 24,
+      "id": "RXE-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Give Rate Units",
+      "item": "333"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "0523",
+  "description": "Computation type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "%",
+      "description": "Indicates a percent change"
+    },
+    {
+      "name": "a",
+      "description": "Absolute Change"
+    }
+  ]
+}

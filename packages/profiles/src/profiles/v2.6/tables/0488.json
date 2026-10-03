@@ -1,0 +1,175 @@
+{
+  "id": "0488",
+  "description": "Specimen Collection Method",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ANP",
+      "description": "Plates, Anaerobic"
+    },
+    {
+      "name": "BAP",
+      "description": "Plates, Blood Agar"
+    },
+    {
+      "name": "BCAE",
+      "description": "Blood Culture, Aerobic Bottle"
+    },
+    {
+      "name": "BCAN",
+      "description": "Blood Culture, Anaerobic Bottle"
+    },
+    {
+      "name": "BCPD",
+      "description": "Blood Culture, Pediatric Bottle"
+    },
+    {
+      "name": "BIO",
+      "description": "Biopsy"
+    },
+    {
+      "name": "CAP",
+      "description": "Capillary Specimen"
+    },
+    {
+      "name": "CATH",
+      "description": "Catheterized"
+    },
+    {
+      "name": "CVP",
+      "description": "Line, CVP"
+    },
+    {
+      "name": "EPLA",
+      "description": "Environmental, Plate"
+    },
+    {
+      "name": "ESWA",
+      "description": "Environmental, Swab"
+    },
+    {
+      "name": "FNA",
+      "description": "Aspiration, Fine Needle"
+    },
+    {
+      "name": "KOFFP",
+      "description": "Plate, Cough"
+    },
+    {
+      "name": "LNA",
+      "description": "Line, Arterial"
+    },
+    {
+      "name": "LNV",
+      "description": "Line, Venous"
+    },
+    {
+      "name": "MARTL",
+      "description": "Martin-Lewis Agar"
+    },
+    {
+      "name": "ML11",
+      "description": "Mod. Martin-Lewis Agar"
+    },
+    {
+      "name": "MLP",
+      "description": "Plate, Martin-Lewis"
+    },
+    {
+      "name": "NYP",
+      "description": "Plate, New York City"
+    },
+    {
+      "name": "PACE",
+      "description": "Pace, Gen-Probe"
+    },
+    {
+      "name": "PIN",
+      "description": "Pinworm Prep"
+    },
+    {
+      "name": "PNA",
+      "description": "Aterial puncture"
+    },
+    {
+      "name": "PRIME",
+      "description": "Pump Prime"
+    },
+    {
+      "name": "PUMP",
+      "description": "Pump Specimen"
+    },
+    {
+      "name": "QC5",
+      "description": "Quality Control For Micro"
+    },
+    {
+      "name": "SCLP",
+      "description": "Scalp, Fetal Vein"
+    },
+    {
+      "name": "SCRAPS",
+      "description": "Scrapings"
+    },
+    {
+      "name": "SHA",
+      "description": "Shaving"
+    },
+    {
+      "name": "SWA",
+      "description": "Swab"
+    },
+    {
+      "name": "SWD",
+      "description": "Swab, Dacron tipped"
+    },
+    {
+      "name": "TMAN",
+      "description": "Transport Media, Anaerobic"
+    },
+    {
+      "name": "TMCH",
+      "description": "Transport Media, Chalamydia"
+    },
+    {
+      "name": "TMM4",
+      "description": "Transport Media, M4"
+    },
+    {
+      "name": "TMMY",
+      "description": "Transport Media, Mycoplasma"
+    },
+    {
+      "name": "TMOT",
+      "description": "Transport Media,"
+    },
+    {
+      "name": "TMP",
+      "description": "Plate, Thayer-Martin"
+    },
+    {
+      "name": "TMPV",
+      "description": "Transport Media, PVA"
+    },
+    {
+      "name": "TMSC",
+      "description": "Transport Media, Stool Culture"
+    },
+    {
+      "name": "TMUP",
+      "description": "Transport Media, Ureaplasma"
+    },
+    {
+      "name": "TMVI",
+      "description": "Transport Media, Viral"
+    },
+    {
+      "name": "VENIP",
+      "description": "Venipuncture"
+    },
+    {
+      "name": "WOOD",
+      "description": "Swab, Wooden Shaft"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "v2-0946",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0946",
+  "oid": "2.16.840.1.113883.18.446",
+  "name": "SupplierType",
+  "title": "supplierType",
+  "codes": [
+    {
+      "code": "D",
+      "display": "Distributor",
+      "status": "active"
+    },
+    {
+      "code": "M",
+      "display": "Manufacturer",
+      "status": "active"
+    }
+  ]
+}

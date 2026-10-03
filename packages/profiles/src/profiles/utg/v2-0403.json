@@ -1,0 +1,34 @@
+{
+  "id": "v2-0403",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0403",
+  "oid": "2.16.840.1.113883.18.252",
+  "name": "LanguageAbility",
+  "title": "languageAbility",
+  "codes": [
+    {
+      "code": "1",
+      "display": "Read",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Write",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Speak",
+      "status": "active"
+    },
+    {
+      "code": "4",
+      "display": "Understand",
+      "status": "active"
+    },
+    {
+      "code": "5",
+      "display": "Sign",
+      "status": "active"
+    }
+  ]
+}

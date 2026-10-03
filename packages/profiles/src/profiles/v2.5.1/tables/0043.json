@@ -1,0 +1,11 @@
+{
+  "id": "0043",
+  "description": "Condition Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values"
+    }
+  ]
+}

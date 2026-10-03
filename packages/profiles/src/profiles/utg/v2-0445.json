@@ -1,0 +1,29 @@
+{
+  "id": "v2-0445",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0445",
+  "oid": "2.16.840.1.113883.18.285",
+  "name": "IdentityReliability",
+  "title": "identityReliability",
+  "codes": [
+    {
+      "code": "AL",
+      "display": "Patient/Person Name is an Alias",
+      "status": "active"
+    },
+    {
+      "code": "UA",
+      "display": "Unknown/Default Address",
+      "status": "active"
+    },
+    {
+      "code": "UD",
+      "display": "Unknown/Default Date of Birth",
+      "status": "active"
+    },
+    {
+      "code": "US",
+      "display": "Unknown/Default Social Security Number",
+      "status": "active"
+    }
+  ]
+}

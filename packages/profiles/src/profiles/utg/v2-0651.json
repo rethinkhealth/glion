@@ -1,0 +1,19 @@
+{
+  "id": "v2-0651",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0651",
+  "oid": "2.16.840.1.113883.18.380",
+  "name": "LaborCalculationType",
+  "title": "laborCalculationType",
+  "codes": [
+    {
+      "code": "CST",
+      "display": "Cost",
+      "status": "active"
+    },
+    {
+      "code": "TME",
+      "display": "Time",
+      "status": "active"
+    }
+  ]
+}

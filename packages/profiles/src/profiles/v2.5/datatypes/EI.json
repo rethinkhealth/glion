@@ -1,0 +1,32 @@
+{
+  "id": "EI",
+  "version": "2.5",
+  "kind": "composite",
+  "title": "Entity Identifier",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Entity Identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Namespace ID",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Universal ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Universal ID Type",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

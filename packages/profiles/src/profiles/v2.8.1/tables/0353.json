@@ -1,0 +1,27 @@
+{
+  "id": "0353",
+  "description": "CWE statuses",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "NA",
+      "description": "Not applicable"
+    },
+    {
+      "name": "NASK",
+      "description": "Not asked"
+    },
+    {
+      "name": "NAV",
+      "description": "Not available"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    },
+    {
+      "name": "UASK",
+      "description": "Asked but Unknown"
+    }
+  ]
+}

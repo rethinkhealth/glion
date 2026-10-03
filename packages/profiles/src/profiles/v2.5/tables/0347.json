@@ -1,0 +1,15 @@
+{
+  "id": "0347",
+  "description": "State/province",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AB",
+      "description": "Alberta  (US and Canada)"
+    },
+    {
+      "name": "MI",
+      "description": "Michigan  (US)"
+    }
+  ]
+}

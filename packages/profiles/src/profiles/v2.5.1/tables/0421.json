@@ -1,0 +1,19 @@
+{
+  "id": "0421",
+  "description": "Severity of Illness Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "MI",
+      "description": "Mild"
+    },
+    {
+      "name": "MO",
+      "description": "Moderate"
+    },
+    {
+      "name": "SE",
+      "description": "Severe"
+    }
+  ]
+}

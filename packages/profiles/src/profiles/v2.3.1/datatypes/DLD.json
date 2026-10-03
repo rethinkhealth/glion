@@ -1,0 +1,20 @@
+{
+  "id": "DLD",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "discharge location",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "discharge location",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "effective date",
+      "datatypeId": "TS",
+      "required": false
+    }
+  ]
+}

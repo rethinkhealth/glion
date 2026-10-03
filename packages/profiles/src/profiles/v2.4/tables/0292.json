@@ -1,0 +1,415 @@
+{
+  "id": "0292",
+  "description": "Vaccines administered",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "01",
+      "description": "diphtheria, tetanus toxoids and pertussis vaccine"
+    },
+    {
+      "name": "02",
+      "description": "poliovirus vaccine, live, oral"
+    },
+    {
+      "name": "03",
+      "description": "measles, mumps and rubella virus vaccine"
+    },
+    {
+      "name": "04",
+      "description": "measles and rubella virus vaccine"
+    },
+    {
+      "name": "05",
+      "description": "measles virus vaccine"
+    },
+    {
+      "name": "06",
+      "description": "rubella virus vaccine"
+    },
+    {
+      "name": "07",
+      "description": "mumps virus vaccine"
+    },
+    {
+      "name": "08",
+      "description": "hepatitis B vaccine, pediatric or pediatric/adolescent dosage"
+    },
+    {
+      "name": "09",
+      "description": "tetanus and diphtheria toxoids, adsorbed for adult use"
+    },
+    {
+      "name": "10",
+      "description": "poliovirus vaccine, inactivated"
+    },
+    {
+      "name": "100",
+      "description": "pneumococcal conjugate vaccine, polyvalent"
+    },
+    {
+      "name": "101",
+      "description": "Typhoid Vi capsular polysaccharide vaccine"
+    },
+    {
+      "name": "11",
+      "description": "pertussis vaccine"
+    },
+    {
+      "name": "12",
+      "description": "diphtheria antitoxin"
+    },
+    {
+      "name": "13",
+      "description": "tetanus immune globulin"
+    },
+    {
+      "name": "14",
+      "description": "immune globulin, NOS"
+    },
+    {
+      "name": "15",
+      "description": "influenza virus vaccine, split virus (incl. purified surface antigen)"
+    },
+    {
+      "name": "16",
+      "description": "influenza virus vaccine, whole virus"
+    },
+    {
+      "name": "17",
+      "description": "Haemophilus influenzae type b vaccine, conjugate NOS"
+    },
+    {
+      "name": "18",
+      "description": "rabies vaccine, for intramuscular injection"
+    },
+    {
+      "name": "19",
+      "description": "Bacillus Calmette-Guerin vaccine"
+    },
+    {
+      "name": "20",
+      "description": "diphtheria, tetanus toxoids and acellular pertussis vaccine"
+    },
+    {
+      "name": "21",
+      "description": "varicella virus vaccine"
+    },
+    {
+      "name": "22",
+      "description": "DTP-Haemophilus influenzae type b conjugate vaccine"
+    },
+    {
+      "name": "23",
+      "description": "plague vaccine"
+    },
+    {
+      "name": "24",
+      "description": "anthrax vaccine"
+    },
+    {
+      "name": "25",
+      "description": "typhoid vaccine, live, oral"
+    },
+    {
+      "name": "26",
+      "description": "cholera vaccine"
+    },
+    {
+      "name": "27",
+      "description": "botulinum antitoxin"
+    },
+    {
+      "name": "28",
+      "description": "diphtheria and tetanus toxoids, adsorbed for pediatric use"
+    },
+    {
+      "name": "29",
+      "description": "cytomegalovirus immune globulin, intravenous"
+    },
+    {
+      "name": "30",
+      "description": "hepatitis B immune globulin"
+    },
+    {
+      "name": "31",
+      "description": "hepatitis A vaccine, pediatric dosage, NOS"
+    },
+    {
+      "name": "32",
+      "description": "meningococcal polysaccharide vaccine"
+    },
+    {
+      "name": "33",
+      "description": "pneumococcal  polysaccharide vaccine"
+    },
+    {
+      "name": "34",
+      "description": "rabies immune globulin"
+    },
+    {
+      "name": "35",
+      "description": "tetanus toxoid"
+    },
+    {
+      "name": "36",
+      "description": "varicella zoster immune globulin"
+    },
+    {
+      "name": "37",
+      "description": "yellow fever vaccine"
+    },
+    {
+      "name": "38",
+      "description": "rubella and mumps virus vaccine"
+    },
+    {
+      "name": "39",
+      "description": "Japanese encephalitis vaccine"
+    },
+    {
+      "name": "40",
+      "description": "rabies vaccine, for intradermal injection"
+    },
+    {
+      "name": "41",
+      "description": "typhoid vaccine, parenteral, other than acetone-killed, dried"
+    },
+    {
+      "name": "42",
+      "description": "hepatitis B vaccine, adolescent/high risk infant dosage"
+    },
+    {
+      "name": "43",
+      "description": "hepatitis B vaccine, adult dosage"
+    },
+    {
+      "name": "44",
+      "description": "hepatitis B vaccine, dialysis patient dosage"
+    },
+    {
+      "name": "45",
+      "description": "hepatitis B vaccine, NOS"
+    },
+    {
+      "name": "46",
+      "description": "Haemophilus influenzae type b vaccine, PRP-D conjugate"
+    },
+    {
+      "name": "47",
+      "description": "Haemophilus influenzae type b vaccine, HbOC conjugate"
+    },
+    {
+      "name": "48",
+      "description": "Haemophilus influenzae type b vaccine, PRP-T conjugate"
+    },
+    {
+      "name": "49",
+      "description": "Haemophilus influenzae type b vaccine, PRP-OMP conjugate"
+    },
+    {
+      "name": "50",
+      "description": "DTaP-Haemophilus influenzae type b conjugate vaccine"
+    },
+    {
+      "name": "51",
+      "description": "Haemophilus influenzae type b conjugate and Hepatitis B vaccine"
+    },
+    {
+      "name": "52",
+      "description": "hepatitis A vaccine, adult dosage"
+    },
+    {
+      "name": "53",
+      "description": "typhoid vaccine, parenteral, acetone-killed, dried (U.S. military)"
+    },
+    {
+      "name": "54",
+      "description": "adenovirus vaccine, type 4, live, oral"
+    },
+    {
+      "name": "55",
+      "description": "adenovirus vaccine, type 7, live, oral"
+    },
+    {
+      "name": "56",
+      "description": "dengue fever vaccine"
+    },
+    {
+      "name": "57",
+      "description": "hantavirus vaccine"
+    },
+    {
+      "name": "58",
+      "description": "hepatitis C vaccine"
+    },
+    {
+      "name": "59",
+      "description": "hepatitis E vaccine"
+    },
+    {
+      "name": "60",
+      "description": "herpes simplex virus, type 2 vaccine"
+    },
+    {
+      "name": "61",
+      "description": "human immunodeficiency virus vaccine"
+    },
+    {
+      "name": "62",
+      "description": "human papilloma virus vaccine"
+    },
+    {
+      "name": "63",
+      "description": "Junin virus vaccine"
+    },
+    {
+      "name": "64",
+      "description": "leishmaniasis vaccine"
+    },
+    {
+      "name": "65",
+      "description": "leprosy vaccine"
+    },
+    {
+      "name": "66",
+      "description": "Lyme disease vaccine"
+    },
+    {
+      "name": "67",
+      "description": "malaria vaccine"
+    },
+    {
+      "name": "68",
+      "description": "melanoma vaccine"
+    },
+    {
+      "name": "69",
+      "description": "parainfluenza-3 virus vaccine"
+    },
+    {
+      "name": "70",
+      "description": "Q fever vaccine"
+    },
+    {
+      "name": "71",
+      "description": "respiratory syncytial virus immune globulin, intravenous"
+    },
+    {
+      "name": "72",
+      "description": "rheumatic fever vaccine"
+    },
+    {
+      "name": "73",
+      "description": "Rift Valley fever vaccine"
+    },
+    {
+      "name": "74",
+      "description": "rotavirus vaccine, tetravalent, live, oral"
+    },
+    {
+      "name": "75",
+      "description": "smallpox vaccine"
+    },
+    {
+      "name": "76",
+      "description": "Staphylococcus bacteriophage lysate"
+    },
+    {
+      "name": "77",
+      "description": "tick-borne encephalitis vaccine"
+    },
+    {
+      "name": "78",
+      "description": "tularemia vaccine"
+    },
+    {
+      "name": "79",
+      "description": "vaccinia immune globulin"
+    },
+    {
+      "name": "80",
+      "description": "Venezuelan equine encephalitis, live, attenuated"
+    },
+    {
+      "name": "81",
+      "description": "Venezuelan equine encephalitis, inactivated"
+    },
+    {
+      "name": "82",
+      "description": "adenovirus vaccine, NOS"
+    },
+    {
+      "name": "83",
+      "description": "hepatitis A vaccine, pediatric/adolescent dosage, 2 dose schedule"
+    },
+    {
+      "name": "84",
+      "description": "hepatitis A vaccine, pediatric/adolescent dosage, 3 dose schedule"
+    },
+    {
+      "name": "85",
+      "description": "hepatitis A vaccine, NOS"
+    },
+    {
+      "name": "86",
+      "description": "immune globulin, intramuscular"
+    },
+    {
+      "name": "87",
+      "description": "immune globulin, intravenous"
+    },
+    {
+      "name": "88",
+      "description": "influenza virus vaccine, NOS"
+    },
+    {
+      "name": "89",
+      "description": "poliovirus vaccine, NOS"
+    },
+    {
+      "name": "90",
+      "description": "rabies vaccine, NOS"
+    },
+    {
+      "name": "91",
+      "description": "typhoid vaccine, NOS"
+    },
+    {
+      "name": "92",
+      "description": "Venezuelan equine encephalitis vaccine, NOS"
+    },
+    {
+      "name": "93",
+      "description": "respiratory syncytial virus monoclonal antibody (palivizumab), intramuscular"
+    },
+    {
+      "name": "94",
+      "description": "measles, mumps, rubella, and varicella virus vaccine"
+    },
+    {
+      "name": "95",
+      "description": "tuberculin skin test; old tuberculin, multipuncture device"
+    },
+    {
+      "name": "96",
+      "description": "tuberculin skin test; purified protein derivative solution, intradermal"
+    },
+    {
+      "name": "97",
+      "description": "tuberculin skin test; purified protein derivative, multipuncture device"
+    },
+    {
+      "name": "98",
+      "description": "tuberculin skin test; NOS"
+    },
+    {
+      "name": "99",
+      "description": "RESERVED - do not use"
+    },
+    {
+      "name": "999",
+      "description": "unknown vaccine or immune globulin"
+    }
+  ]
+}

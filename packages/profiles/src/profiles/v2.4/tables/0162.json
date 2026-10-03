@@ -1,0 +1,195 @@
+{
+  "id": "0162",
+  "description": "Route of administration",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AP",
+      "description": "Apply Externally"
+    },
+    {
+      "name": "B",
+      "description": "Buccal"
+    },
+    {
+      "name": "DT",
+      "description": "Dental"
+    },
+    {
+      "name": "EP",
+      "description": "Epidural"
+    },
+    {
+      "name": "ET",
+      "description": "Endotrachial Tube"
+    },
+    {
+      "name": "GTT",
+      "description": "Gastrostomy Tube"
+    },
+    {
+      "name": "GU",
+      "description": "GU Irrigant"
+    },
+    {
+      "name": "IA",
+      "description": "Intra-arterial"
+    },
+    {
+      "name": "IB",
+      "description": "Intrabursal"
+    },
+    {
+      "name": "IC",
+      "description": "Intracardiac"
+    },
+    {
+      "name": "ICV",
+      "description": "Intracervical (uterus)"
+    },
+    {
+      "name": "ID",
+      "description": "Intradermal"
+    },
+    {
+      "name": "IH",
+      "description": "Inhalation"
+    },
+    {
+      "name": "IHA",
+      "description": "Intrahepatic Artery"
+    },
+    {
+      "name": "IM",
+      "description": "Intramuscular"
+    },
+    {
+      "name": "IMR",
+      "description": "Immerse (Soak) Body Part"
+    },
+    {
+      "name": "IN",
+      "description": "Intranasal"
+    },
+    {
+      "name": "IO",
+      "description": "Intraocular"
+    },
+    {
+      "name": "IP",
+      "description": "Intraperitoneal"
+    },
+    {
+      "name": "IS",
+      "description": "Intrasynovial"
+    },
+    {
+      "name": "IT",
+      "description": "Intrathecal"
+    },
+    {
+      "name": "IU",
+      "description": "Intrauterine"
+    },
+    {
+      "name": "IV",
+      "description": "Intravenous"
+    },
+    {
+      "name": "MM",
+      "description": "Mucous Membrane"
+    },
+    {
+      "name": "MTH",
+      "description": "Mouth/Throat"
+    },
+    {
+      "name": "NG",
+      "description": "Nasogastric"
+    },
+    {
+      "name": "NP",
+      "description": "Nasal Prongs"
+    },
+    {
+      "name": "NS",
+      "description": "Nasal"
+    },
+    {
+      "name": "NT",
+      "description": "Nasotrachial Tube"
+    },
+    {
+      "name": "OP",
+      "description": "Ophthalmic"
+    },
+    {
+      "name": "OT",
+      "description": "Otic"
+    },
+    {
+      "name": "OTH",
+      "description": "Other/Miscellaneous"
+    },
+    {
+      "name": "PF",
+      "description": "Perfusion"
+    },
+    {
+      "name": "PO",
+      "description": "Oral"
+    },
+    {
+      "name": "PR",
+      "description": "Rectal"
+    },
+    {
+      "name": "RM",
+      "description": "Rebreather Mask"
+    },
+    {
+      "name": "SC",
+      "description": "Subcutaneous"
+    },
+    {
+      "name": "SD",
+      "description": "Soaked Dressing"
+    },
+    {
+      "name": "SL",
+      "description": "Sublingual"
+    },
+    {
+      "name": "TD",
+      "description": "Transdermal"
+    },
+    {
+      "name": "TL",
+      "description": "Translingual"
+    },
+    {
+      "name": "TP",
+      "description": "Topical"
+    },
+    {
+      "name": "TRA",
+      "description": "Tracheostomy"
+    },
+    {
+      "name": "UR",
+      "description": "Urethral"
+    },
+    {
+      "name": "VG",
+      "description": "Vaginal"
+    },
+    {
+      "name": "VM",
+      "description": "Ventimask"
+    },
+    {
+      "name": "WND",
+      "description": "Wound"
+    }
+  ]
+}

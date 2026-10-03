@@ -1,0 +1,49 @@
+{
+  "id": "v2-0261",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0261",
+  "oid": "2.16.840.1.113883.18.156",
+  "name": "LocationEquipment",
+  "title": "locationEquipment",
+  "codes": [
+    {
+      "code": "EEG",
+      "display": "Electro-Encephalogram",
+      "status": "active"
+    },
+    {
+      "code": "EKG",
+      "display": "Electro-Cardiogram",
+      "status": "active"
+    },
+    {
+      "code": "INF",
+      "display": "Infusion pump",
+      "status": "active"
+    },
+    {
+      "code": "IVP",
+      "display": "IV pump",
+      "status": "active"
+    },
+    {
+      "code": "OXY",
+      "display": "Oxygen",
+      "status": "active"
+    },
+    {
+      "code": "SUC",
+      "display": "Suction",
+      "status": "active"
+    },
+    {
+      "code": "VEN",
+      "display": "Ventilator",
+      "status": "active"
+    },
+    {
+      "code": "VIT",
+      "display": "Vital signs monitor",
+      "status": "active"
+    }
+  ]
+}

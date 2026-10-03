@@ -1,0 +1,7 @@
+{
+  "id": "CK",
+  "version": "2.1",
+  "kind": "primitive",
+  "title": "composite ID with check digit",
+  "components": []
+}
