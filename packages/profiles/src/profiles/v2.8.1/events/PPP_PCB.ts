@@ -849,9 +849,7 @@ export const effects = {
     ],
   },
   "27:ORC": {
-    groupsClosed: [
-      "PPP_PCB/PATHWAY/PROBLEM/ORDER/ORDER_DETAIL/ORDER_OBSERVATION",
-    ],
+    groupsClosed: ["PPP_PCB/PATHWAY/PROBLEM/ORDER/ORDER_DETAIL/CHOICE"],
     groupsOpened: ["PPP_PCB/PATHWAY/PROBLEM/ORDER"],
   },
   "27:PRB": {
