@@ -4,21 +4,23 @@ import { createLruCache } from "../src/cache/lru";
 import type { ProfileStoreConfig } from "../src/store";
 import { createProfileStore } from "../src/store";
 
-// Minimal manifest for testing
-const testManifest: Record<string, () => Promise<{ value: string }>> = {
-  "v2.5/BAR": () => Promise.resolve({ value: "bar-raw" }),
-  "v2.5/FOO": () => Promise.resolve({ value: "foo-raw" }),
-  "v2.6/FOO": () => Promise.resolve({ value: "foo-v26-raw" }),
+const testProfiles: Record<string, { value: string }> = {
+  "v2.5/BAR": { value: "bar-raw" },
+  "v2.5/FOO": { value: "foo-raw" },
+  "v2.6/FOO": { value: "foo-v26-raw" },
 };
 
+const importTestProfile = (version: string, id: string) =>
+  Promise.resolve(testProfiles[`v${version}/${id}`]);
+
 const baseConfig: ProfileStoreConfig<{ value: string }> = {
-  manifest: testManifest,
+  importProfile: importTestProfile,
   namespace: "test",
 };
 
 describe("createProfileStore", () => {
   describe("load", () => {
-    it("loads a profile from the manifest", async () => {
+    it("loads a profile", async () => {
       const store = createProfileStore(baseConfig, createLruCache());
       const result = await store.load("2.5", "FOO");
       expect(result).toEqual({ value: "foo-raw" });
@@ -38,17 +40,17 @@ describe("createProfileStore", () => {
       expect(a).toBe(b);
     });
 
-    it("calls manifest factory only once per key", async () => {
-      const factory = vi.fn(() => Promise.resolve({ value: "spied" }));
+    it("imports a profile only once per key", async () => {
+      const importProfile = vi.fn(() => Promise.resolve({ value: "spied" }));
       const config: ProfileStoreConfig<{ value: string }> = {
-        manifest: { "v2.5/SPY": factory },
+        importProfile,
         namespace: "test",
       };
       const store = createProfileStore(config, createLruCache());
 
       await store.load("2.5", "SPY");
       await store.load("2.5", "SPY");
-      expect(factory).toHaveBeenCalledOnce();
+      expect(importProfile).toHaveBeenCalledOnce();
     });
   });
 
@@ -56,7 +58,7 @@ describe("createProfileStore", () => {
     it("applies compile transform to raw data", async () => {
       const config: ProfileStoreConfig<{ value: string }, string> = {
         compile: (raw) => raw.value.toUpperCase(),
-        manifest: testManifest,
+        importProfile: importTestProfile,
         namespace: "test",
       };
       const store = createProfileStore(config, createLruCache());
@@ -68,7 +70,7 @@ describe("createProfileStore", () => {
   describe("resolveId", () => {
     it("resolves alias IDs before loading", async () => {
       const config: ProfileStoreConfig<{ value: string }> = {
-        manifest: testManifest,
+        importProfile: importTestProfile,
         namespace: "test",
         resolveId: (_version, id) => (id === "ALIAS" ? "FOO" : undefined),
       };
@@ -79,7 +81,7 @@ describe("createProfileStore", () => {
 
     it("passes through when resolveId returns undefined", async () => {
       const config: ProfileStoreConfig<{ value: string }> = {
-        manifest: testManifest,
+        importProfile: importTestProfile,
         namespace: "test",
         resolveId: (_version, _id) => undefined as string | undefined,
       };
@@ -151,9 +153,7 @@ describe("createProfileStore", () => {
   describe("error eviction", () => {
     it("evicts rejected promises from cache", async () => {
       const config: ProfileStoreConfig<{ value: string }> = {
-        manifest: {
-          "v2.5/FAIL": () => Promise.reject(new Error("boom")),
-        },
+        importProfile: () => Promise.reject(new Error("boom")),
         namespace: "test",
       };
       const store = createProfileStore(config, createLruCache());

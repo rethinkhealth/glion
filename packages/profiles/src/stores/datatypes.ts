@@ -1,5 +1,6 @@
-import { datatypeImports } from "../profiles/datatype-manifest";
 import type { ProfileStoreConfig } from "../store";
+import type { ProfileIndex } from "./import-from-index";
+import { importFromIndex } from "./import-from-index";
 import type {
   ComponentProfile,
   DatatypeDefinition,
@@ -28,12 +29,18 @@ const compileDatatypes = (raw: DatatypeModule): DatatypeDefinition => {
   };
 };
 
+const datatypeIndexes = import.meta.glob<ProfileIndex<DatatypeModule>>(
+  "../profiles/v*/datatypes/index.ts",
+  { import: "default" }
+);
+
 /** Store configuration for datatype profiles. */
 export const datatypesConfig: ProfileStoreConfig<
   DatatypeModule,
   DatatypeDefinition
 > = {
   compile: compileDatatypes,
-  manifest: datatypeImports,
+  importProfile: (version, id) =>
+    importFromIndex(datatypeIndexes, `../profiles/v${version}/datatypes`, id),
   namespace: "datatypes",
 };

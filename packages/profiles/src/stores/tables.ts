@@ -1,5 +1,6 @@
-import { tableImports } from "../profiles/table-manifest";
 import type { ProfileStoreConfig } from "../store";
+import type { ProfileIndex } from "./import-from-index";
+import { importFromIndex } from "./import-from-index";
 import type { TableCodeEntry, TableDefinition, TableModule } from "./types";
 
 /** Compile raw table module into indexed definition. */
@@ -18,9 +19,15 @@ const compileTables = (raw: TableModule): TableDefinition => {
   };
 };
 
+const tableIndexes = import.meta.glob<ProfileIndex<TableModule>>(
+  "../profiles/v*/tables/index.ts",
+  { import: "default" }
+);
+
 /** Store configuration for table profiles. */
 export const tablesConfig: ProfileStoreConfig<TableModule, TableDefinition> = {
   compile: compileTables,
-  manifest: tableImports,
+  importProfile: (version, id) =>
+    importFromIndex(tableIndexes, `../profiles/v${version}/tables`, id),
   namespace: "tables",
 };

@@ -51,7 +51,7 @@ export type {
 } from "./stores/types";
 
 // Structure maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
-export { structureMaps } from "./profiles/structure-map-manifest";
+export { structureMaps } from "./structure-maps";
 
 // Resolution utilities
 export { loadMessageStructure } from "./load-message-structure";
