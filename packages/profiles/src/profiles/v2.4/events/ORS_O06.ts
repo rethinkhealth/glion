@@ -81,47 +81,47 @@ export const transitions = new Map<number, Map<string, number>>([
 export const effects = {
   "10:ORC": {
     groupsClosed: [],
-    groupsOpened: ["ORS_O06/RSPONSE/ORDER"],
+    groupsOpened: ["ORS_O06/RESPONSE/ORDER"],
   },
   "2:ORC": {
-    groupsClosed: ["ORS_O06/RSPONSE/PATIENT"],
-    groupsOpened: ["ORS_O06/RSPONSE", "ORS_O06/RSPONSE/ORDER"],
+    groupsClosed: ["ORS_O06/RESPONSE/PATIENT"],
+    groupsOpened: ["ORS_O06/RESPONSE", "ORS_O06/RESPONSE/ORDER"],
   },
   "2:PID": {
     groupsClosed: [],
-    groupsOpened: ["ORS_O06/RSPONSE", "ORS_O06/RSPONSE/PATIENT"],
+    groupsOpened: ["ORS_O06/RESPONSE", "ORS_O06/RESPONSE/PATIENT"],
   },
   "4:ORC": {
-    groupsClosed: ["ORS_O06/RSPONSE/PATIENT"],
-    groupsOpened: ["ORS_O06/RSPONSE/ORDER"],
+    groupsClosed: ["ORS_O06/RESPONSE/PATIENT"],
+    groupsOpened: ["ORS_O06/RESPONSE/ORDER"],
   },
   "5:ORC": {
-    groupsClosed: ["ORS_O06/RSPONSE/PATIENT"],
-    groupsOpened: ["ORS_O06/RSPONSE", "ORS_O06/RSPONSE/ORDER"],
+    groupsClosed: ["ORS_O06/RESPONSE/PATIENT"],
+    groupsOpened: ["ORS_O06/RESPONSE", "ORS_O06/RESPONSE/ORDER"],
   },
   "5:PID": {
     groupsClosed: [],
-    groupsOpened: ["ORS_O06/RSPONSE", "ORS_O06/RSPONSE/PATIENT"],
+    groupsOpened: ["ORS_O06/RESPONSE", "ORS_O06/RESPONSE/PATIENT"],
   },
   "6:ORC": {
-    groupsClosed: ["ORS_O06/RSPONSE/PATIENT"],
-    groupsOpened: ["ORS_O06/RSPONSE", "ORS_O06/RSPONSE/ORDER"],
+    groupsClosed: ["ORS_O06/RESPONSE/PATIENT"],
+    groupsOpened: ["ORS_O06/RESPONSE", "ORS_O06/RESPONSE/ORDER"],
   },
   "6:PID": {
     groupsClosed: [],
-    groupsOpened: ["ORS_O06/RSPONSE", "ORS_O06/RSPONSE/PATIENT"],
+    groupsOpened: ["ORS_O06/RESPONSE", "ORS_O06/RESPONSE/PATIENT"],
   },
   "7:ORC": {
     groupsClosed: [],
-    groupsOpened: ["ORS_O06/RSPONSE/ORDER"],
+    groupsOpened: ["ORS_O06/RESPONSE/ORDER"],
   },
   "8:ORC": {
-    groupsClosed: ["ORS_O06/RSPONSE/PATIENT"],
-    groupsOpened: ["ORS_O06/RSPONSE/ORDER"],
+    groupsClosed: ["ORS_O06/RESPONSE/PATIENT"],
+    groupsOpened: ["ORS_O06/RESPONSE/ORDER"],
   },
   "9:ORC": {
     groupsClosed: [],
-    groupsOpened: ["ORS_O06/RSPONSE/ORDER"],
+    groupsOpened: ["ORS_O06/RESPONSE/ORDER"],
   },
 } satisfies Readonly<
   Record<
