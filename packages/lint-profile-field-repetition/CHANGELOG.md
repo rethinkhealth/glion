@@ -1,5 +1,13 @@
 # @rethinkhealth/hl7v2-lint-profile-field-repetition
 
+## 0.20.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/util-visit@0.20.0
+  - @glion/ast@0.20.0
+
 ## 0.19.0
 
 ### Patch Changes
