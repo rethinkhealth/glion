@@ -65,7 +65,7 @@ export const fields = [
     id: "ADJ-7",
     item: "2009",
     name: "Adjustment Reason PA",
-    repeatable: true,
+    repeatable: false,
     required: false,
     sequence: 7,
     table: "HL70565",
