@@ -1,5 +1,19 @@
 # @glion/cli
 
+## 0.20.0
+
+### Patch Changes
+
+- [#826](https://github.com/rethinkhealth/glion/pull/826) [`af5a279`](https://github.com/rethinkhealth/glion/commit/af5a2799c45bcd033d666f58ced29042c6a1c7a4) Thanks [@meleksomai](https://github.com/meleksomai)! - Update `rolldown` to 1.0.0-rc.17, the version the rest of the workspace builds with.
+- Updated dependencies [[`62963fe`](https://github.com/rethinkhealth/glion/commit/62963fe254e90d903795d30b418eb7b8d93d8d87), [`e3dad65`](https://github.com/rethinkhealth/glion/commit/e3dad65d4650ef175aeb87cd1c81d61ef7f10019), [`a0cc178`](https://github.com/rethinkhealth/glion/commit/a0cc178a0aed61d92b240c0e8af830e86db488d1), [`d716120`](https://github.com/rethinkhealth/glion/commit/d7161207ed85a57908f52318027967f5aaf2d9dd), [`003907b`](https://github.com/rethinkhealth/glion/commit/003907bfe239970a5d333e47bc9d5e82ca750c51)]:
+  - @glion/mllp-client@0.20.0
+  - @glion/to-hl7v2@0.20.0
+  - @glion/parser@0.20.0
+  - @glion/ack@0.20.0
+  - @glion/mllp@0.20.0
+  - @glion/util-query@0.20.0
+  - @glion/ast@0.20.0
+
 ## 0.19.0
 
 ### Patch Changes
