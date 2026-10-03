@@ -42,7 +42,7 @@ pnpm --filter @glion/benchmarks test        # Canaries proving suites measure re
 
 # Bundle size
 pnpm size                     # Check the size budgets in .size-limit.json (needs a build)
-pnpm --filter @glion/profiles check:bundle   # Check the bundled message structures (runs in its build)
+pnpm --filter @glion/profiles check:bundle   # Check the bundled event schemas (runs in its build)
 
 # Dependencies
 pnpm install                  # Install all
@@ -118,7 +118,7 @@ Each package uses a **dual build**:
 - **tsdown** — bundles ESM JavaScript (Rolldown-based, `format: "esm"`, target `es2022`).
 - **tsc** — generates TypeScript declarations with source maps for IDE go-to-definition.
 
-`@glion/profiles` uses tsdown's `codeSplitting` to merge ~10,800 profile files into ~170 chunks for install/runtime performance.
+`@glion/profiles` bundles one JSON file per profile, loaded through each directory's `index.ts` glob; tsdown's `codeSplitting` groups them by version and kind into chunks of about 100 kB.
 
 Each package's `package.json`:
 

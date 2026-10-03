@@ -1,4 +1,4 @@
-import { eventMaps } from "./profiles/event-map-manifest";
+import { eventMaps } from "./event-maps";
 
 /**
  * The event schema ID the event map of `version` gives `key`, a trigger

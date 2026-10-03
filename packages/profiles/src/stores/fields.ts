@@ -1,5 +1,6 @@
-import { fieldImports } from "../profiles/field-manifest";
 import type { ProfileStoreConfig } from "../store";
+import type { ProfileIndex } from "./import-from-index";
+import { importFromIndex } from "./import-from-index";
 import type { FieldDefinition, FieldModule } from "./types";
 
 /** Compile raw field module into indexed definition. */
@@ -21,9 +22,15 @@ const compileFields = (raw: FieldModule): FieldDefinition => {
   };
 };
 
+const fieldIndexes = import.meta.glob<ProfileIndex<FieldModule>>(
+  "../profiles/v*/fields/index.ts",
+  { import: "default" }
+);
+
 /** Store configuration for segment field profiles. */
 export const fieldsConfig: ProfileStoreConfig<FieldModule, FieldDefinition> = {
   compile: compileFields,
-  manifest: fieldImports,
+  importProfile: (version, id) =>
+    importFromIndex(fieldIndexes, `../profiles/v${version}/fields`, id),
   namespace: "fields",
 };

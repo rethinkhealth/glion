@@ -50,7 +50,7 @@ export type {
 } from "./stores/types";
 
 // Event maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical schema ID)
-export { eventMaps } from "./profiles/event-map-manifest";
+export { eventMaps } from "./event-maps";
 
 // Resolution utilities
 export { loadEventSchema } from "./load-event-schema";

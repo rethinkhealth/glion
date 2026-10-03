@@ -1,31 +1,25 @@
-import { compile } from "../compile";
 import { eventMapEntry } from "../event-map-entry";
-import type { ProfileStoreConfig } from "../store";
+import { compile } from "../compile";
 import type { EventSchema } from "../types";
+import type { ProfileStoreConfig } from "../store";
+import type { ProfileIndex } from "./import-from-index";
+import { importFromIndex } from "./import-from-index";
 
-/** A bundled event schema file. */
-export type EventSchemaModule = Readonly<{ default: EventSchema }>;
+const schemaIndexes = import.meta.glob<ProfileIndex<EventSchema>>(
+  "../profiles/v*/events/index.ts",
+  { import: "default" }
+);
 
-/** Lazy loaders for the bundled event schemas, keyed by file path. */
-export const eventSchemaImports: Readonly<
-  Record<string, () => Promise<EventSchemaModule>>
-> = import.meta.glob<EventSchemaModule>("../profiles/v*/events/*.json");
-
-/** The path `eventSchemaImports` keys a schema by. */
-export const eventSchemaPath = (version: string, id: string): string =>
-  `../profiles/v${version}/events/${id}.json`;
-
-/** Store configuration for event (event schema) profiles. */
-export const eventsConfig: ProfileStoreConfig<EventSchemaModule, EventSchema> =
-  {
-    // Compiling on load makes an invalid schema fail the load, not a later
-    // runner() call.
-    compile: ({ default: schema }) => {
-      compile(schema);
-      return schema;
-    },
-    manifest: eventSchemaImports,
-    manifestKey: eventSchemaPath,
-    namespace: "events",
-    resolveId: eventMapEntry,
-  };
+/** Store configuration for event schemas. */
+export const eventsConfig: ProfileStoreConfig<EventSchema> = {
+  // Compiling on load makes an invalid schema fail the load, not a later
+  // runner() call.
+  compile: (schema) => {
+    compile(schema);
+    return schema;
+  },
+  importProfile: (version, id) =>
+    importFromIndex(schemaIndexes, `../profiles/v${version}/events`, id),
+  namespace: "events",
+  resolveId: eventMapEntry,
+};
