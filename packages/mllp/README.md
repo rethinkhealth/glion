@@ -4,7 +4,7 @@ Transport-agnostic MLLP engine and middleware-driven MLLP server for HL7v2 messa
 
 ## What it does
 
-`@glion/mllp` provides everything you need to send and receive HL7v2 messages over MLLP/TCP: frame encoding and decoding primitives, streaming TransformStreams for chunked TCP, and an `Mllp` class with pattern-based routing, composable middleware, and first-class `unified` processor integration. The server is transport-agnostic at its core and ships with a `serve()` helper for Node.js and Bun.
+`@glion/mllp` provides everything you need to send and receive HL7v2 messages over MLLP/TCP: an `Mllp` class with pattern-based routing, composable middleware, and first-class `unified` processor integration. The server is transport-agnostic at its core and ships with a `serve()` helper for Node.js and Bun. MLLP framing itself lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-codec).
 
 ## Install
 
@@ -16,7 +16,7 @@ npm install @glion/mllp
 
 | Subpath            | Description                       |
 | ------------------ | --------------------------------- |
-| `@glion/mllp`      | Core `Mllp` class and primitives  |
+| `@glion/mllp`      | Core `Mllp` class and routing     |
 | `@glion/mllp/node` | `serve()` helper for Node and Bun |
 
 ## Use
