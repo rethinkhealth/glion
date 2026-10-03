@@ -221,7 +221,7 @@ function authMiddleware(): Middleware {
 function ackMiddleware(): Middleware {
   return async (ctx, next) => {
     await next();
-    ctx.res = { raw: toHl7v2(acknowledge(ctx.ast)) };
+    ctx.res = { raw: toHl7v2(buildAck(ctx.ast)) };
   };
 }
 

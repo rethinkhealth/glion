@@ -166,7 +166,7 @@ Each layer also handles its own concerns: adapters absorb their own teardown err
 
 **Anti-pattern from real work**: the client turned the session's `null` reply and raw stream error into `MllpConnectionLostError`. The session observed the loss; it raises it now, and the client relays it.
 
-**Example**: `MllpDuplexStream.close()` MUST resolve (never reject) and MUST be idempotent. The core awaits `duplex.close()` in `finally` blocks and fires-and-forgets via `void duplex.close()` from the abort handler; the Node/Deno/Workers adapters take responsibility for honouring the contract internally.
+**Example**: `MllpConnection.close()` MUST resolve (never reject) and MUST be idempotent. The core relies on that contract on every teardown path; the Node/Deno/Workers adapters take responsibility for honouring it internally.
 
 ### 4. Functional over class for internal types
 
