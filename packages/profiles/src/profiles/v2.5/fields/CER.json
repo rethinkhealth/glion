@@ -1,0 +1,324 @@
+{
+  "segmentId": "CER",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "CER-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID _ CER",
+      "item": "1856"
+    },
+    {
+      "sequence": 2,
+      "id": "CER-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 80,
+      "name": "Serial Number",
+      "item": "1857"
+    },
+    {
+      "sequence": 3,
+      "id": "CER-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 80,
+      "name": "Version",
+      "item": "1858"
+    },
+    {
+      "sequence": 4,
+      "id": "CER-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XON",
+      "maxLength": 250,
+      "name": "Granting Authority",
+      "item": "1859"
+    },
+    {
+      "sequence": 5,
+      "id": "CER-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XCN",
+      "maxLength": 250,
+      "name": "Issuing Authority",
+      "item": "1860"
+    },
+    {
+      "sequence": 6,
+      "id": "CER-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ED",
+      "maxLength": 65536,
+      "name": "Signature of Issuing Authority",
+      "item": "1861"
+    },
+    {
+      "sequence": 7,
+      "id": "CER-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70399",
+      "name": "Granting Country",
+      "item": "1862"
+    },
+    {
+      "sequence": 8,
+      "id": "CER-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70347",
+      "name": "Granting State/Province",
+      "item": "1863"
+    },
+    {
+      "sequence": 9,
+      "id": "CER-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70289",
+      "name": "Granting County/Parish",
+      "item": "1864"
+    },
+    {
+      "sequence": 10,
+      "id": "CER-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Certificate Type",
+      "item": "1865"
+    },
+    {
+      "sequence": 11,
+      "id": "CER-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Certificate Domain",
+      "item": "1866"
+    },
+    {
+      "sequence": 12,
+      "id": "CER-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 250,
+      "name": "Subject ID",
+      "item": "1867"
+    },
+    {
+      "sequence": 13,
+      "id": "CER-13",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 250,
+      "name": "Subject Name",
+      "item": "1907"
+    },
+    {
+      "sequence": 14,
+      "id": "CER-14",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Subject Directory Attribute Extension (Health Professional Data)",
+      "item": "1868"
+    },
+    {
+      "sequence": 15,
+      "id": "CER-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Subject Public Key Info",
+      "item": "1869"
+    },
+    {
+      "sequence": 16,
+      "id": "CER-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Authority Key Identifier",
+      "item": "1870"
+    },
+    {
+      "sequence": 17,
+      "id": "CER-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 250,
+      "table": "HL70136",
+      "name": "Basic Constraint",
+      "item": "1871"
+    },
+    {
+      "sequence": 18,
+      "id": "CER-18",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "CRL Distribution Point",
+      "item": "1872"
+    },
+    {
+      "sequence": 19,
+      "id": "CER-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70399",
+      "name": "Jurisdiction Country",
+      "item": "1875"
+    },
+    {
+      "sequence": 20,
+      "id": "CER-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70347",
+      "name": "Jurisdiction State/Province",
+      "item": "1873"
+    },
+    {
+      "sequence": 21,
+      "id": "CER-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70289",
+      "name": "Jurisdiction County/Parish",
+      "item": "1874"
+    },
+    {
+      "sequence": 22,
+      "id": "CER-22",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70547",
+      "name": "Jurisdiction Breadth",
+      "item": "1895"
+    },
+    {
+      "sequence": 23,
+      "id": "CER-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Granting Date",
+      "item": "1876"
+    },
+    {
+      "sequence": 24,
+      "id": "CER-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Issuing Date",
+      "item": "1877"
+    },
+    {
+      "sequence": 25,
+      "id": "CER-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Activation Date",
+      "item": "1878"
+    },
+    {
+      "sequence": 26,
+      "id": "CER-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Inactivation Date",
+      "item": "1879"
+    },
+    {
+      "sequence": 27,
+      "id": "CER-27",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Expiration Date",
+      "item": "1880"
+    },
+    {
+      "sequence": 28,
+      "id": "CER-28",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Renewal Date",
+      "item": "1881"
+    },
+    {
+      "sequence": 29,
+      "id": "CER-29",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Revocation Date",
+      "item": "1882"
+    },
+    {
+      "sequence": 30,
+      "id": "CER-30",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Revocation Reason Code",
+      "item": "1883"
+    },
+    {
+      "sequence": 31,
+      "id": "CER-31",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70536",
+      "name": "Certificate Status",
+      "item": "1884"
+    }
+  ]
+}

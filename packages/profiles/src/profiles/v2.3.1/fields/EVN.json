@@ -1,0 +1,68 @@
+{
+  "segmentId": "EVN",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "EVN-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70003",
+      "name": "Event Type Code",
+      "item": "99"
+    },
+    {
+      "sequence": 2,
+      "id": "EVN-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Recorded Date/Time",
+      "item": "100"
+    },
+    {
+      "sequence": 3,
+      "id": "EVN-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Date/Time Planned Event",
+      "item": "101"
+    },
+    {
+      "sequence": 4,
+      "id": "EVN-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 3,
+      "table": "HL70062",
+      "name": "Event Reason Code",
+      "item": "102"
+    },
+    {
+      "sequence": 5,
+      "id": "EVN-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "maxLength": 60,
+      "table": "HL70188",
+      "name": "Operator ID",
+      "item": "103"
+    },
+    {
+      "sequence": 6,
+      "id": "EVN-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Event Occurred",
+      "item": "1278"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "0569",
+  "description": "Adjustment Action",
+  "type": "user",
+  "codes": [
+    {
+      "name": "EOB",
+      "description": "Print on EOB"
+    },
+    {
+      "name": "PAT",
+      "description": "Inform Patient"
+    },
+    {
+      "name": "PRO",
+      "description": "Inform Provider"
+    }
+  ]
+}

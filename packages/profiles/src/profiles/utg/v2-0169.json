@@ -1,0 +1,19 @@
+{
+  "id": "v2-0169",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0169",
+  "oid": "2.16.840.1.113883.18.87",
+  "name": "ReportingPriority",
+  "title": "reportingPriority",
+  "codes": [
+    {
+      "code": "C",
+      "display": "Call back results",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Rush reporting",
+      "status": "active"
+    }
+  ]
+}

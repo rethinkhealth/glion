@@ -1,0 +1,29 @@
+{
+  "id": "v2-0669",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0669",
+  "oid": "2.16.840.1.113883.18.385",
+  "name": "LoadStatus",
+  "title": "loadStatus",
+  "codes": [
+    {
+      "code": "LCC",
+      "display": "Load is Complete",
+      "status": "active"
+    },
+    {
+      "code": "LCN",
+      "display": "Load Canceled",
+      "status": "active"
+    },
+    {
+      "code": "LCP",
+      "display": "Load In Process",
+      "status": "active"
+    },
+    {
+      "code": "LLD",
+      "display": "Building a Load",
+      "status": "active"
+    }
+  ]
+}

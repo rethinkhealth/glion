@@ -1,0 +1,32 @@
+{
+  "id": "CK",
+  "version": "2.3",
+  "kind": "composite",
+  "title": "composite ID with check digit",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "ID number (NM)",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "check digit",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "code identifying the check digit scheme employed",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "assigning authority",
+      "datatypeId": "HD",
+      "required": false
+    }
+  ]
+}

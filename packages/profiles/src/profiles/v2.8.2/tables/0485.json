@@ -1,0 +1,59 @@
+{
+  "id": "0485",
+  "description": "Extended Priority Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "ASAP"
+    },
+    {
+      "name": "C",
+      "description": "Callback"
+    },
+    {
+      "name": "P",
+      "description": "Preop"
+    },
+    {
+      "name": "PRN",
+      "description": "As needed"
+    },
+    {
+      "name": "R",
+      "description": "Routine"
+    },
+    {
+      "name": "S",
+      "description": "Stat"
+    },
+    {
+      "name": "T",
+      "description": "Timing critical"
+    },
+    {
+      "name": "TD<integer>",
+      "description": "Timing critical within <integer> days."
+    },
+    {
+      "name": "TH<integer>",
+      "description": "Timing critical within <integer> hours."
+    },
+    {
+      "name": "TL<integer>",
+      "description": "Timing critical within <integer> months."
+    },
+    {
+      "name": "TM<integer>",
+      "description": "Timing critical within <integer> minutes."
+    },
+    {
+      "name": "TS<integer>",
+      "description": "Timing critical within <integer> seconds."
+    },
+    {
+      "name": "TW<integer>",
+      "description": "Timing critical within <integer> weeks."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "0445",
+  "description": "Identity Reliability Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AL",
+      "description": "Patient/Person Name is an Alias"
+    },
+    {
+      "name": "UA",
+      "description": "Unknown/Default Address"
+    },
+    {
+      "name": "UD",
+      "description": "Unknown/Default Date of Birth"
+    },
+    {
+      "name": "US",
+      "description": "Unknown/Default Social Security Number"
+    }
+  ]
+}

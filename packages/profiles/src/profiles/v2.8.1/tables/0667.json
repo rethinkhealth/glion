@@ -1,0 +1,15 @@
+{
+  "id": "0667",
+  "description": "Device Data State",
+  "type": "user",
+  "codes": [
+    {
+      "name": "0",
+      "description": "Real Time Values"
+    },
+    {
+      "name": "1",
+      "description": "Historic Values"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "0436",
+  "description": "Sensitivity to Causative Agent Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AD",
+      "description": "Adverse Reaction (Not otherwise classified)"
+    },
+    {
+      "name": "AL",
+      "description": "Allergy"
+    },
+    {
+      "name": "CT",
+      "description": "Contraindication"
+    },
+    {
+      "name": "IN",
+      "description": "Intolerance"
+    }
+  ]
+}

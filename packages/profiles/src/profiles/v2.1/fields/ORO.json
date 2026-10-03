@@ -1,0 +1,46 @@
+{
+  "segmentId": "ORO",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "ORO-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 200,
+      "name": "ORDER ITEM ID",
+      "item": "731"
+    },
+    {
+      "sequence": 2,
+      "id": "ORO-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "name": "SUBSTITUTE ALLOWED",
+      "item": "120"
+    },
+    {
+      "sequence": 3,
+      "id": "ORO-3",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CN",
+      "maxLength": 80,
+      "name": "RESULTS COPIES TO",
+      "item": "586"
+    },
+    {
+      "sequence": 4,
+      "id": "ORO-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70012",
+      "name": "STOCK LOCATION",
+      "item": "68"
+    }
+  ]
+}

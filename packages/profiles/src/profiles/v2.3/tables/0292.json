@@ -1,0 +1,215 @@
+{
+  "id": "0292",
+  "description": "Vaccines Administered",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "01",
+      "description": "DTP"
+    },
+    {
+      "name": "02",
+      "description": "OPV"
+    },
+    {
+      "name": "03",
+      "description": "MMR"
+    },
+    {
+      "name": "04",
+      "description": "M/R"
+    },
+    {
+      "name": "05",
+      "description": "Measles"
+    },
+    {
+      "name": "06",
+      "description": "Rubella"
+    },
+    {
+      "name": "07",
+      "description": "Mumps"
+    },
+    {
+      "name": "08",
+      "description": "Hep B - adolescent or pediatric"
+    },
+    {
+      "name": "09",
+      "description": "Td (Adult)"
+    },
+    {
+      "name": "10",
+      "description": "IPV"
+    },
+    {
+      "name": "11",
+      "description": "Pertussis"
+    },
+    {
+      "name": "12",
+      "description": "Diphtheria antitoxin"
+    },
+    {
+      "name": "13",
+      "description": "TIG"
+    },
+    {
+      "name": "14",
+      "description": "IG"
+    },
+    {
+      "name": "15",
+      "description": "Influenza—split (incl. purified surface antigen)"
+    },
+    {
+      "name": "16",
+      "description": "Influenza—whole"
+    },
+    {
+      "name": "17",
+      "description": "Hib-unspecified"
+    },
+    {
+      "name": "18",
+      "description": "Rabies—intramuscular injection"
+    },
+    {
+      "name": "19",
+      "description": "BCG"
+    },
+    {
+      "name": "20",
+      "description": "DTaP"
+    },
+    {
+      "name": "21",
+      "description": "Varicella"
+    },
+    {
+      "name": "22",
+      "description": "DTP-Hib"
+    },
+    {
+      "name": "23",
+      "description": "Plague"
+    },
+    {
+      "name": "24",
+      "description": "Anthrax"
+    },
+    {
+      "name": "25",
+      "description": "Typhoid—oral"
+    },
+    {
+      "name": "26",
+      "description": "Cholera"
+    },
+    {
+      "name": "27",
+      "description": "Botulinum antitoxin"
+    },
+    {
+      "name": "28",
+      "description": "DT(pediatric)"
+    },
+    {
+      "name": "29",
+      "description": "CMVIG"
+    },
+    {
+      "name": "30",
+      "description": "HBIG"
+    },
+    {
+      "name": "31",
+      "description": "Hep A - pediatric"
+    },
+    {
+      "name": "32",
+      "description": "Meningococcal"
+    },
+    {
+      "name": "33",
+      "description": "Pneumococcal"
+    },
+    {
+      "name": "34",
+      "description": "RIG"
+    },
+    {
+      "name": "35",
+      "description": "Tetanus toxoid"
+    },
+    {
+      "name": "36",
+      "description": "VZIG"
+    },
+    {
+      "name": "37",
+      "description": "Yellow fever"
+    },
+    {
+      "name": "38",
+      "description": "Rubella/Mumps"
+    },
+    {
+      "name": "39",
+      "description": "Japanese encephalitis"
+    },
+    {
+      "name": "40",
+      "description": "Rabies—intradermal injection"
+    },
+    {
+      "name": "41",
+      "description": "Typhoid—parenteral"
+    },
+    {
+      "name": "42",
+      "description": "Hep B- adolescent/high risk infant"
+    },
+    {
+      "name": "43",
+      "description": "Hep B-adult"
+    },
+    {
+      "name": "44",
+      "description": "Hep B-dialysis"
+    },
+    {
+      "name": "45",
+      "description": "Hep B-other or unspecified"
+    },
+    {
+      "name": "46",
+      "description": "Hib-PRP-D"
+    },
+    {
+      "name": "47",
+      "description": "Hib-HbOC"
+    },
+    {
+      "name": "48",
+      "description": "Hib-PRP-T"
+    },
+    {
+      "name": "49",
+      "description": "Hib-PRP-OMP"
+    },
+    {
+      "name": "50",
+      "description": "Dtap-Hib"
+    },
+    {
+      "name": "51",
+      "description": "Hib-Hep B"
+    },
+    {
+      "name": "52",
+      "description": "Hep A - adult"
+    }
+  ]
+}

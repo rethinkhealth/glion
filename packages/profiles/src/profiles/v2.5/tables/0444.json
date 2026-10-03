@@ -1,0 +1,15 @@
+{
+  "id": "0444",
+  "description": "Name assembly order",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Prefix Family Middle Given Suffix"
+    },
+    {
+      "name": "G",
+      "description": "Prefix Given Middle Family Suffix"
+    }
+  ]
+}

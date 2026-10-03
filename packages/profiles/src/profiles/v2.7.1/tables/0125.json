@@ -1,0 +1,131 @@
+{
+  "id": "0125",
+  "description": "Value Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AD",
+      "description": "Address"
+    },
+    {
+      "name": "CF",
+      "description": "Coded Element With Formatted Values"
+    },
+    {
+      "name": "CK",
+      "description": "Composite ID With Check Digit"
+    },
+    {
+      "name": "CN",
+      "description": "Composite ID And Name"
+    },
+    {
+      "name": "CNE",
+      "description": "Coded with No Exceptions"
+    },
+    {
+      "name": "CP",
+      "description": "Composite Price"
+    },
+    {
+      "name": "CWE",
+      "description": "Coded Entry"
+    },
+    {
+      "name": "CX",
+      "description": "Extended Composite ID With Check Digit"
+    },
+    {
+      "name": "DR",
+      "description": "Date/Time Range"
+    },
+    {
+      "name": "DT",
+      "description": "Date"
+    },
+    {
+      "name": "DTM",
+      "description": "Time Stamp (Date & Time)"
+    },
+    {
+      "name": "ED",
+      "description": "Encapsulated Data"
+    },
+    {
+      "name": "FT",
+      "description": "Formatted Text (Display)"
+    },
+    {
+      "name": "ID",
+      "description": "Coded Value for HL7 Defined Tables"
+    },
+    {
+      "name": "IS",
+      "description": "Coded Value for User-Defined Tables"
+    },
+    {
+      "name": "MA",
+      "description": "Multiplexed Array"
+    },
+    {
+      "name": "MO",
+      "description": "Money"
+    },
+    {
+      "name": "NA",
+      "description": "Numeric Array"
+    },
+    {
+      "name": "NM",
+      "description": "Numeric"
+    },
+    {
+      "name": "PN",
+      "description": "Person Name"
+    },
+    {
+      "name": "RP",
+      "description": "Reference Pointer"
+    },
+    {
+      "name": "SN",
+      "description": "Structured Numeric"
+    },
+    {
+      "name": "ST",
+      "description": "String Data."
+    },
+    {
+      "name": "TM",
+      "description": "Time"
+    },
+    {
+      "name": "TN",
+      "description": "Telephone Number"
+    },
+    {
+      "name": "TX",
+      "description": "Text Data (Display)"
+    },
+    {
+      "name": "XAD",
+      "description": "Extended Address"
+    },
+    {
+      "name": "XCN",
+      "description": "Extended Composite Name And Number For Persons"
+    },
+    {
+      "name": "XON",
+      "description": "Extended Composite Name And Number For Organizations"
+    },
+    {
+      "name": "XPN",
+      "description": "Extended Person Name"
+    },
+    {
+      "name": "XTN",
+      "description": "Extended Telecommunications Number"
+    }
+  ]
+}

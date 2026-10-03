@@ -1,0 +1,34 @@
+{
+  "id": "v2-0761",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0761",
+  "oid": "2.16.840.1.113883.18.400",
+  "name": "DrgProcedureDeterminationStatus",
+  "title": "drgProcedureDeterminationStatus",
+  "codes": [
+    {
+      "code": "0",
+      "display": "Valid code",
+      "status": "active"
+    },
+    {
+      "code": "1",
+      "display": "Invalid code",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Not used",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Invalid for this gender",
+      "status": "active"
+    },
+    {
+      "code": "4",
+      "display": "Invalid for this age",
+      "status": "active"
+    }
+  ]
+}

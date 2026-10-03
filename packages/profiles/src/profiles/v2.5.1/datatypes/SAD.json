@@ -1,0 +1,26 @@
+{
+  "id": "SAD",
+  "version": "2.5.1",
+  "kind": "composite",
+  "title": "Street Address",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Street or Mailing Address",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Street Name",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Dwelling Number",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

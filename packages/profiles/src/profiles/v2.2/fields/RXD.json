@@ -1,0 +1,156 @@
+{
+  "segmentId": "RXD",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RXD-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "Dispense Sub-ID Counter",
+      "item": "334"
+    },
+    {
+      "sequence": 2,
+      "id": "RXD-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 100,
+      "name": "Dispense / give code",
+      "item": "335"
+    },
+    {
+      "sequence": 3,
+      "id": "RXD-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Date / time dispensed",
+      "item": "336"
+    },
+    {
+      "sequence": 4,
+      "id": "RXD-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Actual Dispense Amount",
+      "item": "337"
+    },
+    {
+      "sequence": 5,
+      "id": "RXD-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Actual Dispense Units",
+      "item": "338"
+    },
+    {
+      "sequence": 6,
+      "id": "RXD-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Actual Dosage Form",
+      "item": "339"
+    },
+    {
+      "sequence": 7,
+      "id": "RXD-7",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Prescription Number",
+      "item": "325"
+    },
+    {
+      "sequence": 8,
+      "id": "RXD-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Number of Refills Remaining",
+      "item": "326"
+    },
+    {
+      "sequence": 9,
+      "id": "RXD-9",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 200,
+      "name": "Dispense Notes",
+      "item": "340"
+    },
+    {
+      "sequence": 10,
+      "id": "RXD-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 200,
+      "name": "Dispensing Provider",
+      "item": "341"
+    },
+    {
+      "sequence": 11,
+      "id": "RXD-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70167",
+      "name": "Substitution Status",
+      "item": "322"
+    },
+    {
+      "sequence": 12,
+      "id": "RXD-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 10,
+      "name": "Total Daily Dose",
+      "item": "329"
+    },
+    {
+      "sequence": 13,
+      "id": "RXD-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 12,
+      "name": "Deliver-to location",
+      "item": "299"
+    },
+    {
+      "sequence": 14,
+      "id": "RXD-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "name": "Needs Human Review",
+      "item": "307"
+    },
+    {
+      "sequence": 15,
+      "id": "RXD-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 200,
+      "name": "Pharmacy Special Dispensing Instructions",
+      "item": "330"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "v2-0253",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0253",
+  "oid": "2.16.840.1.113883.18.148",
+  "name": "IndirectExposureMechanism",
+  "title": "indirectExposureMechanism",
+  "codes": [
+    {
+      "code": "B",
+      "display": "Breast milk",
+      "status": "active"
+    },
+    {
+      "code": "F",
+      "display": "Father",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Transplacental",
+      "status": "active"
+    },
+    {
+      "code": "X",
+      "display": "Blood product",
+      "status": "active"
+    }
+  ]
+}

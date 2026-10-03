@@ -1,0 +1,31 @@
+{
+  "id": "0422",
+  "description": "Triage Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Non-acute"
+    },
+    {
+      "name": "2",
+      "description": "Acute"
+    },
+    {
+      "name": "3",
+      "description": "Urgent"
+    },
+    {
+      "name": "4",
+      "description": "Severe"
+    },
+    {
+      "name": "5",
+      "description": "Dead on Arrival (DOA)"
+    },
+    {
+      "name": "99",
+      "description": "Other"
+    }
+  ]
+}

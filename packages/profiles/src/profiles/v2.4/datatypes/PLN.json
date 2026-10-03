@@ -1,0 +1,32 @@
+{
+  "id": "PLN",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "Practitioner ID Numbers",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "ID number (ST)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "type of ID number (IS)",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "state/other qualifying info",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "expiration date",
+      "datatypeId": "DT",
+      "required": false
+    }
+  ]
+}

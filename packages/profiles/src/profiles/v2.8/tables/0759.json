@@ -1,0 +1,23 @@
+{
+  "id": "0759",
+  "description": "Status Admission",
+  "type": "user",
+  "codes": [
+    {
+      "name": "0",
+      "description": "Admission status is valid; used for grouping"
+    },
+    {
+      "name": "1",
+      "description": "Admission status is valid; not used for grouping"
+    },
+    {
+      "name": "2",
+      "description": "Admission status is invalid; not used for grouping"
+    },
+    {
+      "name": "3",
+      "description": "Admission status is invalid; default value used for grouping"
+    }
+  ]
+}

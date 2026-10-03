@@ -1,0 +1,27 @@
+{
+  "id": "0868",
+  "description": "Telecommunication expiration reason",
+  "type": "user",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Corrected"
+    },
+    {
+      "name": "E",
+      "description": "Added in error"
+    },
+    {
+      "name": "M",
+      "description": "Moved"
+    },
+    {
+      "name": "N",
+      "description": "No longer in service"
+    },
+    {
+      "name": "R",
+      "description": "On request"
+    }
+  ]
+}

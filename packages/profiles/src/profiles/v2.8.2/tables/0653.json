@@ -1,0 +1,31 @@
+{
+  "id": "0653",
+  "description": "Date Format",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "mm/dd/yy"
+    },
+    {
+      "name": "2",
+      "description": "yy.mm.dd"
+    },
+    {
+      "name": "3",
+      "description": "dd/mm/yy"
+    },
+    {
+      "name": "4",
+      "description": "dd.mm.yy"
+    },
+    {
+      "name": "5",
+      "description": "yy/mm/dd"
+    },
+    {
+      "name": "6",
+      "description": "Yymmdd"
+    }
+  ]
+}

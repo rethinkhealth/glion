@@ -1,0 +1,19 @@
+{
+  "id": "v2-0682",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0682",
+  "oid": "2.16.840.1.113883.18.386",
+  "name": "DeviceStatus",
+  "title": "deviceStatus",
+  "codes": [
+    {
+      "code": "0",
+      "display": "Ready",
+      "status": "active"
+    },
+    {
+      "code": "1",
+      "display": "Not Ready",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "HD",
+  "version": "2.5.1",
+  "kind": "composite",
+  "title": "Hierarchic Designator",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Namespace ID",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Universal ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Universal ID Type",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

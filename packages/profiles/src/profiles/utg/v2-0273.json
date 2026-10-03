@@ -1,0 +1,29 @@
+{
+  "id": "v2-0273",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0273",
+  "oid": "2.16.840.1.113883.18.167",
+  "name": "DocumentAvailabilityStatus",
+  "title": "documentAvailabilityStatus",
+  "codes": [
+    {
+      "code": "AV",
+      "display": "Available for patient care",
+      "status": "active"
+    },
+    {
+      "code": "CA",
+      "display": "Deleted",
+      "status": "active"
+    },
+    {
+      "code": "OB",
+      "display": "Obsolete",
+      "status": "active"
+    },
+    {
+      "code": "UN",
+      "display": "Unavailable for patient care",
+      "status": "active"
+    }
+  ]
+}

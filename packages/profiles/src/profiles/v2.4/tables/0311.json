@@ -1,0 +1,23 @@
+{
+  "id": "0311",
+  "description": "Job status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "P",
+      "description": "Permanent"
+    },
+    {
+      "name": "T",
+      "description": "Temporary"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

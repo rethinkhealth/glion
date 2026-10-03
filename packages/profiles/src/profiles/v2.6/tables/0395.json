@@ -1,0 +1,15 @@
+{
+  "id": "0395",
+  "description": "Modify indicator",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "M",
+      "description": "Modified Subscription"
+    },
+    {
+      "name": "N",
+      "description": "New Subscription"
+    }
+  ]
+}

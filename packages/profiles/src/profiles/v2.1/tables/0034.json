@@ -1,0 +1,15 @@
+{
+  "id": "0034",
+  "description": "SITE ADMINISTERED",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Buttock"
+    },
+    {
+      "name": "L",
+      "description": "Left arm"
+    }
+  ]
+}

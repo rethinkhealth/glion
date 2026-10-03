@@ -1,0 +1,11 @@
+{
+  "id": "0068",
+  "description": "Guarantor Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

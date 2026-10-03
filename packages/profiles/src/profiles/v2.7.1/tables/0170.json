@@ -1,0 +1,19 @@
+{
+  "id": "0170",
+  "description": "Derived Specimen",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Child Observation"
+    },
+    {
+      "name": "N",
+      "description": "Not Applicable"
+    },
+    {
+      "name": "P",
+      "description": "Parent Observation"
+    }
+  ]
+}

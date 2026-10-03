@@ -1,0 +1,34 @@
+{
+  "id": "v2-0536",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0536",
+  "oid": "2.16.840.1.113883.18.350",
+  "name": "CertificateStatus",
+  "title": "certificateStatus",
+  "codes": [
+    {
+      "code": "E",
+      "display": "Expired",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Inactive",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Provisional",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Revoked",
+      "status": "active"
+    },
+    {
+      "code": "V",
+      "display": "Active/Valid",
+      "status": "active"
+    }
+  ]
+}

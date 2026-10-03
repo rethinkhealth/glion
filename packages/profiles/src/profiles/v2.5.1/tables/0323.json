@@ -1,0 +1,23 @@
+{
+  "id": "0323",
+  "description": "Action Code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Add/Insert"
+    },
+    {
+      "name": "D",
+      "description": "Delete"
+    },
+    {
+      "name": "U",
+      "description": "Update"
+    },
+    {
+      "name": "X",
+      "description": "No change"
+    }
+  ]
+}

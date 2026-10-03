@@ -1,0 +1,44 @@
+{
+  "id": "CE",
+  "version": "2.3",
+  "kind": "composite",
+  "title": "coded element",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "identifier",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "text",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "name of coding system",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "alternate identifier",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "alternate text",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "name of alternate coding system",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

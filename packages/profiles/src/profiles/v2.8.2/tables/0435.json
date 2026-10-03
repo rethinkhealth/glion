@@ -1,0 +1,15 @@
+{
+  "id": "0435",
+  "description": "Advance Directive Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "DNR",
+      "description": "Do not resuscitate"
+    },
+    {
+      "name": "N",
+      "description": "No directive"
+    }
+  ]
+}

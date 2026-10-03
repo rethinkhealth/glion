@@ -1,0 +1,267 @@
+{
+  "id": "0290",
+  "description": "MIME base64 encoding characters",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "(pad)",
+      "description": "="
+    },
+    {
+      "name": "0",
+      "description": "A"
+    },
+    {
+      "name": "1",
+      "description": "B"
+    },
+    {
+      "name": "10",
+      "description": "K"
+    },
+    {
+      "name": "11",
+      "description": "L"
+    },
+    {
+      "name": "12",
+      "description": "M"
+    },
+    {
+      "name": "13",
+      "description": "N"
+    },
+    {
+      "name": "14",
+      "description": "O"
+    },
+    {
+      "name": "15",
+      "description": "P"
+    },
+    {
+      "name": "16",
+      "description": "Q"
+    },
+    {
+      "name": "17",
+      "description": "R"
+    },
+    {
+      "name": "18",
+      "description": "S"
+    },
+    {
+      "name": "19",
+      "description": "T"
+    },
+    {
+      "name": "2",
+      "description": "C"
+    },
+    {
+      "name": "20",
+      "description": "U"
+    },
+    {
+      "name": "21",
+      "description": "V"
+    },
+    {
+      "name": "22",
+      "description": "W"
+    },
+    {
+      "name": "23",
+      "description": "X"
+    },
+    {
+      "name": "24",
+      "description": "Y"
+    },
+    {
+      "name": "25",
+      "description": "Z"
+    },
+    {
+      "name": "26",
+      "description": "a"
+    },
+    {
+      "name": "27",
+      "description": "b"
+    },
+    {
+      "name": "28",
+      "description": "c"
+    },
+    {
+      "name": "29",
+      "description": "d"
+    },
+    {
+      "name": "3",
+      "description": "D"
+    },
+    {
+      "name": "30",
+      "description": "e"
+    },
+    {
+      "name": "31",
+      "description": "f"
+    },
+    {
+      "name": "32",
+      "description": "g"
+    },
+    {
+      "name": "33",
+      "description": "h"
+    },
+    {
+      "name": "34",
+      "description": "I"
+    },
+    {
+      "name": "35",
+      "description": "j"
+    },
+    {
+      "name": "36",
+      "description": "k"
+    },
+    {
+      "name": "37",
+      "description": "l"
+    },
+    {
+      "name": "38",
+      "description": "m"
+    },
+    {
+      "name": "39",
+      "description": "n"
+    },
+    {
+      "name": "4",
+      "description": "E"
+    },
+    {
+      "name": "40",
+      "description": "o"
+    },
+    {
+      "name": "41",
+      "description": "p"
+    },
+    {
+      "name": "42",
+      "description": "q"
+    },
+    {
+      "name": "43",
+      "description": "r"
+    },
+    {
+      "name": "44",
+      "description": "s"
+    },
+    {
+      "name": "45",
+      "description": "t"
+    },
+    {
+      "name": "46",
+      "description": "u"
+    },
+    {
+      "name": "47",
+      "description": "v"
+    },
+    {
+      "name": "48",
+      "description": "w"
+    },
+    {
+      "name": "49",
+      "description": "x"
+    },
+    {
+      "name": "5",
+      "description": "F"
+    },
+    {
+      "name": "50",
+      "description": "y"
+    },
+    {
+      "name": "51",
+      "description": "z"
+    },
+    {
+      "name": "52",
+      "description": "0"
+    },
+    {
+      "name": "53",
+      "description": "1"
+    },
+    {
+      "name": "54",
+      "description": "2"
+    },
+    {
+      "name": "55",
+      "description": "3"
+    },
+    {
+      "name": "56",
+      "description": "4"
+    },
+    {
+      "name": "57",
+      "description": "5"
+    },
+    {
+      "name": "58",
+      "description": "6"
+    },
+    {
+      "name": "59",
+      "description": "7"
+    },
+    {
+      "name": "6",
+      "description": "G"
+    },
+    {
+      "name": "60",
+      "description": "8"
+    },
+    {
+      "name": "61",
+      "description": "9"
+    },
+    {
+      "name": "62",
+      "description": "+"
+    },
+    {
+      "name": "63",
+      "description": "/"
+    },
+    {
+      "name": "7",
+      "description": "H"
+    },
+    {
+      "name": "8",
+      "description": "I"
+    },
+    {
+      "name": "9",
+      "description": "J"
+    }
+  ]
+}

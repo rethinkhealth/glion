@@ -1,0 +1,26 @@
+{
+  "id": "OSP",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "occurence span",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "occurrence span code",
+      "datatypeId": "CE",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "occurrence span start date",
+      "datatypeId": "DT",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "occurrence span stop date",
+      "datatypeId": "DT",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "0332",
+  "description": "Source Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Accept"
+    },
+    {
+      "name": "I",
+      "description": "Initiate"
+    }
+  ]
+}

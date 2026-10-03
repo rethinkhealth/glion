@@ -1,0 +1,15 @@
+{
+  "id": "0920",
+  "description": "Preferred Specimen/Attribute Status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Alternate"
+    },
+    {
+      "name": "P",
+      "description": "Preferred"
+    }
+  ]
+}

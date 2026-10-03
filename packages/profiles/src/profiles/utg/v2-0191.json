@@ -1,0 +1,74 @@
+{
+  "id": "v2-0191",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0191",
+  "oid": "2.16.840.1.113883.18.102",
+  "name": "TypeOfReferencedData",
+  "title": "typeOfReferencedData",
+  "codes": [
+    {
+      "code": "AP",
+      "display": "Other application data, typically uninterpreted binary data (HL7 V2.3 and later)",
+      "status": "active"
+    },
+    {
+      "code": "Application",
+      "display": "Other application data, typically uninterpreted binary data  (HL7 V2.3 and later)",
+      "status": "deprecated"
+    },
+    {
+      "code": "AU",
+      "display": "Audio data (HL7 V2.3 and later)",
+      "status": "active"
+    },
+    {
+      "code": "Audio",
+      "display": "Audio data  (HL7 V2.3 and later)",
+      "status": "deprecated"
+    },
+    {
+      "code": "FT",
+      "display": "Formatted text (HL7 V2.2 only)",
+      "status": "active"
+    },
+    {
+      "code": "IM",
+      "display": "Image data (HL7 V2.3 and later)",
+      "status": "active"
+    },
+    {
+      "code": "Image",
+      "display": "Image data  (HL7 V2.3 and later)",
+      "status": "deprecated"
+    },
+    {
+      "code": "multipart",
+      "display": "MIME multipart package",
+      "status": "active"
+    },
+    {
+      "code": "NS",
+      "display": "Non-scanned image (HL7 V2.2 only)",
+      "status": "active"
+    },
+    {
+      "code": "SD",
+      "display": "Scanned document (HL7 V2.2 only)",
+      "status": "active"
+    },
+    {
+      "code": "SI",
+      "display": "Scanned image (HL7 V2.2 only)",
+      "status": "active"
+    },
+    {
+      "code": "TEXT",
+      "display": "Machine readable text document (HL7 V2.3.1 and later)",
+      "status": "active"
+    },
+    {
+      "code": "TX",
+      "display": "Machine readable text document (HL7 V2.2 only)",
+      "status": "active"
+    }
+  ]
+}

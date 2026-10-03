@@ -1,0 +1,63 @@
+{
+  "id": "0078",
+  "description": "ABNORMAL FLAGS",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "<",
+      "description": "Below absolute low-off instrument scale"
+    },
+    {
+      "name": "A",
+      "description": "Abnormal (applies to non-numeric results)"
+    },
+    {
+      "name": "AA",
+      "description": "Very abnormal"
+    },
+    {
+      "name": "D",
+      "description": "Significant change down"
+    },
+    {
+      "name": "H",
+      "description": "Above high normal"
+    },
+    {
+      "name": "HH",
+      "description": "Above upper panic limits"
+    },
+    {
+      "name": "I",
+      "description": "Interval"
+    },
+    {
+      "name": "LL",
+      "description": "Below lower panic limits"
+    },
+    {
+      "name": "MS",
+      "description": "Moderately sensitive"
+    },
+    {
+      "name": "null",
+      "description": "No range defined,or normal ranges don't apply"
+    },
+    {
+      "name": "R",
+      "description": "Resists"
+    },
+    {
+      "name": "S",
+      "description": "Sensitive"
+    },
+    {
+      "name": "U",
+      "description": "Significant change up"
+    },
+    {
+      "name": "VS",
+      "description": "Very sensitive"
+    }
+  ]
+}

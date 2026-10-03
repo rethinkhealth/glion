@@ -1,0 +1,68 @@
+{
+  "segmentId": "MFA",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "MFA-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70180",
+      "name": "Record-Level Event Code",
+      "item": "664"
+    },
+    {
+      "sequence": 2,
+      "id": "MFA-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "MFN Control ID",
+      "item": "665"
+    },
+    {
+      "sequence": 3,
+      "id": "MFA-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Event Completion Date/Time",
+      "item": "668"
+    },
+    {
+      "sequence": 4,
+      "id": "MFA-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70181",
+      "name": "MFN Record Level Error Return",
+      "item": "669"
+    },
+    {
+      "sequence": 5,
+      "id": "MFA-5",
+      "required": true,
+      "repeatable": true,
+      "datatype": "varies",
+      "maxLength": 250,
+      "name": "Primary Key Value - MFA",
+      "item": "1308"
+    },
+    {
+      "sequence": 6,
+      "id": "MFA-6",
+      "required": true,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70355",
+      "name": "Primary Key Value Type - MFA",
+      "item": "1320"
+    }
+  ]
+}

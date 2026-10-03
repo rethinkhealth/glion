@@ -1,0 +1,20 @@
+{
+  "id": "MOC",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "Charge To Practise",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "dollar amount",
+      "datatypeId": "MO",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "charge code",
+      "datatypeId": "CE",
+      "required": false
+    }
+  ]
+}

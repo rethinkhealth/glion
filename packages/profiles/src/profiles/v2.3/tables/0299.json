@@ -1,0 +1,19 @@
+{
+  "id": "0299",
+  "description": "Encoding",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "no encoding - data are displayable ASCII characters."
+    },
+    {
+      "name": "Base64",
+      "description": "encoding as defined by MIME (Multipurpose Internet Mail Extensions) standard RFC 1521.  Four consecutive ASCII characters represent three consecutive octets of binary data."
+    },
+    {
+      "name": "Hex",
+      "description": "hexadecimal encoding - consecutive pairs of hexadecimal digits represent consecutive single octets."
+    }
+  ]
+}

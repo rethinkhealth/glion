@@ -1,0 +1,27 @@
+{
+  "id": "0137",
+  "description": "MAIL CLAIM PARTY",
+  "type": "user",
+  "codes": [
+    {
+      "name": "E",
+      "description": "Employer"
+    },
+    {
+      "name": "G",
+      "description": "Guarantor"
+    },
+    {
+      "name": "I",
+      "description": "Insurance Company"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "P",
+      "description": "Patient"
+    }
+  ]
+}

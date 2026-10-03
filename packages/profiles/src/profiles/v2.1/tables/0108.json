@@ -1,0 +1,19 @@
+{
+  "id": "0108",
+  "description": "QUERY RESULTS LEVEL",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "O",
+      "description": "Order plus order status"
+    },
+    {
+      "name": "S",
+      "description": "Status only"
+    },
+    {
+      "name": "T",
+      "description": "Full Results"
+    }
+  ]
+}

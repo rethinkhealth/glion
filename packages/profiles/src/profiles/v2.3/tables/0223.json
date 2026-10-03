@@ -1,0 +1,27 @@
+{
+  "id": "0223",
+  "description": "Living Dependency",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CB",
+      "description": "Common bath"
+    },
+    {
+      "name": "D",
+      "description": "Spouse dependent"
+    },
+    {
+      "name": "M",
+      "description": "Medical supervision required"
+    },
+    {
+      "name": "S",
+      "description": "Small children"
+    },
+    {
+      "name": "WU",
+      "description": "Walk up"
+    }
+  ]
+}

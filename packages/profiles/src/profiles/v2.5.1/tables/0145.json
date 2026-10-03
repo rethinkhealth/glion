@@ -1,0 +1,31 @@
+{
+  "id": "0145",
+  "description": "Room type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "2ICU",
+      "description": "Second intensive care unit"
+    },
+    {
+      "name": "2PRI",
+      "description": "Second private room"
+    },
+    {
+      "name": "2SPR",
+      "description": "Second semi-private room"
+    },
+    {
+      "name": "ICU",
+      "description": "Intensive care unit"
+    },
+    {
+      "name": "PRI",
+      "description": "Private room"
+    },
+    {
+      "name": "SPR",
+      "description": "Semi-private room"
+    }
+  ]
+}

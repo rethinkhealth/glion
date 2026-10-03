@@ -1,0 +1,128 @@
+{
+  "segmentId": "ROL",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "ROL-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 60,
+      "name": "Role Instance ID",
+      "item": "1206"
+    },
+    {
+      "sequence": 2,
+      "id": "ROL-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70287",
+      "name": "Action Code",
+      "item": "816"
+    },
+    {
+      "sequence": 3,
+      "id": "ROL-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70443",
+      "name": "Role-ROL",
+      "item": "1197"
+    },
+    {
+      "sequence": 4,
+      "id": "ROL-4",
+      "required": true,
+      "repeatable": true,
+      "datatype": "XCN",
+      "maxLength": 250,
+      "name": "Role Person",
+      "item": "1198"
+    },
+    {
+      "sequence": 5,
+      "id": "ROL-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Role Begin Date/Time",
+      "item": "1199"
+    },
+    {
+      "sequence": 6,
+      "id": "ROL-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Role End Date/Time",
+      "item": "1200"
+    },
+    {
+      "sequence": 7,
+      "id": "ROL-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Role Duration",
+      "item": "1201"
+    },
+    {
+      "sequence": 8,
+      "id": "ROL-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Role Action Reason",
+      "item": "1205"
+    },
+    {
+      "sequence": 9,
+      "id": "ROL-9",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Provider Type",
+      "item": "1510"
+    },
+    {
+      "sequence": 10,
+      "id": "ROL-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70406",
+      "name": "Organization Unit Type - ROL",
+      "item": "1461"
+    },
+    {
+      "sequence": 11,
+      "id": "ROL-11",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XAD",
+      "maxLength": 250,
+      "name": "Office/Home Address",
+      "item": "679"
+    },
+    {
+      "sequence": 12,
+      "id": "ROL-12",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XTN",
+      "maxLength": 250,
+      "name": "Phone",
+      "item": "678"
+    }
+  ]
+}

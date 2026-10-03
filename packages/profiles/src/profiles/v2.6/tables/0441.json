@@ -1,0 +1,35 @@
+{
+  "id": "0441",
+  "description": "Immunization Registry Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Active"
+    },
+    {
+      "name": "I",
+      "description": "Inactive"
+    },
+    {
+      "name": "L",
+      "description": "Inactive - Lost to follow-up (cancel contract)"
+    },
+    {
+      "name": "M",
+      "description": "Inactive - Moved or gone elsewhere (cancel contract)"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "P",
+      "description": "Inactive - Permanently inactive (Do not reactivate or add new entries to the record)"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

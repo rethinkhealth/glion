@@ -1,0 +1,23 @@
+{
+  "id": "0080",
+  "description": "Nature of abnormal testing",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "An age-based population"
+    },
+    {
+      "name": "N",
+      "description": "None - generic normal range"
+    },
+    {
+      "name": "R",
+      "description": "A race-based population"
+    },
+    {
+      "name": "S",
+      "description": "A sex-based population"
+    }
+  ]
+}

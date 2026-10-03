@@ -1,0 +1,11 @@
+{
+  "id": "0811",
+  "description": "Maintenance Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

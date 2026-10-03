@@ -1,0 +1,27 @@
+{
+  "id": "0513",
+  "description": "Blood Product Transfusion/Disposition Status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "RA",
+      "description": "Returned unused/no longer needed"
+    },
+    {
+      "name": "RL",
+      "description": "Returned unused/keep linked to patient for possible use later"
+    },
+    {
+      "name": "TR",
+      "description": "Transfused with adverse reaction"
+    },
+    {
+      "name": "TX",
+      "description": "Transfused"
+    },
+    {
+      "name": "WA",
+      "description": "Wasted (product no longer viable)"
+    }
+  ]
+}

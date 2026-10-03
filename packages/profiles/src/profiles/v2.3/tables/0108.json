@@ -1,0 +1,23 @@
+{
+  "id": "0108",
+  "description": "Query Results Level",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "O",
+      "description": "Order plus order status"
+    },
+    {
+      "name": "R",
+      "description": "Results without bulk text"
+    },
+    {
+      "name": "S",
+      "description": "Status only"
+    },
+    {
+      "name": "T",
+      "description": "Full results (default)"
+    }
+  ]
+}

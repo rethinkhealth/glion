@@ -1,0 +1,19 @@
+{
+  "id": "v2-0183",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0183",
+  "oid": "2.16.840.1.113883.18.97",
+  "name": "ActiveInactive",
+  "title": "active-inactive",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Active Staff",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Inactive Staff",
+      "status": "active"
+    }
+  ]
+}

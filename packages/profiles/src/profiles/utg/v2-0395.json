@@ -1,0 +1,19 @@
+{
+  "id": "v2-0395",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0395",
+  "oid": "2.16.840.1.113883.18.246",
+  "name": "ModifyIndicator",
+  "title": "modifyIndicator",
+  "codes": [
+    {
+      "code": "M",
+      "display": "Modified Subscription",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "New Subscription",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "id": "0203",
+  "description": "Identifier Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AM",
+      "description": "American Express"
+    },
+    {
+      "name": "AN",
+      "description": "Account Number"
+    },
+    {
+      "name": "BR",
+      "description": "Birth Registry Number"
+    },
+    {
+      "name": "DI",
+      "description": "Diner's Club Card"
+    },
+    {
+      "name": "DL",
+      "description": "Driver's License Number"
+    },
+    {
+      "name": "DN",
+      "description": "Doctor Number"
+    },
+    {
+      "name": "DS",
+      "description": "Discover Card"
+    },
+    {
+      "name": "EI",
+      "description": "Employee Number"
+    },
+    {
+      "name": "EN",
+      "description": "Employer Number"
+    },
+    {
+      "name": "GI",
+      "description": "Guarantor Internal Identifier"
+    },
+    {
+      "name": "GN",
+      "description": "Guarantor External Identifier"
+    },
+    {
+      "name": "MA",
+      "description": "Medicaid Number"
+    },
+    {
+      "name": "MC",
+      "description": "Medicare Number"
+    },
+    {
+      "name": "MR",
+      "description": "Medical Record Number"
+    },
+    {
+      "name": "MS",
+      "description": "Master Card"
+    },
+    {
+      "name": "PI",
+      "description": "Patient Internal Identifier"
+    },
+    {
+      "name": "PT",
+      "description": "Patient External Identifier"
+    },
+    {
+      "name": "RR",
+      "description": "Railroad Retirement Number"
+    },
+    {
+      "name": "SS",
+      "description": "Social Security Number"
+    },
+    {
+      "name": "VN",
+      "description": "Visit Number"
+    },
+    {
+      "name": "VS",
+      "description": "VISA"
+    },
+    {
+      "name": "XX",
+      "description": "Organizaiton Indentifier"
+    }
+  ]
+}

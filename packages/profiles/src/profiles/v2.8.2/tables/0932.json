@@ -1,0 +1,15 @@
+{
+  "id": "0932",
+  "description": "Donation Duration Units",
+  "type": "user",
+  "codes": [
+    {
+      "name": "min",
+      "description": "Minutes"
+    },
+    {
+      "name": "s",
+      "description": "Seconds"
+    }
+  ]
+}

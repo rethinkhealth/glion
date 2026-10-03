@@ -1,0 +1,20 @@
+{
+  "id": "CQ",
+  "version": "2.5",
+  "kind": "composite",
+  "title": "Composite Quantity with Units",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Quantity",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Units",
+      "datatypeId": "CE",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "0287",
+  "description": "Problem/Goal Action Code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AD",
+      "description": "ADD"
+    },
+    {
+      "name": "CO",
+      "description": "CORRECT"
+    },
+    {
+      "name": "DE",
+      "description": "DELETE"
+    },
+    {
+      "name": "LI",
+      "description": "LINK"
+    },
+    {
+      "name": "UC",
+      "description": "UNCHANGED *"
+    },
+    {
+      "name": "UN",
+      "description": "UNLINK"
+    },
+    {
+      "name": "UP",
+      "description": "UPDATE"
+    }
+  ]
+}

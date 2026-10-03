@@ -1,0 +1,52 @@
+{
+  "segmentId": "VND",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "VND-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set Id - VND",
+      "item": "2217"
+    },
+    {
+      "sequence": 2,
+      "id": "VND-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Vendor Identifier",
+      "item": "2218"
+    },
+    {
+      "sequence": 3,
+      "id": "VND-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Vendor Name",
+      "item": "2276"
+    },
+    {
+      "sequence": 4,
+      "id": "VND-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Vendor Catalog Number",
+      "item": "2219"
+    },
+    {
+      "sequence": 5,
+      "id": "VND-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70532",
+      "name": "Primary Vendor Indicator",
+      "item": "2220"
+    }
+  ]
+}

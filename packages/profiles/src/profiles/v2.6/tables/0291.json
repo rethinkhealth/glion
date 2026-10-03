@@ -1,0 +1,15 @@
+{
+  "id": "0291",
+  "description": "Subtype of referenced data",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "Source RFC 2046"
+    },
+    {
+      "name": "x-hl7-cda-level-one",
+      "description": "HL7 Clinical Document Architecture Level One document"
+    }
+  ]
+}

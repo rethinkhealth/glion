@@ -1,0 +1,87 @@
+{
+  "segmentId": "EDU",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "EDU-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 60,
+      "name": "Set ID - EDU",
+      "item": "1448"
+    },
+    {
+      "sequence": 2,
+      "id": "EDU-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 10,
+      "table": "HL70360",
+      "name": "Academic Degree",
+      "item": "1449"
+    },
+    {
+      "sequence": 3,
+      "id": "EDU-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DR",
+      "maxLength": 52,
+      "name": "Academic Degree Program Date Range",
+      "item": "1597"
+    },
+    {
+      "sequence": 4,
+      "id": "EDU-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DR",
+      "maxLength": 52,
+      "name": "Academic Degree Program Participation Date Range",
+      "item": "1450"
+    },
+    {
+      "sequence": 5,
+      "id": "EDU-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "Academic Degree Granted Date",
+      "item": "1451"
+    },
+    {
+      "sequence": 6,
+      "id": "EDU-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XON",
+      "maxLength": 250,
+      "name": "School",
+      "item": "1452"
+    },
+    {
+      "sequence": 7,
+      "id": "EDU-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70402",
+      "name": "School Type Code",
+      "item": "1453"
+    },
+    {
+      "sequence": 8,
+      "id": "EDU-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XAD",
+      "maxLength": 250,
+      "name": "School Address",
+      "item": "1454"
+    }
+  ]
+}

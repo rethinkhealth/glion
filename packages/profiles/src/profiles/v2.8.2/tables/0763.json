@@ -1,0 +1,19 @@
+{
+  "id": "0763",
+  "description": "DRG Procedure Relevance",
+  "type": "user",
+  "codes": [
+    {
+      "name": "0",
+      "description": "Neither operation relevant nor non-operation relevant procedure"
+    },
+    {
+      "name": "1",
+      "description": "Operation relevant procedure"
+    },
+    {
+      "name": "2",
+      "description": "Non-operation relevant procedure"
+    }
+  ]
+}

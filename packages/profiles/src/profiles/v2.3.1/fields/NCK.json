@@ -1,0 +1,14 @@
+{
+  "segmentId": "NCK",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "NCK-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "name": "System Date/Time",
+      "item": "1172"
+    }
+  ]
+}

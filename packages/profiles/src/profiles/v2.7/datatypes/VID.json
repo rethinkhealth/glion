@@ -1,0 +1,26 @@
+{
+  "id": "VID",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Version Identifier",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Version ID",
+      "datatypeId": "ID",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Internationalization Code",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "International Version ID",
+      "datatypeId": "CWE",
+      "required": false
+    }
+  ]
+}

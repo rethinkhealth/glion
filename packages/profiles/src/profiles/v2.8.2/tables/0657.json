@@ -1,0 +1,19 @@
+{
+  "id": "0657",
+  "description": "Device Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "EO Gas Sterilizer"
+    },
+    {
+      "name": "2",
+      "description": "Steam Sterilizer"
+    },
+    {
+      "name": "3",
+      "description": "Peracetic Acid"
+    }
+  ]
+}

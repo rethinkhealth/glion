@@ -1,0 +1,71 @@
+{
+  "id": "0495",
+  "description": "Body Site Modifier",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ANT",
+      "description": "Anterior"
+    },
+    {
+      "name": "BIL",
+      "description": "Bilateral"
+    },
+    {
+      "name": "DIS",
+      "description": "Distal"
+    },
+    {
+      "name": "EXT",
+      "description": "External"
+    },
+    {
+      "name": "L",
+      "description": "Left"
+    },
+    {
+      "name": "LAT",
+      "description": "Lateral"
+    },
+    {
+      "name": "LLQ",
+      "description": "Quadrant, Left Lower"
+    },
+    {
+      "name": "LOW",
+      "description": "Lower"
+    },
+    {
+      "name": "LUQ",
+      "description": "Quadrant, Left Upper"
+    },
+    {
+      "name": "MED",
+      "description": "Medial"
+    },
+    {
+      "name": "POS",
+      "description": "Posterior"
+    },
+    {
+      "name": "PRO",
+      "description": "Proximal"
+    },
+    {
+      "name": "R",
+      "description": "Right"
+    },
+    {
+      "name": "RLQ",
+      "description": "Quadrant, Right Lower"
+    },
+    {
+      "name": "RUQ",
+      "description": "Quadrant, Right Upper"
+    },
+    {
+      "name": "UPP",
+      "description": "Upper"
+    }
+  ]
+}

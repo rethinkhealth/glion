@@ -1,0 +1,35 @@
+{
+  "id": "0205",
+  "description": "Price Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AP",
+      "description": "Administrative Price or Handling Fee"
+    },
+    {
+      "name": "DC",
+      "description": "Direct Unit Cost"
+    },
+    {
+      "name": "IC",
+      "description": "Indirect Unit Cost"
+    },
+    {
+      "name": "PF",
+      "description": "Professional Fee for Performing Provider"
+    },
+    {
+      "name": "TF",
+      "description": "Technology Fee for Use of Equipment"
+    },
+    {
+      "name": "TP",
+      "description": "Total Price"
+    },
+    {
+      "name": "UP",
+      "description": "Unit Price, may be based on length of procedure or service"
+    }
+  ]
+}

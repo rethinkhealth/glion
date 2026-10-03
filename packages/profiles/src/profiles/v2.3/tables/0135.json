@@ -1,0 +1,19 @@
+{
+  "id": "0135",
+  "description": "Assignment of Benefits",
+  "type": "user",
+  "codes": [
+    {
+      "name": "M",
+      "description": "Modified assignment"
+    },
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "0169",
+  "description": "REPORTIN PRIORITY",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Call back results"
+    },
+    {
+      "name": "R",
+      "description": "Rush reporting"
+    }
+  ]
+}

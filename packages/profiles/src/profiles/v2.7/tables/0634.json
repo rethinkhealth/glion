@@ -1,0 +1,11 @@
+{
+  "id": "0634",
+  "description": "Item Importance Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CRT",
+      "description": "Critical"
+    }
+  ]
+}

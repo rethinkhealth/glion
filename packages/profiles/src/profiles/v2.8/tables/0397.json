@@ -1,0 +1,27 @@
+{
+  "id": "0397",
+  "description": "Sequencing",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Ascending"
+    },
+    {
+      "name": "AN",
+      "description": "Ascending, case insensitive"
+    },
+    {
+      "name": "D",
+      "description": "Descending"
+    },
+    {
+      "name": "DN",
+      "description": "Descending, case insensitive"
+    },
+    {
+      "name": "N",
+      "description": "None"
+    }
+  ]
+}

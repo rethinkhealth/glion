@@ -1,0 +1,24 @@
+{
+  "id": "v2-0098",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0098",
+  "oid": "2.16.840.1.113883.18.37",
+  "name": "TypeOfAgreement",
+  "title": "typeOfAgreement",
+  "codes": [
+    {
+      "code": "M",
+      "display": "Maternity",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "Standard",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unified",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "segmentId": "PM1",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PM1-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70072",
+      "name": "Health Plan ID",
+      "item": "368"
+    },
+    {
+      "sequence": 2,
+      "id": "PM1-2",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CX",
+      "name": "Insurance Company ID",
+      "item": "428"
+    },
+    {
+      "sequence": 3,
+      "id": "PM1-3",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XON",
+      "name": "Insurance Company Name",
+      "item": "429"
+    },
+    {
+      "sequence": 4,
+      "id": "PM1-4",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XAD",
+      "name": "Insurance Company Address",
+      "item": "430"
+    },
+    {
+      "sequence": 5,
+      "id": "PM1-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XPN",
+      "name": "Insurance Co Contact Person",
+      "item": "431"
+    },
+    {
+      "sequence": 6,
+      "id": "PM1-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XTN",
+      "name": "Insurance Co Phone Number",
+      "item": "432"
+    },
+    {
+      "sequence": 7,
+      "id": "PM1-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Group Number",
+      "item": "433"
+    },
+    {
+      "sequence": 8,
+      "id": "PM1-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XON",
+      "name": "Group Name",
+      "item": "434"
+    },
+    {
+      "sequence": 9,
+      "id": "PM1-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "name": "Plan Effective Date",
+      "item": "437"
+    },
+    {
+      "sequence": 10,
+      "id": "PM1-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "name": "Plan Expiration Date",
+      "item": "438"
+    },
+    {
+      "sequence": 11,
+      "id": "PM1-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Patient DOB Required",
+      "item": "3454"
+    },
+    {
+      "sequence": 12,
+      "id": "PM1-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Patient Gender Required",
+      "item": "3455"
+    },
+    {
+      "sequence": 13,
+      "id": "PM1-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Patient Relationship Required",
+      "item": "3456"
+    },
+    {
+      "sequence": 14,
+      "id": "PM1-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Patient Signature Required",
+      "item": "3457"
+    },
+    {
+      "sequence": 15,
+      "id": "PM1-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Diagnosis Required",
+      "item": "3458"
+    },
+    {
+      "sequence": 16,
+      "id": "PM1-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Service Required",
+      "item": "3459"
+    },
+    {
+      "sequence": 17,
+      "id": "PM1-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Patient Name Required",
+      "item": "3460"
+    },
+    {
+      "sequence": 18,
+      "id": "PM1-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Patient Address Required",
+      "item": "3461"
+    },
+    {
+      "sequence": 19,
+      "id": "PM1-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Subscribers Name Required",
+      "item": "3462"
+    },
+    {
+      "sequence": 20,
+      "id": "PM1-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Workman's Comp Indicator",
+      "item": "3463"
+    },
+    {
+      "sequence": 21,
+      "id": "PM1-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Bill Type Required",
+      "item": "3464"
+    },
+    {
+      "sequence": 22,
+      "id": "PM1-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Commercial Carrier Name and Address Required",
+      "item": "3465"
+    },
+    {
+      "sequence": 23,
+      "id": "PM1-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Policy Number Pattern",
+      "item": "3466"
+    },
+    {
+      "sequence": 24,
+      "id": "PM1-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Group Number Pattern",
+      "item": "3467"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "0565",
+  "description": "Provider Adjustment Reason Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "DISP",
+      "description": "Dispensing Fee"
+    },
+    {
+      "name": "GST",
+      "description": "Goods and Services Tax"
+    },
+    {
+      "name": "HST",
+      "description": "Harmonized Sales Tax"
+    },
+    {
+      "name": "MKUP",
+      "description": "Mark up Fee"
+    },
+    {
+      "name": "PST",
+      "description": "Provincial Sales Tax"
+    }
+  ]
+}

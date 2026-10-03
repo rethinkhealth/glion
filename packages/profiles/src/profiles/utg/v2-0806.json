@@ -1,0 +1,24 @@
+{
+  "id": "v2-0806",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0806",
+  "oid": "2.16.840.1.113883.18.406",
+  "name": "SterilizationType",
+  "title": "sterilizationType",
+  "codes": [
+    {
+      "code": "EOG",
+      "display": "Ethylene Oxide Gas",
+      "status": "active"
+    },
+    {
+      "code": "PCA",
+      "display": "Peracetic acid",
+      "status": "active"
+    },
+    {
+      "code": "STM",
+      "display": "Steam",
+      "status": "active"
+    }
+  ]
+}

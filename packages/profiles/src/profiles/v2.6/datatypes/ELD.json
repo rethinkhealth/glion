@@ -1,0 +1,32 @@
+{
+  "id": "ELD",
+  "version": "2.6",
+  "kind": "composite",
+  "title": "Error Location and Description",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Segment ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Segment Sequence",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Field Position",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Code Identifying Error",
+      "datatypeId": "CWE",
+      "required": false
+    }
+  ]
+}

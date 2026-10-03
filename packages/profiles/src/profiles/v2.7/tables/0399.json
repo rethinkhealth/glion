@@ -1,0 +1,11 @@
+{
+  "id": "0399",
+  "description": "Country Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "..",
+      "description": "use 3-character (alphabetic) form of ISO 3166"
+    }
+  ]
+}

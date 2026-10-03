@@ -1,0 +1,223 @@
+{
+  "id": "0163",
+  "description": "Administrative site",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "BE",
+      "description": "Bilateral Ears"
+    },
+    {
+      "name": "BN",
+      "description": "Bilateral Nares"
+    },
+    {
+      "name": "BU",
+      "description": "Buttock"
+    },
+    {
+      "name": "CT",
+      "description": "Chest Tube"
+    },
+    {
+      "name": "LA",
+      "description": "Left Arm"
+    },
+    {
+      "name": "LAC",
+      "description": "Left Anterior Chest"
+    },
+    {
+      "name": "LACF",
+      "description": "Left Antecubital Fossa"
+    },
+    {
+      "name": "LD",
+      "description": "Left Deltoid"
+    },
+    {
+      "name": "LE",
+      "description": "Left Ear"
+    },
+    {
+      "name": "LEJ",
+      "description": "Left External Jugular"
+    },
+    {
+      "name": "LF",
+      "description": "Left Foot"
+    },
+    {
+      "name": "LG",
+      "description": "Left Gluteus Medius"
+    },
+    {
+      "name": "LH",
+      "description": "Left Hand"
+    },
+    {
+      "name": "LIJ",
+      "description": "Left Internal Jugular"
+    },
+    {
+      "name": "LLAQ",
+      "description": "Left Lower Abd Quadrant"
+    },
+    {
+      "name": "LLFA",
+      "description": "Left Lower Forearm"
+    },
+    {
+      "name": "LMFA",
+      "description": "Left Mid Forearm"
+    },
+    {
+      "name": "LN",
+      "description": "Left Naris"
+    },
+    {
+      "name": "LPC",
+      "description": "Left Posterior Chest"
+    },
+    {
+      "name": "LSC",
+      "description": "Left Subclavian"
+    },
+    {
+      "name": "LT",
+      "description": "Left Thigh"
+    },
+    {
+      "name": "LUA",
+      "description": "Left Upper Arm"
+    },
+    {
+      "name": "LUAQ",
+      "description": "Left Upper Abd Quadrant"
+    },
+    {
+      "name": "LUFA",
+      "description": "Left Upper Forearm"
+    },
+    {
+      "name": "LVG",
+      "description": "Left Ventragluteal"
+    },
+    {
+      "name": "LVL",
+      "description": "Left Vastus Lateralis"
+    },
+    {
+      "name": "NB",
+      "description": "Nebulized"
+    },
+    {
+      "name": "OD",
+      "description": "Right Eye"
+    },
+    {
+      "name": "OS",
+      "description": "Left Eye"
+    },
+    {
+      "name": "OU",
+      "description": "Bilateral Eyes"
+    },
+    {
+      "name": "PA",
+      "description": "Perianal"
+    },
+    {
+      "name": "PERIN",
+      "description": "Perineal"
+    },
+    {
+      "name": "RA",
+      "description": "Right Arm"
+    },
+    {
+      "name": "RAC",
+      "description": "Right Anterior Chest"
+    },
+    {
+      "name": "RACF",
+      "description": "Right Antecubital Fossa"
+    },
+    {
+      "name": "RD",
+      "description": "Right Deltoid"
+    },
+    {
+      "name": "RE",
+      "description": "Right Ear"
+    },
+    {
+      "name": "REJ",
+      "description": "Right External Jugular"
+    },
+    {
+      "name": "RF",
+      "description": "Right Foot"
+    },
+    {
+      "name": "RG",
+      "description": "Right Gluteus Medius"
+    },
+    {
+      "name": "RH",
+      "description": "Right Hand"
+    },
+    {
+      "name": "RIJ",
+      "description": "Right Internal Jugular"
+    },
+    {
+      "name": "RLAQ",
+      "description": "Rt Lower Abd Quadrant"
+    },
+    {
+      "name": "RLFA",
+      "description": "Right Lower Forearm"
+    },
+    {
+      "name": "RMFA",
+      "description": "Right Mid Forearm"
+    },
+    {
+      "name": "RN",
+      "description": "Right Naris"
+    },
+    {
+      "name": "RPC",
+      "description": "Right Posterior Chest"
+    },
+    {
+      "name": "RSC",
+      "description": "Right Subclavian"
+    },
+    {
+      "name": "RT",
+      "description": "Right Thigh"
+    },
+    {
+      "name": "RUA",
+      "description": "Right Upper Arm"
+    },
+    {
+      "name": "RUAQ",
+      "description": "Right Upper Abd Quadrant"
+    },
+    {
+      "name": "RUFA",
+      "description": "Right Upper Forearm"
+    },
+    {
+      "name": "RVG",
+      "description": "Right Ventragluteal"
+    },
+    {
+      "name": "RVL",
+      "description": "Right Vastus Lateralis"
+    }
+  ]
+}

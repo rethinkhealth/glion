@@ -1,0 +1,23 @@
+{
+  "id": "0322",
+  "description": "Completion status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CP",
+      "description": "Complete"
+    },
+    {
+      "name": "NA",
+      "description": "Not Administered"
+    },
+    {
+      "name": "PA",
+      "description": "Partially Administered"
+    },
+    {
+      "name": "RE",
+      "description": "Refused"
+    }
+  ]
+}

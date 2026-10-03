@@ -1,0 +1,44 @@
+{
+  "id": "v2-0561",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0561",
+  "oid": "2.16.840.1.113883.18.364",
+  "name": "ProductServicesClarification",
+  "title": "product-servicesClarification",
+  "codes": [
+    {
+      "code": "CLCTR",
+      "display": "Claim Center",
+      "status": "active"
+    },
+    {
+      "code": "DGAPP",
+      "display": "Diagnostic Approval Number",
+      "status": "active"
+    },
+    {
+      "code": "DTCTR",
+      "display": "Data Center Number",
+      "status": "active"
+    },
+    {
+      "code": "ENC",
+      "display": "Encounter Number",
+      "status": "active"
+    },
+    {
+      "code": "GFTH",
+      "display": "Good Faith Indicator",
+      "status": "active"
+    },
+    {
+      "code": "OOP",
+      "display": "Out of Province Indicator",
+      "status": "active"
+    },
+    {
+      "code": "SEQ",
+      "display": "Sequence Number",
+      "status": "active"
+    }
+  ]
+}

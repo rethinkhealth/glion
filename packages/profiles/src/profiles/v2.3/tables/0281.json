@@ -1,0 +1,31 @@
+{
+  "id": "0281",
+  "description": "Referral Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "HOM",
+      "description": "Home Care"
+    },
+    {
+      "name": "LAB",
+      "description": "Laboratory"
+    },
+    {
+      "name": "MED",
+      "description": "Medical"
+    },
+    {
+      "name": "PSY",
+      "description": "Psychiatric"
+    },
+    {
+      "name": "RAD",
+      "description": "Radiology"
+    },
+    {
+      "name": "SKN",
+      "description": "Skilled Nursing"
+    }
+  ]
+}

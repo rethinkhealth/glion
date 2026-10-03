@@ -1,0 +1,27 @@
+{
+  "id": "0002",
+  "description": "MARITAL STATUS",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Separated"
+    },
+    {
+      "name": "D",
+      "description": "Divorced"
+    },
+    {
+      "name": "M",
+      "description": "Married"
+    },
+    {
+      "name": "S",
+      "description": "Single"
+    },
+    {
+      "name": "W",
+      "description": "Widowed"
+    }
+  ]
+}

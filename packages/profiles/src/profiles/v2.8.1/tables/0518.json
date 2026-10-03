@@ -1,0 +1,19 @@
+{
+  "id": "0518",
+  "description": "Override Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "EQV",
+      "description": "Equivalence Override"
+    },
+    {
+      "name": "EXTN",
+      "description": "Extension Override"
+    },
+    {
+      "name": "INLV",
+      "description": "Interval Override"
+    }
+  ]
+}

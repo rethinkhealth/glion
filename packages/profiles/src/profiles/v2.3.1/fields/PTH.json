@@ -1,0 +1,66 @@
+{
+  "segmentId": "PTH",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PTH-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70287",
+      "name": "Action Code",
+      "item": "816"
+    },
+    {
+      "sequence": 2,
+      "id": "PTH-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 80,
+      "name": "Pathway ID",
+      "item": "1207"
+    },
+    {
+      "sequence": 3,
+      "id": "PTH-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 60,
+      "name": "Pathway Instance ID",
+      "item": "1208"
+    },
+    {
+      "sequence": 4,
+      "id": "PTH-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Pathway Established Date/Time",
+      "item": "1209"
+    },
+    {
+      "sequence": 5,
+      "id": "PTH-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 80,
+      "name": "Pathway Life Cycle Status",
+      "item": "1210"
+    },
+    {
+      "sequence": 6,
+      "id": "PTH-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Change Pathway Life Cycle Status Date/Time",
+      "item": "1211"
+    }
+  ]
+}

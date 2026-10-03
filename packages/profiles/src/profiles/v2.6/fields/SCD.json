@@ -1,0 +1,387 @@
+{
+  "segmentId": "SCD",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "SCD-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TM",
+      "maxLength": 16,
+      "name": "Cycle Start Time",
+      "item": "2104"
+    },
+    {
+      "sequence": 2,
+      "id": "SCD-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 16,
+      "name": "Cycle Count",
+      "item": "2105"
+    },
+    {
+      "sequence": 3,
+      "id": "SCD-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 36,
+      "name": "Temp Max",
+      "item": "2106"
+    },
+    {
+      "sequence": 4,
+      "id": "SCD-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 36,
+      "name": "Temp Min",
+      "item": "2107"
+    },
+    {
+      "sequence": 5,
+      "id": "SCD-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 16,
+      "name": "Load Number",
+      "item": "2108"
+    },
+    {
+      "sequence": 6,
+      "id": "SCD-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Condition Time",
+      "item": "2109"
+    },
+    {
+      "sequence": 7,
+      "id": "SCD-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Sterilize Time",
+      "item": "2110"
+    },
+    {
+      "sequence": 8,
+      "id": "SCD-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Exhaust Time",
+      "item": "2111"
+    },
+    {
+      "sequence": 9,
+      "id": "SCD-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Total Cycle Time",
+      "item": "2112"
+    },
+    {
+      "sequence": 10,
+      "id": "SCD-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 4,
+      "table": "HL70682",
+      "name": "Device Status",
+      "item": "2113"
+    },
+    {
+      "sequence": 11,
+      "id": "SCD-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Cycle Start Date/Time",
+      "item": "2114"
+    },
+    {
+      "sequence": 12,
+      "id": "SCD-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Dry Time",
+      "item": "2115"
+    },
+    {
+      "sequence": 13,
+      "id": "SCD-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Leak Rate",
+      "item": "2116"
+    },
+    {
+      "sequence": 14,
+      "id": "SCD-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 36,
+      "name": "Control Temperature",
+      "item": "2117"
+    },
+    {
+      "sequence": 15,
+      "id": "SCD-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 36,
+      "name": "Sterilizer Temperature",
+      "item": "2118"
+    },
+    {
+      "sequence": 16,
+      "id": "SCD-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TM",
+      "maxLength": 16,
+      "name": "Cycle Complete Time",
+      "item": "2119"
+    },
+    {
+      "sequence": 17,
+      "id": "SCD-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 36,
+      "name": "Under Temperature",
+      "item": "2120"
+    },
+    {
+      "sequence": 18,
+      "id": "SCD-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 36,
+      "name": "Over Temperature",
+      "item": "2121"
+    },
+    {
+      "sequence": 19,
+      "id": "SCD-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Abort Cycle",
+      "item": "2122"
+    },
+    {
+      "sequence": 20,
+      "id": "SCD-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Alarm",
+      "item": "2123"
+    },
+    {
+      "sequence": 21,
+      "id": "SCD-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Long in Charge Phase",
+      "item": "2124"
+    },
+    {
+      "sequence": 22,
+      "id": "SCD-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Long in Exhaust Phase",
+      "item": "2125"
+    },
+    {
+      "sequence": 23,
+      "id": "SCD-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Long in Fast Exhaust Phase",
+      "item": "2126"
+    },
+    {
+      "sequence": 24,
+      "id": "SCD-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Reset",
+      "item": "2127"
+    },
+    {
+      "sequence": 25,
+      "id": "SCD-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XCN",
+      "maxLength": 15,
+      "name": "Operator - Unload",
+      "item": "2128"
+    },
+    {
+      "sequence": 26,
+      "id": "SCD-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Door Open",
+      "item": "2129"
+    },
+    {
+      "sequence": 27,
+      "id": "SCD-27",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 4,
+      "table": "HL70532",
+      "name": "Reading Failure",
+      "item": "2130"
+    },
+    {
+      "sequence": 28,
+      "id": "SCD-28",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 3,
+      "table": "HL70702",
+      "name": "Cycle Type",
+      "item": "2131"
+    },
+    {
+      "sequence": 29,
+      "id": "SCD-29",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Thermal Rinse Time",
+      "item": "2132"
+    },
+    {
+      "sequence": 30,
+      "id": "SCD-30",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Wash Time",
+      "item": "2133"
+    },
+    {
+      "sequence": 31,
+      "id": "SCD-31",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Injection Rate",
+      "item": "2134"
+    },
+    {
+      "sequence": 32,
+      "id": "SCD-32",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 705,
+      "table": "HL70088",
+      "name": "Procedure Code",
+      "item": "393"
+    },
+    {
+      "sequence": 33,
+      "id": "SCD-33",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CX",
+      "maxLength": 250,
+      "name": "Patient Identifier List",
+      "item": "106"
+    },
+    {
+      "sequence": 34,
+      "id": "SCD-34",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XCN",
+      "maxLength": 250,
+      "table": "HL70010",
+      "name": "Attending Doctor",
+      "item": "137"
+    },
+    {
+      "sequence": 35,
+      "id": "SCD-35",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SN",
+      "maxLength": 36,
+      "name": "Dilution Factor",
+      "item": "1356"
+    },
+    {
+      "sequence": 36,
+      "id": "SCD-36",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 16,
+      "name": "Fill Time",
+      "item": "2139"
+    },
+    {
+      "sequence": 37,
+      "id": "SCD-37",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 36,
+      "name": "Inlet Temperature",
+      "item": "2140"
+    }
+  ]
+}

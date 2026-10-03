@@ -1,0 +1,32 @@
+{
+  "id": "NA",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "numeric array",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "value1",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "value2",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "value3",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "value4",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

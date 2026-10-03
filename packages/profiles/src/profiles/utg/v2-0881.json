@@ -1,0 +1,24 @@
+{
+  "id": "v2-0881",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0881",
+  "oid": "2.16.840.1.113883.18.411",
+  "name": "RoleExecutingPhysician",
+  "title": "roleExecutingPhysician",
+  "codes": [
+    {
+      "code": "B",
+      "display": "Both",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Professional Part",
+      "status": "active"
+    },
+    {
+      "code": "T",
+      "display": "Technical Part",
+      "status": "active"
+    }
+  ]
+}

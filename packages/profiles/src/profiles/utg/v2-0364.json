@@ -1,0 +1,49 @@
+{
+  "id": "v2-0364",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0364",
+  "oid": "2.16.840.1.113883.18.222",
+  "name": "CommentType",
+  "title": "commentType",
+  "codes": [
+    {
+      "code": "1R",
+      "display": "Primary Reason",
+      "status": "active"
+    },
+    {
+      "code": "2R",
+      "display": "Secondary Reason",
+      "status": "active"
+    },
+    {
+      "code": "AI",
+      "display": "Ancillary Instructions",
+      "status": "active"
+    },
+    {
+      "code": "DR",
+      "display": "Duplicate/Interaction Reason",
+      "status": "active"
+    },
+    {
+      "code": "GI",
+      "display": "General Instructions",
+      "status": "active"
+    },
+    {
+      "code": "GR",
+      "display": "General Reason",
+      "status": "active"
+    },
+    {
+      "code": "PI",
+      "display": "Patient Instructions",
+      "status": "active"
+    },
+    {
+      "code": "RE",
+      "display": "Remark",
+      "status": "active"
+    }
+  ]
+}

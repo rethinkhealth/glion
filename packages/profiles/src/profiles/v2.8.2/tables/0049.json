@@ -1,0 +1,11 @@
+{
+  "id": "0049",
+  "description": "Department Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

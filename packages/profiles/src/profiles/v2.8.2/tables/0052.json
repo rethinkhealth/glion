@@ -1,0 +1,19 @@
+{
+  "id": "0052",
+  "description": "Diagnosis Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Admitting"
+    },
+    {
+      "name": "F",
+      "description": "Final"
+    },
+    {
+      "name": "W",
+      "description": "Working"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "v2-0166",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0166",
+  "oid": "2.16.840.1.113883.18.84",
+  "name": "RxComponentType",
+  "title": "rxComponentType",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Additive",
+      "status": "active"
+    },
+    {
+      "code": "B",
+      "display": "Base",
+      "status": "active"
+    }
+  ]
+}

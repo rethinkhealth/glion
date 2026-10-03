@@ -1,0 +1,19 @@
+{
+  "id": "0642",
+  "description": "Reorder Theory Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "D",
+      "description": "DOP/DOQ"
+    },
+    {
+      "name": "M",
+      "description": "MIN/MAX"
+    },
+    {
+      "name": "O",
+      "description": "Override"
+    }
+  ]
+}

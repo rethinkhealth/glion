@@ -1,0 +1,123 @@
+{
+  "id": "0162",
+  "description": "ROUTE OF ADMINISTRATION",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AP",
+      "description": "Apply Externally"
+    },
+    {
+      "name": "B",
+      "description": "Buccal"
+    },
+    {
+      "name": "DT",
+      "description": "Dental"
+    },
+    {
+      "name": "GTT",
+      "description": "Gastronomy Tube"
+    },
+    {
+      "name": "GU",
+      "description": "Magenspülung"
+    },
+    {
+      "name": "IA",
+      "description": "Intra-arterial"
+    },
+    {
+      "name": "IC",
+      "description": "Intracardiac"
+    },
+    {
+      "name": "ID",
+      "description": "Intradermal"
+    },
+    {
+      "name": "IH",
+      "description": "Inhalation"
+    },
+    {
+      "name": "IM",
+      "description": "Intramuscular"
+    },
+    {
+      "name": "IN",
+      "description": "Intranasal"
+    },
+    {
+      "name": "IO",
+      "description": "Intraocular"
+    },
+    {
+      "name": "IP",
+      "description": "Intraperitoneal"
+    },
+    {
+      "name": "IS",
+      "description": "Intrasynovial"
+    },
+    {
+      "name": "IT",
+      "description": "Intrathecal"
+    },
+    {
+      "name": "IV",
+      "description": "Intravenous"
+    },
+    {
+      "name": "NG",
+      "description": "Nasogastric"
+    },
+    {
+      "name": "NS",
+      "description": "Nasal"
+    },
+    {
+      "name": "OP",
+      "description": "Ophthalmic"
+    },
+    {
+      "name": "OT",
+      "description": "Otic"
+    },
+    {
+      "name": "PO",
+      "description": "Oral"
+    },
+    {
+      "name": "PR",
+      "description": "Rectal"
+    },
+    {
+      "name": "SC",
+      "description": "Subcutaneous"
+    },
+    {
+      "name": "SL",
+      "description": "Sublingual"
+    },
+    {
+      "name": "TD",
+      "description": "Transdermal"
+    },
+    {
+      "name": "TL",
+      "description": "Translingual"
+    },
+    {
+      "name": "TP",
+      "description": "Topical"
+    },
+    {
+      "name": "UR",
+      "description": "Urethral"
+    },
+    {
+      "name": "VG",
+      "description": "Vaginal"
+    }
+  ]
+}

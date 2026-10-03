@@ -1,0 +1,111 @@
+{
+  "id": "0265",
+  "description": "Specialty type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ALC",
+      "description": "Allergy"
+    },
+    {
+      "name": "AMB",
+      "description": "Ambulatory"
+    },
+    {
+      "name": "CAN",
+      "description": "Cancer"
+    },
+    {
+      "name": "CAR",
+      "description": "Coronary/cardiac care"
+    },
+    {
+      "name": "CCR",
+      "description": "Critical care"
+    },
+    {
+      "name": "CHI",
+      "description": "Chiropractic"
+    },
+    {
+      "name": "EDI",
+      "description": "Education"
+    },
+    {
+      "name": "EMR",
+      "description": "Emergency"
+    },
+    {
+      "name": "FPC",
+      "description": "Family planning"
+    },
+    {
+      "name": "INT",
+      "description": "Intensive care"
+    },
+    {
+      "name": "ISO",
+      "description": "Isolation"
+    },
+    {
+      "name": "NAT",
+      "description": "Naturopathic"
+    },
+    {
+      "name": "NBI",
+      "description": "Newborn, nursery, infants"
+    },
+    {
+      "name": "OBG",
+      "description": "Obstetrics, gynecology"
+    },
+    {
+      "name": "OBS",
+      "description": "Observation"
+    },
+    {
+      "name": "OTH",
+      "description": "Other specialty"
+    },
+    {
+      "name": "PED",
+      "description": "Pediatrics"
+    },
+    {
+      "name": "PHY",
+      "description": "General/family practice"
+    },
+    {
+      "name": "PIN",
+      "description": "Pediatric/neonatal intensive care"
+    },
+    {
+      "name": "PPS",
+      "description": "Pediatric psychiatric"
+    },
+    {
+      "name": "PRE",
+      "description": "Pediatric rehabilitation"
+    },
+    {
+      "name": "PSI",
+      "description": "Psychiatric intensive care"
+    },
+    {
+      "name": "PSY",
+      "description": "Psychiatric"
+    },
+    {
+      "name": "REH",
+      "description": "Rehabilitation"
+    },
+    {
+      "name": "SUR",
+      "description": "Surgery"
+    },
+    {
+      "name": "WIC",
+      "description": "Walk-in clinic"
+    }
+  ]
+}

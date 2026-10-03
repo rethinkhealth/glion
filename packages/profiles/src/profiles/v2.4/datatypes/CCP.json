@@ -1,0 +1,26 @@
+{
+  "id": "CCP",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "channel calibration parameters",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "channel calibration sensitivity correction factor",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "channel calibration baseline",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "channel calibration time skew",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

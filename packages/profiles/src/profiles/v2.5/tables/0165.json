@@ -1,0 +1,67 @@
+{
+  "id": "0165",
+  "description": "Administration Method",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CH",
+      "description": "Chew"
+    },
+    {
+      "name": "DI",
+      "description": "Dissolve"
+    },
+    {
+      "name": "DU",
+      "description": "Dust"
+    },
+    {
+      "name": "IF",
+      "description": "Infiltrate"
+    },
+    {
+      "name": "IR",
+      "description": "Irrigate"
+    },
+    {
+      "name": "IS",
+      "description": "Insert"
+    },
+    {
+      "name": "IVP",
+      "description": "IV Push"
+    },
+    {
+      "name": "IVPB",
+      "description": "IV Piggyback"
+    },
+    {
+      "name": "NB",
+      "description": "Nebulized"
+    },
+    {
+      "name": "PF",
+      "description": "Perfuse"
+    },
+    {
+      "name": "PT",
+      "description": "Pain"
+    },
+    {
+      "name": "SH",
+      "description": "Shampoo"
+    },
+    {
+      "name": "SO",
+      "description": "Soak"
+    },
+    {
+      "name": "WA",
+      "description": "Wash"
+    },
+    {
+      "name": "WI",
+      "description": "Wipe"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "0302",
+  "description": "Point of Care",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

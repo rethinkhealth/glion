@@ -1,0 +1,19 @@
+{
+  "id": "v2-0298",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0298",
+  "oid": "2.16.840.1.113883.18.184",
+  "name": "CpRangeType",
+  "title": "cpRangeType",
+  "codes": [
+    {
+      "code": "F",
+      "display": "Flat-rate. Apply the entire price to this interval, do not pro-rate the price if the full interval has not occurred/been consumed",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Pro-rate. Apply this price to this interval, pro-rated by whatever portion of the interval has occurred/been consumed",
+      "status": "active"
+    }
+  ]
+}

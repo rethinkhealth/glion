@@ -1,0 +1,35 @@
+{
+  "id": "0144",
+  "description": "Eligibility Source",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Insurance company"
+    },
+    {
+      "name": "2",
+      "description": "Employer"
+    },
+    {
+      "name": "3",
+      "description": "Insured presented policy"
+    },
+    {
+      "name": "4",
+      "description": "Insured presented card"
+    },
+    {
+      "name": "5",
+      "description": "Signed statement on file"
+    },
+    {
+      "name": "6",
+      "description": "Verbal information"
+    },
+    {
+      "name": "7",
+      "description": "None"
+    }
+  ]
+}

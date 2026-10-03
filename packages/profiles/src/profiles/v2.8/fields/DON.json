@@ -1,0 +1,314 @@
+{
+  "segmentId": "DON",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "DON-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Donation Identification Number - DIN",
+      "item": "3340"
+    },
+    {
+      "sequence": 2,
+      "id": "DON-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "name": "Donation Type",
+      "item": "3341"
+    },
+    {
+      "sequence": 3,
+      "id": "DON-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Phlebotomy Start Date/Time",
+      "item": "3342"
+    },
+    {
+      "sequence": 4,
+      "id": "DON-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Phlebotomy End Date/Time",
+      "item": "3343"
+    },
+    {
+      "sequence": 5,
+      "id": "DON-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Donation Duration",
+      "item": "3344"
+    },
+    {
+      "sequence": 6,
+      "id": "DON-6",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70932",
+      "name": "Donation Duration Units",
+      "item": "3345"
+    },
+    {
+      "sequence": 7,
+      "id": "DON-7",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CNE",
+      "table": "HL70933",
+      "name": "Intended Procedure Type",
+      "item": "3346"
+    },
+    {
+      "sequence": 8,
+      "id": "DON-8",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CNE",
+      "table": "HL70933",
+      "name": "Actual Procedure Type",
+      "item": "3347"
+    },
+    {
+      "sequence": 9,
+      "id": "DON-9",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Donor Eligibility Flag",
+      "item": "3348"
+    },
+    {
+      "sequence": 10,
+      "id": "DON-10",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CNE",
+      "table": "HL70933",
+      "name": "Donor Eligibility Procedure Type",
+      "item": "3349"
+    },
+    {
+      "sequence": 11,
+      "id": "DON-11",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Donor Eligibility Date",
+      "item": "3350"
+    },
+    {
+      "sequence": 12,
+      "id": "DON-12",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70923",
+      "name": "Process Interruption",
+      "item": "3351"
+    },
+    {
+      "sequence": 13,
+      "id": "DON-13",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70935",
+      "name": "Process Interruption Reason",
+      "item": "3352"
+    },
+    {
+      "sequence": 14,
+      "id": "DON-14",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CNE",
+      "table": "HL70925",
+      "name": "Phlebotomy Issue",
+      "item": "3353"
+    },
+    {
+      "sequence": 15,
+      "id": "DON-15",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Intended Recipient Blood Relative",
+      "item": "3354"
+    },
+    {
+      "sequence": 16,
+      "id": "DON-16",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XPN",
+      "name": "Intended Recipient Name",
+      "item": "3355"
+    },
+    {
+      "sequence": 17,
+      "id": "DON-17",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Intended Recipient DOB",
+      "item": "3356"
+    },
+    {
+      "sequence": 18,
+      "id": "DON-18",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XON",
+      "name": "Intended Recipient Facility",
+      "item": "3357"
+    },
+    {
+      "sequence": 19,
+      "id": "DON-19",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Intended Recipient Procedure Date",
+      "item": "3358"
+    },
+    {
+      "sequence": 20,
+      "id": "DON-20",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XPN",
+      "name": "Intended Recipient Ordering Provider",
+      "item": "3359"
+    },
+    {
+      "sequence": 21,
+      "id": "DON-21",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70926",
+      "name": "Phlebotomy Status",
+      "item": "3360"
+    },
+    {
+      "sequence": 22,
+      "id": "DON-22",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70927",
+      "name": "Arm Stick",
+      "item": "3361"
+    },
+    {
+      "sequence": 23,
+      "id": "DON-23",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XPN",
+      "name": "Bleed Start Phlebotomist",
+      "item": "3362"
+    },
+    {
+      "sequence": 24,
+      "id": "DON-24",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XPN",
+      "name": "Bleed End Phlebotomist",
+      "item": "3363"
+    },
+    {
+      "sequence": 25,
+      "id": "DON-25",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Aphaeresis Type Machine",
+      "item": "3364"
+    },
+    {
+      "sequence": 26,
+      "id": "DON-26",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Aphaeresis Machine Serial Number",
+      "item": "3365"
+    },
+    {
+      "sequence": 27,
+      "id": "DON-27",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Donor Reaction",
+      "item": "3366"
+    },
+    {
+      "sequence": 28,
+      "id": "DON-28",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XPN",
+      "name": "Final Review Staff ID",
+      "item": "3367"
+    },
+    {
+      "sequence": 29,
+      "id": "DON-29",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Final Review Date/Time",
+      "item": "3368"
+    },
+    {
+      "sequence": 30,
+      "id": "DON-30",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Number of Tubes Collected",
+      "item": "3369"
+    },
+    {
+      "sequence": 31,
+      "id": "DON-31",
+      "required": true,
+      "repeatable": true,
+      "datatype": "EI",
+      "name": "Donation Sample Identifier",
+      "item": "3370"
+    },
+    {
+      "sequence": 32,
+      "id": "DON-32",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XCN",
+      "name": "Donation Accept Staff",
+      "item": "3371"
+    },
+    {
+      "sequence": 33,
+      "id": "DON-33",
+      "required": true,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Donation Material Review Staff",
+      "item": "3372"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "v2-0334",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0334",
+  "oid": "2.16.840.1.113883.18.204",
+  "name": "DisabilityInformationRelationship",
+  "title": "disabilityInformationRelationship",
+  "codes": [
+    {
+      "code": "AP",
+      "display": "Associated party",
+      "status": "active"
+    },
+    {
+      "code": "GT",
+      "display": "Guarantor",
+      "status": "active"
+    },
+    {
+      "code": "IN",
+      "display": "Insured",
+      "status": "active"
+    },
+    {
+      "code": "PT",
+      "display": "Patient",
+      "status": "active"
+    }
+  ]
+}

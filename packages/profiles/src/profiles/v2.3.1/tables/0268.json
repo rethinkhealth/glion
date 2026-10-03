@@ -1,0 +1,19 @@
+{
+  "id": "0268",
+  "description": "Override",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Override allowed"
+    },
+    {
+      "name": "R",
+      "description": "Override required"
+    },
+    {
+      "name": "X",
+      "description": "Override not allowed"
+    }
+  ]
+}

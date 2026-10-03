@@ -1,0 +1,511 @@
+{
+  "id": "0354",
+  "description": "Message structure",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ACK",
+      "description": ""
+    },
+    {
+      "name": "ADR_A19",
+      "description": "A19"
+    },
+    {
+      "name": "ADT_A01",
+      "description": "A01, A04, A05, A08, A13, A14, A28, A31"
+    },
+    {
+      "name": "ADT_A02",
+      "description": "A02, A21, A22, A23, A25, A26, A27, A29, A32, A33"
+    },
+    {
+      "name": "ADT_A03",
+      "description": "A03"
+    },
+    {
+      "name": "ADT_A06",
+      "description": "A06, A07"
+    },
+    {
+      "name": "ADT_A09",
+      "description": "A09, A10, A11, A15"
+    },
+    {
+      "name": "ADT_A12",
+      "description": "A12"
+    },
+    {
+      "name": "ADT_A16",
+      "description": "A16"
+    },
+    {
+      "name": "ADT_A17",
+      "description": "A17"
+    },
+    {
+      "name": "ADT_A18",
+      "description": "A18"
+    },
+    {
+      "name": "ADT_A20",
+      "description": "A20"
+    },
+    {
+      "name": "ADT_A24",
+      "description": "A24"
+    },
+    {
+      "name": "ADT_A28",
+      "description": "A28, A31"
+    },
+    {
+      "name": "ADT_A30",
+      "description": "A30, A34, A35, 136, A46, A47, A48, A49"
+    },
+    {
+      "name": "ADT_A37",
+      "description": "A37"
+    },
+    {
+      "name": "ADT_A38",
+      "description": "A38"
+    },
+    {
+      "name": "ADT_A39",
+      "description": "A39, A40, A41, A42"
+    },
+    {
+      "name": "ADT_A43",
+      "description": "A43, A44"
+    },
+    {
+      "name": "ADT_A45",
+      "description": "A45"
+    },
+    {
+      "name": "ADT_A50",
+      "description": "A50, A51"
+    },
+    {
+      "name": "ARD_A19",
+      "description": "A19"
+    },
+    {
+      "name": "BAR_P01",
+      "description": "P01, P05"
+    },
+    {
+      "name": "BAR_P02",
+      "description": "P02"
+    },
+    {
+      "name": "BAR_P06",
+      "description": "P06"
+    },
+    {
+      "name": "CRM_C01",
+      "description": "C01, C02, C03, C04, C05, C06, C07, C08"
+    },
+    {
+      "name": "CSU_C09",
+      "description": "C09, C10, C11, C12"
+    },
+    {
+      "name": "DFT_P03",
+      "description": "P03"
+    },
+    {
+      "name": "DOC_T12",
+      "description": "T12"
+    },
+    {
+      "name": "DSR_Q01",
+      "description": "Q01"
+    },
+    {
+      "name": "DSR_Q03",
+      "description": "Q03"
+    },
+    {
+      "name": "EDR_R07",
+      "description": "R07"
+    },
+    {
+      "name": "EQQ_Q04",
+      "description": "Q04"
+    },
+    {
+      "name": "ERP_R09",
+      "description": "R09"
+    },
+    {
+      "name": "MDM_T01",
+      "description": "T01, T03, T05, T07, T09, T11"
+    },
+    {
+      "name": "MDM_T02",
+      "description": "T02, T04, T06, T08, T10"
+    },
+    {
+      "name": "MFD_P09",
+      "description": "P09"
+    },
+    {
+      "name": "MFK_M01",
+      "description": "M01, M03, M05, M06, M07, M08, M09, M10, M11"
+    },
+    {
+      "name": "MFN_M01",
+      "description": "M01"
+    },
+    {
+      "name": "MFN_M02",
+      "description": "M02"
+    },
+    {
+      "name": "MFN_M03",
+      "description": "M03"
+    },
+    {
+      "name": "MFN_M05",
+      "description": "M05"
+    },
+    {
+      "name": "MFN_M06",
+      "description": "M06"
+    },
+    {
+      "name": "MFN_M07",
+      "description": "M07"
+    },
+    {
+      "name": "MFN_M08",
+      "description": "M08"
+    },
+    {
+      "name": "MFN_M09",
+      "description": "M09"
+    },
+    {
+      "name": "MFN_M10",
+      "description": "M10"
+    },
+    {
+      "name": "MFN_M11",
+      "description": "M11"
+    },
+    {
+      "name": "OMD_O01",
+      "description": ""
+    },
+    {
+      "name": "OMN_O01",
+      "description": ""
+    },
+    {
+      "name": "OMS_O01",
+      "description": ""
+    },
+    {
+      "name": "ORD_O02",
+      "description": ""
+    },
+    {
+      "name": "ORF_R02",
+      "description": "R02, R04"
+    },
+    {
+      "name": "ORM_O01",
+      "description": "O01"
+    },
+    {
+      "name": "ORM_Q06",
+      "description": "Q06"
+    },
+    {
+      "name": "ORN_O02",
+      "description": ""
+    },
+    {
+      "name": "ORR_O02",
+      "description": "O02"
+    },
+    {
+      "name": "ORR_Q06",
+      "description": "Q06"
+    },
+    {
+      "name": "ORS_O02",
+      "description": ""
+    },
+    {
+      "name": "ORU_R01",
+      "description": "R01"
+    },
+    {
+      "name": "ORU_W01",
+      "description": "W01"
+    },
+    {
+      "name": "OSQ_Q06",
+      "description": "Q06"
+    },
+    {
+      "name": "OSR_Q06",
+      "description": "Q06"
+    },
+    {
+      "name": "PEX_P07",
+      "description": "P07, P08"
+    },
+    {
+      "name": "PGL_PC6",
+      "description": "PC6, PC7, PC8"
+    },
+    {
+      "name": "PIN_I07",
+      "description": "I07"
+    },
+    {
+      "name": "PPG_PCG",
+      "description": "PCC, PCH, PCJ"
+    },
+    {
+      "name": "PPP_PCB",
+      "description": "PCB, PCD"
+    },
+    {
+      "name": "PPR_PC1",
+      "description": "PC1, PC2, PC3"
+    },
+    {
+      "name": "PPT_PCL",
+      "description": "PCL"
+    },
+    {
+      "name": "PPV_PCA",
+      "description": "PCA"
+    },
+    {
+      "name": "PRR_PC5",
+      "description": "PC5"
+    },
+    {
+      "name": "PTR_PCF",
+      "description": "PCF"
+    },
+    {
+      "name": "QCK_Q02",
+      "description": "Q02"
+    },
+    {
+      "name": "QRY_A19",
+      "description": "A19"
+    },
+    {
+      "name": "QRY_PC4",
+      "description": "PC4, PC9, PCE, PCK"
+    },
+    {
+      "name": "QRY_Q01",
+      "description": "Q01"
+    },
+    {
+      "name": "QRY_Q02",
+      "description": "Q02"
+    },
+    {
+      "name": "QRY_R02",
+      "description": "R02, R04"
+    },
+    {
+      "name": "QRY_T12",
+      "description": "T12"
+    },
+    {
+      "name": "RAR_RAR",
+      "description": "RAR"
+    },
+    {
+      "name": "RAS_O01",
+      "description": "O01"
+    },
+    {
+      "name": "RAS_O02",
+      "description": "O022"
+    },
+    {
+      "name": "RCI_I05",
+      "description": "I05"
+    },
+    {
+      "name": "RCL_I06",
+      "description": "I06"
+    },
+    {
+      "name": "RDE_O01",
+      "description": "O01"
+    },
+    {
+      "name": "RDO_O01",
+      "description": ""
+    },
+    {
+      "name": "RDR_RDR",
+      "description": "RDR"
+    },
+    {
+      "name": "RDS_O01",
+      "description": "O01"
+    },
+    {
+      "name": "REF_I12",
+      "description": "I12, I13, I14, I15"
+    },
+    {
+      "name": "RER_RER",
+      "description": "RER"
+    },
+    {
+      "name": "RGR_RGR",
+      "description": "RGR"
+    },
+    {
+      "name": "RGV_O01",
+      "description": "O01"
+    },
+    {
+      "name": "ROR_ROR",
+      "description": "ROR"
+    },
+    {
+      "name": "RPA_I08",
+      "description": "I08, I09. I10, 1II"
+    },
+    {
+      "name": "RPI_I0I",
+      "description": "I01, I04"
+    },
+    {
+      "name": "RPL_I02",
+      "description": "I02"
+    },
+    {
+      "name": "RPR_I03",
+      "description": "I03"
+    },
+    {
+      "name": "RQA_I08",
+      "description": "I08, I09, I10, I11"
+    },
+    {
+      "name": "RQC_I05",
+      "description": "I05"
+    },
+    {
+      "name": "RQC_I06",
+      "description": "I06"
+    },
+    {
+      "name": "RQI_I0I",
+      "description": "I01, I02, I03"
+    },
+    {
+      "name": "RQP_I04",
+      "description": "I04"
+    },
+    {
+      "name": "RQQ_Q09",
+      "description": "Q09"
+    },
+    {
+      "name": "RRA_O02",
+      "description": "O02"
+    },
+    {
+      "name": "RRD_O02",
+      "description": "O02"
+    },
+    {
+      "name": "RRE_O02",
+      "description": "O02"
+    },
+    {
+      "name": "RRG_O02",
+      "description": "O02"
+    },
+    {
+      "name": "RRI_I12",
+      "description": "I12, I13, I14, I15"
+    },
+    {
+      "name": "RRO_O02",
+      "description": ""
+    },
+    {
+      "name": "SIU_S12",
+      "description": "S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S26"
+    },
+    {
+      "name": "SPQ_Q08",
+      "description": "Q08"
+    },
+    {
+      "name": "SQM_S25",
+      "description": "S25"
+    },
+    {
+      "name": "SQR_S25",
+      "description": "S25"
+    },
+    {
+      "name": "SRM_S01",
+      "description": "S01, S02, S03, S04, S05, S06, S07, S08, S09, S10, S11"
+    },
+    {
+      "name": "SRM_T12",
+      "description": "T12"
+    },
+    {
+      "name": "SRR_S01",
+      "description": "S01, S02, S03, S04, S05, S06, S07, S08, S09, S10, S11"
+    },
+    {
+      "name": "SRR_T12",
+      "description": "T12"
+    },
+    {
+      "name": "SUR_P09",
+      "description": "P09"
+    },
+    {
+      "name": "TBR_R09",
+      "description": "R09"
+    },
+    {
+      "name": "UDM_Q05",
+      "description": "Q05"
+    },
+    {
+      "name": "VQQ_Q07",
+      "description": "Q07"
+    },
+    {
+      "name": "VXQ_V01",
+      "description": "V01"
+    },
+    {
+      "name": "VXR_V03",
+      "description": "V03"
+    },
+    {
+      "name": "VXU_V04",
+      "description": "V04"
+    },
+    {
+      "name": "VXX_V02",
+      "description": "V02"
+    }
+  ]
+}

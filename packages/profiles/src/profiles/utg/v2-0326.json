@@ -1,0 +1,19 @@
+{
+  "id": "v2-0326",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0326",
+  "oid": "2.16.840.1.113883.18.199",
+  "name": "VisitIndicator",
+  "title": "visitIndicator",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Account level",
+      "status": "active"
+    },
+    {
+      "code": "V",
+      "display": "Visit level",
+      "status": "active"
+    }
+  ]
+}

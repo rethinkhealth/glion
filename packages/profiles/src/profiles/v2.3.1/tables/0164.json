@@ -1,0 +1,43 @@
+{
+  "id": "0164",
+  "description": "Administration device",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AP",
+      "description": "Applicator"
+    },
+    {
+      "name": "BT",
+      "description": "Buretrol"
+    },
+    {
+      "name": "HL",
+      "description": "Heparin Lock"
+    },
+    {
+      "name": "IPPB",
+      "description": "IPPB"
+    },
+    {
+      "name": "IVP",
+      "description": "IV Pump"
+    },
+    {
+      "name": "IVS",
+      "description": "IV Soluset"
+    },
+    {
+      "name": "MI",
+      "description": "Metered Inhaler"
+    },
+    {
+      "name": "NEB",
+      "description": "Nebulizer"
+    },
+    {
+      "name": "PCA",
+      "description": "PCA Pump"
+    }
+  ]
+}

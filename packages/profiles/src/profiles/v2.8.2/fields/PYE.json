@@ -1,0 +1,72 @@
+{
+  "segmentId": "PYE",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PYE-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - PYE",
+      "item": "1939"
+    },
+    {
+      "sequence": 2,
+      "id": "PYE-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70557",
+      "name": "Payee Type",
+      "item": "1940"
+    },
+    {
+      "sequence": 3,
+      "id": "PYE-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70558",
+      "name": "Payee Relationship to Invoice (Patient)",
+      "item": "1941"
+    },
+    {
+      "sequence": 4,
+      "id": "PYE-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XON",
+      "name": "Payee Identification List",
+      "item": "1942"
+    },
+    {
+      "sequence": 5,
+      "id": "PYE-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XPN",
+      "name": "Payee Person Name",
+      "item": "1943"
+    },
+    {
+      "sequence": 6,
+      "id": "PYE-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XAD",
+      "name": "Payee Address",
+      "item": "1944"
+    },
+    {
+      "sequence": 7,
+      "id": "PYE-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70570",
+      "name": "Payment Method",
+      "item": "1945"
+    }
+  ]
+}

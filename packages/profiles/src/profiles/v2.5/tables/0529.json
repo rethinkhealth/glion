@@ -1,0 +1,31 @@
+{
+  "id": "0529",
+  "description": "Precision",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "day"
+    },
+    {
+      "name": "H",
+      "description": "hour"
+    },
+    {
+      "name": "L",
+      "description": "month"
+    },
+    {
+      "name": "M",
+      "description": "minute"
+    },
+    {
+      "name": "S",
+      "description": "second"
+    },
+    {
+      "name": "Y",
+      "description": "year"
+    }
+  ]
+}

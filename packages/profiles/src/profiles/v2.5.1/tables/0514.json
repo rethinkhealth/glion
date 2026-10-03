@@ -1,0 +1,83 @@
+{
+  "id": "0514",
+  "description": "Transfusion Adverse Reaction",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ABOINC",
+      "description": "ABO Incompatible Transfusion Reaction"
+    },
+    {
+      "name": "ACUTHEHTR",
+      "description": "Acute Hemolytic Transfusion Reaction"
+    },
+    {
+      "name": "ALLERGIC1",
+      "description": "Allergic Reaction - First"
+    },
+    {
+      "name": "ALLERGIC2",
+      "description": "Allergic Reaction - Recurrent"
+    },
+    {
+      "name": "ALLERGICR",
+      "description": "Allergic Reaction - Repeating"
+    },
+    {
+      "name": "ANAPHYLAC",
+      "description": "Anaphylactic Reaction"
+    },
+    {
+      "name": "BACTCONTAM",
+      "description": "Reaction to Bacterial Contamination"
+    },
+    {
+      "name": "DELAYEDHTR",
+      "description": "Delayed Hemolytic Transfusion Reaction"
+    },
+    {
+      "name": "DELAYEDSTR",
+      "description": "Delayed Serological Transfusion Reaction"
+    },
+    {
+      "name": "GVHD",
+      "description": "Graft vs Host Disease - Transfusion - Associated"
+    },
+    {
+      "name": "HYPOTENS",
+      "description": "Non-hemolytic Hypotensive Reaction"
+    },
+    {
+      "name": "NONHTR1",
+      "description": "Non-Hemolytic Fever Chill Transfusion Reaction - First"
+    },
+    {
+      "name": "NONHTR2",
+      "description": "Non-Hemolytic Fever Chill Transfusion Reaction - Recurrent"
+    },
+    {
+      "name": "NONHTRREC",
+      "description": "Non-Hemolytic Fever Chill Transfusion Reaction - Repeating"
+    },
+    {
+      "name": "NONIMMUNE",
+      "description": "Non-Immune Hemolysis"
+    },
+    {
+      "name": "NONSPEC",
+      "description": "Non-Specific, Non-Hemolytic Transfusion Reaction"
+    },
+    {
+      "name": "NORXN",
+      "description": "No Evidence of Transfusion Reaction"
+    },
+    {
+      "name": "PTP",
+      "description": "Posttransfusion Purpura"
+    },
+    {
+      "name": "VOLOVER",
+      "description": "Symptoms most likely due to volume overload"
+    }
+  ]
+}

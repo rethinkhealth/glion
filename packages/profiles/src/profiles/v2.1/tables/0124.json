@@ -1,0 +1,19 @@
+{
+  "id": "0124",
+  "description": "TRANSPORTATION MODE",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "PORT",
+      "description": "The examining device goes to Patient's Loc."
+    },
+    {
+      "name": "WALK",
+      "description": "Patient walks to diagnostic service"
+    },
+    {
+      "name": "WHLC",
+      "description": "Wheelchair"
+    }
+  ]
+}

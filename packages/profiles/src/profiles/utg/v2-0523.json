@@ -1,0 +1,19 @@
+{
+  "id": "v2-0523",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0523",
+  "oid": "2.16.840.1.113883.18.341",
+  "name": "ComputationType",
+  "title": "computationType",
+  "codes": [
+    {
+      "code": "%",
+      "display": "Indicates a percent change",
+      "status": "active"
+    },
+    {
+      "code": "a",
+      "display": "Absolute Change",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "0131",
+  "description": "Contact Role",
+  "type": "user",
+  "codes": [
+    {
+      "name": "BP",
+      "description": "Billing contact person"
+    },
+    {
+      "name": "CP",
+      "description": "Contact person"
+    },
+    {
+      "name": "EP",
+      "description": "Emergency contact person"
+    },
+    {
+      "name": "PR",
+      "description": "Person preparing referral"
+    }
+  ]
+}

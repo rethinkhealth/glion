@@ -1,0 +1,20 @@
+{
+  "id": "OCD",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "occurence",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "occurrence code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "occurrence date",
+      "datatypeId": "DT",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "0336",
+  "description": "Referral Reason",
+  "type": "user",
+  "codes": [
+    {
+      "name": "O",
+      "description": "Provider Ordered"
+    },
+    {
+      "name": "P",
+      "description": "Patient Preference"
+    },
+    {
+      "name": "S",
+      "description": "Second Opinion"
+    },
+    {
+      "name": "W",
+      "description": "Work Load"
+    }
+  ]
+}

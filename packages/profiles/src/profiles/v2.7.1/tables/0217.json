@@ -1,0 +1,19 @@
+{
+  "id": "0217",
+  "description": "Visit Priority Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Emergency"
+    },
+    {
+      "name": "2",
+      "description": "Urgent"
+    },
+    {
+      "name": "3",
+      "description": "Elective"
+    }
+  ]
+}

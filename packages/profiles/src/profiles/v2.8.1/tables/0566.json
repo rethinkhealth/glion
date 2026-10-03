@@ -1,0 +1,35 @@
+{
+  "id": "0566",
+  "description": "Blood Unit Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "GRN",
+      "description": "Granulocytes"
+    },
+    {
+      "name": "LYM",
+      "description": "Lymphocytes"
+    },
+    {
+      "name": "PLS",
+      "description": "Plasma"
+    },
+    {
+      "name": "PLT",
+      "description": "Platelets"
+    },
+    {
+      "name": "PSC",
+      "description": "Peripheral Stem Cells"
+    },
+    {
+      "name": "RBC",
+      "description": "Red Blood Cells"
+    },
+    {
+      "name": "WBL",
+      "description": "Whole Blood"
+    }
+  ]
+}

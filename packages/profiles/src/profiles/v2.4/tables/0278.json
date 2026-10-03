@@ -1,0 +1,47 @@
+{
+  "id": "0278",
+  "description": "Filler status codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "Blocked",
+      "description": "The indicated time slot(s) is(are) blocked"
+    },
+    {
+      "name": "Booked",
+      "description": "The indicated appointment is booked"
+    },
+    {
+      "name": "Cancelled",
+      "description": "The indicated appointment was stopped from occurring (canceled prior to starting)"
+    },
+    {
+      "name": "Complete",
+      "description": "The indicated appointment has completed normally (was not discontinued, canceled, or deleted)"
+    },
+    {
+      "name": "Dc",
+      "description": "The indicated appointment was discontinued (DC'ed while in progress, discontinued parent appointment, or discontinued child appointment)"
+    },
+    {
+      "name": "Deleted",
+      "description": "The indicated appointment was deleted from the filler application"
+    },
+    {
+      "name": "Overbook",
+      "description": "The appointment has been confirmed; however it is confirmed in an overbooked state"
+    },
+    {
+      "name": "Pending",
+      "description": "Appointment has not yet been confirmed"
+    },
+    {
+      "name": "Started",
+      "description": "The indicated appointment has begun and is currently in progress"
+    },
+    {
+      "name": "Waitlist",
+      "description": "Appointment has been placed on a waiting list for a particular slot, or set of slots"
+    }
+  ]
+}

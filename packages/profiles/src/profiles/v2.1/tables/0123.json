@@ -1,0 +1,39 @@
+{
+  "id": "0123",
+  "description": "RESULT STATUS - OBR",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Correction of previously transmitted results"
+    },
+    {
+      "name": "F",
+      "description": "Final results - results stored & verified"
+    },
+    {
+      "name": "I",
+      "description": "Specimen in lab, not yet processed."
+    },
+    {
+      "name": "P",
+      "description": "Preliminary results"
+    },
+    {
+      "name": "R",
+      "description": "Results stored - not yet verified"
+    },
+    {
+      "name": "S",
+      "description": "Procedure scheduled, not done"
+    },
+    {
+      "name": "Y",
+      "description": "No order on record for this test"
+    },
+    {
+      "name": "Z",
+      "description": "No record of this patient"
+    }
+  ]
+}

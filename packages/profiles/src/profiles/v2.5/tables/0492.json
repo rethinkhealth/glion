@@ -1,0 +1,23 @@
+{
+  "id": "0492",
+  "description": "Specimen Appropriateness",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "??",
+      "description": "Inappropriate due to _"
+    },
+    {
+      "name": "A",
+      "description": "Appropriate"
+    },
+    {
+      "name": "I",
+      "description": "Inappropriate"
+    },
+    {
+      "name": "P",
+      "description": "Preferred"
+    }
+  ]
+}

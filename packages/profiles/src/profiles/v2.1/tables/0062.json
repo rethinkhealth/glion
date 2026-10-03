@@ -1,0 +1,15 @@
+{
+  "id": "0062",
+  "description": "EVENT REASON",
+  "type": "user",
+  "codes": [
+    {
+      "name": "01",
+      "description": "Patient Request"
+    },
+    {
+      "name": "02",
+      "description": "Physician Order"
+    }
+  ]
+}

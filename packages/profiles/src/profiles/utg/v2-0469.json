@@ -1,0 +1,24 @@
+{
+  "id": "v2-0469",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0469",
+  "oid": "2.16.840.1.113883.18.298",
+  "name": "PackagingStatus",
+  "title": "packagingStatus",
+  "codes": [
+    {
+      "code": "0",
+      "display": "Not packaged",
+      "status": "active"
+    },
+    {
+      "code": "1",
+      "display": "Packaged service (status indicator N, or no HCPCS code and certain revenue codes)",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Packaged as part of partial hospitalization per diem or daily mental health service per diem",
+      "status": "active"
+    }
+  ]
+}

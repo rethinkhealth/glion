@@ -1,0 +1,29 @@
+{
+  "id": "v2-0236",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0236",
+  "oid": "2.16.840.1.113883.18.135",
+  "name": "EventReportedTo",
+  "title": "eventReportedTo",
+  "codes": [
+    {
+      "code": "D",
+      "display": "Distributor",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Local facility/user facility",
+      "status": "active"
+    },
+    {
+      "code": "M",
+      "display": "Manufacturer",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Regulatory agency",
+      "status": "active"
+    }
+  ]
+}

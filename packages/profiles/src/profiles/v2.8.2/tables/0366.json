@@ -1,0 +1,19 @@
+{
+  "id": "0366",
+  "description": "Local/Remote Control State",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "...",
+      "description": "(null) No state change"
+    },
+    {
+      "name": "L",
+      "description": "Local"
+    },
+    {
+      "name": "R",
+      "description": "Remote"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "v2-0238",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0238",
+  "oid": "2.16.840.1.113883.18.137",
+  "name": "EventSeriousness",
+  "title": "eventSeriousness",
+  "codes": [
+    {
+      "code": "N",
+      "display": "No",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "Significant",
+      "status": "active"
+    },
+    {
+      "code": "Y",
+      "display": "Yes",
+      "status": "active"
+    }
+  ]
+}

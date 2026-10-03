@@ -1,0 +1,19 @@
+{
+  "id": "0881",
+  "description": "Role Executing Physician",
+  "type": "user",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Both"
+    },
+    {
+      "name": "P",
+      "description": "Professional Part"
+    },
+    {
+      "name": "T",
+      "description": "Technical Part"
+    }
+  ]
+}

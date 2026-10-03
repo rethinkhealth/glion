@@ -1,0 +1,23 @@
+{
+  "id": "0273",
+  "description": "Document availability status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AV",
+      "description": "Available for patient care"
+    },
+    {
+      "name": "CA",
+      "description": "Deleted"
+    },
+    {
+      "name": "OB",
+      "description": "Obsolete"
+    },
+    {
+      "name": "UN",
+      "description": "Unavailable for patient care"
+    }
+  ]
+}

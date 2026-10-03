@@ -1,0 +1,27 @@
+{
+  "id": "0778",
+  "description": "Item Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "EQP",
+      "description": "Equipment"
+    },
+    {
+      "name": "IMP",
+      "description": "Implant"
+    },
+    {
+      "name": "MED",
+      "description": "Medication"
+    },
+    {
+      "name": "SUP",
+      "description": "Supply"
+    },
+    {
+      "name": "TDC",
+      "description": "Tubes, Drains, and Catheters"
+    }
+  ]
+}

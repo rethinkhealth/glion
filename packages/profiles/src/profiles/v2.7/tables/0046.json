@@ -1,0 +1,11 @@
+{
+  "id": "0046",
+  "description": "Credit Rating",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "no suggested values"
+    }
+  ]
+}

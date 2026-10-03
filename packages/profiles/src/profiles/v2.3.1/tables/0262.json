@@ -1,0 +1,31 @@
+{
+  "id": "0262",
+  "description": "Privacy level",
+  "type": "user",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Isolation"
+    },
+    {
+      "name": "J",
+      "description": "Private room - medically justified"
+    },
+    {
+      "name": "P",
+      "description": "Private room"
+    },
+    {
+      "name": "Q",
+      "description": "Private room - due to overflow"
+    },
+    {
+      "name": "S",
+      "description": "Semi-private room"
+    },
+    {
+      "name": "W",
+      "description": "Ward"
+    }
+  ]
+}

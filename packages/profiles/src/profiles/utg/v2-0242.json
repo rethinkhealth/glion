@@ -1,0 +1,44 @@
+{
+  "id": "v2-0242",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0242",
+  "oid": "2.16.840.1.113883.18.141",
+  "name": "PrimaryObserverQualification",
+  "title": "primaryObserverQualification",
+  "codes": [
+    {
+      "code": "C",
+      "display": "Health care consumer/patient",
+      "status": "active"
+    },
+    {
+      "code": "H",
+      "display": "Other health professional",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Lawyer/attorney",
+      "status": "active"
+    },
+    {
+      "code": "M",
+      "display": "Mid-level professional (nurse, nurse practitioner, physician&#39;s assistant)",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other non-health professional",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Physician (osteopath, homeopath)",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Pharmacist",
+      "status": "active"
+    }
+  ]
+}

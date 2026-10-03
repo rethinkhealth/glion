@@ -1,0 +1,74 @@
+{
+  "id": "OSD",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "order sequence",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "sequence/results flag",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "placer order number: entity identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "placer order number: namespace ID",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "filler order number: entity identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "filler order number: namespace ID",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "sequence condition value",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "maximum number of repeats",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "placer order number: universal ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "placer order number; universal ID type",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "filler order number: universal ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "filler order number: universal ID type",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

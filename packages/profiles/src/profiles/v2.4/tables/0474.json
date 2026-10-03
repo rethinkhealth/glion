@@ -1,0 +1,35 @@
+{
+  "id": "0474",
+  "description": "Organization unit type - ORG",
+  "type": "user",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Department"
+    },
+    {
+      "name": "F",
+      "description": "Facility"
+    },
+    {
+      "name": "L",
+      "description": "Local market area"
+    },
+    {
+      "name": "M",
+      "description": "Medical Center Area"
+    },
+    {
+      "name": "S",
+      "description": "Subdivision"
+    },
+    {
+      "name": "U",
+      "description": "Subdepartment"
+    },
+    {
+      "name": "V",
+      "description": "Division"
+    }
+  ]
+}

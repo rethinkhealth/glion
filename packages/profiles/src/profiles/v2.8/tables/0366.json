@@ -1,0 +1,15 @@
+{
+  "id": "0366",
+  "description": "Local/Remote Control State",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "L",
+      "description": "Local"
+    },
+    {
+      "name": "R",
+      "description": "Remote"
+    }
+  ]
+}

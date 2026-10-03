@@ -1,0 +1,32 @@
+{
+  "id": "QSC",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "query selection criteria",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "segment field name",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "relational operator",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Value",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "relational conjunction",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

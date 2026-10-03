@@ -1,0 +1,20 @@
+{
+  "id": "SRT",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "sort order",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "sort-by field",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "sequencing",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "id": "0440",
+  "description": "Data types",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AD",
+      "description": "Address"
+    },
+    {
+      "name": "CD",
+      "description": "Channel definition"
+    },
+    {
+      "name": "CE",
+      "description": "Coded element"
+    },
+    {
+      "name": "CF",
+      "description": "Coded element with formatted values"
+    },
+    {
+      "name": "CK",
+      "description": "Composite ID with check digit"
+    },
+    {
+      "name": "CM",
+      "description": "Composite"
+    },
+    {
+      "name": "CN",
+      "description": "Composite ID number and name"
+    },
+    {
+      "name": "CNE",
+      "description": "Coded with no exceptions"
+    },
+    {
+      "name": "CP",
+      "description": "Composite price"
+    },
+    {
+      "name": "CQ",
+      "description": "Composite quantity with units"
+    },
+    {
+      "name": "CWE",
+      "description": "Coded with exceptions"
+    },
+    {
+      "name": "CX",
+      "description": "Extended composite ID with check digit"
+    },
+    {
+      "name": "DLN",
+      "description": "Driver's license number"
+    },
+    {
+      "name": "DR",
+      "description": "Date/time range"
+    },
+    {
+      "name": "DT",
+      "description": "Date"
+    },
+    {
+      "name": "ED",
+      "description": "Encapsulated data"
+    },
+    {
+      "name": "EI",
+      "description": "Entity identifier"
+    },
+    {
+      "name": "FC",
+      "description": "Financial class"
+    },
+    {
+      "name": "FN",
+      "description": "Family name"
+    },
+    {
+      "name": "FT",
+      "description": "Formatted text"
+    },
+    {
+      "name": "HD",
+      "description": "Hierarchic designator"
+    },
+    {
+      "name": "ID",
+      "description": "Coded values for HL7 tables"
+    },
+    {
+      "name": "IS",
+      "description": "Coded value for user-defined tables"
+    },
+    {
+      "name": "JCC",
+      "description": "Job code/class"
+    },
+    {
+      "name": "MA",
+      "description": "Multiplexed array"
+    },
+    {
+      "name": "MO",
+      "description": "Money"
+    },
+    {
+      "name": "NA",
+      "description": "Numeric array"
+    },
+    {
+      "name": "NM",
+      "description": "Numeric"
+    },
+    {
+      "name": "PL",
+      "description": "Person location"
+    },
+    {
+      "name": "PN",
+      "description": "Person name"
+    },
+    {
+      "name": "PPN",
+      "description": "Performing person time stamp"
+    },
+    {
+      "name": "PT",
+      "description": "Processing type"
+    },
+    {
+      "name": "QIP",
+      "description": "Query input parameter list"
+    },
+    {
+      "name": "QSC",
+      "description": "Query selection criteria"
+    },
+    {
+      "name": "RCD",
+      "description": "Row column definition"
+    },
+    {
+      "name": "RI",
+      "description": "Repeat interval"
+    },
+    {
+      "name": "RP",
+      "description": "Reference pointer"
+    },
+    {
+      "name": "SAD",
+      "description": "Street Address"
+    },
+    {
+      "name": "SCV",
+      "description": "Scheduling class value pair"
+    },
+    {
+      "name": "SI",
+      "description": "Sequence ID"
+    },
+    {
+      "name": "SN",
+      "description": "Structured numeric"
+    },
+    {
+      "name": "SRT",
+      "description": "Sort order"
+    },
+    {
+      "name": "ST",
+      "description": "String"
+    },
+    {
+      "name": "TM",
+      "description": "Time"
+    },
+    {
+      "name": "TN",
+      "description": "Telephone number"
+    },
+    {
+      "name": "TQ",
+      "description": "Timing/quantity"
+    },
+    {
+      "name": "TS",
+      "description": "Time stamp"
+    },
+    {
+      "name": "TX",
+      "description": "Text data"
+    },
+    {
+      "name": "VH",
+      "description": "Visiting hours"
+    },
+    {
+      "name": "VID",
+      "description": "Version identifier"
+    },
+    {
+      "name": "XAD",
+      "description": "Extended address"
+    },
+    {
+      "name": "XCN",
+      "description": "Extended composite ID number and name"
+    },
+    {
+      "name": "XON",
+      "description": "Extended composite name and ID number for organizations"
+    },
+    {
+      "name": "XPN",
+      "description": "Extended person name"
+    },
+    {
+      "name": "XTN",
+      "description": "Extended telecommunications number"
+    }
+  ]
+}

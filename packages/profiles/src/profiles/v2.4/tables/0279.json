@@ -1,0 +1,23 @@
+{
+  "id": "0279",
+  "description": "Allow substitution codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "Confirm",
+      "description": "Contact the Placer Contact Person prior to making any substitutions of this resource"
+    },
+    {
+      "name": "No",
+      "description": "Substitution of this resource is not allowed"
+    },
+    {
+      "name": "Notify",
+      "description": "Notify the Placer Contact Person, through normal institutional procedures, that a substitution of this resource has been made"
+    },
+    {
+      "name": "Yes",
+      "description": "Substitution of this resource is allowed"
+    }
+  ]
+}

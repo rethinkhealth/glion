@@ -1,0 +1,19 @@
+{
+  "id": "v2-0444",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0444",
+  "oid": "2.16.840.1.113883.18.284",
+  "name": "NameAssemblyOrder",
+  "title": "nameAssemblyOrder",
+  "codes": [
+    {
+      "code": "F",
+      "display": "Prefix Family Middle Given Suffix",
+      "status": "active"
+    },
+    {
+      "code": "G",
+      "display": "Prefix Given Middle Family Suffix",
+      "status": "active"
+    }
+  ]
+}

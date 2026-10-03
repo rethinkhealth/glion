@@ -1,0 +1,19 @@
+{
+  "id": "0106",
+  "description": "Query/Response Format Code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Response is in display format"
+    },
+    {
+      "name": "R",
+      "description": "Response is in record-oriented format"
+    },
+    {
+      "name": "T",
+      "description": "Response is in tabular format"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "0469",
+  "description": "Packaging Status Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "0",
+      "description": "Not packaged"
+    },
+    {
+      "name": "1",
+      "description": "Packaged service (status indicator N, or no HCPCS code and certain revenue codes)"
+    },
+    {
+      "name": "2",
+      "description": "Packaged as part of partial hospitalization per diem or daily mental health service per diem"
+    }
+  ]
+}

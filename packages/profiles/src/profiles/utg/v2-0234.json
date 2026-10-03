@@ -1,0 +1,59 @@
+{
+  "id": "v2-0234",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0234",
+  "oid": "2.16.840.1.113883.18.133",
+  "name": "ReportTiming",
+  "title": "reportTiming",
+  "codes": [
+    {
+      "code": "10D",
+      "display": "10 day report",
+      "status": "active"
+    },
+    {
+      "code": "15D",
+      "display": "15 day report",
+      "status": "active"
+    },
+    {
+      "code": "30D",
+      "display": "30 day report",
+      "status": "active"
+    },
+    {
+      "code": "3D",
+      "display": "3 day report",
+      "status": "active"
+    },
+    {
+      "code": "7D",
+      "display": "7 day report",
+      "status": "active"
+    },
+    {
+      "code": "AD",
+      "display": "Additional information",
+      "status": "active"
+    },
+    {
+      "code": "CO",
+      "display": "Correction",
+      "status": "active"
+    },
+    {
+      "code": "DE",
+      "display": "Device evaluation",
+      "status": "active"
+    },
+    {
+      "code": "PD",
+      "display": "Periodic",
+      "status": "active"
+    },
+    {
+      "code": "RQ",
+      "display": "Requested information",
+      "status": "active"
+    }
+  ]
+}

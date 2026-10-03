@@ -1,0 +1,46 @@
+{
+  "segmentId": "MFE",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "MFE-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70180",
+      "name": "Record-Level Event Code",
+      "item": "664"
+    },
+    {
+      "sequence": 2,
+      "id": "MFE-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "MFN Control ID",
+      "item": "665"
+    },
+    {
+      "sequence": 3,
+      "id": "MFE-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Effective Date/Time",
+      "item": "662"
+    },
+    {
+      "sequence": 4,
+      "id": "MFE-4",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Primary Key Value",
+      "item": "667"
+    }
+  ]
+}

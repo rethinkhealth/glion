@@ -1,0 +1,23 @@
+{
+  "id": "0248",
+  "description": "Product source",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Actual product involved in incident was evaluated"
+    },
+    {
+      "name": "L",
+      "description": "A product from the same lot as the actual product involved was evaluated"
+    },
+    {
+      "name": "N",
+      "description": "A product from a controlled/non-related inventory was evaluated"
+    },
+    {
+      "name": "R",
+      "description": "A product from a reserve sample was evaluated"
+    }
+  ]
+}

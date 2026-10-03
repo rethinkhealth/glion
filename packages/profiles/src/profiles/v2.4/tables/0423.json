@@ -1,0 +1,11 @@
+{
+  "id": "0423",
+  "description": "Case category code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Doctor's Office Closed"
+    }
+  ]
+}

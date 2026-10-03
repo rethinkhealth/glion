@@ -1,0 +1,23 @@
+{
+  "id": "0392",
+  "description": "Match Reason",
+  "type": "user",
+  "codes": [
+    {
+      "name": "DB",
+      "description": "Match on Date of Birth"
+    },
+    {
+      "name": "NA",
+      "description": "Match on Name (Alpha Match)"
+    },
+    {
+      "name": "NP",
+      "description": "Match on Name (Phonetic Match)"
+    },
+    {
+      "name": "SS",
+      "description": "Match on Social Security Number"
+    }
+  ]
+}

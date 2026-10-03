@@ -1,0 +1,19 @@
+{
+  "id": "0472",
+  "description": "TQ Conjunction ID",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Asynchronous"
+    },
+    {
+      "name": "C",
+      "description": "Actuation Time"
+    },
+    {
+      "name": "S",
+      "description": "Synchronous"
+    }
+  ]
+}

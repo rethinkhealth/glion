@@ -1,0 +1,23 @@
+{
+  "id": "0491",
+  "description": "Specimen Quality",
+  "type": "user",
+  "codes": [
+    {
+      "name": "E",
+      "description": "Excellent"
+    },
+    {
+      "name": "F",
+      "description": "Fair"
+    },
+    {
+      "name": "G",
+      "description": "Good"
+    },
+    {
+      "name": "P",
+      "description": "Poor"
+    }
+  ]
+}

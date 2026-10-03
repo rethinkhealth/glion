@@ -1,0 +1,29 @@
+{
+  "id": "v2-0466",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0466",
+  "oid": "2.16.840.1.113883.18.296",
+  "name": "AmbulatoryPaymentClassification",
+  "title": "ambulatoryPaymentClassification",
+  "codes": [
+    {
+      "code": "...",
+      "display": "No suggested values defined",
+      "status": "deprecated"
+    },
+    {
+      "code": "031",
+      "display": "Dental procedures",
+      "status": "active"
+    },
+    {
+      "code": "163",
+      "display": "Excision/biopsy",
+      "status": "active"
+    },
+    {
+      "code": "181",
+      "display": "Level 1 skin repair.",
+      "status": "active"
+    }
+  ]
+}

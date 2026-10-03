@@ -1,0 +1,20 @@
+{
+  "id": "WVS",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "waveform source",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "source name 1",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "source name 2",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

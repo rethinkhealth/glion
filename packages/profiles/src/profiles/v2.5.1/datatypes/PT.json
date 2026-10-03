@@ -1,0 +1,20 @@
+{
+  "id": "PT",
+  "version": "2.5.1",
+  "kind": "composite",
+  "title": "Processing Type",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Processing ID",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Processing Mode",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}
