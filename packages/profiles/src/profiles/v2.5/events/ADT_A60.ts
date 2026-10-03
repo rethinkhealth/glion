@@ -33,7 +33,6 @@ export const transitions = new Map<number, Map<string, number>>([
     new Map([
       ["IAM", 5],
       ["PV1", 7],
-      ["PV2", 6],
     ]),
   ],
   [5, new Map([["IAM", 5]])],
