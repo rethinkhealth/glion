@@ -48,10 +48,19 @@ jobs:
     needs: select-mode
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    environment: release
     permissions:
-      contents: write # push the version branch
-      pull-requests: write # open or update the version pull request
+      contents: read # checkout
     steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write # push the version branch
+          permission-pull-requests: write # open or update the version pull request
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -73,6 +82,7 @@ jobs:
           script: pnpm ci:version
           commit-message: "chore: update versions"
           pr-title: "chore: update versions"
+          github-token: ${{ steps.app-token.outputs.token }}
 
   pack:
     name: Pack
