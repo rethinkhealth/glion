@@ -1,5 +1,6 @@
-import { utgCodeSystemImports } from "../profiles/utg/manifest";
 import type { ProfileStoreConfig } from "../store";
+import type { ProfileIndex } from "./import-from-index";
+import { importFromIndex } from "./import-from-index";
 import type {
   CodeSystemDefinition,
   UtgCodeEntry,
@@ -29,12 +30,18 @@ const compileCodeSystem = (raw: UtgCodeSystemModule): CodeSystemDefinition => {
   return result;
 };
 
+const codeSystemIndexes = import.meta.glob<ProfileIndex<UtgCodeSystemModule>>(
+  "../profiles/utg/index.ts",
+  { import: "default" }
+);
+
 /** Store configuration for UTG code system profiles. */
 export const codeSystemsConfig: ProfileStoreConfig<
   UtgCodeSystemModule,
   CodeSystemDefinition
 > = {
   compile: compileCodeSystem,
-  manifest: utgCodeSystemImports,
+  importProfile: (_version, id) =>
+    importFromIndex(codeSystemIndexes, "../profiles/utg", id),
   namespace: "codeSystems",
 };

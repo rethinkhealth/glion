@@ -3,18 +3,12 @@
     "name": "@glion/profiles: import { profiles }",
     "path": "packages/profiles/dist/index.js",
     "import": "{ profiles }",
-    "limit": "45 kB"
+    "limit": "12 kB"
   },
   {
     "name": "@glion/profiles/structure-maps: import { structureMaps }",
     "path": "packages/profiles/dist/structure-maps.js",
     "import": "{ structureMaps }",
     "limit": "3 kB"
-  },
-  {
-    "name": "@glion/profiles: largest structures chunk",
-    "path": "packages/profiles/dist/structures-v2.8.2.js",
-    "webpack": false,
-    "limit": "20 kB"
   }
 ]

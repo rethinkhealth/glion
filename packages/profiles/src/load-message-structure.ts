@@ -2,8 +2,8 @@ import type { Root } from "@glion/ast";
 import { value } from "@glion/util-query";
 
 import { profiles } from "./profiles";
-import { structureMaps } from "./profiles/structure-map-manifest";
 import { resolveMessageStructure } from "./resolve-message-structure";
+import { structureMaps } from "./structure-maps";
 import type { MessageStructure } from "./structure/types";
 
 /**

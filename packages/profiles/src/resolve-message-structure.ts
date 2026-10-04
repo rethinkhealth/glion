@@ -1,4 +1,4 @@
-import { structureMaps } from "./profiles/structure-map-manifest";
+import { structureMaps } from "./structure-maps";
 
 /**
  * The message structure ID the structure maps give `messageCode` and

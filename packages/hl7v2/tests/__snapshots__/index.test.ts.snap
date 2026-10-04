@@ -2126,9 +2126,9 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
               "description": "The printable characters from the ISO 8859/9 Character set",
               "name": "8859/9",
             },
-            "ascii" => {
+            "ASCII" => {
               "description": "The printable 7-bit ASCII character set.",
-              "name": "ascii",
+              "name": "ASCII",
             },
             "BIG-5" => {
               "description": "Code for Taiwanese Character Set (BIG-5)",

@@ -9,12 +9,10 @@ import type { StructureLoadOptions, ProfileStore } from "./types";
 export type ProfileStoreConfig<TRaw, T = TRaw> = Readonly<{
   /** Namespace for cache keys (e.g., "structures", "fields", "datatypes"). */
   namespace: string;
-  /** Manifest of lazy import factories, keyed by `manifestKey`. */
-  manifest: Readonly<Record<string, (() => Promise<TRaw>) | undefined>>;
+  /** The raw profile `id` of `version`, or `undefined` when none is bundled. */
+  importProfile: (version: string, id: string) => Promise<TRaw | undefined>;
   /** Optional post-import transform (e.g., build indexed Maps from raw arrays). */
   compile?: (raw: TRaw) => T;
-  /** The manifest key for a profile. Default: `v{version}/{id}`. */
-  manifestKey?: (version: string, id: string) => string;
   /** Optional ID resolver for alias support (e.g., ADT_A04 → ADT_A01). */
   resolveId?: (version: string, id: string) => string | undefined;
 }>;
@@ -24,7 +22,7 @@ export type ProfileStoreConfig<TRaw, T = TRaw> = Readonly<{
 // ---------------------------------------------------------------------------
 
 /**
- * Create a typed, cached profile store backed by a manifest of lazy imports.
+ * Create a typed, cached profile store backed by lazy imports.
  *
  * Each store tracks its own cache keys (via `ownKeys`) so that `reset()` only
  * flushes entries belonging to this store, even on a shared cache.
@@ -33,18 +31,17 @@ export const createProfileStore = <TRaw, T = TRaw>(
   config: ProfileStoreConfig<TRaw, T>,
   cache: Cache | false
 ): ProfileStore<T> => {
-  const { namespace, manifest, manifestKey, compile, resolveId } = config;
+  const { namespace, importProfile, compile, resolveId } = config;
   const ownKeys = new Set<string>();
 
   const toKey = (version: string, id: string) =>
     `${namespace}:${version}/${id}`;
 
   const importAndCompile = async (version: string, id: string): Promise<T> => {
-    const factory = manifest[manifestKey?.(version, id) ?? `v${version}/${id}`];
-    if (!factory) {
+    const raw = await importProfile(version, id);
+    if (raw === undefined) {
       throw new Error(`Unknown ${namespace} profile: v${version}/${id}`);
     }
-    const raw = await factory();
     return compile ? compile(raw) : (raw as unknown as T);
   };
 
