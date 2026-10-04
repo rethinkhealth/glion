@@ -40,7 +40,7 @@ describe("runner", () => {
 
     expect(automaton.consume("PID")).toEqual({
       expected: ["EVN"],
-      symbol: "PID",
+      segment: "PID",
       type: "invalid",
     });
     expect(automaton.accepted).toBe(false);
@@ -58,7 +58,7 @@ describe("runner", () => {
 
     expect(automaton.consume("MSH")).toEqual({
       expected: [],
-      symbol: "MSH",
+      segment: "MSH",
       type: "invalid",
     });
     expect(automaton.accepted).toBe(false);
@@ -180,7 +180,7 @@ describe("runner", () => {
     expect(lab.accepted).toBe(true);
     expect(consumeAll(both, "ORC", "OBR", "RXO").at(-1)).toEqual({
       expected: [],
-      symbol: "RXO",
+      segment: "RXO",
       type: "invalid",
     });
   });

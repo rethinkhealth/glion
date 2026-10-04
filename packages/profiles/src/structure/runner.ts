@@ -18,9 +18,9 @@
 //                  moves along its edges. Optional and repeating elements are
 //                  built from these
 //   edge           a move from one state to another that consumes no segment,
-//                  written `[target, action]`. The runner reads the target and
-//                  ignores the action, which records group boundaries for
-//                  matchStructure()
+//                  written `[target, boundary]`. The runner reads the target
+//                  and ignores the boundary, which marks where a group opens
+//                  or closes for matchStructure()
 //   final          the state that marks the end of the message
 //   live           the states the runner is holding, explained next
 //
@@ -155,10 +155,10 @@ export function runner(structure: MessageStructure): Runner {
   // Before the first segment: what the message can open with.
   follow(program.start);
 
-  const consume = (symbol: string): RunnerEvent => {
+  const consume = (segment: string): RunnerEvent => {
     // A segment was already rejected, so the positions are stale.
     if (failed) {
-      return { expected: [], symbol, type: "invalid" };
+      return { expected: [], segment, type: "invalid" };
     }
 
     // Start a new set, and raise the generation to clear `visited`.
@@ -171,7 +171,7 @@ export function runner(structure: MessageStructure): Runner {
     // next in the numbering. See compile.ts.
     for (const state of current) {
       const name = segments[state];
-      if (name === symbol || name === ANY_SEGMENT) {
+      if (name === segment || name === ANY_SEGMENT) {
         follow(state + 1);
       }
     }
@@ -181,7 +181,7 @@ export function runner(structure: MessageStructure): Runner {
     if (live.length === 0) {
       failed = true;
       live = current;
-      return { expected: names(current), symbol, type: "invalid" };
+      return { expected: names(current), segment, type: "invalid" };
     }
 
     return { type: "step" };

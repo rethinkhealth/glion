@@ -2,9 +2,11 @@ import { programOf } from "./compile";
 import { ANY_SEGMENT } from "./constants";
 import type { MessageStructure, StructureMatch } from "./types";
 
+// A step in a match's log: SEGMENT for a consumed segment, otherwise the
+// boundary of the edge taken (see StructureEdge).
 const SEGMENT = 0;
 
-type Log = Readonly<{ action: number; previous: Log | undefined }>;
+type Log = Readonly<{ step: number; previous: Log | undefined }>;
 type Thread = Readonly<{ state: number; log: Log | undefined }>;
 interface OpenGroup {
   name: string;
@@ -46,8 +48,8 @@ export function matchStructure(
     if (segments[state] !== null || state === final) {
       threads.push({ log, state });
     }
-    for (const [target, action] of edges[state] ?? []) {
-      follow(target, action === 0 ? log : { action, previous: log });
+    for (const [target, boundary] of edges[state] ?? []) {
+      follow(target, boundary === 0 ? log : { previous: log, step: boundary });
     }
   };
 
@@ -59,7 +61,7 @@ export function matchStructure(
     for (const { log, state } of current) {
       const consumed = segments[state];
       if (consumed === name || consumed === ANY_SEGMENT) {
-        follow(state + 1, { action: SEGMENT, previous: log });
+        follow(state + 1, { previous: log, step: SEGMENT });
       }
     }
     if (threads.length === 0) {
@@ -75,21 +77,21 @@ function build(
   groups: readonly string[],
   log: Log | undefined
 ): StructureMatch[] {
-  const actions: number[] = [];
+  const steps: number[] = [];
   for (let entry = log; entry; entry = entry.previous) {
-    actions.push(entry.action);
+    steps.push(entry.step);
   }
 
   const root: StructureMatch[] = [];
   const open: OpenGroup[] = [];
   let index = 0;
-  for (const action of actions.toReversed()) {
+  for (const step of steps.toReversed()) {
     const siblings = open.at(-1)?.children ?? root;
-    if (action === SEGMENT) {
+    if (step === SEGMENT) {
       siblings.push(index);
       index += 1;
-    } else if (action > 0) {
-      open.push({ children: [], name: groups[action - 1] as string });
+    } else if (step > 0) {
+      open.push({ children: [], name: groups[step - 1] as string });
     } else {
       const group = open.pop() as OpenGroup;
       const parent = open.at(-1)?.children ?? root;
