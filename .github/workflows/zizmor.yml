@@ -2,7 +2,7 @@ name: zizmor
 
 on:
   push:
-    branches: ["**"]
+    branches: ["**", "!changesets-ghcommit-temp/**"]
   pull_request:
     types: [opened, synchronize, reopened]
 
