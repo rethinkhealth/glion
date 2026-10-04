@@ -1,0 +1,15 @@
+{
+  "id": "0499",
+  "description": "Consent Bypass Reason",
+  "type": "user",
+  "codes": [
+    {
+      "name": "E",
+      "description": "Emergency"
+    },
+    {
+      "name": "PJ",
+      "description": "Professional Judgment"
+    }
+  ]
+}

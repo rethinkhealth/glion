@@ -1,0 +1,29 @@
+{
+  "id": "v2-0321",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0321",
+  "oid": "2.16.840.1.113883.18.194",
+  "name": "DispenseMethod",
+  "title": "dispenseMethod",
+  "codes": [
+    {
+      "code": "AD",
+      "display": "Automatic Dispensing",
+      "status": "active"
+    },
+    {
+      "code": "F",
+      "display": "Floor Stock",
+      "status": "active"
+    },
+    {
+      "code": "TR",
+      "display": "Traditional",
+      "status": "active"
+    },
+    {
+      "code": "UD",
+      "display": "Unit Dose",
+      "status": "active"
+    }
+  ]
+}

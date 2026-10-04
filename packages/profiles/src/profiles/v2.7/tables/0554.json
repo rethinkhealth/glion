@@ -1,0 +1,19 @@
+{
+  "id": "0554",
+  "description": "Invoice Reason Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "LATE",
+      "description": "Late Invoice"
+    },
+    {
+      "name": "NORM",
+      "description": "Normal submission"
+    },
+    {
+      "name": "SUB",
+      "description": "Subscriber coverage problem"
+    }
+  ]
+}

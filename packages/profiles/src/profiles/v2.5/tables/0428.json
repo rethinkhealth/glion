@@ -1,0 +1,19 @@
+{
+  "id": "0428",
+  "description": "Incident Type Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "P",
+      "description": "Preventable"
+    },
+    {
+      "name": "U",
+      "description": "User Error"
+    }
+  ]
+}

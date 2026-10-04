@@ -1,0 +1,323 @@
+{
+  "id": "0125",
+  "description": "Value Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "...",
+      "description": ""
+    },
+    {
+      "name": "AUI",
+      "description": "Authorization information"
+    },
+    {
+      "name": "CCD",
+      "description": "Charge code and date"
+    },
+    {
+      "name": "CCP",
+      "description": "Channel calibration parameters"
+    },
+    {
+      "name": "CD",
+      "description": "Channel definition"
+    },
+    {
+      "name": "CF",
+      "description": "Coded element with formatted values"
+    },
+    {
+      "name": "CNE",
+      "description": "Coded with no exceptions"
+    },
+    {
+      "name": "CNN",
+      "description": "Composite ID number and name simplified"
+    },
+    {
+      "name": "CP",
+      "description": "Composite price"
+    },
+    {
+      "name": "CSU",
+      "description": "Channel sensitivity and units"
+    },
+    {
+      "name": "CWE",
+      "description": "Coded with exceptions"
+    },
+    {
+      "name": "CX",
+      "description": "Extended composite ID with check digit"
+    },
+    {
+      "name": "DDI",
+      "description": "Daily deductible information"
+    },
+    {
+      "name": "DIN",
+      "description": "Date and institution name"
+    },
+    {
+      "name": "DLD",
+      "description": "Discharge to location and date"
+    },
+    {
+      "name": "DLN",
+      "description": "Driver's license number"
+    },
+    {
+      "name": "DLT",
+      "description": "Delta"
+    },
+    {
+      "name": "DR",
+      "description": "Date/time range"
+    },
+    {
+      "name": "DT",
+      "description": "Date"
+    },
+    {
+      "name": "DTM",
+      "description": "Date/time"
+    },
+    {
+      "name": "DTN",
+      "description": "Day type and number"
+    },
+    {
+      "name": "ED",
+      "description": "Encapsulated data"
+    },
+    {
+      "name": "EI",
+      "description": "Entity identifier"
+    },
+    {
+      "name": "EIP",
+      "description": "Entity identifier pair"
+    },
+    {
+      "name": "ERL",
+      "description": "Error location"
+    },
+    {
+      "name": "FC",
+      "description": "Financial class"
+    },
+    {
+      "name": "FT",
+      "description": "Formatted text"
+    },
+    {
+      "name": "GTS",
+      "description": "General timing specification"
+    },
+    {
+      "name": "HD",
+      "description": "Hierarchic designator"
+    },
+    {
+      "name": "ICD",
+      "description": "Insurance certification definition"
+    },
+    {
+      "name": "IS",
+      "description": "Coded value for user-defined tables"
+    },
+    {
+      "name": "JCC",
+      "description": "Job code/class"
+    },
+    {
+      "name": "LA1",
+      "description": "Location with address variation 1"
+    },
+    {
+      "name": "LA2",
+      "description": "Location with address variation 2"
+    },
+    {
+      "name": "MA",
+      "description": "Multiplexed array"
+    },
+    {
+      "name": "MO",
+      "description": "Money"
+    },
+    {
+      "name": "MOC",
+      "description": "Money and charge code"
+    },
+    {
+      "name": "MOP",
+      "description": "Money or percentage"
+    },
+    {
+      "name": "MSG",
+      "description": "Message type"
+    },
+    {
+      "name": "NA",
+      "description": "Numeric array"
+    },
+    {
+      "name": "NDL",
+      "description": "Name with date and location"
+    },
+    {
+      "name": "NM",
+      "description": "Numeric"
+    },
+    {
+      "name": "NR",
+      "description": "Numeric range"
+    },
+    {
+      "name": "OCD",
+      "description": "Occurrence code and date"
+    },
+    {
+      "name": "OSP",
+      "description": "Occurrence span code and date"
+    },
+    {
+      "name": "PIP",
+      "description": "Practitioner institutional privileges"
+    },
+    {
+      "name": "PL",
+      "description": "Person location"
+    },
+    {
+      "name": "PLN",
+      "description": "Practitioner license or other ID number"
+    },
+    {
+      "name": "PPN",
+      "description": "Performing person time stamp"
+    },
+    {
+      "name": "PRL",
+      "description": "Parent result link"
+    },
+    {
+      "name": "PT",
+      "description": "Processing type"
+    },
+    {
+      "name": "PTA",
+      "description": "Policy type and amount"
+    },
+    {
+      "name": "QIP",
+      "description": "Query input parameter list"
+    },
+    {
+      "name": "QSC",
+      "description": "Query selection criteria"
+    },
+    {
+      "name": "RCD",
+      "description": "Row column definition"
+    },
+    {
+      "name": "RFR",
+      "description": "Reference range"
+    },
+    {
+      "name": "RI",
+      "description": "Repeat interval"
+    },
+    {
+      "name": "RMC",
+      "description": "Room coverage"
+    },
+    {
+      "name": "RP",
+      "description": "Reference pointer"
+    },
+    {
+      "name": "RPT",
+      "description": "Repeat pattern"
+    },
+    {
+      "name": "SCV",
+      "description": "Scheduling class value pair"
+    },
+    {
+      "name": "SN",
+      "description": "Structured numeric"
+    },
+    {
+      "name": "SNM",
+      "description": "String of telephone number digits"
+    },
+    {
+      "name": "SPD",
+      "description": "Specialty description"
+    },
+    {
+      "name": "SRT",
+      "description": "Sort order"
+    },
+    {
+      "name": "ST",
+      "description": "String data"
+    },
+    {
+      "name": "TM",
+      "description": "Time"
+    },
+    {
+      "name": "TX",
+      "description": "Text data"
+    },
+    {
+      "name": "UVC",
+      "description": "UB value code and amount"
+    },
+    {
+      "name": "VH",
+      "description": "Visiting hours"
+    },
+    {
+      "name": "VID",
+      "description": "Version identifier"
+    },
+    {
+      "name": "VR",
+      "description": "Value range"
+    },
+    {
+      "name": "WVI",
+      "description": "Channel Identifier"
+    },
+    {
+      "name": "WVS",
+      "description": "Waveform source"
+    },
+    {
+      "name": "XAD",
+      "description": "Extended address"
+    },
+    {
+      "name": "XCN",
+      "description": "Extended composite ID number and name for persons"
+    },
+    {
+      "name": "XON",
+      "description": "Extended composite name and ID number for organizations"
+    },
+    {
+      "name": "XPN",
+      "description": "Extended person name"
+    },
+    {
+      "name": "XTN",
+      "description": "Extended telecommunications number"
+    }
+  ]
+}

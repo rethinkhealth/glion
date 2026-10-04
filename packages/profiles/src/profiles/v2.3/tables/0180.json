@@ -1,0 +1,27 @@
+{
+  "id": "0180",
+  "description": "Record Level Event Code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "MAC",
+      "description": "Reactivate deactivated record"
+    },
+    {
+      "name": "MAD",
+      "description": "Add record to master file"
+    },
+    {
+      "name": "MDC",
+      "description": "Deactivate: discontinue using record in master file, but do not delete from database"
+    },
+    {
+      "name": "MDL",
+      "description": "Delete record from master file"
+    },
+    {
+      "name": "MUP",
+      "description": "Update record for master file"
+    }
+  ]
+}

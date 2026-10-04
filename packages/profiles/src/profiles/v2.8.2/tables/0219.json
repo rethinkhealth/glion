@@ -1,0 +1,11 @@
+{
+  "id": "0219",
+  "description": "Recurring Service Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

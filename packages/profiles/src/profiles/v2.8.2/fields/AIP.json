@@ -1,0 +1,118 @@
+{
+  "segmentId": "AIP",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "AIP-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - AIP",
+      "item": "906"
+    },
+    {
+      "sequence": 2,
+      "id": "AIP-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70206",
+      "name": "Segment Action Code",
+      "item": "763"
+    },
+    {
+      "sequence": 3,
+      "id": "AIP-3",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Personnel Resource ID",
+      "item": "913"
+    },
+    {
+      "sequence": 4,
+      "id": "AIP-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70182",
+      "name": "Resource Type",
+      "item": "907"
+    },
+    {
+      "sequence": 5,
+      "id": "AIP-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Resource Group",
+      "item": "899"
+    },
+    {
+      "sequence": 6,
+      "id": "AIP-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Start Date/Time",
+      "item": "1202"
+    },
+    {
+      "sequence": 7,
+      "id": "AIP-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Start Date/Time Offset",
+      "item": "891"
+    },
+    {
+      "sequence": 8,
+      "id": "AIP-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "name": "Start Date/Time Offset Units",
+      "item": "892"
+    },
+    {
+      "sequence": 9,
+      "id": "AIP-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Duration",
+      "item": "893"
+    },
+    {
+      "sequence": 10,
+      "id": "AIP-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "name": "Duration Units",
+      "item": "894"
+    },
+    {
+      "sequence": 11,
+      "id": "AIP-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70279",
+      "name": "Allow Substitution Code",
+      "item": "895"
+    },
+    {
+      "sequence": 12,
+      "id": "AIP-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70278",
+      "name": "Filler Status Code",
+      "item": "889"
+    }
+  ]
+}

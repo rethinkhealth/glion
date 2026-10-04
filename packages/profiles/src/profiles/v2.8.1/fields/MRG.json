@@ -1,0 +1,55 @@
+{
+  "segmentId": "MRG",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "MRG-1",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CX",
+      "table": "HL70061",
+      "name": "Prior Patient Identifier List",
+      "item": "211"
+    },
+    {
+      "sequence": 2,
+      "id": "MRG-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CX",
+      "table": "HL70061",
+      "name": "Prior Patient Account Number",
+      "item": "213"
+    },
+    {
+      "sequence": 3,
+      "id": "MRG-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CX",
+      "table": "HL70061",
+      "name": "Prior Visit Number",
+      "item": "1279"
+    },
+    {
+      "sequence": 4,
+      "id": "MRG-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CX",
+      "table": "HL70061",
+      "name": "Prior Alternate Visit ID",
+      "item": "1280"
+    },
+    {
+      "sequence": 5,
+      "id": "MRG-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XPN",
+      "table": "HL70200",
+      "name": "Prior Patient Name",
+      "item": "1281"
+    }
+  ]
+}

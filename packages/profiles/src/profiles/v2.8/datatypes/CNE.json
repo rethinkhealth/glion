@@ -1,0 +1,140 @@
+{
+  "id": "CNE",
+  "version": "2.8",
+  "kind": "composite",
+  "title": "Coded with No Exceptions",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Identifier",
+      "datatypeId": "ST",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Text",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Name of Coding System",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Alternate Identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Alternate Text",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "Name of Alternate Coding System",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "Coding System Version ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "Alternate Coding System Version ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "Original Text",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "Second Alternate Identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "Second Alternate Text",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 12,
+      "name": "Name of Second Alternate Coding System",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 13,
+      "name": "Second Alternate Coding System Version ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 14,
+      "name": "Coding System OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 15,
+      "name": "Value Set OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 16,
+      "name": "Value Set Version ID",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 17,
+      "name": "Alternate Coding System OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 18,
+      "name": "Alternate Value Set OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 19,
+      "name": "Alternate Value Set Version ID",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 20,
+      "name": "Second Alternate Coding System OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 21,
+      "name": "Second Alternate Value Set OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 22,
+      "name": "Second Alternate Value Set Version ID",
+      "datatypeId": "DTM",
+      "required": false
+    }
+  ]
+}

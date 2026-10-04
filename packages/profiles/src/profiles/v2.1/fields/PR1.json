@@ -1,0 +1,143 @@
+{
+  "segmentId": "PR1",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PR1-1",
+      "required": true,
+      "repeatable": true,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "SET ID - PROCEDURE",
+      "item": "304"
+    },
+    {
+      "sequence": 2,
+      "id": "PR1-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70089",
+      "name": "PROCEDURE CODING METHOD.",
+      "item": "393"
+    },
+    {
+      "sequence": 3,
+      "id": "PR1-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 10,
+      "table": "HL70088",
+      "name": "PROCEDURE CODE",
+      "item": "305"
+    },
+    {
+      "sequence": 4,
+      "id": "PR1-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 40,
+      "name": "PROCEDURE DESCRIPTION",
+      "item": "306"
+    },
+    {
+      "sequence": 5,
+      "id": "PR1-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "PROCEDURE DATE/TIME",
+      "item": "307"
+    },
+    {
+      "sequence": 6,
+      "id": "PR1-6",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70090",
+      "name": "PROCEDURE TYPE",
+      "item": "309"
+    },
+    {
+      "sequence": 7,
+      "id": "PR1-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "PROCEDURE MINUTES",
+      "item": "310"
+    },
+    {
+      "sequence": 8,
+      "id": "PR1-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 60,
+      "table": "HL70010",
+      "name": "ANESTHESIOLOGIST",
+      "item": "311"
+    },
+    {
+      "sequence": 9,
+      "id": "PR1-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70019",
+      "name": "ANESTHESIA CODE",
+      "item": "313"
+    },
+    {
+      "sequence": 10,
+      "id": "PR1-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "ANESTHESIA MINUTES",
+      "item": "314"
+    },
+    {
+      "sequence": 11,
+      "id": "PR1-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 60,
+      "table": "HL70010",
+      "name": "SURGEON",
+      "item": "315"
+    },
+    {
+      "sequence": 12,
+      "id": "PR1-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 60,
+      "table": "HL70010",
+      "name": "RESIDENT CODE",
+      "item": "318"
+    },
+    {
+      "sequence": 13,
+      "id": "PR1-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70059",
+      "name": "CONSENT CODE",
+      "item": "317"
+    }
+  ]
+}

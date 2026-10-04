@@ -1,0 +1,29 @@
+{
+  "id": "v2-0309",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0309",
+  "oid": "2.16.840.1.113883.18.188",
+  "name": "CoverageType",
+  "title": "coverageType",
+  "codes": [
+    {
+      "code": "B",
+      "display": "Both hospital and physician",
+      "status": "active"
+    },
+    {
+      "code": "H",
+      "display": "Hospital/institutional",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Physician/professional",
+      "status": "active"
+    },
+    {
+      "code": "RX",
+      "display": "Pharmacy",
+      "status": "active"
+    }
+  ]
+}

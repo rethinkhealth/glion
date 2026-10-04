@@ -1,0 +1,80 @@
+{
+  "id": "TQ",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "timing quantity",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "quantity",
+      "datatypeId": "CQ",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "interval",
+      "datatypeId": "RI",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "duration",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "start date/time",
+      "datatypeId": "TS",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "end date/time",
+      "datatypeId": "TS",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "priority",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "condition",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "text (TX)",
+      "datatypeId": "TX",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "conjunction component",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "order sequencing",
+      "datatypeId": "OSD",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "occurrence duration",
+      "datatypeId": "CE",
+      "required": false
+    },
+    {
+      "sequence": 12,
+      "name": "total occurences",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

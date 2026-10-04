@@ -1,0 +1,39 @@
+{
+  "id": "v2-0905",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0905",
+  "oid": "2.16.840.1.113883.18.416",
+  "name": "ShipmentStatus",
+  "title": "shipmentStatus",
+  "codes": [
+    {
+      "code": "INV",
+      "display": "Inventoried",
+      "status": "active"
+    },
+    {
+      "code": "ONH",
+      "display": "On Hold",
+      "status": "active"
+    },
+    {
+      "code": "PRC",
+      "display": "Processing",
+      "status": "active"
+    },
+    {
+      "code": "REJ",
+      "display": "Rejected",
+      "status": "active"
+    },
+    {
+      "code": "TRN",
+      "display": "In Transit",
+      "status": "active"
+    },
+    {
+      "code": "TTL",
+      "display": "Triaged to Lab",
+      "status": "active"
+    }
+  ]
+}

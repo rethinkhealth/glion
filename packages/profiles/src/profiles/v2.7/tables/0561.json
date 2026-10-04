@@ -1,0 +1,35 @@
+{
+  "id": "0561",
+  "description": "Product/Services Clarification Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CLCTR",
+      "description": "Claim Center"
+    },
+    {
+      "name": "DGAPP",
+      "description": "Diagnostic Approval Number"
+    },
+    {
+      "name": "DTCTR",
+      "description": "Data Center Number"
+    },
+    {
+      "name": "ENC",
+      "description": "Encounter Number"
+    },
+    {
+      "name": "GFTH",
+      "description": "Good Faith Indicator"
+    },
+    {
+      "name": "OOP",
+      "description": "Out of Province Indicator"
+    },
+    {
+      "name": "SEQ",
+      "description": "Sequence Number"
+    }
+  ]
+}

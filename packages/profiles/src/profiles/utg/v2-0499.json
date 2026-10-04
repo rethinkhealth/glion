@@ -1,0 +1,19 @@
+{
+  "id": "v2-0499",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0499",
+  "oid": "2.16.840.1.113883.18.323",
+  "name": "ConsentBypassReason",
+  "title": "consentBypassReason",
+  "codes": [
+    {
+      "code": "E",
+      "display": "Emergency",
+      "status": "active"
+    },
+    {
+      "code": "PJ",
+      "display": "Professional Judgment",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "segmentId": "BHS",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "BHS-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 1,
+      "name": "Batch Field Separator",
+      "item": "81"
+    },
+    {
+      "sequence": 2,
+      "id": "BHS-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 4,
+      "name": "Batch Encoding Characters",
+      "item": "82"
+    },
+    {
+      "sequence": 3,
+      "id": "BHS-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 15,
+      "name": "Batch Sending Application",
+      "item": "83"
+    },
+    {
+      "sequence": 4,
+      "id": "BHS-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Batch Sending Facility",
+      "item": "84"
+    },
+    {
+      "sequence": 5,
+      "id": "BHS-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "Batch Receiving Application",
+      "item": "85"
+    },
+    {
+      "sequence": 6,
+      "id": "BHS-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "Batch Receiving Facility",
+      "item": "86"
+    },
+    {
+      "sequence": 7,
+      "id": "BHS-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Batch creation date / time",
+      "item": "87"
+    },
+    {
+      "sequence": 8,
+      "id": "BHS-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 40,
+      "name": "Batch Security",
+      "item": "88"
+    },
+    {
+      "sequence": 9,
+      "id": "BHS-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Batch name / ID / type",
+      "item": "89"
+    },
+    {
+      "sequence": 10,
+      "id": "BHS-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 80,
+      "name": "Batch Comment",
+      "item": "90"
+    },
+    {
+      "sequence": 11,
+      "id": "BHS-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Batch Control ID",
+      "item": "91"
+    },
+    {
+      "sequence": 12,
+      "id": "BHS-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Reference Batch Control ID",
+      "item": "92"
+    }
+  ]
+}

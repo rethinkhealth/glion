@@ -1,0 +1,15 @@
+{
+  "id": "0173",
+  "description": "Coordination of benefits",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CO",
+      "description": "Coordination"
+    },
+    {
+      "name": "IN",
+      "description": "Independent"
+    }
+  ]
+}

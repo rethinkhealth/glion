@@ -1,0 +1,78 @@
+{
+  "segmentId": "URD",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "URD-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "R/U date / time",
+      "item": "45"
+    },
+    {
+      "sequence": 2,
+      "id": "URD-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70109",
+      "name": "Report Priority",
+      "item": "46"
+    },
+    {
+      "sequence": 3,
+      "id": "URD-3",
+      "required": true,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U Who Subject Definition",
+      "item": "47"
+    },
+    {
+      "sequence": 4,
+      "id": "URD-4",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70048",
+      "name": "R/U What Subject Definition",
+      "item": "48"
+    },
+    {
+      "sequence": 5,
+      "id": "URD-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U What Department Code",
+      "item": "49"
+    },
+    {
+      "sequence": 6,
+      "id": "URD-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U display / print locations",
+      "item": "50"
+    },
+    {
+      "sequence": 7,
+      "id": "URD-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70108",
+      "name": "R/U Results Level",
+      "item": "51"
+    }
+  ]
+}

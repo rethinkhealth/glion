@@ -1,0 +1,270 @@
+{
+  "segmentId": "RXA",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RXA-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "Give Sub-ID Counter",
+      "item": "342"
+    },
+    {
+      "sequence": 2,
+      "id": "RXA-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "Administration Sub-ID Counter",
+      "item": "344"
+    },
+    {
+      "sequence": 3,
+      "id": "RXA-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Date/Time Start of Administration",
+      "item": "345"
+    },
+    {
+      "sequence": 4,
+      "id": "RXA-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Date/Time End of Administration",
+      "item": "346"
+    },
+    {
+      "sequence": 5,
+      "id": "RXA-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70292",
+      "name": "Administered Code",
+      "item": "347"
+    },
+    {
+      "sequence": 6,
+      "id": "RXA-6",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Administered Amount",
+      "item": "348"
+    },
+    {
+      "sequence": 7,
+      "id": "RXA-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Administered Units",
+      "item": "349"
+    },
+    {
+      "sequence": 8,
+      "id": "RXA-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Administered Dosage Form",
+      "item": "350"
+    },
+    {
+      "sequence": 9,
+      "id": "RXA-9",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Administration Notes",
+      "item": "351"
+    },
+    {
+      "sequence": 10,
+      "id": "RXA-10",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "maxLength": 250,
+      "name": "Administering Provider",
+      "item": "352"
+    },
+    {
+      "sequence": 11,
+      "id": "RXA-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "LA2",
+      "maxLength": 200,
+      "name": "Administered-at Location",
+      "item": "353"
+    },
+    {
+      "sequence": 12,
+      "id": "RXA-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Administered Per (Time Unit)",
+      "item": "354"
+    },
+    {
+      "sequence": 13,
+      "id": "RXA-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Administered Strength",
+      "item": "1134"
+    },
+    {
+      "sequence": 14,
+      "id": "RXA-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Administered Strength Units",
+      "item": "1135"
+    },
+    {
+      "sequence": 15,
+      "id": "RXA-15",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Substance Lot Number",
+      "item": "1129"
+    },
+    {
+      "sequence": 16,
+      "id": "RXA-16",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Substance Expiration Date",
+      "item": "1130"
+    },
+    {
+      "sequence": 17,
+      "id": "RXA-17",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70227",
+      "name": "Substance Manufacturer Name",
+      "item": "1131"
+    },
+    {
+      "sequence": 18,
+      "id": "RXA-18",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Substance/Treatment Refusal Reason",
+      "item": "1136"
+    },
+    {
+      "sequence": 19,
+      "id": "RXA-19",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Indication",
+      "item": "1123"
+    },
+    {
+      "sequence": 20,
+      "id": "RXA-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70322",
+      "name": "Completion Status",
+      "item": "1223"
+    },
+    {
+      "sequence": 21,
+      "id": "RXA-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70323",
+      "name": "Action Code - RXA",
+      "item": "1224"
+    },
+    {
+      "sequence": 22,
+      "id": "RXA-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "System Entry Date/Time",
+      "item": "1225"
+    },
+    {
+      "sequence": 23,
+      "id": "RXA-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 5,
+      "name": "Administered Drug Strength Volume",
+      "item": "1696"
+    },
+    {
+      "sequence": 24,
+      "id": "RXA-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Administered Drug Strength Volume Units",
+      "item": "1697"
+    },
+    {
+      "sequence": 25,
+      "id": "RXA-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 60,
+      "name": "Administered Barcode Identifier",
+      "item": "1698"
+    },
+    {
+      "sequence": 26,
+      "id": "RXA-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70480",
+      "name": "Pharmacy Order Type",
+      "item": "1699"
+    }
+  ]
+}

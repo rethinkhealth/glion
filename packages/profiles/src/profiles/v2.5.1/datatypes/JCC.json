@@ -1,0 +1,26 @@
+{
+  "id": "JCC",
+  "version": "2.5.1",
+  "kind": "composite",
+  "title": "Job Code/Class",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Job Code",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Job Class",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Job Description Text",
+      "datatypeId": "TX",
+      "required": false
+    }
+  ]
+}

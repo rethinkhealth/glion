@@ -1,0 +1,29 @@
+{
+  "id": "v2-0505",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0505",
+  "oid": "2.16.840.1.113883.18.329",
+  "name": "CyclicEntryExitIndicator",
+  "title": "cyclicEntryExitIndicator",
+  "codes": [
+    {
+      "code": "*",
+      "display": "The first service request in a cyclic group",
+      "status": "retired"
+    },
+    {
+      "code": "#",
+      "display": "The last service request in a cyclic group.",
+      "status": "retired"
+    },
+    {
+      "code": "F",
+      "display": "First service",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Last service",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "segmentId": "FTS",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "FTS-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 10,
+      "name": "FILE BATCH COUNT",
+      "item": "667"
+    },
+    {
+      "sequence": 2,
+      "id": "FTS-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 80,
+      "name": "FILE TRAILER COMMENT",
+      "item": "668"
+    }
+  ]
+}

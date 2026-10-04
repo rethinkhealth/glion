@@ -1,0 +1,78 @@
+{
+  "segmentId": "URD",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "URD-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "R/U DATE/TIME",
+      "item": "600"
+    },
+    {
+      "sequence": 2,
+      "id": "URD-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70109",
+      "name": "REPORT PRIORITY",
+      "item": "601"
+    },
+    {
+      "sequence": 3,
+      "id": "URD-3",
+      "required": true,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U WHO SUBJECT DEFINITION",
+      "item": "602"
+    },
+    {
+      "sequence": 4,
+      "id": "URD-4",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70048",
+      "name": "R/U WHAT SUBJECT DEFINITION",
+      "item": "603"
+    },
+    {
+      "sequence": 5,
+      "id": "URD-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U WHAT DEPARTMENT CODE",
+      "item": "605"
+    },
+    {
+      "sequence": 6,
+      "id": "URD-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U DISPLAY/PRINT LOCATIONS",
+      "item": "607"
+    },
+    {
+      "sequence": 7,
+      "id": "URD-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70108",
+      "name": "R/U RESULTS LEVEL",
+      "item": "702"
+    }
+  ]
+}

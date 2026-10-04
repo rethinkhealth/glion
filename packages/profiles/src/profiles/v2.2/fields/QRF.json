@@ -1,0 +1,88 @@
+{
+  "segmentId": "QRF",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "QRF-1",
+      "required": true,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Where Subject Filter",
+      "item": "37"
+    },
+    {
+      "sequence": 2,
+      "id": "QRF-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "When data start date / time",
+      "item": "38"
+    },
+    {
+      "sequence": 3,
+      "id": "QRF-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "When data end date / time",
+      "item": "39"
+    },
+    {
+      "sequence": 4,
+      "id": "QRF-4",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "What User Qualifier",
+      "item": "40"
+    },
+    {
+      "sequence": 5,
+      "id": "QRF-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Other QRY Subject Filter",
+      "item": "41"
+    },
+    {
+      "sequence": 6,
+      "id": "QRF-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 12,
+      "table": "HL70156",
+      "name": "Which date / time qualifier",
+      "item": "42"
+    },
+    {
+      "sequence": 7,
+      "id": "QRF-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 12,
+      "table": "HL70157",
+      "name": "Which date / time status qualifier",
+      "item": "43"
+    },
+    {
+      "sequence": 8,
+      "id": "QRF-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 12,
+      "table": "HL70158",
+      "name": "Date / time selection qualifier",
+      "item": "44"
+    }
+  ]
+}

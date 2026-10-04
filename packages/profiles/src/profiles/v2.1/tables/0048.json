@@ -1,0 +1,51 @@
+{
+  "id": "0048",
+  "description": "WHAT SUBJECT FILTER",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ADV",
+      "description": "Advice/Diagnosis"
+    },
+    {
+      "name": "ANU",
+      "description": "Nursing Unit Look up"
+    },
+    {
+      "name": "APN",
+      "description": "Patient name look up"
+    },
+    {
+      "name": "CAN",
+      "description": "Cancel. Used to cancel a query"
+    },
+    {
+      "name": "DEM",
+      "description": "Demographics"
+    },
+    {
+      "name": "MRI",
+      "description": "Most recent inpatient"
+    },
+    {
+      "name": "MRO",
+      "description": "Most recent outpatient"
+    },
+    {
+      "name": "OTH",
+      "description": "Other"
+    },
+    {
+      "name": "PRO",
+      "description": "Procedure"
+    },
+    {
+      "name": "RES",
+      "description": "Result"
+    },
+    {
+      "name": "STA",
+      "description": "Status"
+    }
+  ]
+}

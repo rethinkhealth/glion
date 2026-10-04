@@ -1,0 +1,255 @@
+{
+  "id": "0153",
+  "description": "Value code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "01",
+      "description": "Most common semi-private rate"
+    },
+    {
+      "name": "02",
+      "description": "Hospital has no semi-private rooms"
+    },
+    {
+      "name": "04",
+      "description": "Inpatient professional component charges which are combined billed"
+    },
+    {
+      "name": "05",
+      "description": "Professional component included in charges and also billed separate to carrier"
+    },
+    {
+      "name": "06",
+      "description": "Medicare blood deductible"
+    },
+    {
+      "name": "08",
+      "description": "Medicare life time reserve amount in the first calendar year"
+    },
+    {
+      "name": "09",
+      "description": "Medicare co-insurance amount in the first calendar year"
+    },
+    {
+      "name": "10",
+      "description": "Lifetime reserve amount in the second calendar year"
+    },
+    {
+      "name": "11",
+      "description": "Co-insurance amount in the second calendar year"
+    },
+    {
+      "name": "12",
+      "description": "Working aged beneficiary/spouse with employer group health plan"
+    },
+    {
+      "name": "13",
+      "description": "ESRD beneficiary in a Medicare coordination period with an employer group health plan"
+    },
+    {
+      "name": "14",
+      "description": "No Fault including auto/other"
+    },
+    {
+      "name": "15",
+      "description": "Worker’s Compensation"
+    },
+    {
+      "name": "16",
+      "description": "PHS, or other federal agency"
+    },
+    {
+      "name": "17",
+      "description": "Payer code"
+    },
+    {
+      "name": "21",
+      "description": "Catastrophic"
+    },
+    {
+      "name": "22",
+      "description": "Surplus"
+    },
+    {
+      "name": "23",
+      "description": "Recurring monthly incode"
+    },
+    {
+      "name": "24",
+      "description": "Medicaid rate code"
+    },
+    {
+      "name": "30",
+      "description": "Pre-admission testing"
+    },
+    {
+      "name": "31",
+      "description": "Patient liability amount"
+    },
+    {
+      "name": "37",
+      "description": "Pints of blood furnished"
+    },
+    {
+      "name": "38",
+      "description": "Blood deductible pints"
+    },
+    {
+      "name": "39",
+      "description": "Pints of blood replaced"
+    },
+    {
+      "name": "40",
+      "description": "New coverage not implemented by HMO (for inpatient service only)"
+    },
+    {
+      "name": "41",
+      "description": "Black lung"
+    },
+    {
+      "name": "42",
+      "description": "VA"
+    },
+    {
+      "name": "43",
+      "description": "Disabled beneficiary under age 64 with LGHP"
+    },
+    {
+      "name": "44",
+      "description": "Amount provider agreed to accept from primary payer when this amount is less than charges but higher than payment received,, then a Medicare secondary payment is due"
+    },
+    {
+      "name": "45",
+      "description": "Accident hour"
+    },
+    {
+      "name": "46",
+      "description": "Number of grace days"
+    },
+    {
+      "name": "47",
+      "description": "Any liability insurance"
+    },
+    {
+      "name": "48",
+      "description": "Hemoglobin reading"
+    },
+    {
+      "name": "49",
+      "description": "Hematocrit reading"
+    },
+    {
+      "name": "50",
+      "description": "Physical therapy visits"
+    },
+    {
+      "name": "51",
+      "description": "Occupational therapy visits"
+    },
+    {
+      "name": "52",
+      "description": "Speech therapy visits"
+    },
+    {
+      "name": "53",
+      "description": "Cardiac rehab visits"
+    },
+    {
+      "name": "56",
+      "description": "Skilled nurse - home visit hours"
+    },
+    {
+      "name": "57",
+      "description": "Home health aide - home visit hours"
+    },
+    {
+      "name": "58",
+      "description": "Arterial blood gas"
+    },
+    {
+      "name": "59",
+      "description": "Oxygen saturation"
+    },
+    {
+      "name": "60",
+      "description": "HHA branch MSA"
+    },
+    {
+      "name": "67",
+      "description": "Peritoneal dialysis"
+    },
+    {
+      "name": "68",
+      "description": "EPO-drug"
+    },
+    {
+      "name": "70",
+      "description": "Payer codes"
+    },
+    {
+      "name": "70 ... 72",
+      "description": "Payer codes"
+    },
+    {
+      "name": "71",
+      "description": "Payer codes"
+    },
+    {
+      "name": "72",
+      "description": "Payer codes"
+    },
+    {
+      "name": "75",
+      "description": "Payer codes"
+    },
+    {
+      "name": "75 ... 79",
+      "description": "Payer codes"
+    },
+    {
+      "name": "76",
+      "description": "Payer codes"
+    },
+    {
+      "name": "77",
+      "description": "Payer codes"
+    },
+    {
+      "name": "78",
+      "description": "Payer codes"
+    },
+    {
+      "name": "79",
+      "description": "Payer codes"
+    },
+    {
+      "name": "80",
+      "description": "Psychiatric visits"
+    },
+    {
+      "name": "81",
+      "description": "Visits subject to co-payment"
+    },
+    {
+      "name": "A1",
+      "description": "Deductible payer A"
+    },
+    {
+      "name": "A2",
+      "description": "Coinsurance payer A"
+    },
+    {
+      "name": "A3",
+      "description": "Estimated responsibility payer A"
+    },
+    {
+      "name": "X0",
+      "description": "Service excluded on primary policy"
+    },
+    {
+      "name": "X4",
+      "description": "Supplemental coverage"
+    }
+  ]
+}

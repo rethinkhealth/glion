@@ -1,0 +1,47 @@
+{
+  "id": "0177",
+  "description": "CONFIDENTIALITY CODE",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AID",
+      "description": "AIDS patient"
+    },
+    {
+      "name": "EMP",
+      "description": "Employee"
+    },
+    {
+      "name": "ETH",
+      "description": "Alcohol / drug treatment patient"
+    },
+    {
+      "name": "HIV",
+      "description": "HIV(+) patient"
+    },
+    {
+      "name": "PSY",
+      "description": "Psychiatric patient"
+    },
+    {
+      "name": "R",
+      "description": "Restricted"
+    },
+    {
+      "name": "U",
+      "description": "Usual control"
+    },
+    {
+      "name": "UWM",
+      "description": "Unwed mother"
+    },
+    {
+      "name": "V",
+      "description": "Very restricted"
+    },
+    {
+      "name": "VIP",
+      "description": "Very important person or celebrity"
+    }
+  ]
+}

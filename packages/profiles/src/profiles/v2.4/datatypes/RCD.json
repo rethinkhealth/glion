@@ -1,0 +1,26 @@
+{
+  "id": "RCD",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "row column definition",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "segment field name",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "HL7 date type",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "maximum column width",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

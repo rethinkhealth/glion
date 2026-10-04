@@ -1,0 +1,155 @@
+{
+  "id": "0048",
+  "description": "What subject filter",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ADV",
+      "description": "Advice/diagnosis"
+    },
+    {
+      "name": "ANU",
+      "description": "Nursing unit lookup (returns patients in beds, excluding empty beds)"
+    },
+    {
+      "name": "APA",
+      "description": "Account number query, return matching visit"
+    },
+    {
+      "name": "APM",
+      "description": "Medical record number query, returns visits for a medical record number"
+    },
+    {
+      "name": "APN",
+      "description": "Patient name lookup"
+    },
+    {
+      "name": "APP",
+      "description": "Physician lookup"
+    },
+    {
+      "name": "ARN",
+      "description": "Nursing unit lookup (returns patients in beds, including empty beds)"
+    },
+    {
+      "name": "CAN",
+      "description": "Cancel.  Used to cancel a query"
+    },
+    {
+      "name": "DEM",
+      "description": "Demographics"
+    },
+    {
+      "name": "FIN",
+      "description": "Financial"
+    },
+    {
+      "name": "GID",
+      "description": "Generate new identifier"
+    },
+    {
+      "name": "GOL",
+      "description": "Goals"
+    },
+    {
+      "name": "MRI",
+      "description": "Most recent inpatient"
+    },
+    {
+      "name": "MRO",
+      "description": "Most recent outpatient"
+    },
+    {
+      "name": "NCK",
+      "description": "Network clock"
+    },
+    {
+      "name": "NSC",
+      "description": "Network status change"
+    },
+    {
+      "name": "NST",
+      "description": "Network statistic"
+    },
+    {
+      "name": "ORD",
+      "description": "Order"
+    },
+    {
+      "name": "OTH",
+      "description": "Other"
+    },
+    {
+      "name": "PRB",
+      "description": "Problems"
+    },
+    {
+      "name": "PRO",
+      "description": "Procedure"
+    },
+    {
+      "name": "RAR",
+      "description": "Pharmacy administration information"
+    },
+    {
+      "name": "RDR",
+      "description": "Pharmacy dispense information"
+    },
+    {
+      "name": "RER",
+      "description": "Pharmacy encoded order information"
+    },
+    {
+      "name": "RES",
+      "description": "Result"
+    },
+    {
+      "name": "RGR",
+      "description": "Pharmacy give information"
+    },
+    {
+      "name": "ROR",
+      "description": "Pharmacy prescription information"
+    },
+    {
+      "name": "SAL",
+      "description": "All schedule related information, including open slots, booked slots, blocked slots"
+    },
+    {
+      "name": "SBK",
+      "description": "Booked slots on the identified schedule"
+    },
+    {
+      "name": "SBL",
+      "description": "Blocked slots on the identified schedule"
+    },
+    {
+      "name": "SOF",
+      "description": "First open slot on the identified schedule after the start date/time"
+    },
+    {
+      "name": "SOP",
+      "description": "Open slots on the identified schedule"
+    },
+    {
+      "name": "SSA",
+      "description": "Time slots available for a single appointment"
+    },
+    {
+      "name": "SSR",
+      "description": "Time slots available for a recurring appointment"
+    },
+    {
+      "name": "STA",
+      "description": "Status"
+    },
+    {
+      "name": "VXI",
+      "description": "Vaccine Information"
+    },
+    {
+      "name": "XID",
+      "description": "Get cross-referenced identifiers"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "DIN",
+  "version": "2.5",
+  "kind": "composite",
+  "title": "Date and Institution Name",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Date",
+      "datatypeId": "TS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Institution Name",
+      "datatypeId": "CE",
+      "required": false
+    }
+  ]
+}

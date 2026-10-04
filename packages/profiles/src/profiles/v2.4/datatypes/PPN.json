@@ -1,0 +1,122 @@
+{
+  "id": "PPN",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "performing person time stamp",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "ID number (ST)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "family name",
+      "datatypeId": "FN",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "given name",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "second and further given names or initials thereof",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "suffix (e.g., JR or III)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "prefix (e.g., DR)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "degree (e.g., MD)",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "source table",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "assigning authority",
+      "datatypeId": "HD",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "name type code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "identifier check digit",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 12,
+      "name": "code identifying the check digit scheme employed",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 13,
+      "name": "identifier type code (IS)",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 14,
+      "name": "assigning facility",
+      "datatypeId": "HD",
+      "required": false
+    },
+    {
+      "sequence": 15,
+      "name": "Date/Time Action Performed",
+      "datatypeId": "TS",
+      "required": false
+    },
+    {
+      "sequence": 16,
+      "name": "Name Representation code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 17,
+      "name": "name context",
+      "datatypeId": "CE",
+      "required": false
+    },
+    {
+      "sequence": 18,
+      "name": "name validity range",
+      "datatypeId": "DR",
+      "required": false
+    },
+    {
+      "sequence": 19,
+      "name": "name assembly order",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

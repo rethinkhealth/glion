@@ -1,0 +1,15 @@
+{
+  "id": "0415",
+  "description": "Transfer Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "E",
+      "description": "DRG Exempt"
+    },
+    {
+      "name": "N",
+      "description": "DRG Non Exempt"
+    }
+  ]
+}

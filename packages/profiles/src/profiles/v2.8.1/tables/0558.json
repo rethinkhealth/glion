@@ -1,0 +1,23 @@
+{
+  "id": "0558",
+  "description": "Payee Relationship to Invoice",
+  "type": "user",
+  "codes": [
+    {
+      "name": "FM",
+      "description": "Family Member"
+    },
+    {
+      "name": "GT",
+      "description": "Guarantor"
+    },
+    {
+      "name": "PT",
+      "description": "Patient"
+    },
+    {
+      "name": "SB",
+      "description": "Subscriber"
+    }
+  ]
+}

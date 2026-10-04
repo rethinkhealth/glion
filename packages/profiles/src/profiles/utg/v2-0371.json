@@ -1,0 +1,294 @@
+{
+  "id": "v2-0371",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0371",
+  "oid": "2.16.840.1.113883.18.229",
+  "name": "AdditivePreservative",
+  "title": "additivePreservative",
+  "codes": [
+    {
+      "code": "ACDA",
+      "display": "ACD Solution A",
+      "status": "active"
+    },
+    {
+      "code": "ACDB",
+      "display": "ACD Solution B",
+      "status": "active"
+    },
+    {
+      "code": "ACET",
+      "display": "Acetic Acid",
+      "status": "active"
+    },
+    {
+      "code": "AMIES",
+      "display": "Amies transport medium",
+      "status": "active"
+    },
+    {
+      "code": "BACTM",
+      "display": "Bacterial Transport medium",
+      "status": "active"
+    },
+    {
+      "code": "BF10",
+      "display": "Buffered 10% formalin",
+      "status": "active"
+    },
+    {
+      "code": "BOR",
+      "display": "Borate Boric Acid",
+      "status": "active"
+    },
+    {
+      "code": "BOUIN",
+      "display": "Bouin&#39;s solution",
+      "status": "active"
+    },
+    {
+      "code": "BSKM",
+      "display": "Buffered skim milk",
+      "status": "active"
+    },
+    {
+      "code": "C32",
+      "display": "3.2%  Citrate",
+      "status": "active"
+    },
+    {
+      "code": "C38",
+      "display": "3.8% Citrate",
+      "status": "active"
+    },
+    {
+      "code": "CARS",
+      "display": "Carson&#39;s Modified 10% formalin",
+      "status": "active"
+    },
+    {
+      "code": "CARY",
+      "display": "Cary Blair Medium",
+      "status": "active"
+    },
+    {
+      "code": "CHLTM",
+      "display": "Chlamydia transport medium",
+      "status": "active"
+    },
+    {
+      "code": "CTAD",
+      "display": "CTAD (this should be spelled out if not universally understood)",
+      "status": "active"
+    },
+    {
+      "code": "EDTK",
+      "display": "Potassium/K EDTA",
+      "status": "active"
+    },
+    {
+      "code": "EDTK15",
+      "display": "Potassium/K EDTA 15%",
+      "status": "active"
+    },
+    {
+      "code": "EDTK75",
+      "display": "Potassium/K EDTA 7.5%",
+      "status": "active"
+    },
+    {
+      "code": "EDTN",
+      "display": "Sodium/Na EDTA",
+      "status": "active"
+    },
+    {
+      "code": "ENT",
+      "display": "Enteric bacteria transport medium",
+      "status": "active"
+    },
+    {
+      "code": "ENT+",
+      "display": "Enteric plus",
+      "status": "active"
+    },
+    {
+      "code": "F10",
+      "display": "10% Formalin",
+      "status": "active"
+    },
+    {
+      "code": "FDP",
+      "display": "Thrombin NIH; soybean trypsin inhibitor (Fibrin Degradation Products)",
+      "status": "active"
+    },
+    {
+      "code": "FL10",
+      "display": "Sodium Fluoride, 10mg",
+      "status": "active"
+    },
+    {
+      "code": "FL100",
+      "display": "Sodium Fluoride, 100mg",
+      "status": "active"
+    },
+    {
+      "code": "HCL6",
+      "display": "6N HCL",
+      "status": "active"
+    },
+    {
+      "code": "HEPA",
+      "display": "Ammonium heparin",
+      "status": "active"
+    },
+    {
+      "code": "HEPL",
+      "display": "Lithium/Li  Heparin",
+      "status": "active"
+    },
+    {
+      "code": "HEPN",
+      "display": "Sodium/Na  Heparin",
+      "status": "active"
+    },
+    {
+      "code": "HNO3",
+      "display": "Nitric Acid",
+      "status": "active"
+    },
+    {
+      "code": "JKM",
+      "display": "Jones Kendrick Medium",
+      "status": "active"
+    },
+    {
+      "code": "KARN",
+      "display": "Karnovsky&#39;s fixative",
+      "status": "active"
+    },
+    {
+      "code": "KOX",
+      "display": "Potassium Oxalate",
+      "status": "active"
+    },
+    {
+      "code": "LIA",
+      "display": "Lithium iodoacetate",
+      "status": "active"
+    },
+    {
+      "code": "M4",
+      "display": "M4",
+      "status": "active"
+    },
+    {
+      "code": "M4RT",
+      "display": "M4-RT",
+      "status": "active"
+    },
+    {
+      "code": "M5",
+      "display": "M5",
+      "status": "active"
+    },
+    {
+      "code": "MICHTM",
+      "display": "Michel&#39;s transport medium",
+      "status": "active"
+    },
+    {
+      "code": "MMDTM",
+      "display": "MMD transport medium",
+      "status": "active"
+    },
+    {
+      "code": "NAF",
+      "display": "Sodium Fluoride",
+      "status": "active"
+    },
+    {
+      "code": "NAPS",
+      "display": "Sodium polyanethol sulfonate 0.35% in 0.85% sodium chloride",
+      "status": "active"
+    },
+    {
+      "code": "NONE",
+      "display": "None",
+      "status": "active"
+    },
+    {
+      "code": "PAGE",
+      "display": "Pages&#39;s Saline",
+      "status": "active"
+    },
+    {
+      "code": "PHENOL",
+      "display": "Phenol",
+      "status": "active"
+    },
+    {
+      "code": "PVA",
+      "display": "PVA (polyvinylalcohol)",
+      "status": "active"
+    },
+    {
+      "code": "RLM",
+      "display": "Reagan Lowe Medium",
+      "status": "active"
+    },
+    {
+      "code": "SILICA",
+      "display": "Siliceous earth, 12 mg",
+      "status": "active"
+    },
+    {
+      "code": "SPS",
+      "display": "SPS(this should be spelled out if not universally understood)",
+      "status": "active"
+    },
+    {
+      "code": "SST",
+      "display": "Serum Separator Tube (Polymer Gel)",
+      "status": "active"
+    },
+    {
+      "code": "STUTM",
+      "display": "Stuart transport medium",
+      "status": "active"
+    },
+    {
+      "code": "THROM",
+      "display": "Thrombin",
+      "status": "active"
+    },
+    {
+      "code": "THYMOL",
+      "display": "Thymol",
+      "status": "active"
+    },
+    {
+      "code": "THYO",
+      "display": "Thyoglycollate broth",
+      "status": "active"
+    },
+    {
+      "code": "TOLU",
+      "display": "Toluene",
+      "status": "active"
+    },
+    {
+      "code": "URETM",
+      "display": "Ureaplasma transport medium",
+      "status": "active"
+    },
+    {
+      "code": "VIRTM",
+      "display": "Viral Transport medium",
+      "status": "active"
+    },
+    {
+      "code": "WEST",
+      "display": "Buffered Citrate (Westergren Sedimentation Rate)",
+      "status": "active"
+    }
+  ]
+}

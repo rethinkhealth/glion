@@ -1,0 +1,15 @@
+{
+  "id": "0377",
+  "description": "Other environmental factors",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A60",
+      "description": "Opened container, indoor atmosphere, 60 minutes duration"
+    },
+    {
+      "name": "ATM",
+      "description": "Opened container, atmosphere/duration unspecified"
+    }
+  ]
+}

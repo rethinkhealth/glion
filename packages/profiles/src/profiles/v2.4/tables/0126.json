@@ -1,0 +1,27 @@
+{
+  "id": "0126",
+  "description": "Quantity limited request",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CH",
+      "description": "Characters"
+    },
+    {
+      "name": "LI",
+      "description": "Lines"
+    },
+    {
+      "name": "PG",
+      "description": "Pages"
+    },
+    {
+      "name": "RD",
+      "description": "Records"
+    },
+    {
+      "name": "ZO",
+      "description": "Locally defined"
+    }
+  ]
+}

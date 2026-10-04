@@ -1,0 +1,65 @@
+{
+  "segmentId": "SFT",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "SFT-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XON",
+      "maxLength": 567,
+      "name": "Software Vendor Organization",
+      "item": "1834"
+    },
+    {
+      "sequence": 2,
+      "id": "SFT-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 15,
+      "name": "Software Certified Version or Release Number",
+      "item": "1835"
+    },
+    {
+      "sequence": 3,
+      "id": "SFT-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Software Product Name",
+      "item": "1836"
+    },
+    {
+      "sequence": 4,
+      "id": "SFT-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "Software Binary ID",
+      "item": "1837"
+    },
+    {
+      "sequence": 5,
+      "id": "SFT-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TX",
+      "maxLength": 1024,
+      "name": "Software Product Information",
+      "item": "1838"
+    },
+    {
+      "sequence": 6,
+      "id": "SFT-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Software Install Date",
+      "item": "1839"
+    }
+  ]
+}

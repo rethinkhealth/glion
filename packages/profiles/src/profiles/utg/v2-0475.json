@@ -1,0 +1,34 @@
+{
+  "id": "v2-0475",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0475",
+  "oid": "2.16.840.1.113883.18.303",
+  "name": "ChargeTypeReason",
+  "title": "chargeTypeReason",
+  "codes": [
+    {
+      "code": "01",
+      "display": "Allergy",
+      "status": "active"
+    },
+    {
+      "code": "02",
+      "display": "Intolerance",
+      "status": "active"
+    },
+    {
+      "code": "03",
+      "display": "Treatment Failure",
+      "status": "active"
+    },
+    {
+      "code": "04",
+      "display": "Patient Request",
+      "status": "active"
+    },
+    {
+      "code": "05",
+      "display": "No Exception",
+      "status": "active"
+    }
+  ]
+}

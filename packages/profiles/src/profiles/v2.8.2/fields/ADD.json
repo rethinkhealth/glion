@@ -1,0 +1,14 @@
+{
+  "segmentId": "ADD",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "ADD-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Addendum Continuation Pointer",
+      "item": "66"
+    }
+  ]
+}

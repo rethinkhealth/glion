@@ -1,0 +1,34 @@
+{
+  "id": "v2-0062",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0062",
+  "oid": "2.16.840.1.113883.18.23",
+  "name": "EventReason",
+  "title": "eventReason",
+  "codes": [
+    {
+      "code": "01",
+      "display": "Patient request",
+      "status": "active"
+    },
+    {
+      "code": "02",
+      "display": "Physician/health practitioner order",
+      "status": "active"
+    },
+    {
+      "code": "03",
+      "display": "Census management",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "id": "0125",
+  "description": "Value type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AD",
+      "description": "Address"
+    },
+    {
+      "name": "CE",
+      "description": "Coded Entry"
+    },
+    {
+      "name": "CF",
+      "description": "Coded Element With Formatted Values"
+    },
+    {
+      "name": "CK",
+      "description": "Composite ID With Check Digit"
+    },
+    {
+      "name": "CN",
+      "description": "Composite ID And Name"
+    },
+    {
+      "name": "CP",
+      "description": "Composite Price"
+    },
+    {
+      "name": "CX",
+      "description": "Extended Composite ID With Check Digit"
+    },
+    {
+      "name": "DT",
+      "description": "Date"
+    },
+    {
+      "name": "ED",
+      "description": "Encapsulated Data"
+    },
+    {
+      "name": "FT",
+      "description": "Formatted Text (Display)"
+    },
+    {
+      "name": "MO",
+      "description": "Money"
+    },
+    {
+      "name": "NM",
+      "description": "Numeric"
+    },
+    {
+      "name": "PN",
+      "description": "Person Name"
+    },
+    {
+      "name": "RP",
+      "description": "Reference Pointer"
+    },
+    {
+      "name": "SN",
+      "description": "Structured Numeric"
+    },
+    {
+      "name": "ST",
+      "description": "String Data."
+    },
+    {
+      "name": "TM",
+      "description": "Time"
+    },
+    {
+      "name": "TN",
+      "description": "Telephone Number"
+    },
+    {
+      "name": "TS",
+      "description": "Time Stamp (Date & Time)"
+    },
+    {
+      "name": "TX",
+      "description": "Text Data (Display)"
+    },
+    {
+      "name": "XAD",
+      "description": "Extended Address"
+    },
+    {
+      "name": "XCN",
+      "description": "Extended Composite Name And Number For Persons"
+    },
+    {
+      "name": "XON",
+      "description": "Extended Composite Name And Number For Organizations"
+    },
+    {
+      "name": "XPN",
+      "description": "Extended Person Name"
+    },
+    {
+      "name": "XTN",
+      "description": "Extended Telecommunications Number"
+    }
+  ]
+}

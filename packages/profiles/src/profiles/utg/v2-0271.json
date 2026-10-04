@@ -1,0 +1,44 @@
+{
+  "id": "v2-0271",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0271",
+  "oid": "2.16.840.1.113883.18.164",
+  "name": "DocumentCompletionStatus",
+  "title": "documentCompletionStatus",
+  "codes": [
+    {
+      "code": "AU",
+      "display": "Authenticated",
+      "status": "active"
+    },
+    {
+      "code": "DI",
+      "display": "Dictated",
+      "status": "active"
+    },
+    {
+      "code": "DO",
+      "display": "Documented",
+      "status": "active"
+    },
+    {
+      "code": "IN",
+      "display": "Incomplete",
+      "status": "active"
+    },
+    {
+      "code": "IP",
+      "display": "In Progress",
+      "status": "active"
+    },
+    {
+      "code": "LA",
+      "display": "Legally authenticated",
+      "status": "active"
+    },
+    {
+      "code": "PA",
+      "display": "Pre-authenticated",
+      "status": "active"
+    }
+  ]
+}

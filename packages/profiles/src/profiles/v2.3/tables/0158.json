@@ -1,0 +1,23 @@
+{
+  "id": "0158",
+  "description": "Date/Time Selection Qualifier",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "1ST",
+      "description": "First value within range"
+    },
+    {
+      "name": "ALL",
+      "description": "All values within the range"
+    },
+    {
+      "name": "LST",
+      "description": "Last value within the range"
+    },
+    {
+      "name": "REV",
+      "description": "All values within the range returned in reverse chronological order (Default if not otherwise specified.)"
+    }
+  ]
+}

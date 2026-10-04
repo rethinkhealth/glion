@@ -1,0 +1,152 @@
+{
+  "id": "PPN",
+  "version": "2.7.1",
+  "kind": "composite",
+  "title": "Performing Person Time Stamp",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Person Identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Family Name",
+      "datatypeId": "FN",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Given Name",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Second and Further Given Names or Initials Thereof",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Suffix (e.g., JR or III)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "Prefix (e.g., DR)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "Source Table",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "Assigning Authority",
+      "datatypeId": "HD",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "Name Type Code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "Identifier Check Digit",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 12,
+      "name": "Check Digit Scheme",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 13,
+      "name": "Identifier Type Code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 14,
+      "name": "Assigning Facility",
+      "datatypeId": "HD",
+      "required": false
+    },
+    {
+      "sequence": 15,
+      "name": "Date/Time Action Performed",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 16,
+      "name": "Name Representation Code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 17,
+      "name": "Name Context",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 19,
+      "name": "Name Assembly Order",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 20,
+      "name": "Effective Date",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 21,
+      "name": "Expiration Date",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 22,
+      "name": "Professional Suffix",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 23,
+      "name": "Assigning Jurisdiction",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 24,
+      "name": "Assigning Agency or Department",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 25,
+      "name": "Security Check",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 26,
+      "name": "Security Check Scheme",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

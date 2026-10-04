@@ -1,0 +1,15 @@
+{
+  "id": "0012",
+  "description": "STOCK LOCATION",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AN",
+      "description": "Filled from ancillary department stock"
+    },
+    {
+      "name": "FL",
+      "description": "Filled from floor stock"
+    }
+  ]
+}

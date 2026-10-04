@@ -1,0 +1,19 @@
+{
+  "id": "0098",
+  "description": "Type of Agreement",
+  "type": "user",
+  "codes": [
+    {
+      "name": "M",
+      "description": "Maternity"
+    },
+    {
+      "name": "S",
+      "description": "Standard"
+    },
+    {
+      "name": "U",
+      "description": "Unified"
+    }
+  ]
+}

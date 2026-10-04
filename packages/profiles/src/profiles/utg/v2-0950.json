@@ -1,0 +1,19 @@
+{
+  "id": "v2-0950",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0950",
+  "oid": "2.16.840.1.113883.18.450",
+  "name": "OrderStatusModifier",
+  "title": "orderStatusModifier",
+  "codes": [
+    {
+      "code": "EOE",
+      "display": "Expiration on event",
+      "status": "N"
+    },
+    {
+      "code": "EOT",
+      "display": "Expiration on time",
+      "status": "N"
+    }
+  ]
+}

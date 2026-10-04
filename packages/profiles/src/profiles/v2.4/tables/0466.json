@@ -1,0 +1,23 @@
+{
+  "id": "0466",
+  "description": "Ambulatory payment classification code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": ""
+    },
+    {
+      "name": "031",
+      "description": "Dental procedures"
+    },
+    {
+      "name": "163",
+      "description": "Excision/biopsy"
+    },
+    {
+      "name": "181",
+      "description": "Level 1 skin repair."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "0567",
+  "description": "Weight Units",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "[lb_av]",
+      "description": "Pound"
+    },
+    {
+      "name": "[oz_av]",
+      "description": "Ounce"
+    },
+    {
+      "name": "g",
+      "description": "Gram"
+    },
+    {
+      "name": "kg",
+      "description": "Kilogram"
+    }
+  ]
+}

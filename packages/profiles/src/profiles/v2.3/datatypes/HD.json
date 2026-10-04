@@ -1,0 +1,26 @@
+{
+  "id": "HD",
+  "version": "2.3",
+  "kind": "composite",
+  "title": "hierarchic designator",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "namespace ID",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "universal ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "universal ID type",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

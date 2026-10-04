@@ -1,0 +1,14 @@
+{
+  "id": "v2-0092",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0092",
+  "oid": "2.16.840.1.113883.18.36",
+  "name": "ReAdmissionIndicator",
+  "title": "re-admissionIndicator",
+  "codes": [
+    {
+      "code": "R",
+      "display": "Re-admission",
+      "status": "active"
+    }
+  ]
+}

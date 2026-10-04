@@ -1,0 +1,11 @@
+{
+  "id": "0051",
+  "description": "Diagnosis Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

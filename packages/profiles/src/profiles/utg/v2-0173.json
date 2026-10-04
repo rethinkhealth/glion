@@ -1,0 +1,19 @@
+{
+  "id": "v2-0173",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0173",
+  "oid": "2.16.840.1.113883.18.89",
+  "name": "CoordinationOfBenefits",
+  "title": "coordinationOfBenefits",
+  "codes": [
+    {
+      "code": "CO",
+      "display": "Coordination",
+      "status": "active"
+    },
+    {
+      "code": "IN",
+      "display": "Independent",
+      "status": "active"
+    }
+  ]
+}

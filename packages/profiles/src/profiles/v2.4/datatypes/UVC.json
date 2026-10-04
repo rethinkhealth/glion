@@ -1,0 +1,20 @@
+{
+  "id": "UVC",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "Value code and amount",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "value code",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "value amount",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

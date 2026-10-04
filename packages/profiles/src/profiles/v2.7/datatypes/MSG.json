@@ -1,0 +1,26 @@
+{
+  "id": "MSG",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Message Type",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Message Code",
+      "datatypeId": "ID",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Trigger Event",
+      "datatypeId": "ID",
+      "required": true
+    },
+    {
+      "sequence": 3,
+      "name": "Message Structure",
+      "datatypeId": "ID",
+      "required": true
+    }
+  ]
+}

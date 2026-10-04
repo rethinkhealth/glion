@@ -1,0 +1,110 @@
+{
+  "id": "XTN",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Extended Telecommunication Number",
+  "components": [
+    {
+      "sequence": 2,
+      "name": "Telecommunication Use Code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Telecommunication Equipment Type",
+      "datatypeId": "ID",
+      "required": true
+    },
+    {
+      "sequence": 4,
+      "name": "Communication Address",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Country Code",
+      "datatypeId": "SNM",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "Area/City Code",
+      "datatypeId": "SNM",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "Local Number",
+      "datatypeId": "SNM",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "Extension",
+      "datatypeId": "SNM",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "Any Text",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "Extension Prefix",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "Speed Dial Code",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 12,
+      "name": "Unformatted Telephone number",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 13,
+      "name": "Effective Start Date",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 14,
+      "name": "Expiration Date",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 15,
+      "name": "Expiration Reason",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 16,
+      "name": "Protection Code",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 17,
+      "name": "Shared Telecommunication Identifier",
+      "datatypeId": "EI",
+      "required": false
+    },
+    {
+      "sequence": 18,
+      "name": "Preference Order",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

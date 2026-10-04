@@ -1,0 +1,31 @@
+{
+  "id": "0905",
+  "description": "Shipment Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "INV",
+      "description": "Inventoried"
+    },
+    {
+      "name": "ONH",
+      "description": "On Hold"
+    },
+    {
+      "name": "PRC",
+      "description": "Processing"
+    },
+    {
+      "name": "REJ",
+      "description": "Rejected"
+    },
+    {
+      "name": "TRN",
+      "description": "In Transit"
+    },
+    {
+      "name": "TTL",
+      "description": "Triaged to Lab"
+    }
+  ]
+}

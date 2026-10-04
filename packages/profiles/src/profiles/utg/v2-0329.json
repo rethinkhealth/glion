@@ -1,0 +1,19 @@
+{
+  "id": "v2-0329",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0329",
+  "oid": "2.16.840.1.113883.18.200",
+  "name": "QuantityMethod",
+  "title": "quantityMethod",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Actual count",
+      "status": "active"
+    },
+    {
+      "code": "E",
+      "display": "Estimated (see comment)",
+      "status": "active"
+    }
+  ]
+}

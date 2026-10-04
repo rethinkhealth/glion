@@ -1,0 +1,19 @@
+{
+  "id": "0757",
+  "description": "DRG Status Respiration Minutes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "0",
+      "description": "Respiration minutes not used for grouping"
+    },
+    {
+      "name": "1",
+      "description": "Listed respiration minutes used for grouping"
+    },
+    {
+      "name": "2",
+      "description": "OPS code value used for grouping"
+    }
+  ]
+}

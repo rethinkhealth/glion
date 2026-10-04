@@ -1,0 +1,86 @@
+{
+  "segmentId": "IPC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "IPC-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Accession Identifier",
+      "item": "1330"
+    },
+    {
+      "sequence": 2,
+      "id": "IPC-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Requested Procedure ID",
+      "item": "1658"
+    },
+    {
+      "sequence": 3,
+      "id": "IPC-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Study Instance UID",
+      "item": "1659"
+    },
+    {
+      "sequence": 4,
+      "id": "IPC-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Scheduled Procedure Step ID",
+      "item": "1660"
+    },
+    {
+      "sequence": 5,
+      "id": "IPC-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Modality",
+      "item": "1661"
+    },
+    {
+      "sequence": 6,
+      "id": "IPC-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Protocol Code",
+      "item": "1662"
+    },
+    {
+      "sequence": 7,
+      "id": "IPC-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Scheduled Station Name",
+      "item": "1663"
+    },
+    {
+      "sequence": 8,
+      "id": "IPC-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Scheduled Procedure Step Location",
+      "item": "1664"
+    },
+    {
+      "sequence": 9,
+      "id": "IPC-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Scheduled Station AE Title",
+      "item": "1665"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "0524",
+  "description": "Sequence condition",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Repeating cycle of orders"
+    },
+    {
+      "name": "R",
+      "description": "Reserved for possible future use"
+    },
+    {
+      "name": "S",
+      "description": "Sequence conditions"
+    }
+  ]
+}

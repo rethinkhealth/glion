@@ -1,0 +1,304 @@
+{
+  "segmentId": "RX1",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RX1-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "UNUSED",
+      "item": "770"
+    },
+    {
+      "sequence": 2,
+      "id": "RX1-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "UNUSED",
+      "item": "771"
+    },
+    {
+      "sequence": 3,
+      "id": "RX1-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 8,
+      "table": "HL70033",
+      "name": "ROUTE",
+      "item": "129"
+    },
+    {
+      "sequence": 4,
+      "id": "RX1-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "table": "HL70034",
+      "name": "SITE ADMINISTERED",
+      "item": "130"
+    },
+    {
+      "sequence": 5,
+      "id": "RX1-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 10,
+      "name": "IV SOLUTION RATE",
+      "item": "131"
+    },
+    {
+      "sequence": 6,
+      "id": "RX1-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 14,
+      "name": "DRUG STRENGTH",
+      "item": "133"
+    },
+    {
+      "sequence": 7,
+      "id": "RX1-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 10,
+      "name": "FINAL CONCENTRATION",
+      "item": "137"
+    },
+    {
+      "sequence": 8,
+      "id": "RX1-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 10,
+      "name": "FINAL VOLUME IN ML.",
+      "item": "138"
+    },
+    {
+      "sequence": 9,
+      "id": "RX1-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 10,
+      "name": "DRUG DOSE",
+      "item": "135"
+    },
+    {
+      "sequence": 10,
+      "id": "RX1-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "name": "DRUG ROLE",
+      "item": "139"
+    },
+    {
+      "sequence": 11,
+      "id": "RX1-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 3,
+      "name": "PRESCRIPTION SEQUENCE #",
+      "item": "469"
+    },
+    {
+      "sequence": 12,
+      "id": "RX1-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 4,
+      "name": "QUANTITY DISPENSED",
+      "item": "470"
+    },
+    {
+      "sequence": 13,
+      "id": "RX1-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "UNUSED",
+      "item": "772"
+    },
+    {
+      "sequence": 14,
+      "id": "RX1-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 5,
+      "table": "HL70057",
+      "name": "DRUG ID",
+      "item": "473"
+    },
+    {
+      "sequence": 15,
+      "id": "RX1-15",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 5,
+      "name": "COMPONENT DRUG IDS",
+      "item": "474"
+    },
+    {
+      "sequence": 16,
+      "id": "RX1-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "name": "PRESCRIPTION TYPE",
+      "item": "479"
+    },
+    {
+      "sequence": 17,
+      "id": "RX1-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "name": "SUBSTITUTION STATUS",
+      "item": "480"
+    },
+    {
+      "sequence": 18,
+      "id": "RX1-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70038",
+      "name": "RX ORDER STATUS",
+      "item": "588"
+    },
+    {
+      "sequence": 19,
+      "id": "RX1-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 3,
+      "name": "NUMBER OF REFILLS",
+      "item": "481"
+    },
+    {
+      "sequence": 20,
+      "id": "RX1-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "UNUSED",
+      "item": "773"
+    },
+    {
+      "sequence": 21,
+      "id": "RX1-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 3,
+      "name": "REFILLS REMAINING",
+      "item": "482"
+    },
+    {
+      "sequence": 22,
+      "id": "RX1-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 5,
+      "name": "DEA CLASS",
+      "item": "619"
+    },
+    {
+      "sequence": 23,
+      "id": "RX1-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 10,
+      "name": "ORDERING MD&apos;S DEA NUMBER",
+      "item": "620"
+    },
+    {
+      "sequence": 24,
+      "id": "RX1-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "UNUSED",
+      "item": "774"
+    },
+    {
+      "sequence": 25,
+      "id": "RX1-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "LAST REFILL DATE/TIME",
+      "item": "483"
+    },
+    {
+      "sequence": 26,
+      "id": "RX1-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "RX NUMBER",
+      "item": "596"
+    },
+    {
+      "sequence": 27,
+      "id": "RX1-27",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 5,
+      "name": "PRN STATUS",
+      "item": "621"
+    },
+    {
+      "sequence": 28,
+      "id": "RX1-28",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TX",
+      "maxLength": 80,
+      "name": "PHARMACY INSTRUCTIONS",
+      "item": "484"
+    },
+    {
+      "sequence": 29,
+      "id": "RX1-29",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TX",
+      "maxLength": 80,
+      "name": "PATIENT INSTRUCTIONS",
+      "item": "489"
+    },
+    {
+      "sequence": 30,
+      "id": "RX1-30",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TX",
+      "maxLength": 500,
+      "name": "INSTRUCTIONS (SIG)",
+      "item": "618"
+    }
+  ]
+}

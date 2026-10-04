@@ -1,0 +1,31 @@
+{
+  "id": "0434",
+  "description": "Patient condition code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Satisfactory"
+    },
+    {
+      "name": "C",
+      "description": "Critical"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "P",
+      "description": "Poor"
+    },
+    {
+      "name": "S",
+      "description": "Stable"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

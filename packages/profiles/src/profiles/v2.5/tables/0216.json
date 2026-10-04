@@ -1,0 +1,15 @@
+{
+  "id": "0216",
+  "description": "Patient Status Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AI",
+      "description": "Active Inpatient"
+    },
+    {
+      "name": "DI",
+      "description": "Discharged Inpatient"
+    }
+  ]
+}

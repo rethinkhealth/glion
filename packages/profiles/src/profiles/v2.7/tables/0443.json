@@ -1,0 +1,99 @@
+{
+  "id": "0443",
+  "description": "Provider Role",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AD",
+      "description": "Admitting"
+    },
+    {
+      "name": "AI",
+      "description": "Assistant/Alternate Interpreter"
+    },
+    {
+      "name": "AP",
+      "description": "Administering Provider"
+    },
+    {
+      "name": "AT",
+      "description": "Attending"
+    },
+    {
+      "name": "CLP",
+      "description": "Collecting Provider"
+    },
+    {
+      "name": "CP",
+      "description": "Consulting Provider"
+    },
+    {
+      "name": "DP",
+      "description": "Dispensing Provider"
+    },
+    {
+      "name": "EP",
+      "description": "Entering Provider (probably not the same as transcriptionist?)"
+    },
+    {
+      "name": "FHCP",
+      "description": "Family Health Care Professional"
+    },
+    {
+      "name": "IP",
+      "description": "Initiating Provider (as in action by)"
+    },
+    {
+      "name": "MDIR",
+      "description": "Medical Director"
+    },
+    {
+      "name": "OP",
+      "description": "Ordering Provider"
+    },
+    {
+      "name": "PH",
+      "description": "Pharmacist   (not sure how to dissect Pharmacist/Treatment Supplier's Verifier ID)"
+    },
+    {
+      "name": "PI",
+      "description": "Primary Interpreter"
+    },
+    {
+      "name": "PP",
+      "description": "Primary Care Provider"
+    },
+    {
+      "name": "RO",
+      "description": "Responsible Observer"
+    },
+    {
+      "name": "RP",
+      "description": "Referring Provider"
+    },
+    {
+      "name": "RT",
+      "description": "Referred to Provider"
+    },
+    {
+      "name": "TN",
+      "description": "Technician"
+    },
+    {
+      "name": "TR",
+      "description": "Transcriptionist"
+    },
+    {
+      "name": "VP",
+      "description": "Verifying Provider"
+    },
+    {
+      "name": "VPS",
+      "description": "Verifying Pharmaceutical Supplier   (not sure how to dissect Pharmacist/Treatment Supplier's Verifier ID)"
+    },
+    {
+      "name": "VTS",
+      "description": "Verifying Treatment Supplier   (not sure how to dissect Pharmacist/Treatment Supplier's Verifier ID)"
+    }
+  ]
+}

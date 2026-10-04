@@ -1,0 +1,65 @@
+{
+  "segmentId": "VAR",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "VAR-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 60,
+      "name": "Variance Instance ID",
+      "item": "1212"
+    },
+    {
+      "sequence": 2,
+      "id": "VAR-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Documented Date/Time",
+      "item": "1213"
+    },
+    {
+      "sequence": 3,
+      "id": "VAR-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Stated Variance Date/Time",
+      "item": "1214"
+    },
+    {
+      "sequence": 4,
+      "id": "VAR-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XCN",
+      "maxLength": 860,
+      "name": "Variance Originator",
+      "item": "1215"
+    },
+    {
+      "sequence": 5,
+      "id": "VAR-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Variance Classification",
+      "item": "1216"
+    },
+    {
+      "sequence": 6,
+      "id": "VAR-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 512,
+      "name": "Variance Description",
+      "item": "1217"
+    }
+  ]
+}

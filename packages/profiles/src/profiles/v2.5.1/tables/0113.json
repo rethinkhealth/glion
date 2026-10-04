@@ -1,0 +1,11 @@
+{
+  "id": "0113",
+  "description": "Discharged to location",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "no suggested values"
+    }
+  ]
+}

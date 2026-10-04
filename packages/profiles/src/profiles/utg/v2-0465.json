@@ -1,0 +1,24 @@
+{
+  "id": "v2-0465",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0465",
+  "oid": "2.16.840.1.113883.18.295",
+  "name": "NameAddressRepresentation",
+  "title": "name-addressRepresentation",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Alphabetic (i.e., Default or some single-byte)",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Ideographic (i.e., Kanji)",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Phonetic (i.e., ASCII, Katakana, Hiragana, etc.)",
+      "status": "active"
+    }
+  ]
+}

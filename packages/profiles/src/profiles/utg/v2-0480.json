@@ -1,0 +1,24 @@
+{
+  "id": "v2-0480",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0480",
+  "oid": "2.16.840.1.113883.18.306",
+  "name": "PharmacyOrderTypes",
+  "title": "pharmacyOrderTypes",
+  "codes": [
+    {
+      "code": "M",
+      "display": "Medication",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other solution as medication orders",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "IV Large Volume Solutions",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "UVC",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "UB Value Code and Amount",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Value Code",
+      "datatypeId": "CWE",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Value Amount",
+      "datatypeId": "MO",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Non-Monetary Value Amount / Quantity",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Non-Monetary Value Amount / Units",
+      "datatypeId": "CWE",
+      "required": false
+    }
+  ]
+}

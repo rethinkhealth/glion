@@ -1,0 +1,69 @@
+{
+  "id": "v2-0429",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0429",
+  "oid": "2.16.840.1.113883.18.270",
+  "name": "ProductionClass",
+  "title": "productionClass",
+  "codes": [
+    {
+      "code": "BR",
+      "display": "Breeding/genetic stock",
+      "status": "active"
+    },
+    {
+      "code": "DA",
+      "display": "Dairy",
+      "status": "active"
+    },
+    {
+      "code": "DR",
+      "display": "Draft",
+      "status": "active"
+    },
+    {
+      "code": "DU",
+      "display": "Dual Purpose",
+      "status": "active"
+    },
+    {
+      "code": "LY",
+      "display": "Layer, Includes Multiplier flocks",
+      "status": "active"
+    },
+    {
+      "code": "MT",
+      "display": "Meat",
+      "status": "active"
+    },
+    {
+      "code": "NA",
+      "display": "Not Applicable",
+      "status": "active"
+    },
+    {
+      "code": "OT",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "PL",
+      "display": "Pleasure",
+      "status": "active"
+    },
+    {
+      "code": "RA",
+      "display": "Racing",
+      "status": "active"
+    },
+    {
+      "code": "SH",
+      "display": "Show",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    }
+  ]
+}

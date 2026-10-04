@@ -1,0 +1,209 @@
+{
+  "segmentId": "GT1",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "GT1-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "SET ID - GUARANTOR",
+      "item": "321"
+    },
+    {
+      "sequence": 2,
+      "id": "GT1-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 20,
+      "name": "GUARANTOR NUMBER",
+      "item": "322"
+    },
+    {
+      "sequence": 3,
+      "id": "GT1-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "PN",
+      "maxLength": 48,
+      "name": "GUARANTOR NAME",
+      "item": "323"
+    },
+    {
+      "sequence": 4,
+      "id": "GT1-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PN",
+      "maxLength": 48,
+      "name": "GUARANTOR SPOUSE NAME",
+      "item": "707"
+    },
+    {
+      "sequence": 5,
+      "id": "GT1-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "AD",
+      "maxLength": 106,
+      "name": "GUARANTOR ADDRESS",
+      "item": "324"
+    },
+    {
+      "sequence": 6,
+      "id": "GT1-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TN",
+      "maxLength": 40,
+      "name": "GUARANTOR PH. NUM.- HOME",
+      "item": "329"
+    },
+    {
+      "sequence": 7,
+      "id": "GT1-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TN",
+      "maxLength": 40,
+      "name": "GUARANTOR PH. NUM-BUSINESS",
+      "item": "330"
+    },
+    {
+      "sequence": 8,
+      "id": "GT1-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "GUARANTOR DATE OF BIRTH",
+      "item": "331"
+    },
+    {
+      "sequence": 9,
+      "id": "GT1-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70001",
+      "name": "GUARANTOR SEX",
+      "item": "332"
+    },
+    {
+      "sequence": 10,
+      "id": "GT1-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70068",
+      "name": "GUARANTOR TYPE",
+      "item": "333"
+    },
+    {
+      "sequence": 11,
+      "id": "GT1-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70063",
+      "name": "GUARANTOR RELATIONSHIP",
+      "item": "334"
+    },
+    {
+      "sequence": 12,
+      "id": "GT1-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 11,
+      "name": "GUARANTOR SSN",
+      "item": "335"
+    },
+    {
+      "sequence": 13,
+      "id": "GT1-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "GUARANTOR DATE - BEGIN",
+      "item": "338"
+    },
+    {
+      "sequence": 14,
+      "id": "GT1-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "GUARANTOR DATE - END",
+      "item": "339"
+    },
+    {
+      "sequence": 15,
+      "id": "GT1-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "GUARANTOR PRIORITY",
+      "item": "340"
+    },
+    {
+      "sequence": 16,
+      "id": "GT1-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 45,
+      "name": "GUARANTOR EMPLOYER NAME",
+      "item": "341"
+    },
+    {
+      "sequence": 17,
+      "id": "GT1-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "AD",
+      "maxLength": 106,
+      "name": "GUARANTOR EMPLOYER ADDRESS",
+      "item": "342"
+    },
+    {
+      "sequence": 18,
+      "id": "GT1-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TN",
+      "maxLength": 40,
+      "name": "GUARANTOR EMPLOY PHONE #",
+      "item": "347"
+    },
+    {
+      "sequence": 19,
+      "id": "GT1-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "GUARANTOR EMPLOYEE ID NUM",
+      "item": "391"
+    },
+    {
+      "sequence": 20,
+      "id": "GT1-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70066",
+      "name": "GUARANTOR EMPLOYMENT STATUS",
+      "item": "392"
+    }
+  ]
+}

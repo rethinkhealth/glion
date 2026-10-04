@@ -1,0 +1,74 @@
+{
+  "id": "v2-0417",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0417",
+  "oid": "2.16.840.1.113883.18.259",
+  "name": "TissueType",
+  "title": "tissueType",
+  "codes": [
+    {
+      "code": "0",
+      "display": "No tissue expected",
+      "status": "active"
+    },
+    {
+      "code": "1",
+      "display": "Insufficient Tissue",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Not abnormal",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Abnormal-not categorized",
+      "status": "active"
+    },
+    {
+      "code": "4",
+      "display": "Mechanical abnormal",
+      "status": "active"
+    },
+    {
+      "code": "5",
+      "display": "Growth alteration",
+      "status": "active"
+    },
+    {
+      "code": "6",
+      "display": "Degeneration &amp; necrosis",
+      "status": "active"
+    },
+    {
+      "code": "7",
+      "display": "Non-acute inflammation",
+      "status": "active"
+    },
+    {
+      "code": "8",
+      "display": "Non-malignant neoplasm",
+      "status": "active"
+    },
+    {
+      "code": "9",
+      "display": "Malignant neoplasm",
+      "status": "active"
+    },
+    {
+      "code": "B",
+      "display": "Basal cell carcinoma",
+      "status": "active"
+    },
+    {
+      "code": "C",
+      "display": "Carcinoma-unspecified type",
+      "status": "active"
+    },
+    {
+      "code": "G",
+      "display": "Additional tissue required",
+      "status": "active"
+    }
+  ]
+}

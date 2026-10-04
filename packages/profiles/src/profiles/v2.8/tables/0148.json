@@ -1,0 +1,15 @@
+{
+  "id": "0148",
+  "description": "Money or Percentage Indicator",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AT",
+      "description": "Currency amount"
+    },
+    {
+      "name": "PC",
+      "description": "Percentage"
+    }
+  ]
+}

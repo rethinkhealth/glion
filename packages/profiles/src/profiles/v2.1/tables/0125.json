@@ -1,0 +1,39 @@
+{
+  "id": "0125",
+  "description": "VALUE TYPE",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AD",
+      "description": "Address"
+    },
+    {
+      "name": "CK",
+      "description": "Composite ID with check digit"
+    },
+    {
+      "name": "FT",
+      "description": "Formatted Text"
+    },
+    {
+      "name": "PN",
+      "description": "Person name"
+    },
+    {
+      "name": "ST",
+      "description": "String data. Used to transmit numerics."
+    },
+    {
+      "name": "TM",
+      "description": "Time"
+    },
+    {
+      "name": "TS",
+      "description": "Time stamp"
+    },
+    {
+      "name": "TX",
+      "description": "Text"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "0208",
+  "description": "Query Response Status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AE",
+      "description": "Application error"
+    },
+    {
+      "name": "AR",
+      "description": "Application reject"
+    },
+    {
+      "name": "NF",
+      "description": "No data found, no errors"
+    },
+    {
+      "name": "OK",
+      "description": "Data found, no errors (this is the default)"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "0391",
+  "description": "Segment group",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "etc",
+      "description": ""
+    },
+    {
+      "name": "OBRG",
+      "description": "OBR group"
+    },
+    {
+      "name": "ORCG",
+      "description": "ORC group"
+    },
+    {
+      "name": "PIDG",
+      "description": "PID group"
+    },
+    {
+      "name": "RXAG",
+      "description": "RXA group"
+    },
+    {
+      "name": "RXDG",
+      "description": "RXD group"
+    },
+    {
+      "name": "RXEG",
+      "description": "RXE group"
+    },
+    {
+      "name": "RXOG",
+      "description": "RXO group"
+    }
+  ]
+}

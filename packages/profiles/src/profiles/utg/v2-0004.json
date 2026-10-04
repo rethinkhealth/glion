@@ -1,0 +1,54 @@
+{
+  "id": "v2-0004",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0004",
+  "oid": "2.16.840.1.113883.18.5",
+  "name": "PatientClass",
+  "title": "patientClass",
+  "codes": [
+    {
+      "code": "B",
+      "display": "Obstetrics",
+      "status": "active"
+    },
+    {
+      "code": "C",
+      "display": "Commercial Account",
+      "status": "active"
+    },
+    {
+      "code": "E",
+      "display": "Emergency",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Inpatient",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "Not Applicable",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Outpatient",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Preadmit",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Recurring patient",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    }
+  ]
+}

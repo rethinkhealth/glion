@@ -1,0 +1,15 @@
+{
+  "id": "0505",
+  "description": "Cyclic Entry/Exit Indicator",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "*",
+      "description": "The first service request in a cyclic group"
+    },
+    {
+      "name": "#",
+      "description": "The last service request in a cyclic group."
+    }
+  ]
+}

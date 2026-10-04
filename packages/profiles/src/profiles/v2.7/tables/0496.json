@@ -1,0 +1,555 @@
+{
+  "id": "0496",
+  "description": "Consent Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "001",
+      "description": "Release of Information/MR / Authorization to Disclosure Protected Health Information"
+    },
+    {
+      "name": "002",
+      "description": "Medical Procedure (invasive)"
+    },
+    {
+      "name": "003",
+      "description": "Acknowledge Receipt of Privacy Notice"
+    },
+    {
+      "name": "004",
+      "description": "Abortion"
+    },
+    {
+      "name": "005",
+      "description": "Abortion/Laminaria"
+    },
+    {
+      "name": "006",
+      "description": "Accutane - Information"
+    },
+    {
+      "name": "007",
+      "description": "Accutane - Woman"
+    },
+    {
+      "name": "008",
+      "description": "Advanced Beneficiary Notice"
+    },
+    {
+      "name": "009",
+      "description": "AFP (Alpha Fetoprotein) Screening"
+    },
+    {
+      "name": "010",
+      "description": "Amniocentesis (consent & refusal)"
+    },
+    {
+      "name": "011",
+      "description": "Anatomical Gift (organ donation)"
+    },
+    {
+      "name": "012",
+      "description": "Anesthesia - Complications"
+    },
+    {
+      "name": "013",
+      "description": "Anesthesia - Questionnaire"
+    },
+    {
+      "name": "014",
+      "description": "Angiogram"
+    },
+    {
+      "name": "015",
+      "description": "Angioplasty"
+    },
+    {
+      "name": "016",
+      "description": "Anticancer Drugs"
+    },
+    {
+      "name": "017",
+      "description": "Antipsychotic Medications"
+    },
+    {
+      "name": "018",
+      "description": "Arthrogram"
+    },
+    {
+      "name": "019",
+      "description": "Autopsy"
+    },
+    {
+      "name": "020",
+      "description": "AZT Therapy"
+    },
+    {
+      "name": "021",
+      "description": "Biliary Drainage"
+    },
+    {
+      "name": "022",
+      "description": "Biliary Stone Extraction"
+    },
+    {
+      "name": "023",
+      "description": "Biopsy"
+    },
+    {
+      "name": "024",
+      "description": "Bleeding Time Test"
+    },
+    {
+      "name": "025",
+      "description": "Bronchogram"
+    },
+    {
+      "name": "026",
+      "description": "Cardiac Catheterization"
+    },
+    {
+      "name": "027",
+      "description": "Coronary Angiography"
+    },
+    {
+      "name": "028",
+      "description": "\"\"\"      \"\"\"\" w/o Surgery Capability\""
+    },
+    {
+      "name": "029",
+      "description": "Cataract Op/Implant of FDA Aprvd Lens"
+    },
+    {
+      "name": "030",
+      "description": "Cataract Op/Implant of Investigational Lens"
+    },
+    {
+      "name": "031",
+      "description": "Cataract Surgery"
+    },
+    {
+      "name": "032",
+      "description": "Cholera Immunization"
+    },
+    {
+      "name": "033",
+      "description": "Cholesterol Screening"
+    },
+    {
+      "name": "034",
+      "description": "Circumcision - Newborn"
+    },
+    {
+      "name": "035",
+      "description": "Colonoscopy"
+    },
+    {
+      "name": "036",
+      "description": "Contact Lenses"
+    },
+    {
+      "name": "037",
+      "description": "CT Scan - Cervical & Lumbar"
+    },
+    {
+      "name": "038",
+      "description": "CT Scan w/ IV Contrast Media into Vein"
+    },
+    {
+      "name": "039",
+      "description": "CVS (Chorionic Villus) Sampling"
+    },
+    {
+      "name": "040",
+      "description": "Cystospy"
+    },
+    {
+      "name": "041",
+      "description": "Disclosure of Protected Health Information to Family/Friends"
+    },
+    {
+      "name": "042",
+      "description": "D & C and Conization"
+    },
+    {
+      "name": "043",
+      "description": "Dacryocystogram"
+    },
+    {
+      "name": "044",
+      "description": "Diagnostic Isotope"
+    },
+    {
+      "name": "045",
+      "description": "Drainage of an Abscess"
+    },
+    {
+      "name": "046",
+      "description": "Drug Screening"
+    },
+    {
+      "name": "047",
+      "description": "Electronic Monitoring of Labor - Refusal"
+    },
+    {
+      "name": "048",
+      "description": "Endometrial Biopsy"
+    },
+    {
+      "name": "049",
+      "description": "Endoscopy/Sclerosis of Esophageal Varices"
+    },
+    {
+      "name": "050",
+      "description": "ERCP"
+    },
+    {
+      "name": "051",
+      "description": "Exposure to reportable Communicable Disease"
+    },
+    {
+      "name": "052",
+      "description": "External Version"
+    },
+    {
+      "name": "053",
+      "description": "Fluorescein Angioscopy"
+    },
+    {
+      "name": "054",
+      "description": "Hepatitis B - Consent/Declination"
+    },
+    {
+      "name": "055",
+      "description": "Herniogram"
+    },
+    {
+      "name": "056",
+      "description": "HIV Test - Consent Refusal"
+    },
+    {
+      "name": "057",
+      "description": "HIV Test - Disclosure"
+    },
+    {
+      "name": "058",
+      "description": "HIV Test - Prenatal"
+    },
+    {
+      "name": "059",
+      "description": "Home IV Treatment Program"
+    },
+    {
+      "name": "060",
+      "description": "Home Parenteral Treatment Program"
+    },
+    {
+      "name": "061",
+      "description": "Hysterectomy"
+    },
+    {
+      "name": "062",
+      "description": "Hysterosalpingogram"
+    },
+    {
+      "name": "063",
+      "description": "Injection Slip/ Consent"
+    },
+    {
+      "name": "064",
+      "description": "Intrauterine Device"
+    },
+    {
+      "name": "065",
+      "description": "Intrauterine Device/Sterilization"
+    },
+    {
+      "name": "066",
+      "description": "Intravascular Infusion of Streptokinase/Urokinase"
+    },
+    {
+      "name": "067",
+      "description": "Intravenous Cholangiogram"
+    },
+    {
+      "name": "068",
+      "description": "Intravenous Digital Angiography"
+    },
+    {
+      "name": "069",
+      "description": "Iodine Administration"
+    },
+    {
+      "name": "070",
+      "description": "ISG"
+    },
+    {
+      "name": "071",
+      "description": "IVP"
+    },
+    {
+      "name": "072",
+      "description": "Laser Photocoagulation"
+    },
+    {
+      "name": "073",
+      "description": "Laser treatment"
+    },
+    {
+      "name": "074",
+      "description": "Lithium Carbonate"
+    },
+    {
+      "name": "075",
+      "description": "Liver Biopsy"
+    },
+    {
+      "name": "076",
+      "description": "Lumbar Puncture"
+    },
+    {
+      "name": "077",
+      "description": "Lymphangiogram"
+    },
+    {
+      "name": "078",
+      "description": "MAO Inhibitors"
+    },
+    {
+      "name": "079",
+      "description": "Med, Psych, and/or Drug/Alcohol"
+    },
+    {
+      "name": "080",
+      "description": "Medical Treatment - Refusal"
+    },
+    {
+      "name": "081",
+      "description": "Morning-after Pill"
+    },
+    {
+      "name": "082",
+      "description": "MRI - Adult"
+    },
+    {
+      "name": "083",
+      "description": "MRI - Pediatric"
+    },
+    {
+      "name": "084",
+      "description": "Myelogram"
+    },
+    {
+      "name": "085",
+      "description": "Needle Biopsy"
+    },
+    {
+      "name": "086",
+      "description": "Needle Biopsy of Lung"
+    },
+    {
+      "name": "087",
+      "description": "Newborn Treatment and Release"
+    },
+    {
+      "name": "088",
+      "description": "Norplant Subdermal Birth Control Implant"
+    },
+    {
+      "name": "089",
+      "description": "Operations, Anesthesia, Transfusions"
+    },
+    {
+      "name": "090",
+      "description": "Oral Contraceptives"
+    },
+    {
+      "name": "091",
+      "description": "Organ Donation"
+    },
+    {
+      "name": "092",
+      "description": "Patient Permits, Consents"
+    },
+    {
+      "name": "093",
+      "description": "Patient Treatment Permit, Release & Admission"
+    },
+    {
+      "name": "094",
+      "description": "Penile Injections"
+    },
+    {
+      "name": "095",
+      "description": "Percutaneous Nephrostomy"
+    },
+    {
+      "name": "096",
+      "description": "Percutaneous Transhepatic Cholangiogram"
+    },
+    {
+      "name": "097",
+      "description": "Photographs"
+    },
+    {
+      "name": "098",
+      "description": "Photographs - Employee"
+    },
+    {
+      "name": "099",
+      "description": "Photographs - Medical Research"
+    },
+    {
+      "name": "100",
+      "description": "Photographs - news Media"
+    },
+    {
+      "name": "101",
+      "description": "Psychiatric Admission - Next of Kin"
+    },
+    {
+      "name": "102",
+      "description": "Psychiatric Information During Hospital Stay"
+    },
+    {
+      "name": "103",
+      "description": "Public Release of Information"
+    },
+    {
+      "name": "104",
+      "description": "Radiologic Procedure"
+    },
+    {
+      "name": "105",
+      "description": "Refusal of Treatment"
+    },
+    {
+      "name": "106",
+      "description": "Release of Body"
+    },
+    {
+      "name": "107",
+      "description": "Release of Limb"
+    },
+    {
+      "name": "108",
+      "description": "Rh Immune Globulin"
+    },
+    {
+      "name": "109",
+      "description": "Rights of Medical Research Participants"
+    },
+    {
+      "name": "110",
+      "description": "Request to Restrict Access/Disclosure to Medical Record/Protected Health Information"
+    },
+    {
+      "name": "111",
+      "description": "Request for Remain Anonymous"
+    },
+    {
+      "name": "112",
+      "description": "Seat Belt Exemption"
+    },
+    {
+      "name": "113",
+      "description": "Sialogram"
+    },
+    {
+      "name": "1137",
+      "description": "Voiding Cystogram"
+    },
+    {
+      "name": "114",
+      "description": "Sigmoidoscopy"
+    },
+    {
+      "name": "115",
+      "description": "Sterilization - Anesthesia & Medical Services"
+    },
+    {
+      "name": "116",
+      "description": "Sterilization -Federally Funded"
+    },
+    {
+      "name": "117",
+      "description": "Sterilization - Female"
+    },
+    {
+      "name": "118",
+      "description": "Sterilization - Laparoscopy/Pomeroy"
+    },
+    {
+      "name": "119",
+      "description": "Sterilization - Non-Federally Funded"
+    },
+    {
+      "name": "120",
+      "description": "Sterilization - Secondary"
+    },
+    {
+      "name": "121",
+      "description": "Tranquilizers"
+    },
+    {
+      "name": "122",
+      "description": "Transfer - Acknowledgement"
+    },
+    {
+      "name": "123",
+      "description": "Transfer - Authorization"
+    },
+    {
+      "name": "124",
+      "description": "Transfer Certification - Physician"
+    },
+    {
+      "name": "125",
+      "description": "Transfer/Discharge Request"
+    },
+    {
+      "name": "126",
+      "description": "Transfer for Non-Medical Reasons"
+    },
+    {
+      "name": "127",
+      "description": "Transfer - Interfaculty Neonatal"
+    },
+    {
+      "name": "128",
+      "description": "Transfer Refusal"
+    },
+    {
+      "name": "129",
+      "description": "Transfer Refusal of Further Treatment"
+    },
+    {
+      "name": "130",
+      "description": "Treadmill & EKG"
+    },
+    {
+      "name": "131",
+      "description": "Treadmill, Thallium-201"
+    },
+    {
+      "name": "132",
+      "description": "Typhoid"
+    },
+    {
+      "name": "133",
+      "description": "Use of Investigational Device"
+    },
+    {
+      "name": "134",
+      "description": "Use of Investigational Drug"
+    },
+    {
+      "name": "135",
+      "description": "Venogram"
+    },
+    {
+      "name": "136",
+      "description": "Videotape"
+    }
+  ]
+}

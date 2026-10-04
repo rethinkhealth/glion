@@ -1,0 +1,23 @@
+{
+  "id": "0334",
+  "description": "Disabled person",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AP",
+      "description": "Associated party"
+    },
+    {
+      "name": "GT",
+      "description": "Guarantor"
+    },
+    {
+      "name": "IN",
+      "description": "Insured"
+    },
+    {
+      "name": "PT",
+      "description": "Patient"
+    }
+  ]
+}

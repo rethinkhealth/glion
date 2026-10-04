@@ -1,0 +1,19 @@
+{
+  "id": "0520",
+  "description": "Message waiting priority",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "H",
+      "description": "High"
+    },
+    {
+      "name": "L",
+      "description": "Low"
+    },
+    {
+      "name": "M",
+      "description": "Medium"
+    }
+  ]
+}

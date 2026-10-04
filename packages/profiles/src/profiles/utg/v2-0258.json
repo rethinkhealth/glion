@@ -1,0 +1,29 @@
+{
+  "id": "v2-0258",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0258",
+  "oid": "2.16.840.1.113883.18.153",
+  "name": "RelationshipModifier",
+  "title": "relationshipModifier",
+  "codes": [
+    {
+      "code": "BPU",
+      "display": "Blood product unit",
+      "status": "active"
+    },
+    {
+      "code": "CONTROL",
+      "display": "Control",
+      "status": "active"
+    },
+    {
+      "code": "DONOR",
+      "display": "Donor",
+      "status": "active"
+    },
+    {
+      "code": "PATIENT",
+      "display": "Patient",
+      "status": "active"
+    }
+  ]
+}

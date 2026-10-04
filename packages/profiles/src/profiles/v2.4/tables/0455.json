@@ -1,0 +1,19 @@
+{
+  "id": "0455",
+  "description": "Type of bill code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": ""
+    },
+    {
+      "name": "131",
+      "description": "Hospital - Outpatient - Admit thru Discharge Claim"
+    },
+    {
+      "name": "141",
+      "description": "Hospital - Other - Admit thru Discharge Claim"
+    }
+  ]
+}

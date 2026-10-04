@@ -1,0 +1,15 @@
+{
+  "id": "0337",
+  "description": "Certification status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Certified"
+    },
+    {
+      "name": "E",
+      "description": "Eligible"
+    }
+  ]
+}

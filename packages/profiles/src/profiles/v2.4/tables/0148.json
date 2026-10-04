@@ -1,0 +1,15 @@
+{
+  "id": "0148",
+  "description": "Penalty type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AT",
+      "description": "Currency amount"
+    },
+    {
+      "name": "PC",
+      "description": "Percentage"
+    }
+  ]
+}

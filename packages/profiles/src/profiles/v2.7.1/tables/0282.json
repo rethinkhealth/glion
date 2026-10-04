@@ -1,0 +1,23 @@
+{
+  "id": "0282",
+  "description": "Referral Disposition",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AM",
+      "description": "Assume Management"
+    },
+    {
+      "name": "RP",
+      "description": "Return Patient After Evaluation"
+    },
+    {
+      "name": "SO",
+      "description": "Second Opinion"
+    },
+    {
+      "name": "WR",
+      "description": "Send Written Report"
+    }
+  ]
+}

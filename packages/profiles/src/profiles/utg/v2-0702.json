@@ -1,0 +1,169 @@
+{
+  "id": "v2-0702",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0702",
+  "oid": "2.16.840.1.113883.18.387",
+  "name": "CycleType",
+  "title": "cycleType",
+  "codes": [
+    {
+      "code": "2RS",
+      "display": "Second Rinse",
+      "status": "active"
+    },
+    {
+      "code": "ANR",
+      "display": "Anesthesia/Respiratory",
+      "status": "active"
+    },
+    {
+      "code": "BDP",
+      "display": "Bedpans",
+      "status": "active"
+    },
+    {
+      "code": "BWD",
+      "display": "Bowie-Dick Test",
+      "status": "active"
+    },
+    {
+      "code": "CMW",
+      "display": "Chemical Wash",
+      "status": "active"
+    },
+    {
+      "code": "COD",
+      "display": "Code",
+      "status": "active"
+    },
+    {
+      "code": "CRT",
+      "display": "Cart Wash",
+      "status": "active"
+    },
+    {
+      "code": "DEC",
+      "display": "Decontamination",
+      "status": "active"
+    },
+    {
+      "code": "DRT",
+      "display": "Dart",
+      "status": "active"
+    },
+    {
+      "code": "DRW",
+      "display": "Dart Warm-up Cycle",
+      "status": "active"
+    },
+    {
+      "code": "EOH",
+      "display": "EO High Temperature",
+      "status": "active"
+    },
+    {
+      "code": "EOL",
+      "display": "EO Low Temperature",
+      "status": "active"
+    },
+    {
+      "code": "EXP",
+      "display": "Express",
+      "status": "active"
+    },
+    {
+      "code": "FLS",
+      "display": "Flash",
+      "status": "active"
+    },
+    {
+      "code": "GLS",
+      "display": "Glassware",
+      "status": "active"
+    },
+    {
+      "code": "GNP",
+      "display": "Gen. Purpose",
+      "status": "active"
+    },
+    {
+      "code": "GRV",
+      "display": "Gravity",
+      "status": "active"
+    },
+    {
+      "code": "GTL",
+      "display": "Gentle",
+      "status": "active"
+    },
+    {
+      "code": "ISO",
+      "display": "Isothermal",
+      "status": "active"
+    },
+    {
+      "code": "IST",
+      "display": "Instrument Wash",
+      "status": "active"
+    },
+    {
+      "code": "LKT",
+      "display": "Leak Test",
+      "status": "active"
+    },
+    {
+      "code": "LQD",
+      "display": "Liquid",
+      "status": "active"
+    },
+    {
+      "code": "OPW",
+      "display": "Optional Wash",
+      "status": "active"
+    },
+    {
+      "code": "PEA",
+      "display": "Peracetic Acid",
+      "status": "active"
+    },
+    {
+      "code": "PLA",
+      "display": "Plastic Goods Wash",
+      "status": "active"
+    },
+    {
+      "code": "PRV",
+      "display": "Prevac",
+      "status": "active"
+    },
+    {
+      "code": "RNS",
+      "display": "Rinse",
+      "status": "active"
+    },
+    {
+      "code": "SFP",
+      "display": "Steam Flush Pressure Pulse",
+      "status": "active"
+    },
+    {
+      "code": "THR",
+      "display": "Thermal",
+      "status": "active"
+    },
+    {
+      "code": "TRB",
+      "display": "Tray/Basin",
+      "status": "active"
+    },
+    {
+      "code": "UTL",
+      "display": "Utensil Wash",
+      "status": "active"
+    },
+    {
+      "code": "WFP",
+      "display": "Wrap/Steam Flush Pressure Pulse (Wrap/SFPP)",
+      "status": "active"
+    }
+  ]
+}

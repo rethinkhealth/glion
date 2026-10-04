@@ -1,0 +1,20 @@
+{
+  "id": "DTN",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "Day Type and Number",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "day type",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "number of days",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

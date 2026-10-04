@@ -1,0 +1,55 @@
+{
+  "id": "0291",
+  "description": "Subtype of Referenced Data",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "BASIC",
+      "description": "ISDN PCM audio data"
+    },
+    {
+      "name": "DICOM",
+      "description": "Digital Imaging and Communications in Medicine"
+    },
+    {
+      "name": "FAX",
+      "description": "Facsimile data"
+    },
+    {
+      "name": "GIF",
+      "description": "Needs formal description"
+    },
+    {
+      "name": "HTML",
+      "description": "Hypertext Markup Language"
+    },
+    {
+      "name": "JOT",
+      "description": "Electronic ink data (Jot 1.0 standard)"
+    },
+    {
+      "name": "JPEG",
+      "description": "Needs formal description"
+    },
+    {
+      "name": "Octet-stream",
+      "description": "Uninterpreted binary data"
+    },
+    {
+      "name": "PICT",
+      "description": "PICT format image data"
+    },
+    {
+      "name": "PostScript",
+      "description": "PostScript program"
+    },
+    {
+      "name": "RTF",
+      "description": "Rich Text Format"
+    },
+    {
+      "name": "TIFF",
+      "description": "TIFF image data"
+    }
+  ]
+}

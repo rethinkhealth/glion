@@ -1,0 +1,24 @@
+{
+  "id": "v2-0927",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0927",
+  "oid": "2.16.840.1.113883.18.433",
+  "name": "ArmStick",
+  "title": "armStick",
+  "codes": [
+    {
+      "code": "B",
+      "display": "Both Arms",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Left Arm",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Right Arm",
+      "status": "active"
+    }
+  ]
+}

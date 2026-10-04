@@ -1,0 +1,35 @@
+{
+  "id": "0834",
+  "description": "MIME Types",
+  "type": "user",
+  "codes": [
+    {
+      "name": "application",
+      "description": "Application data"
+    },
+    {
+      "name": "audio",
+      "description": "Audio data"
+    },
+    {
+      "name": "image",
+      "description": "Image data"
+    },
+    {
+      "name": "model",
+      "description": "Model data"
+    },
+    {
+      "name": "multipart",
+      "description": "MIME multipart package"
+    },
+    {
+      "name": "text",
+      "description": "Text data"
+    },
+    {
+      "name": "video",
+      "description": "Video data"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "v2-0280",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0280",
+  "oid": "2.16.840.1.113883.18.173",
+  "name": "ReferralPriority",
+  "title": "referralPriority",
+  "codes": [
+    {
+      "code": "A",
+      "display": "ASAP",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Routine",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "STAT",
+      "status": "active"
+    }
+  ]
+}

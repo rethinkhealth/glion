@@ -1,0 +1,35 @@
+{
+  "id": "0871",
+  "description": "Supply Risk Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "COR",
+      "description": "Corrosive"
+    },
+    {
+      "name": "EXP",
+      "description": "Explosive"
+    },
+    {
+      "name": "FLA",
+      "description": "Flammable"
+    },
+    {
+      "name": "INJ",
+      "description": "Injury Hazard"
+    },
+    {
+      "name": "RAD",
+      "description": "Radioactive"
+    },
+    {
+      "name": "TOX",
+      "description": "Toxic"
+    },
+    {
+      "name": "UNK",
+      "description": "Unknown"
+    }
+  ]
+}

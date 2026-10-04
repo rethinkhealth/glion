@@ -1,0 +1,148 @@
+{
+  "segmentId": "BPO",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "BPO-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - BPO",
+      "item": "1700"
+    },
+    {
+      "sequence": 2,
+      "id": "BPO-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "BP Universal Service ID",
+      "item": "1701"
+    },
+    {
+      "sequence": 3,
+      "id": "BPO-3",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70508",
+      "name": "BP  Processing Requirements",
+      "item": "1702"
+    },
+    {
+      "sequence": 4,
+      "id": "BPO-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 5,
+      "name": "BP Quantity",
+      "item": "1703"
+    },
+    {
+      "sequence": 5,
+      "id": "BPO-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 5,
+      "name": "BP Amount",
+      "item": "1704"
+    },
+    {
+      "sequence": 6,
+      "id": "BPO-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "BP Units",
+      "item": "1705"
+    },
+    {
+      "sequence": 7,
+      "id": "BPO-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "BP Intended Use Date/Time",
+      "item": "1706"
+    },
+    {
+      "sequence": 8,
+      "id": "BPO-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PL",
+      "maxLength": 80,
+      "name": "BP Intended Dispense From Location",
+      "item": "1707"
+    },
+    {
+      "sequence": 9,
+      "id": "BPO-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XAD",
+      "maxLength": 250,
+      "name": "BP Intended Dispense From Address",
+      "item": "1708"
+    },
+    {
+      "sequence": 10,
+      "id": "BPO-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "BP Requested Dispense Date/Time",
+      "item": "1709"
+    },
+    {
+      "sequence": 11,
+      "id": "BPO-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PL",
+      "maxLength": 80,
+      "name": "BP Requested Dispense To Location",
+      "item": "1710"
+    },
+    {
+      "sequence": 12,
+      "id": "BPO-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XAD",
+      "maxLength": 250,
+      "name": "BP Requested Dispense To Address",
+      "item": "1711"
+    },
+    {
+      "sequence": 13,
+      "id": "BPO-13",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70509",
+      "name": "BP Indication for Use",
+      "item": "1712"
+    },
+    {
+      "sequence": 14,
+      "id": "BPO-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70136",
+      "name": "BP Informed Consent Indicator",
+      "item": "1713"
+    }
+  ]
+}

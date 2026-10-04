@@ -1,0 +1,27 @@
+{
+  "id": "0474",
+  "description": "Organization Unit Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Department"
+    },
+    {
+      "name": "F",
+      "description": "Facility"
+    },
+    {
+      "name": "S",
+      "description": "Subdivision"
+    },
+    {
+      "name": "U",
+      "description": "Subdepartment"
+    },
+    {
+      "name": "V",
+      "description": "Division"
+    }
+  ]
+}

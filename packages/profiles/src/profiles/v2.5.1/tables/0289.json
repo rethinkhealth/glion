@@ -1,0 +1,11 @@
+{
+  "id": "0289",
+  "description": "County/parish",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

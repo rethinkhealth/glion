@@ -1,0 +1,20 @@
+{
+  "id": "UVC",
+  "version": "2.5.1",
+  "kind": "composite",
+  "title": "UB Value Code and Amount",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Value Code",
+      "datatypeId": "CNE",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Value Amount",
+      "datatypeId": "MO",
+      "required": false
+    }
+  ]
+}

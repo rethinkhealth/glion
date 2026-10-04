@@ -1,0 +1,59 @@
+{
+  "id": "0925",
+  "description": "Phlebotomy Issue",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ACN",
+      "description": "Air Contamination"
+    },
+    {
+      "name": "CLT",
+      "description": "Clotted"
+    },
+    {
+      "name": "COL",
+      "description": "Collapse"
+    },
+    {
+      "name": "DAK",
+      "description": "Defective Apheresis Kit"
+    },
+    {
+      "name": "DBG",
+      "description": "Defective Bag"
+    },
+    {
+      "name": "DMT",
+      "description": "Defective Instrument"
+    },
+    {
+      "name": "DND",
+      "description": "Defective Needle"
+    },
+    {
+      "name": "INF",
+      "description": "Infiltration"
+    },
+    {
+      "name": "IPF",
+      "description": "Instrument Power Failure"
+    },
+    {
+      "name": "MIS",
+      "description": "Missed / in tissue"
+    },
+    {
+      "name": "NAD",
+      "description": "Needle adjustment (this may not end a procedure, if successful will impact component production)"
+    },
+    {
+      "name": "PFL",
+      "description": "Poor flow"
+    },
+    {
+      "name": "VSM",
+      "description": "Vein Spasm"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "0556",
+  "description": "Benefit Group",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AMB",
+      "description": "AMBULATORY CARE"
+    },
+    {
+      "name": "DENT",
+      "description": "DENTAL"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "0004",
+  "description": "PATIENT CLASS",
+  "type": "user",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Obstetrics"
+    },
+    {
+      "name": "E",
+      "description": "Emergency"
+    },
+    {
+      "name": "I",
+      "description": "Inpatient"
+    },
+    {
+      "name": "O",
+      "description": "Outpatient"
+    },
+    {
+      "name": "P",
+      "description": "Preadmit"
+    },
+    {
+      "name": "R",
+      "description": "Recurring Patient"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "0406",
+  "description": "Organization unit type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Hospital"
+    },
+    {
+      "name": "2",
+      "description": "Physician Clinic"
+    },
+    {
+      "name": "3",
+      "description": "Long Term Care"
+    },
+    {
+      "name": "4",
+      "description": "Acute Care"
+    },
+    {
+      "name": "5",
+      "description": "Other"
+    },
+    {
+      "name": "H",
+      "description": "Home"
+    },
+    {
+      "name": "O",
+      "description": "Office"
+    }
+  ]
+}

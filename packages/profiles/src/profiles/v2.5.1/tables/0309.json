@@ -1,0 +1,19 @@
+{
+  "id": "0309",
+  "description": "Coverage Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Both hospital and physician"
+    },
+    {
+      "name": "H",
+      "description": "Hospital/institutional"
+    },
+    {
+      "name": "P",
+      "description": "Physician/professional"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "0316",
+  "description": "Organ Donor",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Yes, patient is a donor, but card is not on file"
+    },
+    {
+      "name": "N",
+      "description": "No, patient is not a donor"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    },
+    {
+      "name": "Y",
+      "description": "Yes, patient is a donor and card is on file"
+    }
+  ]
+}

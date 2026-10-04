@@ -1,0 +1,11 @@
+{
+  "id": "0053",
+  "description": "DIAGNOSIS CODING METHOD",
+  "type": "user",
+  "codes": [
+    {
+      "name": "I9",
+      "description": "ICD9"
+    }
+  ]
+}

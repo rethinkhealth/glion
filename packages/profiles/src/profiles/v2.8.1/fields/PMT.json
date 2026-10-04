@@ -1,0 +1,114 @@
+{
+  "segmentId": "PMT",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PMT-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Payment/Remittance Advice Number",
+      "item": "2018"
+    },
+    {
+      "sequence": 2,
+      "id": "PMT-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Payment/Remittance Effective Date/Time",
+      "item": "2019"
+    },
+    {
+      "sequence": 3,
+      "id": "PMT-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Payment/Remittance Expiration Date/Time",
+      "item": "2020"
+    },
+    {
+      "sequence": 4,
+      "id": "PMT-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70570",
+      "name": "Payment Method",
+      "item": "2021"
+    },
+    {
+      "sequence": 5,
+      "id": "PMT-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Payment/Remittance Date/Time",
+      "item": "2022"
+    },
+    {
+      "sequence": 6,
+      "id": "PMT-6",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CP",
+      "name": "Payment/Remittance Amount",
+      "item": "2023"
+    },
+    {
+      "sequence": 7,
+      "id": "PMT-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Check Number",
+      "item": "2024"
+    },
+    {
+      "sequence": 8,
+      "id": "PMT-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XON",
+      "name": "Payee Bank Identification",
+      "item": "2025"
+    },
+    {
+      "sequence": 9,
+      "id": "PMT-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Payee Transit Number",
+      "item": "2026"
+    },
+    {
+      "sequence": 10,
+      "id": "PMT-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CX",
+      "name": "Payee Bank Account ID",
+      "item": "2027"
+    },
+    {
+      "sequence": 11,
+      "id": "PMT-11",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XON",
+      "name": "Payment Organization",
+      "item": "2028"
+    },
+    {
+      "sequence": 12,
+      "id": "PMT-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "ESR-Code-Line",
+      "item": "2029"
+    }
+  ]
+}

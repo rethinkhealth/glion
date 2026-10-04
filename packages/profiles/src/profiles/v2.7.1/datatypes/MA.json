@@ -1,0 +1,32 @@
+{
+  "id": "MA",
+  "version": "2.7.1",
+  "kind": "composite",
+  "title": "Multiplexed Array",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Sample Y From Channel 1",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Sample Y From Channel 2",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Sample Y From Channel 3",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Sample Y From Channel 4",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

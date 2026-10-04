@@ -1,0 +1,39 @@
+{
+  "id": "0228",
+  "description": "Diagnosis classification",
+  "type": "user",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Consultation"
+    },
+    {
+      "name": "D",
+      "description": "Diagnosis"
+    },
+    {
+      "name": "I",
+      "description": "Invasive procedure not classified elsewhere (I.V., catheter, etc.)"
+    },
+    {
+      "name": "M",
+      "description": "Medication (antibiotic)"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "R",
+      "description": "Radiological scheduling (not using ICDA codes)"
+    },
+    {
+      "name": "S",
+      "description": "Sign and symptom"
+    },
+    {
+      "name": "T",
+      "description": "Tissue diagnosis"
+    }
+  ]
+}

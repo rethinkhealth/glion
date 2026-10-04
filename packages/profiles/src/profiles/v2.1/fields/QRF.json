@@ -1,0 +1,55 @@
+{
+  "segmentId": "QRF",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "QRF-1",
+      "required": true,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "WHERE SUBJECT FILTER",
+      "item": "173"
+    },
+    {
+      "sequence": 2,
+      "id": "QRF-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "WHEN DATA START DATE/TIME",
+      "item": "174"
+    },
+    {
+      "sequence": 3,
+      "id": "QRF-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "WHEN DATA END DATE/TIME",
+      "item": "176"
+    },
+    {
+      "sequence": 4,
+      "id": "QRF-4",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "WHAT USER QUALIFIER",
+      "item": "178"
+    },
+    {
+      "sequence": 5,
+      "id": "QRF-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "OTHER QRY SUBJECT FILTER",
+      "item": "179"
+    }
+  ]
+}

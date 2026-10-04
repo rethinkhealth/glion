@@ -1,0 +1,20 @@
+{
+  "id": "FN",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "family + last name prefix",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "family name",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "last name prefix",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

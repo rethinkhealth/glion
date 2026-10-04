@@ -1,0 +1,39 @@
+{
+  "id": "v2-0145",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0145",
+  "oid": "2.16.840.1.113883.18.66",
+  "name": "RoomType",
+  "title": "roomType",
+  "codes": [
+    {
+      "code": "2ICU",
+      "display": "Second intensive care unit",
+      "status": "active"
+    },
+    {
+      "code": "2PRI",
+      "display": "Second private room",
+      "status": "active"
+    },
+    {
+      "code": "2SPR",
+      "display": "Second semi-private room",
+      "status": "active"
+    },
+    {
+      "code": "ICU",
+      "display": "Intensive care unit",
+      "status": "active"
+    },
+    {
+      "code": "PRI",
+      "display": "Private room",
+      "status": "active"
+    },
+    {
+      "code": "SPR",
+      "display": "Semi-private room",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "0922",
+  "description": "Certification Category Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "IR",
+      "description": "Initial Request"
+    },
+    {
+      "name": "RA",
+      "description": "Request for Appeal"
+    },
+    {
+      "name": "RE",
+      "description": "Request for Extension"
+    }
+  ]
+}

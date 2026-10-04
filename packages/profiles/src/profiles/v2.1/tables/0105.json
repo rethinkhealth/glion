@@ -1,0 +1,15 @@
+{
+  "id": "0105",
+  "description": "SOURCE OF COMMENT",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "L",
+      "description": "Ancillary department is source of comment"
+    },
+    {
+      "name": "P",
+      "description": "Orderer is source of comment"
+    }
+  ]
+}

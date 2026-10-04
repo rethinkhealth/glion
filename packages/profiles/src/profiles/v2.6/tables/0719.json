@@ -1,0 +1,35 @@
+{
+  "id": "0719",
+  "description": "Access Restriction Reason Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "DIA",
+      "description": "Diagnosis-related"
+    },
+    {
+      "name": "EMP",
+      "description": "Employee of this organization"
+    },
+    {
+      "name": "ORG",
+      "description": "Organizational policy or requirement"
+    },
+    {
+      "name": "PAT",
+      "description": "Patient Request"
+    },
+    {
+      "name": "PHY",
+      "description": "Physician Request"
+    },
+    {
+      "name": "REG",
+      "description": "Regulatory requirement"
+    },
+    {
+      "name": "VIP",
+      "description": "Very important person or celebrity"
+    }
+  ]
+}

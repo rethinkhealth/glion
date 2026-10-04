@@ -1,0 +1,146 @@
+{
+  "id": "CSU",
+  "version": "2.8",
+  "kind": "composite",
+  "title": "Channel Sensitivity and Units",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Channel Sensitivity",
+      "datatypeId": "NM",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Unit of Measure Identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Unit of Measure Description",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Unit of Measure Coding System",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Alternate Unit of Measure Identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "Alternate Unit of Measure Description",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "Alternate Unit of Measure Coding System",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "Unit of Measure Coding System Version ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "Alternate Unit of Measure Coding System Version ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "Original Text",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "Second Alternate Unit of Measure Identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 12,
+      "name": "Second Alternate Unit of Measure Text",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 13,
+      "name": "Name of Second Alternate Unit of Measure Coding Sy",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 14,
+      "name": "Second Alternate Unit of Measure Coding System Ver",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 15,
+      "name": "Unit of Measure Coding System OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 16,
+      "name": "Unit of Measure Value Set OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 17,
+      "name": "Unit of Measure Value Set Version ID",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 18,
+      "name": "Alternate Unit of Measure Coding System OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 19,
+      "name": "Alternate Unit of Measure Value Set OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 20,
+      "name": "Alternate Unit of Measure Value Set Version ID",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 21,
+      "name": "Alternate Unit of Measure Coding System OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 22,
+      "name": "Alternate Unit of Measure Value Set OID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 23,
+      "name": "Alternate Unit of Measure Value Set Version ID",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

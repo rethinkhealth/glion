@@ -1,0 +1,23 @@
+{
+  "id": "0359",
+  "description": "Diagnosis Priority",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": ""
+    },
+    {
+      "name": "0",
+      "description": "Not included in diagnosis ranking"
+    },
+    {
+      "name": "1",
+      "description": "The primary diagnosis"
+    },
+    {
+      "name": "2",
+      "description": "For ranked secondary diagnosis"
+    }
+  ]
+}

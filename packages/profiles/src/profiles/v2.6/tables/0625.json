@@ -1,0 +1,19 @@
+{
+  "id": "0625",
+  "description": "Item Status Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Active"
+    },
+    {
+      "name": "2",
+      "description": "Pending Inactive"
+    },
+    {
+      "name": "3",
+      "description": "Inactive"
+    }
+  ]
+}

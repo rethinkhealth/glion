@@ -1,0 +1,44 @@
+{
+  "id": "v2-0080",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0080",
+  "oid": "2.16.840.1.113883.18.32",
+  "name": "NatureOfAbnormalTesting",
+  "title": "natureOfAbnormalTesting",
+  "codes": [
+    {
+      "code": "A",
+      "display": "An age-based population",
+      "status": "active"
+    },
+    {
+      "code": "B",
+      "display": "Breed",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "None - generic normal range",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "A race-based population",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "A sex-based population",
+      "status": "active"
+    },
+    {
+      "code": "SP",
+      "display": "Species",
+      "status": "active"
+    },
+    {
+      "code": "ST",
+      "display": "Strain",
+      "status": "active"
+    }
+  ]
+}

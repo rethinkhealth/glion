@@ -1,0 +1,23 @@
+{
+  "id": "0230",
+  "description": "Procedure Functional Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Anesthesia"
+    },
+    {
+      "name": "D",
+      "description": "Diagnostic Procedure"
+    },
+    {
+      "name": "I",
+      "description": "Invasive procedure not classified elsewhere (e.g., IV, catheter, etc.)"
+    },
+    {
+      "name": "P",
+      "description": "Procedure for treatment (therapeutic includes operations)"
+    }
+  ]
+}

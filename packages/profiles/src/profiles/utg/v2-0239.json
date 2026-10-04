@@ -1,0 +1,24 @@
+{
+  "id": "v2-0239",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0239",
+  "oid": "2.16.840.1.113883.18.138",
+  "name": "EventExpected",
+  "title": "eventExpected",
+  "codes": [
+    {
+      "code": "N",
+      "display": "No",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    },
+    {
+      "code": "Y",
+      "display": "Yes",
+      "status": "active"
+    }
+  ]
+}

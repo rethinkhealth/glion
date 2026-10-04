@@ -1,0 +1,19 @@
+{
+  "id": "0904",
+  "description": "Security Check Scheme",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "BCV",
+      "description": "Bank Card Validation Number"
+    },
+    {
+      "name": "CCS",
+      "description": "Credit Card Security code"
+    },
+    {
+      "name": "VID",
+      "description": "Version ID"
+    }
+  ]
+}

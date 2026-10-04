@@ -1,0 +1,50 @@
+{
+  "id": "SPS",
+  "version": "2.6",
+  "kind": "composite",
+  "title": "Specimen Source",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Specimen Source Name or Code",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Additives",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Specimen Collection Method",
+      "datatypeId": "TX",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Body Site",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Site Modifier",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "Collection Method Modifier Code",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "Specimen Role",
+      "datatypeId": "CWE",
+      "required": false
+    }
+  ]
+}

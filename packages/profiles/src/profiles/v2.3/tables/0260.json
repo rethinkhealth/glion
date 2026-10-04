@@ -1,0 +1,39 @@
+{
+  "id": "0260",
+  "description": "Patient Location Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Bed"
+    },
+    {
+      "name": "C",
+      "description": "Clinic"
+    },
+    {
+      "name": "D",
+      "description": "Department"
+    },
+    {
+      "name": "E",
+      "description": "Exam Room"
+    },
+    {
+      "name": "L",
+      "description": "Other Location"
+    },
+    {
+      "name": "N",
+      "description": "Nursing Unit"
+    },
+    {
+      "name": "O",
+      "description": "Operating Room"
+    },
+    {
+      "name": "R",
+      "description": "Room"
+    }
+  ]
+}

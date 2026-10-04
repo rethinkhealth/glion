@@ -1,0 +1,31 @@
+{
+  "id": "0330",
+  "description": "Marketing basis",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "510E",
+      "description": "510 (K) exempt"
+    },
+    {
+      "name": "510K",
+      "description": "510 (K)"
+    },
+    {
+      "name": "522S",
+      "description": "Post marketing study (522)"
+    },
+    {
+      "name": "PMA",
+      "description": "Premarketing authorization"
+    },
+    {
+      "name": "PRE",
+      "description": "Preamendment"
+    },
+    {
+      "name": "TXN",
+      "description": "Transitional"
+    }
+  ]
+}

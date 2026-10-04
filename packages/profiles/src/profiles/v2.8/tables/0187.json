@@ -1,0 +1,15 @@
+{
+  "id": "0187",
+  "description": "Provider Billing",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "I",
+      "description": "Institution bills for provider"
+    },
+    {
+      "name": "P",
+      "description": "Provider does own billing"
+    }
+  ]
+}

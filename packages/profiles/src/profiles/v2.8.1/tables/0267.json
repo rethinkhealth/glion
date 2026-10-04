@@ -1,0 +1,35 @@
+{
+  "id": "0267",
+  "description": "Days of the Week",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "FRI",
+      "description": "Friday"
+    },
+    {
+      "name": "MON",
+      "description": "Monday"
+    },
+    {
+      "name": "SAT",
+      "description": "Saturday"
+    },
+    {
+      "name": "SUN",
+      "description": "Sunday"
+    },
+    {
+      "name": "THU",
+      "description": "Thursday"
+    },
+    {
+      "name": "TUE",
+      "description": "Tuesday"
+    },
+    {
+      "name": "WED",
+      "description": "Wednesday"
+    }
+  ]
+}

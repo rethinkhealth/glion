@@ -1,0 +1,23 @@
+{
+  "id": "0564",
+  "description": "Adjustment Category Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "EA",
+      "description": "Edit/Adjudication Response"
+    },
+    {
+      "name": "IN",
+      "description": "Information"
+    },
+    {
+      "name": "PA",
+      "description": "Provider Adjustment"
+    },
+    {
+      "name": "PR",
+      "description": "Processing Result"
+    }
+  ]
+}

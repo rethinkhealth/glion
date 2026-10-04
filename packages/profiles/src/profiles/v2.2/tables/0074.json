@@ -1,0 +1,151 @@
+{
+  "id": "0074",
+  "description": "DIAGNOSTIC SERVICE SECTION ID",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AU",
+      "description": "Audiology"
+    },
+    {
+      "name": "BG",
+      "description": "Blood gases"
+    },
+    {
+      "name": "BLB",
+      "description": "Blood bank"
+    },
+    {
+      "name": "CH",
+      "description": "Chemistry"
+    },
+    {
+      "name": "CP",
+      "description": "Cytopathology"
+    },
+    {
+      "name": "CT",
+      "description": "CAT scan"
+    },
+    {
+      "name": "CTH",
+      "description": "Cardiac catheterization"
+    },
+    {
+      "name": "CUS",
+      "description": "Cardiac Ultrasound"
+    },
+    {
+      "name": "EC",
+      "description": "Electrocardiac (e.g., EKG, EEC, Holter)"
+    },
+    {
+      "name": "EN",
+      "description": "Electroneuro (EEG, EMG)"
+    },
+    {
+      "name": "HM",
+      "description": "Hematology"
+    },
+    {
+      "name": "IMM",
+      "description": "Immunology"
+    },
+    {
+      "name": "MB",
+      "description": "Microbiology"
+    },
+    {
+      "name": "MCB",
+      "description": "Mycobacteriology"
+    },
+    {
+      "name": "MYC",
+      "description": "Mycology"
+    },
+    {
+      "name": "NMR",
+      "description": "Nuclear magnetic resonance"
+    },
+    {
+      "name": "NMS",
+      "description": "Nuclear medicine scan"
+    },
+    {
+      "name": "NRS",
+      "description": "Nursing service measures"
+    },
+    {
+      "name": "OSL",
+      "description": "Outside Lab"
+    },
+    {
+      "name": "OT",
+      "description": "Occupational therapy"
+    },
+    {
+      "name": "OTH",
+      "description": "Other"
+    },
+    {
+      "name": "OUS",
+      "description": "OB Ultrasound"
+    },
+    {
+      "name": "PF",
+      "description": "Pulmonary function"
+    },
+    {
+      "name": "PHR",
+      "description": "Pharmacy"
+    },
+    {
+      "name": "PHY",
+      "description": "Physician (Hx, Dx, admission note, etc.)"
+    },
+    {
+      "name": "PT",
+      "description": "Physical therapy"
+    },
+    {
+      "name": "RC",
+      "description": "Respiratory care (therapy)"
+    },
+    {
+      "name": "RT",
+      "description": "Radiation therapy"
+    },
+    {
+      "name": "RUS",
+      "description": "Radiology ultrasound"
+    },
+    {
+      "name": "RX",
+      "description": "Radiograph"
+    },
+    {
+      "name": "SP",
+      "description": "Surgical Pathology"
+    },
+    {
+      "name": "SR",
+      "description": "Serology"
+    },
+    {
+      "name": "TX",
+      "description": "Toxicology"
+    },
+    {
+      "name": "VR",
+      "description": "Virology"
+    },
+    {
+      "name": "VUS",
+      "description": "Vascular Ultrasound"
+    },
+    {
+      "name": "XRC",
+      "description": "Cineradiograph"
+    }
+  ]
+}

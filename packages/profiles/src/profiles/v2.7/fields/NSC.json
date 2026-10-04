@@ -1,0 +1,91 @@
+{
+  "segmentId": "NSC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "NSC-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70409",
+      "name": "Application Change Type",
+      "item": "1188"
+    },
+    {
+      "sequence": 2,
+      "id": "NSC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Current CPU",
+      "item": "1189"
+    },
+    {
+      "sequence": 3,
+      "id": "NSC-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Current Fileserver",
+      "item": "1190"
+    },
+    {
+      "sequence": 4,
+      "id": "NSC-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "HD",
+      "table": "HL70361",
+      "name": "Current Application",
+      "item": "1191"
+    },
+    {
+      "sequence": 5,
+      "id": "NSC-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "HD",
+      "table": "HL70362",
+      "name": "Current Facility",
+      "item": "1192"
+    },
+    {
+      "sequence": 6,
+      "id": "NSC-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "New CPU",
+      "item": "1193"
+    },
+    {
+      "sequence": 7,
+      "id": "NSC-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "New Fileserver",
+      "item": "1194"
+    },
+    {
+      "sequence": 8,
+      "id": "NSC-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "HD",
+      "table": "HL70361",
+      "name": "New Application",
+      "item": "1195"
+    },
+    {
+      "sequence": 9,
+      "id": "NSC-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "HD",
+      "table": "HL70362",
+      "name": "New Facility",
+      "item": "1196"
+    }
+  ]
+}

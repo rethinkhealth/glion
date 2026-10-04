@@ -1,0 +1,159 @@
+{
+  "id": "0078",
+  "description": "Interpretation Codes",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "<",
+      "description": "Off scale low"
+    },
+    {
+      "name": ">",
+      "description": "Off scale high"
+    },
+    {
+      "name": "A",
+      "description": "Abnormal"
+    },
+    {
+      "name": "AA",
+      "description": "Critically abnormal"
+    },
+    {
+      "name": "AC",
+      "description": "Anti-complementary substances present"
+    },
+    {
+      "name": "B",
+      "description": "Better"
+    },
+    {
+      "name": "D",
+      "description": "Significant change down"
+    },
+    {
+      "name": "DET",
+      "description": "Detected"
+    },
+    {
+      "name": "H",
+      "description": "High"
+    },
+    {
+      "name": "HH",
+      "description": "Critically high"
+    },
+    {
+      "name": "HM",
+      "description": "Hold for Medical Review"
+    },
+    {
+      "name": "HU",
+      "description": "Very high"
+    },
+    {
+      "name": "I",
+      "description": "Intermediate"
+    },
+    {
+      "name": "IE",
+      "description": "Insufficient evidence"
+    },
+    {
+      "name": "L",
+      "description": "Low"
+    },
+    {
+      "name": "LL",
+      "description": "Critically low"
+    },
+    {
+      "name": "LU",
+      "description": "Very low"
+    },
+    {
+      "name": "MS",
+      "description": "Moderately susceptible. Indicates for microbiology susceptibilities only."
+    },
+    {
+      "name": "N",
+      "description": "Normal"
+    },
+    {
+      "name": "ND",
+      "description": "Not Detected"
+    },
+    {
+      "name": "NEG",
+      "description": "Negative"
+    },
+    {
+      "name": "NR",
+      "description": "Non-reactive"
+    },
+    {
+      "name": "NS",
+      "description": "Non-susceptible"
+    },
+    {
+      "name": "null",
+      "description": "No range defined, or normal ranges don't apply"
+    },
+    {
+      "name": "OBX",
+      "description": "Interpretation qualifiers in separate OBX segments"
+    },
+    {
+      "name": "POS",
+      "description": "Positive"
+    },
+    {
+      "name": "QCF",
+      "description": "Quality Control Failure"
+    },
+    {
+      "name": "R",
+      "description": "Resistant"
+    },
+    {
+      "name": "RR",
+      "description": "Reactive"
+    },
+    {
+      "name": "S",
+      "description": "Susceptible"
+    },
+    {
+      "name": "SDD",
+      "description": "Susceptible-dose dependent"
+    },
+    {
+      "name": "SYN-R",
+      "description": "Synergy - resistant"
+    },
+    {
+      "name": "SYN-S",
+      "description": "Synergy - susceptible"
+    },
+    {
+      "name": "TOX",
+      "description": "Cytotoxic substance present"
+    },
+    {
+      "name": "U",
+      "description": "Significant change up"
+    },
+    {
+      "name": "VS",
+      "description": "Very susceptible. Indicates for microbiology susceptibilities only."
+    },
+    {
+      "name": "W",
+      "description": "Worse"
+    },
+    {
+      "name": "WR",
+      "description": "Weakly reactive"
+    }
+  ]
+}

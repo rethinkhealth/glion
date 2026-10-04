@@ -1,0 +1,19 @@
+{
+  "id": "0141",
+  "description": "Military Rank/Grade",
+  "type": "user",
+  "codes": [
+    {
+      "name": "E1... E9",
+      "description": "Enlisted"
+    },
+    {
+      "name": "O1 ... O9",
+      "description": "Officers"
+    },
+    {
+      "name": "W1 ... W4",
+      "description": "Warrant Officers"
+    }
+  ]
+}

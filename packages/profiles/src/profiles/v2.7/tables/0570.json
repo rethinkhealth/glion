@@ -1,0 +1,47 @@
+{
+  "id": "0570",
+  "description": "Payment Method Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CASH",
+      "description": "Cash"
+    },
+    {
+      "name": "CCCA",
+      "description": "Credit Card"
+    },
+    {
+      "name": "CCHK",
+      "description": "Cashier's Check"
+    },
+    {
+      "name": "CDAC",
+      "description": "Credit/Debit Account"
+    },
+    {
+      "name": "CHCK",
+      "description": "Check"
+    },
+    {
+      "name": "DDPO",
+      "description": "Direct Deposit"
+    },
+    {
+      "name": "DEBC",
+      "description": "Debit Card"
+    },
+    {
+      "name": "SWFT",
+      "description": "Society for Worldwide Interbank Financial Telecommunications (S.W.I.F.T.)"
+    },
+    {
+      "name": "TRAC",
+      "description": "Traveler's Check"
+    },
+    {
+      "name": "VISN",
+      "description": "VISA Special Electronic Funds Transfer Network"
+    }
+  ]
+}

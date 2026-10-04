@@ -1,0 +1,23 @@
+{
+  "id": "0321",
+  "description": "Dispense method",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AD",
+      "description": "Automatic Dispensing"
+    },
+    {
+      "name": "F",
+      "description": "Floor Stock"
+    },
+    {
+      "name": "TR",
+      "description": "Traditional"
+    },
+    {
+      "name": "UD",
+      "description": "Unit Dose"
+    }
+  ]
+}

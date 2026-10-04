@@ -1,0 +1,29 @@
+{
+  "id": "v2-0564",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0564",
+  "oid": "2.16.840.1.113883.18.366",
+  "name": "AdjustmentCategory",
+  "title": "adjustmentCategory",
+  "codes": [
+    {
+      "code": "EA",
+      "display": "Edit/Adjudication Response",
+      "status": "active"
+    },
+    {
+      "code": "IN",
+      "display": "Information",
+      "status": "active"
+    },
+    {
+      "code": "PA",
+      "display": "Provider Adjustment",
+      "status": "active"
+    },
+    {
+      "code": "PR",
+      "display": "Processing Result",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "0502",
+  "description": "Non-Subject Consenter Reason",
+  "type": "user",
+  "codes": [
+    {
+      "name": "LM",
+      "description": "Legally mandated"
+    },
+    {
+      "name": "MIN",
+      "description": "Subject is a minor"
+    },
+    {
+      "name": "NC",
+      "description": "Subject is not competent to consent"
+    }
+  ]
+}

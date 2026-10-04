@@ -1,0 +1,34 @@
+{
+  "id": "v2-0121",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0121",
+  "oid": "2.16.840.1.113883.18.49",
+  "name": "ResponseFlag",
+  "title": "responseFlag",
+  "codes": [
+    {
+      "code": "D",
+      "display": "Same as R, also other associated segments",
+      "status": "active"
+    },
+    {
+      "code": "E",
+      "display": "Report exceptions only",
+      "status": "active"
+    },
+    {
+      "code": "F",
+      "display": "Same as D, plus confirmations explicitly",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "Only the MSA segment is returned",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Same as E, also Replacement and Parent-Child",
+      "status": "active"
+    }
+  ]
+}

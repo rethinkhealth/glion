@@ -1,0 +1,15 @@
+{
+  "id": "0375",
+  "description": "Artificial Blood",
+  "type": "user",
+  "codes": [
+    {
+      "name": "FLUR",
+      "description": "Fluorocarbons"
+    },
+    {
+      "name": "SFHB",
+      "description": "Stromal free hemoglobin preparations"
+    }
+  ]
+}

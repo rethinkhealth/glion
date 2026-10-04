@@ -1,0 +1,15 @@
+{
+  "id": "0326",
+  "description": "Visit Indicator",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Account level"
+    },
+    {
+      "name": "V",
+      "description": "Visit Level"
+    }
+  ]
+}

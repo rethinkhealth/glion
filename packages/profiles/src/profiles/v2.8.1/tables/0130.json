@@ -1,0 +1,23 @@
+{
+  "id": "0130",
+  "description": "Visit User Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "HO",
+      "description": "Home"
+    },
+    {
+      "name": "MO",
+      "description": "Mobile Unit"
+    },
+    {
+      "name": "PH",
+      "description": "Phone"
+    },
+    {
+      "name": "TE",
+      "description": "Teaching"
+    }
+  ]
+}

@@ -1,0 +1,519 @@
+{
+  "id": "v2-0254",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0254",
+  "oid": "2.16.840.1.113883.18.149",
+  "name": "KindOfQuantity",
+  "title": "kindOfQuantity",
+  "codes": [
+    {
+      "code": "ABS",
+      "display": "Absorbance",
+      "status": "active"
+    },
+    {
+      "code": "ACNC",
+      "display": "Concentration, Arbitrary Substance",
+      "status": "active"
+    },
+    {
+      "code": "ACT",
+      "display": "Activity",
+      "status": "active"
+    },
+    {
+      "code": "APER",
+      "display": "Appearance",
+      "status": "active"
+    },
+    {
+      "code": "ARB",
+      "display": "Arbitrary",
+      "status": "active"
+    },
+    {
+      "code": "AREA",
+      "display": "Area",
+      "status": "active"
+    },
+    {
+      "code": "ASPECT",
+      "display": "Aspect",
+      "status": "active"
+    },
+    {
+      "code": "CACT",
+      "display": "Catalytic Activity",
+      "status": "active"
+    },
+    {
+      "code": "CCNT",
+      "display": "Catalytic Content",
+      "status": "active"
+    },
+    {
+      "code": "CCRTO",
+      "display": "Catalytic Concentration Ratio",
+      "status": "active"
+    },
+    {
+      "code": "CFR",
+      "display": "Catalytic Fraction",
+      "status": "active"
+    },
+    {
+      "code": "CLAS",
+      "display": "Class",
+      "status": "active"
+    },
+    {
+      "code": "CNC",
+      "display": "Catalytic Concentration",
+      "status": "active"
+    },
+    {
+      "code": "CNST",
+      "display": "Constant",
+      "status": "active"
+    },
+    {
+      "code": "COEF",
+      "display": "Coefficient",
+      "status": "active"
+    },
+    {
+      "code": "COLOR",
+      "display": "Color",
+      "status": "active"
+    },
+    {
+      "code": "CONS",
+      "display": "Consistency",
+      "status": "active"
+    },
+    {
+      "code": "CRAT",
+      "display": "Catalytic Rate",
+      "status": "active"
+    },
+    {
+      "code": "CRTO",
+      "display": "Catalytic Ratio",
+      "status": "active"
+    },
+    {
+      "code": "DEN",
+      "display": "Density",
+      "status": "active"
+    },
+    {
+      "code": "DEV",
+      "display": "Device",
+      "status": "active"
+    },
+    {
+      "code": "DIFF",
+      "display": "Difference",
+      "status": "active"
+    },
+    {
+      "code": "ELAS",
+      "display": "Elasticity",
+      "status": "active"
+    },
+    {
+      "code": "ELPOT",
+      "display": "Electrical Potential (Voltage)",
+      "status": "active"
+    },
+    {
+      "code": "ELRAT",
+      "display": "Electrical current (amperage)",
+      "status": "active"
+    },
+    {
+      "code": "ELRES",
+      "display": "Electrical Resistance",
+      "status": "active"
+    },
+    {
+      "code": "ENGR",
+      "display": "Energy",
+      "status": "active"
+    },
+    {
+      "code": "ENT",
+      "display": "Entitic",
+      "status": "active"
+    },
+    {
+      "code": "ENTCAT",
+      "display": "Entitic Catalytic Activity",
+      "status": "active"
+    },
+    {
+      "code": "ENTNUM",
+      "display": "Entitic Number",
+      "status": "active"
+    },
+    {
+      "code": "ENTSUB",
+      "display": "Entitic Substance of Amount",
+      "status": "active"
+    },
+    {
+      "code": "ENTVOL",
+      "display": "Entitic Volume",
+      "status": "active"
+    },
+    {
+      "code": "EQL",
+      "display": "Equilibrium",
+      "status": "active"
+    },
+    {
+      "code": "FORCE",
+      "display": "Mechanical force",
+      "status": "active"
+    },
+    {
+      "code": "FREQ",
+      "display": "Frequency",
+      "status": "active"
+    },
+    {
+      "code": "IMP",
+      "display": "Impression/ interpretation of study",
+      "status": "active"
+    },
+    {
+      "code": "KINV",
+      "display": "Kinematic Viscosity",
+      "status": "active"
+    },
+    {
+      "code": "LEN",
+      "display": "Length",
+      "status": "active"
+    },
+    {
+      "code": "LINC",
+      "display": "Length Increment",
+      "status": "active"
+    },
+    {
+      "code": "LIQ",
+      "display": "Liquefaction",
+      "status": "active"
+    },
+    {
+      "code": "MASS",
+      "display": "Mass",
+      "status": "active"
+    },
+    {
+      "code": "MCNC",
+      "display": "Mass Concentration",
+      "status": "active"
+    },
+    {
+      "code": "MCNT",
+      "display": "Mass Content",
+      "status": "active"
+    },
+    {
+      "code": "MCRTO",
+      "display": "Mass Concentration Ratio",
+      "status": "active"
+    },
+    {
+      "code": "MFR",
+      "display": "Mass Fraction",
+      "status": "active"
+    },
+    {
+      "code": "MGFLUX",
+      "display": "Magnetic flux",
+      "status": "active"
+    },
+    {
+      "code": "MINC",
+      "display": "Mass Increment",
+      "status": "active"
+    },
+    {
+      "code": "MORPH",
+      "display": "Morphology",
+      "status": "active"
+    },
+    {
+      "code": "MOTIL",
+      "display": "Motility",
+      "status": "active"
+    },
+    {
+      "code": "MRAT",
+      "display": "Mass Rate",
+      "status": "active"
+    },
+    {
+      "code": "MRTO",
+      "display": "Mass Ratio",
+      "status": "active"
+    },
+    {
+      "code": "NCNC",
+      "display": "Number Concentration",
+      "status": "active"
+    },
+    {
+      "code": "NCNT",
+      "display": "Number Content",
+      "status": "active"
+    },
+    {
+      "code": "NFR",
+      "display": "Number Fraction",
+      "status": "active"
+    },
+    {
+      "code": "NRTO",
+      "display": "Number Ratio",
+      "status": "active"
+    },
+    {
+      "code": "NUM",
+      "display": "Number",
+      "status": "active"
+    },
+    {
+      "code": "OD",
+      "display": "Optical density",
+      "status": "active"
+    },
+    {
+      "code": "OSMOL",
+      "display": "Osmolality",
+      "status": "active"
+    },
+    {
+      "code": "PRES",
+      "display": "Pressure (Partial)",
+      "status": "active"
+    },
+    {
+      "code": "PRID",
+      "display": "Presence/Identity/Existence",
+      "status": "active"
+    },
+    {
+      "code": "PWR",
+      "display": "Power (wattage)",
+      "status": "active"
+    },
+    {
+      "code": "RANGE",
+      "display": "Ranges",
+      "status": "active"
+    },
+    {
+      "code": "RATIO",
+      "display": "Ratios",
+      "status": "active"
+    },
+    {
+      "code": "RCRLTM",
+      "display": "Reciprocal Relative Time",
+      "status": "active"
+    },
+    {
+      "code": "RDEN",
+      "display": "Relative Density",
+      "status": "active"
+    },
+    {
+      "code": "REL",
+      "display": "Relative",
+      "status": "active"
+    },
+    {
+      "code": "RLMCNC",
+      "display": "Relative Mass Concentration",
+      "status": "active"
+    },
+    {
+      "code": "RLSCNC",
+      "display": "Relative Substance Concentration",
+      "status": "active"
+    },
+    {
+      "code": "RLTM",
+      "display": "Relative Time",
+      "status": "active"
+    },
+    {
+      "code": "SATFR",
+      "display": "Saturation Fraction",
+      "status": "active"
+    },
+    {
+      "code": "SCNC",
+      "display": "Substance Concentration",
+      "status": "active"
+    },
+    {
+      "code": "SCNCIN",
+      "display": "Substance Concentration Increment",
+      "status": "active"
+    },
+    {
+      "code": "SCNT",
+      "display": "Substance Content",
+      "status": "active"
+    },
+    {
+      "code": "SCNTR",
+      "display": "Substance Content Rate",
+      "status": "active"
+    },
+    {
+      "code": "SCRTO",
+      "display": "Substance Concentration Ratio",
+      "status": "active"
+    },
+    {
+      "code": "SFR",
+      "display": "Substance Fraction",
+      "status": "active"
+    },
+    {
+      "code": "SHAPE",
+      "display": "Shape",
+      "status": "active"
+    },
+    {
+      "code": "SMELL",
+      "display": "Smell",
+      "status": "active"
+    },
+    {
+      "code": "SRAT",
+      "display": "Substance Rate",
+      "status": "active"
+    },
+    {
+      "code": "SRTO",
+      "display": "Substance Ratio",
+      "status": "active"
+    },
+    {
+      "code": "SUB",
+      "display": "Substance Amount",
+      "status": "active"
+    },
+    {
+      "code": "SUSC",
+      "display": "Susceptibility",
+      "status": "active"
+    },
+    {
+      "code": "TASTE",
+      "display": "Taste",
+      "status": "active"
+    },
+    {
+      "code": "TEMP",
+      "display": "Temperature",
+      "status": "active"
+    },
+    {
+      "code": "TEMPDF",
+      "display": "Temperature Difference",
+      "status": "active"
+    },
+    {
+      "code": "TEMPIN",
+      "display": "Temperature Increment",
+      "status": "active"
+    },
+    {
+      "code": "THRMCNC",
+      "display": "Threshold Mass Concentration",
+      "status": "active"
+    },
+    {
+      "code": "THRSCNC",
+      "display": "Threshold Substance Concentration",
+      "status": "active"
+    },
+    {
+      "code": "TIME",
+      "display": "Time (e.g. seconds)",
+      "status": "active"
+    },
+    {
+      "code": "TITR",
+      "display": "Dilution Factor (Titer)",
+      "status": "active"
+    },
+    {
+      "code": "TMDF",
+      "display": "Time Difference",
+      "status": "active"
+    },
+    {
+      "code": "TMSTP",
+      "display": "Time Stamp-Date and Time",
+      "status": "active"
+    },
+    {
+      "code": "TRTO",
+      "display": "Time Ratio",
+      "status": "active"
+    },
+    {
+      "code": "TYPE",
+      "display": "Type",
+      "status": "active"
+    },
+    {
+      "code": "VCNT",
+      "display": "Volume Content",
+      "status": "active"
+    },
+    {
+      "code": "VEL",
+      "display": "Velocity",
+      "status": "active"
+    },
+    {
+      "code": "VELRT",
+      "display": "Velocity Ratio",
+      "status": "active"
+    },
+    {
+      "code": "VFR",
+      "display": "Volume Fraction",
+      "status": "active"
+    },
+    {
+      "code": "VISC",
+      "display": "Viscosity",
+      "status": "active"
+    },
+    {
+      "code": "VOL",
+      "display": "Volume",
+      "status": "active"
+    },
+    {
+      "code": "VRAT",
+      "display": "Volume Rate",
+      "status": "active"
+    },
+    {
+      "code": "VRTO",
+      "display": "Volume Ratio",
+      "status": "active"
+    }
+  ]
+}

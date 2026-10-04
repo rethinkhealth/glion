@@ -1,0 +1,19 @@
+{
+  "id": "0161",
+  "description": "Allow Substitution",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "G",
+      "description": "Allow generic substitutions."
+    },
+    {
+      "name": "N",
+      "description": "Substitutions are NOT authorized.  (This is the default - null.)"
+    },
+    {
+      "name": "T",
+      "description": "Allow therapeutic substitutions"
+    }
+  ]
+}

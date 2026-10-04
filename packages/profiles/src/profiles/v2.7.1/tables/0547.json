@@ -1,0 +1,19 @@
+{
+  "id": "0547",
+  "description": "Jurisdictional Breadth",
+  "type": "user",
+  "codes": [
+    {
+      "name": "C",
+      "description": "County/Parish"
+    },
+    {
+      "name": "N",
+      "description": "Country"
+    },
+    {
+      "name": "S",
+      "description": "State/Province"
+    }
+  ]
+}

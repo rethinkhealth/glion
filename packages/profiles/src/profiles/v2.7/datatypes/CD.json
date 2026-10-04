@@ -1,0 +1,44 @@
+{
+  "id": "CD",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Channel Definition",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Channel Identifier",
+      "datatypeId": "WVI",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Waveform Source",
+      "datatypeId": "WVS",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Channel Sensitivity and Units",
+      "datatypeId": "CSU",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Channel Calibration Parameters",
+      "datatypeId": "CCP",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Channel Sampling Frequency",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "Minimum and Maximum Data Values",
+      "datatypeId": "NR",
+      "required": false
+    }
+  ]
+}

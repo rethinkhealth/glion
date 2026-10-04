@@ -1,0 +1,49 @@
+{
+  "id": "v2-0279",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0279",
+  "oid": "2.16.840.1.113883.18.172",
+  "name": "AllowSubstitution",
+  "title": "allowSubstitution",
+  "codes": [
+    {
+      "code": "Confirm",
+      "display": "Contact the Placer Contact Person prior to making any substitutions of this resource",
+      "status": "active"
+    },
+    {
+      "code": "CONFIRM",
+      "display": "Contact the Placer Contact Person prior to making any substitutions of this resource",
+      "status": "active"
+    },
+    {
+      "code": "No",
+      "display": "Substitution of this resource is not allowed",
+      "status": "active"
+    },
+    {
+      "code": "NO",
+      "display": "Substitution of this resource is not allowed",
+      "status": "active"
+    },
+    {
+      "code": "Notify",
+      "display": "Notify the Placer Contact Person, through normal institutional procedures, that a substitution of this resource has been made",
+      "status": "active"
+    },
+    {
+      "code": "NOTIFY",
+      "display": "Notify the Placer Contact Person, through normal institutional procedures, that a substitution of this resource has been made",
+      "status": "active"
+    },
+    {
+      "code": "Yes",
+      "display": "Substitution of this resource is allowed",
+      "status": "active"
+    },
+    {
+      "code": "YES",
+      "display": "Substitution of this resource is allowed",
+      "status": "active"
+    }
+  ]
+}

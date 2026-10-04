@@ -1,0 +1,19 @@
+{
+  "id": "0497",
+  "description": "Consent Mode",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "T",
+      "description": "Telephone"
+    },
+    {
+      "name": "V",
+      "description": "Verbal"
+    },
+    {
+      "name": "W",
+      "description": "Written"
+    }
+  ]
+}

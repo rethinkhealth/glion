@@ -1,0 +1,11 @@
+{
+  "id": "0328",
+  "description": "Employee classification",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

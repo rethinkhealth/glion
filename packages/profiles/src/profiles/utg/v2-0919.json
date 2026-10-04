@@ -1,0 +1,24 @@
+{
+  "id": "v2-0919",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0919",
+  "oid": "2.16.840.1.113883.18.425",
+  "name": "ExclusiveTest",
+  "title": "exclusiveTest",
+  "codes": [
+    {
+      "code": "D",
+      "display": "In some cases, this test should be only exclusively with like tests (examples are cyto or pathology)",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "This test can be included with any number of other tests",
+      "status": "active"
+    },
+    {
+      "code": "Y",
+      "display": "This test should be exclusive",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "0415",
+  "description": "DRG transfer type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "E",
+      "description": "DRG Exempt"
+    },
+    {
+      "name": "N",
+      "description": "DRG Non Exempt"
+    }
+  ]
+}

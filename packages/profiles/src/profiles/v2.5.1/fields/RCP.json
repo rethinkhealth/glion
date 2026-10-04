@@ -1,0 +1,79 @@
+{
+  "segmentId": "RCP",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RCP-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70091",
+      "name": "Query Priority",
+      "item": "27"
+    },
+    {
+      "sequence": 2,
+      "id": "RCP-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 10,
+      "table": "HL70126",
+      "name": "Quantity Limited Request",
+      "item": "31"
+    },
+    {
+      "sequence": 3,
+      "id": "RCP-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70394",
+      "name": "Response Modality",
+      "item": "1440"
+    },
+    {
+      "sequence": 4,
+      "id": "RCP-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Execution and Delivery Time",
+      "item": "1441"
+    },
+    {
+      "sequence": 5,
+      "id": "RCP-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70395",
+      "name": "Modify Indicator",
+      "item": "1443"
+    },
+    {
+      "sequence": 6,
+      "id": "RCP-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "SRT",
+      "maxLength": 512,
+      "name": "Sort-by Field",
+      "item": "1624"
+    },
+    {
+      "sequence": 7,
+      "id": "RCP-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 256,
+      "name": "Segment group inclusion",
+      "item": "1594"
+    }
+  ]
+}

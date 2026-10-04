@@ -1,0 +1,19 @@
+{
+  "id": "0618",
+  "description": "Protection Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "LI",
+      "description": "Listed"
+    },
+    {
+      "name": "UL",
+      "description": "Unlisted (Should not appear in directories)"
+    },
+    {
+      "name": "UP",
+      "description": "Unpublished"
+    }
+  ]
+}

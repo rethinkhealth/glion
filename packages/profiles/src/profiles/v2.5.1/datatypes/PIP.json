@@ -1,0 +1,38 @@
+{
+  "id": "PIP",
+  "version": "2.5.1",
+  "kind": "composite",
+  "title": "Practitioner Institutional Privileges",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Privilege",
+      "datatypeId": "CE",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Privilege Class",
+      "datatypeId": "CE",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Expiration Date",
+      "datatypeId": "DT",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Activation Date",
+      "datatypeId": "DT",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Facility",
+      "datatypeId": "EI",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "id": "v2-0211",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0211",
+  "oid": "2.16.840.1.113883.18.116",
+  "name": "AlternateCharacterSets",
+  "title": "alternateCharacterSets",
+  "codes": [
+    {
+      "code": "8859/1",
+      "display": "The printable characters from the ISO 8859/1 Character set",
+      "status": "active"
+    },
+    {
+      "code": "8859/15",
+      "display": "The printable characters from the ISO 8859/15 (Latin-15)",
+      "status": "active"
+    },
+    {
+      "code": "8859/2",
+      "display": "The printable characters from the ISO 8859/2 Character set",
+      "status": "active"
+    },
+    {
+      "code": "8859/3",
+      "display": "The printable characters from the ISO 8859/3 Character set",
+      "status": "active"
+    },
+    {
+      "code": "8859/4",
+      "display": "The printable characters from the ISO 8859/4 Character set",
+      "status": "active"
+    },
+    {
+      "code": "8859/5",
+      "display": "The printable characters from the ISO 8859/5 Character set",
+      "status": "active"
+    },
+    {
+      "code": "8859/6",
+      "display": "The printable characters from the ISO 8859/6 Character set",
+      "status": "active"
+    },
+    {
+      "code": "8859/7",
+      "display": "The printable characters from the ISO 8859/7 Character set",
+      "status": "active"
+    },
+    {
+      "code": "8859/8",
+      "display": "The printable characters from the ISO 8859/8 Character set",
+      "status": "active"
+    },
+    {
+      "code": "8859/9",
+      "display": "The printable characters from the ISO 8859/9 Character set",
+      "status": "active"
+    },
+    {
+      "code": "ASCII",
+      "display": "The printable 7-bit ASCII character set.",
+      "status": "active"
+    },
+    {
+      "code": "BIG-5",
+      "display": "Code for Taiwanese Character Set (BIG-5)",
+      "status": "active"
+    },
+    {
+      "code": "CNS 11643-1992",
+      "display": "Code for Taiwanese Character Set (CNS 11643-1992)",
+      "status": "active"
+    },
+    {
+      "code": "GB 18030-2000",
+      "display": "Code for Chinese Character Set (GB 18030-2000)",
+      "status": "active"
+    },
+    {
+      "code": "ISO IR14",
+      "display": "Code for Information Exchange (one byte)(JIS X 0201-1976).",
+      "status": "active"
+    },
+    {
+      "code": "ISO IR159",
+      "display": "Code of the supplementary Japanese Graphic Character set for information interchange (JIS X 0212-1990).",
+      "status": "active"
+    },
+    {
+      "code": "ISO IR6",
+      "display": "ASCII graphic character set consisting of 94 characters.",
+      "status": "active"
+    },
+    {
+      "code": "ISO IR87",
+      "display": "Code for the Japanese Graphic Character set for information interchange (JIS X 0208-1990),",
+      "status": "active"
+    },
+    {
+      "code": "JAS2020",
+      "display": "A subset of ISO2020 used for most Kanjii transmissions",
+      "status": "active"
+    },
+    {
+      "code": "JIS X 0202",
+      "display": "ISO 2022 with escape sequences for Kanjii",
+      "status": "active"
+    },
+    {
+      "code": "KS X 1001",
+      "display": "Code for Korean Character Set (KS X 1001)",
+      "status": "active"
+    },
+    {
+      "code": "UNICODE",
+      "display": "The world wide character standard from ISO/IEC 10646-1-1993",
+      "status": "active"
+    },
+    {
+      "code": "UNICODE UTF-16",
+      "display": "UCS Transformation Format, 16-bit form",
+      "status": "active"
+    },
+    {
+      "code": "UNICODE UTF-32",
+      "display": "UCS Transformation Format, 32-bit form",
+      "status": "active"
+    },
+    {
+      "code": "UNICODE UTF-8",
+      "display": "UCS Transformation Format, 8-bit form",
+      "status": "active"
+    }
+  ]
+}

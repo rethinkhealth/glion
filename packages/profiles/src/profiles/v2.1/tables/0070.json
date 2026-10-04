@@ -1,0 +1,123 @@
+{
+  "id": "0070",
+  "description": "SOURCE OF SPECIMEN",
+  "type": "user",
+  "codes": [
+    {
+      "name": "BLD",
+      "description": "Blood"
+    },
+    {
+      "name": "BON",
+      "description": "Bone"
+    },
+    {
+      "name": "BRN",
+      "description": "Burn"
+    },
+    {
+      "name": "CNJT",
+      "description": "Conjunctiva"
+    },
+    {
+      "name": "CSF",
+      "description": "Cerebral spinal fluid"
+    },
+    {
+      "name": "CVX",
+      "description": "Cervix"
+    },
+    {
+      "name": "EAR",
+      "description": "Ear"
+    },
+    {
+      "name": "FIB",
+      "description": "Fibroblood"
+    },
+    {
+      "name": "HAR",
+      "description": "Hair"
+    },
+    {
+      "name": "MN",
+      "description": "Amniotic Fluid"
+    },
+    {
+      "name": "NOS",
+      "description": "Nose"
+    },
+    {
+      "name": "OTH",
+      "description": "Other"
+    },
+    {
+      "name": "PLAS",
+      "description": "Plasma"
+    },
+    {
+      "name": "PRT",
+      "description": "Peritoneal Fluid"
+    },
+    {
+      "name": "RBC",
+      "description": "Erythrocytes"
+    },
+    {
+      "name": "SAL",
+      "description": "Saliva"
+    },
+    {
+      "name": "SEM",
+      "description": "Seminal Fluid"
+    },
+    {
+      "name": "SER",
+      "description": "Serum"
+    },
+    {
+      "name": "SKN",
+      "description": "Skin"
+    },
+    {
+      "name": "SNV",
+      "description": "Synovial Fluid"
+    },
+    {
+      "name": "STL",
+      "description": "Stool"
+    },
+    {
+      "name": "SWT",
+      "description": "Sweat"
+    },
+    {
+      "name": "THRT",
+      "description": "Throat"
+    },
+    {
+      "name": "TIS",
+      "description": "Tissue"
+    },
+    {
+      "name": "UMB",
+      "description": "Umbilical Blood"
+    },
+    {
+      "name": "UR",
+      "description": "Urine"
+    },
+    {
+      "name": "URTH",
+      "description": "Urethra"
+    },
+    {
+      "name": "WBC",
+      "description": "Leukocytes"
+    },
+    {
+      "name": "WND",
+      "description": "Wound"
+    }
+  ]
+}

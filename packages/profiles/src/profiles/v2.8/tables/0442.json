@@ -1,0 +1,23 @@
+{
+  "id": "0442",
+  "description": "Location Service Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Diagnostic"
+    },
+    {
+      "name": "E",
+      "description": "Emergency Room Casualty"
+    },
+    {
+      "name": "P",
+      "description": "Primary Care"
+    },
+    {
+      "name": "T",
+      "description": "Therapeutic"
+    }
+  ]
+}

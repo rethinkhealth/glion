@@ -1,0 +1,24 @@
+{
+  "id": "v2-0569",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0569",
+  "oid": "2.16.840.1.113883.18.369",
+  "name": "AdjustmentAction",
+  "title": "adjustmentAction",
+  "codes": [
+    {
+      "code": "EOB",
+      "display": "Print on EOB",
+      "status": "active"
+    },
+    {
+      "code": "PAT",
+      "display": "Inform Patient",
+      "status": "active"
+    },
+    {
+      "code": "PRO",
+      "display": "Inform Provider",
+      "status": "active"
+    }
+  ]
+}

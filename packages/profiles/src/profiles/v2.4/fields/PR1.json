@@ -1,0 +1,198 @@
+{
+  "segmentId": "PR1",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PR1-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - PR1",
+      "item": "391"
+    },
+    {
+      "sequence": 2,
+      "id": "PR1-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 3,
+      "table": "HL70089",
+      "name": "Procedure Coding Method",
+      "item": "392"
+    },
+    {
+      "sequence": 3,
+      "id": "PR1-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70088",
+      "name": "Procedure Code",
+      "item": "393"
+    },
+    {
+      "sequence": 4,
+      "id": "PR1-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 40,
+      "name": "Procedure Description",
+      "item": "394"
+    },
+    {
+      "sequence": 5,
+      "id": "PR1-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Procedure Date/Time",
+      "item": "395"
+    },
+    {
+      "sequence": 6,
+      "id": "PR1-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 2,
+      "table": "HL70230",
+      "name": "Procedure Functional Type",
+      "item": "396"
+    },
+    {
+      "sequence": 7,
+      "id": "PR1-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "Procedure Minutes",
+      "item": "397"
+    },
+    {
+      "sequence": 8,
+      "id": "PR1-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "maxLength": 250,
+      "table": "HL70010",
+      "name": "Anesthesiologist",
+      "item": "398"
+    },
+    {
+      "sequence": 9,
+      "id": "PR1-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 2,
+      "table": "HL70019",
+      "name": "Anesthesia Code",
+      "item": "399"
+    },
+    {
+      "sequence": 10,
+      "id": "PR1-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "Anesthesia Minutes",
+      "item": "400"
+    },
+    {
+      "sequence": 11,
+      "id": "PR1-11",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "maxLength": 250,
+      "table": "HL70010",
+      "name": "Surgeon",
+      "item": "401"
+    },
+    {
+      "sequence": 12,
+      "id": "PR1-12",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "maxLength": 250,
+      "table": "HL70010",
+      "name": "Procedure Practitioner",
+      "item": "402"
+    },
+    {
+      "sequence": 13,
+      "id": "PR1-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70059",
+      "name": "Consent Code",
+      "item": "403"
+    },
+    {
+      "sequence": 14,
+      "id": "PR1-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70418",
+      "name": "Procedure Priority",
+      "item": "404"
+    },
+    {
+      "sequence": 15,
+      "id": "PR1-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70051",
+      "name": "Associated Diagnosis Code",
+      "item": "772"
+    },
+    {
+      "sequence": 16,
+      "id": "PR1-16",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70340",
+      "name": "Procedure Code Modifier",
+      "item": "1316"
+    },
+    {
+      "sequence": 17,
+      "id": "PR1-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 20,
+      "table": "HL70416",
+      "name": "Procedure DRG Type",
+      "item": "1501"
+    },
+    {
+      "sequence": 18,
+      "id": "PR1-18",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70417",
+      "name": "Tissue Type Code",
+      "item": "1502"
+    }
+  ]
+}

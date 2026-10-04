@@ -1,0 +1,94 @@
+{
+  "id": "v2-0553",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0553",
+  "oid": "2.16.840.1.113883.18.357",
+  "name": "InvoiceControl",
+  "title": "invoiceControl",
+  "codes": [
+    {
+      "code": "AA",
+      "display": "Authorization request for inpatient admission",
+      "status": "active"
+    },
+    {
+      "code": "AI",
+      "display": "Combined Authorization and Adjudication request",
+      "status": "active"
+    },
+    {
+      "code": "CA",
+      "display": "Cancel Authorization request",
+      "status": "active"
+    },
+    {
+      "code": "CG",
+      "display": "Cancel Invoice Product/Service Group",
+      "status": "active"
+    },
+    {
+      "code": "CL",
+      "display": "Cancel Invoice Product/Service Line Item",
+      "status": "active"
+    },
+    {
+      "code": "CN",
+      "display": "Cancel Invoice",
+      "status": "active"
+    },
+    {
+      "code": "CP",
+      "display": "Copy of Invoice",
+      "status": "active"
+    },
+    {
+      "code": "CQ",
+      "display": "Coverage Register Query",
+      "status": "active"
+    },
+    {
+      "code": "EA",
+      "display": "Authorization request for inpatient stay extension",
+      "status": "active"
+    },
+    {
+      "code": "OA",
+      "display": "Original Authorization",
+      "status": "active"
+    },
+    {
+      "code": "OR",
+      "display": "Original Invoice",
+      "status": "active"
+    },
+    {
+      "code": "PA",
+      "display": "Pre-Authorization",
+      "status": "active"
+    },
+    {
+      "code": "PD",
+      "display": "Pre-Determination Invoice",
+      "status": "active"
+    },
+    {
+      "code": "RA",
+      "display": "Re-Assessment",
+      "status": "active"
+    },
+    {
+      "code": "RC",
+      "display": "Referral Pre-Authorization",
+      "status": "active"
+    },
+    {
+      "code": "RU",
+      "display": "Referral authorization",
+      "status": "active"
+    },
+    {
+      "code": "SA",
+      "display": "Special Authorization",
+      "status": "active"
+    }
+  ]
+}

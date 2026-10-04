@@ -1,0 +1,23 @@
+{
+  "id": "0283",
+  "description": "Referral Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Accepted"
+    },
+    {
+      "name": "E",
+      "description": "Expired"
+    },
+    {
+      "name": "P",
+      "description": "Pending"
+    },
+    {
+      "name": "R",
+      "description": "Rejected"
+    }
+  ]
+}

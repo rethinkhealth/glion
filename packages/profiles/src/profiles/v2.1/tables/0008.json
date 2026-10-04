@@ -1,0 +1,19 @@
+{
+  "id": "0008",
+  "description": "ACKNOWLEDGMENT CODE",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AA",
+      "description": "Application Accept"
+    },
+    {
+      "name": "AE",
+      "description": "Application Error"
+    },
+    {
+      "name": "AR",
+      "description": "Application Reject"
+    }
+  ]
+}

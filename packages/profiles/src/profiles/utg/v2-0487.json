@@ -1,0 +1,1584 @@
+{
+  "id": "v2-0487",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0487",
+  "oid": "2.16.840.1.113883.18.311",
+  "name": "SpecimenType",
+  "title": "specimenType",
+  "codes": [
+    {
+      "code": "...",
+      "display": "No suggested values",
+      "status": "deprecated"
+    },
+    {
+      "code": "ABS",
+      "display": "Abscess",
+      "status": "active"
+    },
+    {
+      "code": "ACNE",
+      "display": "Tissue, Acne",
+      "status": "active"
+    },
+    {
+      "code": "ACNFLD",
+      "display": "Fluid, Acne",
+      "status": "active"
+    },
+    {
+      "code": "AIRS",
+      "display": "Air Sample",
+      "status": "active"
+    },
+    {
+      "code": "ALL",
+      "display": "Allograft",
+      "status": "active"
+    },
+    {
+      "code": "AMN",
+      "display": "Amniotic fluid",
+      "status": "active"
+    },
+    {
+      "code": "AMP",
+      "display": "Amputation",
+      "status": "active"
+    },
+    {
+      "code": "ANGI",
+      "display": "Catheter Tip, Angio",
+      "status": "active"
+    },
+    {
+      "code": "ARTC",
+      "display": "Catheter Tip, Arterial",
+      "status": "active"
+    },
+    {
+      "code": "ASERU",
+      "display": "Serum, Acute",
+      "status": "active"
+    },
+    {
+      "code": "ASP",
+      "display": "Aspirate",
+      "status": "active"
+    },
+    {
+      "code": "ATTE",
+      "display": "Environment, Attest",
+      "status": "deprecated"
+    },
+    {
+      "code": "AUTOA",
+      "display": "Environmental, Autoclave Ampule",
+      "status": "active"
+    },
+    {
+      "code": "AUTOC",
+      "display": "Environmental, Autoclave Capsule",
+      "status": "deprecated"
+    },
+    {
+      "code": "AUTP",
+      "display": "Autopsy",
+      "status": "active"
+    },
+    {
+      "code": "BBL",
+      "display": "Blood bag",
+      "status": "active"
+    },
+    {
+      "code": "BCYST",
+      "display": "Cyst, Baker&#39;s",
+      "status": "active"
+    },
+    {
+      "code": "BDY",
+      "display": "Whole body",
+      "status": "active"
+    },
+    {
+      "code": "BIFL",
+      "display": "Bile Fluid",
+      "status": "active"
+    },
+    {
+      "code": "BITE",
+      "display": "Bite",
+      "status": "active"
+    },
+    {
+      "code": "BLD",
+      "display": "Whole blood",
+      "status": "active"
+    },
+    {
+      "code": "BLDA",
+      "display": "Blood arterial",
+      "status": "active"
+    },
+    {
+      "code": "BLDCO",
+      "display": "Cord blood",
+      "status": "active"
+    },
+    {
+      "code": "BLDV",
+      "display": "Blood venous",
+      "status": "active"
+    },
+    {
+      "code": "BLEB",
+      "display": "Bleb",
+      "status": "active"
+    },
+    {
+      "code": "BLIST",
+      "display": "Blister",
+      "status": "active"
+    },
+    {
+      "code": "BOIL",
+      "display": "Boil",
+      "status": "active"
+    },
+    {
+      "code": "BON",
+      "display": "Bone",
+      "status": "active"
+    },
+    {
+      "code": "BONE",
+      "display": "Bone",
+      "status": "active"
+    },
+    {
+      "code": "BOWL",
+      "display": "Bowel contents",
+      "status": "active"
+    },
+    {
+      "code": "BPH",
+      "display": "Basophils",
+      "status": "active"
+    },
+    {
+      "code": "BPU",
+      "display": "Blood product unit",
+      "status": "active"
+    },
+    {
+      "code": "BRN",
+      "display": "Burn",
+      "status": "active"
+    },
+    {
+      "code": "BRSH",
+      "display": "Brush",
+      "status": "active"
+    },
+    {
+      "code": "BRTH",
+      "display": "Breath (use EXHLD)",
+      "status": "active"
+    },
+    {
+      "code": "BRUS",
+      "display": "Brushing",
+      "status": "active"
+    },
+    {
+      "code": "BUB",
+      "display": "Bubo",
+      "status": "active"
+    },
+    {
+      "code": "BULLA",
+      "display": "Bulla/Bullae",
+      "status": "active"
+    },
+    {
+      "code": "BX",
+      "display": "Biopsy",
+      "status": "active"
+    },
+    {
+      "code": "CALC",
+      "display": "Calculus (=Stone)",
+      "status": "active"
+    },
+    {
+      "code": "CARBU",
+      "display": "Carbuncle",
+      "status": "active"
+    },
+    {
+      "code": "CAT",
+      "display": "Catheter",
+      "status": "active"
+    },
+    {
+      "code": "CBITE",
+      "display": "Bite, Cat",
+      "status": "active"
+    },
+    {
+      "code": "CDM",
+      "display": "Cardiac muscle",
+      "status": "active"
+    },
+    {
+      "code": "CLIPP",
+      "display": "Clippings",
+      "status": "active"
+    },
+    {
+      "code": "CNJT",
+      "display": "Conjunctiva",
+      "status": "active"
+    },
+    {
+      "code": "CNL",
+      "display": "Cannula",
+      "status": "active"
+    },
+    {
+      "code": "COL",
+      "display": "Colostrum",
+      "status": "active"
+    },
+    {
+      "code": "CONE",
+      "display": "Biospy, Cone",
+      "status": "active"
+    },
+    {
+      "code": "CSCR",
+      "display": "Scratch, Cat",
+      "status": "active"
+    },
+    {
+      "code": "CSERU",
+      "display": "Serum, Convalescent",
+      "status": "active"
+    },
+    {
+      "code": "CSF",
+      "display": "Cerebral spinal fluid",
+      "status": "active"
+    },
+    {
+      "code": "CSITE",
+      "display": "Catheter Insertion Site",
+      "status": "active"
+    },
+    {
+      "code": "CSMY",
+      "display": "Fluid,  Cystostomy Tube",
+      "status": "active"
+    },
+    {
+      "code": "CST",
+      "display": "Fluid, Cyst",
+      "status": "active"
+    },
+    {
+      "code": "CSVR",
+      "display": "Blood, Cell Saver",
+      "status": "active"
+    },
+    {
+      "code": "CTP",
+      "display": "Catheter tip",
+      "status": "active"
+    },
+    {
+      "code": "CUR",
+      "display": "Curretage",
+      "status": "active"
+    },
+    {
+      "code": "CVM",
+      "display": "Cervical Mucus",
+      "status": "active"
+    },
+    {
+      "code": "CVPS",
+      "display": "Site, CVP",
+      "status": "active"
+    },
+    {
+      "code": "CVPT",
+      "display": "Catheter Tip, CVP",
+      "status": "active"
+    },
+    {
+      "code": "CYN",
+      "display": "Nodule, Cystic",
+      "status": "active"
+    },
+    {
+      "code": "CYST",
+      "display": "Cyst",
+      "status": "active"
+    },
+    {
+      "code": "DBITE",
+      "display": "Bite, Dog",
+      "status": "active"
+    },
+    {
+      "code": "DCS",
+      "display": "Sputum, Deep Cough",
+      "status": "active"
+    },
+    {
+      "code": "DEC",
+      "display": "Ulcer, Decubitus",
+      "status": "active"
+    },
+    {
+      "code": "DEION",
+      "display": "Environmental, Water  (Deionized)",
+      "status": "active"
+    },
+    {
+      "code": "DIA",
+      "display": "Dialysate",
+      "status": "active"
+    },
+    {
+      "code": "DIAF",
+      "display": "Dialysis Fluid",
+      "status": "active"
+    },
+    {
+      "code": "DISCHG",
+      "display": "Discharge",
+      "status": "active"
+    },
+    {
+      "code": "DIV",
+      "display": "Diverticulum",
+      "status": "active"
+    },
+    {
+      "code": "DRN",
+      "display": "Drain",
+      "status": "active"
+    },
+    {
+      "code": "DRNG",
+      "display": "Drainage, Tube",
+      "status": "active"
+    },
+    {
+      "code": "DRNGP",
+      "display": "Drainage, Penrose",
+      "status": "active"
+    },
+    {
+      "code": "DUFL",
+      "display": "Duodenal fluid",
+      "status": "active"
+    },
+    {
+      "code": "EARW",
+      "display": "Ear wax (cerumen)",
+      "status": "active"
+    },
+    {
+      "code": "EBRUSH",
+      "display": "Brush, Esophageal",
+      "status": "active"
+    },
+    {
+      "code": "EEYE",
+      "display": "Environmental, Eye Wash",
+      "status": "active"
+    },
+    {
+      "code": "EFF",
+      "display": "Environmental, Effluent",
+      "status": "active"
+    },
+    {
+      "code": "EFFUS",
+      "display": "Effusion",
+      "status": "active"
+    },
+    {
+      "code": "EFOD",
+      "display": "Environmental, Food",
+      "status": "active"
+    },
+    {
+      "code": "EISO",
+      "display": "Environmental, Isolette",
+      "status": "active"
+    },
+    {
+      "code": "ELT",
+      "display": "Electrode",
+      "status": "active"
+    },
+    {
+      "code": "ENVIR",
+      "display": "Environmental, Unidentified Substance",
+      "status": "active"
+    },
+    {
+      "code": "EOS",
+      "display": "Eosinophils",
+      "status": "active"
+    },
+    {
+      "code": "EOTH",
+      "display": "Environmental, Other Substance",
+      "status": "active"
+    },
+    {
+      "code": "ESOI",
+      "display": "Environmental, Soil",
+      "status": "active"
+    },
+    {
+      "code": "ESOS",
+      "display": "Environmental, Solution (Sterile)",
+      "status": "active"
+    },
+    {
+      "code": "ETA",
+      "display": "Aspirate,  Endotrach",
+      "status": "active"
+    },
+    {
+      "code": "ETTP",
+      "display": "Catheter Tip, Endotracheal",
+      "status": "active"
+    },
+    {
+      "code": "ETTUB",
+      "display": "Tube, Endotracheal",
+      "status": "active"
+    },
+    {
+      "code": "EWHI",
+      "display": "Environmental, Whirlpool",
+      "status": "active"
+    },
+    {
+      "code": "EXG",
+      "display": "Gas, exhaled (=breath)",
+      "status": "active"
+    },
+    {
+      "code": "EXS",
+      "display": "Shunt, External",
+      "status": "active"
+    },
+    {
+      "code": "EXUDTE",
+      "display": "Exudate",
+      "status": "active"
+    },
+    {
+      "code": "FAW",
+      "display": "Environmental, Water  (Well)",
+      "status": "active"
+    },
+    {
+      "code": "FBLOOD",
+      "display": "Blood, Fetal",
+      "status": "active"
+    },
+    {
+      "code": "FGA",
+      "display": "Fluid,  Abdomen",
+      "status": "active"
+    },
+    {
+      "code": "FIB",
+      "display": "Fibroblasts",
+      "status": "active"
+    },
+    {
+      "code": "FIST",
+      "display": "Fistula",
+      "status": "active"
+    },
+    {
+      "code": "FLD",
+      "display": "Fluid, Other",
+      "status": "active"
+    },
+    {
+      "code": "FLT",
+      "display": "Filter",
+      "status": "active"
+    },
+    {
+      "code": "FLU",
+      "display": "Fluid, Body unsp",
+      "status": "active"
+    },
+    {
+      "code": "FLUID",
+      "display": "Fluid",
+      "status": "active"
+    },
+    {
+      "code": "FOLEY",
+      "display": "Catheter Tip, Foley",
+      "status": "active"
+    },
+    {
+      "code": "FRS",
+      "display": "Fluid, Respiratory",
+      "status": "active"
+    },
+    {
+      "code": "FSCLP",
+      "display": "Scalp, Fetal",
+      "status": "active"
+    },
+    {
+      "code": "FUR",
+      "display": "Furuncle",
+      "status": "active"
+    },
+    {
+      "code": "GAS",
+      "display": "Gas",
+      "status": "active"
+    },
+    {
+      "code": "GASA",
+      "display": "Aspirate, Gastric",
+      "status": "active"
+    },
+    {
+      "code": "GASAN",
+      "display": "Antrum, Gastric",
+      "status": "active"
+    },
+    {
+      "code": "GASBR",
+      "display": "Brushing, Gastric",
+      "status": "active"
+    },
+    {
+      "code": "GASD",
+      "display": "Drainage, Gastric",
+      "status": "active"
+    },
+    {
+      "code": "GAST",
+      "display": "Fluid/contents, Gastric",
+      "status": "active"
+    },
+    {
+      "code": "GENL",
+      "display": "Genital lochia",
+      "status": "active"
+    },
+    {
+      "code": "GENV",
+      "display": "Genital vaginal",
+      "status": "active"
+    },
+    {
+      "code": "GRAFT",
+      "display": "Graft",
+      "status": "active"
+    },
+    {
+      "code": "GRAFTS",
+      "display": "Graft Site",
+      "status": "active"
+    },
+    {
+      "code": "GRANU",
+      "display": "Granuloma",
+      "status": "active"
+    },
+    {
+      "code": "GROSH",
+      "display": "Catheter, Groshong",
+      "status": "active"
+    },
+    {
+      "code": "GSOL",
+      "display": "Solution, Gastrostomy",
+      "status": "active"
+    },
+    {
+      "code": "GSPEC",
+      "display": "Biopsy, Gastric",
+      "status": "active"
+    },
+    {
+      "code": "GT",
+      "display": "Tube, Gastric",
+      "status": "active"
+    },
+    {
+      "code": "GTUBE",
+      "display": "Drainage Tube, Drainage (Gastrostomy)",
+      "status": "active"
+    },
+    {
+      "code": "HAR",
+      "display": "Hair",
+      "status": "active"
+    },
+    {
+      "code": "HBITE",
+      "display": "Bite, Human",
+      "status": "active"
+    },
+    {
+      "code": "HBLUD",
+      "display": "Blood, Autopsy",
+      "status": "active"
+    },
+    {
+      "code": "HEMAQ",
+      "display": "Catheter Tip, Hemaquit",
+      "status": "active"
+    },
+    {
+      "code": "HEMO",
+      "display": "Catheter Tip, Hemovac",
+      "status": "active"
+    },
+    {
+      "code": "HERNI",
+      "display": "Tissue, Herniated",
+      "status": "active"
+    },
+    {
+      "code": "HEV",
+      "display": "Drain, Hemovac",
+      "status": "active"
+    },
+    {
+      "code": "HIC",
+      "display": "Catheter, Hickman",
+      "status": "active"
+    },
+    {
+      "code": "HYDC",
+      "display": "Fluid, Hydrocele",
+      "status": "active"
+    },
+    {
+      "code": "IBITE",
+      "display": "Bite, Insect",
+      "status": "active"
+    },
+    {
+      "code": "ICYST",
+      "display": "Cyst, Inclusion",
+      "status": "active"
+    },
+    {
+      "code": "IDC",
+      "display": "Catheter Tip, Indwelling",
+      "status": "active"
+    },
+    {
+      "code": "IHG",
+      "display": "Gas, Inhaled",
+      "status": "active"
+    },
+    {
+      "code": "ILEO",
+      "display": "Drainage, Ileostomy",
+      "status": "active"
+    },
+    {
+      "code": "ILLEG",
+      "display": "Source of Specimen Is Illegible",
+      "status": "active"
+    },
+    {
+      "code": "IMP",
+      "display": "Implant",
+      "status": "active"
+    },
+    {
+      "code": "INCI",
+      "display": "Site, Incision/Surgical",
+      "status": "active"
+    },
+    {
+      "code": "INFIL",
+      "display": "Infiltrate",
+      "status": "active"
+    },
+    {
+      "code": "INS",
+      "display": "Insect",
+      "status": "active"
+    },
+    {
+      "code": "INTRD",
+      "display": "Catheter Tip, Introducer",
+      "status": "active"
+    },
+    {
+      "code": "ISLT",
+      "display": "Isolate",
+      "status": "active"
+    },
+    {
+      "code": "IT",
+      "display": "Intubation tube",
+      "status": "active"
+    },
+    {
+      "code": "IUD",
+      "display": "Intrauterine Device",
+      "status": "active"
+    },
+    {
+      "code": "IVCAT",
+      "display": "Catheter Tip, IV",
+      "status": "active"
+    },
+    {
+      "code": "IVFLD",
+      "display": "Fluid, IV",
+      "status": "active"
+    },
+    {
+      "code": "IVTIP",
+      "display": "Tubing Tip, IV",
+      "status": "active"
+    },
+    {
+      "code": "JEJU",
+      "display": "Drainage, Jejunal",
+      "status": "active"
+    },
+    {
+      "code": "JNTFLD",
+      "display": "Fluid, Joint",
+      "status": "active"
+    },
+    {
+      "code": "JP",
+      "display": "Drainage, Jackson Pratt",
+      "status": "active"
+    },
+    {
+      "code": "KELOI",
+      "display": "Lavage",
+      "status": "active"
+    },
+    {
+      "code": "KIDFLD",
+      "display": "Fluid, Kidney",
+      "status": "active"
+    },
+    {
+      "code": "LAVG",
+      "display": "Lavage, Bronhial",
+      "status": "active"
+    },
+    {
+      "code": "LAVGG",
+      "display": "Lavage, Gastric",
+      "status": "active"
+    },
+    {
+      "code": "LAVGP",
+      "display": "Lavage, Peritoneal",
+      "status": "active"
+    },
+    {
+      "code": "LAVPG",
+      "display": "Lavage, Pre-Bronch",
+      "status": "active"
+    },
+    {
+      "code": "LENS1",
+      "display": "Contact Lens",
+      "status": "active"
+    },
+    {
+      "code": "LENS2",
+      "display": "Contact Lens Case",
+      "status": "active"
+    },
+    {
+      "code": "LESN",
+      "display": "Lesion",
+      "status": "active"
+    },
+    {
+      "code": "LIQ",
+      "display": "Liquid, Unspecified",
+      "status": "active"
+    },
+    {
+      "code": "LIQO",
+      "display": "Liquid, Other",
+      "status": "active"
+    },
+    {
+      "code": "LNA",
+      "display": "Line arterial",
+      "status": "active"
+    },
+    {
+      "code": "LNV",
+      "display": "Line venous",
+      "status": "active"
+    },
+    {
+      "code": "LSAC",
+      "display": "Fluid, Lumbar Sac",
+      "status": "active"
+    },
+    {
+      "code": "LYM",
+      "display": "Lymphocytes",
+      "status": "active"
+    },
+    {
+      "code": "MAC",
+      "display": "Macrophages",
+      "status": "active"
+    },
+    {
+      "code": "MAHUR",
+      "display": "Catheter Tip, Makurkour",
+      "status": "active"
+    },
+    {
+      "code": "MAR",
+      "display": "Marrow",
+      "status": "active"
+    },
+    {
+      "code": "MASS",
+      "display": "Mass",
+      "status": "active"
+    },
+    {
+      "code": "MBLD",
+      "display": "Blood, Menstrual",
+      "status": "active"
+    },
+    {
+      "code": "MEC",
+      "display": "Meconium",
+      "status": "active"
+    },
+    {
+      "code": "MILK",
+      "display": "Breast milk",
+      "status": "active"
+    },
+    {
+      "code": "MLK",
+      "display": "Milk",
+      "status": "active"
+    },
+    {
+      "code": "MUCOS",
+      "display": "Mucosa",
+      "status": "active"
+    },
+    {
+      "code": "MUCUS",
+      "display": "Mucus",
+      "status": "active"
+    },
+    {
+      "code": "NAIL",
+      "display": "Nail",
+      "status": "active"
+    },
+    {
+      "code": "NASDR",
+      "display": "Drainage, Nasal",
+      "status": "active"
+    },
+    {
+      "code": "NEDL",
+      "display": "Needle",
+      "status": "active"
+    },
+    {
+      "code": "NEPH",
+      "display": "Site, Nephrostomy",
+      "status": "active"
+    },
+    {
+      "code": "NGASP",
+      "display": "Aspirate, Nasogastric",
+      "status": "active"
+    },
+    {
+      "code": "NGAST",
+      "display": "Drainage, Nasogastric",
+      "status": "active"
+    },
+    {
+      "code": "NGS",
+      "display": "Site, Naso/Gastric",
+      "status": "active"
+    },
+    {
+      "code": "NODUL",
+      "display": "Nodule(s)",
+      "status": "active"
+    },
+    {
+      "code": "NSECR",
+      "display": "Secretion, Nasal",
+      "status": "active"
+    },
+    {
+      "code": "ORH",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "ORL",
+      "display": "Lesion, Oral",
+      "status": "active"
+    },
+    {
+      "code": "OTH",
+      "display": "Source, Other",
+      "status": "active"
+    },
+    {
+      "code": "PACEM",
+      "display": "Pacemaker",
+      "status": "active"
+    },
+    {
+      "code": "PAFL",
+      "display": "Pancreatic fluid",
+      "status": "active"
+    },
+    {
+      "code": "PCFL",
+      "display": "Fluid, Pericardial",
+      "status": "active"
+    },
+    {
+      "code": "PDSIT",
+      "display": "Site, Peritoneal Dialysis",
+      "status": "active"
+    },
+    {
+      "code": "PDTS",
+      "display": "Site, Peritoneal Dialysis Tunnel",
+      "status": "active"
+    },
+    {
+      "code": "PELVA",
+      "display": "Abscess, Pelvic",
+      "status": "active"
+    },
+    {
+      "code": "PENIL",
+      "display": "Lesion, Penile",
+      "status": "active"
+    },
+    {
+      "code": "PERIA",
+      "display": "Abscess, Perianal",
+      "status": "active"
+    },
+    {
+      "code": "PILOC",
+      "display": "Cyst, Pilonidal",
+      "status": "active"
+    },
+    {
+      "code": "PINS",
+      "display": "Site, Pin",
+      "status": "active"
+    },
+    {
+      "code": "PIS",
+      "display": "Site, Pacemaker Insetion",
+      "status": "active"
+    },
+    {
+      "code": "PLAN",
+      "display": "Plant Material",
+      "status": "active"
+    },
+    {
+      "code": "PLAS",
+      "display": "Plasma",
+      "status": "active"
+    },
+    {
+      "code": "PLB",
+      "display": "Plasma bag",
+      "status": "active"
+    },
+    {
+      "code": "PLC",
+      "display": "Placenta",
+      "status": "active"
+    },
+    {
+      "code": "PLEVS",
+      "display": "Serum, Peak Level",
+      "status": "active"
+    },
+    {
+      "code": "PLR",
+      "display": "Pleural fluid (thoracentesis fluid)",
+      "status": "active"
+    },
+    {
+      "code": "PMN",
+      "display": "Polymorphonuclear neutrophils",
+      "status": "active"
+    },
+    {
+      "code": "PND",
+      "display": "Drainage, Penile",
+      "status": "active"
+    },
+    {
+      "code": "POL",
+      "display": "Polyps",
+      "status": "active"
+    },
+    {
+      "code": "POPGS",
+      "display": "Graft Site, Popliteal",
+      "status": "active"
+    },
+    {
+      "code": "POPLG",
+      "display": "Graft, Popliteal",
+      "status": "active"
+    },
+    {
+      "code": "POPLV",
+      "display": "Site, Popliteal Vein",
+      "status": "active"
+    },
+    {
+      "code": "PORTA",
+      "display": "Catheter, Porta",
+      "status": "active"
+    },
+    {
+      "code": "PPP",
+      "display": "Plasma, Platelet poor",
+      "status": "active"
+    },
+    {
+      "code": "PROST",
+      "display": "Prosthetic Device",
+      "status": "active"
+    },
+    {
+      "code": "PRP",
+      "display": "Plasma, Platelet rich",
+      "status": "active"
+    },
+    {
+      "code": "PSC",
+      "display": "Pseudocyst",
+      "status": "active"
+    },
+    {
+      "code": "PUNCT",
+      "display": "Wound, Puncture",
+      "status": "active"
+    },
+    {
+      "code": "PUS",
+      "display": "Pus",
+      "status": "active"
+    },
+    {
+      "code": "PUSFR",
+      "display": "Pustule",
+      "status": "active"
+    },
+    {
+      "code": "PUST",
+      "display": "Pus",
+      "status": "active"
+    },
+    {
+      "code": "QC3",
+      "display": "Quality Control",
+      "status": "active"
+    },
+    {
+      "code": "RANDU",
+      "display": "Urine, Random",
+      "status": "active"
+    },
+    {
+      "code": "RBC",
+      "display": "Erythrocytes",
+      "status": "active"
+    },
+    {
+      "code": "RBITE",
+      "display": "Bite, Reptile",
+      "status": "active"
+    },
+    {
+      "code": "RECT",
+      "display": "Drainage, Rectal",
+      "status": "active"
+    },
+    {
+      "code": "RECTA",
+      "display": "Abscess, Rectal",
+      "status": "active"
+    },
+    {
+      "code": "RENALC",
+      "display": "Cyst, Renal",
+      "status": "active"
+    },
+    {
+      "code": "RENC",
+      "display": "Fluid, Renal Cyst",
+      "status": "active"
+    },
+    {
+      "code": "RES",
+      "display": "Respiratory",
+      "status": "active"
+    },
+    {
+      "code": "SAL",
+      "display": "Saliva",
+      "status": "active"
+    },
+    {
+      "code": "SCAR",
+      "display": "Tissue, Keloid (Scar)",
+      "status": "active"
+    },
+    {
+      "code": "SCLV",
+      "display": "Catheter Tip, Subclavian",
+      "status": "active"
+    },
+    {
+      "code": "SCROA",
+      "display": "Abscess, Scrotal",
+      "status": "active"
+    },
+    {
+      "code": "SECRE",
+      "display": "Secretion(s)",
+      "status": "active"
+    },
+    {
+      "code": "SER",
+      "display": "Serum",
+      "status": "active"
+    },
+    {
+      "code": "SHU",
+      "display": "Site, Shunt",
+      "status": "active"
+    },
+    {
+      "code": "SHUNF",
+      "display": "Fluid, Shunt",
+      "status": "active"
+    },
+    {
+      "code": "SHUNT",
+      "display": "Shunt",
+      "status": "active"
+    },
+    {
+      "code": "SITE",
+      "display": "Site",
+      "status": "active"
+    },
+    {
+      "code": "SKBP",
+      "display": "Biopsy, Skin",
+      "status": "active"
+    },
+    {
+      "code": "SKN",
+      "display": "Skin",
+      "status": "active"
+    },
+    {
+      "code": "SMM",
+      "display": "Mass, Sub-Mandibular",
+      "status": "active"
+    },
+    {
+      "code": "SMN",
+      "display": "Seminal fluid",
+      "status": "active"
+    },
+    {
+      "code": "SNV",
+      "display": "Fluid, synovial (Joint fluid)",
+      "status": "active"
+    },
+    {
+      "code": "SPRM",
+      "display": "Spermatozoa",
+      "status": "active"
+    },
+    {
+      "code": "SPRP",
+      "display": "Catheter Tip, Suprapubic",
+      "status": "active"
+    },
+    {
+      "code": "SPRPB",
+      "display": "Cathether Tip, Suprapubic",
+      "status": "active"
+    },
+    {
+      "code": "SPS",
+      "display": "Environmental, Spore Strip",
+      "status": "active"
+    },
+    {
+      "code": "SPT",
+      "display": "Sputum",
+      "status": "active"
+    },
+    {
+      "code": "SPTC",
+      "display": "Sputum - coughed",
+      "status": "active"
+    },
+    {
+      "code": "SPTT",
+      "display": "Sputum - tracheal aspirate",
+      "status": "active"
+    },
+    {
+      "code": "SPUT1",
+      "display": "Sputum, Simulated",
+      "status": "active"
+    },
+    {
+      "code": "SPUTIN",
+      "display": "Sputum, Inducted",
+      "status": "active"
+    },
+    {
+      "code": "SPUTSP",
+      "display": "Sputum, Spontaneous",
+      "status": "active"
+    },
+    {
+      "code": "STER",
+      "display": "Environmental, Sterrad",
+      "status": "active"
+    },
+    {
+      "code": "STL",
+      "display": "Stool = Fecal",
+      "status": "active"
+    },
+    {
+      "code": "STONE",
+      "display": "Stone, Kidney",
+      "status": "active"
+    },
+    {
+      "code": "SUBMA",
+      "display": "Abscess, Submandibular",
+      "status": "active"
+    },
+    {
+      "code": "SUBMX",
+      "display": "Abscess, Submaxillary",
+      "status": "active"
+    },
+    {
+      "code": "SUMP",
+      "display": "Drainage, Sump",
+      "status": "active"
+    },
+    {
+      "code": "SUP",
+      "display": "Suprapubic Tap",
+      "status": "active"
+    },
+    {
+      "code": "SUTUR",
+      "display": "Suture",
+      "status": "active"
+    },
+    {
+      "code": "SWGZ",
+      "display": "Catheter Tip, Swan Gantz",
+      "status": "active"
+    },
+    {
+      "code": "SWT",
+      "display": "Sweat",
+      "status": "active"
+    },
+    {
+      "code": "TASP",
+      "display": "Aspirate, Tracheal",
+      "status": "active"
+    },
+    {
+      "code": "TEAR",
+      "display": "Tears",
+      "status": "active"
+    },
+    {
+      "code": "THRB",
+      "display": "Thrombocyte (platelet)",
+      "status": "active"
+    },
+    {
+      "code": "TISS",
+      "display": "Tissue",
+      "status": "active"
+    },
+    {
+      "code": "TISU",
+      "display": "Tissue ulcer",
+      "status": "active"
+    },
+    {
+      "code": "TLC",
+      "display": "Cathether Tip, Triple Lumen",
+      "status": "active"
+    },
+    {
+      "code": "TRAC",
+      "display": "Site, Tracheostomy",
+      "status": "active"
+    },
+    {
+      "code": "TRANS",
+      "display": "Transudate",
+      "status": "active"
+    },
+    {
+      "code": "TSERU",
+      "display": "Serum, Trough",
+      "status": "active"
+    },
+    {
+      "code": "TSTES",
+      "display": "Abscess, Testicular",
+      "status": "active"
+    },
+    {
+      "code": "TTRA",
+      "display": "Aspirate, Transtracheal",
+      "status": "active"
+    },
+    {
+      "code": "TUBES",
+      "display": "Tubes",
+      "status": "active"
+    },
+    {
+      "code": "TUMOR",
+      "display": "Tumor",
+      "status": "active"
+    },
+    {
+      "code": "TZANC",
+      "display": "Smear, Tzanck",
+      "status": "active"
+    },
+    {
+      "code": "UDENT",
+      "display": "Source, Unidentified",
+      "status": "active"
+    },
+    {
+      "code": "UMED",
+      "display": "Unknown Medicine",
+      "status": "active"
+    },
+    {
+      "code": "UR",
+      "display": "Urine",
+      "status": "active"
+    },
+    {
+      "code": "URC",
+      "display": "Urine clean catch",
+      "status": "active"
+    },
+    {
+      "code": "URINB",
+      "display": "Urine, Bladder Washings",
+      "status": "active"
+    },
+    {
+      "code": "URINC",
+      "display": "Urine, Catheterized",
+      "status": "active"
+    },
+    {
+      "code": "URINM",
+      "display": "Urine, Midstream",
+      "status": "active"
+    },
+    {
+      "code": "URINN",
+      "display": "Urine, Nephrostomy",
+      "status": "active"
+    },
+    {
+      "code": "URINP",
+      "display": "Urine, Pedibag",
+      "status": "active"
+    },
+    {
+      "code": "URNS",
+      "display": "Urine sediment",
+      "status": "active"
+    },
+    {
+      "code": "URT",
+      "display": "Urine catheter",
+      "status": "active"
+    },
+    {
+      "code": "USCOP",
+      "display": "Urine, Cystoscopy",
+      "status": "active"
+    },
+    {
+      "code": "USPEC",
+      "display": "Source, Unspecified",
+      "status": "active"
+    },
+    {
+      "code": "USUB",
+      "display": "Unkown substance",
+      "status": "active"
+    },
+    {
+      "code": "VASTIP",
+      "display": "Catheter Tip, Vas",
+      "status": "active"
+    },
+    {
+      "code": "VENT",
+      "display": "Catheter Tip, Ventricular",
+      "status": "active"
+    },
+    {
+      "code": "VITF",
+      "display": "Vitreous Fluid",
+      "status": "active"
+    },
+    {
+      "code": "VOM",
+      "display": "Vomitus",
+      "status": "active"
+    },
+    {
+      "code": "WASH",
+      "display": "Wash",
+      "status": "active"
+    },
+    {
+      "code": "WASI",
+      "display": "Washing, e.g. bronchial washing",
+      "status": "active"
+    },
+    {
+      "code": "WAT",
+      "display": "Water",
+      "status": "active"
+    },
+    {
+      "code": "WB",
+      "display": "Blood, Whole",
+      "status": "active"
+    },
+    {
+      "code": "WBC",
+      "display": "Leukocytes",
+      "status": "active"
+    },
+    {
+      "code": "WEN",
+      "display": "Wen",
+      "status": "active"
+    },
+    {
+      "code": "WICK",
+      "display": "Wick",
+      "status": "active"
+    },
+    {
+      "code": "WND",
+      "display": "Wound",
+      "status": "active"
+    },
+    {
+      "code": "WNDA",
+      "display": "Wound abscess",
+      "status": "active"
+    },
+    {
+      "code": "WNDD",
+      "display": "Wound drainage",
+      "status": "active"
+    },
+    {
+      "code": "WNDE",
+      "display": "Wound exudate",
+      "status": "active"
+    },
+    {
+      "code": "WORM",
+      "display": "Worm",
+      "status": "active"
+    },
+    {
+      "code": "WRT",
+      "display": "Wart",
+      "status": "active"
+    },
+    {
+      "code": "WWA",
+      "display": "Environmental, Water",
+      "status": "active"
+    },
+    {
+      "code": "WWO",
+      "display": "Environmental, Water (Ocean)",
+      "status": "active"
+    },
+    {
+      "code": "WWT",
+      "display": "Environmental, Water  (Tap)",
+      "status": "active"
+    }
+  ]
+}

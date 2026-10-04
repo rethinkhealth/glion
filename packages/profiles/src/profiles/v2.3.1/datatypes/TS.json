@@ -1,0 +1,20 @@
+{
+  "id": "TS",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "time stamp",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "time of an event",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "degree of precision",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "segmentId": "SGT",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "SGT-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - SGT",
+      "item": "3394"
+    },
+    {
+      "sequence": 2,
+      "id": "SGT-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Segment Group Name",
+      "item": "3395"
+    }
+  ]
+}

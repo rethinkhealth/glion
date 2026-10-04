@@ -1,0 +1,29 @@
+{
+  "id": "v2-0155",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0155",
+  "oid": "2.16.840.1.113883.18.73",
+  "name": "AcceptApplicationAcknowledgmentConditions",
+  "title": "accept-applicationAcknowledgmentConditions",
+  "codes": [
+    {
+      "code": "AL",
+      "display": "Always",
+      "status": "active"
+    },
+    {
+      "code": "ER",
+      "display": "Error/reject conditions only",
+      "status": "active"
+    },
+    {
+      "code": "NE",
+      "display": "Never",
+      "status": "active"
+    },
+    {
+      "code": "SU",
+      "display": "Successful completion only",
+      "status": "active"
+    }
+  ]
+}

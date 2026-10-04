@@ -1,0 +1,35 @@
+{
+  "id": "0431",
+  "description": "Recreational drug use code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Alcohol"
+    },
+    {
+      "name": "C",
+      "description": "Tobacco - chewed"
+    },
+    {
+      "name": "K",
+      "description": "Kava"
+    },
+    {
+      "name": "M",
+      "description": "Marijuana"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "T",
+      "description": "Tobacco - smoked"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

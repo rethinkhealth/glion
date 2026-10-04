@@ -1,0 +1,27 @@
+{
+  "id": "0146",
+  "description": "AMOUNT TYPE",
+  "type": "user",
+  "codes": [
+    {
+      "name": "DF",
+      "description": "Differential"
+    },
+    {
+      "name": "LM",
+      "description": "Limit"
+    },
+    {
+      "name": "PC",
+      "description": "Percentage"
+    },
+    {
+      "name": "RT",
+      "description": "Rate"
+    },
+    {
+      "name": "UL",
+      "description": "Unlimited"
+    }
+  ]
+}

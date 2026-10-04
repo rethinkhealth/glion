@@ -1,0 +1,289 @@
+{
+  "segmentId": "PRB",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PRB-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70287",
+      "name": "Action Code",
+      "item": "816"
+    },
+    {
+      "sequence": 2,
+      "id": "PRB-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Action Date/Time",
+      "item": "817"
+    },
+    {
+      "sequence": 3,
+      "id": "PRB-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Problem ID",
+      "item": "838"
+    },
+    {
+      "sequence": 4,
+      "id": "PRB-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 60,
+      "name": "Problem Instance ID",
+      "item": "839"
+    },
+    {
+      "sequence": 5,
+      "id": "PRB-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 60,
+      "name": "Episode of Care ID",
+      "item": "820"
+    },
+    {
+      "sequence": 6,
+      "id": "PRB-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 60,
+      "name": "Problem List Priority",
+      "item": "841"
+    },
+    {
+      "sequence": 7,
+      "id": "PRB-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Problem Established Date/Time",
+      "item": "842"
+    },
+    {
+      "sequence": 8,
+      "id": "PRB-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Anticipated Problem Resolution Date/Time",
+      "item": "843"
+    },
+    {
+      "sequence": 9,
+      "id": "PRB-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Actual Problem Resolution Date/Time",
+      "item": "844"
+    },
+    {
+      "sequence": 10,
+      "id": "PRB-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Problem Classification",
+      "item": "845"
+    },
+    {
+      "sequence": 11,
+      "id": "PRB-11",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Problem Management Discipline",
+      "item": "846"
+    },
+    {
+      "sequence": 12,
+      "id": "PRB-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Problem Persistence",
+      "item": "847"
+    },
+    {
+      "sequence": 13,
+      "id": "PRB-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Problem Confirmation Status",
+      "item": "848"
+    },
+    {
+      "sequence": 14,
+      "id": "PRB-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Problem Life Cycle Status",
+      "item": "849"
+    },
+    {
+      "sequence": 15,
+      "id": "PRB-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Problem Life Cycle Status Date/Time",
+      "item": "850"
+    },
+    {
+      "sequence": 16,
+      "id": "PRB-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 24,
+      "name": "Problem Date of Onset",
+      "item": "851"
+    },
+    {
+      "sequence": 17,
+      "id": "PRB-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 80,
+      "name": "Problem Onset Text",
+      "item": "852"
+    },
+    {
+      "sequence": 18,
+      "id": "PRB-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Problem Ranking",
+      "item": "853"
+    },
+    {
+      "sequence": 19,
+      "id": "PRB-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Certainty of Problem",
+      "item": "854"
+    },
+    {
+      "sequence": 20,
+      "id": "PRB-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 5,
+      "name": "Probability of Problem (0-1)",
+      "item": "855"
+    },
+    {
+      "sequence": 21,
+      "id": "PRB-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Individual Awareness of Problem",
+      "item": "856"
+    },
+    {
+      "sequence": 22,
+      "id": "PRB-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Problem Prognosis",
+      "item": "857"
+    },
+    {
+      "sequence": 23,
+      "id": "PRB-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Individual Awareness of Prognosis",
+      "item": "858"
+    },
+    {
+      "sequence": 24,
+      "id": "PRB-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 200,
+      "name": "Family/Significant Other Awareness of Problem/Prognosis",
+      "item": "859"
+    },
+    {
+      "sequence": 25,
+      "id": "PRB-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "name": "Security/Sensitivity",
+      "item": "823"
+    },
+    {
+      "sequence": 26,
+      "id": "PRB-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "table": "HL70836",
+      "name": "Problem Severity",
+      "item": "2234"
+    },
+    {
+      "sequence": 27,
+      "id": "PRB-27",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "table": "HL70838",
+      "name": "Problem Perspective",
+      "item": "2235"
+    },
+    {
+      "sequence": 28,
+      "id": "PRB-28",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "maxLength": 60,
+      "table": "HL70725",
+      "name": "Mood Code",
+      "item": "2237"
+    }
+  ]
+}

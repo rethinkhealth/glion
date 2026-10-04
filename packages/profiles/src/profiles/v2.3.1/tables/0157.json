@@ -1,0 +1,31 @@
+{
+  "id": "0157",
+  "description": "Which date/time status qualifier",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ANY",
+      "description": "Any status"
+    },
+    {
+      "name": "CFN",
+      "description": "Current final value, whether final or corrected"
+    },
+    {
+      "name": "COR",
+      "description": "Corrected only (no final with corrections)"
+    },
+    {
+      "name": "FIN",
+      "description": "Final only (no corrections)"
+    },
+    {
+      "name": "PRE",
+      "description": "Preliminary"
+    },
+    {
+      "name": "REP",
+      "description": "Report completion date/time"
+    }
+  ]
+}

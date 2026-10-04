@@ -1,0 +1,241 @@
+{
+  "segmentId": "UB1",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "UB1-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - UB1",
+      "item": "530"
+    },
+    {
+      "sequence": 2,
+      "id": "UB1-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 1,
+      "name": "Blood Deductible  (43)",
+      "item": "531"
+    },
+    {
+      "sequence": 3,
+      "id": "UB1-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "Blood Furnished-Pints Of (40)",
+      "item": "532"
+    },
+    {
+      "sequence": 4,
+      "id": "UB1-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "Blood Replaced-Pints (41)",
+      "item": "533"
+    },
+    {
+      "sequence": 5,
+      "id": "UB1-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "Blood Not Replaced-Pints(42)",
+      "item": "534"
+    },
+    {
+      "sequence": 6,
+      "id": "UB1-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "Co-Insurance Days (25)",
+      "item": "535"
+    },
+    {
+      "sequence": 7,
+      "id": "UB1-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "IS",
+      "maxLength": 14,
+      "table": "HL70043",
+      "name": "Condition Code (35-39)",
+      "item": "536"
+    },
+    {
+      "sequence": 8,
+      "id": "UB1-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 3,
+      "name": "Covered Days - (23)",
+      "item": "537"
+    },
+    {
+      "sequence": 9,
+      "id": "UB1-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 3,
+      "name": "Non Covered Days - (24)",
+      "item": "538"
+    },
+    {
+      "sequence": 10,
+      "id": "UB1-10",
+      "required": false,
+      "repeatable": true,
+      "datatype": "UVC",
+      "maxLength": 12,
+      "table": "HL70153",
+      "name": "Value Amount &amp; Code (46-49)",
+      "item": "539"
+    },
+    {
+      "sequence": 11,
+      "id": "UB1-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "Number Of Grace Days (90)",
+      "item": "540"
+    },
+    {
+      "sequence": 12,
+      "id": "UB1-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "table": "HL70348",
+      "name": "Special Program Indicator (44)",
+      "item": "541"
+    },
+    {
+      "sequence": 13,
+      "id": "UB1-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "table": "HL70349",
+      "name": "PSRO/UR Approval Indicator (87)",
+      "item": "542"
+    },
+    {
+      "sequence": 14,
+      "id": "UB1-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "PSRO/UR Approved Stay-Fm (88)",
+      "item": "543"
+    },
+    {
+      "sequence": 15,
+      "id": "UB1-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "PSRO/UR Approved Stay-To (89)",
+      "item": "544"
+    },
+    {
+      "sequence": 16,
+      "id": "UB1-16",
+      "required": false,
+      "repeatable": true,
+      "datatype": "OCD",
+      "maxLength": 20,
+      "table": "HL70350",
+      "name": "Occurrence (28-32)",
+      "item": "545"
+    },
+    {
+      "sequence": 17,
+      "id": "UB1-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "table": "HL70351",
+      "name": "Occurrence Span (33)",
+      "item": "546"
+    },
+    {
+      "sequence": 18,
+      "id": "UB1-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "Occur Span Start Date(33)",
+      "item": "547"
+    },
+    {
+      "sequence": 19,
+      "id": "UB1-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "Occur Span End Date (33)",
+      "item": "548"
+    },
+    {
+      "sequence": 20,
+      "id": "UB1-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "UB-82 Locator 2",
+      "item": "549"
+    },
+    {
+      "sequence": 21,
+      "id": "UB1-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 7,
+      "name": "UB-82 Locator 9",
+      "item": "550"
+    },
+    {
+      "sequence": 22,
+      "id": "UB1-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 8,
+      "name": "UB-82 Locator 27",
+      "item": "551"
+    },
+    {
+      "sequence": 23,
+      "id": "UB1-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 17,
+      "name": "UB-82 Locator 45",
+      "item": "552"
+    }
+  ]
+}

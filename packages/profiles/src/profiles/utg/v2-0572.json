@@ -1,0 +1,19 @@
+{
+  "id": "v2-0572",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0572",
+  "oid": "2.16.840.1.113883.18.372",
+  "name": "TaxStatus",
+  "title": "taxStatus",
+  "codes": [
+    {
+      "code": "RVAT",
+      "display": "Registered in VAT register",
+      "status": "active"
+    },
+    {
+      "code": "UVAT",
+      "display": "Unregistered in VAT register",
+      "status": "active"
+    }
+  ]
+}

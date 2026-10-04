@@ -1,0 +1,128 @@
+{
+  "segmentId": "OMC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "OMC-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Sequence Number - Test/Observation Master File",
+      "item": "586"
+    },
+    {
+      "sequence": 2,
+      "id": "OMC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70206",
+      "name": "Segment Action Code",
+      "item": "763"
+    },
+    {
+      "sequence": 3,
+      "id": "OMC-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Segment Unique Key",
+      "item": "764"
+    },
+    {
+      "sequence": 4,
+      "id": "OMC-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Clinical Information Request",
+      "item": "3444"
+    },
+    {
+      "sequence": 5,
+      "id": "OMC-5",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70938",
+      "name": "Collection Event/Process Step",
+      "item": "3445"
+    },
+    {
+      "sequence": 6,
+      "id": "OMC-6",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70939",
+      "name": "Communication Location",
+      "item": "3446"
+    },
+    {
+      "sequence": 7,
+      "id": "OMC-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Answer Required",
+      "item": "3447"
+    },
+    {
+      "sequence": 8,
+      "id": "OMC-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Hint/Help Text",
+      "item": "3448"
+    },
+    {
+      "sequence": 9,
+      "id": "OMC-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "varies",
+      "table": "HL70125",
+      "name": "Type of Answer",
+      "item": "3449"
+    },
+    {
+      "sequence": 10,
+      "id": "OMC-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70136",
+      "name": "Multiple Answers Allowed",
+      "item": "3450"
+    },
+    {
+      "sequence": 11,
+      "id": "OMC-11",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Answer Choices",
+      "item": "3451"
+    },
+    {
+      "sequence": 12,
+      "id": "OMC-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Character Limit",
+      "item": "3452"
+    },
+    {
+      "sequence": 13,
+      "id": "OMC-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Number of Decimals",
+      "item": "3453"
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "id": "v2-0175",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0175",
+  "oid": "2.16.840.1.113883.18.91",
+  "name": "MasterFileIdentifierCodes",
+  "title": "masterFileIdentifierCodes",
+  "codes": [
+    {
+      "code": "CDM",
+      "display": "Charge description master file",
+      "status": "active"
+    },
+    {
+      "code": "CLN",
+      "display": "Clinic master file",
+      "status": "active"
+    },
+    {
+      "code": "CM0",
+      "display": "Clinical study master",
+      "status": "active"
+    },
+    {
+      "code": "CM1",
+      "display": "Clinical study phase master",
+      "status": "active"
+    },
+    {
+      "code": "CM2",
+      "display": "Clinical study Data Schedule Master",
+      "status": "active"
+    },
+    {
+      "code": "CMA",
+      "display": "Clinical study with phases and scheduled master file",
+      "status": "active"
+    },
+    {
+      "code": "CMB",
+      "display": "Clinical study without phases but with scheduled master file",
+      "status": "active"
+    },
+    {
+      "code": "INV",
+      "display": "Inventory master file",
+      "status": "active"
+    },
+    {
+      "code": "LOC",
+      "display": "Location master file",
+      "status": "active"
+    },
+    {
+      "code": "MACP",
+      "display": "Medicare Approved Coverage Process",
+      "status": "active"
+    },
+    {
+      "code": "MLCP",
+      "display": "Medicare Limited Coverage Process",
+      "status": "active"
+    },
+    {
+      "code": "OM1",
+      "display": "Observation text master file segments (e.g., Lab)",
+      "status": "active"
+    },
+    {
+      "code": "OM1-OM6",
+      "display": "Observation text master file segments (e.g., Lab)",
+      "status": "deprecated"
+    },
+    {
+      "code": "OM2",
+      "display": "Observation text master file segments (e.g., Lab)",
+      "status": "active"
+    },
+    {
+      "code": "OM3",
+      "display": "Observation text master file segments (e.g., Lab)",
+      "status": "active"
+    },
+    {
+      "code": "OM4",
+      "display": "Observation text master file segments (e.g., Lab)",
+      "status": "active"
+    },
+    {
+      "code": "OM5",
+      "display": "Observation text master file segments (e.g., Lab)",
+      "status": "active"
+    },
+    {
+      "code": "OM6",
+      "display": "Observation text master file segments (e.g., Lab)",
+      "status": "active"
+    },
+    {
+      "code": "OMA",
+      "display": "Numerical observation master file",
+      "status": "active"
+    },
+    {
+      "code": "OMB",
+      "display": "Categorical observation master file",
+      "status": "active"
+    },
+    {
+      "code": "OMC",
+      "display": "Observation batteries master file",
+      "status": "active"
+    },
+    {
+      "code": "OMD",
+      "display": "Calculated observations master file",
+      "status": "active"
+    },
+    {
+      "code": "OME",
+      "display": "Other Observation/Service Item master file",
+      "status": "active"
+    },
+    {
+      "code": "OMM",
+      "display": "Mixed type observation master file",
+      "status": "active"
+    },
+    {
+      "code": "PRA",
+      "display": "Practitioner master file",
+      "status": "active"
+    },
+    {
+      "code": "STF",
+      "display": "Staff master file",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "0937",
+  "description": "Observation Sub-Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AOE",
+      "description": "Ask at Order Entry"
+    },
+    {
+      "name": "ASC",
+      "description": "Ask at Specimen Collection"
+    },
+    {
+      "name": "MIR",
+      "description": "Micro Isolate Related"
+    },
+    {
+      "name": "MIRM",
+      "description": "Micro Isolate Related Modifier"
+    },
+    {
+      "name": "MNIR",
+      "description": "Micro Non-Isolate Related"
+    },
+    {
+      "name": "SUP",
+      "description": "Supplemental Result"
+    },
+    {
+      "name": "SUR",
+      "description": "Susceptibility Related"
+    },
+    {
+      "name": "UNSP",
+      "description": "Unspecified"
+    }
+  ]
+}

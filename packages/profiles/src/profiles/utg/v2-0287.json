@@ -1,0 +1,49 @@
+{
+  "id": "v2-0287",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0287",
+  "oid": "2.16.840.1.113883.18.3",
+  "name": "ProblemGoalAction",
+  "title": "problem-goalAction",
+  "codes": [
+    {
+      "code": "AD",
+      "display": "ADD",
+      "status": "active"
+    },
+    {
+      "code": "CO",
+      "display": "CORRECT",
+      "status": "active"
+    },
+    {
+      "code": "DE",
+      "display": "DELETE",
+      "status": "active"
+    },
+    {
+      "code": "LI",
+      "display": "LINK",
+      "status": "active"
+    },
+    {
+      "code": "SP",
+      "display": "Used in Snapshot mode",
+      "status": "N"
+    },
+    {
+      "code": "UC",
+      "display": "UNCHANGED",
+      "status": "active"
+    },
+    {
+      "code": "UN",
+      "display": "UNLINK",
+      "status": "active"
+    },
+    {
+      "code": "UP",
+      "display": "UPDATE",
+      "status": "active"
+    }
+  ]
+}

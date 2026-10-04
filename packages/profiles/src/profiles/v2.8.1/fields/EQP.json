@@ -1,0 +1,51 @@
+{
+  "segmentId": "EQP",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "EQP-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70450",
+      "name": "Event type",
+      "item": "1430"
+    },
+    {
+      "sequence": 2,
+      "id": "EQP-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "File Name",
+      "item": "1431"
+    },
+    {
+      "sequence": 3,
+      "id": "EQP-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Start Date/Time",
+      "item": "1202"
+    },
+    {
+      "sequence": 4,
+      "id": "EQP-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "End Date/Time",
+      "item": "1432"
+    },
+    {
+      "sequence": 5,
+      "id": "EQP-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "FT",
+      "name": "Transaction Data",
+      "item": "1433"
+    }
+  ]
+}

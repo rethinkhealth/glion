@@ -1,0 +1,23 @@
+{
+  "id": "0204",
+  "description": "Organizational Name Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Alias name"
+    },
+    {
+      "name": "D",
+      "description": "Display name"
+    },
+    {
+      "name": "L",
+      "description": "Legal name"
+    },
+    {
+      "name": "SL",
+      "description": "Stock exchange listing name"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "FC",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "financial class",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Financial Class",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Effective Date",
+      "datatypeId": "TS",
+      "required": false
+    }
+  ]
+}

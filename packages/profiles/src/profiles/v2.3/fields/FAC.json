@@ -1,0 +1,126 @@
+{
+  "segmentId": "FAC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "FAC-1",
+      "required": true,
+      "repeatable": true,
+      "datatype": "EI",
+      "maxLength": 60,
+      "name": "Facility ID",
+      "item": "1262"
+    },
+    {
+      "sequence": 2,
+      "id": "FAC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70331",
+      "name": "Facility Type",
+      "item": "1263"
+    },
+    {
+      "sequence": 3,
+      "id": "FAC-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XAD",
+      "maxLength": 200,
+      "name": "Facility Address",
+      "item": "1264"
+    },
+    {
+      "sequence": 4,
+      "id": "FAC-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XTN",
+      "maxLength": 44,
+      "name": "Facility Telecommunication",
+      "item": "1265"
+    },
+    {
+      "sequence": 5,
+      "id": "FAC-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "maxLength": 60,
+      "name": "Contact Person",
+      "item": "1266"
+    },
+    {
+      "sequence": 6,
+      "id": "FAC-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 60,
+      "name": "Contact Title",
+      "item": "1267"
+    },
+    {
+      "sequence": 7,
+      "id": "FAC-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XAD",
+      "maxLength": 60,
+      "name": "Contact Address",
+      "item": "1268"
+    },
+    {
+      "sequence": 8,
+      "id": "FAC-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XTN",
+      "maxLength": 44,
+      "name": "Contact Telecommunication",
+      "item": "1269"
+    },
+    {
+      "sequence": 9,
+      "id": "FAC-9",
+      "required": true,
+      "repeatable": false,
+      "datatype": "XCN",
+      "maxLength": 60,
+      "name": "Signature Authority",
+      "item": "1270"
+    },
+    {
+      "sequence": 10,
+      "id": "FAC-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 60,
+      "name": "Signature Authority Title",
+      "item": "1271"
+    },
+    {
+      "sequence": 11,
+      "id": "FAC-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XAD",
+      "maxLength": 200,
+      "name": "Signature Authority Address",
+      "item": "1272"
+    },
+    {
+      "sequence": 12,
+      "id": "FAC-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XTN",
+      "maxLength": 44,
+      "name": "Signature Authority Telecommunication",
+      "item": "1273"
+    }
+  ]
+}

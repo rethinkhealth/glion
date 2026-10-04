@@ -1,0 +1,15 @@
+{
+  "id": "0269",
+  "description": "Charge On Indicator",
+  "type": "user",
+  "codes": [
+    {
+      "name": "O",
+      "description": "Charge on Order"
+    },
+    {
+      "name": "R",
+      "description": "Charge on Result"
+    }
+  ]
+}

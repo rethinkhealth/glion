@@ -1,0 +1,26 @@
+{
+  "id": "PCF",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "Pre-certification required",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "pre-certification patient type",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "pre-certification required",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "pre-certification window",
+      "datatypeId": "TS",
+      "required": false
+    }
+  ]
+}

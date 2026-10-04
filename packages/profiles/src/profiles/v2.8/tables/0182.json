@@ -1,0 +1,11 @@
+{
+  "id": "0182",
+  "description": "Staff type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

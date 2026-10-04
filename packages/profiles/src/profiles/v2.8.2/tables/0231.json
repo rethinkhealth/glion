@@ -1,0 +1,19 @@
+{
+  "id": "0231",
+  "description": "Student Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Full-time student"
+    },
+    {
+      "name": "N",
+      "description": "Not a student"
+    },
+    {
+      "name": "P",
+      "description": "Part-time student"
+    }
+  ]
+}

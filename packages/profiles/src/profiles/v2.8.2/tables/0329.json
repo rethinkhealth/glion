@@ -1,0 +1,15 @@
+{
+  "id": "0329",
+  "description": "Quantity Method",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Actual count"
+    },
+    {
+      "name": "E",
+      "description": "Estimated (see comment)"
+    }
+  ]
+}

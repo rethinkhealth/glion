@@ -1,0 +1,146 @@
+{
+  "id": "XAD",
+  "version": "2.6",
+  "kind": "composite",
+  "title": "Extended Address",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Street Address",
+      "datatypeId": "SAD",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Other Designation",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "City",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "State or Province",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Zip or Postal Code",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "Country",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "Address Type",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "Other Geographic Designation",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "County/Parish Code",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "Census Tract",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "Address Representation Code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 12,
+      "name": "Address Validity Range",
+      "datatypeId": "DR",
+      "required": false
+    },
+    {
+      "sequence": 13,
+      "name": "Effective Date",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 14,
+      "name": "Expiration Date",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 15,
+      "name": "Expiration Reason",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 16,
+      "name": "Temporary Indicator",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 17,
+      "name": "Bad Address Indicator",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 18,
+      "name": "Address Usage",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 19,
+      "name": "Addressee",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 20,
+      "name": "Comment",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 21,
+      "name": "Preference Order",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 22,
+      "name": "Protection Code",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 23,
+      "name": "Address Identifier",
+      "datatypeId": "EI",
+      "required": false
+    }
+  ]
+}

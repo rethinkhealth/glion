@@ -1,0 +1,15 @@
+{
+  "id": "0482",
+  "description": "Order Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "I",
+      "description": "Inpatient Order"
+    },
+    {
+      "name": "O",
+      "description": "Outpatient Order"
+    }
+  ]
+}
