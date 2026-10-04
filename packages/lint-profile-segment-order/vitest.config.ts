@@ -5,7 +5,7 @@ export default mergeConfig(
   baseConfig,
   defineConfig({
     test: {
-      name: "hl7v2-lint-profile-events-segments-order",
+      name: "hl7v2-lint-profile-segment-order",
     },
   })
 );

@@ -1,4 +1,4 @@
-# @glion/lint-profile-events-segments-order
+# @glion/lint-profile-segment-order
 
 Lint rule that validates HL7v2 segment order against the message structure defined by the profile.
 
@@ -9,14 +9,14 @@ Walks the parsed tree segment-by-segment, feeding each segment name to a runner 
 ## Install
 
 ```bash
-npm install @glion/lint-profile-events-segments-order
+npm install @glion/lint-profile-segment-order
 ```
 
 ## Use
 
 ```ts
 import { hl7v2Parser } from "@glion/parser";
-import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
+import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import { unified } from "unified";
 import { reporter } from "vfile-reporter";
 
@@ -37,7 +37,7 @@ console.error(reporter([file]));
 With a message structure of your own:
 
 ```ts
-import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
+import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import type { MessageStructure } from "@glion/profiles";
 import { unified } from "unified";
 
@@ -59,7 +59,7 @@ const processor = unified().use(hl7v2LintSegmentOrder, {
 With a structure chosen per message:
 
 ```ts
-import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
+import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import { loadMessageStructure } from "@glion/profiles";
 import { value } from "@glion/util-query";
 import { unified } from "unified";
@@ -179,7 +179,7 @@ When no `definition` is given and MSH-9 and MSH-12 do not name a bundled structu
 
 ## Part of Glion
 
-`@glion/lint-profile-events-segments-order` is part of **[Glion]**, the application framework for HL7v2. See the [Glion README] for the full package catalog and architecture.
+`@glion/lint-profile-segment-order` is part of **[Glion]**, the application framework for HL7v2. See the [Glion README] for the full package catalog and architecture.
 
 [Glion]: https://github.com/rethinkhealth/glion#readme
 [Glion README]: https://github.com/rethinkhealth/glion#readme

@@ -1,5 +1,5 @@
 // Checks a message's segment order against its structure, one segment at a
-// time. @glion/lint-profile-events-segments-order feeds it each segment name,
+// time. @glion/lint-profile-segment-order feeds it each segment name,
 // then reads `accepted` to see whether the message was complete.
 //
 // Vocabulary

@@ -1,11 +1,11 @@
 import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
-import hl7v2LintEventsSegmentsOrder from "@glion/lint-profile-events-segments-order";
 import hl7v2LintExtraComponents from "@glion/lint-profile-extra-components";
 import hl7v2LintExtraFields from "@glion/lint-profile-extra-fields";
 import hl7v2LintFieldMaxLength from "@glion/lint-profile-field-max-length";
 import hl7v2LintFieldRepetition from "@glion/lint-profile-field-repetition";
 import hl7v2LintRequiredComponents from "@glion/lint-profile-required-components";
 import hl7v2LintRequiredFields from "@glion/lint-profile-required-fields";
+import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import hl7v2LintTableValues from "@glion/lint-profile-table-values";
 import type { Preset } from "unified";
 
@@ -26,7 +26,7 @@ import type { Preset } from "unified";
  * - **extra-fields** — warns when segments have fields beyond the profile maximum
  * - **extra-components** — warns when composite fields have components beyond the
  *   datatype maximum
- * - **events-segments-order** — validates segment order against message structure
+ * - **segment-order** — validates segment order against message structure
  *   profiles
  *
  * All rules read the HL7v2 version from MSH-12 and load profiles accordingly.
@@ -56,7 +56,7 @@ const hl7v2PresetLintProfileRecommended: Preset = {
     hl7v2LintTableValues,
     hl7v2LintExtraFields,
     hl7v2LintExtraComponents,
-    hl7v2LintEventsSegmentsOrder,
+    hl7v2LintSegmentOrder,
   ],
 };
 
