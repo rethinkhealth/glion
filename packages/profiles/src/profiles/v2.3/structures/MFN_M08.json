@@ -1,0 +1,64 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "MFN_M08",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MFI",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "MF_TEST_NUMERIC",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "MFE",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "OM1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "MF_NUMERIC_OBSERVATION",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "OM2",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "OM3",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "OM4",
+              "optional": true,
+              "repeating": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

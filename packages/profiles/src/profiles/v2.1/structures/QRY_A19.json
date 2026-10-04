@@ -1,0 +1,18 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "QRY_A19",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QRD",
+      "optional": false,
+      "repeating": false
+    }
+  ]
+}

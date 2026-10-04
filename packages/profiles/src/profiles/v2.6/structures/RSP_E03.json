@@ -1,0 +1,69 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "RSP_E03",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "choice",
+      "optional": true,
+      "repeating": false,
+      "alternatives": [
+        {
+          "type": "segment",
+          "name": "QAK",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "QPD",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "INVOICE_PROCESSING_RESULTS_INFO",
+          "optional": false,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "IPR",
+              "optional": false,
+              "repeating": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

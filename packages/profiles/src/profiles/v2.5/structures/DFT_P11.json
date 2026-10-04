@@ -1,0 +1,354 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "DFT_P11",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "EVN",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PID",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PD1",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ROL",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "PV1",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PV2",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ROL",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "DB1",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "COMMON_ORDER",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "ORC",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "TIMING_QUANTITY",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "TQ1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "TQ2",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "ORDER",
+          "optional": true,
+          "repeating": false,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "OBR",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "OBSERVATION",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "OBX",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "NTE",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "DG1",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "DRG",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "GT1",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "INSURANCE",
+      "optional": true,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "IN1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IN2",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "IN3",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "ROL",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "ACC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "FINANCIAL",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "FT1",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "group",
+          "name": "FINANCIAL_PROCEDURE",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "PR1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "ROL",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "FINANCIAL_COMMON_ORDER",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "ORC",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "group",
+              "name": "FINANCIAL_TIMING_QUANTITY",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "TQ1",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "TQ2",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "FINANCIAL_ORDER",
+              "optional": true,
+              "repeating": false,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "OBR",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "FINANCIAL_OBSERVATION",
+              "optional": true,
+              "repeating": true,
+              "elements": [
+                {
+                  "type": "segment",
+                  "name": "OBX",
+                  "optional": false,
+                  "repeating": false
+                },
+                {
+                  "type": "segment",
+                  "name": "NTE",
+                  "optional": true,
+                  "repeating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "segment",
+          "name": "DG1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "DRG",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "GT1",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "group",
+          "name": "FINANCIAL_INSURANCE",
+          "optional": true,
+          "repeating": true,
+          "elements": [
+            {
+              "type": "segment",
+              "name": "IN1",
+              "optional": false,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "IN2",
+              "optional": true,
+              "repeating": false
+            },
+            {
+              "type": "segment",
+              "name": "IN3",
+              "optional": true,
+              "repeating": true
+            },
+            {
+              "type": "segment",
+              "name": "ROL",
+              "optional": true,
+              "repeating": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

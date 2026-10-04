@@ -1,0 +1,110 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "RSP_K25",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "QAK",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QPD",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "RCP",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "STAFF",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "STF",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "PRA",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "ORG",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "AFF",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "LAN",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "EDU",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "CER",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}

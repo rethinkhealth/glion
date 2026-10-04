@@ -1,0 +1,98 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "EHC_E12",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "UAC",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "RFI",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "CTD",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "IVC",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PSS",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PSG",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PID",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "PSL",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "group",
+      "name": "REQUEST",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "CTD",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "OBR",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "NTE",
+          "optional": true,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "OBX",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    }
+  ]
+}

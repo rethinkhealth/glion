@@ -1,0 +1,110 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "MFR_M05",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "MSA",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "ERR",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "QAK",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QRD",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "QRF",
+      "optional": true,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "MFI",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "group",
+      "name": "MF_QUERY",
+      "optional": false,
+      "repeating": true,
+      "elements": [
+        {
+          "type": "segment",
+          "name": "MFE",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "LOC",
+          "optional": false,
+          "repeating": false
+        },
+        {
+          "type": "segment",
+          "name": "LCH",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "LRL",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "LDP",
+          "optional": false,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "LCH",
+          "optional": true,
+          "repeating": true
+        },
+        {
+          "type": "segment",
+          "name": "LCC",
+          "optional": true,
+          "repeating": true
+        }
+      ]
+    },
+    {
+      "type": "segment",
+      "name": "DSC",
+      "optional": true,
+      "repeating": false
+    }
+  ]
+}

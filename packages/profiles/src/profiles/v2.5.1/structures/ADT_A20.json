@@ -1,0 +1,30 @@
+{
+  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "id": "ADT_A20",
+  "elements": [
+    {
+      "type": "segment",
+      "name": "MSH",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "SFT",
+      "optional": true,
+      "repeating": true
+    },
+    {
+      "type": "segment",
+      "name": "EVN",
+      "optional": false,
+      "repeating": false
+    },
+    {
+      "type": "segment",
+      "name": "NPU",
+      "optional": false,
+      "repeating": false
+    }
+  ]
+}
