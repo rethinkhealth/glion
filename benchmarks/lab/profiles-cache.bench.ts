@@ -47,7 +47,7 @@ const SEGMENTS = [
 // Warmup: populate Node's module cache so the first measured iteration
 // doesn't pay one-time dynamic-import cost.
 const warmup = createProfiles();
-await warmup.events.load("2.5", "ADT_A01");
+await warmup.structures.load("2.5", "ADT_A01");
 for (const seg of SEGMENTS) {
   await warmup.fields.load("2.5", seg);
 }
@@ -73,13 +73,13 @@ describe("transition: cold first message then warm second", () => {
     const p = createProfiles();
 
     // First message — cold
-    await p.events.load("2.5", "ADT_A01");
+    await p.structures.load("2.5", "ADT_A01");
     for (const seg of SEGMENTS) {
       await p.fields.load("2.5", seg);
     }
 
     // Second message — warm
-    await p.events.load("2.5", "ADT_A01");
+    await p.structures.load("2.5", "ADT_A01");
     for (const seg of SEGMENTS) {
       await p.fields.load("2.5", seg);
     }
@@ -89,13 +89,13 @@ describe("transition: cold first message then warm second", () => {
     const p = createProfiles({ cache: false });
 
     // First message — cold
-    await p.events.load("2.5", "ADT_A01");
+    await p.structures.load("2.5", "ADT_A01");
     for (const seg of SEGMENTS) {
       await p.fields.load("2.5", seg);
     }
 
     // Second message — warm
-    await p.events.load("2.5", "ADT_A01");
+    await p.structures.load("2.5", "ADT_A01");
     for (const seg of SEGMENTS) {
       await p.fields.load("2.5", seg);
     }

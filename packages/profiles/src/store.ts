@@ -1,5 +1,5 @@
 import type { Cache } from "./cache/types";
-import type { EventLoadOptions, ProfileStore } from "./types";
+import type { StructureLoadOptions, ProfileStore } from "./types";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -7,12 +7,14 @@ import type { EventLoadOptions, ProfileStore } from "./types";
 
 /** Configuration for a profile store. */
 export type ProfileStoreConfig<TRaw, T = TRaw> = Readonly<{
-  /** Namespace for cache keys (e.g., "events", "fields", "datatypes"). */
+  /** Namespace for cache keys (e.g., "structures", "fields", "datatypes"). */
   namespace: string;
-  /** Manifest of lazy import factories keyed by "v{version}/{id}". */
+  /** Manifest of lazy import factories, keyed by `manifestKey`. */
   manifest: Readonly<Record<string, (() => Promise<TRaw>) | undefined>>;
   /** Optional post-import transform (e.g., build indexed Maps from raw arrays). */
   compile?: (raw: TRaw) => T;
+  /** The manifest key for a profile. Default: `v{version}/{id}`. */
+  manifestKey?: (version: string, id: string) => string;
   /** Optional ID resolver for alias support (e.g., ADT_A04 → ADT_A01). */
   resolveId?: (version: string, id: string) => string | undefined;
 }>;
@@ -31,17 +33,16 @@ export const createProfileStore = <TRaw, T = TRaw>(
   config: ProfileStoreConfig<TRaw, T>,
   cache: Cache | false
 ): ProfileStore<T> => {
-  const { namespace, manifest, compile, resolveId } = config;
+  const { namespace, manifest, manifestKey, compile, resolveId } = config;
   const ownKeys = new Set<string>();
 
   const toKey = (version: string, id: string) =>
     `${namespace}:${version}/${id}`;
 
   const importAndCompile = async (version: string, id: string): Promise<T> => {
-    const manifestKey = `v${version}/${id}`;
-    const factory = manifest[manifestKey];
+    const factory = manifest[manifestKey?.(version, id) ?? `v${version}/${id}`];
     if (!factory) {
-      throw new Error(`Unknown ${namespace} profile: ${manifestKey}`);
+      throw new Error(`Unknown ${namespace} profile: v${version}/${id}`);
     }
     const raw = await factory();
     return compile ? compile(raw) : (raw as unknown as T);
@@ -50,7 +51,7 @@ export const createProfileStore = <TRaw, T = TRaw>(
   const load = (
     version: string,
     id: string,
-    options?: EventLoadOptions
+    options?: StructureLoadOptions
   ): Promise<T> => {
     const resolvedId =
       options?.resolve === false ? id : (resolveId?.(version, id) ?? id);

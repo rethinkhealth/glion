@@ -3,8 +3,8 @@ import type { Cache, CacheOptions } from "./cache/types";
 import { createProfileStore } from "./store";
 import { codeSystemsConfig } from "./stores/code-systems";
 import { datatypesConfig } from "./stores/datatypes";
-import { eventsConfig } from "./stores/events";
 import { fieldsConfig } from "./stores/fields";
+import { structuresConfig } from "./stores/structures";
 import { tablesConfig } from "./stores/tables";
 import type { CodeSystemStore, Profiles, ProfilesOptions } from "./types";
 
@@ -59,8 +59,8 @@ const createCodeSystemStoreWrapped = (
 // ---------------------------------------------------------------------------
 
 /**
- * Create a `Profiles` instance with namespaced stores for events, fields,
- * datatypes, tables, and UTG code systems.
+ * Create a `Profiles` instance with namespaced stores for message structures,
+ * fields, datatypes, tables, and UTG code systems.
  *
  * Segment definitions are loaded separately via `loadSegments()` from
  * `@glion/profiles/stores/segments` — they are lightweight
@@ -69,7 +69,7 @@ const createCodeSystemStoreWrapped = (
  * @example
  *   ```ts
  *   const profiles = createProfiles();
- *   const def = await profiles.events.load("2.5", "ADT_A01");
+ *   const def = await profiles.structures.load("2.5", "ADT_A01");
  *   const fields = await profiles.fields.load("2.5", "PID");
  *   const table = await profiles.tables.load("2.5", "0001");
  *   const cs = await profiles.codeSystems.load("v2-0001");
@@ -80,7 +80,10 @@ export const createProfiles = (options?: ProfilesOptions): Profiles => {
   const storeCache = (opt?: { cache?: Cache | CacheOptions | false }) =>
     resolveCache(opt?.cache) ?? defaultCache;
 
-  const events = createProfileStore(eventsConfig, storeCache(options?.events));
+  const structures = createProfileStore(
+    structuresConfig,
+    storeCache(options?.structures)
+  );
   const fields = createProfileStore(fieldsConfig, storeCache(options?.fields));
   const datatypes = createProfileStore(
     datatypesConfig,
@@ -94,15 +97,15 @@ export const createProfiles = (options?: ProfilesOptions): Profiles => {
   return {
     codeSystems,
     datatypes,
-    events,
     fields,
     reset() {
-      events.reset();
+      structures.reset();
       fields.reset();
       datatypes.reset();
       tables.reset();
       codeSystems.reset();
     },
+    structures,
     tables,
   };
 };

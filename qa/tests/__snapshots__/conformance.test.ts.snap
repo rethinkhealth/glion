@@ -1781,32 +1781,13 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
 exports[`QR1: message conformance > orm-o01-order.hl7 — pipeline output matches snapshot 1`] = `
 "orm-o01-order.hl7
   segments: MSH(12) PID(11) PV1(3) ORC(12) OBR(16)
-  diagnostics: 1
-    - [segment-order] Message ended prematurely. Expected: RQD"
+  diagnostics: 0"
 `;
 
 exports[`QR1: message conformance > orm-o01-order.hl7 — pipeline output matches snapshot 2`] = `
 {
-  "diagnosticCount": 1,
-  "diagnostics": [
-    {
-      "message": "Message ended prematurely. Expected: RQD",
-      "place": {
-        "end": {
-          "column": 113,
-          "line": 5,
-          "offset": 380,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "ruleId": "segment-order",
-      "source": "hl7v2-lint",
-    },
-  ],
+  "diagnosticCount": 0,
+  "diagnostics": [],
   "result": [
     {
       "fields": [

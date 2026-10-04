@@ -44,13 +44,13 @@
   },
   "dependencies": {
     "@glion/annotate-profile-context": "workspace:*",
-    "@glion/lint-profile-events-segments-order": "workspace:*",
     "@glion/lint-profile-extra-components": "workspace:*",
     "@glion/lint-profile-extra-fields": "workspace:*",
     "@glion/lint-profile-field-max-length": "workspace:*",
     "@glion/lint-profile-field-repetition": "workspace:*",
     "@glion/lint-profile-required-components": "workspace:*",
     "@glion/lint-profile-required-fields": "workspace:*",
+    "@glion/lint-profile-segment-order": "workspace:*",
     "@glion/lint-profile-table-values": "workspace:*",
     "unified": "11.0.5"
   },

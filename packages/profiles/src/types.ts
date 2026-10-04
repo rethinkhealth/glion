@@ -1,4 +1,3 @@
-import type { Definition } from "./automata/types";
 import type { Cache, CacheOptions } from "./cache/types";
 import type {
   CodeSystemDefinition,
@@ -6,19 +5,18 @@ import type {
   FieldDefinition,
   TableDefinition,
 } from "./stores/types";
+import type { MessageStructure } from "./structure/types";
 
 // ---------------------------------------------------------------------------
 // Load options
 // ---------------------------------------------------------------------------
 
 /** Options for event profile loading. */
-export type EventLoadOptions = Readonly<{
+export type StructureLoadOptions = Readonly<{
   /**
-   * Whether to resolve trigger event aliases to canonical structure IDs.
-   * Default: true.
-   *
-   * Example: load("2.5", "ADT_A04") with resolve=true returns ADT_A01's DFA.
-   * With resolve=false, it looks up ADT_A04 directly (which may not exist).
+   * Whether to resolve a trigger event, such as `ADT_A04`, to the message
+   * structure the structure maps give it, such as `ADT_A01`. Default: `true`.
+   * When `false`, `id` is loaded as a structure ID.
    */
   resolve?: boolean;
 }>;
@@ -39,14 +37,17 @@ export type ProfileStore<T> = Readonly<{
   reset(): void;
 }>;
 
-/** Events store with alias resolution support. */
-export type EventProfileStore = Readonly<{
-  /** Load a DFA definition. Resolves trigger event aliases by default. */
+/** The message structure store, which resolves trigger events to structures. */
+export type StructureProfileStore = Readonly<{
+  /**
+   * Load a message structure definition. Resolves trigger event aliases by
+   * default.
+   */
   load(
     version: string,
     id: string,
-    options?: EventLoadOptions
-  ): Promise<Definition>;
+    options?: StructureLoadOptions
+  ): Promise<MessageStructure>;
   /** Check whether a profile is in the cache. */
   has(version: string, id: string): boolean;
   /** Remove a single entry from the cache. */
@@ -75,8 +76,8 @@ export type CodeSystemStore = Readonly<{
 export type ProfilesOptions = Readonly<{
   /** Shared cache for all stores. Default: built-in LRU (10,000 entries). */
   cache?: Cache | CacheOptions | false;
-  /** Override cache for the events store. */
-  events?: { cache?: Cache | CacheOptions | false };
+  /** Override cache for the message structure store. */
+  structures?: { cache?: Cache | CacheOptions | false };
   /** Override cache for the fields store. */
   fields?: { cache?: Cache | CacheOptions | false };
   /** Override cache for the datatypes store. */
@@ -89,8 +90,8 @@ export type ProfilesOptions = Readonly<{
 
 /** The top-level profiles API returned by `createProfiles()`. */
 export type Profiles = Readonly<{
-  /** DFA definitions for message structure validation. */
-  events: EventProfileStore;
+  /** Message structures, such as `ORU_R01`, by version and structure ID. */
+  structures: StructureProfileStore;
   /** Segment field metadata (required, repeatable, maxLength, datatype). */
   fields: ProfileStore<FieldDefinition>;
   /** Component structure and constraints for datatypes. */

@@ -1,18 +1,22 @@
 /** Biome-ignore-all lint/performance/noBarrelFile: public API surface */
 
-// Automata engine (unchanged)
-export { runner } from "./automata/runner";
+// Message structures
+export { matchStructure } from "./structure/match";
+export { runner } from "./structure/runner";
 export type {
-  Definition,
-  Effects,
-  NFA,
+  ChoiceElement,
+  GroupElement,
+  GroupMatch,
+  MessageStructure,
+  Occurrence,
   Runner,
   RunnerEvent,
   RunnerInvalidEvent,
   RunnerStepEvent,
-  TransitionMap,
-} from "./automata/types";
-export { RunnerState } from "./automata/types";
+  SegmentElement,
+  StructureElement,
+  StructureMatch,
+} from "./structure/types";
 
 // Cache
 export { createLruCache } from "./cache/lru";
@@ -46,17 +50,18 @@ export type {
   UtgCodeSystemModule,
 } from "./stores/types";
 
-// Event maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
-export { eventMaps } from "./profiles/event-map-manifest";
+// Structure maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
+export { structureMaps } from "./profiles/structure-map-manifest";
 
-// Resolution utility
+// Resolution utilities
+export { loadMessageStructure } from "./load-message-structure";
 export { resolveMessageStructure } from "./resolve-message-structure";
 
 // Profiles API types
 export type {
   CodeSystemStore,
-  EventLoadOptions,
-  EventProfileStore,
+  StructureLoadOptions,
+  StructureProfileStore,
   ProfileStore,
   Profiles,
   ProfilesOptions,
