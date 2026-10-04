@@ -123,7 +123,7 @@ import { profiles, runner } from "@glion/profiles";
 const structure = await profiles.events.load("2.5", "ADT_A01");
 const automaton = runner(structure);
 automaton.consume("MSH"); // { type: "step" }
-automaton.consume("ZZZ"); // { type: "invalid", symbol: "ZZZ", expected: ["EVN", "SFT"] }
+automaton.consume("ZZZ"); // { type: "invalid", segment: "ZZZ", expected: ["EVN", "SFT"] }
 automaton.accepted; // false
 ```
 

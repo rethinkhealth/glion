@@ -10,7 +10,7 @@
 //   creates a segment's exit state right after it, so the engines compute
 //   `state + 1` and no edge is stored.
 // - Every other state has `null` in `segments`. It consumes nothing and moves
-//   along its `edges`, each `[target, action]`.
+//   along its `edges`, each `[target, boundary]`.
 //
 // Edge order is priority. Where a message can be read more than one way,
 // `matchStructure()` follows a state's edges first to last and keeps the first
@@ -20,9 +20,9 @@
 // choice before the later. `runner()` only asks whether any reading exists, so
 // the order does not change what it accepts.
 //
-// An edge's action marks a group boundary: `g + 1` opens group `g`, `-(g + 1)`
-// closes it, and `0` does neither. `g` indexes `groups`. The offset by one
-// keeps group 0 apart from "no action".
+// An edge's boundary marks where a group opens or closes: `g + 1` opens group
+// `g`, `-(g + 1)` closes it, and `0` does neither. `g` indexes `groups`. The
+// offset by one keeps group 0 apart from "no boundary".
 //
 // Construction
 // ------------
@@ -48,12 +48,8 @@
 // 0 is the sequence's entry. 5 and 6 are the wrapper occurrences() put around
 // NTE because it is optional and repeating; MSH is neither and gets none.
 
-import type {
-  MessageStructure,
-  StructureEdge,
-  StructureElement,
-  StructureProgram,
-} from "./types";
+import type { StructureEdge, StructureProgram } from "./program";
+import type { MessageStructure, StructureElement } from "./types";
 
 /** A compiled element: enter at `start`, leave from `end`. */
 type Fragment = readonly [start: number, end: number];
@@ -105,8 +101,8 @@ export function compileStructure(
   };
 
   // Adds an edge out of `from`. Call order is priority order.
-  const edge = (from: number, target: number, action = 0): void => {
-    edges[from]?.push([target, action]);
+  const edge = (from: number, target: number, boundary = 0): void => {
+    edges[from]?.push([target, boundary]);
   };
 
   // A fresh entry state, then each element's fragment chained end to start.
@@ -140,15 +136,15 @@ export function compileStructure(
           throw invalid(`group ${element.name} has no elements`);
         }
         // `push` returns the new length, which is the group's number plus one:
-        // the action that opens it. Its negative closes it.
-        const action = groups.push(element.name);
+        // the boundary that opens it. Its negative closes it.
+        const boundary = groups.push(element.name);
         const [first, last] = sequence(element.elements);
         const start = state();
         const end = state();
         // The body sits between two edges that carry the boundary, so a reading
         // records the group as it enters and as it leaves.
-        edge(start, first, action);
-        edge(last, end, -action);
+        edge(start, first, boundary);
+        edge(last, end, -boundary);
         return [start, end];
       }
       case "choice": {

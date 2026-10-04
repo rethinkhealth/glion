@@ -90,9 +90,9 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
     let aborted = false;
 
     visit(tree, "segment", (node, parents) => {
-      const symbol = node.name;
+      const segment = node.name;
 
-      if (!symbol) {
+      if (!segment) {
         aborted = true;
         file.message("Segment has empty segment name at this position", {
           ancestors: [...parents, node],
@@ -101,12 +101,12 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
         return EXIT;
       }
 
-      const result = automaton.consume(symbol);
+      const result = automaton.consume(segment);
 
       if (result.type === "invalid") {
         aborted = true;
         file.message(
-          `Unexpected segment '${symbol}'. Expected: ${result.expected.join(", ")}`,
+          `Unexpected segment '${segment}'. Expected: ${result.expected.join(", ")}`,
           { ancestors: [...parents, node], place: node.position }
         );
         return EXIT;
