@@ -1,8 +1,0 @@
-// Generated table profile for 0132 (v2.7)
-
-export const id = "0132";
-export const description = "Transaction Code";
-export const type = "user";
-export const codes = [
-  { description: "No suggested values defined", name: "..." },
-] as const;
