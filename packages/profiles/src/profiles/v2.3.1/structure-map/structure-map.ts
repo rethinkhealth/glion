@@ -1,6 +1,6 @@
-// Generated event-to-structure map for v2.3.1
+// Generated structure map (trigger event or structure ID to structure ID) for v2.3.1
 // Source: HAPI HL7v2 (https://github.com/hapifhir/hapi-hl7v2)
-export const eventMap: Record<string, string> = {
+export const structureMap: Record<string, string> = {
   ACK: "ACK",
   ADR_A19: "ADR_A19",
   ADT_A01: "ADT_A01",
