@@ -286,7 +286,7 @@ describe("hl7v2LintSegmentOrder", () => {
       expect(file.messages).toHaveLength(0);
     });
 
-    it("resolves via event map when MSH-9.3 is missing but MSH-9.1 and MSH-9.2 are present", async () => {
+    it("resolves via the structure map when MSH-9.3 is missing but MSH-9.1 and MSH-9.2 are present", async () => {
       const tree = m(
         s(
           "MSH",
@@ -419,8 +419,8 @@ describe("hl7v2LintSegmentOrder", () => {
     });
   });
 
-  describe("event map fallback integration", () => {
-    it("detects wrong segment order via event map fallback (no MSH-9.3)", async () => {
+  describe("structure map fallback integration", () => {
+    it("detects wrong segment order via structure map fallback (no MSH-9.3)", async () => {
       // PID before EVN is invalid for ADT_A01
       const tree = m(
         s(
@@ -541,7 +541,7 @@ describe("hl7v2LintSegmentOrder", () => {
       expect(file.messages).toHaveLength(0);
     });
 
-    it("wire value wins: uses MSH-9.3 even when it differs from event map", async () => {
+    it("wire value wins: uses MSH-9.3 even when it differs from the structure map", async () => {
       // ADT^A04 with MSH-9.3 = "ADT_A04" — wire value wins, load resolves alias internally
       const tree = m(
         s(

@@ -15,7 +15,7 @@ import type { MessageStructure } from "./structure/types";
 export type StructureLoadOptions = Readonly<{
   /**
    * Whether to resolve a trigger event, such as `ADT_A04`, to the message
-   * structure the event maps give it, such as `ADT_A01`. Default: `true`.
+   * structure the structure maps give it, such as `ADT_A01`. Default: `true`.
    * When `false`, `id` is loaded as a structure ID.
    */
   resolve?: boolean;

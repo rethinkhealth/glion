@@ -2,7 +2,7 @@ import type { Root } from "@glion/ast";
 import { value } from "@glion/util-query";
 
 import { profiles } from "./profiles";
-import { eventMaps } from "./profiles/event-map-manifest";
+import { structureMaps } from "./profiles/structure-map-manifest";
 import { resolveMessageStructure } from "./resolve-message-structure";
 import type { MessageStructure } from "./structure/types";
 
@@ -10,7 +10,7 @@ import type { MessageStructure } from "./structure/types";
  * The message structure `tree` names.
  *
  * Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the
- * event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty.
+ * structure maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty.
  *
  * Never rejects.
  *
@@ -34,7 +34,7 @@ export const loadMessageStructure = async (
       value(tree, "MSH-9.2")?.value ?? ""
     );
 
-  if (!id || eventMaps[version]?.[id] === undefined) {
+  if (!id || structureMaps[version]?.[id] === undefined) {
     return undefined;
   }
 

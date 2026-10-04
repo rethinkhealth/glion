@@ -1,4 +1,4 @@
-import { eventMaps } from "../profiles/event-map-manifest";
+import { structureMaps } from "../profiles/structure-map-manifest";
 import type { ProfileStoreConfig } from "../store";
 import { programOf } from "../structure/compile";
 import type { MessageStructure } from "../structure/types";
@@ -29,5 +29,5 @@ export const structuresConfig: ProfileStoreConfig<
   manifest: structureImports,
   manifestKey: structurePath,
   namespace: "structures",
-  resolveId: (version, id) => eventMaps[version]?.[id],
+  resolveId: (version, id) => structureMaps[version]?.[id],
 };

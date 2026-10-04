@@ -32,9 +32,9 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./event-maps": {
-      "types": "./dist/event-maps.d.ts",
-      "default": "./dist/event-maps.js"
+    "./structure-maps": {
+      "types": "./dist/structure-maps.d.ts",
+      "default": "./dist/structure-maps.js"
     },
     "./message-structure.schema.json": "./src/profiles/message-structure.schema.json"
   },

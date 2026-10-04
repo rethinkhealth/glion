@@ -1,7 +1,7 @@
 import { importGlobPlugin } from "rolldown/experimental";
 import { defineConfig } from "tsdown";
 
-// Manifests and event maps load at import, so they match neither pattern:
+// Manifests and structure maps load at import, so they match neither pattern:
 // a chunk holding one would load at import with all the data beside it.
 const VERSION_DATA =
   /[\\/]src[\\/]profiles[\\/](v[^\\/]+)[\\/](datatypes|fields|segments|structures|tables)(?:[\\/](?!manifest\.)|\.ts$)/;
@@ -19,8 +19,8 @@ const dataChunk = (id: string): string | null => {
 export default defineConfig({
   dts: false,
   entry: {
-    "event-maps": "src/event-maps.ts",
     index: "src/index.ts",
+    "structure-maps": "src/structure-maps.ts",
   },
   fixedExtension: false,
   format: "esm",

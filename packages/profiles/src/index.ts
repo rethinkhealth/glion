@@ -50,8 +50,8 @@ export type {
   UtgCodeSystemModule,
 } from "./stores/types";
 
-// Event maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
-export { eventMaps } from "./profiles/event-map-manifest";
+// Structure maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
+export { structureMaps } from "./profiles/structure-map-manifest";
 
 // Resolution utilities
 export { loadMessageStructure } from "./load-message-structure";

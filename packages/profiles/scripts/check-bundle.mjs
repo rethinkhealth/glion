@@ -5,8 +5,8 @@
  *
  * 1. Every structure file matches `message-structure.schema.json` and names it in
  *    `$schema`.
- * 2. Every event map entry names a bundled structure, and every bundled structure
- *    maps to itself.
+ * 2. Every structure map entry names a bundled structure, and every bundled
+ *    structure maps to itself.
  * 3. Every structure loads, compiles, and accepts messages generated from it.
  * 4. `matchStructure` groups those messages exactly as `referenceMatch` does, and
  *    the two agree on near misses.
@@ -332,7 +332,7 @@ const bundledStructures = () =>
 // oxlint-disable-next-line complexity/complexity -- four independent checks over the same file list, each a loop with its own failure branches
 async function problemsInBundle() {
   const { Ajv } = await import("ajv");
-  const { eventMaps, matchStructure, profiles, runner } =
+  const { structureMaps, matchStructure, profiles, runner } =
     await import("../dist/index.js");
 
   const accepts = (structure, input) => {
@@ -360,10 +360,10 @@ async function problemsInBundle() {
     }
   }
 
-  // 2. The event maps and the structure files agree.
+  // 2. The structure maps and the structure files agree.
   const ids = new Set(bundled.map(({ id, version }) => `v${version}/${id}`));
 
-  for (const [version, map] of Object.entries(eventMaps)) {
+  for (const [version, map] of Object.entries(structureMaps)) {
     for (const [event, id] of Object.entries(map)) {
       if (!ids.has(`v${version}/${id}`)) {
         problems.push(
@@ -373,7 +373,7 @@ async function problemsInBundle() {
     }
   }
   for (const { id, version } of bundled) {
-    if (eventMaps[version]?.[id] !== id) {
+    if (structureMaps[version]?.[id] !== id) {
       problems.push(`v${version}/${id} is bundled but maps to itself nowhere`);
     }
   }

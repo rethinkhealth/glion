@@ -1,4 +1,4 @@
-// Generated root event map manifest
+// Generated root structure map manifest
 
 import { structureMap as v2_1 } from "./v2.1/structure-map/structure-map";
 import { structureMap as v2_2 } from "./v2.2/structure-map/structure-map";
@@ -14,7 +14,7 @@ import { structureMap as v2_8_1 } from "./v2.8.1/structure-map/structure-map";
 import { structureMap as v2_8_2 } from "./v2.8.2/structure-map/structure-map";
 import { structureMap as v2_8 } from "./v2.8/structure-map/structure-map";
 
-export const eventMaps: Record<string, Record<string, string>> = {
+export const structureMaps: Record<string, Record<string, string>> = {
   "2.1": v2_1,
   "2.2": v2_2,
   "2.3": v2_3,

@@ -6,9 +6,9 @@
     "limit": "45 kB"
   },
   {
-    "name": "@glion/profiles/event-maps: import { eventMaps }",
-    "path": "packages/profiles/dist/event-maps.js",
-    "import": "{ eventMaps }",
+    "name": "@glion/profiles/structure-maps: import { structureMaps }",
+    "path": "packages/profiles/dist/structure-maps.js",
+    "import": "{ structureMaps }",
     "limit": "3 kB"
   },
   {

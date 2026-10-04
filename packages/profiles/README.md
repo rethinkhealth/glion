@@ -75,7 +75,7 @@ Standalone helper that loads every segment definition for a given version in one
 
 ### `loadMessageStructure(tree)`
 
-Returns the message structure a parsed message names, or `undefined` when MSH-12 or MSH-9 is missing or the version defines no such structure. Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty.
+Returns the message structure a parsed message names, or `undefined` when MSH-12 or MSH-9 is missing or the version defines no such structure. Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the structure maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty.
 
 ```ts
 import { loadMessageStructure } from "@glion/profiles";
