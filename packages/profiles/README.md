@@ -33,7 +33,7 @@ console.log(cx.components.length); // => 10
 Message structures use the same API:
 
 ```ts
-const adt = await profiles.events.load("2.5", "ADT_A01");
+const adt = await profiles.structures.load("2.5", "ADT_A01");
 // adt.id       === "ADT_A01"
 // adt.elements — the segments, groups, and choices, as the standard defines them
 ```
@@ -64,14 +64,14 @@ const store = createProfiles({
 | `fields.load(version, segmentId, position)` | `FieldProfile`         |
 | `datatypes.load(version, datatypeId)`       | `DatatypeDefinition`   |
 | `tables.load(version, tableId)`             | `Table`                |
-| `events.load(version, structureId)`         | `MessageStructure`     |
+| `structures.load(version, structureId)`     | `MessageStructure`     |
 | `codeSystems.load(version, codeSystemId)`   | `CodeSystemDefinition` |
 
 ### `loadSegments(version)`
 
 Standalone helper that loads every segment definition for a given version in one call. Used by batch-processing plugins.
 
-`events.load` resolves trigger-event aliases (`ADT_A04` → `ADT_A01`) unless called with `{ resolve: false }`.
+`structures.load` resolves trigger-event aliases (`ADT_A04` → `ADT_A01`) unless called with `{ resolve: false }`.
 
 ### `loadMessageStructure(tree)`
 
@@ -111,7 +111,7 @@ const structure: MessageStructure = {
 };
 ```
 
-A structure of your own works wherever a bundled one does: `runner`, `matchStructure`, and the `definition` option of `@glion/lint-profile-events-segments-order`. Both functions throw when the structure has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
+A structure of your own works wherever a bundled one does: `runner`, `matchStructure`, and the `definition` option of `@glion/lint-profile-segment-order`. Both functions throw when the structure has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
 
 ### `runner(structure)`
 
@@ -120,7 +120,7 @@ Returns a single-use runner that validates segment order against a message struc
 ```ts
 import { profiles, runner } from "@glion/profiles";
 
-const structure = await profiles.events.load("2.5", "ADT_A01");
+const structure = await profiles.structures.load("2.5", "ADT_A01");
 const automaton = runner(structure);
 automaton.consume("MSH"); // { type: "step" }
 automaton.consume("ZZZ"); // { type: "invalid", segment: "ZZZ", expected: ["EVN", "SFT"] }
@@ -136,7 +136,7 @@ Returns the segment indexes nested in the groups the message structure defines, 
 ```ts
 import { matchStructure, profiles } from "@glion/profiles";
 
-const structure = await profiles.events.load("2.5", "ORU_R01");
+const structure = await profiles.structures.load("2.5", "ORU_R01");
 matchStructure(structure, ["MSH", "PID", "OBR", "OBX"]);
 // [0, { name: "PATIENT_RESULT", children: [
 //   { name: "PATIENT", children: [1] },

@@ -114,7 +114,7 @@ describe("hl7v2LintSegmentOrder", () => {
 
       await unified()
         .use(hl7v2LintSegmentOrder, {
-          definition: () => profiles.events.load("2.5", "ADT_A01"),
+          definition: () => profiles.structures.load("2.5", "ADT_A01"),
         })
         .run(tree, file);
 
@@ -607,7 +607,7 @@ describe("hl7v2LintSegmentOrder", () => {
 
   describe("integration with real profiles", () => {
     it("validates ADT_A01 segment order", async () => {
-      const definition = await profiles.events.load("2.5", "ADT_A01");
+      const definition = await profiles.structures.load("2.5", "ADT_A01");
 
       // Valid start of ADT_A01: MSH -> EVN -> PID
       const tree = m(s("MSH"), s("EVN"), s("PID"));
@@ -625,7 +625,7 @@ describe("hl7v2LintSegmentOrder", () => {
     });
 
     it("rejects wrong segment order in ADT_A01", async () => {
-      const definition = await profiles.events.load("2.5", "ADT_A01");
+      const definition = await profiles.structures.load("2.5", "ADT_A01");
 
       // PID before EVN should be invalid in ADT_A01
       const tree = m(s("MSH"), s("PID"), s("EVN"));

@@ -60,8 +60,8 @@ export { resolveMessageStructure } from "./resolve-message-structure";
 // Profiles API types
 export type {
   CodeSystemStore,
-  EventLoadOptions,
-  EventProfileStore,
+  StructureLoadOptions,
+  StructureProfileStore,
   ProfileStore,
   Profiles,
   ProfilesOptions,

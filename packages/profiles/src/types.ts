@@ -12,7 +12,7 @@ import type { MessageStructure } from "./structure/types";
 // ---------------------------------------------------------------------------
 
 /** Options for event profile loading. */
-export type EventLoadOptions = Readonly<{
+export type StructureLoadOptions = Readonly<{
   /**
    * Whether to resolve a trigger event, such as `ADT_A04`, to the message
    * structure the event maps give it, such as `ADT_A01`. Default: `true`.
@@ -37,8 +37,8 @@ export type ProfileStore<T> = Readonly<{
   reset(): void;
 }>;
 
-/** Events store with alias resolution support. */
-export type EventProfileStore = Readonly<{
+/** The message structure store, which resolves trigger events to structures. */
+export type StructureProfileStore = Readonly<{
   /**
    * Load a message structure definition. Resolves trigger event aliases by
    * default.
@@ -46,7 +46,7 @@ export type EventProfileStore = Readonly<{
   load(
     version: string,
     id: string,
-    options?: EventLoadOptions
+    options?: StructureLoadOptions
   ): Promise<MessageStructure>;
   /** Check whether a profile is in the cache. */
   has(version: string, id: string): boolean;
@@ -76,8 +76,8 @@ export type CodeSystemStore = Readonly<{
 export type ProfilesOptions = Readonly<{
   /** Shared cache for all stores. Default: built-in LRU (10,000 entries). */
   cache?: Cache | CacheOptions | false;
-  /** Override cache for the events store. */
-  events?: { cache?: Cache | CacheOptions | false };
+  /** Override cache for the message structure store. */
+  structures?: { cache?: Cache | CacheOptions | false };
   /** Override cache for the fields store. */
   fields?: { cache?: Cache | CacheOptions | false };
   /** Override cache for the datatypes store. */
@@ -91,7 +91,7 @@ export type ProfilesOptions = Readonly<{
 /** The top-level profiles API returned by `createProfiles()`. */
 export type Profiles = Readonly<{
   /** Message structures, such as `ORU_R01`, by version and structure ID. */
-  events: EventProfileStore;
+  structures: StructureProfileStore;
   /** Segment field metadata (required, repeatable, maxLength, datatype). */
   fields: ProfileStore<FieldDefinition>;
   /** Component structure and constraints for datatypes. */

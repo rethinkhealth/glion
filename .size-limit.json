@@ -12,8 +12,8 @@
     "limit": "3 kB"
   },
   {
-    "name": "@glion/profiles: largest events chunk",
-    "path": "packages/profiles/dist/events-v2.8.2.js",
+    "name": "@glion/profiles: largest structures chunk",
+    "path": "packages/profiles/dist/structures-v2.8.2.js",
     "webpack": false,
     "limit": "20 kB"
   }

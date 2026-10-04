@@ -120,7 +120,7 @@ Linting rules and presets for HL7v2 message quality and conformance.
 - **[@glion/lint-profile-field-max-length][glion-lint-profile-field-max-length]** — enforce field value maximum lengths defined in the HL7v2 profile.
 - **[@glion/lint-profile-field-repetition][glion-lint-profile-field-repetition]** — flag non-repeatable fields that contain multiple repetitions.
 - **[@glion/lint-profile-table-values][glion-lint-profile-table-values]** — validate coded values against HL7v2 table definitions (UTG).
-- **[@glion/lint-profile-events-segments-order][glion-lint-profile-events-segments-order]** — validate segment ordering per the message structure definition.
+- **[@glion/lint-profile-segment-order][glion-lint-profile-segment-order]** — validate segment ordering per the message structure definition.
 - **[@glion/lint-profile-extra-fields][glion-lint-profile-extra-fields]** — flag segments that contain fields beyond the maximum sequence defined in the profile.
 - **[@glion/lint-profile-extra-components][glion-lint-profile-extra-components]** — flag composite fields that contain more components than the datatype profile defines.
 
@@ -197,7 +197,7 @@ This program is licensed to you under the terms of the [MIT License](https://ope
 [glion-lint-max-message-size]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-max-message-size#readme
 [glion-lint-message-version]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme
 [glion-lint-no-trailing-empty-field]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-no-trailing-empty-field#readme
-[glion-lint-profile-events-segments-order]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-events-segments-order#readme
+[glion-lint-profile-segment-order]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-segment-order#readme
 [glion-lint-profile-extra-components]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-extra-components#readme
 [glion-lint-profile-extra-fields]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-extra-fields#readme
 [glion-lint-profile-field-max-length]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-field-max-length#readme

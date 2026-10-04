@@ -4,7 +4,7 @@ import { defineConfig } from "tsdown";
 // Manifests and event maps load at import, so they match neither pattern:
 // a chunk holding one would load at import with all the data beside it.
 const VERSION_DATA =
-  /[\\/]src[\\/]profiles[\\/](v[^\\/]+)[\\/](datatypes|events|fields|tables|segments)(?:[\\/](?!manifest\.)|\.ts$)/;
+  /[\\/]src[\\/]profiles[\\/](v[^\\/]+)[\\/](datatypes|fields|segments|structures|tables)(?:[\\/](?!manifest\.)|\.ts$)/;
 const UTG_DATA = /[\\/]src[\\/]profiles[\\/]utg[\\/](?!manifest\.)/;
 
 const dataChunk = (id: string): string | null => {

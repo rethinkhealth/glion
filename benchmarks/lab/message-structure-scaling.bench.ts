@@ -4,7 +4,7 @@
  *
  * Not CodSpeed-tracked: run with `pnpm bench:lab` when touching
  * `@glion/profiles`' message structures or
- * `@glion/lint-profile-events-segments-order`.
+ * `@glion/lint-profile-segment-order`.
  *
  * The question it answers: is the engine linear in the number of segments, and
  * where is the ceiling? The engine never backtracks, so doubling the segments
@@ -31,7 +31,7 @@
  *   The engine closes and reopens nested groups constantly, its worst case.
  */
 import { parseHL7v2 as pipeline } from "@glion/hl7v2";
-import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
+import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetLintProfileRecommended from "@glion/preset-lint-profile-recommended";
 import { matchStructure, profiles, runner } from "@glion/profiles";
@@ -50,7 +50,7 @@ const PIPELINE_SIZES = [10, 30, 100, 300, 1000, 3000];
 
 // Loaded once, outside every bench: the sweep measures running a structure,
 // not loading it.
-const structure = await profiles.events.load("2.5.1", "ORU_R01");
+const structure = await profiles.structures.load("2.5.1", "ORU_R01");
 
 // A message of about `n` segments: many OBR/OBX pairs.
 const ordersMessage = (n: number): string =>

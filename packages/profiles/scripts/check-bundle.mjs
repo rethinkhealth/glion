@@ -318,12 +318,12 @@ const bundledStructures = () =>
   readdirSync(PROFILES)
     .filter((entry) => entry.startsWith("v2"))
     .flatMap((version) => {
-      const events = new URL(`${version}/events/`, PROFILES);
-      return readdirSync(events)
+      const structures = new URL(`${version}/structures/`, PROFILES);
+      return readdirSync(structures)
         .filter((file) => file.endsWith(".json"))
         .map((file) => ({
           id: file.slice(0, -".json".length),
-          url: new URL(file, events),
+          url: new URL(file, structures),
           version: version.slice(1),
         }));
     });
@@ -380,7 +380,7 @@ async function problemsInBundle() {
 
   // 3 and 4. The engine runs every structure as the reference does.
   for (const { id, version } of bundled) {
-    const structure = await profiles.events.load(version, id, {
+    const structure = await profiles.structures.load(version, id, {
       resolve: false,
     });
     const random = seeded(version.length * 31 + id.length);

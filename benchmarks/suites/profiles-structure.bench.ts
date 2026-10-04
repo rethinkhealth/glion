@@ -27,7 +27,7 @@ const symbols = (message: string): string[] =>
   );
 
 // Loaded once: loading is not measured.
-const structure = await profiles.events.load("2.5.1", "ORU_R01");
+const structure = await profiles.structures.load("2.5.1", "ORU_R01");
 
 describe("profiles-structure", () => {
   const medium = symbols(ORU_R01_MEDIUM);

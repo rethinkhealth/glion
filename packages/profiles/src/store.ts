@@ -1,5 +1,5 @@
 import type { Cache } from "./cache/types";
-import type { EventLoadOptions, ProfileStore } from "./types";
+import type { StructureLoadOptions, ProfileStore } from "./types";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -7,7 +7,7 @@ import type { EventLoadOptions, ProfileStore } from "./types";
 
 /** Configuration for a profile store. */
 export type ProfileStoreConfig<TRaw, T = TRaw> = Readonly<{
-  /** Namespace for cache keys (e.g., "events", "fields", "datatypes"). */
+  /** Namespace for cache keys (e.g., "structures", "fields", "datatypes"). */
   namespace: string;
   /** Manifest of lazy import factories, keyed by `manifestKey`. */
   manifest: Readonly<Record<string, (() => Promise<TRaw>) | undefined>>;
@@ -51,7 +51,7 @@ export const createProfileStore = <TRaw, T = TRaw>(
   const load = (
     version: string,
     id: string,
-    options?: EventLoadOptions
+    options?: StructureLoadOptions
   ): Promise<T> => {
     const resolvedId =
       options?.resolve === false ? id : (resolveId?.(version, id) ?? id);

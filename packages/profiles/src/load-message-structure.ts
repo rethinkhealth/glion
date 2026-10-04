@@ -38,5 +38,5 @@ export const loadMessageStructure = async (
     return undefined;
   }
 
-  return await profiles.events.load(version, id);
+  return await profiles.structures.load(version, id);
 };

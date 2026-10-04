@@ -26,7 +26,7 @@ const symbols = (message: string): string[] =>
   );
 
 // Loaded once: loading is not measured.
-const structure = await profiles.events.load("2.5.1", "ORU_R01");
+const structure = await profiles.structures.load("2.5.1", "ORU_R01");
 
 // One message: a new runner, then every segment. A runner is single-use, so
 // creating it is part of the cost.

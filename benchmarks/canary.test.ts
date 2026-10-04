@@ -36,7 +36,7 @@ describe("canary — suites measure real work", () => {
   });
 
   it("profiles-runner: ORU_R01 fixtures are accepted", async () => {
-    const structure = await profiles.events.load("2.5.1", "ORU_R01");
+    const structure = await profiles.structures.load("2.5.1", "ORU_R01");
     for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
       const automaton = runner(structure);
       for (const node of parseHL7v2(message).children) {
@@ -47,7 +47,7 @@ describe("canary — suites measure real work", () => {
   });
 
   it("profiles-structure: ORU_R01 fixtures group into ORDER_OBSERVATION", async () => {
-    const structure = await profiles.events.load("2.5.1", "ORU_R01");
+    const structure = await profiles.structures.load("2.5.1", "ORU_R01");
     for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
       const names = parseHL7v2(message).children.map((node) =>
         node.type === "segment" ? node.name : ""

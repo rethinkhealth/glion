@@ -42,17 +42,17 @@ Default export is a `Preset` (unified's `{ plugins: [...] }` shape). No options 
 
 The preset applies these plugins in order. `annotate-profile-context` runs first so every subsequent rule sees the resolved profile on `file.data.profile`.
 
-| Plugin                                                                               | Purpose                                                                  |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| [`@glion/annotate-profile-context`](../annotate-profile-context)                     | Loads the HL7v2 profile for the message version onto `file.data`.        |
-| [`@glion/lint-profile-required-fields`](../lint-profile-required-fields)             | Flags missing or empty required fields.                                  |
-| [`@glion/lint-profile-field-max-length`](../lint-profile-field-max-length)           | Enforces field-value `maxLength` from the profile.                       |
-| [`@glion/lint-profile-field-repetition`](../lint-profile-field-repetition)           | Flags non-repeatable fields that contain multiple repetitions.           |
-| [`@glion/lint-profile-required-components`](../lint-profile-required-components)     | Validates required components inside composite datatypes.                |
-| [`@glion/lint-profile-table-values`](../lint-profile-table-values)                   | Validates coded values against HL7 tables.                               |
-| [`@glion/lint-profile-events-segments-order`](../lint-profile-events-segments-order) | Validates segment order per the message structure definition.            |
-| [`@glion/lint-profile-extra-fields`](../lint-profile-extra-fields)                   | Warns when a segment contains more fields than the profile defines.      |
-| [`@glion/lint-profile-extra-components`](../lint-profile-extra-components)           | Warns when a composite field contains more components than its datatype. |
+| Plugin                                                                           | Purpose                                                                  |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [`@glion/annotate-profile-context`](../annotate-profile-context)                 | Loads the HL7v2 profile for the message version onto `file.data`.        |
+| [`@glion/lint-profile-required-fields`](../lint-profile-required-fields)         | Flags missing or empty required fields.                                  |
+| [`@glion/lint-profile-field-max-length`](../lint-profile-field-max-length)       | Enforces field-value `maxLength` from the profile.                       |
+| [`@glion/lint-profile-field-repetition`](../lint-profile-field-repetition)       | Flags non-repeatable fields that contain multiple repetitions.           |
+| [`@glion/lint-profile-required-components`](../lint-profile-required-components) | Validates required components inside composite datatypes.                |
+| [`@glion/lint-profile-table-values`](../lint-profile-table-values)               | Validates coded values against HL7 tables.                               |
+| [`@glion/lint-profile-segment-order`](../lint-profile-segment-order)             | Validates segment order per the message structure definition.            |
+| [`@glion/lint-profile-extra-fields`](../lint-profile-extra-fields)               | Warns when a segment contains more fields than the profile defines.      |
+| [`@glion/lint-profile-extra-components`](../lint-profile-extra-components)       | Warns when a composite field contains more components than its datatype. |
 
 The companion `@glion/preset-lint-recommended` covers the core (version-independent) lint rules; use both together for comprehensive validation.
 

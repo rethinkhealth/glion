@@ -9,14 +9,14 @@ export type StructureModule = Readonly<{ default: MessageStructure }>;
 /** Lazy loaders for the bundled message structures, keyed by file path. */
 export const structureImports: Readonly<
   Record<string, () => Promise<StructureModule>>
-> = import.meta.glob<StructureModule>("../profiles/v*/events/*.json");
+> = import.meta.glob<StructureModule>("../profiles/v*/structures/*.json");
 
 /** The path `structureImports` keys a structure by. */
 export const structurePath = (version: string, id: string): string =>
-  `../profiles/v${version}/events/${id}.json`;
+  `../profiles/v${version}/structures/${id}.json`;
 
 /** Store configuration for event (message structure) profiles. */
-export const eventsConfig: ProfileStoreConfig<
+export const structuresConfig: ProfileStoreConfig<
   StructureModule,
   MessageStructure
 > = {
@@ -28,6 +28,6 @@ export const eventsConfig: ProfileStoreConfig<
   },
   manifest: structureImports,
   manifestKey: structurePath,
-  namespace: "events",
+  namespace: "structures",
   resolveId: (version, id) => eventMaps[version]?.[id],
 };

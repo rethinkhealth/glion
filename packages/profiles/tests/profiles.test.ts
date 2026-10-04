@@ -4,10 +4,10 @@ import { loadSegments } from "../src/stores/segments";
 import { runner } from "../src/structure/runner";
 
 describe("createProfiles", () => {
-  describe("events", () => {
+  describe("structures", () => {
     it("loads a message structure by version and id", async () => {
       const profiles = createProfiles();
-      const def = await profiles.events.load("2.5", "ADT_A01");
+      const def = await profiles.structures.load("2.5", "ADT_A01");
       expect(def.id).toBe("ADT_A01");
       expect(def.elements[0]).toEqual({
         name: "MSH",
@@ -19,21 +19,21 @@ describe("createProfiles", () => {
 
     it("resolves event aliases transparently", async () => {
       const profiles = createProfiles();
-      const alias = await profiles.events.load("2.5", "ADT_A04");
-      const canonical = await profiles.events.load("2.5", "ADT_A01");
+      const alias = await profiles.structures.load("2.5", "ADT_A04");
+      const canonical = await profiles.structures.load("2.5", "ADT_A01");
       expect(alias).toBe(canonical);
     });
 
     it("supports resolve: false to skip alias resolution", async () => {
       const profiles = createProfiles();
       await expect(
-        profiles.events.load("2.5", "ADT_A04", { resolve: false })
+        profiles.structures.load("2.5", "ADT_A04", { resolve: false })
       ).rejects.toThrow();
     });
 
     it("returns a structure the runner validates against", async () => {
       const profiles = createProfiles();
-      const def = await profiles.events.load("2.5", "ADT_A01");
+      const def = await profiles.structures.load("2.5", "ADT_A01");
       const r = runner(def);
       r.consume("MSH");
       r.consume("EVN");
@@ -44,23 +44,23 @@ describe("createProfiles", () => {
 
     it("caches repeated loads", async () => {
       const profiles = createProfiles();
-      const a = await profiles.events.load("2.5", "ACK");
-      const b = await profiles.events.load("2.5", "ACK");
+      const a = await profiles.structures.load("2.5", "ACK");
+      const b = await profiles.structures.load("2.5", "ACK");
       expect(a).toBe(b);
     });
 
     it("throws for unknown profile", async () => {
       const profiles = createProfiles();
       await expect(
-        profiles.events.load("2.5", "NONEXISTENT_ZZZ")
+        profiles.structures.load("2.5", "NONEXISTENT_ZZZ")
       ).rejects.toThrow();
     });
 
     it("loads across multiple versions", async () => {
       const profiles = createProfiles();
-      const v21 = await profiles.events.load("2.1", "ADT_A01");
-      const v25 = await profiles.events.load("2.5", "ADT_A01");
-      const v282 = await profiles.events.load("2.8.2", "ADT_A01");
+      const v21 = await profiles.structures.load("2.1", "ADT_A01");
+      const v25 = await profiles.structures.load("2.5", "ADT_A01");
+      const v282 = await profiles.structures.load("2.8.2", "ADT_A01");
       expect(v21.id).toBe("ADT_A01");
       expect(v25.id).toBe("ADT_A01");
       expect(v282.id).toBe("ADT_A01");
@@ -70,42 +70,42 @@ describe("createProfiles", () => {
   describe("cache operations", () => {
     it("has() reflects cache state", async () => {
       const profiles = createProfiles();
-      expect(profiles.events.has("2.5", "ACK")).toBe(false);
-      await profiles.events.load("2.5", "ACK");
-      expect(profiles.events.has("2.5", "ACK")).toBe(true);
+      expect(profiles.structures.has("2.5", "ACK")).toBe(false);
+      await profiles.structures.load("2.5", "ACK");
+      expect(profiles.structures.has("2.5", "ACK")).toBe(true);
     });
 
     it("evict() removes a cached entry", async () => {
       const profiles = createProfiles();
-      await profiles.events.load("2.5", "ACK");
-      profiles.events.evict("2.5", "ACK");
-      expect(profiles.events.has("2.5", "ACK")).toBe(false);
+      await profiles.structures.load("2.5", "ACK");
+      profiles.structures.evict("2.5", "ACK");
+      expect(profiles.structures.has("2.5", "ACK")).toBe(false);
     });
 
-    it("events.reset() flushes only events", async () => {
-      // With shared cache, events.reset() should not affect other stores.
+    it("structures.reset() flushes only structures", async () => {
+      // With shared cache, structures.reset() should not affect other stores.
       // Since fields/datatypes have empty manifests, we test via cache keys.
       const profiles = createProfiles();
-      await profiles.events.load("2.5", "ACK");
-      await profiles.events.load("2.1", "ACK");
-      profiles.events.reset();
-      expect(profiles.events.has("2.5", "ACK")).toBe(false);
-      expect(profiles.events.has("2.1", "ACK")).toBe(false);
+      await profiles.structures.load("2.5", "ACK");
+      await profiles.structures.load("2.1", "ACK");
+      profiles.structures.reset();
+      expect(profiles.structures.has("2.5", "ACK")).toBe(false);
+      expect(profiles.structures.has("2.1", "ACK")).toBe(false);
     });
 
     it("profiles.reset() flushes all stores", async () => {
       const profiles = createProfiles();
-      await profiles.events.load("2.5", "ACK");
+      await profiles.structures.load("2.5", "ACK");
       profiles.reset();
-      expect(profiles.events.has("2.5", "ACK")).toBe(false);
+      expect(profiles.structures.has("2.5", "ACK")).toBe(false);
     });
 
     it("has() checks the raw key, not the resolved alias", async () => {
       const profiles = createProfiles();
       // ADT_A04 resolves to ADT_A01, so the cache key uses ADT_A01
-      await profiles.events.load("2.5", "ADT_A04");
-      expect(profiles.events.has("2.5", "ADT_A01")).toBe(true);
-      expect(profiles.events.has("2.5", "ADT_A04")).toBe(false);
+      await profiles.structures.load("2.5", "ADT_A04");
+      expect(profiles.structures.has("2.5", "ADT_A01")).toBe(true);
+      expect(profiles.structures.has("2.5", "ADT_A04")).toBe(false);
     });
   });
 
@@ -203,22 +203,22 @@ describe("createProfiles", () => {
   });
 
   describe("shared cache across stores", () => {
-    it("events.reset() does not affect fields cache", async () => {
+    it("structures.reset() does not affect fields cache", async () => {
       const profiles = createProfiles();
-      await profiles.events.load("2.5", "ACK");
+      await profiles.structures.load("2.5", "ACK");
       await profiles.fields.load("2.5", "PID");
-      profiles.events.reset();
-      expect(profiles.events.has("2.5", "ACK")).toBe(false);
+      profiles.structures.reset();
+      expect(profiles.structures.has("2.5", "ACK")).toBe(false);
       expect(profiles.fields.has("2.5", "PID")).toBe(true);
     });
 
     it("profiles.reset() flushes all stores", async () => {
       const profiles = createProfiles();
-      await profiles.events.load("2.5", "ACK");
+      await profiles.structures.load("2.5", "ACK");
       await profiles.fields.load("2.5", "PID");
       await profiles.datatypes.load("2.5", "CWE");
       profiles.reset();
-      expect(profiles.events.has("2.5", "ACK")).toBe(false);
+      expect(profiles.structures.has("2.5", "ACK")).toBe(false);
       expect(profiles.fields.has("2.5", "PID")).toBe(false);
       expect(profiles.datatypes.has("2.5", "CWE")).toBe(false);
     });
@@ -227,32 +227,32 @@ describe("createProfiles", () => {
   describe("cache configuration", () => {
     it("accepts cache: false to disable caching", async () => {
       const profiles = createProfiles({ cache: false });
-      const def = await profiles.events.load("2.5", "ACK");
+      const def = await profiles.structures.load("2.5", "ACK");
       expect(def.id).toBe("ACK");
-      expect(profiles.events.has("2.5", "ACK")).toBe(false);
+      expect(profiles.structures.has("2.5", "ACK")).toBe(false);
     });
 
     it("accepts CacheOptions for built-in LRU", async () => {
       const profiles = createProfiles({ cache: { maxEntries: 5 } });
-      const def = await profiles.events.load("2.5", "ACK");
+      const def = await profiles.structures.load("2.5", "ACK");
       expect(def.id).toBe("ACK");
     });
 
     it("accepts a custom Cache implementation", async () => {
       const cache = createLruCache({ maxEntries: 100 });
       const profiles = createProfiles({ cache });
-      await profiles.events.load("2.5", "ACK");
+      await profiles.structures.load("2.5", "ACK");
       // Custom cache should have the namespaced key
-      expect(cache.has("events:2.5/ACK")).toBe(true);
+      expect(cache.has("structures:2.5/ACK")).toBe(true);
     });
 
     it("supports per-domain cache override", async () => {
       const customCache = createLruCache({ maxEntries: 100 });
       const profiles = createProfiles({
-        events: { cache: customCache },
+        structures: { cache: customCache },
       });
-      await profiles.events.load("2.5", "ACK");
-      expect(customCache.has("events:2.5/ACK")).toBe(true);
+      await profiles.structures.load("2.5", "ACK");
+      expect(customCache.has("structures:2.5/ACK")).toBe(true);
     });
   });
 
