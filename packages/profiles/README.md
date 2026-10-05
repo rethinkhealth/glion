@@ -1,10 +1,10 @@
 # @glion/profiles
 
-HL7v2 profile data for each version — event schemas, segments, fields, datatypes, tables, and code systems — with cached loaders, and a runner that validates and groups a message's segments against its event schema.
+HL7v2 profile data for each version — event schemas, segments, fields, datatypes, tables, and code systems — with loaders, and a runner that validates and groups a message's segments against its event schema.
 
 ## What it does
 
-`@glion/profiles` is the data source for Glion's profile-aware plugins. It provides structured HL7v2 profile definitions for every supported version (2.1 through 2.8.2), loaded on demand and cached in memory. The annotation plugins (`@glion/annotate-profile-*`) and the profile lint rules (`@glion/lint-profile-*`) read from this package to enrich and validate HL7v2 messages against the HL7-published specifications.
+`@glion/profiles` is the data source for Glion's profile-aware plugins. It provides structured HL7v2 profile definitions for every supported version (2.1 through 2.8.2), loaded on demand, once per process. The annotation plugins (`@glion/annotate-profile-*`) and the profile lint rules (`@glion/lint-profile-*`) read from this package to enrich and validate HL7v2 messages against the HL7-published specifications.
 
 ## Install
 
@@ -33,19 +33,7 @@ runner(schema, ["MSH", "EVN", "PID", "PV1"]);
 
 ### `profiles`
 
-The default stores, sharing one LRU cache of 10,000 entries.
-
-### `createProfiles(options)`
-
-Creates stores with their own cache: a `Cache`, `CacheOptions` for the built-in LRU cache, or `false` for none, shared or per store.
-
-```ts
-import { createLruCache, createProfiles } from "@glion/profiles";
-
-const store = createProfiles({
-  cache: createLruCache({ maxEntries: 500 }),
-});
-```
+The profile stores: `events`, `fields`, `datatypes`, `tables`, and `codeSystems`.
 
 ### Stores
 
@@ -57,7 +45,7 @@ const store = createProfiles({
 | `tables.load(version, tableNumber)`   | `TableDefinition`                                                                                                 |
 | `codeSystems.load(codeSystemId)`      | `CodeSystemDefinition`                                                                                            |
 
-`load` rejects for a profile the version does not bundle. Each store also has `has(version, id)`, `evict(version, id)`, and `reset()` for its cache entries.
+`load` rejects for a profile the version does not bundle. Each profile loads once per process; later loads of it resolve the same value, and a load that fails is retried by the next call.
 
 ### `loadSegments(version)`
 
@@ -159,7 +147,7 @@ runner(schema, ["MSH", "PID", "OBR", "MSH"]);
 | `Hxx`                                           | A segment element that matches any segment ID.                                                                                                                                                      |
 | Runner (`runner`)                               | Runs a message's segment IDs through an event schema once: validates their order and groups them. Its result (`RunnerResult`) is `matched`, `mismatched`, or `incomplete`.                          |
 | Groups (`SegmentMatch`, `GroupMatch`)           | What a `matched` result carries: each segment's index in the message, nested in the group occurrences (`GroupMatch`) it belongs to.                                                                 |
-| Store (`profiles.events`, `profiles.fields`, …) | The cached loader of one kind of profile: `load(version, id)` resolves the profile, or rejects for an unknown one.                                                                                  |
+| Store (`profiles.events`, `profiles.fields`, …) | The loader of one kind of profile: `load(version, id)` resolves the profile, or rejects for an unknown one.                                                                                         |
 
 ### Naming convention
 
@@ -170,7 +158,7 @@ runner(schema, ["MSH", "PID", "OBR", "MSH"]);
 
 ## Profile data format
 
-Each kind of profile is loaded on demand, the first time it is requested, and cached.
+Each profile is loaded on demand, the first time it is requested, and kept for the life of the process.
 
 ### Segments
 

@@ -1,102 +1,53 @@
-import type { Cache } from "./cache/types";
 import type { EventLoadOptions, ProfileStore } from "./types";
 
-// ---------------------------------------------------------------------------
-// Config
-// ---------------------------------------------------------------------------
-
 /** Configuration for a profile store. */
-export type ProfileStoreConfig<TRaw, T = TRaw> = Readonly<{
-  /** Namespace for cache keys (e.g., "events", "fields", "datatypes"). */
+export type ProfileStoreConfig<TRaw extends object, T = TRaw> = Readonly<{
+  /** The kind of profile, such as `"fields"`, as it appears in errors. */
   namespace: string;
   /** The raw profile `id` of `version`, or `undefined` when none is bundled. */
   importProfile: (version: string, id: string) => Promise<TRaw | undefined>;
-  /** Optional post-import transform (e.g., build indexed Maps from raw arrays). */
+  /** The profile a raw profile compiles to, such as indexed Maps. */
   compile?: (raw: TRaw) => T;
-  /** Optional ID resolver for alias support (e.g., ADT_A04 → ADT_A01). */
+  /** The profile ID `id` resolves to in `version`, such as ADT_A04 → ADT_A01. */
   resolveId?: (version: string, id: string) => string | undefined;
 }>;
 
-// ---------------------------------------------------------------------------
-// Factory
-// ---------------------------------------------------------------------------
-
 /**
- * Create a typed, cached profile store backed by lazy imports.
+ * Creates a store that loads the profiles `config` imports.
  *
- * Each store tracks its own cache keys (via `ownKeys`) so that `reset()` only
- * flushes entries belonging to this store, even on a shared cache.
+ * Each raw profile is imported once by the module system and compiled once
+ * per process; later loads of it resolve the same value. A failed import is
+ * not kept, so the next load imports again.
  */
-export const createProfileStore = <TRaw, T = TRaw>(
-  config: ProfileStoreConfig<TRaw, T>,
-  cache: Cache | false
+export const createProfileStore = <TRaw extends object, T = TRaw>(
+  config: ProfileStoreConfig<TRaw, T>
 ): ProfileStore<T> => {
   const { namespace, importProfile, compile, resolveId } = config;
-  const ownKeys = new Set<string>();
+  const compiled = new WeakMap<TRaw, T>();
 
-  const toKey = (version: string, id: string) =>
-    `${namespace}:${version}/${id}`;
-
-  const importAndCompile = async (version: string, id: string): Promise<T> => {
-    const raw = await importProfile(version, id);
-    if (raw === undefined) {
-      throw new Error(`Unknown ${namespace} profile: v${version}/${id}`);
-    }
-    return compile ? compile(raw) : (raw as unknown as T);
-  };
-
-  const load = (
+  const load = async (
     version: string,
     id: string,
     options?: EventLoadOptions
   ): Promise<T> => {
     const resolvedId =
       options?.resolve === false ? id : (resolveId?.(version, id) ?? id);
-    const cacheKey = toKey(version, resolvedId);
-
-    if (cache) {
-      const cached = cache.get(cacheKey);
-      if (cached) {
-        return cached as Promise<T>;
-      }
+    const raw = await importProfile(version, resolvedId);
+    if (raw === undefined) {
+      throw new Error(
+        `Unknown ${namespace} profile: v${version}/${resolvedId}`
+      );
     }
-
-    const promise = importAndCompile(version, resolvedId);
-
-    if (cache) {
-      cache.set(cacheKey, promise);
-      ownKeys.add(cacheKey);
-
-      // Evict on failure — don't permanently cache rejected promises.
-      // The error handler is intentionally detached; the caller observes the
-      // original `promise` rejection, not this cleanup chain.
-      // oxlint-disable-next-line promise/prefer-await-to-then
-      const _evict = promise.catch(() => {
-        cache.delete(cacheKey);
-        ownKeys.delete(cacheKey);
-      });
+    if (!compile) {
+      return raw as unknown as T;
     }
-
-    return promise;
+    let profile = compiled.get(raw);
+    if (profile === undefined) {
+      profile = compile(raw);
+      compiled.set(raw, profile);
+    }
+    return profile;
   };
 
-  return {
-    evict: (version, id) => {
-      const key = toKey(version, id);
-      if (cache) {
-        cache.delete(key);
-      }
-      ownKeys.delete(key);
-    },
-    has: (version, id) => (cache ? cache.has(toKey(version, id)) : false),
-    load,
-    reset: () => {
-      if (cache) {
-        for (const key of ownKeys) {
-          cache.delete(key);
-        }
-      }
-      ownKeys.clear();
-    },
-  };
+  return { load };
 };
