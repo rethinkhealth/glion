@@ -62,4 +62,29 @@ describe(loadMessageStructure, () => {
   it("returns nothing when MSH-12 is empty", async () => {
     expect(await loadMessageStructure(message(""))).toBeUndefined();
   });
+
+  it("resolves nothing, and does not reject, for MSH-9.3 naming an Object.prototype key", async () => {
+    for (const key of [
+      "constructor",
+      "__proto__",
+      "toString",
+      "hasOwnProperty",
+    ]) {
+      const structure = await loadMessageStructure(
+        message("2.5", f(c("ADT"), c("A01"), c(key)))
+      );
+
+      expect(structure).toBeUndefined();
+    }
+  });
+
+  it("resolves nothing for MSH-12 naming an Object.prototype key", async () => {
+    for (const key of ["constructor", "__proto__", "toString"]) {
+      const structure = await loadMessageStructure(
+        message(key, f(c("ADT"), c("A01"), c("ADT_A01")))
+      );
+
+      expect(structure).toBeUndefined();
+    }
+  });
 });

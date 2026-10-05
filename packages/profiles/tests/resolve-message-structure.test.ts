@@ -32,4 +32,15 @@ describe("resolveMessageStructure", () => {
   it("returns undefined for empty triggerEvent", () => {
     expect(resolveMessageStructure("2.5", "ADT", "")).toBeUndefined();
   });
+
+  it("returns undefined for an event or version naming an Object.prototype key", () => {
+    expect(resolveMessageStructure("2.5", "", "_proto__")).toBeUndefined();
+    expect(
+      resolveMessageStructure("2.5", "has", "OwnProperty")
+    ).toBeUndefined();
+    expect(resolveMessageStructure("__proto__", "ADT", "A01")).toBeUndefined();
+    expect(
+      resolveMessageStructure("constructor", "ADT", "A01")
+    ).toBeUndefined();
+  });
 });

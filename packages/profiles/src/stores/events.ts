@@ -1,4 +1,4 @@
-import { eventMaps } from "../profiles/event-map-manifest";
+import { eventMapEntry } from "../resolve-message-structure";
 import type { ProfileStoreConfig } from "../store";
 import { programOf } from "../structure/compile";
 import type { MessageStructure } from "../structure/types";
@@ -29,5 +29,5 @@ export const eventsConfig: ProfileStoreConfig<
   manifest: structureImports,
   manifestKey: structurePath,
   namespace: "events",
-  resolveId: (version, id) => eventMaps[version]?.[id],
+  resolveId: eventMapEntry,
 };
