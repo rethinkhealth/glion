@@ -2,8 +2,8 @@ import type { Root } from "@glion/ast";
 import { value } from "@glion/util-query";
 
 import { eventMapEntry } from "./event-map-entry";
-import type { EventSchema } from "./event-schema/types";
 import { profiles } from "./profiles";
+import type { EventSchema } from "./types";
 
 /**
  * The schema of the event `tree` carries: its event schema.

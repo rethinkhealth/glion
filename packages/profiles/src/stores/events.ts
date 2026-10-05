@@ -1,7 +1,7 @@
+import { compile } from "../compile";
 import { eventMapEntry } from "../event-map-entry";
-import { compile } from "../event-schema/compile";
-import type { EventSchema } from "../event-schema/types";
 import type { ProfileStoreConfig } from "../store";
+import type { EventSchema } from "../types";
 
 /** A bundled event schema file. */
 export type EventSchemaModule = Readonly<{ default: EventSchema }>;

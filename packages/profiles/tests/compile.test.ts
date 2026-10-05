@@ -1,6 +1,6 @@
-import { compile } from "../../src/event-schema/compile";
-import { runner } from "../../src/event-schema/runner";
-import type { EventSchema } from "../../src/event-schema/types";
+import { compile } from "../src/compile";
+import { runner } from "../src/runner";
+import type { EventSchema } from "../src/types";
 import { ORU_R01_V2_5 } from "./fixtures";
 
 describe("compile", () => {

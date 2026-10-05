@@ -3,13 +3,13 @@ import {
   referenceMatch,
   seeded,
   validMessage,
-} from "../../scripts/check-bundle.mjs";
-import { runner } from "../../src/event-schema/runner";
+} from "../scripts/check-bundle.mjs";
+import { runner } from "../src/runner";
 import type {
   EventSchema,
   EventSchemaElement,
   SegmentMatch,
-} from "../../src/event-schema/types";
+} from "../src/types";
 import {
   ADT_A01_V2_5,
   CSU_C09_V2_5,

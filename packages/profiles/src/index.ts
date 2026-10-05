@@ -1,7 +1,7 @@
 /** Biome-ignore-all lint/performance/noBarrelFile: public API surface */
 
 // Event schemas
-export { runner } from "./event-schema/runner";
+export { runner } from "./runner";
 export type {
   ChoiceElement,
   GroupElement,
@@ -15,7 +15,7 @@ export type {
   SegmentElement,
   EventSchemaElement,
   SegmentMatch,
-} from "./event-schema/types";
+} from "./types";
 
 // Cache
 export { createLruCache } from "./cache/lru";

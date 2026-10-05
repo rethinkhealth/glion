@@ -1,6 +1,6 @@
-import { runner } from "../../src/event-schema/runner";
-import type { EventSchema } from "../../src/event-schema/types";
 import { profiles } from "../../src/profiles";
+import { runner } from "../../src/runner";
+import type { EventSchema } from "../../src/types";
 
 const accepts = (schema: EventSchema, input: readonly string[]) =>
   runner(schema, input).type === "matched";

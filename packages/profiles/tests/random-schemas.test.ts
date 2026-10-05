@@ -1,15 +1,12 @@
-import type { Random } from "../../scripts/check-bundle.mjs";
+import type { Random } from "../scripts/check-bundle.mjs";
 import {
   nearMiss,
   referenceMatch,
   seeded,
   validMessage,
-} from "../../scripts/check-bundle.mjs";
-import { runner } from "../../src/event-schema/runner";
-import type {
-  EventSchema,
-  EventSchemaElement,
-} from "../../src/event-schema/types";
+} from "../scripts/check-bundle.mjs";
+import { runner } from "../src/runner";
+import type { EventSchema, EventSchemaElement } from "../src/types";
 
 const STRUCTURES = 3000;
 const MESSAGES_PER_STRUCTURE = 12;

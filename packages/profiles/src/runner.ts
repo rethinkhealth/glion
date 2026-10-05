@@ -33,8 +33,10 @@
 // shared between threads, so a step costs one small object, not a copy.
 
 import { compile } from "./compile";
-import { ANY_SEGMENT } from "./constants";
 import type { EventSchema, RunnerResult, SegmentMatch } from "./types";
+
+// The segment ID that matches any segment in the schema.
+const ANY_SEGMENT = "Hxx";
 
 // A step in a reading's log: SEGMENT for a consumed segment, otherwise the
 // boundary of the edge taken (see EventSchemaEdge).

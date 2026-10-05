@@ -20,11 +20,11 @@
  * The engine's tests import `referenceMatch` and the message generators from
  * this file; the check itself runs only when the file is executed.
  *
- * @typedef {import("../src/event-schema/types").EventSchema} EventSchema
+ * @typedef {import("../src/types").EventSchema} EventSchema
  *
- * @typedef {import("../src/event-schema/types").EventSchemaElement} EventSchemaElement
+ * @typedef {import("../src/types").EventSchemaElement} EventSchemaElement
  *
- * @typedef {import("../src/event-schema/types").SegmentMatch} SegmentMatch
+ * @typedef {import("../src/types").SegmentMatch} SegmentMatch
  *
  * @typedef {() => number} Random
  */

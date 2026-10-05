@@ -1,6 +1,6 @@
 import { createLruCache } from "../src/cache/lru";
-import { runner } from "../src/event-schema/runner";
 import { createProfiles } from "../src/profiles";
+import { runner } from "../src/runner";
 import { loadSegments } from "../src/stores/segments";
 
 describe("createProfiles", () => {
