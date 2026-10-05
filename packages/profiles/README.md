@@ -1,10 +1,10 @@
 # @glion/profiles
 
-HL7v2 version-specific profile data — segments, fields, datatypes, and tables — with LRU-cached loaders.
+HL7v2 profile data for each version — event schemas, segments, fields, datatypes, tables, and code systems — with cached loaders, and a runner that validates and groups a message's segments against its event schema.
 
 ## What it does
 
-`@glion/profiles` is the data source for Glion's profile-aware plugins. It provides structured HL7v2 profile definitions for every supported version (2.3 through 2.8), loaded on demand and cached in memory. The annotation plugins (`@glion/annotate-profile-*`) and the profile lint rules (`@glion/lint-profile-*`) read from this package to enrich and validate HL7v2 messages against the HL7-published specifications.
+`@glion/profiles` is the data source for Glion's profile-aware plugins. It provides structured HL7v2 profile definitions for every supported version (2.1 through 2.8.2), loaded on demand and cached in memory. The annotation plugins (`@glion/annotate-profile-*`) and the profile lint rules (`@glion/lint-profile-*`) read from this package to enrich and validate HL7v2 messages against the HL7-published specifications.
 
 ## Install
 
@@ -15,38 +15,29 @@ npm install @glion/profiles
 ## Use
 
 ```ts
-import { profiles } from "@glion/profiles";
+import { profiles, runner } from "@glion/profiles";
 
-const msh = await profiles.segments.load("2.5", "MSH");
-console.log(msh.fields.length); // => 21
+const fields = await profiles.fields.load("2.5", "MSH");
+const msh9 = fields.bySequence.get(9);
+msh9?.name; // => "Message Type"
+msh9?.datatype; // => "MSG"
 
-const field = await profiles.fields.load("2.5", "MSH", "9");
-console.log(field.name); // => "Message Type"
-console.log(field.required); // => true
-console.log(field.datatype); // => "MSG"
+const schema = await profiles.events.load("2.5", "ADT_A04");
+schema.id; // => "ADT_A01", the event schema ADT^A04 uses
 
-const cx = await profiles.datatypes.load("2.5", "CX");
-console.log(cx.kind); // => "composite"
-console.log(cx.components.length); // => 10
-```
-
-Event schemas use the same API:
-
-```ts
-const adt = await profiles.events.load("2.5", "ADT_A01");
-// adt.id       === "ADT_A01"
-// adt.elements — the segments, groups, and choices, as the standard defines them
+runner(schema, ["MSH", "EVN", "PID", "PV1"]);
+// => { type: "matched", groups: [0, 1, 2, 3] }
 ```
 
 ## API
 
 ### `profiles`
 
-Shared singleton store (eager LRU cache, 100 entries per kind). Use this unless you need a bespoke cache configuration.
+The default stores, sharing one LRU cache of 10,000 entries.
 
 ### `createProfiles(options)`
 
-Construct a dedicated store with a custom cache size or eviction strategy.
+Creates stores with their own cache: a `Cache`, `CacheOptions` for the built-in LRU cache, or `false` for none, shared or per store.
 
 ```ts
 import { createLruCache, createProfiles } from "@glion/profiles";
@@ -56,22 +47,21 @@ const store = createProfiles({
 });
 ```
 
-### Loaders on each store
+### Stores
 
-| Method                                      | Returns                |
-| ------------------------------------------- | ---------------------- |
-| `segments.load(version, segmentId)`         | `SegmentDefinition`    |
-| `fields.load(version, segmentId, position)` | `FieldProfile`         |
-| `datatypes.load(version, datatypeId)`       | `DatatypeDefinition`   |
-| `tables.load(version, tableId)`             | `Table`                |
-| `events.load(version, schemaId)`            | `EventSchema`          |
-| `codeSystems.load(version, codeSystemId)`   | `CodeSystemDefinition` |
+| Method                                | Resolves                                                                                                          |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `events.load(version, id, options?)`  | `EventSchema`, by event (`ADT_A04`) or schema ID (`ADT_A01`); `{ resolve: false }` takes `id` as a schema ID only |
+| `fields.load(version, segmentId)`     | `FieldDefinition`                                                                                                 |
+| `datatypes.load(version, datatypeId)` | `DatatypeDefinition`                                                                                              |
+| `tables.load(version, tableNumber)`   | `TableDefinition`                                                                                                 |
+| `codeSystems.load(codeSystemId)`      | `CodeSystemDefinition`                                                                                            |
+
+`load` rejects for a profile the version does not bundle. Each store also has `has(version, id)`, `evict(version, id)`, and `reset()` for its cache entries.
 
 ### `loadSegments(version)`
 
-Standalone helper that loads every segment definition for a given version in one call. Used by batch-processing plugins.
-
-`events.load` resolves trigger-event aliases (`ADT_A04` → `ADT_A01`) unless called with `{ resolve: false }`.
+Resolves the segment definitions of a version: each segment ID with its title. Rejects for a version not bundled.
 
 ### `loadEventSchema(tree)`
 
@@ -140,6 +130,44 @@ runner(schema, ["MSH", "PID", "OBR", "MSH"]);
 
 `expected` is sorted; `Hxx` in a schema matches any segment ID and is listed as `Hxx`. Where the schema admits more than one grouping, the runner enters an optional element rather than skip it, repeats an element rather than leave it, and takes the earlier alternative of a choice. A group occurrence that holds no segment is left out. Runs in time proportional to the number of segments times the size of the schema.
 
+## Glossary
+
+### HL7v2 terms
+
+| Term                 | Meaning                                                                                         | In a message        |
+| -------------------- | ----------------------------------------------------------------------------------------------- | ------------------- |
+| Version              | The HL7v2 version a message follows, such as `2.5.1`. Every profile belongs to one version.     | MSH-12.1            |
+| Message type         | What kind of message it is, such as `ADT` or `ORU`.                                             | MSH-9.1             |
+| Trigger event        | What happened, such as `A04` (patient registered).                                              | MSH-9.2             |
+| Event                | A message type and trigger event together, written `ADT_A04`.                                   | MSH-9.1 and MSH-9.2 |
+| Message structure ID | The ID of the event schema a message follows, such as `ADT_A01`. Several events share one.      | MSH-9.3             |
+| Segment              | A line of a message, named by a three-character segment ID such as `PID`.                       | Each segment        |
+| Field, component     | A segment's fields, numbered from 1 (PID-3), and the components of a composite field (PID-3.1). |                     |
+| Datatype             | The type of a field or component, such as `CX` (composite) or `ST` (primitive).                 |                     |
+| Table                | A version's list of allowed codes for a field, such as table `0001` (Administrative Sex).       |                     |
+| Code system          | The HL7 Terminology (UTG) form of a table, such as `v2-0001`, the same across versions.         |                     |
+
+### Glion names
+
+| Name                                            | Meaning                                                                                                                                                                                             |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Profile                                         | The data this package bundles about one thing in one version: an event schema, a segment's fields, a datatype, a table, or the version's segments. Code systems are the one kind without a version. |
+| Event schema (`EventSchema`)                    | The structure an event's messages follow: its segments in order, nested in groups and choices, as the standard defines it. Its `id` is the message structure ID.                                    |
+| Event map (`eventMaps`)                         | For each version, the event schema ID each event and each schema ID maps to, such as `ADT_A04` → `ADT_A01`.                                                                                         |
+| Element (`EventSchemaElement`)                  | One node of an event schema: a segment (`SegmentElement`), a named group of elements (`GroupElement`), or a choice between alternatives (`ChoiceElement`).                                          |
+| Occurrence (`Occurrence`)                       | Every element's `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). An element that is neither occurs exactly once.                                                                      |
+| `Hxx`                                           | A segment element that matches any segment ID.                                                                                                                                                      |
+| Runner (`runner`)                               | Runs a message's segment IDs through an event schema once: validates their order and groups them. Its result (`RunnerResult`) is `matched`, `mismatched`, or `incomplete`.                          |
+| Groups (`SegmentMatch`, `GroupMatch`)           | What a `matched` result carries: each segment's index in the message, nested in the group occurrences (`GroupMatch`) it belongs to.                                                                 |
+| Store (`profiles.events`, `profiles.fields`, …) | The cached loader of one kind of profile: `load(version, id)` resolves the profile, or rejects for an unknown one.                                                                                  |
+
+### Naming convention
+
+- **Event** names what is keyed or looked up by trigger event: `profiles.events`, `eventMaps`, `loadEventSchema`. **Event schema** names the data an event resolves to: `EventSchema`, `event-schema.schema.json`. **Message structure** names only the MSH-9.3 value, the schema's `id`.
+- **`…Definition`** is what a store resolves: `FieldDefinition`, `DatatypeDefinition`, `TableDefinition`, `SegmentDefinition`, `CodeSystemDefinition`. **`…Profile`** and **`…Entry`** are one item inside it: `FieldProfile`, `ComponentProfile`, `SegmentProfile`, `TableCodeEntry`, `UtgCodeEntry`. **`…Module`** is the shape of a bundled data file.
+- **`…Element`** is a node of an event schema; **`…Match`** is a node of the groups a `runner` result carries.
+- A version is a string without a prefix, `"2.5.1"`. A table loads by its number, `"0001"`, while a field names it with the HL7 prefix, `"HL70001"`. A code system ID has the UTG prefix, `"v2-0001"`.
+
 ## Profile data format
 
 Each kind of profile is loaded on demand, the first time it is requested, and cached.
@@ -148,25 +176,29 @@ Each kind of profile is loaded on demand, the first time it is requested, and ca
 
 ```ts
 interface SegmentDefinition {
-  id: string; // "MSH", "PID", ...
-  name: string; // "Message Header"
-  fields: FieldProfile[]; // in positional order
+  byId: ReadonlyMap<string, { id: string; title: string }>; // "PID" → "Patient Identification"
 }
 ```
 
 ### Fields
 
 ```ts
+interface FieldDefinition {
+  segmentId: string; // "MSH"
+  bySequence: ReadonlyMap<number, FieldProfile>; // 9 → MSH-9
+  requiredSequences: ReadonlySet<number>;
+}
+
 interface FieldProfile {
+  sequence: number; // 9
   id: string; // "MSH-9"
-  name: string; // "Message Type"
-  position: number; // 9
+  name?: string; // "Message Type"
   datatype: string; // "MSG"
   required: boolean;
   repeatable: boolean;
   maxLength?: number;
   table?: string; // "HL70001" when the field is coded
-  item?: string;
+  item?: string; // the HL7 data element number
 }
 ```
 
@@ -175,9 +207,19 @@ interface FieldProfile {
 ```ts
 interface DatatypeDefinition {
   id: string; // "CX"
-  kind: "primitive" | "composite";
-  title: string;
-  components?: ComponentProfile[]; // only for composite kind
+  version: string; // "2.5"
+  kind: string; // "primitive" or "composite"
+  title?: string;
+  componentsBySequence: ReadonlyMap<number, ComponentProfile>; // empty for a primitive
+  requiredSequences: ReadonlySet<number>;
+}
+
+interface ComponentProfile {
+  sequence: number;
+  name: string;
+  datatypeId: string;
+  required: boolean;
+  maxLength?: number;
 }
 ```
 
@@ -213,9 +255,25 @@ type EventSchemaElement =
 import schema from "@glion/profiles/event-schema.schema.json" with { type: "json" };
 ```
 
-### Tables, code systems
+### Tables and code systems
 
-Same shape convention: each exposes its id, version, and the typed payload (value lists for tables, concept lists with displayNames for code systems).
+```ts
+interface TableDefinition {
+  id: string; // "0001"
+  description: string; // "Administrative Sex"
+  type: "user" | "hl7";
+  codes: ReadonlyMap<string, { name: string; description: string }>; // "F" → "Female"
+}
+
+interface CodeSystemDefinition {
+  id: string; // "v2-0001"
+  url: string;
+  oid?: string;
+  name: string;
+  title: string;
+  codes: ReadonlyMap<string, { code: string; display: string; status: string }>;
+}
+```
 
 ## Part of Glion
 
