@@ -1,11 +1,11 @@
+import { runner } from "../../src/event-schema/runner";
+import type { EventSchema } from "../../src/event-schema/types";
 import { profiles } from "../../src/profiles";
-import { runner } from "../../src/structure/runner";
-import type { MessageStructure } from "../../src/structure/types";
 
-const accepts = (structure: MessageStructure, input: readonly string[]) =>
-  runner(structure, input).type === "matched";
+const accepts = (schema: EventSchema, input: readonly string[]) =>
+  runner(schema, input).type === "matched";
 
-describe("bundled message structures", () => {
+describe("bundled event schemas", () => {
   it("reads a choice with optional members as the XML schemas encode it (#838)", async () => {
     // EHC_E01 v2.6 INVOICE_INFORMATION is an xsd:choice whose members PYE,
     // CTD, AUT, LOC, and ROL are optional: one member per message, or none.

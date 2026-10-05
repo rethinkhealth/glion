@@ -1,10 +1,10 @@
 # @glion/lint-profile-segment-order
 
-Lint rule that validates HL7v2 segment order against the message structure defined by the profile.
+Lint rule that validates HL7v2 segment order against the event schema defined by the profile.
 
 ## What it does
 
-Walks the parsed tree segment-by-segment, feeding each segment name to a runner over the message structure from `@glion/profiles`. Reports one message for the first segment that is not valid at its position, or for a message that ends before the structure is complete. When no `definition` is given, the rule resolves the structure from MSH-9 and MSH-12.
+Walks the parsed tree segment-by-segment, feeding each segment name to a runner over the event schema from `@glion/profiles`. Reports one message for the first segment that is not valid at its position, or for a message that ends before the schema is complete. When no `definition` is given, the rule resolves the schema from MSH-9 and MSH-12.
 
 ## Install
 
@@ -34,14 +34,14 @@ const file = await unified()
 console.error(reporter([file]));
 ```
 
-With a message structure of your own:
+With an event schema of your own:
 
 ```ts
 import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
-import type { MessageStructure } from "@glion/profiles";
+import type { EventSchema } from "@glion/profiles";
 import { unified } from "unified";
 
-const ADT_A01_SITE: MessageStructure = {
+const ADT_A01_SITE: EventSchema = {
   id: "ADT_A01_SITE",
   elements: [
     { type: "segment", name: "MSH", optional: false, repeating: false },
@@ -56,7 +56,7 @@ const processor = unified().use(hl7v2LintSegmentOrder, {
 });
 ```
 
-With a structure chosen per message:
+With a schema chosen per message:
 
 ```ts
 import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
@@ -81,7 +81,7 @@ A `unified` lint rule plugin.
 ```ts
 import type { Plugin } from "unified";
 import type { Root } from "@glion/ast";
-import type { MessageStructure } from "@glion/profiles";
+import type { EventSchema } from "@glion/profiles";
 import type { VFile } from "vfile";
 
 export interface SegmentOrderContext {
@@ -91,35 +91,32 @@ export interface SegmentOrderContext {
 
 export interface SegmentOrderOptions {
   /**
-   * The message structure to validate against, or a function that returns the
-   * one to use for a message. Default: the structure MSH-9 names.
+   * The event schema to validate against, or a function that returns the
+   * one to use for a message. Default: the schema MSH-9 names.
    *
    * When the function returns `undefined`, the rule reports nothing for that
    * message.
    */
   definition?:
-    | MessageStructure
+    | EventSchema
     | ((
         context: SegmentOrderContext
-      ) =>
-        | MessageStructure
-        | undefined
-        | Promise<MessageStructure | undefined>);
+      ) => EventSchema | undefined | Promise<EventSchema | undefined>);
 }
 
 declare const hl7v2LintSegmentOrder: Plugin<[SegmentOrderOptions?], Root>;
 export default hl7v2LintSegmentOrder;
 ```
 
-All messages use `ruleId: "segment-order"` and `source: "hl7v2-lint"`. The rule reports at most one order error per message: the first segment the structure does not allow.
+All messages use `ruleId: "segment-order"` and `source: "hl7v2-lint"`. The rule reports at most one order error per message: the first segment the schema does not allow.
 
 ## What it checks
 
-Segments must appear in an order the message structure allows, and the message must include every segment the structure requires.
+Segments must appear in an order the event schema allows, and the message must include every segment the schema requires.
 
 ### Valid
 
-An `ADT_A01` message whose segments follow the structure defined for v2.5:
+An `ADT_A01` message whose segments follow the schema defined for v2.5:
 
 ```hl7
 MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5
@@ -147,7 +144,7 @@ The offending segment name and the segments valid at that position, sorted, are 
 
 ### Invalid — message ended prematurely
 
-All segments were consumed but the structure still requires more; an `ADT_A01` needs a `PV1`:
+All segments were consumed but the schema still requires more; an `ADT_A01` needs a `PV1`:
 
 ```hl7
 MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5
@@ -163,9 +160,9 @@ Message ended prematurely. Expected: NK1, PD1, PV1, ROL
 
 The list is the segments valid after the last one, sorted. Only reported when no other validation error was emitted.
 
-### No structure
+### No schema
 
-When no `definition` is given and MSH-9 and MSH-12 do not name a bundled structure, or when a `definition` function returns `undefined`, the rule reports nothing.
+When no `definition` is given and MSH-9 and MSH-12 do not name a bundled schema, or when a `definition` function returns `undefined`, the rule reports nothing.
 
 ## Part of Glion
 

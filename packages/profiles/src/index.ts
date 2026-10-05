@@ -1,21 +1,21 @@
 /** Biome-ignore-all lint/performance/noBarrelFile: public API surface */
 
-// Message structures
-export { runner } from "./structure/runner";
+// Event schemas
+export { runner } from "./event-schema/runner";
 export type {
   ChoiceElement,
   GroupElement,
   GroupMatch,
-  MessageStructure,
+  EventSchema,
   Occurrence,
   RunnerIncomplete,
   RunnerMatched,
   RunnerMismatched,
   RunnerResult,
   SegmentElement,
-  StructureElement,
-  StructureMatch,
-} from "./structure/types";
+  EventSchemaElement,
+  SegmentMatch,
+} from "./event-schema/types";
 
 // Cache
 export { createLruCache } from "./cache/lru";
@@ -49,7 +49,7 @@ export type {
   UtgCodeSystemModule,
 } from "./stores/types";
 
-// Event maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
+// Event maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical schema ID)
 export { eventMaps } from "./profiles/event-map-manifest";
 
 // Resolution utilities

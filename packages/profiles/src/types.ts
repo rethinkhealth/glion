@@ -1,11 +1,11 @@
 import type { Cache, CacheOptions } from "./cache/types";
+import type { EventSchema } from "./event-schema/types";
 import type {
   CodeSystemDefinition,
   DatatypeDefinition,
   FieldDefinition,
   TableDefinition,
 } from "./stores/types";
-import type { MessageStructure } from "./structure/types";
 
 // ---------------------------------------------------------------------------
 // Load options
@@ -15,8 +15,8 @@ import type { MessageStructure } from "./structure/types";
 export type EventLoadOptions = Readonly<{
   /**
    * Whether to resolve a trigger event, such as `ADT_A04`, to the message
-   * structure the event maps give it, such as `ADT_A01`. Default: `true`.
-   * When `false`, `id` is loaded as a structure ID.
+   * schema the event maps give it, such as `ADT_A01`. Default: `true`.
+   * When `false`, `id` is loaded as a schema ID.
    */
   resolve?: boolean;
 }>;
@@ -40,14 +40,14 @@ export type ProfileStore<T> = Readonly<{
 /** Events store with alias resolution support. */
 export type EventProfileStore = Readonly<{
   /**
-   * Load a message structure definition. Resolves trigger event aliases by
+   * Load an event schema definition. Resolves trigger event aliases by
    * default.
    */
   load(
     version: string,
     id: string,
     options?: EventLoadOptions
-  ): Promise<MessageStructure>;
+  ): Promise<EventSchema>;
   /** Check whether a profile is in the cache. */
   has(version: string, id: string): boolean;
   /** Remove a single entry from the cache. */
@@ -90,11 +90,11 @@ export type ProfilesOptions = Readonly<{
 
 /** The top-level profiles API returned by `createProfiles()`. */
 export type Profiles = Readonly<{
-  /** Message structures, such as `ORU_R01`, by version and structure ID. */
+  /** Event schemas, such as `ORU_R01`, by version and schema ID. */
   events: EventProfileStore;
   /** Segment field metadata (required, repeatable, maxLength, datatype). */
   fields: ProfileStore<FieldDefinition>;
-  /** Component structure and constraints for datatypes. */
+  /** Component schema and constraints for datatypes. */
   datatypes: ProfileStore<DatatypeDefinition>;
   /** HL7-defined and user-defined table value sets. */
   tables: ProfileStore<TableDefinition>;

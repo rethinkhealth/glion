@@ -1,33 +1,31 @@
 import { eventMapEntry } from "../event-map-entry";
+import { programOf } from "../event-schema/compile";
+import type { EventSchema } from "../event-schema/types";
 import type { ProfileStoreConfig } from "../store";
-import { programOf } from "../structure/compile";
-import type { MessageStructure } from "../structure/types";
 
-/** A bundled message structure file. */
-export type StructureModule = Readonly<{ default: MessageStructure }>;
+/** A bundled event schema file. */
+export type EventSchemaModule = Readonly<{ default: EventSchema }>;
 
-/** Lazy loaders for the bundled message structures, keyed by file path. */
-export const structureImports: Readonly<
-  Record<string, () => Promise<StructureModule>>
-> = import.meta.glob<StructureModule>("../profiles/v*/events/*.json");
+/** Lazy loaders for the bundled event schemas, keyed by file path. */
+export const eventSchemaImports: Readonly<
+  Record<string, () => Promise<EventSchemaModule>>
+> = import.meta.glob<EventSchemaModule>("../profiles/v*/events/*.json");
 
-/** The path `structureImports` keys a structure by. */
-export const structurePath = (version: string, id: string): string =>
+/** The path `eventSchemaImports` keys a schema by. */
+export const eventSchemaPath = (version: string, id: string): string =>
   `../profiles/v${version}/events/${id}.json`;
 
-/** Store configuration for event (message structure) profiles. */
-export const eventsConfig: ProfileStoreConfig<
-  StructureModule,
-  MessageStructure
-> = {
-  // Compiling on load makes an invalid structure fail the load, not a later
-  // runner() call.
-  compile: ({ default: structure }) => {
-    programOf(structure);
-    return structure;
-  },
-  manifest: structureImports,
-  manifestKey: structurePath,
-  namespace: "events",
-  resolveId: eventMapEntry,
-};
+/** Store configuration for event (event schema) profiles. */
+export const eventsConfig: ProfileStoreConfig<EventSchemaModule, EventSchema> =
+  {
+    // Compiling on load makes an invalid schema fail the load, not a later
+    // runner() call.
+    compile: ({ default: schema }) => {
+      programOf(schema);
+      return schema;
+    },
+    manifest: eventSchemaImports,
+    manifestKey: eventSchemaPath,
+    namespace: "events",
+    resolveId: eventMapEntry,
+  };

@@ -1,10 +1,10 @@
-// Runs a message's segment IDs through its structure: it validates their
+// Runs a message's segment IDs through its schema: it validates their
 // order and groups them. The segment-order lint rule reads a failure; the
 // group transform reads the groups.
 //
 // The model
 //
-// compile.ts turns a structure into a program (see program.ts). A structure
+// compile.ts turns a schema into a program (see program.ts). A schema
 // often allows more than one reading: in `MSH [{NTE}] PID`, the segment after
 // MSH can be NTE or PID. The runner keeps one thread per state the reading can
 // be in, and replaces that set with each segment it consumes. A thread
@@ -34,46 +34,46 @@
 
 import { programOf } from "./compile";
 import { ANY_SEGMENT } from "./constants";
-import type { MessageStructure, RunnerResult, StructureMatch } from "./types";
+import type { EventSchema, RunnerResult, SegmentMatch } from "./types";
 
 // A step in a reading's log: SEGMENT for a consumed segment, otherwise the
-// boundary of the edge taken (see StructureEdge).
+// boundary of the edge taken (see EventSchemaEdge).
 const SEGMENT = 0;
 
 type Log = Readonly<{ step: number; previous: Log | undefined }>;
 type Thread = Readonly<{ state: number; log: Log | undefined }>;
 interface OpenGroup {
   name: string;
-  children: StructureMatch[];
+  children: SegmentMatch[];
 }
 
 /**
- * Runs the segment IDs in `input` through `structure`: validates their order
+ * Runs the segment IDs in `input` through `schema`: validates their order
  * and groups them.
  *
- * Returns `matched` with the segments grouped as the structure defines them;
- * `mismatched` with the `index` of the first segment the structure does not
+ * Returns `matched` with the segments grouped as the schema defines them;
+ * `mismatched` with the `index` of the first segment the schema does not
  * allow at its position; or `incomplete` when every segment fits but the
- * structure requires more. `expected` lists the segment IDs valid at that
+ * schema requires more. `expected` lists the segment IDs valid at that
  * point, sorted.
  *
- * Where the structure admits more than one grouping, the runner prefers, in
+ * Where the schema admits more than one grouping, the runner prefers, in
  * order: entering an optional element over skipping it, repeating an element
  * over leaving it, and the earlier alternative of a choice. A group occurrence
  * that holds no segment is left out of the groups. A segment named `Hxx` in the
- * structure matches any segment ID.
+ * schema matches any segment ID.
  *
- * Runs in time proportional to the input length times the structure size.
+ * Runs in time proportional to the input length times the schema size.
  *
- * @throws {Error} When `structure` has no elements, a segment or group has no
+ * @throws {Error} When `schema` has no elements, a segment or group has no
  *   name, a group has no elements, a choice has no alternatives, or a choice
  *   alternative can match no segment.
  */
 export function runner(
-  structure: MessageStructure,
+  schema: EventSchema,
   input: readonly string[]
 ): RunnerResult {
-  const program = programOf(structure);
+  const program = programOf(schema);
   const { edges, final, segments } = program;
   const visited = new Int32Array(segments.length).fill(-1);
   let generation = 0;
@@ -129,13 +129,13 @@ export function runner(
 function build(
   groups: readonly string[],
   log: Log | undefined
-): StructureMatch[] {
+): SegmentMatch[] {
   const steps: number[] = [];
   for (let entry = log; entry; entry = entry.previous) {
     steps.push(entry.step);
   }
 
-  const root: StructureMatch[] = [];
+  const root: SegmentMatch[] = [];
   const open: OpenGroup[] = [];
   let index = 0;
   for (const step of steps.toReversed()) {

@@ -2,24 +2,24 @@ import type { Root } from "@glion/ast";
 import { value } from "@glion/util-query";
 
 import { eventMapEntry } from "./event-map-entry";
+import type { EventSchema } from "./event-schema/types";
 import { profiles } from "./profiles";
-import type { MessageStructure } from "./structure/types";
 
 /**
- * The schema of the event `tree` carries: its message structure.
+ * The schema of the event `tree` carries: its event schema.
  *
- * Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the
+ * Reads the version from MSH-12.1, and the schema from MSH-9.3, or from the
  * event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty.
  *
  * Never rejects.
  *
  * @param tree - The message.
- * @returns The structure, or `undefined` when MSH-12 or MSH-9 is missing, or
- *   when the version defines no such structure.
+ * @returns The schema, or `undefined` when MSH-12 or MSH-9 is missing, or
+ *   when the version defines no such schema.
  */
 export const loadEventSchema = async (
   tree: Root
-): Promise<MessageStructure | undefined> => {
+): Promise<EventSchema | undefined> => {
   const version = value(tree, "MSH-12.1")?.value;
   if (!version) {
     return undefined;

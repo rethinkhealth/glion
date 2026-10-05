@@ -1,9 +1,9 @@
 /**
- * Lab sweep — how running a message structure (order and grouping) scales with
+ * Lab sweep — how running an event schema (order and grouping) scales with
  * message size, next to the stages around them.
  *
  * Not CodSpeed-tracked: run with `pnpm bench:lab` when touching
- * `@glion/profiles`' message structures or
+ * `@glion/profiles`' event schemas or
  * `@glion/lint-profile-segment-order`.
  *
  * The question it answers: is the engine linear in the number of segments, and
@@ -48,9 +48,9 @@ const ENGINE_SIZES = [10, 30, 100, 300, 1000, 3000, 10_000, 30_000, 100_000];
 const TREE_SIZES = [10, 30, 100, 300, 1000, 3000, 10_000, 30_000];
 const PIPELINE_SIZES = [10, 30, 100, 300, 1000, 3000];
 
-// Loaded once, outside every bench: the sweep measures running a structure,
+// Loaded once, outside every bench: the sweep measures running a schema,
 // not loading it.
-const structure = await profiles.events.load("2.5.1", "ORU_R01");
+const schema = await profiles.events.load("2.5.1", "ORU_R01");
 
 // A message of about `n` segments: many OBR/OBX pairs.
 const ordersMessage = (n: number): string =>
@@ -84,7 +84,7 @@ const names = (text: string) =>
 const options = (n: number) =>
   n >= 10_000 ? { iterations: 3, time: 0, warmupIterations: 1 } : { time: 200 };
 
-const lint = unified().use(hl7v2LintSegmentOrder, { definition: structure });
+const lint = unified().use(hl7v2LintSegmentOrder, { definition: schema });
 const preset = unified().use(hl7v2PresetLintProfileRecommended);
 
 // Each describe below is one table in the output: one stage, on one shape,
@@ -103,7 +103,7 @@ describe("scaling: orders | runner", () => {
     bench(
       `runner | orders n=${input.length} bytes=${text.length}`,
       () => {
-        runner(structure, input);
+        runner(schema, input);
       },
       options(n)
     );
@@ -118,7 +118,7 @@ describe("scaling: results | runner", () => {
     bench(
       `runner | results n=${input.length} bytes=${text.length}`,
       () => {
-        runner(structure, input);
+        runner(schema, input);
       },
       options(n)
     );
@@ -127,7 +127,7 @@ describe("scaling: results | runner", () => {
 
 // ---------------------------------------------------------------------------
 // Tier 2: parsing, and the segment-order lint over an already parsed tree.
-// The lint is given the structure, so resolving it from MSH-9 is not measured.
+// The lint is given the schema, so resolving it from MSH-9 is not measured.
 // ---------------------------------------------------------------------------
 
 describe("scaling: orders | parse", () => {

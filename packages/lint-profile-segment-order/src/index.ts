@@ -1,11 +1,11 @@
 import type { Nodes, Root, Segment } from "@glion/ast";
-import type { MessageStructure } from "@glion/profiles";
+import type { EventSchema } from "@glion/profiles";
 import { loadEventSchema, runner } from "@glion/profiles";
 import { SKIP, visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
 import type { VFile } from "vfile";
 
-/** The message a `definition` function chooses a message structure for. */
+/** The message a `definition` function chooses an event schema for. */
 export interface SegmentOrderContext {
   tree: Root;
   file: VFile;
@@ -16,42 +16,39 @@ export interface SegmentOrderContext {
  */
 export interface SegmentOrderOptions {
   /**
-   * The message structure to validate against, or a function that returns the
-   * one to use for a message. Default: the structure MSH-9 names.
+   * The event schema to validate against, or a function that returns the
+   * one to use for a message. Default: the schema MSH-9 names.
    *
    * When the function returns `undefined`, the rule reports nothing for that
    * message.
    */
   definition?:
-    | MessageStructure
+    | EventSchema
     | ((
         context: SegmentOrderContext
-      ) =>
-        | MessageStructure
-        | undefined
-        | Promise<MessageStructure | undefined>);
+      ) => EventSchema | undefined | Promise<EventSchema | undefined>);
 }
 
 /**
- * Lint rule that validates HL7v2 segment order against message structure
+ * Lint rule that validates HL7v2 segment order against event schema
  * profiles.
  *
- * Verifies each segment appears in the order the message structure defines.
+ * Verifies each segment appears in the order the event schema defines.
  *
  * **Resolution**: If no `definition` is provided, the rule resolves the
- * structure from MSH-12 (version) and MSH-9.3 (message structure), or MSH-9.1
- * and MSH-9.2 when MSH-9.3 is empty. If the structure is unavailable, the rule
+ * schema from MSH-12 (version) and MSH-9.3 (event schema), or MSH-9.1
+ * and MSH-9.2 when MSH-9.3 is empty. If the schema is unavailable, the rule
  * reports nothing.
  *
  * **Behavior**: Reports at most one order error per message: the first segment
- * the structure does not allow.
+ * the schema does not allow.
  *
  * @example
  *   ```typescript
- *   // With the structure MSH-9 names:
+ *   // With the schema MSH-9 names:
  *   unified().use(hl7v2LintSegmentOrder);
  *
- *   // With a structure of your own:
+ *   // With a schema of your own:
  *   unified().use(hl7v2LintSegmentOrder, {
  *     definition: {
  *       elements: [
@@ -62,7 +59,7 @@ export interface SegmentOrderOptions {
  *     },
  *   });
  *
- *   // With a structure chosen per message:
+ *   // With a schema chosen per message:
  *   unified().use(hl7v2LintSegmentOrder, {
  *     definition: ({ tree }) =>
  *       isSiteMessage(tree) ? SITE_STRUCTURE : loadEventSchema(tree),
@@ -75,12 +72,12 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
   },
   async (tree, file, options) => {
     const definition = options?.definition;
-    const structure =
+    const schema =
       typeof definition === "function"
         ? await definition({ file, tree })
         : (definition ?? (await loadEventSchema(tree)));
 
-    if (!structure) {
+    if (!schema) {
       return;
     }
 
@@ -91,7 +88,7 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
     });
 
     const result = runner(
-      structure,
+      schema,
       segments.map(({ node }) => node.name)
     );
 

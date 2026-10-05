@@ -7,9 +7,9 @@
  * RQ1 RXO ODS ODT` was accepted.
  * Cause: the profile generator compiled the standard's choice
  * `< OBR | RQD | RQ1 | RXO | ODS | ODT >` as a required sequence of all six
- * segments; it read `xsd:choice` blocks as sequences. 108 bundled structures
+ * segments; it read `xsd:choice` blocks as sequences. 108 bundled schemas
  * were affected.
- * Resolution: the generator writes each message structure as data, with a
+ * Resolution: the generator writes each event schema as data, with a
  * choice as a `choice` element, and the engine reads a choice as exactly one
  * of its alternatives.
  */

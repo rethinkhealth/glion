@@ -23,7 +23,7 @@
   },
   "files": [
     "dist",
-    "src/profiles/message-structure.schema.json"
+    "src/profiles/event-schema.schema.json"
   ],
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -36,7 +36,7 @@
       "types": "./dist/event-maps.d.ts",
       "default": "./dist/event-maps.js"
     },
-    "./message-structure.schema.json": "./src/profiles/message-structure.schema.json"
+    "./event-schema.schema.json": "./src/profiles/event-schema.schema.json"
   },
   "publishConfig": {
     "access": "public"

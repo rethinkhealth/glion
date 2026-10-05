@@ -7,7 +7,7 @@ export default mergeConfig(
     test: {
       coverage: {
         // `scripts/` is build tooling, not shipped source: the bundle check
-        // runs in `pnpm build`, over every bundled structure.
+        // runs in `pnpm build`, over every bundled schema.
         exclude: ["scripts/**", "src/profiles/**"],
       },
       name: "hl7-profiles",

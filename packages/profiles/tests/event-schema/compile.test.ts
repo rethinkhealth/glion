@@ -1,29 +1,29 @@
-import { compileStructure } from "../../src/structure/compile";
-import { runner } from "../../src/structure/runner";
-import type { MessageStructure } from "../../src/structure/types";
+import { compileEventSchema } from "../../src/event-schema/compile";
+import { runner } from "../../src/event-schema/runner";
+import type { EventSchema } from "../../src/event-schema/types";
 import { ORU_R01_V2_5 } from "./fixtures";
 
-describe("compileStructure", () => {
-  it("rejects a structure with no elements", () => {
-    expect(() => compileStructure({ elements: [], id: "ZZZ_Z10" })).toThrow(
-      "Invalid message structure ZZZ_Z10: it has no elements"
+describe("compileEventSchema", () => {
+  it("rejects a schema with no elements", () => {
+    expect(() => compileEventSchema({ elements: [], id: "ZZZ_Z10" })).toThrow(
+      "Invalid event schema ZZZ_Z10: it has no elements"
     );
   });
 
   it("rejects a segment with no name", () => {
     expect(() =>
-      compileStructure({
+      compileEventSchema({
         elements: [
           { name: "", optional: false, repeating: false, type: "segment" },
         ],
         id: "ZZZ_Z11",
       })
-    ).toThrow("Invalid message structure ZZZ_Z11: a segment has no name");
+    ).toThrow("Invalid event schema ZZZ_Z11: a segment has no name");
   });
 
   it("rejects a group with no name", () => {
     expect(() =>
-      compileStructure({
+      compileEventSchema({
         elements: [
           {
             elements: [
@@ -42,12 +42,12 @@ describe("compileStructure", () => {
         ],
         id: "ZZZ_Z12",
       })
-    ).toThrow("Invalid message structure ZZZ_Z12: a group has no name");
+    ).toThrow("Invalid event schema ZZZ_Z12: a group has no name");
   });
 
   it("rejects a group with no elements", () => {
     expect(() =>
-      compileStructure({
+      compileEventSchema({
         elements: [
           {
             elements: [],
@@ -59,12 +59,12 @@ describe("compileStructure", () => {
         ],
         id: "ZZZ_Z13",
       })
-    ).toThrow("Invalid message structure ZZZ_Z13: group VISIT has no elements");
+    ).toThrow("Invalid event schema ZZZ_Z13: group VISIT has no elements");
   });
 
   it("rejects a choice with no alternatives", () => {
     expect(() =>
-      compileStructure({
+      compileEventSchema({
         elements: [
           {
             alternatives: [],
@@ -75,14 +75,12 @@ describe("compileStructure", () => {
         ],
         id: "ZZZ_Z14",
       })
-    ).toThrow(
-      "Invalid message structure ZZZ_Z14: a choice has no alternatives"
-    );
+    ).toThrow("Invalid event schema ZZZ_Z14: a choice has no alternatives");
   });
 
   it("rejects a choice whose alternative can match no segment", () => {
     expect(() =>
-      compileStructure({
+      compileEventSchema({
         elements: [
           { name: "MSH", optional: false, repeating: false, type: "segment" },
           {
@@ -108,13 +106,13 @@ describe("compileStructure", () => {
         id: "ZZZ_Z01",
       })
     ).toThrow(
-      "Invalid message structure ZZZ_Z01: a choice alternative can match no segment"
+      "Invalid event schema ZZZ_Z01: a choice alternative can match no segment"
     );
   });
 
   it("rejects a choice whose alternative is a group of optional segments", () => {
     expect(() =>
-      compileStructure({
+      compileEventSchema({
         elements: [
           { name: "MSH", optional: false, repeating: false, type: "segment" },
           {
@@ -148,12 +146,12 @@ describe("compileStructure", () => {
         id: "ZZZ_Z02",
       })
     ).toThrow(
-      "Invalid message structure ZZZ_Z02: a choice alternative can match no segment"
+      "Invalid event schema ZZZ_Z02: a choice alternative can match no segment"
     );
   });
 
   it("accepts a choice whose alternative is a group with a required segment", () => {
-    const structure: MessageStructure = {
+    const schema: EventSchema = {
       elements: [
         {
           alternatives: [
@@ -187,14 +185,14 @@ describe("compileStructure", () => {
       id: "ZZZ_Z03",
     };
 
-    expect(runner(structure, ["OBR", "NTE"])).toEqual({
+    expect(runner(schema, ["OBR", "NTE"])).toEqual({
       groups: [{ children: [0, 1], name: "ORDER" }],
       type: "matched",
     });
   });
 
-  it("numbers groups in the order the structure lists them", () => {
-    expect(compileStructure(ORU_R01_V2_5).groups).toEqual([
+  it("numbers groups in the order the schema lists them", () => {
+    expect(compileEventSchema(ORU_R01_V2_5).groups).toEqual([
       "PATIENT_RESULT",
       "PATIENT",
       "VISIT",
@@ -206,7 +204,7 @@ describe("compileStructure", () => {
   });
 
   it("moves every segment state to the next state number", () => {
-    const program = compileStructure(ORU_R01_V2_5);
+    const program = compileEventSchema(ORU_R01_V2_5);
 
     for (const [state, segment] of program.segments.entries()) {
       if (segment !== null) {

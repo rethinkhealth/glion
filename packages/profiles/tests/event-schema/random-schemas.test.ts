@@ -5,11 +5,11 @@ import {
   seeded,
   validMessage,
 } from "../../scripts/check-bundle.mjs";
-import { runner } from "../../src/structure/runner";
+import { runner } from "../../src/event-schema/runner";
 import type {
-  MessageStructure,
-  StructureElement,
-} from "../../src/structure/types";
+  EventSchema,
+  EventSchemaElement,
+} from "../../src/event-schema/types";
 
 const STRUCTURES = 3000;
 const MESSAGES_PER_STRUCTURE = 12;
@@ -25,7 +25,7 @@ const occurrence = (random: Random) => ({
   repeating: random() < 0.4,
 });
 
-function element(depth: number, random: Random): StructureElement {
+function element(depth: number, random: Random): EventSchemaElement {
   const roll = random();
   if (depth >= MAX_DEPTH || roll < 0.5) {
     return {
@@ -46,17 +46,17 @@ function element(depth: number, random: Random): StructureElement {
   return { ...occurrence(random), alternatives: children, type: "choice" };
 }
 
-function elements(depth: number, random: Random): StructureElement[] {
+function elements(depth: number, random: Random): EventSchemaElement[] {
   const width = 1 + Math.floor(random() * MAX_WIDTH);
   return Array.from({ length: width }, () => element(depth, random));
 }
 
-const matchesNothing = (item: StructureElement): boolean =>
+const matchesNothing = (item: EventSchemaElement): boolean =>
   item.optional ||
   (item.type === "group" && item.elements.every(matchesNothing)) ||
   (item.type === "choice" && item.alternatives.some(matchesNothing));
 
-const hasEmptyAlternative = (items: readonly StructureElement[]): boolean =>
+const hasEmptyAlternative = (items: readonly EventSchemaElement[]): boolean =>
   items.some(
     (item) =>
       (item.type === "choice" &&
@@ -65,36 +65,36 @@ const hasEmptyAlternative = (items: readonly StructureElement[]): boolean =>
       (item.type === "group" && hasEmptyAlternative(item.elements))
   );
 
-describe("runner on random structures", () => {
-  it("agrees with the reference parser on nested, nullable, and ambiguous structures", () => {
+describe("runner on random schemas", () => {
+  it("agrees with the reference parser on nested, nullable, and ambiguous schemas", () => {
     const random = seeded(20_260_919);
     const disagreements: string[] = [];
     let compared = 0;
 
     for (let s = 0; s < STRUCTURES; s += 1) {
-      const structure: MessageStructure = {
+      const schema: EventSchema = {
         elements: [
           { name: "MSH", optional: false, repeating: false, type: "segment" },
           ...elements(0, random),
         ],
         id: `R${s}`,
       };
-      if (hasEmptyAlternative(structure.elements)) {
+      if (hasEmptyAlternative(schema.elements)) {
         continue;
       }
       compared += 1;
 
       for (let n = 0; n < MESSAGES_PER_STRUCTURE; n += 1) {
-        const valid = validMessage(structure, random).slice(0, 14);
+        const valid = validMessage(schema, random).slice(0, 14);
         for (const input of [valid, nearMiss(valid, NAMES, random)]) {
-          const result = runner(structure, input);
+          const result = runner(schema, input);
           const got = JSON.stringify(
             result.type === "matched" ? result.groups : undefined
           );
-          const want = JSON.stringify(referenceMatch(structure, input));
+          const want = JSON.stringify(referenceMatch(schema, input));
           if (got !== want && disagreements.length < 5) {
             disagreements.push(
-              `${JSON.stringify(structure.elements)} on ${input.join(" ")}: vm ${got} ref ${want}`
+              `${JSON.stringify(schema.elements)} on ${input.join(" ")}: vm ${got} ref ${want}`
             );
           }
         }

@@ -36,12 +36,12 @@ describe("canary — suites measure real work", () => {
   });
 
   it("profiles-runner: ORU_R01 fixtures match and group into ORDER_OBSERVATION", async () => {
-    const structure = await profiles.events.load("2.5.1", "ORU_R01");
+    const schema = await profiles.events.load("2.5.1", "ORU_R01");
     for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
       const segmentIds = parseHL7v2(message).children.map((node) =>
         node.type === "segment" ? node.name : ""
       );
-      const result = runner(structure, segmentIds);
+      const result = runner(schema, segmentIds);
       expect(result.type).toBe("matched");
       expect(JSON.stringify(result)).toContain('"name":"ORDER_OBSERVATION"');
     }

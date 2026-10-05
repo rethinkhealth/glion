@@ -30,7 +30,7 @@ console.log(cx.kind); // => "composite"
 console.log(cx.components.length); // => 10
 ```
 
-Message structures use the same API:
+Event schemas use the same API:
 
 ```ts
 const adt = await profiles.events.load("2.5", "ADT_A01");
@@ -64,7 +64,7 @@ const store = createProfiles({
 | `fields.load(version, segmentId, position)` | `FieldProfile`         |
 | `datatypes.load(version, datatypeId)`       | `DatatypeDefinition`   |
 | `tables.load(version, tableId)`             | `Table`                |
-| `events.load(version, structureId)`         | `MessageStructure`     |
+| `events.load(version, schemaId)`            | `EventSchema`          |
 | `codeSystems.load(version, codeSystemId)`   | `CodeSystemDefinition` |
 
 ### `loadSegments(version)`
@@ -75,24 +75,24 @@ Standalone helper that loads every segment definition for a given version in one
 
 ### `loadEventSchema(tree)`
 
-Returns the schema of the event a parsed message carries, its message structure, or `undefined` when MSH-12 or MSH-9 is missing or the version defines no such structure. Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty. Never rejects.
+Returns the schema of the event a parsed message carries, or `undefined` when MSH-12 or MSH-9 is missing or the version defines no such schema. Reads the version from MSH-12.1, and the schema from MSH-9.3, or from the event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty. Never rejects.
 
 ```ts
 import { loadEventSchema } from "@glion/profiles";
 import { parseHL7v2 } from "@glion/parser";
 
-const structure = await loadEventSchema(parseHL7v2(message));
-// structure?.id === "ADT_A01"
+const schema = await loadEventSchema(parseHL7v2(message));
+// schema?.id === "ADT_A01"
 ```
 
-### A message structure of your own
+### An event schema of your own
 
-A `MessageStructure` is plain data, the shape `message-structure.schema.json` describes: `segment`, `group`, and `choice` elements, each with `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). `runner` takes it as it takes a bundled one.
+An `EventSchema` is plain data, the shape `event-schema.schema.json` describes: `segment`, `group`, and `choice` elements, each with `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). `runner` takes it as it takes a bundled one.
 
 ```ts
-import type { MessageStructure } from "@glion/profiles";
+import type { EventSchema } from "@glion/profiles";
 
-const structure: MessageStructure = {
+const schema: EventSchema = {
   id: "ADT_A01_SITE",
   elements: [
     { type: "segment", name: "MSH", optional: false, repeating: false },
@@ -111,34 +111,34 @@ const structure: MessageStructure = {
 };
 ```
 
-A structure of your own works wherever a bundled one does: `runner` and the `definition` option of `@glion/lint-profile-segment-order`. `runner` throws when the structure has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
+A schema of your own works wherever a bundled one does: `runner` and the `definition` option of `@glion/lint-profile-segment-order`. `runner` throws when the schema has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
 
-### `runner(structure, segmentIds)`
+### `runner(schema, segmentIds)`
 
-Runs a message's segment IDs through a message structure: validates their order and groups them. Returns one of:
+Runs a message's segment IDs through an event schema: validates their order and groups them. Returns one of:
 
-| `type`         | Fields                                                                                | When                                                   |
-| -------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `"matched"`    | `groups`: the segment indexes nested in the groups the structure defines              | the segments fit the structure                         |
-| `"mismatched"` | `index`: the first segment that does not fit; `expected`: the segment IDs valid there | a segment the structure does not allow at its position |
-| `"incomplete"` | `expected`: the segment IDs that can come next                                        | every segment fits, but the structure requires more    |
+| `type`         | Fields                                                                                | When                                                |
+| -------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `"matched"`    | `groups`: the segment indexes nested in the groups the schema defines                 | the segments fit the schema                         |
+| `"mismatched"` | `index`: the first segment that does not fit; `expected`: the segment IDs valid there | a segment the schema does not allow at its position |
+| `"incomplete"` | `expected`: the segment IDs that can come next                                        | every segment fits, but the schema requires more    |
 
 ```ts
 import { profiles, runner } from "@glion/profiles";
 
-const structure = await profiles.events.load("2.5", "ORU_R01");
+const schema = await profiles.events.load("2.5", "ORU_R01");
 
-runner(structure, ["MSH", "PID", "OBR", "OBX"]);
+runner(schema, ["MSH", "PID", "OBR", "OBX"]);
 // { type: "matched", groups: [0, { name: "PATIENT_RESULT", children: [
 //   { name: "PATIENT", children: [1] },
 //   { name: "ORDER_OBSERVATION", children: [2, { name: "OBSERVATION", children: [3] }] },
 // ] }] }
 
-runner(structure, ["MSH", "PID", "OBR", "MSH"]);
+runner(schema, ["MSH", "PID", "OBR", "MSH"]);
 // { type: "mismatched", index: 3, expected: ["NTE", "OBX", …] }
 ```
 
-`expected` is sorted; `Hxx` in a structure matches any segment ID and is listed as `Hxx`. Where the structure admits more than one grouping, the runner enters an optional element rather than skip it, repeats an element rather than leave it, and takes the earlier alternative of a choice. A group occurrence that holds no segment is left out. Runs in time proportional to the number of segments times the size of the structure.
+`expected` is sorted; `Hxx` in a schema matches any segment ID and is listed as `Hxx`. Where the schema admits more than one grouping, the runner enters an optional element rather than skip it, repeats an element rather than leave it, and takes the earlier alternative of a choice. A group occurrence that holds no segment is left out. Runs in time proportional to the number of segments times the size of the schema.
 
 ## Profile data format
 
@@ -181,36 +181,36 @@ interface DatatypeDefinition {
 }
 ```
 
-### Message structures
+### Event schemas
 
 ```ts
-type MessageStructure = { id: string; elements: StructureElement[] };
+type EventSchema = { id: string; elements: EventSchemaElement[] };
 
-type StructureElement =
+type EventSchemaElement =
   | { type: "segment"; name: string; optional: boolean; repeating: boolean }
   | {
       type: "group";
       name: string;
       optional: boolean;
       repeating: boolean;
-      elements: StructureElement[];
+      elements: EventSchemaElement[];
     }
   | {
       type: "choice";
       optional: boolean;
       repeating: boolean;
-      alternatives: StructureElement[];
+      alternatives: EventSchemaElement[];
     };
 ```
 
 `optional` is the standard's `[ ]` and `repeating` its `{ }`. A `choice` is the standard's `< A | B >`: exactly one alternative per occurrence, and every alternative matches at least one segment.
 
-### Message structure JSON Schema
+### Event schema JSON Schema
 
-`@glion/profiles/message-structure.schema.json` is the JSON Schema (draft-07) of a message structure, with `$id` `https://glion.dev/schemas/message-structure/v1.json`. Every bundled structure names it by that `$id` in `$schema` and conforms to it. The schema checks the shape; `runner` also requires that every choice alternative matches at least one segment.
+`@glion/profiles/event-schema.schema.json` is the JSON Schema (draft-07) of an event schema, with `$id` `https://glion.dev/schemas/event-schema/v1.json`. Every bundled schema names it by that `$id` in `$schema` and conforms to it. The schema checks the shape; `runner` also requires that every choice alternative matches at least one segment.
 
 ```ts
-import schema from "@glion/profiles/message-structure.schema.json" with { type: "json" };
+import schema from "@glion/profiles/event-schema.schema.json" with { type: "json" };
 ```
 
 ### Tables, code systems

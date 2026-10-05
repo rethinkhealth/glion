@@ -4,12 +4,12 @@ import {
   seeded,
   validMessage,
 } from "../../scripts/check-bundle.mjs";
-import { runner } from "../../src/structure/runner";
+import { runner } from "../../src/event-schema/runner";
 import type {
-  MessageStructure,
-  StructureElement,
-  StructureMatch,
-} from "../../src/structure/types";
+  EventSchema,
+  EventSchemaElement,
+  SegmentMatch,
+} from "../../src/event-schema/types";
 import {
   ADT_A01_V2_5,
   CSU_C09_V2_5,
@@ -20,12 +20,12 @@ import {
   PPP_PCB_V2_3_1,
 } from "./fixtures";
 
-const g = (name: string, ...children: StructureMatch[]) => ({
+const g = (name: string, ...children: SegmentMatch[]) => ({
   children,
   name,
 });
 
-const structureOf = (...elements: StructureElement[]): MessageStructure => ({
+const schemaOf = (...elements: EventSchemaElement[]): EventSchema => ({
   elements,
   id: "TEST",
 });
@@ -33,35 +33,35 @@ const structureOf = (...elements: StructureElement[]): MessageStructure => ({
 const segment = (
   name: string,
   { optional = false, repeating = false } = {}
-): StructureElement => ({ name, optional, repeating, type: "segment" });
+): EventSchemaElement => ({ name, optional, repeating, type: "segment" });
 
-/** The groups when `message` fits `structure`, else `undefined`. */
-const groupsOf = (structure: MessageStructure, input: readonly string[]) => {
-  const result = runner(structure, input);
+/** The groups when `message` fits `schema`, else `undefined`. */
+const groupsOf = (schema: EventSchema, input: readonly string[]) => {
+  const result = runner(schema, input);
   return result.type === "matched" ? result.groups : undefined;
 };
 
-const match = (structure: MessageStructure, message: string) =>
-  groupsOf(structure, message.split(" "));
+const match = (schema: EventSchema, message: string) =>
+  groupsOf(schema, message.split(" "));
 
 describe("runner: segment order", () => {
-  it("matches segments in the order the structure defines", () => {
+  it("matches segments in the order the schema defines", () => {
     expect(
-      runner(structureOf(segment("MSH"), segment("PID")), ["MSH", "PID"])
+      runner(schemaOf(segment("MSH"), segment("PID")), ["MSH", "PID"])
     ).toEqual({
       groups: [0, 1],
       type: "matched",
     });
   });
 
-  it("reports the first segment the structure does not allow there, and what it expected", () => {
-    const structure = structureOf(
+  it("reports the first segment the schema does not allow there, and what it expected", () => {
+    const schema = schemaOf(
       segment("MSH"),
       segment("EVN"),
       segment("SFT", { optional: true })
     );
 
-    expect(runner(structure, ["MSH", "PID", "EVN"])).toEqual({
+    expect(runner(schema, ["MSH", "PID", "EVN"])).toEqual({
       expected: ["EVN"],
       index: 1,
       type: "mismatched",
@@ -70,7 +70,7 @@ describe("runner: segment order", () => {
 
   it("reports a mismatch at the first segment", () => {
     expect(
-      runner(structureOf(segment("MSH"), segment("PID")), ["PV1", "MSH"])
+      runner(schemaOf(segment("MSH"), segment("PID")), ["PV1", "MSH"])
     ).toEqual({
       expected: ["MSH"],
       index: 0,
@@ -79,46 +79,42 @@ describe("runner: segment order", () => {
   });
 
   it("reports an incomplete message, and what can come next", () => {
-    expect(
-      runner(structureOf(segment("MSH"), segment("PID")), ["MSH"])
-    ).toEqual({
+    expect(runner(schemaOf(segment("MSH"), segment("PID")), ["MSH"])).toEqual({
       expected: ["PID"],
       type: "incomplete",
     });
   });
 
-  it("reports an empty message as incomplete when the structure requires a segment", () => {
-    expect(runner(structureOf(segment("MSH")), [])).toEqual({
+  it("reports an empty message as incomplete when the schema requires a segment", () => {
+    expect(runner(schemaOf(segment("MSH")), [])).toEqual({
       expected: ["MSH"],
       type: "incomplete",
     });
   });
 
   it("matches a repeating segment any number of times", () => {
-    const structure = structureOf(
+    const schema = schemaOf(
       segment("MSH"),
       segment("OBX", { repeating: true })
     );
 
-    expect(runner(structure, ["MSH", "OBX"]).type).toBe("matched");
-    expect(runner(structure, ["MSH", "OBX", "OBX", "OBX"]).type).toBe(
-      "matched"
-    );
+    expect(runner(schema, ["MSH", "OBX"]).type).toBe("matched");
+    expect(runner(schema, ["MSH", "OBX", "OBX", "OBX"]).type).toBe("matched");
   });
 
   it("matches a message with or without an optional segment", () => {
-    const structure = structureOf(
+    const schema = schemaOf(
       segment("MSH"),
       segment("SFT", { optional: true }),
       segment("EVN")
     );
 
-    expect(runner(structure, ["MSH", "EVN"]).type).toBe("matched");
-    expect(runner(structure, ["MSH", "SFT", "EVN"]).type).toBe("matched");
+    expect(runner(schema, ["MSH", "EVN"]).type).toBe("matched");
+    expect(runner(schema, ["MSH", "SFT", "EVN"]).type).toBe("matched");
   });
 
   it("lists every segment that can come next, across optional elements and groups, sorted", () => {
-    const structure = structureOf(
+    const schema = schemaOf(
       segment("MSH"),
       segment("SFT", { optional: true, repeating: true }),
       {
@@ -131,47 +127,47 @@ describe("runner: segment order", () => {
       segment("DG1")
     );
 
-    expect(runner(structure, ["MSH"])).toEqual({
+    expect(runner(schema, ["MSH"])).toEqual({
       expected: ["DG1", "PV1", "SFT"],
       type: "incomplete",
     });
   });
 
   it("matches exactly one alternative of a choice", () => {
-    const structure = structureOf(segment("ORC"), {
+    const schema = schemaOf(segment("ORC"), {
       alternatives: [segment("OBR"), segment("RXO")],
       optional: false,
       repeating: false,
       type: "choice",
     });
 
-    expect(runner(structure, ["ORC", "OBR"]).type).toBe("matched");
-    expect(runner(structure, ["ORC", "OBR", "RXO"])).toEqual({
+    expect(runner(schema, ["ORC", "OBR"]).type).toBe("matched");
+    expect(runner(schema, ["ORC", "OBR", "RXO"])).toEqual({
       expected: [],
       index: 2,
       type: "mismatched",
     });
   });
 
-  it("matches any segment in an Hxx position, including one the structure names elsewhere", () => {
-    const structure = structureOf(
+  it("matches any segment in an Hxx position, including one the schema names elsewhere", () => {
+    const schema = schemaOf(
       segment("MSH"),
       segment("Hxx", { optional: true }),
       segment("RCP")
     );
 
-    expect(runner(structure, ["MSH", "RCP", "RCP"]).type).toBe("matched");
-    expect(runner(structure, ["MSH", "ZQP", "RCP"]).type).toBe("matched");
+    expect(runner(schema, ["MSH", "RCP", "RCP"]).type).toBe("matched");
+    expect(runner(schema, ["MSH", "ZQP", "RCP"]).type).toBe("matched");
   });
 
   it("lists Hxx among the expected segments", () => {
-    const structure = structureOf(
+    const schema = schemaOf(
       segment("MSH"),
       segment("Hxx", { optional: true }),
       segment("RCP")
     );
 
-    expect(runner(structure, ["MSH"])).toEqual({
+    expect(runner(schema, ["MSH"])).toEqual({
       expected: ["Hxx", "RCP"],
       type: "incomplete",
     });
@@ -190,7 +186,7 @@ describe("runner: grouping", () => {
     ]);
   });
 
-  it("names groups at every depth of a five-level structure", () => {
+  it("names groups at every depth of a five-level schema", () => {
     expect(match(PPP_PCB_V2_3_1, "MSH PID PTH PRB ORC OBR OBX")).toEqual([
       0,
       1,
@@ -219,7 +215,7 @@ describe("runner: grouping", () => {
   });
 
   it("places a segment by the segments that follow it", () => {
-    const schedule = (...children: StructureMatch[]) => [
+    const schedule = (...children: SegmentMatch[]) => [
       0,
       g("PATIENT", 1, 2, g("STUDY_PHASE", g("STUDY_SCHEDULE", ...children))),
     ];
@@ -241,7 +237,7 @@ describe("runner: grouping", () => {
     );
   });
 
-  it("continues the current group where the structure also allows a new enclosing one", () => {
+  it("continues the current group where the schema also allows a new enclosing one", () => {
     expect(match(ORU_R01_V2_5, "MSH PID OBR OBX ORC OBR")).toEqual([
       0,
       g(
@@ -277,7 +273,7 @@ describe("runner: grouping", () => {
     ]);
   });
 
-  it("matches any segment where the structure has Hxx", () => {
+  it("matches any segment where the schema has Hxx", () => {
     expect(match(MFN_M01_V2_5, "MSH MFI MFE ZL7")).toEqual([
       0,
       1,
@@ -293,7 +289,7 @@ describe("runner: grouping", () => {
     expect(runner(ORU_R01_V2_5, []).type).toBe("incomplete");
   });
 
-  it("forms no groups for a segment the structure does not allow there", () => {
+  it("forms no groups for a segment the schema does not allow there", () => {
     expect(runner(ORU_R01_V2_5, ["MSH", "PID", "OBR", "MSH"])).toMatchObject({
       index: 3,
       type: "mismatched",
@@ -303,7 +299,7 @@ describe("runner: grouping", () => {
 
 describe("runner agrees with the reference parser", () => {
   const MESSAGES_PER_STRUCTURE = 300;
-  const structures = [
+  const schemas = [
     ORU_R01_V2_5,
     ADT_A01_V2_5,
     ORM_O01_V2_5,
@@ -313,22 +309,18 @@ describe("runner agrees with the reference parser", () => {
     PPP_PCB_V2_3_1,
   ];
 
-  for (const structure of structures) {
-    it(`on valid messages and near misses for ${structure.id}`, () => {
-      const random = seeded(structure.id.length * 7919);
-      const names = [...new Set(validMessage(structure, random)), "ZZ1"];
+  for (const schema of schemas) {
+    it(`on valid messages and near misses for ${schema.id}`, () => {
+      const random = seeded(schema.id.length * 7919);
+      const names = [...new Set(validMessage(schema, random)), "ZZ1"];
 
       for (let n = 0; n < MESSAGES_PER_STRUCTURE; n += 1) {
-        const valid = validMessage(structure, random);
+        const valid = validMessage(schema, random);
         const miss = nearMiss(valid, names, random);
 
-        expect(groupsOf(structure, valid)).toEqual(
-          referenceMatch(structure, valid)
-        );
-        expect(groupsOf(structure, valid)).toBeDefined();
-        expect(groupsOf(structure, miss)).toEqual(
-          referenceMatch(structure, miss)
-        );
+        expect(groupsOf(schema, valid)).toEqual(referenceMatch(schema, valid));
+        expect(groupsOf(schema, valid)).toBeDefined();
+        expect(groupsOf(schema, miss)).toEqual(referenceMatch(schema, miss));
       }
     });
   }

@@ -1,36 +1,39 @@
 /**
- * The public types of message structures, in two parts:
+ * The public types of event schemas, in two parts:
  *
- * - **Message structure**: a structure as the HL7v2 standard defines it, such as
- *   `ORU_R01`. A tree of elements: segments, groups of elements, and choices
- *   between elements. Plain data; `message-structure.schema.json` describes the
- *   same shape.
+ * - **Event schema**: the schema of an HL7v2 event, its message structure as the
+ *   standard defines it, such as `ORU_R01`. A tree of elements: segments,
+ *   groups of elements, and choices between elements. Plain data;
+ *   `event-schema.schema.json` describes the same shape.
  * - **Runner result**: what `runner()` returns: the segment indexes of a message
- *   nested in the groups the structure defines, or where the message stops
- *   fitting the structure.
+ *   nested in the groups the schema defines, or where the message stops fitting
+ *   the schema.
  *
  * @module
  */
 
 // ---------------------------------------------------------------------------
-// Message structure
+// Event schema
 // ---------------------------------------------------------------------------
 
-/** A message structure, such as `ORU_R01`, as the HL7v2 standard defines it. */
-export type MessageStructure = Readonly<{
-  /** The JSON Schema the structure conforms to. */
+/**
+ * The schema of an HL7v2 event: its message structure, such as `ORU_R01`, as
+ * the standard defines it.
+ */
+export type EventSchema = Readonly<{
+  /** The JSON Schema this event schema conforms to. */
   $schema?: string;
   /** The message structure ID, as carried in MSH-9.3, such as `ORU_R01`. */
   id: string;
   /** The top-level elements, in the standard's order. At least one. */
-  elements: readonly StructureElement[];
+  elements: readonly EventSchemaElement[];
 }>;
 
 /**
- * One element of a message structure, discriminated by `type`: a segment, a
+ * One element of an event schema, discriminated by `type`: a segment, a
  * group, or a choice.
  */
-export type StructureElement = SegmentElement | GroupElement | ChoiceElement;
+export type EventSchemaElement = SegmentElement | GroupElement | ChoiceElement;
 
 /**
  * How often an element occurs. Every element carries both flags: an element
@@ -58,7 +61,7 @@ export type GroupElement = Occurrence &
     /** The group name, such as `PATIENT_RESULT`. */
     name: string;
     /** The elements of the group, in order. At least one. */
-    elements: readonly StructureElement[];
+    elements: readonly EventSchemaElement[];
   }>;
 
 /** A choice, the standard's `< A | B >`. */
@@ -70,7 +73,7 @@ export type ChoiceElement = Occurrence &
      * matches exactly one. At least one alternative; every alternative MUST
      * match at least one segment.
      */
-    alternatives: readonly StructureElement[];
+    alternatives: readonly EventSchemaElement[];
   }>;
 
 // ---------------------------------------------------------------------------
@@ -81,19 +84,19 @@ export type ChoiceElement = Occurrence &
  * One node of a match: the index of a segment in the matched input, or a
  * group occurrence.
  */
-export type StructureMatch = number | GroupMatch;
+export type SegmentMatch = number | GroupMatch;
 
 /** What `runner()` returns, discriminated by `type`. */
 export type RunnerResult = RunnerMatched | RunnerMismatched | RunnerIncomplete;
 
-/** The segments fit the structure. */
+/** The segments fit the schema. */
 export type RunnerMatched = Readonly<{
   type: "matched";
   /** The segment indexes and group occurrences, in input order. */
-  groups: readonly StructureMatch[];
+  groups: readonly SegmentMatch[];
 }>;
 
-/** A segment the structure does not allow at its position. */
+/** A segment the schema does not allow at its position. */
 export type RunnerMismatched = Readonly<{
   type: "mismatched";
   /** The index in the input of the first segment that does not fit. */
@@ -102,7 +105,7 @@ export type RunnerMismatched = Readonly<{
   expected: readonly string[];
 }>;
 
-/** Every segment fits, but the structure requires more. */
+/** Every segment fits, but the schema requires more. */
 export type RunnerIncomplete = Readonly<{
   type: "incomplete";
   /** The segment IDs valid after the last segment, sorted. */
@@ -114,5 +117,5 @@ export type GroupMatch = Readonly<{
   /** The group name, such as `PATIENT_RESULT`. */
   name: string;
   /** The segment indexes and nested group occurrences, in input order. */
-  children: readonly StructureMatch[];
+  children: readonly SegmentMatch[];
 }>;

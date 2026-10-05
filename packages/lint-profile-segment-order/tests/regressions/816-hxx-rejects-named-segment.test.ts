@@ -4,12 +4,12 @@
  * Date: 2026-09-19
  * Symptom: in HL7 v2.8.1 QBP_Q11 (`MSH [{SFT}] [UAC] QPD [QBP] RCP [DSC]`,
  * where the optional group QBP holds one optional `Hxx`), a segment the
- * structure names elsewhere, such as `RCP`, was rejected in the `Hxx` (any
+ * schema names elsewhere, such as `RCP`, was rejected in the `Hxx` (any
  * segment) position.
  * Cause: the generator compiled `Hxx` as a symbol of its own, and the runner
  * takes a concrete segment's transition before `Hxx`, so the wildcard reading
- * of `RCP` was never considered. 32 bundled structures were affected.
- * Resolution: the runner follows every state the structure can be in at
+ * of `RCP` was never considered. 32 bundled schemas were affected.
+ * Resolution: the runner follows every state the schema can be in at
  * once, so a segment is read both as itself and as `Hxx`.
  */
 
@@ -37,7 +37,7 @@ const lint = async (...segments: string[]) => {
 };
 
 describe("QBP_Q11 Hxx position", () => {
-  it("accepts a segment the structure names elsewhere in the Hxx position", async () => {
+  it("accepts a segment the schema names elsewhere in the Hxx position", async () => {
     expect(await lint("QPD|Q11|Q1", "RCP|I", "RCP|I")).toEqual([]);
   });
 

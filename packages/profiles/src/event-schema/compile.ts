@@ -1,4 +1,4 @@
-// Compiles a message structure into a program: a Thompson NFA over segment
+// Compiles an event schema into a program: a Thompson NFA over segment
 // names, stored as plain arrays. `runner()` runs it.
 //
 // The program
@@ -48,14 +48,14 @@
 // 0 is the sequence's entry. 5 and 6 are the wrapper occurrences() put around
 // NTE because it is optional and repeating; MSH is neither and gets none.
 
-import type { StructureEdge, StructureProgram } from "./program";
-import type { MessageStructure, StructureElement } from "./types";
+import type { EventSchemaEdge, EventSchemaProgram } from "./program";
+import type { EventSchema, EventSchemaElement } from "./types";
 
 /** A compiled element: enter at `start`, leave from `end`. */
 type Fragment = readonly [start: number, end: number];
 
 /** Whether `element` can match zero segments. */
-const canMatchNothing = (element: StructureElement): boolean => {
+const canMatchNothing = (element: EventSchemaElement): boolean => {
   if (element.optional) {
     return true;
   }
@@ -73,25 +73,23 @@ const canMatchNothing = (element: StructureElement): boolean => {
 };
 
 /**
- * Compiles `structure` into the program `runner()` runs.
+ * Compiles `schema` into the program `runner()` runs.
  *
  * The program prefers, in order: entering an optional element over skipping
  * it, repeating an element over leaving it, and earlier choice alternatives
  * over later ones.
  *
- * @throws {Error} When `structure` has no elements, a segment or group has no
+ * @throws {Error} When `schema` has no elements, a segment or group has no
  *   name, a group has no elements, a choice has no alternatives, or a choice
  *   alternative can match no segment.
  */
-export function compileStructure(
-  structure: MessageStructure
-): StructureProgram {
+export function compileEventSchema(schema: EventSchema): EventSchemaProgram {
   const invalid = (reason: string): Error =>
-    new Error(`Invalid message structure ${structure.id}: ${reason}`);
+    new Error(`Invalid event schema ${schema.id}: ${reason}`);
 
   const groups: string[] = [];
   const segments: (string | null)[] = [];
-  const edges: StructureEdge[][] = [];
+  const edges: EventSchemaEdge[][] = [];
 
   // Adds a state and returns its number. With a name, it is a segment state.
   const state = (segment: string | null = null): number => {
@@ -106,7 +104,7 @@ export function compileStructure(
   };
 
   // A fresh entry state, then each element's fragment chained end to start.
-  const sequence = (elements: readonly StructureElement[]): Fragment => {
+  const sequence = (elements: readonly EventSchemaElement[]): Fragment => {
     const start = state();
     let end = start;
     for (const element of elements) {
@@ -117,7 +115,7 @@ export function compileStructure(
     return [start, end];
   };
 
-  const once = (element: StructureElement): Fragment => {
+  const once = (element: EventSchemaElement): Fragment => {
     switch (element.type) {
       case "segment": {
         if (!element.name) {
@@ -153,7 +151,7 @@ export function compileStructure(
         }
         // A choice is exactly one of its alternatives. One that can match
         // nothing makes the choice optional without saying so, and the engines
-        // and the reference parser read such a structure differently. Mark the
+        // and the reference parser read such a schema differently. Mark the
         // choice `optional` instead.
         if (element.alternatives.some(canMatchNothing)) {
           throw invalid("a choice alternative can match no segment");
@@ -172,7 +170,7 @@ export function compileStructure(
     }
   };
 
-  const occurrences = (element: StructureElement): Fragment => {
+  const occurrences = (element: EventSchemaElement): Fragment => {
     const [first, last] = once(element);
 
     // Required and single: the element itself, no wrapper.
@@ -204,29 +202,29 @@ export function compileStructure(
     return [start, end];
   };
 
-  if (structure.elements.length === 0) {
+  if (schema.elements.length === 0) {
     throw invalid("it has no elements");
   }
-  const [start, final] = sequence(structure.elements);
+  const [start, final] = sequence(schema.elements);
   return { edges, final, groups, segments, start };
 }
 
-// Keyed by the structure object, not by its contents: two equal structures in
-// different objects compile separately, and an entry goes when its structure
+// Keyed by the schema object, not by its contents: two equal schemas in
+// different objects compile separately, and an entry goes when its schema
 // is collected.
-const programs = new WeakMap<MessageStructure, StructureProgram>();
+const programs = new WeakMap<EventSchema, EventSchemaProgram>();
 
 /**
- * The program of `structure`, compiled on first use and cached by the
- * structure object.
+ * The program of `schema`, compiled on first use and cached by the
+ * schema object.
  *
- * @throws {Error} When `structure` is invalid.
+ * @throws {Error} When `schema` is invalid.
  */
-export const programOf = (structure: MessageStructure): StructureProgram => {
-  let program = programs.get(structure);
+export const programOf = (schema: EventSchema): EventSchemaProgram => {
+  let program = programs.get(schema);
   if (!program) {
-    program = compileStructure(structure);
-    programs.set(structure, program);
+    program = compileEventSchema(schema);
+    programs.set(schema, program);
   }
   return program;
 };

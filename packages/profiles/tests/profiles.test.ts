@@ -1,11 +1,11 @@
 import { createLruCache } from "../src/cache/lru";
+import { runner } from "../src/event-schema/runner";
 import { createProfiles } from "../src/profiles";
 import { loadSegments } from "../src/stores/segments";
-import { runner } from "../src/structure/runner";
 
 describe("createProfiles", () => {
   describe("events", () => {
-    it("loads a message structure by version and id", async () => {
+    it("loads an event schema by version and id", async () => {
       const profiles = createProfiles();
       const def = await profiles.events.load("2.5", "ADT_A01");
       expect(def.id).toBe("ADT_A01");
@@ -31,7 +31,7 @@ describe("createProfiles", () => {
       ).rejects.toThrow();
     });
 
-    it("returns a structure the runner validates against", async () => {
+    it("returns a schema the runner validates against", async () => {
       const profiles = createProfiles();
       const def = await profiles.events.load("2.5", "ADT_A01");
       expect(runner(def, ["MSH", "EVN", "PID", "PV1"]).type).toBe("matched");
