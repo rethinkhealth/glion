@@ -1,5 +1,7 @@
-// Event-to-structure map for 2.3
+// Generated event-to-structure map for v2.3
+// Source: HAPI HL7v2 (https://github.com/hapifhir/hapi-hl7v2)
 export const eventMap: Record<string, string> = {
+  ACK: "ACK",
   ADT_A01: "ADT_A01",
   ADT_A02: "ADT_A02",
   ADT_A03: "ADT_A03",
