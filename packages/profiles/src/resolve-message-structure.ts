@@ -1,4 +1,4 @@
-import { eventMaps } from "./profiles/event-map-manifest";
+import { eventMapEntry } from "./event-map-entry";
 
 /**
  * Resolve the canonical message structure ID from version, message code,
@@ -15,7 +15,5 @@ export const resolveMessageStructure = (
   version: string,
   messageCode: string,
   triggerEvent: string
-): string | undefined => {
-  const candidate = `${messageCode}_${triggerEvent}`;
-  return eventMaps[version]?.[candidate];
-};
+): string | undefined =>
+  eventMapEntry(version, `${messageCode}_${triggerEvent}`);

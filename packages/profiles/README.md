@@ -61,31 +61,35 @@ engine.step("EVN");
 
 ## Profile data format
 
-Each kind of profile is loaded on demand from pre-built chunks. The compiled output is sharded into ~170 chunks (merged from ~10,800 source files via Rolldown code-splitting) to keep install size and cold-start cost low.
+Each profile is loaded on demand, the first time it is requested, and kept for the life of the process.
 
 ### Segments
 
 ```ts
 interface SegmentDefinition {
-  id: string; // "MSH", "PID", ...
-  name: string; // "Message Header"
-  fields: FieldProfile[]; // in positional order
+  byId: ReadonlyMap<string, { id: string; title: string }>; // "PID" → "Patient Identification"
 }
 ```
 
 ### Fields
 
 ```ts
+interface FieldDefinition {
+  segmentId: string; // "MSH"
+  bySequence: ReadonlyMap<number, FieldProfile>; // 9 → MSH-9
+  requiredSequences: ReadonlySet<number>;
+}
+
 interface FieldProfile {
+  sequence: number; // 9
   id: string; // "MSH-9"
-  name: string; // "Message Type"
-  position: number; // 9
+  name?: string; // "Message Type"
   datatype: string; // "MSG"
   required: boolean;
   repeatable: boolean;
   maxLength?: number;
   table?: string; // "HL70001" when the field is coded
-  item?: string;
+  item?: string; // the HL7 data element number
 }
 ```
 
@@ -94,15 +98,45 @@ interface FieldProfile {
 ```ts
 interface DatatypeDefinition {
   id: string; // "CX"
-  kind: "primitive" | "composite";
-  title: string;
-  components?: ComponentProfile[]; // only for composite kind
+  version: string; // "2.5"
+  kind: string; // "primitive" or "composite"
+  title?: string;
+  componentsBySequence: ReadonlyMap<number, ComponentProfile>; // empty for a primitive
+  requiredSequences: ReadonlySet<number>;
+}
+
+interface ComponentProfile {
+  sequence: number;
+  name: string;
+  datatypeId: string;
+  required: boolean;
+  maxLength?: number;
 }
 ```
 
-### Tables, event structures, code systems
+### Event structures
 
-Same shape convention: each exposes its id, version, and the typed payload (value lists for tables, DFA definitions for event structures, concept lists with displayNames for code systems).
+Each event structure is a DFA `Definition`: `start`, `finals`, `alphabet`, and `transitions`, which `runner` steps through segment by segment.
+
+### Tables and code systems
+
+```ts
+interface TableDefinition {
+  id: string; // "0001"
+  description: string; // "Administrative Sex"
+  type: "user" | "hl7";
+  codes: ReadonlyMap<string, { name: string; description: string }>; // "F" → "Female"
+}
+
+interface CodeSystemDefinition {
+  id: string; // "v2-0001"
+  url: string;
+  oid?: string;
+  name: string;
+  title: string;
+  codes: ReadonlyMap<string, { code: string; display: string; status: string }>;
+}
+```
 
 ## Part of Glion
 

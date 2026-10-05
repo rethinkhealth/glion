@@ -1,6 +1,7 @@
 import { memoize } from "../memoize";
 import type { ProfileStore } from "../profiles";
-import { fieldImports } from "../profiles/field-manifest";
+import type { ProfileIndex } from "./import-from-index";
+import { importFromIndex } from "./import-from-index";
 
 /** Raw shape exported by generated field modules. */
 export type FieldModule = Readonly<{
@@ -51,14 +52,22 @@ const index = memoize((raw: FieldModule): FieldDefinition => {
   };
 });
 
+const fieldIndexes = import.meta.glob<ProfileIndex<FieldModule>>(
+  "../profiles/v*/fields/index.ts",
+  { import: "default" }
+);
+
 /** The loader of segment field profiles. */
 export const fields: ProfileStore<FieldDefinition> = {
   load: async (version, segmentId) => {
-    const key = `v${version}/${segmentId}`;
-    const importFields = fieldImports[key];
-    if (!importFields) {
-      throw new Error(`Unknown fields profile: ${key}`);
+    const raw = await importFromIndex(
+      fieldIndexes,
+      `../profiles/v${version}/fields`,
+      segmentId
+    );
+    if (!raw) {
+      throw new Error(`Unknown fields profile: v${version}/${segmentId}`);
     }
-    return index(await importFields());
+    return index(raw);
   },
 };

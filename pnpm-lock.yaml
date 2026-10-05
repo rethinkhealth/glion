@@ -2139,6 +2139,9 @@ importers:
       publint:
         specifier: 0.3.18
         version: 0.3.18
+      rolldown:
+        specifier: 1.0.0-rc.17
+        version: 1.0.0-rc.17
       tsdown:
         specifier: 0.21.10
         version: 0.21.10(publint@0.3.18)(typescript@6.0.3)

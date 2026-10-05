@@ -1,6 +1,6 @@
 import { memoize } from "../memoize";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { utgCodeSystemImports } from "../profiles/utg/manifest";
+import type { ProfileIndex } from "./import-from-index";
+import { importFromIndex } from "./import-from-index";
 
 /** Raw shape exported by generated UTG code system modules. */
 export type UtgCodeSystemModule = Readonly<{
@@ -65,13 +65,18 @@ const index = memoize((raw: UtgCodeSystemModule): CodeSystemDefinition => {
   return result;
 });
 
+const codeSystemIndexes = import.meta.glob<ProfileIndex<UtgCodeSystemModule>>(
+  "../profiles/utg/index.ts",
+  { import: "default" }
+);
+
 /** The loader of UTG code systems. */
 export const codeSystems: CodeSystemStore = {
   load: async (id) => {
-    const importCodeSystem = utgCodeSystemImports[`vutg/${id}`];
-    if (!importCodeSystem) {
+    const raw = await importFromIndex(codeSystemIndexes, "../profiles/utg", id);
+    if (!raw) {
       throw new Error(`Unknown codeSystems profile: ${id}`);
     }
-    return index(await importCodeSystem());
+    return index(raw);
   },
 };
