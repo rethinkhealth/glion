@@ -1,10 +1,10 @@
 # @glion/profiles
 
-HL7v2 version-specific profile data — segments, fields, datatypes, and tables — with LRU-cached loaders.
+HL7v2 version-specific profile data — segments, fields, datatypes, and tables — with loaders that load each profile once per process.
 
 ## What it does
 
-`@glion/profiles` is the data source for Glion's profile-aware plugins. It provides structured HL7v2 profile definitions for every supported version (2.3 through 2.8), loaded on demand and cached in memory. The annotation plugins (`@glion/annotate-profile-*`) and the profile lint rules (`@glion/lint-profile-*`) read from this package to enrich and validate HL7v2 messages against the HL7-published specifications.
+`@glion/profiles` is the data source for Glion's profile-aware plugins. It provides structured HL7v2 profile definitions for every supported version (2.3 through 2.8), loaded on demand, once per process. The annotation plugins (`@glion/annotate-profile-*`) and the profile lint rules (`@glion/lint-profile-*`) read from this package to enrich and validate HL7v2 messages against the HL7-published specifications.
 
 ## Install
 
@@ -17,54 +17,30 @@ npm install @glion/profiles
 ```ts
 import { profiles } from "@glion/profiles";
 
-const msh = await profiles.segments.load("2.5", "MSH");
-console.log(msh.fields.length); // => 21
+const fields = await profiles.fields.load("2.5", "MSH");
+const msh9 = fields.bySequence.get(9);
+msh9?.name; // => "Message Type"
+msh9?.datatype; // => "MSG"
 
-const field = await profiles.fields.load("2.5", "MSH", "9");
-console.log(field.name); // => "Message Type"
-console.log(field.required); // => true
-console.log(field.datatype); // => "MSG"
-
-const cx = await profiles.datatypes.load("2.5", "CX");
-console.log(cx.kind); // => "composite"
-console.log(cx.components.length); // => 10
-```
-
-Event structure validation uses the same API:
-
-```ts
-const structure = await profiles.events.load("2.5", "ADT_A01");
-// structure.dfa — deterministic finite automaton for segment-order validation
+const definition = await profiles.events.load("2.5", "ADT_A04");
+// definition — the segment-order automaton of ADT_A01, the structure ADT^A04 uses
 ```
 
 ## API
 
 ### `profiles`
 
-Shared singleton store (eager LRU cache, 100 entries per kind). Use this unless you need a bespoke cache configuration.
-
-### `createProfiles(options)`
-
-Construct a dedicated store with a custom cache size or eviction strategy.
-
-```ts
-import { createLruCache, createProfiles } from "@glion/profiles";
-
-const store = createProfiles({
-  cache: createLruCache({ maxEntries: 500 }),
-});
-```
+The profile stores: `events`, `fields`, `datatypes`, `tables`, and `codeSystems`. Each profile loads once per process; later loads of it resolve the same value, and a load that fails is retried by the next call.
 
 ### Loaders on each store
 
-| Method                                      | Returns                |
-| ------------------------------------------- | ---------------------- |
-| `segments.load(version, segmentId)`         | `SegmentDefinition`    |
-| `fields.load(version, segmentId, position)` | `FieldProfile`         |
-| `datatypes.load(version, datatypeId)`       | `DatatypeDefinition`   |
-| `tables.load(version, tableId)`             | `Table`                |
-| `events.load(version, structureId)`         | `EventStructure`       |
-| `codeSystems.load(version, codeSystemId)`   | `CodeSystemDefinition` |
+| Method                                | Returns                |
+| ------------------------------------- | ---------------------- |
+| `fields.load(version, segmentId)`     | `FieldDefinition`      |
+| `datatypes.load(version, datatypeId)` | `DatatypeDefinition`   |
+| `tables.load(version, tableId)`       | `TableDefinition`      |
+| `events.load(version, id, options?)`  | `Definition`           |
+| `codeSystems.load(codeSystemId)`      | `CodeSystemDefinition` |
 
 ### `loadSegments(version)`
 

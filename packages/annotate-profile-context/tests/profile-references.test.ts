@@ -1,7 +1,7 @@
 /**
  * Cache and memory invariants of the profile context: per-file Maps hold
- * references into the shared LRU cache (never copies), sizes scale with
- * unique segment types, and a second run on the same file bails.
+ * references to the profiles the stores resolve (never copies), sizes scale
+ * with unique segment types, and a second run on the same file bails.
  *
  * Converted from assertion-shaped "benchmarks" — these are behavioral
  * contracts, so they live here where failure is loud and attributable.
@@ -59,8 +59,8 @@ function requireProfile(file: VFile): ProfileContext {
   return profile;
 }
 
-describe("shared references with the LRU cache", () => {
-  it("fields entries are the same objects as the cache's", async () => {
+describe("shared references with the loaded profiles", () => {
+  it("fields entries are the same objects the store resolves", async () => {
     const file = new VFile();
     await processor.run(m(msh(), pid()), file);
     const profile = requireProfile(file);
@@ -73,7 +73,7 @@ describe("shared references with the LRU cache", () => {
     );
   });
 
-  it("datatypes entries are the same objects as the cache's", async () => {
+  it("datatypes entries are the same objects the store resolves", async () => {
     const file = new VFile();
     await processor.run(m(msh(), pid()), file);
 
@@ -82,7 +82,7 @@ describe("shared references with the LRU cache", () => {
     );
   });
 
-  it("tables entries are the same objects as the cache's", async () => {
+  it("tables entries are the same objects the store resolves", async () => {
     const file = new VFile();
     await processor.run(m(msh(), pid()), file);
     const profile = requireProfile(file);

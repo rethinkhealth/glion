@@ -14,12 +14,8 @@ export type {
 } from "./automata/types";
 export { RunnerState } from "./automata/types";
 
-// Cache
-export { createLruCache } from "./cache/lru";
-export type { Cache, CacheOptions } from "./cache/types";
-
 // Profiles API
-export { createProfiles, profiles } from "./profiles";
+export { profiles } from "./profiles";
 
 // Segment loader (standalone — not part of the store-based profiles API)
 export { loadSegments } from "./stores/segments";
@@ -59,5 +55,4 @@ export type {
   EventProfileStore,
   ProfileStore,
   Profiles,
-  ProfilesOptions,
 } from "./types";
