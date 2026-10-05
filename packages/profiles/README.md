@@ -73,15 +73,15 @@ Standalone helper that loads every segment definition for a given version in one
 
 `events.load` resolves trigger-event aliases (`ADT_A04` → `ADT_A01`) unless called with `{ resolve: false }`.
 
-### `loadMessageStructure(tree)`
+### `loadEventSchema(tree)`
 
-Returns the message structure a parsed message names, or `undefined` when MSH-12 or MSH-9 is missing or the version defines no such structure. Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty.
+Returns the schema of the event a parsed message carries, its message structure, or `undefined` when MSH-12 or MSH-9 is missing or the version defines no such structure. Reads the version from MSH-12.1, and the structure from MSH-9.3, or from the event maps for MSH-9.1 and MSH-9.2 when MSH-9.3 is empty. Never rejects.
 
 ```ts
-import { loadMessageStructure } from "@glion/profiles";
+import { loadEventSchema } from "@glion/profiles";
 import { parseHL7v2 } from "@glion/parser";
 
-const structure = await loadMessageStructure(parseHL7v2(message));
+const structure = await loadEventSchema(parseHL7v2(message));
 // structure?.id === "ADT_A01"
 ```
 

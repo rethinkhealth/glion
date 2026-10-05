@@ -53,8 +53,7 @@ export type {
 export { eventMaps } from "./profiles/event-map-manifest";
 
 // Resolution utilities
-export { loadMessageStructure } from "./load-message-structure";
-export { resolveMessageStructure } from "./resolve-message-structure";
+export { loadEventSchema } from "./load-event-schema";
 
 // Profiles API types
 export type {

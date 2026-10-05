@@ -60,7 +60,7 @@ With a structure chosen per message:
 
 ```ts
 import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
-import { loadMessageStructure } from "@glion/profiles";
+import { loadEventSchema } from "@glion/profiles";
 import { value } from "@glion/util-query";
 import { unified } from "unified";
 
@@ -68,7 +68,7 @@ const processor = unified().use(hl7v2LintSegmentOrder, {
   definition: ({ tree }) =>
     value(tree, "MSH-4")?.value === "SITE_A"
       ? ADT_A01_SITE
-      : loadMessageStructure(tree),
+      : loadEventSchema(tree),
 });
 ```
 

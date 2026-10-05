@@ -1,6 +1,6 @@
 import type { Nodes, Root, Segment } from "@glion/ast";
 import type { MessageStructure } from "@glion/profiles";
-import { loadMessageStructure, runner } from "@glion/profiles";
+import { loadEventSchema, runner } from "@glion/profiles";
 import { SKIP, visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
 import type { VFile } from "vfile";
@@ -65,7 +65,7 @@ export interface SegmentOrderOptions {
  *   // With a structure chosen per message:
  *   unified().use(hl7v2LintSegmentOrder, {
  *     definition: ({ tree }) =>
- *       isSiteMessage(tree) ? SITE_STRUCTURE : loadMessageStructure(tree),
+ *       isSiteMessage(tree) ? SITE_STRUCTURE : loadEventSchema(tree),
  *   });
  *   ```;
  */
@@ -78,7 +78,7 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
     const structure =
       typeof definition === "function"
         ? await definition({ file, tree })
-        : (definition ?? (await loadMessageStructure(tree)));
+        : (definition ?? (await loadEventSchema(tree)));
 
     if (!structure) {
       return;

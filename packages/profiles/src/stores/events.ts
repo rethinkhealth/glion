@@ -1,4 +1,4 @@
-import { eventMapEntry } from "../resolve-message-structure";
+import { eventMapEntry } from "../event-map-entry";
 import type { ProfileStoreConfig } from "../store";
 import { programOf } from "../structure/compile";
 import type { MessageStructure } from "../structure/types";
