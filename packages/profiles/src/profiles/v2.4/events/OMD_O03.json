@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/message-structure/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
   "id": "OMD_O03",
   "elements": [
     {

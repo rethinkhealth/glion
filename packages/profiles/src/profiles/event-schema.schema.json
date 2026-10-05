@@ -1,9 +1,9 @@
 {
-  "$id": "https://glion.dev/schemas/message-structure/v1.json",
+  "$id": "https://glion.dev/schemas/event-schema/v1.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/MessageStructure",
+  "$ref": "#/definitions/EventSchema",
   "definitions": {
-    "MessageStructure": {
+    "EventSchema": {
       "type": "object",
       "properties": {
         "$schema": {
@@ -18,16 +18,16 @@
         "elements": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/StructureElement"
+            "$ref": "#/definitions/EventSchemaElement"
           },
           "minItems": 1
         }
       },
       "required": ["id", "elements"],
       "additionalProperties": false,
-      "description": "A message structure, such as `ORU_R01`, as the HL7v2 standard defines it."
+      "description": "The schema of an HL7v2 event: its message structure, such as `ORU_R01`, as the standard defines it."
     },
-    "StructureElement": {
+    "EventSchemaElement": {
       "anyOf": [
         {
           "$ref": "#/definitions/SegmentElement"
@@ -39,7 +39,7 @@
           "$ref": "#/definitions/ChoiceElement"
         }
       ],
-      "description": "One element of a message structure, in the standard's order."
+      "description": "One element of an event schema, in the standard's order."
     },
     "SegmentElement": {
       "type": "object",
@@ -87,7 +87,7 @@
         "elements": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/StructureElement"
+            "$ref": "#/definitions/EventSchemaElement"
           },
           "minItems": 1
         }
@@ -114,7 +114,7 @@
         "alternatives": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/StructureElement"
+            "$ref": "#/definitions/EventSchemaElement"
           },
           "minItems": 1
         }
