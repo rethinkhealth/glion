@@ -1,19 +1,17 @@
-import type { Definition } from "../automata/types";
+import type { EventSchema } from "../engine/types";
 import type { ProfileStore } from "../profiles";
-import { profileImports } from "../profiles/profile-manifest";
 import { eventMaps } from "./event-maps";
+import { lazyImport } from "./utils";
 
-/** The loader of event profiles. Resolves a trigger event to its structure. */
-export const events: ProfileStore<Definition> = {
+/** The loader of event schemas. Resolves a trigger event to its schema. */
+export const events: ProfileStore<EventSchema> = {
   load: async (version, id) => {
     const eventMap = await eventMaps.load(version);
     if (!eventMap) {
       return;
     }
-    const importEvent = profileImports[`v${version}/${eventMap[id] ?? id}`];
-    if (!importEvent) {
-      return;
-    }
-    return (await importEvent()) as unknown as Definition;
+    return await lazyImport<EventSchema>(
+      `../profiles/v${version}/events/${eventMap[id] ?? id}.json`
+    );
   },
 };

@@ -3,7 +3,7 @@
     "name": "@glion/profiles: import { profiles }",
     "path": "packages/profiles/dist/index.js",
     "import": "{ profiles }",
-    "limit": "12 kB"
+    "limit": "6 kB"
   },
   {
     "name": "@glion/profiles: largest events chunk",

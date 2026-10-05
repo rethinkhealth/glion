@@ -40,7 +40,7 @@ describe("loadSegments", () => {
     const v21 = await loadSegments("2.1");
     const v282 = await loadSegments("2.8.2");
 
-    expect(v21?.byId.size).toBeLessThan(v282?.byId.size);
+    expect(v21?.byId.size).toBeLessThan(v282?.byId.size ?? 0);
   });
 
   it("loads every bundled version", async () => {

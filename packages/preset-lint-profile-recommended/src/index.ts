@@ -26,8 +26,7 @@ import type { Preset } from "unified";
  * - **extra-fields** — warns when segments have fields beyond the profile maximum
  * - **extra-components** — warns when composite fields have components beyond the
  *   datatype maximum
- * - **segment-order** — validates segment order against message structure
- *   profiles
+ * - **segment-order** — validates segment order against event schema profiles
  *
  * All rules read the HL7v2 version from MSH-12 and load profiles accordingly.
  * Unknown segments (Z-segments) are silently skipped.

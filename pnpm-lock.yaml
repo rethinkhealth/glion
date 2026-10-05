@@ -1486,6 +1486,9 @@ importers:
       unified-lint-rule:
         specifier: 3.0.1
         version: 3.0.1
+      vfile:
+        specifier: 6.0.3
+        version: 6.0.3
     devDependencies:
       '@glion/builder':
         specifier: workspace:*
@@ -1493,6 +1496,9 @@ importers:
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
+      '@glion/parser':
+        specifier: workspace:*
+        version: link:../parser
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
@@ -1517,9 +1523,6 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      vfile:
-        specifier: ^6.0.3
-        version: 6.0.3
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@25.6.0)(@vitest/coverage-v8@4.1.11)(vite@7.3.6(@types/node@25.6.0)(jiti@2.6.1)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
@@ -2112,9 +2115,9 @@ importers:
         specifier: 11.0.5
         version: 11.0.5
     devDependencies:
-      '@glion/ast':
+      '@glion/builder':
         specifier: workspace:*
-        version: link:../ast
+        version: link:../builder
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
@@ -2136,6 +2139,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 4.1.11
         version: 4.1.11(vitest@4.1.11)
+      ajv:
+        specifier: 8.20.0
+        version: 8.20.0
       publint:
         specifier: 0.3.18
         version: 0.3.18
@@ -4566,9 +4572,6 @@ packages:
   es-errors@1.3.0:
     resolution: {integrity: sha512-Zf5H2Kxt2xjTvbJvP2ZWLEICxA6j+hAmMzIlypy4xcBg1vKVnx89Wy0GbS+kf5cwCVFFzdCFh2XSCFNULS6csw==}
     engines: {node: '>= 0.4'}
-
-  es-module-lexer@2.0.0:
-    resolution: {integrity: sha512-5POEcUuZybH7IdmGsD8wlf0AI55wMecM9rVBTI/qEAy2c1kTOm3DjFYjrBdI2K3BaJjJYfYFeRtM0t9ssnRuxw==}
 
   es-module-lexer@2.3.2:
     resolution: {integrity: sha512-poHGpORABojJJucnV9KbOavETW8lBVnphkW77ER5/BQ5Fz7oXSoCNek7IH3vR5nRjdsEz926ibFYX8KtLQmdyw==}
@@ -7676,8 +7679,6 @@ snapshots:
 
   es-errors@1.3.0: {}
 
-  es-module-lexer@2.0.0: {}
-
   es-module-lexer@2.3.2: {}
 
   es-object-atoms@1.1.1:
@@ -8866,7 +8867,7 @@ snapshots:
       '@vitest/snapshot': 4.1.11
       '@vitest/spy': 4.1.11
       '@vitest/utils': 4.1.11
-      es-module-lexer: 2.0.0
+      es-module-lexer: 2.3.2
       expect-type: 1.3.0
       magic-string: 0.30.21
       obug: 2.1.1

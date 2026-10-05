@@ -5,7 +5,8 @@
     "composite": false,
     "declaration": false,
     "declarationMap": false,
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals"],
+    "allowJs": true
   },
   "include": [".", "../src"],
   "exclude": ["../src/profiles/v*", "../src/profiles/utg"]
