@@ -4,7 +4,7 @@
 //
 // The model
 //
-// compile.ts turns a schema into a program (see program.ts). A schema
+// compile.ts turns a schema into a program (see EventSchemaProgram). A schema
 // often allows more than one reading: in `MSH [{NTE}] PID`, the segment after
 // MSH can be NTE or PID. The runner keeps one thread per state the reading can
 // be in, and replaces that set with each segment it consumes. A thread
