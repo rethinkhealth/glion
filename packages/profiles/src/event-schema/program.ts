@@ -1,7 +1,7 @@
 /**
  * The compiled form of an event schema, internal to the package.
  *
- * `compileEventSchema()` builds it; `runner()` runs it.
+ * `compile()` builds it; `runner()` runs it.
  * See compile.ts for how each element compiles.
  *
  * @module

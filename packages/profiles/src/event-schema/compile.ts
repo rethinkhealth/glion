@@ -72,18 +72,8 @@ const canMatchNothing = (element: EventSchemaElement): boolean => {
   }
 };
 
-/**
- * Compiles `schema` into the program `runner()` runs.
- *
- * The program prefers, in order: entering an optional element over skipping
- * it, repeating an element over leaving it, and earlier choice alternatives
- * over later ones.
- *
- * @throws {Error} When `schema` has no elements, a segment or group has no
- *   name, a group has no elements, a choice has no alternatives, or a choice
- *   alternative can match no segment.
- */
-export function compileEventSchema(schema: EventSchema): EventSchemaProgram {
+/** Builds the program of `schema`; `compile` documents the contract. */
+function build(schema: EventSchema): EventSchemaProgram {
   const invalid = (reason: string): Error =>
     new Error(`Invalid event schema ${schema.id}: ${reason}`);
 
@@ -215,15 +205,21 @@ export function compileEventSchema(schema: EventSchema): EventSchemaProgram {
 const programs = new WeakMap<EventSchema, EventSchemaProgram>();
 
 /**
- * The program of `schema`, compiled on first use and cached by the
- * schema object.
+ * Compiles `schema` into the program `runner()` runs, on first use; later
+ * calls with the same schema object return the same program.
  *
- * @throws {Error} When `schema` is invalid.
+ * The program prefers, in order: entering an optional element over skipping
+ * it, repeating an element over leaving it, and earlier choice alternatives
+ * over later ones.
+ *
+ * @throws {Error} When `schema` has no elements, a segment or group has no
+ *   name, a group has no elements, a choice has no alternatives, or a choice
+ *   alternative can match no segment.
  */
-export const programOf = (schema: EventSchema): EventSchemaProgram => {
+export const compile = (schema: EventSchema): EventSchemaProgram => {
   let program = programs.get(schema);
   if (!program) {
-    program = compileEventSchema(schema);
+    program = build(schema);
     programs.set(schema, program);
   }
   return program;

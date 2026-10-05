@@ -1,18 +1,26 @@
-import { compileEventSchema } from "../../src/event-schema/compile";
+import { compile } from "../../src/event-schema/compile";
 import { runner } from "../../src/event-schema/runner";
 import type { EventSchema } from "../../src/event-schema/types";
 import { ORU_R01_V2_5 } from "./fixtures";
 
-describe("compileEventSchema", () => {
+describe("compile", () => {
+  it("returns the same program for the same schema object, and a new one for an equal copy", () => {
+    const program = compile(ORU_R01_V2_5);
+
+    expect(compile(ORU_R01_V2_5)).toBe(program);
+    expect(compile({ ...ORU_R01_V2_5 })).not.toBe(program);
+    expect(compile({ ...ORU_R01_V2_5 })).toEqual(program);
+  });
+
   it("rejects a schema with no elements", () => {
-    expect(() => compileEventSchema({ elements: [], id: "ZZZ_Z10" })).toThrow(
+    expect(() => compile({ elements: [], id: "ZZZ_Z10" })).toThrow(
       "Invalid event schema ZZZ_Z10: it has no elements"
     );
   });
 
   it("rejects a segment with no name", () => {
     expect(() =>
-      compileEventSchema({
+      compile({
         elements: [
           { name: "", optional: false, repeating: false, type: "segment" },
         ],
@@ -23,7 +31,7 @@ describe("compileEventSchema", () => {
 
   it("rejects a group with no name", () => {
     expect(() =>
-      compileEventSchema({
+      compile({
         elements: [
           {
             elements: [
@@ -47,7 +55,7 @@ describe("compileEventSchema", () => {
 
   it("rejects a group with no elements", () => {
     expect(() =>
-      compileEventSchema({
+      compile({
         elements: [
           {
             elements: [],
@@ -64,7 +72,7 @@ describe("compileEventSchema", () => {
 
   it("rejects a choice with no alternatives", () => {
     expect(() =>
-      compileEventSchema({
+      compile({
         elements: [
           {
             alternatives: [],
@@ -80,7 +88,7 @@ describe("compileEventSchema", () => {
 
   it("rejects a choice whose alternative can match no segment", () => {
     expect(() =>
-      compileEventSchema({
+      compile({
         elements: [
           { name: "MSH", optional: false, repeating: false, type: "segment" },
           {
@@ -112,7 +120,7 @@ describe("compileEventSchema", () => {
 
   it("rejects a choice whose alternative is a group of optional segments", () => {
     expect(() =>
-      compileEventSchema({
+      compile({
         elements: [
           { name: "MSH", optional: false, repeating: false, type: "segment" },
           {
@@ -192,7 +200,7 @@ describe("compileEventSchema", () => {
   });
 
   it("numbers groups in the order the schema lists them", () => {
-    expect(compileEventSchema(ORU_R01_V2_5).groups).toEqual([
+    expect(compile(ORU_R01_V2_5).groups).toEqual([
       "PATIENT_RESULT",
       "PATIENT",
       "VISIT",
@@ -204,7 +212,7 @@ describe("compileEventSchema", () => {
   });
 
   it("moves every segment state to the next state number", () => {
-    const program = compileEventSchema(ORU_R01_V2_5);
+    const program = compile(ORU_R01_V2_5);
 
     for (const [state, segment] of program.segments.entries()) {
       if (segment !== null) {

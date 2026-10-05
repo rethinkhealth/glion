@@ -1,5 +1,5 @@
 import { eventMapEntry } from "../event-map-entry";
-import { programOf } from "../event-schema/compile";
+import { compile } from "../event-schema/compile";
 import type { EventSchema } from "../event-schema/types";
 import type { ProfileStoreConfig } from "../store";
 
@@ -21,7 +21,7 @@ export const eventsConfig: ProfileStoreConfig<EventSchemaModule, EventSchema> =
     // Compiling on load makes an invalid schema fail the load, not a later
     // runner() call.
     compile: ({ default: schema }) => {
-      programOf(schema);
+      compile(schema);
       return schema;
     },
     manifest: eventSchemaImports,

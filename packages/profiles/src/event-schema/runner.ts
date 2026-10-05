@@ -32,7 +32,7 @@
 // guard ends a cycle of edges that consume nothing. Logs are linked lists
 // shared between threads, so a step costs one small object, not a copy.
 
-import { programOf } from "./compile";
+import { compile } from "./compile";
 import { ANY_SEGMENT } from "./constants";
 import type { EventSchema, RunnerResult, SegmentMatch } from "./types";
 
@@ -73,7 +73,7 @@ export function runner(
   schema: EventSchema,
   input: readonly string[]
 ): RunnerResult {
-  const program = programOf(schema);
+  const program = compile(schema);
   const { edges, final, segments } = program;
   const visited = new Int32Array(segments.length).fill(-1);
   let generation = 0;
