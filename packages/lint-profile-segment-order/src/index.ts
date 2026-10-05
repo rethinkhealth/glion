@@ -91,16 +91,6 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
 
     visit(tree, "segment", (node, parents) => {
       const segment = node.name;
-
-      if (!segment) {
-        aborted = true;
-        file.message("Segment has empty segment name at this position", {
-          ancestors: [...parents, node],
-          place: node.position,
-        });
-        return EXIT;
-      }
-
       const result = automaton.consume(segment);
 
       if (result.type === "invalid") {

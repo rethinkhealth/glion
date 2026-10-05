@@ -163,16 +163,6 @@ Message ended prematurely. Expected: NK1, PD1, PV1, ROL
 
 The list is the segments valid after the last one, sorted. Only reported when no other validation error was emitted.
 
-### Invalid — empty segment name
-
-A `segment` node in the AST has an empty or undefined `name`:
-
-```
-Segment has empty segment name at this position
-```
-
-Indicates a malformed tree.
-
 ### No structure
 
 When no `definition` is given and MSH-9 and MSH-12 do not name a bundled structure, or when a `definition` function returns `undefined`, the rule reports nothing.

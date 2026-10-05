@@ -152,7 +152,7 @@ describe("hl7v2LintSegmentOrder", () => {
       });
     });
 
-    it("reports segment with empty name", async () => {
+    it("reports a segment with an empty ID as unexpected", async () => {
       const tree = m(s("MSH"), s(""));
       const file = new VFile();
 
@@ -160,33 +160,22 @@ describe("hl7v2LintSegmentOrder", () => {
         .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
-      expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]).toMatchObject({
-        ruleId: "segment-order",
-        source: "hl7v2-lint",
-      });
-      expect(file.messages[0]?.message).toContain("empty segment name");
+      expect(file.messages.map((message) => message.reason)).toEqual([
+        "Unexpected segment ''. Expected: PID",
+      ]);
     });
 
-    it("reports segment with undefined name", async () => {
-      const seg = s("MSH");
-      const unnamed = s("placeholder");
-      // oxlint-disable-next-line typescript/no-explicit-any
-      (unnamed as any).name = undefined;
-
-      const tree = m(seg, unnamed);
+    it("reports a malformed segment ID once, and nothing after it", async () => {
+      const tree = m(s("MSH"), s("PIDX"), s("PV1"));
       const file = new VFile();
 
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID_PV1 })
         .run(tree, file);
 
-      expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]).toMatchObject({
-        ruleId: "segment-order",
-        source: "hl7v2-lint",
-      });
-      expect(file.messages[0]?.message).toContain("empty segment name");
+      expect(file.messages.map((message) => message.reason)).toEqual([
+        "Unexpected segment 'PIDX'. Expected: PID",
+      ]);
     });
 
     it("stops at first invalid segment", async () => {

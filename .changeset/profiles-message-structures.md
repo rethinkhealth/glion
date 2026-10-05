@@ -16,6 +16,8 @@ A choice such as ORM*O01's `< OBR | RQD | RQ1 | RXO | ODS | ODT >` accepts exact
 
 A version or structure read from MSH-12 or MSH-9 that names an `Object.prototype` key, such as MSH-9.3 `constructor`, now resolves to no structure; `loadMessageStructure` rejected on it, and with it the segment-order rule.
 
+`lint-profile-segment-order` reports a segment with an empty ID as unexpected, like any segment the structure does not allow, where it reported "Segment has empty segment name".
+
 **Breaking:** the DFA is removed from the bundled profiles. `Definition`, `TransitionMap`, `NFA`, `RunnerState`, and the group `effects` API are removed; `runner()` takes a `MessageStructure`, a step event is `{ type: "step" }`, and an invalid event names the rejected segment in `segment`, where it was `symbol`. `lint-profile-segment-order`'s `definition` option takes a `MessageStructure`, or a function `({ tree, file }) => MessageStructure | undefined` (sync or async) that chooses one per message; the rule no longer exports `ResolveResult` or `resolveDefinition`; `loadMessageStructure` from `@glion/profiles` replaces them. The rule resolves the structure itself, so it no longer reads `file.data.profile` and no longer needs `@glion/annotate-profile-context` in the pipeline.
 
 **Breaking:** `@glion/lint-profile-events-segments-order` is renamed `@glion/lint-profile-segment-order`, after the `segment-order` rule it reports; the old package is deprecated.
