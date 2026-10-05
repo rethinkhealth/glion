@@ -99,6 +99,9 @@ importers:
       '@glion/hl7v2':
         specifier: workspace:*
         version: link:../packages/hl7v2
+      '@glion/lint-profile-segment-order':
+        specifier: workspace:*
+        version: link:../packages/lint-profile-segment-order
       '@glion/mllp':
         specifier: workspace:*
         version: link:../packages/mllp
