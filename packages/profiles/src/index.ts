@@ -20,9 +20,6 @@ export { profiles } from "./profiles";
 // Segment loader (standalone — not part of the store-based profiles API)
 export { loadSegments } from "./stores/segments";
 
-// Store types
-export type { ProfileStoreConfig } from "./store";
-
 // Domain types
 export type {
   CodeSystemDefinition,
@@ -49,10 +46,4 @@ export { eventMaps } from "./profiles/event-map-manifest";
 export { resolveMessageStructure } from "./resolve-message-structure";
 
 // Profiles API types
-export type {
-  CodeSystemStore,
-  EventLoadOptions,
-  EventProfileStore,
-  ProfileStore,
-  Profiles,
-} from "./types";
+export type { CodeSystemStore, ProfileStore, Profiles } from "./types";

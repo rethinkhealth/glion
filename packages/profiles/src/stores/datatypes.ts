@@ -1,13 +1,13 @@
+import { memoize } from "../memoize";
 import { datatypeImports } from "../profiles/datatype-manifest";
-import type { ProfileStoreConfig } from "../store";
+import type { ProfileStore } from "../types";
 import type {
   ComponentProfile,
   DatatypeDefinition,
   DatatypeModule,
 } from "./types";
 
-/** Compile raw datatype module into indexed definition. */
-const compileDatatypes = (raw: DatatypeModule): DatatypeDefinition => {
+const index = memoize((raw: DatatypeModule): DatatypeDefinition => {
   const componentsBySequence = new Map<number, ComponentProfile>();
   const requiredSequences = new Set<number>();
 
@@ -26,14 +26,16 @@ const compileDatatypes = (raw: DatatypeModule): DatatypeDefinition => {
     title: raw.title,
     version: raw.version,
   };
-};
+});
 
-/** Store configuration for datatype profiles. */
-export const datatypesConfig: ProfileStoreConfig<
-  DatatypeModule,
-  DatatypeDefinition
-> = {
-  compile: compileDatatypes,
-  manifest: datatypeImports,
-  namespace: "datatypes",
+/** The loader of datatype profiles. */
+export const datatypes: ProfileStore<DatatypeDefinition> = {
+  load: async (version, datatypeId) => {
+    const key = `v${version}/${datatypeId}`;
+    const importDatatype = datatypeImports[key];
+    if (!importDatatype) {
+      throw new Error(`Unknown datatypes profile: ${key}`);
+    }
+    return index(await importDatatype());
+  },
 };

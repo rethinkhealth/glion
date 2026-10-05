@@ -39,7 +39,7 @@ The profile stores: `events`, `fields`, `datatypes`, `tables`, and `codeSystems`
 | `fields.load(version, segmentId)`     | `FieldDefinition`      |
 | `datatypes.load(version, datatypeId)` | `DatatypeDefinition`   |
 | `tables.load(version, tableId)`       | `TableDefinition`      |
-| `events.load(version, id, options?)`  | `Definition`           |
+| `events.load(version, id)`            | `Definition`           |
 | `codeSystems.load(codeSystemId)`      | `CodeSystemDefinition` |
 
 ### `loadSegments(version)`

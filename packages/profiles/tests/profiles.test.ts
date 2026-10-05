@@ -20,12 +20,6 @@ describe("profiles", () => {
       expect(alias.alphabet).toEqual(canonical.alphabet);
     });
 
-    it("supports resolve: false to skip alias resolution", async () => {
-      await expect(
-        profiles.events.load("2.5", "ADT_A04", { resolve: false })
-      ).rejects.toThrow();
-    });
-
     it("returns a Definition compatible with the runner", async () => {
       const def = await profiles.events.load("2.5", "ADT_A01");
       const r = runner(def);

@@ -1,12 +1,9 @@
-import { createProfileStore } from "./store";
-import { codeSystemsConfig } from "./stores/code-systems";
-import { datatypesConfig } from "./stores/datatypes";
-import { eventsConfig } from "./stores/events";
-import { fieldsConfig } from "./stores/fields";
-import { tablesConfig } from "./stores/tables";
-import type { CodeSystemStore, Profiles } from "./types";
-
-const codeSystems = createProfileStore(codeSystemsConfig);
+import { codeSystems } from "./stores/code-systems";
+import { datatypes } from "./stores/datatypes";
+import { events } from "./stores/events";
+import { fields } from "./stores/fields";
+import { tables } from "./stores/tables";
+import type { Profiles } from "./types";
 
 /**
  * The profile stores: event profiles, fields, datatypes, and tables by
@@ -21,11 +18,9 @@ const codeSystems = createProfileStore(codeSystemsConfig);
  *   ```;
  */
 export const profiles: Profiles = {
-  codeSystems: {
-    load: (id) => codeSystems.load("utg", id),
-  } satisfies CodeSystemStore,
-  datatypes: createProfileStore(datatypesConfig),
-  events: createProfileStore(eventsConfig),
-  fields: createProfileStore(fieldsConfig),
-  tables: createProfileStore(tablesConfig),
+  codeSystems,
+  datatypes,
+  events,
+  fields,
+  tables,
 };

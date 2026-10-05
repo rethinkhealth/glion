@@ -7,22 +7,6 @@ import type {
 } from "./stores/types";
 
 // ---------------------------------------------------------------------------
-// Load options
-// ---------------------------------------------------------------------------
-
-/** Options for event profile loading. */
-export type EventLoadOptions = Readonly<{
-  /**
-   * Whether to resolve trigger event aliases to canonical structure IDs.
-   * Default: true.
-   *
-   * Example: load("2.5", "ADT_A04") with resolve=true returns ADT_A01's DFA.
-   * With resolve=false, it looks up ADT_A04 directly (which may not exist).
-   */
-  resolve?: boolean;
-}>;
-
-// ---------------------------------------------------------------------------
 // Profile store
 // ---------------------------------------------------------------------------
 
@@ -35,16 +19,6 @@ export type ProfileStore<T> = Readonly<{
    * @throws {Error} When `version` bundles no profile `id`.
    */
   load(version: string, id: string): Promise<T>;
-}>;
-
-/** The loader of event profiles. */
-export type EventProfileStore = Readonly<{
-  /** Load a DFA definition. Resolves trigger event aliases by default. */
-  load(
-    version: string,
-    id: string,
-    options?: EventLoadOptions
-  ): Promise<Definition>;
 }>;
 
 /** The loader of UTG code systems, which have no HL7v2 version. */
@@ -64,7 +38,7 @@ export type CodeSystemStore = Readonly<{
 /** The profile stores. */
 export type Profiles = Readonly<{
   /** DFA definitions for message structure validation. */
-  events: EventProfileStore;
+  events: ProfileStore<Definition>;
   /** Segment field metadata (required, repeatable, maxLength, datatype). */
   fields: ProfileStore<FieldDefinition>;
   /** Component structure and constraints for datatypes. */

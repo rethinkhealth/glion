@@ -1,9 +1,9 @@
+import { memoize } from "../memoize";
 import { fieldImports } from "../profiles/field-manifest";
-import type { ProfileStoreConfig } from "../store";
+import type { ProfileStore } from "../types";
 import type { FieldDefinition, FieldModule } from "./types";
 
-/** Compile raw field module into indexed definition. */
-const compileFields = (raw: FieldModule): FieldDefinition => {
+const index = memoize((raw: FieldModule): FieldDefinition => {
   const bySequence = new Map<number, (typeof raw.fields)[number]>();
   const requiredSequences = new Set<number>();
 
@@ -19,11 +19,16 @@ const compileFields = (raw: FieldModule): FieldDefinition => {
     requiredSequences,
     segmentId: raw.segmentId,
   };
-};
+});
 
-/** Store configuration for segment field profiles. */
-export const fieldsConfig: ProfileStoreConfig<FieldModule, FieldDefinition> = {
-  compile: compileFields,
-  manifest: fieldImports,
-  namespace: "fields",
+/** The loader of segment field profiles. */
+export const fields: ProfileStore<FieldDefinition> = {
+  load: async (version, segmentId) => {
+    const key = `v${version}/${segmentId}`;
+    const importFields = fieldImports[key];
+    if (!importFields) {
+      throw new Error(`Unknown fields profile: ${key}`);
+    }
+    return index(await importFields());
+  },
 };

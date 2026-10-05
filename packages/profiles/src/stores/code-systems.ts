@@ -1,14 +1,14 @@
+import { memoize } from "../memoize";
 // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
 import { utgCodeSystemImports } from "../profiles/utg/manifest";
-import type { ProfileStoreConfig } from "../store";
+import type { CodeSystemStore } from "../types";
 import type {
   CodeSystemDefinition,
   UtgCodeEntry,
   UtgCodeSystemModule,
 } from "./types";
 
-/** Compile raw UTG code system module into indexed definition. */
-const compileCodeSystem = (raw: UtgCodeSystemModule): CodeSystemDefinition => {
+const index = memoize((raw: UtgCodeSystemModule): CodeSystemDefinition => {
   const codes = new Map<string, UtgCodeEntry>();
 
   for (const code of raw.codes) {
@@ -28,14 +28,15 @@ const compileCodeSystem = (raw: UtgCodeSystemModule): CodeSystemDefinition => {
   }
 
   return result;
-};
+});
 
-/** Store configuration for UTG code system profiles. */
-export const codeSystemsConfig: ProfileStoreConfig<
-  UtgCodeSystemModule,
-  CodeSystemDefinition
-> = {
-  compile: compileCodeSystem,
-  manifest: utgCodeSystemImports,
-  namespace: "codeSystems",
+/** The loader of UTG code systems. */
+export const codeSystems: CodeSystemStore = {
+  load: async (id) => {
+    const importCodeSystem = utgCodeSystemImports[`vutg/${id}`];
+    if (!importCodeSystem) {
+      throw new Error(`Unknown codeSystems profile: ${id}`);
+    }
+    return index(await importCodeSystem());
+  },
 };
