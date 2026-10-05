@@ -6,7 +6,7 @@
 
 Message structures are the bundled data, and one engine validates segment order and groups segments.
 
-Each bundled message structure is a JSON file holding the structure as the standard defines it: segments, groups, and choices, each `optional` and `repeating`. `profiles.events.load()` returns that `MessageStructure`. `runner(structure)` validates segment order one segment at a time, with the same `consume`, `accepted`, and `expected` as before; `matchStructure(structure, segmentNames)` returns the segment indexes nested in the groups the structure defines, or `undefined` when the segments do not fit it.
+Each bundled message structure is a JSON file holding the structure as the standard defines it: segments, groups, and choices, each `optional` and `repeating`. `profiles.events.load()` returns that `MessageStructure`. `runner(structure)` validates segment order one segment at a time, with the same `consume`, `accepted`, and `expected` as before, and `failed`, which tells a message with a rejected segment from one that ended early; `matchStructure(structure, segmentNames)` returns the segment indexes nested in the groups the structure defines, or `undefined` when the segments do not fit it.
 
 `loadMessageStructure(tree)` returns the structure a message names in MSH-9, or `undefined` when the version defines none. It reads MSH-12.1 for the version and MSH-9.3, or MSH-9.1 and MSH-9.2 through the event maps, for the structure, and the store caches the result.
 

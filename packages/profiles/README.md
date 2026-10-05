@@ -125,9 +125,10 @@ const automaton = runner(structure);
 automaton.consume("MSH"); // { type: "step" }
 automaton.consume("ZZZ"); // { type: "invalid", segment: "ZZZ", expected: ["EVN", "SFT"] }
 automaton.accepted; // false
+automaton.failed; // true
 ```
 
-`expected` lists segment names sorted; `Hxx` stands for any segment. After the first `invalid` event every later `consume()` returns `invalid` with an empty `expected`.
+`expected` lists segment names sorted; `Hxx` stands for any segment. After the first `invalid` event `failed` is `true` and every later `consume()` returns `invalid` with an empty `expected`; `accepted` and `failed` tell a message that ended early from one with a rejected segment.
 
 ### `matchStructure(structure, segmentNames)`
 

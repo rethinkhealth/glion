@@ -98,7 +98,7 @@ export type GroupMatch = Readonly<{
 /**
  * A runner over one message structure, fed one segment ID at a time.
  *
- * After the first `invalid` event the runner is failed: every later
+ * After the first `invalid` event the runner is `failed`: every later
  * `consume()` returns `invalid` with an empty `expected`, and `accepted` is
  * `false`.
  */
@@ -111,6 +111,8 @@ export type Runner = Readonly<{
   consume(segment: string): RunnerEvent;
   /** Whether the segments consumed so far form a complete message. */
   readonly accepted: boolean;
+  /** Whether a segment was rejected. Once `true`, it stays `true`. */
+  readonly failed: boolean;
   /**
    * The segment IDs valid next, sorted. After a failure, the IDs that were
    * valid before the rejected segment.

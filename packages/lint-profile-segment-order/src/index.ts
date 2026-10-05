@@ -86,15 +86,11 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
 
     const automaton = runner(structure);
 
-    // A message with an order error is not also reported as ended early.
-    let aborted = false;
-
     visit(tree, "segment", (node, parents) => {
       const segment = node.name;
       const result = automaton.consume(segment);
 
       if (result.type === "invalid") {
-        aborted = true;
         file.message(
           `Unexpected segment '${segment}'. Expected: ${result.expected.join(", ")}`,
           { ancestors: [...parents, node], place: node.position }
@@ -105,7 +101,8 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
       return SKIP;
     });
 
-    if (!aborted && !automaton.accepted) {
+    // A message with an order error is not also reported as ended early.
+    if (!automaton.failed && !automaton.accepted) {
       file.message(
         `Message ended prematurely. Expected: ${automaton.expected.join(", ")}`,
         { ancestors: [tree], place: tree.position }

@@ -77,6 +77,39 @@ describe("runner", () => {
     expect(automaton.expected).toEqual(["PID"]);
   });
 
+  it("is failed after a rejected segment, and not before", () => {
+    const automaton = runner(
+      structureOf(
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "PID", optional: false, repeating: false, type: "segment" }
+      )
+    );
+
+    expect(automaton.failed).toBe(false);
+    automaton.consume("MSH");
+    expect(automaton.failed).toBe(false);
+    automaton.consume("ZZZ");
+    expect(automaton.failed).toBe(true);
+    automaton.consume("PID");
+    expect(automaton.failed).toBe(true);
+  });
+
+  it("tells an incomplete message from a failed one, though both are not accepted", () => {
+    const structure = structureOf(
+      { name: "MSH", optional: false, repeating: false, type: "segment" },
+      { name: "PID", optional: false, repeating: false, type: "segment" }
+    );
+    const incomplete = runner(structure);
+    const failed = runner(structure);
+
+    consumeAll(incomplete, "MSH");
+    consumeAll(failed, "MSH", "ZZZ");
+
+    expect(incomplete).toMatchObject({ accepted: false, failed: false });
+    expect(failed).toMatchObject({ accepted: false, failed: true });
+    expect(failed.expected).toEqual(incomplete.expected);
+  });
+
   it("is not accepted before the structure's required segments have all arrived", () => {
     const automaton = runner(
       structureOf(

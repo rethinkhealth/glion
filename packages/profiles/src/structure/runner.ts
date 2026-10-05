@@ -199,5 +199,8 @@ export function runner(structure: MessageStructure): Runner {
     get expected() {
       return names(live);
     },
+    get failed() {
+      return failed;
+    },
   };
 }
