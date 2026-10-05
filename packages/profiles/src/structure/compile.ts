@@ -1,5 +1,5 @@
 // Compiles a message structure into a program: a Thompson NFA over segment
-// names, stored as plain arrays. `runner()` and `matchStructure()` run it.
+// names, stored as plain arrays. `runner()` runs it.
 //
 // The program
 // -----------
@@ -13,12 +13,12 @@
 //   along its `edges`, each `[target, boundary]`.
 //
 // Edge order is priority. Where a message can be read more than one way,
-// `matchStructure()` follows a state's edges first to last and keeps the first
-// reading that reaches the end. So the order in which edges are added below is
-// what decides the grouping: enter an optional element before skipping it,
-// repeat an element before leaving it, take the earlier alternative of a
-// choice before the later. `runner()` only asks whether any reading exists, so
-// the order does not change what it accepts.
+// `runner()` follows a state's edges first to last and keeps the first reading
+// that reaches the end. So the order in which edges are added below is what
+// decides the grouping: enter an optional element before skipping it, repeat
+// an element before leaving it, take the earlier alternative of a choice
+// before the later. The order never changes which messages fit, only how they
+// group.
 //
 // An edge's boundary marks where a group opens or closes: `g + 1` opens group
 // `g`, `-(g + 1)` closes it, and `0` does neither. `g` indexes `groups`. The
@@ -73,7 +73,7 @@ const canMatchNothing = (element: StructureElement): boolean => {
 };
 
 /**
- * Compiles `structure` into the program `runner()` and `matchStructure()` run.
+ * Compiles `structure` into the program `runner()` runs.
  *
  * The program prefers, in order: entering an optional element over skipping
  * it, repeating an element over leaving it, and earlier choice alternatives

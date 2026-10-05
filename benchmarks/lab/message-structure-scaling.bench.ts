@@ -1,5 +1,5 @@
 /**
- * Lab sweep — how segment-order validation and structure matching scale with
+ * Lab sweep — how running a message structure (order and grouping) scales with
  * message size, next to the stages around them.
  *
  * Not CodSpeed-tracked: run with `pnpm bench:lab` when touching
@@ -14,7 +14,7 @@
  * Three tiers, from the engine alone to the whole pipeline. Each tier stops at
  * a smaller size than the one before, because each adds work per segment:
  *
- * 1. Engine: `runner` and `matchStructure` over segment names only.
+ * 1. Engine: `runner` over segment names only.
  * 2. Tree: parsing, and the segment-order lint over a parsed tree.
  * 3. Pipeline: every profile lint rule, and the full `@glion/hl7v2` pipeline.
  *
@@ -34,7 +34,7 @@ import { parseHL7v2 as pipeline } from "@glion/hl7v2";
 import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetLintProfileRecommended from "@glion/preset-lint-profile-recommended";
-import { matchStructure, profiles, runner } from "@glion/profiles";
+import { profiles, runner } from "@glion/profiles";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { bench, describe } from "vitest";
@@ -100,14 +100,10 @@ describe("scaling: orders | runner", () => {
     const text = ordersMessage(n);
     const input = names(text);
 
-    // A runner is single-use, so creating it is part of the per-message cost.
     bench(
       `runner | orders n=${input.length} bytes=${text.length}`,
       () => {
-        const automaton = runner(structure);
-        for (const name of input) {
-          automaton.consume(name);
-        }
+        runner(structure, input);
       },
       options(n)
     );
@@ -122,40 +118,7 @@ describe("scaling: results | runner", () => {
     bench(
       `runner | results n=${input.length} bytes=${text.length}`,
       () => {
-        const automaton = runner(structure);
-        for (const name of input) {
-          automaton.consume(name);
-        }
-      },
-      options(n)
-    );
-  }
-});
-
-describe("scaling: orders | matchStructure", () => {
-  for (const n of ENGINE_SIZES) {
-    const text = ordersMessage(n);
-    const input = names(text);
-
-    bench(
-      `matchStructure | orders n=${input.length} bytes=${text.length}`,
-      () => {
-        matchStructure(structure, input);
-      },
-      options(n)
-    );
-  }
-});
-
-describe("scaling: results | matchStructure", () => {
-  for (const n of ENGINE_SIZES) {
-    const text = resultsMessage(n);
-    const input = names(text);
-
-    bench(
-      `matchStructure | results n=${input.length} bytes=${text.length}`,
-      () => {
-        matchStructure(structure, input);
+        runner(structure, input);
       },
       options(n)
     );

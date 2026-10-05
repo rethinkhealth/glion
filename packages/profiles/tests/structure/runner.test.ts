@@ -1,264 +1,335 @@
+import {
+  nearMiss,
+  referenceMatch,
+  seeded,
+  validMessage,
+} from "../../scripts/check-bundle.mjs";
 import { runner } from "../../src/structure/runner";
 import type {
   MessageStructure,
   StructureElement,
+  StructureMatch,
 } from "../../src/structure/types";
+import {
+  ADT_A01_V2_5,
+  CSU_C09_V2_5,
+  MFN_M01_V2_5,
+  ORM_O01_V2_5,
+  ORU_R01_V2_1,
+  ORU_R01_V2_5,
+  PPP_PCB_V2_3_1,
+} from "./fixtures";
+
+const g = (name: string, ...children: StructureMatch[]) => ({
+  children,
+  name,
+});
 
 const structureOf = (...elements: StructureElement[]): MessageStructure => ({
   elements,
   id: "TEST",
 });
 
-const consumeAll = (automaton: ReturnType<typeof runner>, ...names: string[]) =>
-  names.map((name) => automaton.consume(name));
+const segment = (
+  name: string,
+  { optional = false, repeating = false } = {}
+): StructureElement => ({ name, optional, repeating, type: "segment" });
 
-describe("runner", () => {
-  it("steps through segments in the order the structure defines", () => {
-    const automaton = runner(
-      structureOf(
-        { name: "MSH", optional: false, repeating: false, type: "segment" },
-        { name: "PID", optional: false, repeating: false, type: "segment" }
-      )
-    );
+/** The groups when `message` fits `structure`, else `undefined`. */
+const groupsOf = (structure: MessageStructure, input: readonly string[]) => {
+  const result = runner(structure, input);
+  return result.type === "matched" ? result.groups : undefined;
+};
 
-    expect(consumeAll(automaton, "MSH", "PID")).toEqual([
-      { type: "step" },
-      { type: "step" },
-    ]);
-    expect(automaton.accepted).toBe(true);
+const match = (structure: MessageStructure, message: string) =>
+  groupsOf(structure, message.split(" "));
+
+describe("runner: segment order", () => {
+  it("matches segments in the order the structure defines", () => {
+    expect(
+      runner(structureOf(segment("MSH"), segment("PID")), ["MSH", "PID"])
+    ).toEqual({
+      groups: [0, 1],
+      type: "matched",
+    });
   });
 
-  it("rejects a segment the structure does not allow there and lists the expected ones", () => {
-    const automaton = runner(
-      structureOf(
-        { name: "MSH", optional: false, repeating: false, type: "segment" },
-        { name: "EVN", optional: false, repeating: false, type: "segment" },
-        { name: "SFT", optional: true, repeating: false, type: "segment" }
-      )
+  it("reports the first segment the structure does not allow there, and what it expected", () => {
+    const structure = structureOf(
+      segment("MSH"),
+      segment("EVN"),
+      segment("SFT", { optional: true })
     );
-    automaton.consume("MSH");
 
-    expect(automaton.consume("PID")).toEqual({
+    expect(runner(structure, ["MSH", "PID", "EVN"])).toEqual({
       expected: ["EVN"],
-      segment: "PID",
-      type: "invalid",
+      index: 1,
+      type: "mismatched",
     });
-    expect(automaton.accepted).toBe(false);
   });
 
-  it("rejects every segment after the first rejection, with nothing expected", () => {
-    const automaton = runner(
-      structureOf(
-        { name: "MSH", optional: false, repeating: false, type: "segment" },
-        { name: "PID", optional: false, repeating: false, type: "segment" }
-      )
-    );
-
-    automaton.consume("PV1");
-
-    expect(automaton.consume("MSH")).toEqual({
-      expected: [],
-      segment: "MSH",
-      type: "invalid",
+  it("reports a mismatch at the first segment", () => {
+    expect(
+      runner(structureOf(segment("MSH"), segment("PID")), ["PV1", "MSH"])
+    ).toEqual({
+      expected: ["MSH"],
+      index: 0,
+      type: "mismatched",
     });
-    expect(automaton.accepted).toBe(false);
   });
 
-  it("keeps the expected segments of the last accepted position after a rejection", () => {
-    const automaton = runner(
-      structureOf(
-        { name: "MSH", optional: false, repeating: false, type: "segment" },
-        { name: "PID", optional: false, repeating: false, type: "segment" }
-      )
-    );
-
-    consumeAll(automaton, "MSH", "PV1");
-
-    expect(automaton.expected).toEqual(["PID"]);
+  it("reports an incomplete message, and what can come next", () => {
+    expect(
+      runner(structureOf(segment("MSH"), segment("PID")), ["MSH"])
+    ).toEqual({
+      expected: ["PID"],
+      type: "incomplete",
+    });
   });
 
-  it("is failed after a rejected segment, and not before", () => {
-    const automaton = runner(
-      structureOf(
-        { name: "MSH", optional: false, repeating: false, type: "segment" },
-        { name: "PID", optional: false, repeating: false, type: "segment" }
-      )
-    );
-
-    expect(automaton.failed).toBe(false);
-    automaton.consume("MSH");
-    expect(automaton.failed).toBe(false);
-    automaton.consume("ZZZ");
-    expect(automaton.failed).toBe(true);
-    automaton.consume("PID");
-    expect(automaton.failed).toBe(true);
+  it("reports an empty message as incomplete when the structure requires a segment", () => {
+    expect(runner(structureOf(segment("MSH")), [])).toEqual({
+      expected: ["MSH"],
+      type: "incomplete",
+    });
   });
 
-  it("tells an incomplete message from a failed one, though both are not accepted", () => {
+  it("matches a repeating segment any number of times", () => {
     const structure = structureOf(
-      { name: "MSH", optional: false, repeating: false, type: "segment" },
-      { name: "PID", optional: false, repeating: false, type: "segment" }
-    );
-    const incomplete = runner(structure);
-    const failed = runner(structure);
-
-    consumeAll(incomplete, "MSH");
-    consumeAll(failed, "MSH", "ZZZ");
-
-    expect(incomplete).toMatchObject({ accepted: false, failed: false });
-    expect(failed).toMatchObject({ accepted: false, failed: true });
-    expect(failed.expected).toEqual(incomplete.expected);
-  });
-
-  it("is not accepted before the structure's required segments have all arrived", () => {
-    const automaton = runner(
-      structureOf(
-        { name: "MSH", optional: false, repeating: false, type: "segment" },
-        { name: "PID", optional: false, repeating: false, type: "segment" }
-      )
+      segment("MSH"),
+      segment("OBX", { repeating: true })
     );
 
-    automaton.consume("MSH");
-
-    expect(automaton.accepted).toBe(false);
-    expect(automaton.expected).toEqual(["PID"]);
-  });
-
-  it("does not accept an empty message when the structure requires a segment", () => {
-    const automaton = runner(
-      structureOf({
-        name: "MSH",
-        optional: false,
-        repeating: false,
-        type: "segment",
-      })
+    expect(runner(structure, ["MSH", "OBX"]).type).toBe("matched");
+    expect(runner(structure, ["MSH", "OBX", "OBX", "OBX"]).type).toBe(
+      "matched"
     );
-
-    expect(automaton.accepted).toBe(false);
-    expect(automaton.expected).toEqual(["MSH"]);
   });
 
-  it("accepts a repeating segment any number of times", () => {
-    const automaton = runner(
-      structureOf(
-        { name: "MSH", optional: false, repeating: false, type: "segment" },
-        { name: "OBX", optional: false, repeating: true, type: "segment" }
-      )
-    );
-
-    consumeAll(automaton, "MSH", "OBX", "OBX", "OBX");
-
-    expect(automaton.accepted).toBe(true);
-    expect(automaton.expected).toEqual(["OBX"]);
-  });
-
-  it("accepts a message with or without an optional segment", () => {
+  it("matches a message with or without an optional segment", () => {
     const structure = structureOf(
-      { name: "MSH", optional: false, repeating: false, type: "segment" },
-      { name: "SFT", optional: true, repeating: false, type: "segment" },
-      { name: "EVN", optional: false, repeating: false, type: "segment" }
+      segment("MSH"),
+      segment("SFT", { optional: true }),
+      segment("EVN")
     );
 
-    const without = runner(structure);
-    consumeAll(without, "MSH", "EVN");
-    const withIt = runner(structure);
-    consumeAll(withIt, "MSH", "SFT", "EVN");
-
-    expect(without.accepted).toBe(true);
-    expect(withIt.accepted).toBe(true);
+    expect(runner(structure, ["MSH", "EVN"]).type).toBe("matched");
+    expect(runner(structure, ["MSH", "SFT", "EVN"]).type).toBe("matched");
   });
 
   it("lists every segment that can come next, across optional elements and groups, sorted", () => {
-    const automaton = runner(
-      structureOf(
-        { name: "MSH", optional: false, repeating: false, type: "segment" },
-        { name: "SFT", optional: true, repeating: true, type: "segment" },
-        {
-          elements: [
-            { name: "PV1", optional: false, repeating: false, type: "segment" },
-            { name: "PV2", optional: true, repeating: false, type: "segment" },
-          ],
-          name: "VISIT",
-          optional: true,
-          repeating: false,
-          type: "group",
-        },
-        { name: "DG1", optional: false, repeating: false, type: "segment" }
-      )
-    );
-
-    automaton.consume("MSH");
-
-    expect(automaton.expected).toEqual(["DG1", "PV1", "SFT"]);
-  });
-
-  it("accepts exactly one alternative of a choice", () => {
     const structure = structureOf(
-      { name: "ORC", optional: false, repeating: false, type: "segment" },
+      segment("MSH"),
+      segment("SFT", { optional: true, repeating: true }),
       {
-        alternatives: [
-          { name: "OBR", optional: false, repeating: false, type: "segment" },
-          { name: "RXO", optional: false, repeating: false, type: "segment" },
-        ],
-        optional: false,
+        elements: [segment("PV1"), segment("PV2", { optional: true })],
+        name: "VISIT",
+        optional: true,
         repeating: false,
-        type: "choice",
-      }
+        type: "group",
+      },
+      segment("DG1")
     );
 
-    const lab = runner(structure);
-    consumeAll(lab, "ORC", "OBR");
-    const both = runner(structure);
-
-    expect(lab.accepted).toBe(true);
-    expect(consumeAll(both, "ORC", "OBR", "RXO").at(-1)).toEqual({
-      expected: [],
-      segment: "RXO",
-      type: "invalid",
+    expect(runner(structure, ["MSH"])).toEqual({
+      expected: ["DG1", "PV1", "SFT"],
+      type: "incomplete",
     });
   });
 
-  it("accepts any segment in an Hxx position, including one the structure names elsewhere", () => {
+  it("matches exactly one alternative of a choice", () => {
+    const structure = structureOf(segment("ORC"), {
+      alternatives: [segment("OBR"), segment("RXO")],
+      optional: false,
+      repeating: false,
+      type: "choice",
+    });
+
+    expect(runner(structure, ["ORC", "OBR"]).type).toBe("matched");
+    expect(runner(structure, ["ORC", "OBR", "RXO"])).toEqual({
+      expected: [],
+      index: 2,
+      type: "mismatched",
+    });
+  });
+
+  it("matches any segment in an Hxx position, including one the structure names elsewhere", () => {
     const structure = structureOf(
-      { name: "MSH", optional: false, repeating: false, type: "segment" },
-      { name: "Hxx", optional: true, repeating: false, type: "segment" },
-      { name: "RCP", optional: false, repeating: false, type: "segment" }
+      segment("MSH"),
+      segment("Hxx", { optional: true }),
+      segment("RCP")
     );
 
-    const named = runner(structure);
-    consumeAll(named, "MSH", "RCP", "RCP");
-    const unnamed = runner(structure);
-    consumeAll(unnamed, "MSH", "ZQP", "RCP");
-
-    expect(named.accepted).toBe(true);
-    expect(unnamed.accepted).toBe(true);
+    expect(runner(structure, ["MSH", "RCP", "RCP"]).type).toBe("matched");
+    expect(runner(structure, ["MSH", "ZQP", "RCP"]).type).toBe("matched");
   });
 
   it("lists Hxx among the expected segments", () => {
-    const automaton = runner(
-      structureOf(
-        { name: "MSH", optional: false, repeating: false, type: "segment" },
-        { name: "Hxx", optional: true, repeating: false, type: "segment" },
-        { name: "RCP", optional: false, repeating: false, type: "segment" }
+    const structure = structureOf(
+      segment("MSH"),
+      segment("Hxx", { optional: true }),
+      segment("RCP")
+    );
+
+    expect(runner(structure, ["MSH"])).toEqual({
+      expected: ["Hxx", "RCP"],
+      type: "incomplete",
+    });
+  });
+});
+
+describe("runner: grouping", () => {
+  it("nests each group inside the group that contains it", () => {
+    expect(match(ORU_R01_V2_5, "MSH PID PV1 ORC OBR OBX OBX")).toEqual([
+      0,
+      g(
+        "PATIENT_RESULT",
+        g("PATIENT", 1, g("VISIT", 2)),
+        g("ORDER_OBSERVATION", 3, 4, g("OBSERVATION", 5), g("OBSERVATION", 6))
+      ),
+    ]);
+  });
+
+  it("names groups at every depth of a five-level structure", () => {
+    expect(match(PPP_PCB_V2_3_1, "MSH PID PTH PRB ORC OBR OBX")).toEqual([
+      0,
+      1,
+      g(
+        "PATHWAY",
+        2,
+        g(
+          "PROBLEM",
+          3,
+          g("ORDER", 4, g("ORDER_DETAIL", 5, g("ORDER_OBSERVATION", 6)))
+        )
+      ),
+    ]);
+  });
+
+  it("starts a new group occurrence when the group's first segment repeats", () => {
+    expect(match(ADT_A01_V2_5, "MSH EVN PID PV1 IN1 IN2 IN1 ACC")).toEqual([
+      0,
+      1,
+      2,
+      3,
+      g("INSURANCE", 4, 5),
+      g("INSURANCE", 6),
+      7,
+    ]);
+  });
+
+  it("places a segment by the segments that follow it", () => {
+    const schedule = (...children: StructureMatch[]) => [
+      0,
+      g("PATIENT", 1, 2, g("STUDY_PHASE", g("STUDY_SCHEDULE", ...children))),
+    ];
+
+    expect(match(CSU_C09_V2_5, "MSH PID CSR ORC OBR OBX ORC RXA RXR")).toEqual(
+      schedule(
+        g("STUDY_OBSERVATION", 3, 4, 5),
+        g("STUDY_PHARM", 6, g("RX_ADMIN", 7, 8))
       )
     );
-
-    automaton.consume("MSH");
-
-    expect(automaton.expected).toEqual(["Hxx", "RCP"]);
-  });
-
-  it("gives each runner its own position", () => {
-    const structure = structureOf(
-      { name: "MSH", optional: false, repeating: false, type: "segment" },
-      { name: "PID", optional: false, repeating: false, type: "segment" }
+    expect(
+      match(CSU_C09_V2_5, "MSH PID CSR ORC OBR OBX ORC OBR OBX ORC RXA RXR")
+    ).toEqual(
+      schedule(
+        g("STUDY_OBSERVATION", 3, 4, 5),
+        g("STUDY_OBSERVATION", 6, 7, 8),
+        g("STUDY_PHARM", 9, g("RX_ADMIN", 10, 11))
+      )
     );
-    const first = runner(structure);
-    const second = runner(structure);
-
-    first.consume("MSH");
-
-    expect(first.expected).toEqual(["PID"]);
-    expect(second.expected).toEqual(["MSH"]);
   });
+
+  it("continues the current group where the structure also allows a new enclosing one", () => {
+    expect(match(ORU_R01_V2_5, "MSH PID OBR OBX ORC OBR")).toEqual([
+      0,
+      g(
+        "PATIENT_RESULT",
+        g("PATIENT", 1),
+        g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3)),
+        g("ORDER_OBSERVATION", 4, 5)
+      ),
+    ]);
+  });
+
+  it("accepts any one alternative of a choice without adding a group", () => {
+    expect(match(ORM_O01_V2_5, "MSH PID ORC RXO")).toEqual([
+      0,
+      g("PATIENT", 1),
+      g("ORDER", 2, g("ORDER_DETAIL", 3)),
+    ]);
+    expect(match(ORM_O01_V2_5, "MSH PID ORC OBR")).toEqual([
+      0,
+      g("PATIENT", 1),
+      g("ORDER", 2, g("ORDER_DETAIL", 3)),
+    ]);
+  });
+
+  it("rejects two alternatives of a choice that occurs once", () => {
+    expect(match(ORM_O01_V2_5, "MSH PID ORC OBR RXO")).toBeUndefined();
+  });
+
+  it("leaves out a group occurrence that holds no segment", () => {
+    expect(match(ORU_R01_V2_1, "MSH ORC OBR NTE")).toEqual([
+      0,
+      g("PATIENT_RESULT", g("ORDER_OBSERVATION", 1, 2, 3)),
+    ]);
+  });
+
+  it("matches any segment where the structure has Hxx", () => {
+    expect(match(MFN_M01_V2_5, "MSH MFI MFE ZL7")).toEqual([
+      0,
+      1,
+      g("MF", 2, 3),
+    ]);
+  });
+
+  it("forms no groups when a required segment is missing", () => {
+    expect(runner(ORU_R01_V2_5, ["MSH", "PID"]).type).toBe("incomplete");
+  });
+
+  it("forms no groups for an empty message", () => {
+    expect(runner(ORU_R01_V2_5, []).type).toBe("incomplete");
+  });
+
+  it("forms no groups for a segment the structure does not allow there", () => {
+    expect(runner(ORU_R01_V2_5, ["MSH", "PID", "OBR", "MSH"])).toMatchObject({
+      index: 3,
+      type: "mismatched",
+    });
+  });
+});
+
+describe("runner agrees with the reference parser", () => {
+  const MESSAGES_PER_STRUCTURE = 300;
+  const structures = [
+    ORU_R01_V2_5,
+    ADT_A01_V2_5,
+    ORM_O01_V2_5,
+    CSU_C09_V2_5,
+    MFN_M01_V2_5,
+    ORU_R01_V2_1,
+    PPP_PCB_V2_3_1,
+  ];
+
+  for (const structure of structures) {
+    it(`on valid messages and near misses for ${structure.id}`, () => {
+      const random = seeded(structure.id.length * 7919);
+      const names = [...new Set(validMessage(structure, random)), "ZZ1"];
+
+      for (let n = 0; n < MESSAGES_PER_STRUCTURE; n += 1) {
+        const valid = validMessage(structure, random);
+        const miss = nearMiss(valid, names, random);
+
+        expect(groupsOf(structure, valid)).toEqual(
+          referenceMatch(structure, valid)
+        );
+        expect(groupsOf(structure, valid)).toBeDefined();
+        expect(groupsOf(structure, miss)).toEqual(
+          referenceMatch(structure, miss)
+        );
+      }
+    });
+  }
 });

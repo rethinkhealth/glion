@@ -1,5 +1,5 @@
 import { compileStructure } from "../../src/structure/compile";
-import { matchStructure } from "../../src/structure/match";
+import { runner } from "../../src/structure/runner";
 import type { MessageStructure } from "../../src/structure/types";
 import { ORU_R01_V2_5 } from "./fixtures";
 
@@ -187,9 +187,10 @@ describe("compileStructure", () => {
       id: "ZZZ_Z03",
     };
 
-    expect(matchStructure(structure, ["OBR", "NTE"])).toEqual([
-      { children: [0, 1], name: "ORDER" },
-    ]);
+    expect(runner(structure, ["OBR", "NTE"])).toEqual({
+      groups: [{ children: [0, 1], name: "ORDER" }],
+      type: "matched",
+    });
   });
 
   it("numbers groups in the order the structure lists them", () => {

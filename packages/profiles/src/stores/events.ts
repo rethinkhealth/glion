@@ -21,7 +21,7 @@ export const eventsConfig: ProfileStoreConfig<
   MessageStructure
 > = {
   // Compiling on load makes an invalid structure fail the load, not a later
-  // runner() or matchStructure() call.
+  // runner() call.
   compile: ({ default: structure }) => {
     programOf(structure);
     return structure;

@@ -2,13 +2,8 @@ import { profiles } from "../../src/profiles";
 import { runner } from "../../src/structure/runner";
 import type { MessageStructure } from "../../src/structure/types";
 
-const accepts = (structure: MessageStructure, input: readonly string[]) => {
-  const automaton = runner(structure);
-  return (
-    input.every((name) => automaton.consume(name).type === "step") &&
-    automaton.accepted
-  );
-};
+const accepts = (structure: MessageStructure, input: readonly string[]) =>
+  runner(structure, input).type === "matched";
 
 describe("bundled message structures", () => {
   it("reads a choice with optional members as the XML schemas encode it (#838)", async () => {

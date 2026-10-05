@@ -34,12 +34,7 @@ describe("createProfiles", () => {
     it("returns a structure the runner validates against", async () => {
       const profiles = createProfiles();
       const def = await profiles.events.load("2.5", "ADT_A01");
-      const r = runner(def);
-      r.consume("MSH");
-      r.consume("EVN");
-      r.consume("PID");
-      r.consume("PV1");
-      expect(r.accepted).toBe(true);
+      expect(runner(def, ["MSH", "EVN", "PID", "PV1"]).type).toBe("matched");
     });
 
     it("caches repeated loads", async () => {

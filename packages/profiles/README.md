@@ -87,7 +87,7 @@ const structure = await loadMessageStructure(parseHL7v2(message));
 
 ### A message structure of your own
 
-A `MessageStructure` is plain data, the shape `message-structure.schema.json` describes: `segment`, `group`, and `choice` elements, each with `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). `runner` and `matchStructure` take it as they take a bundled one.
+A `MessageStructure` is plain data, the shape `message-structure.schema.json` describes: `segment`, `group`, and `choice` elements, each with `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). `runner` takes it as it takes a bundled one.
 
 ```ts
 import type { MessageStructure } from "@glion/profiles";
@@ -111,41 +111,34 @@ const structure: MessageStructure = {
 };
 ```
 
-A structure of your own works wherever a bundled one does: `runner`, `matchStructure`, and the `definition` option of `@glion/lint-profile-segment-order`. Both functions throw when the structure has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
+A structure of your own works wherever a bundled one does: `runner` and the `definition` option of `@glion/lint-profile-segment-order`. `runner` throws when the structure has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
 
-### `runner(structure)`
+### `runner(structure, segmentIds)`
 
-Returns a single-use runner that validates segment order against a message structure, one segment at a time.
+Runs a message's segment IDs through a message structure: validates their order and groups them. Returns one of:
+
+| `type`         | Fields                                                                                | When                                                   |
+| -------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `"matched"`    | `groups`: the segment indexes nested in the groups the structure defines              | the segments fit the structure                         |
+| `"mismatched"` | `index`: the first segment that does not fit; `expected`: the segment IDs valid there | a segment the structure does not allow at its position |
+| `"incomplete"` | `expected`: the segment IDs that can come next                                        | every segment fits, but the structure requires more    |
 
 ```ts
 import { profiles, runner } from "@glion/profiles";
 
-const structure = await profiles.events.load("2.5", "ADT_A01");
-const automaton = runner(structure);
-automaton.consume("MSH"); // { type: "step" }
-automaton.consume("ZZZ"); // { type: "invalid", segment: "ZZZ", expected: ["EVN", "SFT"] }
-automaton.accepted; // false
-automaton.failed; // true
-```
-
-`expected` lists segment names sorted; `Hxx` stands for any segment. After the first `invalid` event `failed` is `true` and every later `consume()` returns `invalid` with an empty `expected`; `accepted` and `failed` tell a message that ended early from one with a rejected segment.
-
-### `matchStructure(structure, segmentNames)`
-
-Returns the segment indexes nested in the groups the message structure defines, or `undefined` when the segments do not fit the structure.
-
-```ts
-import { matchStructure, profiles } from "@glion/profiles";
-
 const structure = await profiles.events.load("2.5", "ORU_R01");
-matchStructure(structure, ["MSH", "PID", "OBR", "OBX"]);
-// [0, { name: "PATIENT_RESULT", children: [
+
+runner(structure, ["MSH", "PID", "OBR", "OBX"]);
+// { type: "matched", groups: [0, { name: "PATIENT_RESULT", children: [
 //   { name: "PATIENT", children: [1] },
 //   { name: "ORDER_OBSERVATION", children: [2, { name: "OBSERVATION", children: [3] }] },
-// ] }]
+// ] }] }
+
+runner(structure, ["MSH", "PID", "OBR", "MSH"]);
+// { type: "mismatched", index: 3, expected: ["NTE", "OBX", …] }
 ```
 
-Where the structure admits more than one grouping, the match enters an optional element rather than skip it, repeats an element rather than leave it, and takes the earlier alternative of a choice. A group occurrence that holds no segment is left out. `Hxx` in a structure matches any segment. Runs in time proportional to the number of segments times the size of the structure.
+`expected` is sorted; `Hxx` in a structure matches any segment ID and is listed as `Hxx`. Where the structure admits more than one grouping, the runner enters an optional element rather than skip it, repeats an element rather than leave it, and takes the earlier alternative of a choice. A group occurrence that holds no segment is left out. Runs in time proportional to the number of segments times the size of the structure.
 
 ## Profile data format
 
@@ -214,7 +207,7 @@ type StructureElement =
 
 ### Message structure JSON Schema
 
-`@glion/profiles/message-structure.schema.json` is the JSON Schema (draft-07) of a message structure, with `$id` `https://glion.dev/schemas/message-structure/v1.json`. Every bundled structure names it by that `$id` in `$schema` and conforms to it. The schema checks the shape; `runner` and `matchStructure` also require that every choice alternative matches at least one segment.
+`@glion/profiles/message-structure.schema.json` is the JSON Schema (draft-07) of a message structure, with `$id` `https://glion.dev/schemas/message-structure/v1.json`. Every bundled structure names it by that `$id` in `$schema` and conforms to it. The schema checks the shape; `runner` also requires that every choice alternative matches at least one segment.
 
 ```ts
 import schema from "@glion/profiles/message-structure.schema.json" with { type: "json" };

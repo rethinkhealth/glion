@@ -8,8 +8,8 @@
  * 2. Every event map entry names a bundled structure, and every bundled structure
  *    maps to itself.
  * 3. Every structure loads, compiles, and accepts messages generated from it.
- * 4. `matchStructure` groups those messages exactly as `referenceMatch` does, and
- *    the two agree on near misses.
+ * 4. `runner` groups those messages exactly as `referenceMatch` does, and the two
+ *    agree on near misses.
  *
  * `referenceMatch` is a second implementation of the grouping semantics, a
  * backtracking parser over the structure data that shares no code with the
@@ -332,16 +332,7 @@ const bundledStructures = () =>
 // oxlint-disable-next-line complexity/complexity -- four independent checks over the same file list, each a loop with its own failure branches
 async function problemsInBundle() {
   const { Ajv } = await import("ajv");
-  const { eventMaps, matchStructure, profiles, runner } =
-    await import("../dist/index.js");
-
-  const accepts = (structure, input) => {
-    const automaton = runner(structure);
-    return (
-      input.every((name) => automaton.consume(name).type === "step") &&
-      automaton.accepted
-    );
-  };
+  const { eventMaps, profiles, runner } = await import("../dist/index.js");
 
   const bundled = bundledStructures();
   /** @type {string[]} */
@@ -389,12 +380,12 @@ async function problemsInBundle() {
     for (let n = 0; n < MESSAGES_PER_STRUCTURE; n += 1) {
       const valid = validMessage(structure, random);
       const miss = nearMiss(valid, names, random);
-      const matched = matchStructure(structure, valid);
+      const result = runner(structure, valid);
 
-      if (!accepts(structure, valid) || matched === undefined) {
+      if (result.type !== "matched") {
         problems.push(`v${version}/${id} rejects ${valid.join(" ")}`);
       } else if (
-        JSON.stringify(matched) !==
+        JSON.stringify(result.groups) !==
         JSON.stringify(referenceMatch(structure, valid))
       ) {
         problems.push(
@@ -402,8 +393,8 @@ async function problemsInBundle() {
         );
       }
       if (
-        accepts(structure, miss) !==
-        (matchStructure(structure, miss) !== undefined)
+        (runner(structure, miss).type === "matched") !==
+        (referenceMatch(structure, miss) !== undefined)
       ) {
         problems.push(`v${version}/${id} disagrees on ${miss.join(" ")}`);
       }

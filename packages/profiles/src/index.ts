@@ -1,7 +1,6 @@
 /** Biome-ignore-all lint/performance/noBarrelFile: public API surface */
 
 // Message structures
-export { matchStructure } from "./structure/match";
 export { runner } from "./structure/runner";
 export type {
   ChoiceElement,
@@ -9,10 +8,10 @@ export type {
   GroupMatch,
   MessageStructure,
   Occurrence,
-  Runner,
-  RunnerEvent,
-  RunnerInvalidEvent,
-  RunnerStepEvent,
+  RunnerIncomplete,
+  RunnerMatched,
+  RunnerMismatched,
+  RunnerResult,
   SegmentElement,
   StructureElement,
   StructureMatch,

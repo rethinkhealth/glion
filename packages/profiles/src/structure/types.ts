@@ -1,13 +1,13 @@
 /**
- * The public types of message structures, in three parts:
+ * The public types of message structures, in two parts:
  *
  * - **Message structure**: a structure as the HL7v2 standard defines it, such as
  *   `ORU_R01`. A tree of elements: segments, groups of elements, and choices
  *   between elements. Plain data; `message-structure.schema.json` describes the
  *   same shape.
- * - **Match**: what `matchStructure()` returns, the segment indexes of a message
- *   nested in the groups the structure defines.
- * - **Runner**: what `runner()` returns, and the event each `consume()` returns.
+ * - **Runner result**: what `runner()` returns: the segment indexes of a message
+ *   nested in the groups the structure defines, or where the message stops
+ *   fitting the structure.
  *
  * @module
  */
@@ -74,7 +74,7 @@ export type ChoiceElement = Occurrence &
   }>;
 
 // ---------------------------------------------------------------------------
-// Match
+// Runner result
 // ---------------------------------------------------------------------------
 
 /**
@@ -83,56 +83,36 @@ export type ChoiceElement = Occurrence &
  */
 export type StructureMatch = number | GroupMatch;
 
+/** What `runner()` returns, discriminated by `type`. */
+export type RunnerResult = RunnerMatched | RunnerMismatched | RunnerIncomplete;
+
+/** The segments fit the structure. */
+export type RunnerMatched = Readonly<{
+  type: "matched";
+  /** The segment indexes and group occurrences, in input order. */
+  groups: readonly StructureMatch[];
+}>;
+
+/** A segment the structure does not allow at its position. */
+export type RunnerMismatched = Readonly<{
+  type: "mismatched";
+  /** The index in the input of the first segment that does not fit. */
+  index: number;
+  /** The segment IDs valid at that position, sorted. */
+  expected: readonly string[];
+}>;
+
+/** Every segment fits, but the structure requires more. */
+export type RunnerIncomplete = Readonly<{
+  type: "incomplete";
+  /** The segment IDs valid after the last segment, sorted. */
+  expected: readonly string[];
+}>;
+
 /** One occurrence of a group in a match. Holds at least one segment. */
 export type GroupMatch = Readonly<{
   /** The group name, such as `PATIENT_RESULT`. */
   name: string;
   /** The segment indexes and nested group occurrences, in input order. */
   children: readonly StructureMatch[];
-}>;
-
-// ---------------------------------------------------------------------------
-// Runner
-// ---------------------------------------------------------------------------
-
-/**
- * A runner over one message structure, fed one segment ID at a time.
- *
- * After the first `invalid` event the runner is `failed`: every later
- * `consume()` returns `invalid` with an empty `expected`, and `accepted` is
- * `false`.
- */
-export type Runner = Readonly<{
-  /**
-   * Consumes one segment and returns the resulting event.
-   *
-   * @param segment - The segment ID, such as `PID`.
-   */
-  consume(segment: string): RunnerEvent;
-  /** Whether the segments consumed so far form a complete message. */
-  readonly accepted: boolean;
-  /** Whether a segment was rejected. Once `true`, it stays `true`. */
-  readonly failed: boolean;
-  /**
-   * The segment IDs valid next, sorted. After a failure, the IDs that were
-   * valid before the rejected segment.
-   */
-  readonly expected: readonly string[];
-}>;
-
-/** The event `consume()` returns, discriminated by `type`. */
-export type RunnerEvent = RunnerStepEvent | RunnerInvalidEvent;
-
-/** Returned when the runner accepts a segment. */
-export type RunnerStepEvent = Readonly<{
-  type: "step";
-}>;
-
-/** Returned when the runner rejects a segment. */
-export type RunnerInvalidEvent = Readonly<{
-  type: "invalid";
-  /** The segment ID rejected, such as `PID`. */
-  segment: string;
-  /** The segment IDs valid at this point, sorted. */
-  expected: readonly string[];
 }>;

@@ -1,7 +1,7 @@
-import type { Root } from "@glion/ast";
+import type { Nodes, Root, Segment } from "@glion/ast";
 import type { MessageStructure } from "@glion/profiles";
 import { loadMessageStructure, runner } from "@glion/profiles";
-import { EXIT, SKIP, visit } from "@glion/util-visit";
+import { SKIP, visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
 import type { VFile } from "vfile";
 
@@ -84,29 +84,38 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
       return;
     }
 
-    const automaton = runner(structure);
-
+    const segments: { node: Segment; ancestors: Nodes[] }[] = [];
     visit(tree, "segment", (node, parents) => {
-      const segment = node.name;
-      const result = automaton.consume(segment);
-
-      if (result.type === "invalid") {
-        file.message(
-          `Unexpected segment '${segment}'. Expected: ${result.expected.join(", ")}`,
-          { ancestors: [...parents, node], place: node.position }
-        );
-        return EXIT;
-      }
-
+      segments.push({ ancestors: [...parents, node], node });
       return SKIP;
     });
 
-    // A message with an order error is not also reported as ended early.
-    if (!automaton.failed && !automaton.accepted) {
-      file.message(
-        `Message ended prematurely. Expected: ${automaton.expected.join(", ")}`,
-        { ancestors: [tree], place: tree.position }
-      );
+    const result = runner(
+      structure,
+      segments.map(({ node }) => node.name)
+    );
+
+    switch (result.type) {
+      case "matched": {
+        break;
+      }
+      case "mismatched": {
+        const { ancestors, node } = segments[
+          result.index
+        ] as (typeof segments)[number];
+        file.message(
+          `Unexpected segment '${node.name}'. Expected: ${result.expected.join(", ")}`,
+          { ancestors, place: node.position }
+        );
+        break;
+      }
+      case "incomplete": {
+        file.message(
+          `Message ended prematurely. Expected: ${result.expected.join(", ")}`,
+          { ancestors: [tree], place: tree.position }
+        );
+        break;
+      }
     }
   }
 );

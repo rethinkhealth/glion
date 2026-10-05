@@ -1,7 +1,7 @@
 /**
  * The compiled form of a message structure, internal to the package.
  *
- * `compileStructure()` builds it; `runner()` and `matchStructure()` run it.
+ * `compileStructure()` builds it; `runner()` runs it.
  * See compile.ts for how each element compiles.
  *
  * @module

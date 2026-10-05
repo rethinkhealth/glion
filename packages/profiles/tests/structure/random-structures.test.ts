@@ -5,7 +5,7 @@ import {
   seeded,
   validMessage,
 } from "../../scripts/check-bundle.mjs";
-import { matchStructure } from "../../src/structure/match";
+import { runner } from "../../src/structure/runner";
 import type {
   MessageStructure,
   StructureElement,
@@ -65,7 +65,7 @@ const hasEmptyAlternative = (items: readonly StructureElement[]): boolean =>
       (item.type === "group" && hasEmptyAlternative(item.elements))
   );
 
-describe("matchStructure on random structures", () => {
+describe("runner on random structures", () => {
   it("agrees with the reference parser on nested, nullable, and ambiguous structures", () => {
     const random = seeded(20_260_919);
     const disagreements: string[] = [];
@@ -87,7 +87,10 @@ describe("matchStructure on random structures", () => {
       for (let n = 0; n < MESSAGES_PER_STRUCTURE; n += 1) {
         const valid = validMessage(structure, random).slice(0, 14);
         for (const input of [valid, nearMiss(valid, NAMES, random)]) {
-          const got = JSON.stringify(matchStructure(structure, input));
+          const result = runner(structure, input);
+          const got = JSON.stringify(
+            result.type === "matched" ? result.groups : undefined
+          );
           const want = JSON.stringify(referenceMatch(structure, input));
           if (got !== want && disagreements.length < 5) {
             disagreements.push(
