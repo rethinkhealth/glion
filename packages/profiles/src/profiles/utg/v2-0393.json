@@ -1,0 +1,19 @@
+{
+  "id": "v2-0393",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0393",
+  "oid": "2.16.840.1.113883.18.244",
+  "name": "MatchAlgorithms",
+  "title": "matchAlgorithms",
+  "codes": [
+    {
+      "code": "LINKSOFT_2.01",
+      "display": "Proprietary algorithm for LinkSoft v2.01",
+      "status": "active"
+    },
+    {
+      "code": "MATCHWARE_1.2",
+      "display": "Proprietary algorithm for MatchWare v1.2",
+      "status": "active"
+    }
+  ]
+}

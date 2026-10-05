@@ -1,0 +1,15 @@
+{
+  "id": "0398",
+  "description": "Continuation Style Code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Fragmentation"
+    },
+    {
+      "name": "I",
+      "description": "Interactive Continuation"
+    }
+  ]
+}

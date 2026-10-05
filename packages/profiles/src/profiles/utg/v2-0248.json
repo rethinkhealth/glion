@@ -1,0 +1,29 @@
+{
+  "id": "v2-0248",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0248",
+  "oid": "2.16.840.1.113883.18.144",
+  "name": "ProductSource",
+  "title": "productSource",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Actual product involved in incident was evaluated",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "A product from the same lot as the actual product involved was evaluated",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "A product from a controlled/non-related inventory was evaluated",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "A product from a reserve sample was evaluated",
+      "status": "active"
+    }
+  ]
+}

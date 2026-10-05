@@ -1,0 +1,29 @@
+{
+  "id": "v2-0339",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0339",
+  "oid": "2.16.840.1.113883.18.209",
+  "name": "AdvancedBeneficiaryNotice",
+  "title": "advancedBeneficiaryNotice",
+  "codes": [
+    {
+      "code": "1",
+      "display": "Service is subject to medical necessity procedures",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Patient has been informed of responsibility, and agrees to pay for service",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Patient has been informed of responsibility, and asks that the payer be billed",
+      "status": "active"
+    },
+    {
+      "code": "4",
+      "display": "Advanced Beneficiary Notice has not been signed",
+      "status": "active"
+    }
+  ]
+}

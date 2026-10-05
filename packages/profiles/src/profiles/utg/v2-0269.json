@@ -1,0 +1,19 @@
+{
+  "id": "v2-0269",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0269",
+  "oid": "2.16.840.1.113883.18.162",
+  "name": "ChargeOnIndicator",
+  "title": "chargeOnIndicator",
+  "codes": [
+    {
+      "code": "O",
+      "display": "Charge on Order",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Charge on Result",
+      "status": "active"
+    }
+  ]
+}

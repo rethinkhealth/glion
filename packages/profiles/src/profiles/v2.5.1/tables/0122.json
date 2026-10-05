@@ -1,0 +1,39 @@
+{
+  "id": "0122",
+  "description": "Charge type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CH",
+      "description": "Charge"
+    },
+    {
+      "name": "CO",
+      "description": "Contract"
+    },
+    {
+      "name": "CR",
+      "description": "Credit"
+    },
+    {
+      "name": "DP",
+      "description": "Department"
+    },
+    {
+      "name": "GR",
+      "description": "Grant"
+    },
+    {
+      "name": "NC",
+      "description": "No Charge"
+    },
+    {
+      "name": "PC",
+      "description": "Professional"
+    },
+    {
+      "name": "RS",
+      "description": "Research"
+    }
+  ]
+}

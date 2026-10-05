@@ -1,0 +1,24 @@
+{
+  "id": "v2-0520",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0520",
+  "oid": "2.16.840.1.113883.18.340",
+  "name": "MessageWaitingPriority",
+  "title": "messageWaitingPriority",
+  "codes": [
+    {
+      "code": "H",
+      "display": "High",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Low",
+      "status": "active"
+    },
+    {
+      "code": "M",
+      "display": "Medium",
+      "status": "active"
+    }
+  ]
+}

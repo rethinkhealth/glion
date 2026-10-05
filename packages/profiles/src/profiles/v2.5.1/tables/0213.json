@@ -1,0 +1,19 @@
+{
+  "id": "0213",
+  "description": "Purge Status Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "D",
+      "description": "The visit is marked for deletion and the user cannot enter new data against it."
+    },
+    {
+      "name": "I",
+      "description": "The visit is marked inactive and the user cannot enter new data against it."
+    },
+    {
+      "name": "P",
+      "description": "Marked for purge.  User is no longer able to update the visit."
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "0935",
+  "description": "Process Interruption Reason",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ASC",
+      "description": "Apheresis Software Crash"
+    },
+    {
+      "name": "BSC",
+      "description": "Manufacturing Software Crash"
+    },
+    {
+      "name": "CFT",
+      "description": "Couldn't follow through with donation (scared)"
+    },
+    {
+      "name": "DBB",
+      "description": "Bathroom"
+    },
+    {
+      "name": "DCW",
+      "description": "Couldn't wait"
+    },
+    {
+      "name": "DNI",
+      "description": "Phlebotomy Issue"
+    },
+    {
+      "name": "GFE",
+      "description": "General Facility Emergency"
+    },
+    {
+      "name": "NRG",
+      "description": "No reason given, donor decided to stop without giving a reason"
+    },
+    {
+      "name": "PCD",
+      "description": "Phone Call-Donor"
+    }
+  ]
+}

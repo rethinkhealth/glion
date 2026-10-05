@@ -1,0 +1,80 @@
+{
+  "id": "CX",
+  "version": "2.7.1",
+  "kind": "composite",
+  "title": "Extended Composite ID with Check Digit",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "ID Number",
+      "datatypeId": "ST",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Identifier Check Digit",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Check Digit Scheme",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Assigning Authority",
+      "datatypeId": "HD",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Identifier Type Code",
+      "datatypeId": "ID",
+      "required": true
+    },
+    {
+      "sequence": 6,
+      "name": "Assigning Facility",
+      "datatypeId": "HD",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "Effective Date",
+      "datatypeId": "DT",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "Expiration Date",
+      "datatypeId": "DT",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "Assigning Jurisdiction",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "Assigning Agency or Department",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "Security Check",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 12,
+      "name": "Security Check Scheme",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "0271",
+  "description": "Document Completion Status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AU",
+      "description": "Authenticated"
+    },
+    {
+      "name": "DI",
+      "description": "Dictated"
+    },
+    {
+      "name": "DO",
+      "description": "Documented"
+    },
+    {
+      "name": "IN",
+      "description": "Incomplete"
+    },
+    {
+      "name": "IP",
+      "description": "In Progress"
+    },
+    {
+      "name": "LA",
+      "description": "Legally authenticated"
+    },
+    {
+      "name": "PA",
+      "description": "Pre-authenticated"
+    }
+  ]
+}

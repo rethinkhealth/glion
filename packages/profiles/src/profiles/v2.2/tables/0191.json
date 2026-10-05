@@ -1,0 +1,27 @@
+{
+  "id": "0191",
+  "description": "Type Of Data",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "FT",
+      "description": "Formatted Text"
+    },
+    {
+      "name": "NS",
+      "description": "Non-scanned Image"
+    },
+    {
+      "name": "SD",
+      "description": "Scanned Document"
+    },
+    {
+      "name": "SI",
+      "description": "Scanned Image"
+    },
+    {
+      "name": "TX",
+      "description": "Machine Readable Text Document"
+    }
+  ]
+}

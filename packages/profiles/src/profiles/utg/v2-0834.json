@@ -1,0 +1,44 @@
+{
+  "id": "v2-0834",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0834",
+  "oid": "2.16.840.1.113883.18.408",
+  "name": "MimeTypes",
+  "title": "mimeTypes",
+  "codes": [
+    {
+      "code": "application",
+      "display": "Application data",
+      "status": "active"
+    },
+    {
+      "code": "audio",
+      "display": "Audio data",
+      "status": "active"
+    },
+    {
+      "code": "image",
+      "display": "Image data",
+      "status": "active"
+    },
+    {
+      "code": "model",
+      "display": "Model data",
+      "status": "active"
+    },
+    {
+      "code": "multipart",
+      "display": "MIME multipart package",
+      "status": "active"
+    },
+    {
+      "code": "text",
+      "display": "Text data",
+      "status": "active"
+    },
+    {
+      "code": "video",
+      "display": "Video data",
+      "status": "active"
+    }
+  ]
+}

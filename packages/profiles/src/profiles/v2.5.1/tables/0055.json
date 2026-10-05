@@ -1,0 +1,11 @@
+{
+  "id": "0055",
+  "description": "Diagnosis related group",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

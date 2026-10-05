@@ -1,0 +1,20 @@
+{
+  "id": "QIP",
+  "version": "2.5.1",
+  "kind": "composite",
+  "title": "Query Input Parameter List",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Segment Field Name",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Values",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "segmentId": "PKG",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PKG-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set Id - PKG",
+      "item": "2221"
+    },
+    {
+      "sequence": 2,
+      "id": "PKG-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70818",
+      "name": "Packaging Units",
+      "item": "2222"
+    },
+    {
+      "sequence": 3,
+      "id": "PKG-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70532",
+      "name": "Default Order Unit Of Measure Indicator",
+      "item": "2223"
+    },
+    {
+      "sequence": 4,
+      "id": "PKG-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Package Quantity",
+      "item": "2224"
+    },
+    {
+      "sequence": 5,
+      "id": "PKG-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CP",
+      "name": "Price",
+      "item": "2225"
+    },
+    {
+      "sequence": 6,
+      "id": "PKG-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CP",
+      "name": "Future Item Price",
+      "item": "2226"
+    },
+    {
+      "sequence": 7,
+      "id": "PKG-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Future Item Price Effective Date",
+      "item": "2227"
+    }
+  ]
+}

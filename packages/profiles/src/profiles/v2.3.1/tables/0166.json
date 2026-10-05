@@ -1,0 +1,15 @@
+{
+  "id": "0166",
+  "description": "RX component type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Additive"
+    },
+    {
+      "name": "B",
+      "description": "Base"
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "id": "0702",
+  "description": "Cycle Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "2RS",
+      "description": "Second Rinse"
+    },
+    {
+      "name": "ANR",
+      "description": "Anesthesia/Respiratory"
+    },
+    {
+      "name": "BDP",
+      "description": "Bedpans"
+    },
+    {
+      "name": "BWD",
+      "description": "Bowie-Dick Test"
+    },
+    {
+      "name": "CMW",
+      "description": "Chemical Wash"
+    },
+    {
+      "name": "COD",
+      "description": "Code"
+    },
+    {
+      "name": "CRT",
+      "description": "Cart Wash"
+    },
+    {
+      "name": "DEC",
+      "description": "Decontamination"
+    },
+    {
+      "name": "DRT",
+      "description": "Dart"
+    },
+    {
+      "name": "DRW",
+      "description": "Dart Warm-up Cycle"
+    },
+    {
+      "name": "EOH",
+      "description": "EO High Temperature"
+    },
+    {
+      "name": "EOL",
+      "description": "EO Low Temperature"
+    },
+    {
+      "name": "EXP",
+      "description": "Express"
+    },
+    {
+      "name": "FLS",
+      "description": "Flash"
+    },
+    {
+      "name": "GLS",
+      "description": "Glassware"
+    },
+    {
+      "name": "GNP",
+      "description": "Gen. Purpose"
+    },
+    {
+      "name": "GRV",
+      "description": "Gravity"
+    },
+    {
+      "name": "GTL",
+      "description": "Gentle"
+    },
+    {
+      "name": "ISO",
+      "description": "Isothermal"
+    },
+    {
+      "name": "IST",
+      "description": "Instrument Wash"
+    },
+    {
+      "name": "LKT",
+      "description": "Leak Test"
+    },
+    {
+      "name": "LQD",
+      "description": "Liquid"
+    },
+    {
+      "name": "OPW",
+      "description": "Optional Wash"
+    },
+    {
+      "name": "PEA",
+      "description": "Peracetic Acid"
+    },
+    {
+      "name": "PLA",
+      "description": "Plastic Goods Wash"
+    },
+    {
+      "name": "PRV",
+      "description": "Prevac"
+    },
+    {
+      "name": "RNS",
+      "description": "Rinse"
+    },
+    {
+      "name": "SFP",
+      "description": "Steam Flush Pressure Pulse"
+    },
+    {
+      "name": "THR",
+      "description": "Thermal"
+    },
+    {
+      "name": "TRB",
+      "description": "Tray/Basin"
+    },
+    {
+      "name": "UTL",
+      "description": "Utensil Wash"
+    },
+    {
+      "name": "WFP",
+      "description": "Wrap/Steam Flush Pressure Pulse (Wrap/SFPP)"
+    }
+  ]
+}

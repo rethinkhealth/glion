@@ -1,0 +1,11 @@
+{
+  "id": "0793",
+  "description": "Ruling Act",
+  "type": "user",
+  "codes": [
+    {
+      "name": "SMDA",
+      "description": "Safe Medical Devices Act"
+    }
+  ]
+}

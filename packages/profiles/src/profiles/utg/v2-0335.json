@@ -1,0 +1,149 @@
+{
+  "id": "v2-0335",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0335",
+  "oid": "2.16.840.1.113883.18.205",
+  "name": "RepeatPattern",
+  "title": "repeatPattern",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Ante (before)",
+      "status": "deprecated"
+    },
+    {
+      "code": "BID",
+      "display": "twice a day at institution-specified times",
+      "status": "active"
+    },
+    {
+      "code": "C",
+      "display": "service is provided continuously between start time and stop time",
+      "status": "active"
+    },
+    {
+      "code": "D",
+      "display": "Cibus Diurnus (lunch)",
+      "status": "deprecated"
+    },
+    {
+      "code": "I",
+      "display": "Inter",
+      "status": "deprecated"
+    },
+    {
+      "code": "M",
+      "display": "Cibus Matutinus (breakfast)",
+      "status": "deprecated"
+    },
+    {
+      "code": "Meal Related Timings",
+      "display": "&lt;timing&gt;C (&quot;cum&quot;)&lt;meal&gt;",
+      "status": "deprecated"
+    },
+    {
+      "code": "Once",
+      "display": "one time only.",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Post (after)",
+      "status": "deprecated"
+    },
+    {
+      "code": "PRN",
+      "display": "given as needed",
+      "status": "active"
+    },
+    {
+      "code": "PRNxxx",
+      "display": "where xxx is some frequency code",
+      "status": "deprecated"
+    },
+    {
+      "code": "Q&lt;integer&gt;D",
+      "display": "every &lt;integer&gt; days",
+      "status": "deprecated"
+    },
+    {
+      "code": "Q&lt;integer&gt;H",
+      "display": "every &lt;integer&gt; hours",
+      "status": "deprecated"
+    },
+    {
+      "code": "Q&lt;integer&gt;J&lt;day#&gt;",
+      "display": "repeats on a particular day of the week,",
+      "status": "deprecated"
+    },
+    {
+      "code": "Q&lt;integer&gt;L",
+      "display": "every &lt;integer&gt; months (Lunar cycle)",
+      "status": "deprecated"
+    },
+    {
+      "code": "Q&lt;integer&gt;M",
+      "display": "every &lt;integer&gt; minutes",
+      "status": "deprecated"
+    },
+    {
+      "code": "Q&lt;integer&gt;S",
+      "display": "every &lt;integer&gt; seconds",
+      "status": "deprecated"
+    },
+    {
+      "code": "Q&lt;integer&gt;W",
+      "display": "every &lt;integer&gt; weeks",
+      "status": "deprecated"
+    },
+    {
+      "code": "QAM",
+      "display": "in the morning at institution-specified time",
+      "status": "active"
+    },
+    {
+      "code": "QHS",
+      "display": "every day before the hour of sleep",
+      "status": "active"
+    },
+    {
+      "code": "QID",
+      "display": "four times a day at institution-specified times",
+      "status": "active"
+    },
+    {
+      "code": "QOD",
+      "display": "every other day",
+      "status": "active"
+    },
+    {
+      "code": "QPM",
+      "display": "in the evening at institution-specified time",
+      "status": "active"
+    },
+    {
+      "code": "QSHIFT",
+      "display": "during each of three eight-hour shifts at institution-specified times",
+      "status": "active"
+    },
+    {
+      "code": "TID",
+      "display": "three times a day at institution-specified times",
+      "status": "active"
+    },
+    {
+      "code": "U &lt;spec&gt;",
+      "display": "for future use, where &lt;spec&gt; is an interval specification as defined by the UNIX cron specification.",
+      "status": "deprecated"
+    },
+    {
+      "code": "V",
+      "display": "Cibus Vespertinus (dinner)",
+      "status": "deprecated"
+    },
+    {
+      "code": "xID",
+      "display": "&quot;X&quot; times per day at institution-specified times, where X is a numeral 5 or greater.",
+      "status": "deprecated"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "VH",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Visiting Hours",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Start Day Range",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "End Day Range",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Start Hour Range",
+      "datatypeId": "TM",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "End Hour Range",
+      "datatypeId": "TM",
+      "required": false
+    }
+  ]
+}

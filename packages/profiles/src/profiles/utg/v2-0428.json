@@ -1,0 +1,24 @@
+{
+  "id": "v2-0428",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0428",
+  "oid": "2.16.840.1.113883.18.269",
+  "name": "IncidentType",
+  "title": "incidentType",
+  "codes": [
+    {
+      "code": "O",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Preventable",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "User Error",
+      "status": "active"
+    }
+  ]
+}

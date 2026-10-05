@@ -1,0 +1,19 @@
+{
+  "id": "0238",
+  "description": "Event seriousness",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "S",
+      "description": "Significant"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

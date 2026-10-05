@@ -1,0 +1,31 @@
+{
+  "id": "0200",
+  "description": "Name Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Alias Name"
+    },
+    {
+      "name": "C",
+      "description": "Adopted Name"
+    },
+    {
+      "name": "D",
+      "description": "Display Name"
+    },
+    {
+      "name": "L",
+      "description": "Legal Name"
+    },
+    {
+      "name": "M",
+      "description": "Maiden Name"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    }
+  ]
+}

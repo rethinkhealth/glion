@@ -1,0 +1,15 @@
+{
+  "id": "0882",
+  "description": "Medical Role Executing Physician",
+  "type": "user",
+  "codes": [
+    {
+      "name": "E",
+      "description": "Employed"
+    },
+    {
+      "name": "SE",
+      "description": "Self-employed"
+    }
+  ]
+}

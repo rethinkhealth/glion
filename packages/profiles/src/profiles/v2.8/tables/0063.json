@@ -1,0 +1,135 @@
+{
+  "id": "0063",
+  "description": "Relationship",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ASC",
+      "description": "Associate"
+    },
+    {
+      "name": "BRO",
+      "description": "Brother"
+    },
+    {
+      "name": "CGV",
+      "description": "Care giver"
+    },
+    {
+      "name": "CHD",
+      "description": "Child"
+    },
+    {
+      "name": "DEP",
+      "description": "Handicapped dependent"
+    },
+    {
+      "name": "DOM",
+      "description": "Life partner"
+    },
+    {
+      "name": "EMC",
+      "description": "Emergency contact"
+    },
+    {
+      "name": "EME",
+      "description": "Employee"
+    },
+    {
+      "name": "EMR",
+      "description": "Employer"
+    },
+    {
+      "name": "EXF",
+      "description": "Extended family"
+    },
+    {
+      "name": "FCH",
+      "description": "Foster child"
+    },
+    {
+      "name": "FND",
+      "description": "Friend"
+    },
+    {
+      "name": "FTH",
+      "description": "Father"
+    },
+    {
+      "name": "GCH",
+      "description": "Grandchild"
+    },
+    {
+      "name": "GRD",
+      "description": "Guardian"
+    },
+    {
+      "name": "GRP",
+      "description": "Grandparent"
+    },
+    {
+      "name": "MGR",
+      "description": "Manager"
+    },
+    {
+      "name": "MTH",
+      "description": "Mother"
+    },
+    {
+      "name": "NCH",
+      "description": "Natural child"
+    },
+    {
+      "name": "NON",
+      "description": "None"
+    },
+    {
+      "name": "OAD",
+      "description": "Other adult"
+    },
+    {
+      "name": "OTH",
+      "description": "Other"
+    },
+    {
+      "name": "OWN",
+      "description": "Owner"
+    },
+    {
+      "name": "PAR",
+      "description": "Parent"
+    },
+    {
+      "name": "SCH",
+      "description": "Stepchild"
+    },
+    {
+      "name": "SEL",
+      "description": "Self"
+    },
+    {
+      "name": "SIB",
+      "description": "Sibling"
+    },
+    {
+      "name": "SIS",
+      "description": "Sister"
+    },
+    {
+      "name": "SPO",
+      "description": "Spouse"
+    },
+    {
+      "name": "TRA",
+      "description": "Trainer"
+    },
+    {
+      "name": "UNK",
+      "description": "Unknown"
+    },
+    {
+      "name": "WRD",
+      "description": "Ward of court"
+    }
+  ]
+}

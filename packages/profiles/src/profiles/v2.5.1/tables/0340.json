@@ -1,0 +1,11 @@
+{
+  "id": "0340",
+  "description": "Procedure code modifier",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values"
+    }
+  ]
+}

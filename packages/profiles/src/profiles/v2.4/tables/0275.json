@@ -1,0 +1,23 @@
+{
+  "id": "0275",
+  "description": "Document storage status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AA",
+      "description": "Active and archived"
+    },
+    {
+      "name": "AC",
+      "description": "Active"
+    },
+    {
+      "name": "AR",
+      "description": "Archived (not active)"
+    },
+    {
+      "name": "PU",
+      "description": "Purged"
+    }
+  ]
+}

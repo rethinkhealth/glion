@@ -1,0 +1,29 @@
+{
+  "id": "v2-0284",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0284",
+  "oid": "2.16.840.1.113883.18.177",
+  "name": "ReferralCategory",
+  "title": "referralCategory",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Ambulatory",
+      "status": "active"
+    },
+    {
+      "code": "E",
+      "display": "Emergency",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Inpatient",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Outpatient",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "ICD",
+  "version": "2.7.1",
+  "kind": "composite",
+  "title": "Insurance Certification Definition",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Certification Patient Type",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Certification Required",
+      "datatypeId": "ID",
+      "required": true
+    },
+    {
+      "sequence": 3,
+      "name": "Date/Time Certification Required",
+      "datatypeId": "DTM",
+      "required": false
+    }
+  ]
+}

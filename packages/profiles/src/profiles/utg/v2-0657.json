@@ -1,0 +1,24 @@
+{
+  "id": "v2-0657",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0657",
+  "oid": "2.16.840.1.113883.18.382",
+  "name": "DeviceType",
+  "title": "deviceType",
+  "codes": [
+    {
+      "code": "1",
+      "display": "EO Gas Sterilizer",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Steam Sterilizer",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Peracetic Acid",
+      "status": "active"
+    }
+  ]
+}

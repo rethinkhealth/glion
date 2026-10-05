@@ -1,0 +1,227 @@
+{
+  "id": "0227",
+  "description": "Manufacturers of Vaccines (code=MVX)",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AB",
+      "description": "Abbott Laboratories"
+    },
+    {
+      "name": "AD",
+      "description": "Adams Laboratories, Inc."
+    },
+    {
+      "name": "ALP",
+      "description": "Alpha Therapeutic Corporation"
+    },
+    {
+      "name": "AR",
+      "description": "Armour"
+    },
+    {
+      "name": "AVB",
+      "description": "Aventis Behring L.L.C."
+    },
+    {
+      "name": "AVI",
+      "description": "Aviron"
+    },
+    {
+      "name": "BA",
+      "description": "Baxter Healthcare Corporation"
+    },
+    {
+      "name": "BAH",
+      "description": "Baxter Healthcare Corporation"
+    },
+    {
+      "name": "BAY",
+      "description": "Bayer Corporation"
+    },
+    {
+      "name": "BP",
+      "description": "Berna Products"
+    },
+    {
+      "name": "BPC",
+      "description": "Berna Products Corporation"
+    },
+    {
+      "name": "CEN",
+      "description": "Centeon L.L.C."
+    },
+    {
+      "name": "CHI",
+      "description": "Chiron Corporation"
+    },
+    {
+      "name": "CMP",
+      "description": "Celltech Medeva Pharmaceuticals"
+    },
+    {
+      "name": "CNJ",
+      "description": "Cangene Corporation"
+    },
+    {
+      "name": "CON",
+      "description": "Connaught"
+    },
+    {
+      "name": "DVC",
+      "description": "DynPort Vaccine Company, LLC"
+    },
+    {
+      "name": "EVN",
+      "description": "Evans Medical Limited"
+    },
+    {
+      "name": "GEO",
+      "description": "GeoVax Labs, Inc."
+    },
+    {
+      "name": "GRE",
+      "description": "Greer Laboratories, Inc."
+    },
+    {
+      "name": "IAG",
+      "description": "Immuno International AG"
+    },
+    {
+      "name": "IM",
+      "description": "Merieux"
+    },
+    {
+      "name": "IUS",
+      "description": "Immuno-U.S., Inc."
+    },
+    {
+      "name": "JPN",
+      "description": "The Research Foundation for Microbial Diseases of Osaka University"
+    },
+    {
+      "name": "KGC",
+      "description": "Korea Green Cross Corporation"
+    },
+    {
+      "name": "LED",
+      "description": "Lederle"
+    },
+    {
+      "name": "MA",
+      "description": "Massachusetts Public Health Biologic Laboratories"
+    },
+    {
+      "name": "MBL",
+      "description": "Massachusetts Biologic Laboratories"
+    },
+    {
+      "name": "MED",
+      "description": "MedImmune, Inc."
+    },
+    {
+      "name": "MIL",
+      "description": "Miles"
+    },
+    {
+      "name": "MIP",
+      "description": "Bioport Corporation"
+    },
+    {
+      "name": "MSD",
+      "description": "Merck & Co., Inc."
+    },
+    {
+      "name": "NAB",
+      "description": "NABI"
+    },
+    {
+      "name": "NAV",
+      "description": "North American Vaccine, Inc."
+    },
+    {
+      "name": "NOV",
+      "description": "Novartis Pharmaceutical Corporation"
+    },
+    {
+      "name": "NVX",
+      "description": "Novavax, Inc."
+    },
+    {
+      "name": "NYB",
+      "description": "New York Blood Center"
+    },
+    {
+      "name": "ORT",
+      "description": "Ortho-Clinical Diagnostics"
+    },
+    {
+      "name": "OTC",
+      "description": "Organon Teknika Corporation"
+    },
+    {
+      "name": "OTH",
+      "description": "Other manufacturer"
+    },
+    {
+      "name": "PD",
+      "description": "Parkedale Pharmaceuticals"
+    },
+    {
+      "name": "PMC",
+      "description": "sanofi pasteur"
+    },
+    {
+      "name": "PRX",
+      "description": "Praxis Biologics"
+    },
+    {
+      "name": "PWJ",
+      "description": "PowderJect Pharmaceuticals"
+    },
+    {
+      "name": "SCL",
+      "description": "Sclavo, Inc."
+    },
+    {
+      "name": "SI",
+      "description": "Swiss Serum and Vaccine Inst."
+    },
+    {
+      "name": "SKB",
+      "description": "GlaxoSmithKline"
+    },
+    {
+      "name": "SOL",
+      "description": "Solvay Pharmaceuticals"
+    },
+    {
+      "name": "TAL",
+      "description": "Talecris Biotherapeutics"
+    },
+    {
+      "name": "UNK",
+      "description": "Unknown manufacturer"
+    },
+    {
+      "name": "USA",
+      "description": "United States Army Medical Research and Material Command"
+    },
+    {
+      "name": "VXG",
+      "description": "VaxGen"
+    },
+    {
+      "name": "WA",
+      "description": "Wyeth-Ayerst"
+    },
+    {
+      "name": "WAL",
+      "description": "Wyeth-Ayerst"
+    },
+    {
+      "name": "ZLB",
+      "description": "ZLB Behring"
+    }
+  ]
+}

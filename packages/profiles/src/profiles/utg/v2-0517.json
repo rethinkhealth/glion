@@ -1,0 +1,29 @@
+{
+  "id": "v2-0517",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0517",
+  "oid": "2.16.840.1.113883.18.338",
+  "name": "InformInstructions",
+  "title": "informInstructions",
+  "codes": [
+    {
+      "code": "HD",
+      "display": "Inform help desk",
+      "status": "active"
+    },
+    {
+      "code": "NPAT",
+      "display": "Do NOT inform patient",
+      "status": "active"
+    },
+    {
+      "code": "PAT",
+      "display": "Inform patient",
+      "status": "active"
+    },
+    {
+      "code": "USR",
+      "display": "Inform User",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "id": "0119",
+  "description": "ORDER CONTROL",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CA",
+      "description": "Cancel order request"
+    },
+    {
+      "name": "CH",
+      "description": "Child order"
+    },
+    {
+      "name": "CN",
+      "description": "Combined result"
+    },
+    {
+      "name": "CR",
+      "description": "Canceled as requested"
+    },
+    {
+      "name": "DC",
+      "description": "Discontinue order request"
+    },
+    {
+      "name": "DE",
+      "description": "Data Errors"
+    },
+    {
+      "name": "DR",
+      "description": "Discontinued as requested"
+    },
+    {
+      "name": "HD",
+      "description": "Hold order request"
+    },
+    {
+      "name": "HR",
+      "description": "On hold as requested"
+    },
+    {
+      "name": "NA",
+      "description": "Number assigned"
+    },
+    {
+      "name": "NW",
+      "description": "New Order"
+    },
+    {
+      "name": "OC",
+      "description": "Order canceled"
+    },
+    {
+      "name": "OD",
+      "description": "Order discontinued"
+    },
+    {
+      "name": "OH",
+      "description": "Order held"
+    },
+    {
+      "name": "OK",
+      "description": "Order accepted and OK"
+    },
+    {
+      "name": "OR",
+      "description": "Released as requested"
+    },
+    {
+      "name": "PA",
+      "description": "Parent order"
+    },
+    {
+      "name": "RE",
+      "description": "Observations to follow"
+    },
+    {
+      "name": "RL",
+      "description": "Release previous hold"
+    },
+    {
+      "name": "RO",
+      "description": "Replacement order"
+    },
+    {
+      "name": "RP",
+      "description": "Order replace request"
+    },
+    {
+      "name": "RQ",
+      "description": "Replaced as requested"
+    },
+    {
+      "name": "RR",
+      "description": "Request received"
+    },
+    {
+      "name": "RU",
+      "description": "Replaced unsolicited"
+    },
+    {
+      "name": "SC",
+      "description": "Status changed"
+    },
+    {
+      "name": "SN",
+      "description": "Send order number"
+    },
+    {
+      "name": "SR",
+      "description": "Response to send order status request"
+    },
+    {
+      "name": "SS",
+      "description": "Send order status request"
+    },
+    {
+      "name": "UC",
+      "description": "Unable to cancel"
+    },
+    {
+      "name": "UD",
+      "description": "Unable to discontinue"
+    },
+    {
+      "name": "UH",
+      "description": "Unable to put on hold"
+    },
+    {
+      "name": "UM",
+      "description": "Unable to replace"
+    },
+    {
+      "name": "UR",
+      "description": "Unable to release"
+    },
+    {
+      "name": "UX",
+      "description": "Unable to change"
+    },
+    {
+      "name": "XO",
+      "description": "Change order request"
+    },
+    {
+      "name": "XR",
+      "description": "Changed as requested"
+    },
+    {
+      "name": "XX",
+      "description": "Order changed, unsolicited"
+    }
+  ]
+}

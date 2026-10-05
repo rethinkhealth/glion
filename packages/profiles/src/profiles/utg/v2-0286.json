@@ -1,0 +1,29 @@
+{
+  "id": "v2-0286",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0286",
+  "oid": "2.16.840.1.113883.18.178",
+  "name": "ProviderRole",
+  "title": "providerRole",
+  "codes": [
+    {
+      "code": "CP",
+      "display": "Consulting Provider",
+      "status": "active"
+    },
+    {
+      "code": "PP",
+      "display": "Primary Care Provider",
+      "status": "active"
+    },
+    {
+      "code": "RP",
+      "display": "Referring Provider",
+      "status": "active"
+    },
+    {
+      "code": "RT",
+      "display": "Referred to Provider",
+      "status": "active"
+    }
+  ]
+}

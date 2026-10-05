@@ -1,0 +1,14 @@
+{
+  "id": "v2-0423",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0423",
+  "oid": "2.16.840.1.113883.18.264",
+  "name": "CaseCategory",
+  "title": "caseCategory",
+  "codes": [
+    {
+      "code": "D",
+      "display": "Doctor&#39;s Office Closed",
+      "status": "active"
+    }
+  ]
+}

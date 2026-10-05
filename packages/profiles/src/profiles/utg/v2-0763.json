@@ -1,0 +1,24 @@
+{
+  "id": "v2-0763",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0763",
+  "oid": "2.16.840.1.113883.18.401",
+  "name": "DrgProcedureRelevance",
+  "title": "drgProcedureRelevance",
+  "codes": [
+    {
+      "code": "0",
+      "display": "Neither operation relevant nor non-operation relevant procedure",
+      "status": "active"
+    },
+    {
+      "code": "1",
+      "display": "Operation relevant procedure",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Non-operation relevant procedure",
+      "status": "active"
+    }
+  ]
+}

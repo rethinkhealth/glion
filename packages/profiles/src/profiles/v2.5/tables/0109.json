@@ -1,0 +1,15 @@
+{
+  "id": "0109",
+  "description": "Report priority",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "R",
+      "description": "Routine"
+    },
+    {
+      "name": "S",
+      "description": "Stat"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "0127",
+  "description": "Allergy type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "DA",
+      "description": "Drug allergy"
+    },
+    {
+      "name": "FA",
+      "description": "Food allergy"
+    },
+    {
+      "name": "MA",
+      "description": "Miscellaneous allergy"
+    },
+    {
+      "name": "MC",
+      "description": "Miscellaneous contraindication"
+    }
+  ]
+}

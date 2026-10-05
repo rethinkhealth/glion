@@ -1,0 +1,27 @@
+{
+  "id": "0507",
+  "description": "Observation Result Handling",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Alert provider when abnormal"
+    },
+    {
+      "name": "BCC",
+      "description": "Blind Copy"
+    },
+    {
+      "name": "CC",
+      "description": "Copies Requested"
+    },
+    {
+      "name": "F",
+      "description": "Film-with-patient"
+    },
+    {
+      "name": "N",
+      "description": "Notify provider when ready"
+    }
+  ]
+}

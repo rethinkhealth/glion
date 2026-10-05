@@ -1,0 +1,19 @@
+{
+  "id": "v2-0398",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0398",
+  "oid": "2.16.840.1.113883.18.249",
+  "name": "ContinuationStyle",
+  "title": "continuationStyle",
+  "codes": [
+    {
+      "code": "F",
+      "display": "Fragmentation",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Interactive Continuation",
+      "status": "active"
+    }
+  ]
+}

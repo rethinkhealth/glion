@@ -1,0 +1,19 @@
+{
+  "id": "v2-0083",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0083",
+  "oid": "2.16.840.1.113883.18.33",
+  "name": "OutlierType",
+  "title": "outlierType",
+  "codes": [
+    {
+      "code": "C",
+      "display": "Outlier cost",
+      "status": "active"
+    },
+    {
+      "code": "D",
+      "display": "Outlier days",
+      "status": "active"
+    }
+  ]
+}

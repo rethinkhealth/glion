@@ -1,0 +1,1775 @@
+{
+  "id": "0550",
+  "description": "Body Parts",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "Â ",
+      "description": "External Jugular"
+    },
+    {
+      "name": "ACET",
+      "description": "Acetabulum"
+    },
+    {
+      "name": "ACHIL",
+      "description": "Achilles"
+    },
+    {
+      "name": "ADB",
+      "description": "Abdomen"
+    },
+    {
+      "name": "ADE",
+      "description": "Adenoids"
+    },
+    {
+      "name": "ADR",
+      "description": "Adrenal"
+    },
+    {
+      "name": "AMN",
+      "description": "Amniotic fluid"
+    },
+    {
+      "name": "AMS",
+      "description": "Amniotic Sac"
+    },
+    {
+      "name": "ANAL",
+      "description": "Anal"
+    },
+    {
+      "name": "ANKL",
+      "description": "Ankle"
+    },
+    {
+      "name": "ANTEC",
+      "description": "Antecubital"
+    },
+    {
+      "name": "ANTECF",
+      "description": "Antecubital Fossa"
+    },
+    {
+      "name": "ANTR",
+      "description": "Antrum"
+    },
+    {
+      "name": "ANUS",
+      "description": "Anus"
+    },
+    {
+      "name": "AORTA",
+      "description": "Aorta"
+    },
+    {
+      "name": "APDX",
+      "description": "Appendix"
+    },
+    {
+      "name": "AR",
+      "description": "Aortic Rim"
+    },
+    {
+      "name": "AREO",
+      "description": "Areola"
+    },
+    {
+      "name": "ARM",
+      "description": "Arm"
+    },
+    {
+      "name": "ARTE",
+      "description": "Artery"
+    },
+    {
+      "name": "ASCIT",
+      "description": "Ascites"
+    },
+    {
+      "name": "ASCT",
+      "description": "Ascitic Fluid"
+    },
+    {
+      "name": "ATR",
+      "description": "Atrium"
+    },
+    {
+      "name": "AURI",
+      "description": "Auricular"
+    },
+    {
+      "name": "AV",
+      "description": "Aortic Valve"
+    },
+    {
+      "name": "AXI",
+      "description": "Axilla"
+    },
+    {
+      "name": "BACK",
+      "description": "Back"
+    },
+    {
+      "name": "BARTD",
+      "description": "Bartholin Duct"
+    },
+    {
+      "name": "BARTG",
+      "description": "Bartholin Gland"
+    },
+    {
+      "name": "BCYS",
+      "description": "Brain Cyst Fluid"
+    },
+    {
+      "name": "BDY",
+      "description": "Body, Whole"
+    },
+    {
+      "name": "BID",
+      "description": "Bile Duct"
+    },
+    {
+      "name": "BIFL",
+      "description": "Bile fluid"
+    },
+    {
+      "name": "BLAD",
+      "description": "Bladder"
+    },
+    {
+      "name": "BLD",
+      "description": "Blood, Whole"
+    },
+    {
+      "name": "BLDA",
+      "description": "Blood,  Arterial"
+    },
+    {
+      "name": "BLDC",
+      "description": "Blood,  Capillary"
+    },
+    {
+      "name": "BLDV",
+      "description": "Blood,  Venous"
+    },
+    {
+      "name": "BLOOD",
+      "description": "Blood"
+    },
+    {
+      "name": "BMAR",
+      "description": "Bone marrow"
+    },
+    {
+      "name": "BON",
+      "description": "Bone"
+    },
+    {
+      "name": "BOWEL",
+      "description": "Bowel"
+    },
+    {
+      "name": "BOWLA",
+      "description": "Bowel, Large"
+    },
+    {
+      "name": "BOWSM",
+      "description": "Bowel, Small"
+    },
+    {
+      "name": "BPH",
+      "description": "Basophils"
+    },
+    {
+      "name": "BRA",
+      "description": "Brachial"
+    },
+    {
+      "name": "BRAIN",
+      "description": "Brain"
+    },
+    {
+      "name": "BRO",
+      "description": "Bronchial"
+    },
+    {
+      "name": "BROCH",
+      "description": "Bronchiole/Bronchiolar"
+    },
+    {
+      "name": "BRONC",
+      "description": "Bronchus/Bronchial"
+    },
+    {
+      "name": "BROW",
+      "description": "Eyebrow"
+    },
+    {
+      "name": "BRST",
+      "description": "Breast"
+    },
+    {
+      "name": "BRSTFL",
+      "description": "Breast fluid"
+    },
+    {
+      "name": "BRTGF",
+      "description": "Bartholin Gland Fluid"
+    },
+    {
+      "name": "BRV",
+      "description": "Broviac"
+    },
+    {
+      "name": "BUCCA",
+      "description": "Buccal"
+    },
+    {
+      "name": "BURSA",
+      "description": "Bursa"
+    },
+    {
+      "name": "BURSF",
+      "description": "Bursa Fluid"
+    },
+    {
+      "name": "BUTT",
+      "description": "Buttocks"
+    },
+    {
+      "name": "CALF",
+      "description": "Calf"
+    },
+    {
+      "name": "CANAL",
+      "description": "Canal"
+    },
+    {
+      "name": "CANLI",
+      "description": "Canaliculis"
+    },
+    {
+      "name": "CANTH",
+      "description": "Canthus"
+    },
+    {
+      "name": "CARO",
+      "description": "Carotid"
+    },
+    {
+      "name": "CARP",
+      "description": "Carpal"
+    },
+    {
+      "name": "CAVIT",
+      "description": "Cavity"
+    },
+    {
+      "name": "CBLD",
+      "description": "Blood, Cord"
+    },
+    {
+      "name": "CDM",
+      "description": "Cardiac Muscle"
+    },
+    {
+      "name": "CDUCT",
+      "description": "Common Duct"
+    },
+    {
+      "name": "CECUM",
+      "description": "Cecum/Cecal"
+    },
+    {
+      "name": "CERVUT",
+      "description": "Cervix/Uterus"
+    },
+    {
+      "name": "CHE",
+      "description": "Cavity, Chest"
+    },
+    {
+      "name": "CHEEK",
+      "description": "Cheek"
+    },
+    {
+      "name": "CHES",
+      "description": "Chest"
+    },
+    {
+      "name": "CHEST",
+      "description": "Chest Tube"
+    },
+    {
+      "name": "CHIN",
+      "description": "Chin"
+    },
+    {
+      "name": "CIRCU",
+      "description": "Circumcision Site"
+    },
+    {
+      "name": "CLAVI",
+      "description": "Clavicle/Clavicular"
+    },
+    {
+      "name": "CLIT",
+      "description": "Clitoris"
+    },
+    {
+      "name": "CLITO",
+      "description": "Clitoral"
+    },
+    {
+      "name": "CNL",
+      "description": "Cannula"
+    },
+    {
+      "name": "COCCG",
+      "description": "Coccygeal"
+    },
+    {
+      "name": "COCCY",
+      "description": "Coccyx"
+    },
+    {
+      "name": "COLON",
+      "description": "Colon"
+    },
+    {
+      "name": "COLOS",
+      "description": "Colostomy"
+    },
+    {
+      "name": "CONJ",
+      "description": "Conjunctiva"
+    },
+    {
+      "name": "COR",
+      "description": "Cord"
+    },
+    {
+      "name": "CORAL",
+      "description": "Coral"
+    },
+    {
+      "name": "CORD",
+      "description": "Cord Blood"
+    },
+    {
+      "name": "CORN",
+      "description": "Cornea"
+    },
+    {
+      "name": "COS",
+      "description": "Colostomy Stoma"
+    },
+    {
+      "name": "CRANE",
+      "description": "Cranium, ethmoid"
+    },
+    {
+      "name": "CRANF",
+      "description": "Cranium, frontal"
+    },
+    {
+      "name": "CRANO",
+      "description": "Cranium, occipital"
+    },
+    {
+      "name": "CRANP",
+      "description": "Cranium, parietal"
+    },
+    {
+      "name": "CRANS",
+      "description": "Cranium, sphenoid"
+    },
+    {
+      "name": "CRANT",
+      "description": "Cranium, temporal"
+    },
+    {
+      "name": "CSF",
+      "description": "Cerebral Spinal Fluid"
+    },
+    {
+      "name": "CUBIT",
+      "description": "Cubitus"
+    },
+    {
+      "name": "CUFF",
+      "description": "Cuff"
+    },
+    {
+      "name": "CULD",
+      "description": "Cul De Sac"
+    },
+    {
+      "name": "CULDO",
+      "description": "Culdocentesis"
+    },
+    {
+      "name": "CVX",
+      "description": "Cervix"
+    },
+    {
+      "name": "DELT",
+      "description": "Deltoid"
+    },
+    {
+      "name": "DEN",
+      "description": "Dental Gingiva"
+    },
+    {
+      "name": "DENTA",
+      "description": "Dental"
+    },
+    {
+      "name": "DIAF",
+      "description": "Dialysis Fluid"
+    },
+    {
+      "name": "DIGIT",
+      "description": "Digit"
+    },
+    {
+      "name": "DISC",
+      "description": "Disc"
+    },
+    {
+      "name": "DORS",
+      "description": "Dorsum/Dorsal"
+    },
+    {
+      "name": "DPH",
+      "description": "Diaphragm"
+    },
+    {
+      "name": "DUFL",
+      "description": "Duodenal Fluid"
+    },
+    {
+      "name": "DUODE",
+      "description": "Duodenum/Duodenal"
+    },
+    {
+      "name": "DUR",
+      "description": "Dura"
+    },
+    {
+      "name": "EAR",
+      "description": "Ear"
+    },
+    {
+      "name": "EARBI",
+      "description": "Ear bone, incus"
+    },
+    {
+      "name": "EARBM",
+      "description": "Ear bone, malleus"
+    },
+    {
+      "name": "EARBS",
+      "description": "Ear bone,stapes"
+    },
+    {
+      "name": "EARLO",
+      "description": "Ear Lobe"
+    },
+    {
+      "name": "EC",
+      "description": "Endocervical"
+    },
+    {
+      "name": "ELBOW",
+      "description": "Elbow"
+    },
+    {
+      "name": "ELBOWJ",
+      "description": "Elbow Joint"
+    },
+    {
+      "name": "ENDC",
+      "description": "Endocardium"
+    },
+    {
+      "name": "ENDM",
+      "description": "Endometrium"
+    },
+    {
+      "name": "EOLPH",
+      "description": "endolpthamitis"
+    },
+    {
+      "name": "EOS",
+      "description": "Eosinophils"
+    },
+    {
+      "name": "EPD",
+      "description": "Epididymis"
+    },
+    {
+      "name": "EPICA",
+      "description": "Epicardial"
+    },
+    {
+      "name": "EPICM",
+      "description": "Epicardium"
+    },
+    {
+      "name": "EPIDU",
+      "description": "Epidural"
+    },
+    {
+      "name": "EPIGL",
+      "description": "Epiglottis"
+    },
+    {
+      "name": "ESO",
+      "description": "Esophagus"
+    },
+    {
+      "name": "ESOPG",
+      "description": "Esophageal"
+    },
+    {
+      "name": "ET",
+      "description": "Endotracheal"
+    },
+    {
+      "name": "ETHMO",
+      "description": "Ethmoid"
+    },
+    {
+      "name": "EUR",
+      "description": "Endourethral"
+    },
+    {
+      "name": "EYE",
+      "description": "Eye"
+    },
+    {
+      "name": "EYELI",
+      "description": "Eyelid"
+    },
+    {
+      "name": "FACE",
+      "description": "Face"
+    },
+    {
+      "name": "FALLT",
+      "description": "Fallopian Tube"
+    },
+    {
+      "name": "FBINC",
+      "description": "Facial bone, inferior nasal concha"
+    },
+    {
+      "name": "FBLAC",
+      "description": "Facial bone, lacrimal"
+    },
+    {
+      "name": "FBMAX",
+      "description": "Facial bone, maxilla"
+    },
+    {
+      "name": "FBNAS",
+      "description": "Facial bone, nasal"
+    },
+    {
+      "name": "FBPAL",
+      "description": "Facial bone, palatine"
+    },
+    {
+      "name": "FBVOM",
+      "description": "Facial bone, vomer"
+    },
+    {
+      "name": "FBZYG",
+      "description": "Facial bone, zygomatic"
+    },
+    {
+      "name": "FEMOR",
+      "description": "Femoral"
+    },
+    {
+      "name": "FEMUR",
+      "description": "Femur"
+    },
+    {
+      "name": "FET",
+      "description": "Fetus"
+    },
+    {
+      "name": "FIBU",
+      "description": "Fibula"
+    },
+    {
+      "name": "FING",
+      "description": "Finger"
+    },
+    {
+      "name": "FINGN",
+      "description": "Finger Nail"
+    },
+    {
+      "name": "FMH",
+      "description": "Femoral Head"
+    },
+    {
+      "name": "FOL",
+      "description": "Follicle"
+    },
+    {
+      "name": "FOOT",
+      "description": "Foot"
+    },
+    {
+      "name": "FOREA",
+      "description": "Forearm"
+    },
+    {
+      "name": "FOREH",
+      "description": "Forehead"
+    },
+    {
+      "name": "FORES",
+      "description": "Foreskin"
+    },
+    {
+      "name": "FOURC",
+      "description": "Fourchette"
+    },
+    {
+      "name": "GB",
+      "description": "Gall Bladder"
+    },
+    {
+      "name": "GEN",
+      "description": "Genital"
+    },
+    {
+      "name": "GENC",
+      "description": "Genital Cervix"
+    },
+    {
+      "name": "GENL",
+      "description": "Genital Lochia"
+    },
+    {
+      "name": "GL",
+      "description": "Genital Lesion"
+    },
+    {
+      "name": "GLAND",
+      "description": "Gland"
+    },
+    {
+      "name": "GLANS",
+      "description": "Glans"
+    },
+    {
+      "name": "GLUT",
+      "description": "Gluteus"
+    },
+    {
+      "name": "GLUTE",
+      "description": "Gluteal"
+    },
+    {
+      "name": "GLUTM",
+      "description": "Gluteus Medius"
+    },
+    {
+      "name": "GROIN",
+      "description": "Groin"
+    },
+    {
+      "name": "GUM",
+      "description": "Gum"
+    },
+    {
+      "name": "GVU",
+      "description": "Genital - Vulva"
+    },
+    {
+      "name": "HAL",
+      "description": "Hallux"
+    },
+    {
+      "name": "HAND",
+      "description": "Hand"
+    },
+    {
+      "name": "HAR",
+      "description": "Hair"
+    },
+    {
+      "name": "HART",
+      "description": "Heart"
+    },
+    {
+      "name": "HEAD",
+      "description": "Head"
+    },
+    {
+      "name": "HEEL",
+      "description": "Heel"
+    },
+    {
+      "name": "HEM",
+      "description": "Hemorrhoid"
+    },
+    {
+      "name": "HIP",
+      "description": "Hip"
+    },
+    {
+      "name": "HIPJ",
+      "description": "Hip Joint"
+    },
+    {
+      "name": "HUMER",
+      "description": "Humerus"
+    },
+    {
+      "name": "HV",
+      "description": "Heart Valve"
+    },
+    {
+      "name": "HVB",
+      "description": "Heart Valve, Bicuspid"
+    },
+    {
+      "name": "HVT",
+      "description": "Heart Valve, Tricuspid"
+    },
+    {
+      "name": "HYMEN",
+      "description": "Hymen"
+    },
+    {
+      "name": "ICX",
+      "description": "Intracervical"
+    },
+    {
+      "name": "ILC",
+      "description": "Ileal Conduit"
+    },
+    {
+      "name": "ILCON",
+      "description": "Ilical Conduit"
+    },
+    {
+      "name": "ILCR",
+      "description": "Iliac Crest"
+    },
+    {
+      "name": "ILE",
+      "description": "Ileal Loop"
+    },
+    {
+      "name": "ILEOS",
+      "description": "Ileostomy"
+    },
+    {
+      "name": "ILEUM",
+      "description": "Ileum"
+    },
+    {
+      "name": "ILIAC",
+      "description": "Iliac"
+    },
+    {
+      "name": "INASA",
+      "description": "Intranasal"
+    },
+    {
+      "name": "INGUI",
+      "description": "Inguinal"
+    },
+    {
+      "name": "INSTL",
+      "description": "Intestine, Large"
+    },
+    {
+      "name": "INSTS",
+      "description": "Intestine, Small"
+    },
+    {
+      "name": "INT",
+      "description": "Intestine"
+    },
+    {
+      "name": "INTRO",
+      "description": "Introitus"
+    },
+    {
+      "name": "INTRU",
+      "description": "Intrauterine"
+    },
+    {
+      "name": "ISCHI",
+      "description": "Ischium"
+    },
+    {
+      "name": "ISH",
+      "description": "Loop, Ishial"
+    },
+    {
+      "name": "JAW",
+      "description": "Jaw"
+    },
+    {
+      "name": "JUGI",
+      "description": "Jugular, Internal"
+    },
+    {
+      "name": "KIDN",
+      "description": "Kidney"
+    },
+    {
+      "name": "KNEE",
+      "description": "Knee"
+    },
+    {
+      "name": "KNEEF",
+      "description": "Knee Fluid"
+    },
+    {
+      "name": "KNEEJ",
+      "description": "Knee Joint"
+    },
+    {
+      "name": "LABIA",
+      "description": "Labia"
+    },
+    {
+      "name": "LABMA",
+      "description": "Labia Majora"
+    },
+    {
+      "name": "LABMI",
+      "description": "Labia Minora"
+    },
+    {
+      "name": "LACRI",
+      "description": "Lacrimal"
+    },
+    {
+      "name": "LAM",
+      "description": "Lamella"
+    },
+    {
+      "name": "LARYN",
+      "description": "Larynx"
+    },
+    {
+      "name": "LEG",
+      "description": "Leg"
+    },
+    {
+      "name": "LENS",
+      "description": "Lens"
+    },
+    {
+      "name": "LING",
+      "description": "Lingual"
+    },
+    {
+      "name": "LINGU",
+      "description": "Lingula"
+    },
+    {
+      "name": "LIP",
+      "description": "Lip"
+    },
+    {
+      "name": "LIVER",
+      "description": "Liver"
+    },
+    {
+      "name": "LMN",
+      "description": "Lumen"
+    },
+    {
+      "name": "LN",
+      "description": "Lymph Node"
+    },
+    {
+      "name": "LNG",
+      "description": "Lymph Node, Groin"
+    },
+    {
+      "name": "LOBE",
+      "description": "Lobe"
+    },
+    {
+      "name": "LOCH",
+      "description": "Lochia"
+    },
+    {
+      "name": "LUMBA",
+      "description": "Lumbar"
+    },
+    {
+      "name": "LUNG",
+      "description": "Lung"
+    },
+    {
+      "name": "LYM",
+      "description": "Lymphocytes"
+    },
+    {
+      "name": "MAC",
+      "description": "Macrophages"
+    },
+    {
+      "name": "MALLE",
+      "description": "Malleolus"
+    },
+    {
+      "name": "MANDI",
+      "description": "Mandible/Mandibular"
+    },
+    {
+      "name": "MAR",
+      "description": "Marrow"
+    },
+    {
+      "name": "MAST",
+      "description": "Mastoid"
+    },
+    {
+      "name": "MAXIL",
+      "description": "Maxilla/Maxillary"
+    },
+    {
+      "name": "MAXS",
+      "description": "Maxillary Sinus"
+    },
+    {
+      "name": "MEATU",
+      "description": "Meatus"
+    },
+    {
+      "name": "MEC",
+      "description": "Meconium"
+    },
+    {
+      "name": "MEDST",
+      "description": "Mediastinum"
+    },
+    {
+      "name": "MEDU",
+      "description": "Medullary"
+    },
+    {
+      "name": "METAC",
+      "description": "Metacarpal"
+    },
+    {
+      "name": "METAT",
+      "description": "Metatarsal"
+    },
+    {
+      "name": "MILK",
+      "description": "Milk, Breast"
+    },
+    {
+      "name": "MITRL",
+      "description": "Mitral Valve"
+    },
+    {
+      "name": "MOLAR",
+      "description": "Molar"
+    },
+    {
+      "name": "MONSU",
+      "description": "Mons Ureteris"
+    },
+    {
+      "name": "MONSV",
+      "description": "Mons Veneris(Mons Pubis)"
+    },
+    {
+      "name": "MOU",
+      "description": "Membrane"
+    },
+    {
+      "name": "MOUTH",
+      "description": "Mouth"
+    },
+    {
+      "name": "MP",
+      "description": "Mons Pubis"
+    },
+    {
+      "name": "MPB",
+      "description": "Meninges"
+    },
+    {
+      "name": "MRSA2",
+      "description": "Mrsa:"
+    },
+    {
+      "name": "MYO",
+      "description": "Myocardium"
+    },
+    {
+      "name": "NAIL",
+      "description": "Nail"
+    },
+    {
+      "name": "NAILB",
+      "description": "Nail Bed"
+    },
+    {
+      "name": "NAILF",
+      "description": "Nail, Finger"
+    },
+    {
+      "name": "NAILT",
+      "description": "Nail, Toe"
+    },
+    {
+      "name": "NARES",
+      "description": "Nares"
+    },
+    {
+      "name": "NASL",
+      "description": "Nasal"
+    },
+    {
+      "name": "NAVEL",
+      "description": "Navel"
+    },
+    {
+      "name": "NECK",
+      "description": "Neck"
+    },
+    {
+      "name": "NERVE",
+      "description": "Nerve"
+    },
+    {
+      "name": "NIPPL",
+      "description": "Nipple"
+    },
+    {
+      "name": "NLACR",
+      "description": "Nasolacrimal"
+    },
+    {
+      "name": "NOS",
+      "description": "Nose (Nasal Passage)"
+    },
+    {
+      "name": "NOSE",
+      "description": "Nose"
+    },
+    {
+      "name": "NOSTR",
+      "description": "Nostril"
+    },
+    {
+      "name": "NP",
+      "description": "Nasopharyngeal"
+    },
+    {
+      "name": "NSS",
+      "description": "Nasal Septum"
+    },
+    {
+      "name": "NTRAC",
+      "description": "Nasotracheal"
+    },
+    {
+      "name": "OCCIP",
+      "description": "Occipital"
+    },
+    {
+      "name": "OLECR",
+      "description": "Olecranon"
+    },
+    {
+      "name": "OMEN",
+      "description": "Omentum"
+    },
+    {
+      "name": "ORBIT",
+      "description": "Orbit/Orbital"
+    },
+    {
+      "name": "ORO",
+      "description": "Oropharynx"
+    },
+    {
+      "name": "OSCOX",
+      "description": "Os coxa (pelvic girdle)"
+    },
+    {
+      "name": "OVARY",
+      "description": "Ovary"
+    },
+    {
+      "name": "PAFL",
+      "description": "Pancreatic Fluid"
+    },
+    {
+      "name": "PALAT",
+      "description": "Palate"
+    },
+    {
+      "name": "PALM",
+      "description": "Palm"
+    },
+    {
+      "name": "PANAL",
+      "description": "Perianal/Perirectal"
+    },
+    {
+      "name": "PANCR",
+      "description": "Pancreas"
+    },
+    {
+      "name": "PARAT",
+      "description": "Paratracheal"
+    },
+    {
+      "name": "PARIE",
+      "description": "Parietal"
+    },
+    {
+      "name": "PARON",
+      "description": "Paronychia"
+    },
+    {
+      "name": "PAROT",
+      "description": "Parotid"
+    },
+    {
+      "name": "PAS",
+      "description": "Parasternal"
+    },
+    {
+      "name": "PATEL",
+      "description": "Patella"
+    },
+    {
+      "name": "PCARD",
+      "description": "Pericardium"
+    },
+    {
+      "name": "PCLIT",
+      "description": "Periclitoral"
+    },
+    {
+      "name": "PELV",
+      "description": "Pelvis"
+    },
+    {
+      "name": "PENIS",
+      "description": "Penis"
+    },
+    {
+      "name": "PENSH",
+      "description": "Penile Shaft"
+    },
+    {
+      "name": "PER",
+      "description": "Peritoneal"
+    },
+    {
+      "name": "PERI",
+      "description": "Pericardial Fluid"
+    },
+    {
+      "name": "PERIH",
+      "description": "Perihepatic"
+    },
+    {
+      "name": "PERIN",
+      "description": "Perineal Abscess"
+    },
+    {
+      "name": "PERIS",
+      "description": "Perisplenic"
+    },
+    {
+      "name": "PERIT",
+      "description": "Peritoneum"
+    },
+    {
+      "name": "PERIU",
+      "description": "Periurethal"
+    },
+    {
+      "name": "PERIV",
+      "description": "Perivesicular"
+    },
+    {
+      "name": "PERRA",
+      "description": "Perirectal"
+    },
+    {
+      "name": "PERT",
+      "description": "Peritoneal Fluid"
+    },
+    {
+      "name": "PHALA",
+      "description": "Phalanyx"
+    },
+    {
+      "name": "PILO",
+      "description": "Pilonidal"
+    },
+    {
+      "name": "PINNA",
+      "description": "Pinna"
+    },
+    {
+      "name": "PLACF",
+      "description": "Placenta (Fetal Side)"
+    },
+    {
+      "name": "PLACM",
+      "description": "Placenta (Maternal Side)"
+    },
+    {
+      "name": "PLANT",
+      "description": "Plantar"
+    },
+    {
+      "name": "PLATH",
+      "description": "Palate, Hard"
+    },
+    {
+      "name": "PLATS",
+      "description": "Palate, Soft"
+    },
+    {
+      "name": "PLC",
+      "description": "Placenta"
+    },
+    {
+      "name": "PLEU",
+      "description": "Pleural Fluid"
+    },
+    {
+      "name": "PLEUR",
+      "description": "Pleura"
+    },
+    {
+      "name": "PLR",
+      "description": "Pleural Fluid (Thoracentesis Fld)"
+    },
+    {
+      "name": "PNEAL",
+      "description": "Perineal"
+    },
+    {
+      "name": "PNEPH",
+      "description": "Perinephric"
+    },
+    {
+      "name": "PNM",
+      "description": "Perineum"
+    },
+    {
+      "name": "POPLI",
+      "description": "Popliteal"
+    },
+    {
+      "name": "PORBI",
+      "description": "Periorbital"
+    },
+    {
+      "name": "PREAU",
+      "description": "Preauricular"
+    },
+    {
+      "name": "PRERE",
+      "description": "Prerenal"
+    },
+    {
+      "name": "PROS",
+      "description": "Prostatic Fluid"
+    },
+    {
+      "name": "PRST",
+      "description": "Prostate Gland"
+    },
+    {
+      "name": "PTONS",
+      "description": "Peritonsillar"
+    },
+    {
+      "name": "PUBIC",
+      "description": "Pubic"
+    },
+    {
+      "name": "PUL",
+      "description": "Pulmonary Artery"
+    },
+    {
+      "name": "RADI",
+      "description": "Radial"
+    },
+    {
+      "name": "RADIUS",
+      "description": "Radius"
+    },
+    {
+      "name": "RBC",
+      "description": "Red Blood Cells"
+    },
+    {
+      "name": "RECTL",
+      "description": "Rectal"
+    },
+    {
+      "name": "RECTU",
+      "description": "Rectum"
+    },
+    {
+      "name": "RENL",
+      "description": "Renal"
+    },
+    {
+      "name": "RIB",
+      "description": "Rib"
+    },
+    {
+      "name": "RNP",
+      "description": "Renal Pelvis"
+    },
+    {
+      "name": "RPERI",
+      "description": "Retroperitoneal"
+    },
+    {
+      "name": "SAC",
+      "description": "Uterine Cul/De/Sac"
+    },
+    {
+      "name": "SACIL",
+      "description": "Sacroiliac"
+    },
+    {
+      "name": "SACRA",
+      "description": "Sacral"
+    },
+    {
+      "name": "SACRO",
+      "description": "Sacrococcygeal"
+    },
+    {
+      "name": "SACRU",
+      "description": "Sacrum"
+    },
+    {
+      "name": "SALGL",
+      "description": "Salivary Gland"
+    },
+    {
+      "name": "SCALP",
+      "description": "Scalp"
+    },
+    {
+      "name": "SCAPU",
+      "description": "Scapula/Scapular"
+    },
+    {
+      "name": "SCLAV",
+      "description": "Supraclavicle/Supraclavicular"
+    },
+    {
+      "name": "SCLER",
+      "description": "Sclera"
+    },
+    {
+      "name": "SCLV",
+      "description": "Sub Clavian"
+    },
+    {
+      "name": "SCROT",
+      "description": "Scrotum/Scrotal"
+    },
+    {
+      "name": "SDP",
+      "description": "Subdiaphramatic"
+    },
+    {
+      "name": "SEM",
+      "description": "Seminal Fluid"
+    },
+    {
+      "name": "SEMN",
+      "description": "Semen"
+    },
+    {
+      "name": "SEPTU",
+      "description": "Septum/Septal"
+    },
+    {
+      "name": "SEROM",
+      "description": "Seroma"
+    },
+    {
+      "name": "SGF",
+      "description": "Subgaleal Fluid"
+    },
+    {
+      "name": "SHIN",
+      "description": "Shin"
+    },
+    {
+      "name": "SHOL",
+      "description": "Shoulder"
+    },
+    {
+      "name": "SHOLJ",
+      "description": "Sholder Joint"
+    },
+    {
+      "name": "SIGMO",
+      "description": "Sigmoid"
+    },
+    {
+      "name": "SINUS",
+      "description": "Sinus"
+    },
+    {
+      "name": "SKENE",
+      "description": "Skene's Gland"
+    },
+    {
+      "name": "SKM",
+      "description": "Skeletal Muscle"
+    },
+    {
+      "name": "SKULL",
+      "description": "Skull"
+    },
+    {
+      "name": "SOLE",
+      "description": "Sole"
+    },
+    {
+      "name": "SPCOR",
+      "description": "Spinal Cord"
+    },
+    {
+      "name": "SPHEN",
+      "description": "Sphenoid"
+    },
+    {
+      "name": "SPLN",
+      "description": "Spleen"
+    },
+    {
+      "name": "SPRM",
+      "description": "Spermatozoa"
+    },
+    {
+      "name": "SPX",
+      "description": "Supra Cervical"
+    },
+    {
+      "name": "STER",
+      "description": "Sternum/Sternal"
+    },
+    {
+      "name": "STOM",
+      "description": "Stoma"
+    },
+    {
+      "name": "STOMA",
+      "description": "Stomach"
+    },
+    {
+      "name": "STOOLL",
+      "description": "Liquid Stool"
+    },
+    {
+      "name": "STUMP",
+      "description": "Stump"
+    },
+    {
+      "name": "SUB",
+      "description": "Subdural"
+    },
+    {
+      "name": "SUBD",
+      "description": "Subdural Fluid"
+    },
+    {
+      "name": "SUBM",
+      "description": "Submandibular"
+    },
+    {
+      "name": "SUBME",
+      "description": "Submental"
+    },
+    {
+      "name": "SUBPH",
+      "description": "Subphrenic"
+    },
+    {
+      "name": "SUBX",
+      "description": "Submaxillary"
+    },
+    {
+      "name": "SUPB",
+      "description": "Suprapubic Specimen"
+    },
+    {
+      "name": "SUPRA",
+      "description": "Suprapubic"
+    },
+    {
+      "name": "SWT",
+      "description": "Sweat"
+    },
+    {
+      "name": "SWTG",
+      "description": "Sweat Gland"
+    },
+    {
+      "name": "SYN",
+      "description": "Synovial Fluid"
+    },
+    {
+      "name": "SYNOL",
+      "description": "Synovial"
+    },
+    {
+      "name": "SYNOV",
+      "description": "Synovium"
+    },
+    {
+      "name": "TARS",
+      "description": "Tarsal"
+    },
+    {
+      "name": "TBRON",
+      "description": "Transbronchial"
+    },
+    {
+      "name": "TCN",
+      "description": "Transcarina Asp"
+    },
+    {
+      "name": "TDUCT",
+      "description": "Tear Duct"
+    },
+    {
+      "name": "TEAR",
+      "description": "Tears"
+    },
+    {
+      "name": "TEMPL",
+      "description": "Temple"
+    },
+    {
+      "name": "TEMPO",
+      "description": "Temporal"
+    },
+    {
+      "name": "TESTI",
+      "description": "Testicle(Testis)"
+    },
+    {
+      "name": "THIGH",
+      "description": "Thigh"
+    },
+    {
+      "name": "THM",
+      "description": "Thymus"
+    },
+    {
+      "name": "THORA",
+      "description": "Thoracentesis"
+    },
+    {
+      "name": "THRB",
+      "description": "Throat"
+    },
+    {
+      "name": "THUMB",
+      "description": "Thumb"
+    },
+    {
+      "name": "THYRD",
+      "description": "Thyroid"
+    },
+    {
+      "name": "TIBIA",
+      "description": "Tibia"
+    },
+    {
+      "name": "TML",
+      "description": "Temporal Lobe"
+    },
+    {
+      "name": "TNL",
+      "description": "Thumbnail"
+    },
+    {
+      "name": "TOE",
+      "description": "Toe"
+    },
+    {
+      "name": "TOEN",
+      "description": "Toe Nail"
+    },
+    {
+      "name": "TONG",
+      "description": "Tongue"
+    },
+    {
+      "name": "TONS",
+      "description": "Tonsil"
+    },
+    {
+      "name": "TOOTH",
+      "description": "Tooth"
+    },
+    {
+      "name": "TRCHE",
+      "description": "Trachea/Tracheal"
+    },
+    {
+      "name": "TSK",
+      "description": "Tooth Socket"
+    },
+    {
+      "name": "ULNA",
+      "description": "Ulna/Ulnar"
+    },
+    {
+      "name": "UMB",
+      "description": "Umbilical Blood"
+    },
+    {
+      "name": "UMBL",
+      "description": "Umbilicus"
+    },
+    {
+      "name": "URET",
+      "description": "Ureter"
+    },
+    {
+      "name": "URTH",
+      "description": "Urethra"
+    },
+    {
+      "name": "USTOM",
+      "description": "Stoma, Urinary"
+    },
+    {
+      "name": "UTER",
+      "description": "Uterus"
+    },
+    {
+      "name": "UTERI",
+      "description": "Uterine"
+    },
+    {
+      "name": "VAGIN",
+      "description": "Vagina/Vaginal"
+    },
+    {
+      "name": "VAL",
+      "description": "Valve"
+    },
+    {
+      "name": "VAS",
+      "description": "Vas Deferens"
+    },
+    {
+      "name": "VASTL",
+      "description": "Vastus Lateralis"
+    },
+    {
+      "name": "VAULT",
+      "description": "Vault"
+    },
+    {
+      "name": "VCSF",
+      "description": "Ventricular CSF"
+    },
+    {
+      "name": "VCUFF",
+      "description": "Vaginal Cuff"
+    },
+    {
+      "name": "VEIN",
+      "description": "Vein"
+    },
+    {
+      "name": "VENTG",
+      "description": "Ventragluteal"
+    },
+    {
+      "name": "VERMI",
+      "description": "Vermis Cerebelli"
+    },
+    {
+      "name": "VERTC",
+      "description": "Vertebra, cervical"
+    },
+    {
+      "name": "VERTL",
+      "description": "Vertebra, lumbar"
+    },
+    {
+      "name": "VERTT",
+      "description": "Vertebra, thoracic"
+    },
+    {
+      "name": "VESCL",
+      "description": "Vesicular"
+    },
+    {
+      "name": "VESFLD",
+      "description": "Vesicular Fluid"
+    },
+    {
+      "name": "VESI",
+      "description": "Vesicle"
+    },
+    {
+      "name": "VESTI",
+      "description": "Vestibule(Genital)"
+    },
+    {
+      "name": "VGV",
+      "description": "Vaginal Vault"
+    },
+    {
+      "name": "VITR",
+      "description": "Vitreous Fluid"
+    },
+    {
+      "name": "VOC",
+      "description": "Vocal Cord"
+    },
+    {
+      "name": "VULVA",
+      "description": "Vulva"
+    },
+    {
+      "name": "WBC",
+      "description": "Leukocytes"
+    },
+    {
+      "name": "WRIST",
+      "description": "Wrist"
+    }
+  ]
+}

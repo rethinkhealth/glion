@@ -1,0 +1,11 @@
+{
+  "id": "0024",
+  "description": "Fee Schedule",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

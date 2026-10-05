@@ -1,0 +1,127 @@
+{
+  "id": "0227",
+  "description": "Manufacturers of Vaccines",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AB",
+      "description": "Abbott"
+    },
+    {
+      "name": "AD",
+      "description": "Adams"
+    },
+    {
+      "name": "ALP",
+      "description": "Alpha"
+    },
+    {
+      "name": "AR",
+      "description": "Armour"
+    },
+    {
+      "name": "BA",
+      "description": "Baxter"
+    },
+    {
+      "name": "BAY",
+      "description": "Bayer"
+    },
+    {
+      "name": "BP",
+      "description": "Berna"
+    },
+    {
+      "name": "CON",
+      "description": "Connaught"
+    },
+    {
+      "name": "EVN",
+      "description": "Evans"
+    },
+    {
+      "name": "GRE",
+      "description": "Greer"
+    },
+    {
+      "name": "IM",
+      "description": "Merieux"
+    },
+    {
+      "name": "IUS",
+      "description": "Immuno-US"
+    },
+    {
+      "name": "JPN",
+      "description": "Microbial Dis/Osaka U"
+    },
+    {
+      "name": "KGC",
+      "description": "Korea Green Cross"
+    },
+    {
+      "name": "LED",
+      "description": "Lederle"
+    },
+    {
+      "name": "MA",
+      "description": "Massachusetts Public Health"
+    },
+    {
+      "name": "MIL",
+      "description": "Miles"
+    },
+    {
+      "name": "MIP",
+      "description": "Michigan Dept Public Health"
+    },
+    {
+      "name": "MSD",
+      "description": "Merck"
+    },
+    {
+      "name": "NAB",
+      "description": "North American Biologicals, Inc."
+    },
+    {
+      "name": "NYB",
+      "description": "New York Blood Center"
+    },
+    {
+      "name": "OTC",
+      "description": "Organon Teknika"
+    },
+    {
+      "name": "OTH",
+      "description": "Other"
+    },
+    {
+      "name": "PD",
+      "description": "Parke Davis"
+    },
+    {
+      "name": "PRX",
+      "description": "Praxis Biologics"
+    },
+    {
+      "name": "SCL",
+      "description": "Sclavo"
+    },
+    {
+      "name": "SI",
+      "description": "Swiss Serum and Vaccine Inst."
+    },
+    {
+      "name": "SKB",
+      "description": "SmithKline"
+    },
+    {
+      "name": "UNK",
+      "description": "Unknown manufacturer"
+    },
+    {
+      "name": "WA",
+      "description": "Wyeth-Ayerst"
+    }
+  ]
+}

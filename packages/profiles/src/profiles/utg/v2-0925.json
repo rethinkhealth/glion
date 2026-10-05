@@ -1,0 +1,74 @@
+{
+  "id": "v2-0925",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0925",
+  "oid": "2.16.840.1.113883.18.431",
+  "name": "PhlebotomyIssue",
+  "title": "phlebotomyIssue",
+  "codes": [
+    {
+      "code": "ACN",
+      "display": "Air Contamination",
+      "status": "active"
+    },
+    {
+      "code": "CLT",
+      "display": "Clotted",
+      "status": "active"
+    },
+    {
+      "code": "COL",
+      "display": "Collapse",
+      "status": "active"
+    },
+    {
+      "code": "DAK",
+      "display": "Defective Apheresis Kit",
+      "status": "active"
+    },
+    {
+      "code": "DBG",
+      "display": "Defective Bag",
+      "status": "active"
+    },
+    {
+      "code": "DMT",
+      "display": "Defective Instrument",
+      "status": "active"
+    },
+    {
+      "code": "DND",
+      "display": "Defective Needle",
+      "status": "active"
+    },
+    {
+      "code": "INF",
+      "display": "Infiltration",
+      "status": "active"
+    },
+    {
+      "code": "IPF",
+      "display": "Instrument Power Failure",
+      "status": "active"
+    },
+    {
+      "code": "MIS",
+      "display": "Missed / in tissue",
+      "status": "active"
+    },
+    {
+      "code": "NAD",
+      "display": "Needle adjustment (this may not end a procedure, if successful will impact component production)",
+      "status": "active"
+    },
+    {
+      "code": "PFL",
+      "display": "Poor flow",
+      "status": "active"
+    },
+    {
+      "code": "VSM",
+      "display": "Vein Spasm",
+      "status": "active"
+    }
+  ]
+}

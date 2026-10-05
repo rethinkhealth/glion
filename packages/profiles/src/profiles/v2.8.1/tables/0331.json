@@ -1,0 +1,23 @@
+{
+  "id": "0331",
+  "description": "Facility Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Agent for a foreign manufacturer"
+    },
+    {
+      "name": "D",
+      "description": "Distributor"
+    },
+    {
+      "name": "M",
+      "description": "Manufacturer"
+    },
+    {
+      "name": "U",
+      "description": "User"
+    }
+  ]
+}

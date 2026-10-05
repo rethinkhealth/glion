@@ -1,0 +1,198 @@
+{
+  "segmentId": "ORC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "ORC-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70119",
+      "name": "Order Control",
+      "item": "215"
+    },
+    {
+      "sequence": 2,
+      "id": "ORC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 75,
+      "name": "Placer Order Number",
+      "item": "216"
+    },
+    {
+      "sequence": 3,
+      "id": "ORC-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 75,
+      "name": "Filler Order Number",
+      "item": "217"
+    },
+    {
+      "sequence": 4,
+      "id": "ORC-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 75,
+      "name": "Placer Group Number",
+      "item": "218"
+    },
+    {
+      "sequence": 5,
+      "id": "ORC-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70038",
+      "name": "Order Status",
+      "item": "219"
+    },
+    {
+      "sequence": 6,
+      "id": "ORC-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70121",
+      "name": "Response Flag",
+      "item": "220"
+    },
+    {
+      "sequence": 7,
+      "id": "ORC-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TQ",
+      "maxLength": 200,
+      "name": "Quantity / timing",
+      "item": "221"
+    },
+    {
+      "sequence": 8,
+      "id": "ORC-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 200,
+      "name": "Parent",
+      "item": "222"
+    },
+    {
+      "sequence": 9,
+      "id": "ORC-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Date / time of transaction",
+      "item": "223"
+    },
+    {
+      "sequence": 10,
+      "id": "ORC-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 80,
+      "name": "Entered By",
+      "item": "224"
+    },
+    {
+      "sequence": 11,
+      "id": "ORC-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 80,
+      "name": "Verified By",
+      "item": "225"
+    },
+    {
+      "sequence": 12,
+      "id": "ORC-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 80,
+      "name": "Ordering Provider",
+      "item": "226"
+    },
+    {
+      "sequence": 13,
+      "id": "ORC-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 80,
+      "name": "Enterer&apos;s Location",
+      "item": "227"
+    },
+    {
+      "sequence": 14,
+      "id": "ORC-14",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TN",
+      "maxLength": 40,
+      "name": "Call Back Phone Number",
+      "item": "228"
+    },
+    {
+      "sequence": 15,
+      "id": "ORC-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Order effective date / time",
+      "item": "229"
+    },
+    {
+      "sequence": 16,
+      "id": "ORC-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 200,
+      "name": "Order Control Code Reason",
+      "item": "230"
+    },
+    {
+      "sequence": 17,
+      "id": "ORC-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Entering Organization",
+      "item": "231"
+    },
+    {
+      "sequence": 18,
+      "id": "ORC-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "Entering Device",
+      "item": "232"
+    },
+    {
+      "sequence": 19,
+      "id": "ORC-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 80,
+      "name": "Action by",
+      "item": "233"
+    }
+  ]
+}

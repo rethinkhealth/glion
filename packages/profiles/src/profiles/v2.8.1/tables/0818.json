@@ -1,0 +1,23 @@
+{
+  "id": "0818",
+  "description": "Package",
+  "type": "user",
+  "codes": [
+    {
+      "name": "BX",
+      "description": "Box"
+    },
+    {
+      "name": "CS",
+      "description": "Case"
+    },
+    {
+      "name": "EA",
+      "description": "Each"
+    },
+    {
+      "name": "SET",
+      "description": "Set"
+    }
+  ]
+}

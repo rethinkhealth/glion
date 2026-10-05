@@ -1,0 +1,24 @@
+{
+  "id": "v2-0257",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0257",
+  "oid": "2.16.840.1.113883.18.152",
+  "name": "NatureOfChallenge",
+  "title": "natureOfChallenge",
+  "codes": [
+    {
+      "code": "CFST",
+      "display": "Fasting (no calorie intake) for the period specified in the time component of the term, e.g., 1H POST CFST",
+      "status": "active"
+    },
+    {
+      "code": "EXCZ",
+      "display": "Exercise undertaken as challenge (can be quantified)",
+      "status": "active"
+    },
+    {
+      "code": "FFST",
+      "display": "No fluid intake for the period specified in the time component of the term",
+      "status": "active"
+    }
+  ]
+}

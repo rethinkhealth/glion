@@ -1,0 +1,20 @@
+{
+  "id": "CCD",
+  "version": "2.5",
+  "kind": "composite",
+  "title": "Charge Code and Date",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Invocation Event",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Date/time",
+      "datatypeId": "TS",
+      "required": false
+    }
+  ]
+}

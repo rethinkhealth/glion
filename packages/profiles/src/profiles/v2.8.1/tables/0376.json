@@ -1,0 +1,75 @@
+{
+  "id": "0376",
+  "description": "Special Handling Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AMB",
+      "description": "Ambient temperature"
+    },
+    {
+      "name": "C37",
+      "description": "Body temperature"
+    },
+    {
+      "name": "CAMB",
+      "description": "Critical ambient temperature"
+    },
+    {
+      "name": "CATM",
+      "description": "Protect from air"
+    },
+    {
+      "name": "CFRZ",
+      "description": "Critical frozen temperature"
+    },
+    {
+      "name": "CREF",
+      "description": "Critical refrigerated temperature"
+    },
+    {
+      "name": "DFRZ",
+      "description": "Deep frozen"
+    },
+    {
+      "name": "DRY",
+      "description": "Dry"
+    },
+    {
+      "name": "FRZ",
+      "description": "Frozen temperature"
+    },
+    {
+      "name": "MTLF",
+      "description": "Metal Free"
+    },
+    {
+      "name": "NTR",
+      "description": "Liquid nitrogen"
+    },
+    {
+      "name": "PRTL",
+      "description": "Protect from light"
+    },
+    {
+      "name": "PSA",
+      "description": "Do not shake"
+    },
+    {
+      "name": "PSO",
+      "description": "No shock"
+    },
+    {
+      "name": "REF",
+      "description": "Refrigerated temperature"
+    },
+    {
+      "name": "UFRZ",
+      "description": "Ultra frozen"
+    },
+    {
+      "name": "UPR",
+      "description": "Upright"
+    }
+  ]
+}

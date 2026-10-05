@@ -1,0 +1,139 @@
+{
+  "id": "0912",
+  "description": "Participation",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AD",
+      "description": "Admitting Provider"
+    },
+    {
+      "name": "AI",
+      "description": "Assistant/Alternate Interpreter"
+    },
+    {
+      "name": "AP",
+      "description": "Administering Provider"
+    },
+    {
+      "name": "ARI",
+      "description": "Assistant Result Interpreter"
+    },
+    {
+      "name": "AT",
+      "description": "Attending Provider"
+    },
+    {
+      "name": "AUT",
+      "description": "AUT Author/Event Initiator"
+    },
+    {
+      "name": "CP",
+      "description": "Consulting Provider"
+    },
+    {
+      "name": "DP",
+      "description": "Dispensing Provider"
+    },
+    {
+      "name": "EP",
+      "description": "Entering Provider (probably not the same as transcriptionist)"
+    },
+    {
+      "name": "EQUIP",
+      "description": "Equipment"
+    },
+    {
+      "name": "FHCP",
+      "description": "Family Health Care Professional"
+    },
+    {
+      "name": "MDIR",
+      "description": "Medical Director"
+    },
+    {
+      "name": "OP",
+      "description": "Ordering Provider"
+    },
+    {
+      "name": "PB",
+      "description": "Packed by"
+    },
+    {
+      "name": "PH",
+      "description": "Pharmacist   (not sure how to dissect Pharmacist/Treatment Supplier's Verifier ID)"
+    },
+    {
+      "name": "PI",
+      "description": "Primary Interpreter"
+    },
+    {
+      "name": "PO",
+      "description": "Performing Organization"
+    },
+    {
+      "name": "POMD",
+      "description": "Performing Organization Medical Director"
+    },
+    {
+      "name": "PP",
+      "description": "Primary Care Provider"
+    },
+    {
+      "name": "PRI",
+      "description": "Principal Result Interpreter"
+    },
+    {
+      "name": "RCT",
+      "description": "Results Copies To"
+    },
+    {
+      "name": "RO",
+      "description": "Responsible Observer"
+    },
+    {
+      "name": "RP",
+      "description": "Referring Provider"
+    },
+    {
+      "name": "RT",
+      "description": "Referred to Provider"
+    },
+    {
+      "name": "SB",
+      "description": "Send by"
+    },
+    {
+      "name": "SC",
+      "description": "Specimen Collector"
+    },
+    {
+      "name": "TN",
+      "description": "Technician"
+    },
+    {
+      "name": "TR",
+      "description": "Transcriptionist"
+    },
+    {
+      "name": "VP",
+      "description": "Verifying Provider"
+    },
+    {
+      "name": "VPS",
+      "description": "Verifying Pharmaceutical Supplier   (not sure how to dissect Pharmacist/Treatment Supplier's Verifier ID)"
+    },
+    {
+      "name": "VTS",
+      "description": "Verifying Treatment Supplier   (not sure how to dissect Pharmacist/Treatment Supplier's Verifier ID)"
+    },
+    {
+      "name": "WAY",
+      "description": "Waypoint"
+    },
+    {
+      "name": "WAYR",
+      "description": "Waypoint Recipient"
+    }
+  ]
+}

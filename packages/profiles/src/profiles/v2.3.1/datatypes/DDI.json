@@ -1,0 +1,26 @@
+{
+  "id": "DDI",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "daily deductible",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "delay days",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "amount",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "number of days",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

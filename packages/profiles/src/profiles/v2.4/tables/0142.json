@@ -1,0 +1,19 @@
+{
+  "id": "0142",
+  "description": "Military status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ACT",
+      "description": "Active duty"
+    },
+    {
+      "name": "DEC",
+      "description": "Deceased"
+    },
+    {
+      "name": "RET",
+      "description": "Retired"
+    }
+  ]
+}

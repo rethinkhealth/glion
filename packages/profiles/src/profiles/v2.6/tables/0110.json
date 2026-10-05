@@ -1,0 +1,11 @@
+{
+  "id": "0110",
+  "description": "Transfer to Bad Debt Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "no suggested values"
+    }
+  ]
+}

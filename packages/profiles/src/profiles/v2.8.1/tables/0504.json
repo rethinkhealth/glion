@@ -1,0 +1,23 @@
+{
+  "id": "0504",
+  "description": "Sequence Condition Code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "EE",
+      "description": "End related service request(s), end current service request."
+    },
+    {
+      "name": "ES",
+      "description": "End related service request(s), start current service request."
+    },
+    {
+      "name": "SE",
+      "description": "Start related service request(s), end current service request."
+    },
+    {
+      "name": "SS",
+      "description": "Start related service request(s), start current service request."
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "0191",
+  "description": "Main type of referenced Data",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AP",
+      "description": "Other application data, typically uninterpreted binary data"
+    },
+    {
+      "name": "AU",
+      "description": "Audio Data"
+    },
+    {
+      "name": "FT",
+      "description": "Formatted Text"
+    },
+    {
+      "name": "IM",
+      "description": "Image Data"
+    },
+    {
+      "name": "NS",
+      "description": "Non-scanned Image"
+    },
+    {
+      "name": "SD",
+      "description": "Scanned Document"
+    },
+    {
+      "name": "SI",
+      "description": "Scanned Image"
+    },
+    {
+      "name": "TX",
+      "description": "Machine Readable Text Document"
+    }
+  ]
+}

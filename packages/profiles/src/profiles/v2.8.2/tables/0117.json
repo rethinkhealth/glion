@@ -1,0 +1,11 @@
+{
+  "id": "0117",
+  "description": "Account Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "0493",
+  "description": "Specimen Condition",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AUT",
+      "description": "Autolyzed"
+    },
+    {
+      "name": "CFU",
+      "description": "Centrifuged"
+    },
+    {
+      "name": "CLOT",
+      "description": "Clotted"
+    },
+    {
+      "name": "CON",
+      "description": "Contaminated"
+    },
+    {
+      "name": "COOL",
+      "description": "Cool"
+    },
+    {
+      "name": "FROZ",
+      "description": "Frozen"
+    },
+    {
+      "name": "HEM",
+      "description": "Hemolyzed"
+    },
+    {
+      "name": "LIVE",
+      "description": "Live"
+    },
+    {
+      "name": "ROOM",
+      "description": "Room temperature"
+    },
+    {
+      "name": "SNR",
+      "description": "Sample not received"
+    }
+  ]
+}

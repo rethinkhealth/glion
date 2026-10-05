@@ -1,0 +1,11 @@
+{
+  "id": "0374",
+  "description": "System induced contaminants",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CNTM",
+      "description": "Present, type of contamination unspecified"
+    }
+  ]
+}

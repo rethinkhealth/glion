@@ -1,0 +1,20 @@
+{
+  "id": "SCV",
+  "version": "2.7.1",
+  "kind": "composite",
+  "title": "Scheduling Class Value Pair",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Parameter Class",
+      "datatypeId": "CWE",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Parameter Value",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

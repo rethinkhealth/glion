@@ -1,0 +1,24 @@
+{
+  "id": "v2-0105",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0105",
+  "oid": "2.16.840.1.113883.18.42",
+  "name": "SourceOfComment",
+  "title": "sourceOfComment",
+  "codes": [
+    {
+      "code": "L",
+      "display": "Ancillary (filler) department is source of comment",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other system is source of comment",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Orderer (placer) is source of comment",
+      "status": "active"
+    }
+  ]
+}

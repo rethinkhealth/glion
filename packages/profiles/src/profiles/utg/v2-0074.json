@@ -1,0 +1,234 @@
+{
+  "id": "v2-0074",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0074",
+  "oid": "2.16.840.1.113883.18.29",
+  "name": "DiagnosticServiceSectionId",
+  "title": "diagnosticServiceSectionId",
+  "codes": [
+    {
+      "code": "AU",
+      "display": "Audiology",
+      "status": "active"
+    },
+    {
+      "code": "BG",
+      "display": "Blood Gases",
+      "status": "active"
+    },
+    {
+      "code": "BLB",
+      "display": "Blood Bank",
+      "status": "active"
+    },
+    {
+      "code": "CG",
+      "display": "Cytogenetics",
+      "status": "active"
+    },
+    {
+      "code": "CH",
+      "display": "Chemistry",
+      "status": "active"
+    },
+    {
+      "code": "CP",
+      "display": "Cytopathology",
+      "status": "active"
+    },
+    {
+      "code": "CT",
+      "display": "CAT Scan",
+      "status": "active"
+    },
+    {
+      "code": "CTH",
+      "display": "Cardiac Catheterization",
+      "status": "active"
+    },
+    {
+      "code": "CUS",
+      "display": "Cardiac Ultrasound",
+      "status": "active"
+    },
+    {
+      "code": "EC",
+      "display": "Electrocardiac (e.g., EKG,  EEC, Holter)",
+      "status": "active"
+    },
+    {
+      "code": "EN",
+      "display": "Electroneuro (EEG, EMG,EP,PSG)",
+      "status": "active"
+    },
+    {
+      "code": "GE",
+      "display": "Genetics",
+      "status": "active"
+    },
+    {
+      "code": "HM",
+      "display": "Hematology",
+      "status": "active"
+    },
+    {
+      "code": "ICU",
+      "display": "Bedside ICU Monitoring",
+      "status": "active"
+    },
+    {
+      "code": "IMG",
+      "display": "Diagnostic Imaging",
+      "status": "active"
+    },
+    {
+      "code": "IMM",
+      "display": "Immunology",
+      "status": "active"
+    },
+    {
+      "code": "LAB",
+      "display": "Laboratory",
+      "status": "active"
+    },
+    {
+      "code": "MB",
+      "display": "Microbiology",
+      "status": "active"
+    },
+    {
+      "code": "MCB",
+      "display": "Mycobacteriology",
+      "status": "active"
+    },
+    {
+      "code": "MYC",
+      "display": "Mycology",
+      "status": "active"
+    },
+    {
+      "code": "NMR",
+      "display": "Nuclear Magnetic Resonance",
+      "status": "active"
+    },
+    {
+      "code": "NMS",
+      "display": "Nuclear Medicine Scan",
+      "status": "active"
+    },
+    {
+      "code": "NRS",
+      "display": "Nursing Service Measures",
+      "status": "active"
+    },
+    {
+      "code": "OSL",
+      "display": "Outside Lab",
+      "status": "active"
+    },
+    {
+      "code": "OT",
+      "display": "Occupational Therapy",
+      "status": "active"
+    },
+    {
+      "code": "OTH",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "OUS",
+      "display": "OB Ultrasound",
+      "status": "active"
+    },
+    {
+      "code": "PAR",
+      "display": "Parasitology",
+      "status": "active"
+    },
+    {
+      "code": "PAT",
+      "display": "Pathology (gross &amp; histopath, not surgical)",
+      "status": "active"
+    },
+    {
+      "code": "PF",
+      "display": "Pulmonary Function",
+      "status": "active"
+    },
+    {
+      "code": "PHR",
+      "display": "Pharmacy",
+      "status": "active"
+    },
+    {
+      "code": "PHY",
+      "display": "Physician (Hx. Dx, admission note, etc.)",
+      "status": "active"
+    },
+    {
+      "code": "PT",
+      "display": "Physical Therapy",
+      "status": "active"
+    },
+    {
+      "code": "RAD",
+      "display": "Radiology",
+      "status": "active"
+    },
+    {
+      "code": "RC",
+      "display": "Respiratory Care (therapy)",
+      "status": "active"
+    },
+    {
+      "code": "RT",
+      "display": "Radiation Therapy",
+      "status": "active"
+    },
+    {
+      "code": "RUS",
+      "display": "Radiology Ultrasound",
+      "status": "active"
+    },
+    {
+      "code": "RX",
+      "display": "Radiograph",
+      "status": "active"
+    },
+    {
+      "code": "SP",
+      "display": "Surgical Pathology",
+      "status": "active"
+    },
+    {
+      "code": "SR",
+      "display": "Serology",
+      "status": "active"
+    },
+    {
+      "code": "TX",
+      "display": "Toxicology",
+      "status": "active"
+    },
+    {
+      "code": "URN",
+      "display": "Urinalysis",
+      "status": "active"
+    },
+    {
+      "code": "VR",
+      "display": "Virology",
+      "status": "active"
+    },
+    {
+      "code": "VUS",
+      "display": "Vascular Ultrasound",
+      "status": "active"
+    },
+    {
+      "code": "XRC",
+      "display": "Cineradiograph",
+      "status": "active"
+    }
+  ]
+}

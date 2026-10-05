@@ -1,0 +1,11 @@
+{
+  "id": "0411",
+  "description": "Supplemental Service Information Values",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values<p>Individual implementations may use vocabularies such as the SNOMED DICOM Micro-glossary (SDM) or private (local) entries."
+    }
+  ]
+}

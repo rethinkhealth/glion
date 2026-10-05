@@ -1,0 +1,29 @@
+{
+  "id": "v2-0336",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0336",
+  "oid": "2.16.840.1.113883.18.206",
+  "name": "ReferralReason",
+  "title": "referralReason",
+  "codes": [
+    {
+      "code": "O",
+      "display": "Provider Ordered",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Patient Preference",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "Second Opinion",
+      "status": "active"
+    },
+    {
+      "code": "W",
+      "display": "Work Load",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "0924",
+  "description": "Cumulative Dosage Limit UoM",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Annual"
+    },
+    {
+      "name": "D",
+      "description": "Per Day"
+    },
+    {
+      "name": "M",
+      "description": "Per Month"
+    },
+    {
+      "name": "O",
+      "description": "Duration of the Order"
+    },
+    {
+      "name": "PL",
+      "description": "Patients Lifetime"
+    },
+    {
+      "name": "WK",
+      "description": "Per Week"
+    }
+  ]
+}

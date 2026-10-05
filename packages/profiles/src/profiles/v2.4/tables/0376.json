@@ -1,0 +1,31 @@
+{
+  "id": "0376",
+  "description": "Special handling considerations",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C37",
+      "description": "Critical maintain at 37C (e.g., cryoglobulin specimen"
+    },
+    {
+      "name": "CAMB",
+      "description": "Critical ambient temperature"
+    },
+    {
+      "name": "CATM",
+      "description": "Critical do not expose to atmosphere - Do not uncap"
+    },
+    {
+      "name": "CFRZ",
+      "description": "Critical Frozen"
+    },
+    {
+      "name": "CREF",
+      "description": "Critical refrigerated"
+    },
+    {
+      "name": "PRTL",
+      "description": "Protect from light"
+    }
+  ]
+}

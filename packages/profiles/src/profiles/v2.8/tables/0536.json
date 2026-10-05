@@ -1,0 +1,27 @@
+{
+  "id": "0536",
+  "description": "Certificate Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "E",
+      "description": "Expired"
+    },
+    {
+      "name": "I",
+      "description": "Inactive"
+    },
+    {
+      "name": "P",
+      "description": "Provisional"
+    },
+    {
+      "name": "R",
+      "description": "Revoked"
+    },
+    {
+      "name": "V",
+      "description": "Active/Valid"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "0806",
+  "description": "Sterilization Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "EOG",
+      "description": "Ethylene Oxide Gas"
+    },
+    {
+      "name": "PCA",
+      "description": "Peracetic acid"
+    },
+    {
+      "name": "STM",
+      "description": "Steam"
+    }
+  ]
+}

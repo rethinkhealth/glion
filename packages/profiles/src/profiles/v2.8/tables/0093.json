@@ -1,0 +1,19 @@
+{
+  "id": "0093",
+  "description": "Release Information",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "user-defined codes"
+    },
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

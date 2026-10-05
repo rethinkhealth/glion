@@ -1,0 +1,86 @@
+{
+  "segmentId": "IPR",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "IPR-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 73,
+      "name": "IPR Identifier",
+      "item": "2030"
+    },
+    {
+      "sequence": 2,
+      "id": "IPR-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 73,
+      "name": "Provider Cross Reference Identifier",
+      "item": "2031"
+    },
+    {
+      "sequence": 3,
+      "id": "IPR-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 73,
+      "name": "Payer Cross Reference Identifier",
+      "item": "2032"
+    },
+    {
+      "sequence": 4,
+      "id": "IPR-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 177,
+      "table": "HL70571",
+      "name": "IPR Status",
+      "item": "2033"
+    },
+    {
+      "sequence": 5,
+      "id": "IPR-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 26,
+      "name": "IPR Date/Time",
+      "item": "2034"
+    },
+    {
+      "sequence": 6,
+      "id": "IPR-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CP",
+      "maxLength": 254,
+      "name": "Adjudicated/Paid Amount",
+      "item": "2035"
+    },
+    {
+      "sequence": 7,
+      "id": "IPR-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 26,
+      "name": "Expected Payment Date/Time",
+      "item": "2036"
+    },
+    {
+      "sequence": 8,
+      "id": "IPR-8",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 10,
+      "name": "IPR Checksum",
+      "item": "2037"
+    }
+  ]
+}

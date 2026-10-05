@@ -1,0 +1,87 @@
+{
+  "segmentId": "LOC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "LOC-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "PL",
+      "maxLength": 20,
+      "name": "Primary Key Value",
+      "item": "943"
+    },
+    {
+      "sequence": 2,
+      "id": "LOC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 48,
+      "name": "Location Description",
+      "item": "944"
+    },
+    {
+      "sequence": 3,
+      "id": "LOC-3",
+      "required": true,
+      "repeatable": true,
+      "datatype": "IS",
+      "maxLength": 2,
+      "table": "HL70260",
+      "name": "Location Type",
+      "item": "945"
+    },
+    {
+      "sequence": 4,
+      "id": "LOC-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XON",
+      "maxLength": 90,
+      "name": "Organization Name",
+      "item": "947"
+    },
+    {
+      "sequence": 5,
+      "id": "LOC-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XAD",
+      "maxLength": 106,
+      "name": "Location Address",
+      "item": "948"
+    },
+    {
+      "sequence": 6,
+      "id": "LOC-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XTN",
+      "maxLength": 40,
+      "name": "Location Phone",
+      "item": "949"
+    },
+    {
+      "sequence": 7,
+      "id": "LOC-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "License Number",
+      "item": "951"
+    },
+    {
+      "sequence": 8,
+      "id": "LOC-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70261",
+      "name": "Location Equipment",
+      "item": "953"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "v2-0430",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0430",
+  "oid": "2.16.840.1.113883.18.271",
+  "name": "ArrivalMode",
+  "title": "arrivalMode",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Ambulance",
+      "status": "active"
+    },
+    {
+      "code": "C",
+      "display": "Car",
+      "status": "active"
+    },
+    {
+      "code": "F",
+      "display": "On foot",
+      "status": "active"
+    },
+    {
+      "code": "H",
+      "display": "Helicopter",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Public Transport",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    }
+  ]
+}

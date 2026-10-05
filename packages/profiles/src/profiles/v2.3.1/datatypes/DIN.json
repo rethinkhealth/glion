@@ -1,0 +1,20 @@
+{
+  "id": "DIN",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "activation date",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "date",
+      "datatypeId": "TS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "institution name",
+      "datatypeId": "CE",
+      "required": false
+    }
+  ]
+}

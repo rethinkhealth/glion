@@ -1,0 +1,27 @@
+{
+  "id": "0317",
+  "description": "Annotations",
+  "type": "user",
+  "codes": [
+    {
+      "name": "9900",
+      "description": "Pace spike"
+    },
+    {
+      "name": "9901",
+      "description": "SAS marker"
+    },
+    {
+      "name": "9902",
+      "description": "Sense marker"
+    },
+    {
+      "name": "9903",
+      "description": "Beat marker"
+    },
+    {
+      "name": "9904",
+      "description": "etc."
+    }
+  ]
+}

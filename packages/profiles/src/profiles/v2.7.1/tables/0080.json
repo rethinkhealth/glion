@@ -1,0 +1,35 @@
+{
+  "id": "0080",
+  "description": "Nature of Abnormal Testing",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "An age-based population"
+    },
+    {
+      "name": "B",
+      "description": "Breed"
+    },
+    {
+      "name": "N",
+      "description": "None - generic normal range"
+    },
+    {
+      "name": "R",
+      "description": "A race-based population"
+    },
+    {
+      "name": "S",
+      "description": "A sex-based population"
+    },
+    {
+      "name": "SP",
+      "description": "Species"
+    },
+    {
+      "name": "ST",
+      "description": "Strain"
+    }
+  ]
+}

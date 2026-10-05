@@ -1,0 +1,15 @@
+{
+  "id": "0894",
+  "description": "Side of body",
+  "type": "user",
+  "codes": [
+    {
+      "name": "L",
+      "description": "Left"
+    },
+    {
+      "name": "R",
+      "description": "Right"
+    }
+  ]
+}

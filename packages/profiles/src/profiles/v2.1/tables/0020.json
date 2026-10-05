@@ -1,0 +1,23 @@
+{
+  "id": "0020",
+  "description": "UNUSED TABLE",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Asymptomatic Manifestation"
+    },
+    {
+      "name": "2",
+      "description": "Moderate Manifestation"
+    },
+    {
+      "name": "3",
+      "description": "Major Manifestation"
+    },
+    {
+      "name": "4",
+      "description": "Catastrophic Manifestation"
+    }
+  ]
+}

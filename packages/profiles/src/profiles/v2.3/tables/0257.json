@@ -1,0 +1,19 @@
+{
+  "id": "0257",
+  "description": "Nature of Challenge",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CFST",
+      "description": "Fasting (no calorie intake) for the period specified in the time component of the term, e.g., 1H POST CFST"
+    },
+    {
+      "name": "EXCZ",
+      "description": "Exercise undertaken as challenge (can be quantified)"
+    },
+    {
+      "name": "FFST",
+      "description": "No fluid intake for the period specified in the time component of the term"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "segmentId": "PAC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PAC-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set Id - PAC",
+      "item": "2350"
+    },
+    {
+      "sequence": 2,
+      "id": "PAC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Package ID",
+      "item": "2351"
+    },
+    {
+      "sequence": 3,
+      "id": "PAC-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Parent Package ID",
+      "item": "2352"
+    },
+    {
+      "sequence": 4,
+      "id": "PAC-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NA",
+      "name": "Position in Parent Package",
+      "item": "2353"
+    },
+    {
+      "sequence": 5,
+      "id": "PAC-5",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70908",
+      "name": "Package Type",
+      "item": "2354"
+    },
+    {
+      "sequence": 6,
+      "id": "PAC-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70544",
+      "name": "Package Condition",
+      "item": "2355"
+    },
+    {
+      "sequence": 7,
+      "id": "PAC-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70376",
+      "name": "Package Handling Code",
+      "item": "2356"
+    },
+    {
+      "sequence": 8,
+      "id": "PAC-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70489",
+      "name": "Package Risk Code",
+      "item": "2357"
+    }
+  ]
+}

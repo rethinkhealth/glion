@@ -1,0 +1,407 @@
+{
+  "id": "0203",
+  "description": "Identifier type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AM",
+      "description": "American Express"
+    },
+    {
+      "name": "AMA",
+      "description": "American Medical Association Number"
+    },
+    {
+      "name": "AN",
+      "description": "Account number"
+    },
+    {
+      "name": "ANC",
+      "description": "Account number Creditor"
+    },
+    {
+      "name": "AND",
+      "description": "Account number debitor"
+    },
+    {
+      "name": "ANON",
+      "description": "Anonymous identifier"
+    },
+    {
+      "name": "ANT",
+      "description": "Temporary Account Number"
+    },
+    {
+      "name": "APRN",
+      "description": "Advanced Practice Registered Nurse number"
+    },
+    {
+      "name": "BA",
+      "description": "Bank Account Number"
+    },
+    {
+      "name": "BC",
+      "description": "Bank Card Number"
+    },
+    {
+      "name": "BCT",
+      "description": "Birth Certificate"
+    },
+    {
+      "name": "BR",
+      "description": "Birth registry number"
+    },
+    {
+      "name": "BRN",
+      "description": "Breed Registry Number"
+    },
+    {
+      "name": "CC",
+      "description": "Cost Center number"
+    },
+    {
+      "name": "CONM",
+      "description": "Change of Name Document"
+    },
+    {
+      "name": "CY",
+      "description": "County number"
+    },
+    {
+      "name": "CZ",
+      "description": "Citizenship Card"
+    },
+    {
+      "name": "DDS",
+      "description": "Dentist license number"
+    },
+    {
+      "name": "DEA",
+      "description": "Drug Enforcement Administration registration number"
+    },
+    {
+      "name": "DFN",
+      "description": "Drug Furnishing or prescriptive authority Number"
+    },
+    {
+      "name": "DI",
+      "description": "Diner's Club card"
+    },
+    {
+      "name": "DL",
+      "description": "Driver's license number"
+    },
+    {
+      "name": "DN",
+      "description": "Doctor number"
+    },
+    {
+      "name": "DO",
+      "description": "Osteopathic License number"
+    },
+    {
+      "name": "DP",
+      "description": "Diplomatic Passport"
+    },
+    {
+      "name": "DPM",
+      "description": "Podiatrist license number"
+    },
+    {
+      "name": "DR",
+      "description": "Donor Registration Number"
+    },
+    {
+      "name": "DS",
+      "description": "Discover Card"
+    },
+    {
+      "name": "EI",
+      "description": "Employee number"
+    },
+    {
+      "name": "EN",
+      "description": "Employer number"
+    },
+    {
+      "name": "ESN",
+      "description": "Staff Enterprise Number"
+    },
+    {
+      "name": "FI",
+      "description": "Facility ID"
+    },
+    {
+      "name": "GI",
+      "description": "Guarantor internal identifier"
+    },
+    {
+      "name": "GL",
+      "description": "General ledger number"
+    },
+    {
+      "name": "GN",
+      "description": "Guarantor external  identifier"
+    },
+    {
+      "name": "HC",
+      "description": "Health Card Number"
+    },
+    {
+      "name": "IND",
+      "description": "Indigenous/Aboriginal"
+    },
+    {
+      "name": "JHN",
+      "description": "Jurisdictional health number (Canada)"
+    },
+    {
+      "name": "LI",
+      "description": "Labor and industries number"
+    },
+    {
+      "name": "LN",
+      "description": "License number"
+    },
+    {
+      "name": "LR",
+      "description": "Local Registry ID"
+    },
+    {
+      "name": "MA",
+      "description": "Patient Medicaid number"
+    },
+    {
+      "name": "MB",
+      "description": "Member Number"
+    },
+    {
+      "name": "MC",
+      "description": "Patient's Medicare number"
+    },
+    {
+      "name": "MCD",
+      "description": "Practitioner Medicaid number"
+    },
+    {
+      "name": "MCN",
+      "description": "Microchip Number"
+    },
+    {
+      "name": "MCR",
+      "description": "Practitioner Medicare number"
+    },
+    {
+      "name": "MCT",
+      "description": "Marriage Certificate"
+    },
+    {
+      "name": "MD",
+      "description": "Medical License number"
+    },
+    {
+      "name": "MI",
+      "description": "Military ID number"
+    },
+    {
+      "name": "MR",
+      "description": "Medical record number"
+    },
+    {
+      "name": "MRT",
+      "description": "Temporary Medical Record Number"
+    },
+    {
+      "name": "MS",
+      "description": "MasterCard"
+    },
+    {
+      "name": "NCT",
+      "description": "Naturalization Certificate"
+    },
+    {
+      "name": "NE",
+      "description": "National employer identifier"
+    },
+    {
+      "name": "NH",
+      "description": "National Health Plan Identifier"
+    },
+    {
+      "name": "NI",
+      "description": "National unique individual identifier"
+    },
+    {
+      "name": "NII",
+      "description": "National Insurance Organization Identifier"
+    },
+    {
+      "name": "NIIP",
+      "description": "National Insurance Payor Identifier (Payor)"
+    },
+    {
+      "name": "NNxxx",
+      "description": "National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code"
+    },
+    {
+      "name": "NP",
+      "description": "Nurse practitioner number"
+    },
+    {
+      "name": "NPI",
+      "description": "National provider identifier"
+    },
+    {
+      "name": "OD",
+      "description": "Optometrist license number"
+    },
+    {
+      "name": "PA",
+      "description": "Physician Assistant number"
+    },
+    {
+      "name": "PC",
+      "description": "Parole Card"
+    },
+    {
+      "name": "PCN",
+      "description": "Penitentiary/correctional institution Number"
+    },
+    {
+      "name": "PE",
+      "description": "Living Subject Enterprise Number"
+    },
+    {
+      "name": "PEN",
+      "description": "Pension Number"
+    },
+    {
+      "name": "PI",
+      "description": "Patient internal identifier"
+    },
+    {
+      "name": "PN",
+      "description": "Person number"
+    },
+    {
+      "name": "PNT",
+      "description": "Temporary Living Subject Number"
+    },
+    {
+      "name": "PPIN",
+      "description": "Medicare/CMS Performing Provider Identification Number"
+    },
+    {
+      "name": "PPN",
+      "description": "Passport number"
+    },
+    {
+      "name": "PRC",
+      "description": "Permanent Resident Card Number"
+    },
+    {
+      "name": "PRN",
+      "description": "Provider number"
+    },
+    {
+      "name": "PT",
+      "description": "Patient external identifier"
+    },
+    {
+      "name": "QA",
+      "description": "QA number"
+    },
+    {
+      "name": "RI",
+      "description": "Resource identifier"
+    },
+    {
+      "name": "RN",
+      "description": "Registered Nurse Number"
+    },
+    {
+      "name": "RPH",
+      "description": "Pharmacist license number"
+    },
+    {
+      "name": "RR",
+      "description": "Railroad Retirement number"
+    },
+    {
+      "name": "RRI",
+      "description": "Regional registry ID"
+    },
+    {
+      "name": "RRP",
+      "description": "Railroad Retirement Provider"
+    },
+    {
+      "name": "SL",
+      "description": "State license"
+    },
+    {
+      "name": "SN",
+      "description": "Subscriber Number"
+    },
+    {
+      "name": "SP",
+      "description": "Study Permit"
+    },
+    {
+      "name": "SR",
+      "description": "State registry ID"
+    },
+    {
+      "name": "SS",
+      "description": "Social Security number"
+    },
+    {
+      "name": "TAX",
+      "description": "Tax ID number"
+    },
+    {
+      "name": "TN",
+      "description": "Treaty Number/ (Canada)"
+    },
+    {
+      "name": "TPR",
+      "description": "Temporary Permanent Resident (Canada)"
+    },
+    {
+      "name": "U",
+      "description": "Unspecified identifier"
+    },
+    {
+      "name": "UPIN",
+      "description": "Medicare/CMS (formerly HCFA)'s Universal Physician Identification numbers"
+    },
+    {
+      "name": "VN",
+      "description": "Visit number"
+    },
+    {
+      "name": "VP",
+      "description": "Visitor Permit"
+    },
+    {
+      "name": "VS",
+      "description": "VISA"
+    },
+    {
+      "name": "WC",
+      "description": "WIC identifier"
+    },
+    {
+      "name": "WCN",
+      "description": "Workers' Comp Number"
+    },
+    {
+      "name": "WP",
+      "description": "Work Permit"
+    },
+    {
+      "name": "XX",
+      "description": "Organization identifier"
+    }
+  ]
+}

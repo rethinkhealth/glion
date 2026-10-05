@@ -1,0 +1,27 @@
+{
+  "id": "0534",
+  "description": "Notify Clergy Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "L",
+      "description": "Last Rites only"
+    },
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

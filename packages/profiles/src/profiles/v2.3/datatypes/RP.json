@@ -1,0 +1,32 @@
+{
+  "id": "RP",
+  "version": "2.3",
+  "kind": "composite",
+  "title": "reference pointer",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "pointer",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "application ID",
+      "datatypeId": "HD",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "type of data",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "subtype",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

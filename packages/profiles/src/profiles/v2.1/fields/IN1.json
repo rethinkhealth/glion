@@ -1,0 +1,456 @@
+{
+  "segmentId": "IN1",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "IN1-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "SET ID - INSURANCE",
+      "item": "234"
+    },
+    {
+      "sequence": 2,
+      "id": "IN1-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 8,
+      "table": "HL70072",
+      "name": "INSURANCE PLAN ID",
+      "item": "378"
+    },
+    {
+      "sequence": 3,
+      "id": "IN1-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 6,
+      "name": "INSURANCE COMPANY ID",
+      "item": "235"
+    },
+    {
+      "sequence": 4,
+      "id": "IN1-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 45,
+      "name": "INSURANCE COMPANY NAME",
+      "item": "236"
+    },
+    {
+      "sequence": 5,
+      "id": "IN1-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "AD",
+      "maxLength": 106,
+      "name": "INSURANCE COMPANY ADDRESS",
+      "item": "237"
+    },
+    {
+      "sequence": 6,
+      "id": "IN1-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PN",
+      "maxLength": 48,
+      "name": "INSURANCE CO. CONTACT PERS",
+      "item": "242"
+    },
+    {
+      "sequence": 7,
+      "id": "IN1-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TN",
+      "maxLength": 40,
+      "name": "INSURANCE CO PHONE NUMBER",
+      "item": "243"
+    },
+    {
+      "sequence": 8,
+      "id": "IN1-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 12,
+      "name": "GROUP NUMBER",
+      "item": "248"
+    },
+    {
+      "sequence": 9,
+      "id": "IN1-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 35,
+      "name": "GROUP NAME",
+      "item": "249"
+    },
+    {
+      "sequence": 10,
+      "id": "IN1-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 12,
+      "name": "INSURED&apos;S GROUP EMP. ID",
+      "item": "250"
+    },
+    {
+      "sequence": 11,
+      "id": "IN1-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 45,
+      "name": "INSURED&apos;S GROUP EMP. NAME",
+      "item": "251"
+    },
+    {
+      "sequence": 12,
+      "id": "IN1-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "PLAN EFFECTIVE DATE",
+      "item": "252"
+    },
+    {
+      "sequence": 13,
+      "id": "IN1-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "PLAN EXPIRATION DATE",
+      "item": "253"
+    },
+    {
+      "sequence": 14,
+      "id": "IN1-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 55,
+      "name": "AUTHORIZATION INFORMATION",
+      "item": "254"
+    },
+    {
+      "sequence": 15,
+      "id": "IN1-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70086",
+      "name": "PLAN TYPE",
+      "item": "260"
+    },
+    {
+      "sequence": 16,
+      "id": "IN1-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PN",
+      "maxLength": 48,
+      "name": "NAME OF INSURED",
+      "item": "261"
+    },
+    {
+      "sequence": 17,
+      "id": "IN1-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70063",
+      "name": "INSURED&apos;S RELATIONSHIP TO PATIENT",
+      "item": "262"
+    },
+    {
+      "sequence": 18,
+      "id": "IN1-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "INSURED&apos;S DATE OF BIRTH",
+      "item": "708"
+    },
+    {
+      "sequence": 19,
+      "id": "IN1-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "AD",
+      "maxLength": 106,
+      "name": "INSURED&apos;S ADDRESS",
+      "item": "709"
+    },
+    {
+      "sequence": 20,
+      "id": "IN1-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "name": "ASSIGNMENT OF BENEFITS",
+      "item": "263"
+    },
+    {
+      "sequence": 21,
+      "id": "IN1-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "name": "COORDINATION OF BENEFITS",
+      "item": "264"
+    },
+    {
+      "sequence": 22,
+      "id": "IN1-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 2,
+      "name": "COORD OF BEN. PRIORITY",
+      "item": "265"
+    },
+    {
+      "sequence": 23,
+      "id": "IN1-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70081",
+      "name": "NOTICE OF ADMISSION CODE",
+      "item": "266"
+    },
+    {
+      "sequence": 24,
+      "id": "IN1-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "NOTICE OF ADMISSION DATE",
+      "item": "267"
+    },
+    {
+      "sequence": 25,
+      "id": "IN1-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70094",
+      "name": "RPT OF ELIGIBILITY CODE",
+      "item": "268"
+    },
+    {
+      "sequence": 26,
+      "id": "IN1-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "RPT OF ELIGIBILITY DATE",
+      "item": "269"
+    },
+    {
+      "sequence": 27,
+      "id": "IN1-27",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70093",
+      "name": "RELEASE INFORMATION CODE",
+      "item": "270"
+    },
+    {
+      "sequence": 28,
+      "id": "IN1-28",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 15,
+      "name": "PRE-ADMIT CERT. (PAC)",
+      "item": "271"
+    },
+    {
+      "sequence": 29,
+      "id": "IN1-29",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "maxLength": 8,
+      "name": "VERIFICATION DATE",
+      "item": "272"
+    },
+    {
+      "sequence": 30,
+      "id": "IN1-30",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 60,
+      "name": "VERIFICATION BY",
+      "item": "273"
+    },
+    {
+      "sequence": 31,
+      "id": "IN1-31",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70098",
+      "name": "TYPE OF AGREEMENT CODE",
+      "item": "277"
+    },
+    {
+      "sequence": 32,
+      "id": "IN1-32",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70022",
+      "name": "BILLING STATUS",
+      "item": "278"
+    },
+    {
+      "sequence": 33,
+      "id": "IN1-33",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "LIFETIME RESERVE DAYS",
+      "item": "280"
+    },
+    {
+      "sequence": 34,
+      "id": "IN1-34",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "DELAY BEFORE L. R. DAY",
+      "item": "281"
+    },
+    {
+      "sequence": 35,
+      "id": "IN1-35",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 8,
+      "table": "HL70042",
+      "name": "COMPANY PLAN CODE",
+      "item": "282"
+    },
+    {
+      "sequence": 36,
+      "id": "IN1-36",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 15,
+      "name": "POLICY NUMBER",
+      "item": "283"
+    },
+    {
+      "sequence": 37,
+      "id": "IN1-37",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 12,
+      "name": "POLICY DEDUCTIBLE",
+      "item": "284"
+    },
+    {
+      "sequence": 38,
+      "id": "IN1-38",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 12,
+      "name": "POLICY LIMIT - AMOUNT",
+      "item": "285"
+    },
+    {
+      "sequence": 39,
+      "id": "IN1-39",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 4,
+      "name": "POLICY LIMIT - DAYS",
+      "item": "286"
+    },
+    {
+      "sequence": 40,
+      "id": "IN1-40",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 12,
+      "name": "ROOM RATE - SEMI-PRIVATE",
+      "item": "287"
+    },
+    {
+      "sequence": 41,
+      "id": "IN1-41",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 12,
+      "name": "ROOM RATE - PRIVATE",
+      "item": "288"
+    },
+    {
+      "sequence": 42,
+      "id": "IN1-42",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70066",
+      "name": "INSURED&apos;S EMPLOYMENT STATUS",
+      "item": "710"
+    },
+    {
+      "sequence": 43,
+      "id": "IN1-43",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70001",
+      "name": "INSURED&apos;S SEX",
+      "item": "711"
+    },
+    {
+      "sequence": 44,
+      "id": "IN1-44",
+      "required": false,
+      "repeatable": false,
+      "datatype": "AD",
+      "maxLength": 106,
+      "name": "INSURED&apos;S EMPLOYER ADDRESS",
+      "item": "713"
+    }
+  ]
+}

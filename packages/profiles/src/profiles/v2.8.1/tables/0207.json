@@ -1,0 +1,27 @@
+{
+  "id": "0207",
+  "description": "Processing Mode",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Archive"
+    },
+    {
+      "name": "I",
+      "description": "Initial load"
+    },
+    {
+      "name": "Not present",
+      "description": "Not present (the default, meaning current  processing)"
+    },
+    {
+      "name": "R",
+      "description": "Restore from archive"
+    },
+    {
+      "name": "T",
+      "description": "Current processing, transmitted at intervals (scheduled or on demand)"
+    }
+  ]
+}

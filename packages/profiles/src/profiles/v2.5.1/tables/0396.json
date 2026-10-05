@@ -1,0 +1,355 @@
+{
+  "id": "0396",
+  "description": "Coding system",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "99zzz or L",
+      "description": "Local general code (where z is an alphanumeric character)"
+    },
+    {
+      "name": "ACR",
+      "description": "American College of Radiology finding codes"
+    },
+    {
+      "name": "ANS+",
+      "description": "HL7 set of units of measure"
+    },
+    {
+      "name": "ART",
+      "description": "WHO Adverse Reaction Terms"
+    },
+    {
+      "name": "AS4",
+      "description": "ASTM E1238/ E1467 Universal"
+    },
+    {
+      "name": "AS4E",
+      "description": "AS4 Neurophysiology Codes"
+    },
+    {
+      "name": "ATC",
+      "description": "American Type Culture Collection"
+    },
+    {
+      "name": "C4",
+      "description": "CPT-4"
+    },
+    {
+      "name": "C5",
+      "description": "CPT-5"
+    },
+    {
+      "name": "CAS",
+      "description": "Chemical abstract codes"
+    },
+    {
+      "name": "CD2",
+      "description": "CDT-2 Codes"
+    },
+    {
+      "name": "CDCA",
+      "description": "CDC Analyte Codes"
+    },
+    {
+      "name": "CDCM",
+      "description": "CDC Methods/Instruments Codes"
+    },
+    {
+      "name": "CDS",
+      "description": "CDC Surveillance"
+    },
+    {
+      "name": "CE",
+      "description": "CEN ECG diagnostic codes"
+    },
+    {
+      "name": "CLP",
+      "description": "CLIP"
+    },
+    {
+      "name": "CPTM",
+      "description": "CPT Modifier Code"
+    },
+    {
+      "name": "CST",
+      "description": "COSTART"
+    },
+    {
+      "name": "CVX",
+      "description": "CDC Vaccine Codes"
+    },
+    {
+      "name": "DCM",
+      "description": "DICOM Controlled Terminology"
+    },
+    {
+      "name": "E",
+      "description": "EUCLIDES"
+    },
+    {
+      "name": "E5",
+      "description": "Euclides  quantity codes"
+    },
+    {
+      "name": "E6",
+      "description": "Euclides Lab method codes"
+    },
+    {
+      "name": "E7",
+      "description": "Euclides Lab equipment codes"
+    },
+    {
+      "name": "ENZC",
+      "description": "Enzyme Codes"
+    },
+    {
+      "name": "FDDC",
+      "description": "First DataBank Drug Codes"
+    },
+    {
+      "name": "FDDX",
+      "description": "First DataBank Diagnostic Codes"
+    },
+    {
+      "name": "FDK",
+      "description": "FDA K10"
+    },
+    {
+      "name": "HB",
+      "description": "HIBCC"
+    },
+    {
+      "name": "HCPCS",
+      "description": "CMS (formerly HCFA)  Common Procedure Coding System"
+    },
+    {
+      "name": "HCPT",
+      "description": "Health Care Provider Taxonomy"
+    },
+    {
+      "name": "HHC",
+      "description": "Home Health Care"
+    },
+    {
+      "name": "HI",
+      "description": "Health Outcomes"
+    },
+    {
+      "name": "HL7nnnn",
+      "description": "HL7 Defined Codes where nnnn is the HL7 table number"
+    },
+    {
+      "name": "HOT",
+      "description": "Japanese Nationwide Medicine Code"
+    },
+    {
+      "name": "HPC",
+      "description": "CMS (formerly HCFA )Procedure Codes (HCPCS)"
+    },
+    {
+      "name": "I10",
+      "description": "ICD-10"
+    },
+    {
+      "name": "I10P",
+      "description": "ICD-10  Procedure Codes"
+    },
+    {
+      "name": "I9",
+      "description": "ICD9"
+    },
+    {
+      "name": "I9C",
+      "description": "ICD-9CM"
+    },
+    {
+      "name": "IBT",
+      "description": "ISBT"
+    },
+    {
+      "name": "IBTnnnn",
+      "description": "ISBT 128 codes where nnnn  specifies a specific table within ISBT 128."
+    },
+    {
+      "name": "IC2",
+      "description": "ICHPPC-2"
+    },
+    {
+      "name": "ICD10AM",
+      "description": "ICD-10 Australian modification"
+    },
+    {
+      "name": "ICD10CA",
+      "description": "ICD-10 Canada"
+    },
+    {
+      "name": "ICDO",
+      "description": "International Classification of Diseases for Oncology"
+    },
+    {
+      "name": "ICS",
+      "description": "ICCS"
+    },
+    {
+      "name": "ICSD",
+      "description": "International Classification of Sleep Disorders"
+    },
+    {
+      "name": "ISO+",
+      "description": "ISO 2955.83 (units of measure) with HL7 extensions"
+    },
+    {
+      "name": "ISOnnnn",
+      "description": "ISO Defined Codes where nnnn is the ISO table number"
+    },
+    {
+      "name": "IUPC",
+      "description": "IUPAC/IFCC Component Codes"
+    },
+    {
+      "name": "IUPP",
+      "description": "IUPAC/IFCC Property Codes"
+    },
+    {
+      "name": "JC10",
+      "description": "JLAC/JSLM, nationwide laboratory code"
+    },
+    {
+      "name": "JC8",
+      "description": "Japanese Chemistry"
+    },
+    {
+      "name": "JJ1017",
+      "description": "Japanese Image Examination Cache"
+    },
+    {
+      "name": "LB",
+      "description": "Local billing code"
+    },
+    {
+      "name": "LN",
+      "description": "Logical Observation Identifier Names and Codes (LOINCÂ®)"
+    },
+    {
+      "name": "MCD",
+      "description": "Medicaid"
+    },
+    {
+      "name": "MCR",
+      "description": "Medicare"
+    },
+    {
+      "name": "MDDX",
+      "description": "Medispan Diagnostic Codes"
+    },
+    {
+      "name": "MEDC",
+      "description": "Medical Economics Drug Codes"
+    },
+    {
+      "name": "MEDR",
+      "description": "Medical Dictionary for Drug Regulatory Affairs (MEDDRA)"
+    },
+    {
+      "name": "MEDX",
+      "description": "Medical Economics Diagnostic Codes"
+    },
+    {
+      "name": "MGPI",
+      "description": "Medispan GPI"
+    },
+    {
+      "name": "MVX",
+      "description": "CDC Vaccine Manufacturer Codes"
+    },
+    {
+      "name": "NDA",
+      "description": "NANDA"
+    },
+    {
+      "name": "NDC",
+      "description": "National drug codes"
+    },
+    {
+      "name": "NIC",
+      "description": "Nursing Interventions Classification"
+    },
+    {
+      "name": "NPI",
+      "description": "National Provider Identifier"
+    },
+    {
+      "name": "NUBC",
+      "description": "National Uniform Billing Committee Code"
+    },
+    {
+      "name": "OHA",
+      "description": "Omaha System"
+    },
+    {
+      "name": "POS",
+      "description": "POS Codes"
+    },
+    {
+      "name": "RC",
+      "description": "Read Classification"
+    },
+    {
+      "name": "SDM",
+      "description": "SNOMED- DICOM Microglossary"
+    },
+    {
+      "name": "SNM",
+      "description": "Systemized Nomenclature of Medicine (SNOMED)"
+    },
+    {
+      "name": "SNM3",
+      "description": "SNOMED International"
+    },
+    {
+      "name": "SNT",
+      "description": "SNOMED topology codes (anatomic sites)"
+    },
+    {
+      "name": "UC",
+      "description": "UCDS"
+    },
+    {
+      "name": "UMD",
+      "description": "MDNS"
+    },
+    {
+      "name": "UML",
+      "description": "Unified Medical Language"
+    },
+    {
+      "name": "UPC",
+      "description": "Universal Product Code"
+    },
+    {
+      "name": "UPIN",
+      "description": "UPIN"
+    },
+    {
+      "name": "USPS",
+      "description": "United States Postal Service"
+    },
+    {
+      "name": "W1",
+      "description": "WHO record # drug codes (6 digit)"
+    },
+    {
+      "name": "W2",
+      "description": "WHO record # drug codes (8 digit)"
+    },
+    {
+      "name": "W4",
+      "description": "WHO record # code with ASTM extension"
+    },
+    {
+      "name": "WC",
+      "description": "WHO ATC"
+    }
+  ]
+}

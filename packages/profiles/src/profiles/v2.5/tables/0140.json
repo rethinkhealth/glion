@@ -1,0 +1,51 @@
+{
+  "id": "0140",
+  "description": "Military Service",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AUSA",
+      "description": "Australian Army"
+    },
+    {
+      "name": "AUSAF",
+      "description": "Australian Air Force"
+    },
+    {
+      "name": "AUSN",
+      "description": "Australian Navy"
+    },
+    {
+      "name": "NATO",
+      "description": "North Atlantic Treaty Organization"
+    },
+    {
+      "name": "NOAA",
+      "description": "National Oceanic and Atmospheric Administration"
+    },
+    {
+      "name": "USA",
+      "description": "US Army"
+    },
+    {
+      "name": "USAF",
+      "description": "US Air Force"
+    },
+    {
+      "name": "USCG",
+      "description": "US Coast Guard"
+    },
+    {
+      "name": "USMC",
+      "description": "US Marine Corps"
+    },
+    {
+      "name": "USN",
+      "description": "US Navy"
+    },
+    {
+      "name": "USPHS",
+      "description": "US Public Health Service"
+    }
+  ]
+}

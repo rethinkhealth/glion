@@ -1,0 +1,34 @@
+{
+  "id": "v2-0659",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0659",
+  "oid": "2.16.840.1.113883.18.383",
+  "name": "LotControl",
+  "title": "lotControl",
+  "codes": [
+    {
+      "code": "1",
+      "display": "OR Mode Without Operator",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "OR Mode with Operator",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "CPD Mode Without Operator",
+      "status": "active"
+    },
+    {
+      "code": "4",
+      "display": "CPD Mode With Operator",
+      "status": "active"
+    },
+    {
+      "code": "5",
+      "display": "Offline Mode",
+      "status": "active"
+    }
+  ]
+}

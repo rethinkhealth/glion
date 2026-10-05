@@ -1,0 +1,64 @@
+{
+  "id": "v2-0508",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0508",
+  "oid": "2.16.840.1.113883.18.332",
+  "name": "BloodProductProcessingRequirements",
+  "title": "bloodProductProcessingRequirements",
+  "codes": [
+    {
+      "code": "AU",
+      "display": "Autologous Unit",
+      "status": "active"
+    },
+    {
+      "code": "CM",
+      "display": "CMV Negative",
+      "status": "active"
+    },
+    {
+      "code": "CS",
+      "display": "CMV Safe",
+      "status": "active"
+    },
+    {
+      "code": "DI",
+      "display": "Directed Unit",
+      "status": "active"
+    },
+    {
+      "code": "FR",
+      "display": "Fresh unit",
+      "status": "active"
+    },
+    {
+      "code": "HB",
+      "display": "Hemoglobin S Negative",
+      "status": "active"
+    },
+    {
+      "code": "HL",
+      "display": "HLA Matched",
+      "status": "active"
+    },
+    {
+      "code": "IG",
+      "display": "IgA Deficient",
+      "status": "active"
+    },
+    {
+      "code": "IR",
+      "display": "Irradiated",
+      "status": "active"
+    },
+    {
+      "code": "LR",
+      "display": "Leukoreduced",
+      "status": "active"
+    },
+    {
+      "code": "WA",
+      "display": "Washed",
+      "status": "active"
+    }
+  ]
+}

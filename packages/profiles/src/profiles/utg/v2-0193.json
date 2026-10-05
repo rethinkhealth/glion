@@ -1,0 +1,29 @@
+{
+  "id": "v2-0193",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0193",
+  "oid": "2.16.840.1.113883.18.103",
+  "name": "AmountClass",
+  "title": "amountClass",
+  "codes": [
+    {
+      "code": "AT",
+      "display": "Amount",
+      "status": "active"
+    },
+    {
+      "code": "LM",
+      "display": "Limit",
+      "status": "active"
+    },
+    {
+      "code": "PC",
+      "display": "Percentage",
+      "status": "active"
+    },
+    {
+      "code": "UL",
+      "display": "Unlimited",
+      "status": "active"
+    }
+  ]
+}

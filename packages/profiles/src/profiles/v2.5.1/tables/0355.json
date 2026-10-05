@@ -1,0 +1,15 @@
+{
+  "id": "0355",
+  "description": "Primary key value type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CE",
+      "description": "Coded element"
+    },
+    {
+      "name": "PL",
+      "description": "Person location"
+    }
+  ]
+}

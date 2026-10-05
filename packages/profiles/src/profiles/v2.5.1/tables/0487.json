@@ -1,0 +1,1083 @@
+{
+  "id": "0487",
+  "description": "Specimen Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ABS",
+      "description": "Abscess"
+    },
+    {
+      "name": "ACNE",
+      "description": "Tissue, Acne"
+    },
+    {
+      "name": "ACNFLD",
+      "description": "Fluid, Acne"
+    },
+    {
+      "name": "AIRS",
+      "description": "Air Sample"
+    },
+    {
+      "name": "ALL",
+      "description": "Allograft"
+    },
+    {
+      "name": "AMP",
+      "description": "Amputation"
+    },
+    {
+      "name": "ANGI",
+      "description": "Catheter Tip, Angio"
+    },
+    {
+      "name": "ARTC",
+      "description": "Catheter Tip, Arterial"
+    },
+    {
+      "name": "ASERU",
+      "description": "Serum, Acute"
+    },
+    {
+      "name": "ASP",
+      "description": "Aspirate"
+    },
+    {
+      "name": "ATTE",
+      "description": "Environmental, Autoclave Ampule"
+    },
+    {
+      "name": "AUTOC",
+      "description": "Environment, Attest"
+    },
+    {
+      "name": "AUTP",
+      "description": "Autopsy"
+    },
+    {
+      "name": "BBL",
+      "description": "Blood bag"
+    },
+    {
+      "name": "BCYST",
+      "description": "Cyst, Baker's"
+    },
+    {
+      "name": "BITE",
+      "description": "Bite"
+    },
+    {
+      "name": "BLEB",
+      "description": "Bleb"
+    },
+    {
+      "name": "BLIST",
+      "description": "Blister"
+    },
+    {
+      "name": "BOIL",
+      "description": "Boil"
+    },
+    {
+      "name": "BON",
+      "description": "Bone"
+    },
+    {
+      "name": "BOWL",
+      "description": "Bowel contents"
+    },
+    {
+      "name": "BPU",
+      "description": "Blood product unit"
+    },
+    {
+      "name": "BRN",
+      "description": "Burn"
+    },
+    {
+      "name": "BRSH",
+      "description": "Brush"
+    },
+    {
+      "name": "BRTH",
+      "description": "Breath (use EXHLD)"
+    },
+    {
+      "name": "BRUS",
+      "description": "Brushing"
+    },
+    {
+      "name": "BUB",
+      "description": "Bubo"
+    },
+    {
+      "name": "BULLA",
+      "description": "Bulla/Bullae"
+    },
+    {
+      "name": "BX",
+      "description": "Biopsy"
+    },
+    {
+      "name": "CALC",
+      "description": "Calculus (=Stone)"
+    },
+    {
+      "name": "CARBU",
+      "description": "Carbuncle"
+    },
+    {
+      "name": "CAT",
+      "description": "Catheter"
+    },
+    {
+      "name": "CBITE",
+      "description": "Bite, Cat"
+    },
+    {
+      "name": "CLIPP",
+      "description": "Clippings"
+    },
+    {
+      "name": "CNJT",
+      "description": "Conjunctiva"
+    },
+    {
+      "name": "COL",
+      "description": "Colostrum"
+    },
+    {
+      "name": "CONE",
+      "description": "Biospy, Cone"
+    },
+    {
+      "name": "CSCR",
+      "description": "Scratch, Cat"
+    },
+    {
+      "name": "CSERU",
+      "description": "Serum, Convalescent"
+    },
+    {
+      "name": "CSITE",
+      "description": "Catheter Insertion Site"
+    },
+    {
+      "name": "CSMY",
+      "description": "Fluid,  Cystostomy Tube"
+    },
+    {
+      "name": "CST",
+      "description": "Fluid, Cyst"
+    },
+    {
+      "name": "CSVR",
+      "description": "Blood, Cell Saver"
+    },
+    {
+      "name": "CTP",
+      "description": "Catheter tip"
+    },
+    {
+      "name": "CVPS",
+      "description": "Site, CVP"
+    },
+    {
+      "name": "CVPT",
+      "description": "Catheter Tip, CVP"
+    },
+    {
+      "name": "CYN",
+      "description": "Nodule, Cystic"
+    },
+    {
+      "name": "CYST",
+      "description": "Cyst"
+    },
+    {
+      "name": "DBITE",
+      "description": "Bite, Dog"
+    },
+    {
+      "name": "DCS",
+      "description": "Sputum, Deep Cough"
+    },
+    {
+      "name": "DEC",
+      "description": "Ulcer, Decubitus"
+    },
+    {
+      "name": "DEION",
+      "description": "Environmental, Water  (Deionized)"
+    },
+    {
+      "name": "DIA",
+      "description": "Dialysate"
+    },
+    {
+      "name": "DISCHG",
+      "description": "Discharge"
+    },
+    {
+      "name": "DIV",
+      "description": "Diverticulum"
+    },
+    {
+      "name": "DRN",
+      "description": "Drain"
+    },
+    {
+      "name": "DRNG",
+      "description": "Drainage, Tube"
+    },
+    {
+      "name": "DRNGP",
+      "description": "Drainage, Penrose"
+    },
+    {
+      "name": "EARW",
+      "description": "Ear wax (cerumen)"
+    },
+    {
+      "name": "EBRUSH",
+      "description": "Brush, Esophageal"
+    },
+    {
+      "name": "EEYE",
+      "description": "Environmental, Eye Wash"
+    },
+    {
+      "name": "EFF",
+      "description": "Environmental, Effluent"
+    },
+    {
+      "name": "EFFUS",
+      "description": "Effusion"
+    },
+    {
+      "name": "EFOD",
+      "description": "Environmental, Food"
+    },
+    {
+      "name": "EISO",
+      "description": "Environmental, Isolette"
+    },
+    {
+      "name": "ELT",
+      "description": "Electrode"
+    },
+    {
+      "name": "ENVIR",
+      "description": "Environmental, Unidentified Substance"
+    },
+    {
+      "name": "EOTH",
+      "description": "Environmental, Other Substance"
+    },
+    {
+      "name": "ESOI",
+      "description": "Environmental, Soil"
+    },
+    {
+      "name": "ESOS",
+      "description": "Environmental, Solution (Sterile)"
+    },
+    {
+      "name": "ETA",
+      "description": "Aspirate,  Endotrach"
+    },
+    {
+      "name": "ETTP",
+      "description": "Catheter Tip, Endotracheal"
+    },
+    {
+      "name": "ETTUB",
+      "description": "Tube, Endotracheal"
+    },
+    {
+      "name": "EWHI",
+      "description": "Environmental, Whirlpool"
+    },
+    {
+      "name": "EXG",
+      "description": "Gas, exhaled (=breath)"
+    },
+    {
+      "name": "EXS",
+      "description": "Shunt, External"
+    },
+    {
+      "name": "EXUDTE",
+      "description": "Exudate"
+    },
+    {
+      "name": "FAW",
+      "description": "Environmental, Water  (Well)"
+    },
+    {
+      "name": "FBLOOD",
+      "description": "Blood, Fetal"
+    },
+    {
+      "name": "FGA",
+      "description": "Fluid,  Abdomen"
+    },
+    {
+      "name": "FIST",
+      "description": "Fistula"
+    },
+    {
+      "name": "FLD",
+      "description": "Fluid, Other"
+    },
+    {
+      "name": "FLT",
+      "description": "Filter"
+    },
+    {
+      "name": "FLU",
+      "description": "Fluid, Body unsp"
+    },
+    {
+      "name": "FLUID",
+      "description": "Fluid"
+    },
+    {
+      "name": "FOLEY",
+      "description": "Catheter Tip, Foley"
+    },
+    {
+      "name": "FRS",
+      "description": "Fluid, Respiratory"
+    },
+    {
+      "name": "FSCLP",
+      "description": "Scalp, Fetal"
+    },
+    {
+      "name": "FUR",
+      "description": "Furuncle"
+    },
+    {
+      "name": "GAS",
+      "description": "Gas"
+    },
+    {
+      "name": "GASA",
+      "description": "Aspirate, Gastric"
+    },
+    {
+      "name": "GASAN",
+      "description": "Antrum, Gastric"
+    },
+    {
+      "name": "GASBR",
+      "description": "Brushing, Gastric"
+    },
+    {
+      "name": "GASD",
+      "description": "Drainage, Gastric"
+    },
+    {
+      "name": "GAST",
+      "description": "Fluid/contents, Gastric"
+    },
+    {
+      "name": "GENV",
+      "description": "Genital vaginal"
+    },
+    {
+      "name": "GRAFT",
+      "description": "Graft"
+    },
+    {
+      "name": "GRANU",
+      "description": "Granuloma"
+    },
+    {
+      "name": "GROSH",
+      "description": "Catheter, Groshong"
+    },
+    {
+      "name": "GSOL",
+      "description": "Solution, Gastrostomy"
+    },
+    {
+      "name": "GSPEC",
+      "description": "Biopsy, Gastric"
+    },
+    {
+      "name": "GT",
+      "description": "Tube, Gastric"
+    },
+    {
+      "name": "GTUBE",
+      "description": "Drainage Tube, Drainage (Gastrostomy)"
+    },
+    {
+      "name": "HBITE",
+      "description": "Bite, Human"
+    },
+    {
+      "name": "HBLUD",
+      "description": "Blood, Autopsy"
+    },
+    {
+      "name": "HEMAQ",
+      "description": "Catheter Tip, Hemaquit"
+    },
+    {
+      "name": "HEMO",
+      "description": "Catheter Tip, Hemovac"
+    },
+    {
+      "name": "HERNI",
+      "description": "Tissue, Herniated"
+    },
+    {
+      "name": "HEV",
+      "description": "Drain, Hemovac"
+    },
+    {
+      "name": "HIC",
+      "description": "Catheter, Hickman"
+    },
+    {
+      "name": "HYDC",
+      "description": "Fluid, Hydrocele"
+    },
+    {
+      "name": "IBITE",
+      "description": "Bite, Insect"
+    },
+    {
+      "name": "ICYST",
+      "description": "Cyst, Inclusion"
+    },
+    {
+      "name": "IDC",
+      "description": "Catheter Tip, Indwelling"
+    },
+    {
+      "name": "IHG",
+      "description": "Gas, Inhaled"
+    },
+    {
+      "name": "ILEO",
+      "description": "Drainage, Ileostomy"
+    },
+    {
+      "name": "ILLEG",
+      "description": "Source of Specimen Is Illegible"
+    },
+    {
+      "name": "IMP",
+      "description": "Implant"
+    },
+    {
+      "name": "INCI",
+      "description": "Site, Incision/Surgical"
+    },
+    {
+      "name": "INFIL",
+      "description": "Infiltrate"
+    },
+    {
+      "name": "INS",
+      "description": "Insect"
+    },
+    {
+      "name": "INTRD",
+      "description": "Catheter Tip, Introducer"
+    },
+    {
+      "name": "IT",
+      "description": "Intubation tube"
+    },
+    {
+      "name": "IUD",
+      "description": "Intrauterine Device"
+    },
+    {
+      "name": "IVCAT",
+      "description": "Catheter Tip, IV"
+    },
+    {
+      "name": "IVFLD",
+      "description": "Fluid, IV"
+    },
+    {
+      "name": "IVTIP",
+      "description": "Tubing Tip, IV"
+    },
+    {
+      "name": "JEJU",
+      "description": "Drainage, Jejunal"
+    },
+    {
+      "name": "JNTFLD",
+      "description": "Fluid, Joint"
+    },
+    {
+      "name": "JP",
+      "description": "Drainage, Jackson Pratt"
+    },
+    {
+      "name": "KELOI",
+      "description": "Lavage"
+    },
+    {
+      "name": "KIDFLD",
+      "description": "Fluid, Kidney"
+    },
+    {
+      "name": "LAVG",
+      "description": "Lavage, Bronhial"
+    },
+    {
+      "name": "LAVGG",
+      "description": "Lavage, Gastric"
+    },
+    {
+      "name": "LAVGP",
+      "description": "Lavage, Peritoneal"
+    },
+    {
+      "name": "LAVPG",
+      "description": "Lavage, Pre-Bronch"
+    },
+    {
+      "name": "LENS1",
+      "description": "Contact Lens"
+    },
+    {
+      "name": "LENS2",
+      "description": "Contact Lens Case"
+    },
+    {
+      "name": "LESN",
+      "description": "Lesion"
+    },
+    {
+      "name": "LIQ",
+      "description": "Liquid, Unspecified"
+    },
+    {
+      "name": "LIQO",
+      "description": "Liquid, Other"
+    },
+    {
+      "name": "LSAC",
+      "description": "Fluid, Lumbar Sac"
+    },
+    {
+      "name": "MAHUR",
+      "description": "Catheter Tip, Makurkour"
+    },
+    {
+      "name": "MASS",
+      "description": "Mass"
+    },
+    {
+      "name": "MBLD",
+      "description": "Blood, Menstrual"
+    },
+    {
+      "name": "MUCOS",
+      "description": "Mucosa"
+    },
+    {
+      "name": "MUCUS",
+      "description": "Mucus"
+    },
+    {
+      "name": "NASDR",
+      "description": "Drainage, Nasal"
+    },
+    {
+      "name": "NEDL",
+      "description": "Needle"
+    },
+    {
+      "name": "NEPH",
+      "description": "Site, Nephrostomy"
+    },
+    {
+      "name": "NGASP",
+      "description": "Aspirate, Nasogastric"
+    },
+    {
+      "name": "NGAST",
+      "description": "Drainage, Nasogastric"
+    },
+    {
+      "name": "NGS",
+      "description": "Site, Naso/Gastric"
+    },
+    {
+      "name": "NODUL",
+      "description": "Nodule(s)"
+    },
+    {
+      "name": "NSECR",
+      "description": "Secretion, Nasal"
+    },
+    {
+      "name": "ORH",
+      "description": "Other"
+    },
+    {
+      "name": "ORL",
+      "description": "Lesion, Oral"
+    },
+    {
+      "name": "OTH",
+      "description": "Source, Other"
+    },
+    {
+      "name": "PACEM",
+      "description": "Pacemaker"
+    },
+    {
+      "name": "PCFL",
+      "description": "Fluid, Pericardial"
+    },
+    {
+      "name": "PDSIT",
+      "description": "Site, Peritoneal Dialysis"
+    },
+    {
+      "name": "PDTS",
+      "description": "Site, Peritoneal Dialysis Tunnel"
+    },
+    {
+      "name": "PELVA",
+      "description": "Abscess, Pelvic"
+    },
+    {
+      "name": "PENIL",
+      "description": "Lesion, Penile"
+    },
+    {
+      "name": "PERIA",
+      "description": "Abscess, Perianal"
+    },
+    {
+      "name": "PILOC",
+      "description": "Cyst, Pilonidal"
+    },
+    {
+      "name": "PINS",
+      "description": "Site, Pin"
+    },
+    {
+      "name": "PIS",
+      "description": "Site, Pacemaker Insetion"
+    },
+    {
+      "name": "PLAN",
+      "description": "Plant Material"
+    },
+    {
+      "name": "PLAS",
+      "description": "Plasma"
+    },
+    {
+      "name": "PLB",
+      "description": "Plasma bag"
+    },
+    {
+      "name": "PLEVS",
+      "description": "Serum, Peak Level"
+    },
+    {
+      "name": "PND",
+      "description": "Drainage, Penile"
+    },
+    {
+      "name": "POL",
+      "description": "Polyps"
+    },
+    {
+      "name": "POPGS",
+      "description": "Graft Site, Popliteal"
+    },
+    {
+      "name": "POPLG",
+      "description": "Graft, Popliteal"
+    },
+    {
+      "name": "POPLV",
+      "description": "Site, Popliteal Vein"
+    },
+    {
+      "name": "PORTA",
+      "description": "Catheter, Porta"
+    },
+    {
+      "name": "PPP",
+      "description": "Plasma, Platelet poor"
+    },
+    {
+      "name": "PROST",
+      "description": "Prosthetic Device"
+    },
+    {
+      "name": "PRP",
+      "description": "Plasma, Platelet rich"
+    },
+    {
+      "name": "PSC",
+      "description": "Pseudocyst"
+    },
+    {
+      "name": "PUNCT",
+      "description": "Wound, Puncture"
+    },
+    {
+      "name": "PUS",
+      "description": "Pus"
+    },
+    {
+      "name": "PUSFR",
+      "description": "Pustule"
+    },
+    {
+      "name": "PUST",
+      "description": "Pus"
+    },
+    {
+      "name": "QC3",
+      "description": "Quality Control"
+    },
+    {
+      "name": "RANDU",
+      "description": "Urine, Random"
+    },
+    {
+      "name": "RBITE",
+      "description": "Bite, Reptile"
+    },
+    {
+      "name": "RECT",
+      "description": "Drainage, Rectal"
+    },
+    {
+      "name": "RECTA",
+      "description": "Abscess, Rectal"
+    },
+    {
+      "name": "RENALC",
+      "description": "Cyst, Renal"
+    },
+    {
+      "name": "RENC",
+      "description": "Fluid, Renal Cyst"
+    },
+    {
+      "name": "RES",
+      "description": "Respiratory"
+    },
+    {
+      "name": "SAL",
+      "description": "Saliva"
+    },
+    {
+      "name": "SCAR",
+      "description": "Tissue, Keloid (Scar)"
+    },
+    {
+      "name": "SCLV",
+      "description": "Catheter Tip, Subclavian"
+    },
+    {
+      "name": "SCROA",
+      "description": "Abscess, Scrotal"
+    },
+    {
+      "name": "SECRE",
+      "description": "Secretion(s)"
+    },
+    {
+      "name": "SER",
+      "description": "Serum"
+    },
+    {
+      "name": "SHU",
+      "description": "Site, Shunt"
+    },
+    {
+      "name": "SHUNF",
+      "description": "Fluid, Shunt"
+    },
+    {
+      "name": "SHUNT",
+      "description": "Shunt"
+    },
+    {
+      "name": "SITE",
+      "description": "Site"
+    },
+    {
+      "name": "SKBP",
+      "description": "Biopsy, Skin"
+    },
+    {
+      "name": "SKN",
+      "description": "Skin"
+    },
+    {
+      "name": "SMM",
+      "description": "Mass, Sub-Mandibular"
+    },
+    {
+      "name": "SNV",
+      "description": "Fluid, synovial (Joint fluid)"
+    },
+    {
+      "name": "SPRM",
+      "description": "Spermatozoa"
+    },
+    {
+      "name": "SPRP",
+      "description": "Catheter Tip, Suprapubic"
+    },
+    {
+      "name": "SPRPB",
+      "description": "Cathether Tip, Suprapubic"
+    },
+    {
+      "name": "SPS",
+      "description": "Environmental, Spore Strip"
+    },
+    {
+      "name": "SPT",
+      "description": "Sputum"
+    },
+    {
+      "name": "SPTC",
+      "description": "Sputum - coughed"
+    },
+    {
+      "name": "SPTT",
+      "description": "Sputum - tracheal aspirate"
+    },
+    {
+      "name": "SPUT1",
+      "description": "Sputum, Simulated"
+    },
+    {
+      "name": "SPUTIN",
+      "description": "Sputum, Inducted"
+    },
+    {
+      "name": "SPUTSP",
+      "description": "Sputum, Spontaneous"
+    },
+    {
+      "name": "STER",
+      "description": "Environmental, Sterrad"
+    },
+    {
+      "name": "STL",
+      "description": "Stool = Fecal"
+    },
+    {
+      "name": "STONE",
+      "description": "Stone, Kidney"
+    },
+    {
+      "name": "SUBMA",
+      "description": "Abscess, Submandibular"
+    },
+    {
+      "name": "SUBMX",
+      "description": "Abscess, Submaxillary"
+    },
+    {
+      "name": "SUMP",
+      "description": "Drainage, Sump"
+    },
+    {
+      "name": "SUP",
+      "description": "Suprapubic Tap"
+    },
+    {
+      "name": "SUTUR",
+      "description": "Suture"
+    },
+    {
+      "name": "SWGZ",
+      "description": "Catheter Tip, Swan Gantz"
+    },
+    {
+      "name": "TASP",
+      "description": "Aspirate, Tracheal"
+    },
+    {
+      "name": "TISS",
+      "description": "Tissue"
+    },
+    {
+      "name": "TISU",
+      "description": "Tissue ulcer"
+    },
+    {
+      "name": "TLC",
+      "description": "Cathether Tip, Triple Lumen"
+    },
+    {
+      "name": "TRAC",
+      "description": "Site, Tracheostomy"
+    },
+    {
+      "name": "TRANS",
+      "description": "Transudate"
+    },
+    {
+      "name": "TSERU",
+      "description": "Serum, Trough"
+    },
+    {
+      "name": "TSTES",
+      "description": "Abscess, Testicular"
+    },
+    {
+      "name": "TTRA",
+      "description": "Aspirate, Transtracheal"
+    },
+    {
+      "name": "TUBES",
+      "description": "Tubes"
+    },
+    {
+      "name": "TUMOR",
+      "description": "Tumor"
+    },
+    {
+      "name": "TZANC",
+      "description": "Smear, Tzanck"
+    },
+    {
+      "name": "UDENT",
+      "description": "Source, Unidentified"
+    },
+    {
+      "name": "UR",
+      "description": "Urine"
+    },
+    {
+      "name": "URC",
+      "description": "Urine clean catch"
+    },
+    {
+      "name": "URINB",
+      "description": "Urine, Bladder Washings"
+    },
+    {
+      "name": "URINC",
+      "description": "Urine, Catheterized"
+    },
+    {
+      "name": "URINM",
+      "description": "Urine, Midstream"
+    },
+    {
+      "name": "URINN",
+      "description": "Urine, Nephrostomy"
+    },
+    {
+      "name": "URINP",
+      "description": "Urine, Pedibag"
+    },
+    {
+      "name": "URT",
+      "description": "Urine catheter"
+    },
+    {
+      "name": "USCOP",
+      "description": "Urine, Cystoscopy"
+    },
+    {
+      "name": "USPEC",
+      "description": "Source, Unspecified"
+    },
+    {
+      "name": "VASTIP",
+      "description": "Catheter Tip, Vas"
+    },
+    {
+      "name": "VENT",
+      "description": "Catheter Tip, Ventricular"
+    },
+    {
+      "name": "VITF",
+      "description": "Vitreous Fluid"
+    },
+    {
+      "name": "VOM",
+      "description": "Vomitus"
+    },
+    {
+      "name": "WASH",
+      "description": "Wash"
+    },
+    {
+      "name": "WASI",
+      "description": "Washing, e.g. bronchial washing"
+    },
+    {
+      "name": "WAT",
+      "description": "Water"
+    },
+    {
+      "name": "WB",
+      "description": "Blood, Whole"
+    },
+    {
+      "name": "WEN",
+      "description": "Wen"
+    },
+    {
+      "name": "WICK",
+      "description": "Wick"
+    },
+    {
+      "name": "WND",
+      "description": "Wound"
+    },
+    {
+      "name": "WNDA",
+      "description": "Wound abscess"
+    },
+    {
+      "name": "WNDD",
+      "description": "Wound drainage"
+    },
+    {
+      "name": "WNDE",
+      "description": "Wound exudate"
+    },
+    {
+      "name": "WORM",
+      "description": "Worm"
+    },
+    {
+      "name": "WRT",
+      "description": "Wart"
+    },
+    {
+      "name": "WWA",
+      "description": "Environmental, Water"
+    },
+    {
+      "name": "WWO",
+      "description": "Environmental, Water (Ocean)"
+    },
+    {
+      "name": "WWT",
+      "description": "Environmental, Water  (Tap)"
+    }
+  ]
+}

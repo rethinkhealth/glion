@@ -1,0 +1,54 @@
+{
+  "id": "v2-0484",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0484",
+  "oid": "2.16.840.1.113883.18.309",
+  "name": "DispenseType",
+  "title": "dispenseType",
+  "codes": [
+    {
+      "code": "B",
+      "display": "Trial Quantity Balance",
+      "status": "active"
+    },
+    {
+      "code": "C",
+      "display": "Compassionate Fill",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "New/Renew - Full Fill",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "New/Renew - Part Fill",
+      "status": "active"
+    },
+    {
+      "code": "Q",
+      "display": "Refill - Part Fill",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Refill - Full Fill",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "Manufacturer Sample",
+      "status": "active"
+    },
+    {
+      "code": "T",
+      "display": "Trial Quantity",
+      "status": "active"
+    },
+    {
+      "code": "Z",
+      "display": "Non-Prescription Fill",
+      "status": "active"
+    }
+  ]
+}

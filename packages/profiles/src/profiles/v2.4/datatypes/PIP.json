@@ -1,0 +1,38 @@
+{
+  "id": "PIP",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "Privileges",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "privilege",
+      "datatypeId": "CE",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "privilege class",
+      "datatypeId": "CE",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "expiration date",
+      "datatypeId": "DT",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "activation date",
+      "datatypeId": "DT",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "facility (EI)",
+      "datatypeId": "EI",
+      "required": false
+    }
+  ]
+}

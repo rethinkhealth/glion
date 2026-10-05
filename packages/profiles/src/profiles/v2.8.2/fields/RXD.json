@@ -1,0 +1,321 @@
+{
+  "segmentId": "RXD",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RXD-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Dispense Sub-ID Counter",
+      "item": "334"
+    },
+    {
+      "sequence": 2,
+      "id": "RXD-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70292",
+      "name": "Dispense/Give Code",
+      "item": "335"
+    },
+    {
+      "sequence": 3,
+      "id": "RXD-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Date/Time Dispensed",
+      "item": "336"
+    },
+    {
+      "sequence": 4,
+      "id": "RXD-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Actual Dispense Amount",
+      "item": "337"
+    },
+    {
+      "sequence": 5,
+      "id": "RXD-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Actual Dispense Units",
+      "item": "338"
+    },
+    {
+      "sequence": 6,
+      "id": "RXD-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Actual Dosage Form",
+      "item": "339"
+    },
+    {
+      "sequence": 7,
+      "id": "RXD-7",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Prescription Number",
+      "item": "325"
+    },
+    {
+      "sequence": 8,
+      "id": "RXD-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Number of Refills Remaining",
+      "item": "326"
+    },
+    {
+      "sequence": 9,
+      "id": "RXD-9",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "name": "Dispense Notes",
+      "item": "340"
+    },
+    {
+      "sequence": 10,
+      "id": "RXD-10",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Dispensing Provider",
+      "item": "341"
+    },
+    {
+      "sequence": 11,
+      "id": "RXD-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70167",
+      "name": "Substitution Status",
+      "item": "322"
+    },
+    {
+      "sequence": 12,
+      "id": "RXD-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "name": "Total Daily Dose",
+      "item": "329"
+    },
+    {
+      "sequence": 13,
+      "id": "RXD-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70136",
+      "name": "Needs Human Review",
+      "item": "307"
+    },
+    {
+      "sequence": 14,
+      "id": "RXD-15",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Special Dispensing Instructions",
+      "item": "330"
+    },
+    {
+      "sequence": 15,
+      "id": "RXD-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Actual Strength",
+      "item": "1132"
+    },
+    {
+      "sequence": 16,
+      "id": "RXD-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Actual Strength Unit",
+      "item": "1133"
+    },
+    {
+      "sequence": 17,
+      "id": "RXD-18",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "name": "Substance Lot Number",
+      "item": "1129"
+    },
+    {
+      "sequence": 18,
+      "id": "RXD-19",
+      "required": false,
+      "repeatable": true,
+      "datatype": "DTM",
+      "name": "Substance Expiration Date",
+      "item": "1130"
+    },
+    {
+      "sequence": 19,
+      "id": "RXD-20",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Substance Manufacturer Name",
+      "item": "1131"
+    },
+    {
+      "sequence": 20,
+      "id": "RXD-21",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Indication",
+      "item": "1123"
+    },
+    {
+      "sequence": 21,
+      "id": "RXD-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Dispense Package Size",
+      "item": "1220"
+    },
+    {
+      "sequence": 22,
+      "id": "RXD-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Dispense Package Size Unit",
+      "item": "1221"
+    },
+    {
+      "sequence": 23,
+      "id": "RXD-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70321",
+      "name": "Dispense Package Method",
+      "item": "1222"
+    },
+    {
+      "sequence": 24,
+      "id": "RXD-25",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Supplementary Code",
+      "item": "1476"
+    },
+    {
+      "sequence": 25,
+      "id": "RXD-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Initiating Location",
+      "item": "1477"
+    },
+    {
+      "sequence": 26,
+      "id": "RXD-27",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Packaging/Assembly Location",
+      "item": "1478"
+    },
+    {
+      "sequence": 27,
+      "id": "RXD-28",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Actual Drug Strength Volume",
+      "item": "1686"
+    },
+    {
+      "sequence": 28,
+      "id": "RXD-29",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Actual Drug Strength Volume Units",
+      "item": "1687"
+    },
+    {
+      "sequence": 29,
+      "id": "RXD-30",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Dispense to Pharmacy",
+      "item": "1688"
+    },
+    {
+      "sequence": 30,
+      "id": "RXD-31",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XAD",
+      "name": "Dispense to Pharmacy Address",
+      "item": "1689"
+    },
+    {
+      "sequence": 31,
+      "id": "RXD-32",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70480",
+      "name": "Pharmacy Order Type",
+      "item": "1690"
+    },
+    {
+      "sequence": 32,
+      "id": "RXD-33",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70484",
+      "name": "Dispense Type",
+      "item": "1691"
+    },
+    {
+      "sequence": 33,
+      "id": "RXD-34",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XTN",
+      "name": "Pharmacy Phone Number",
+      "item": "2311"
+    },
+    {
+      "sequence": 34,
+      "id": "RXD-35",
+      "required": false,
+      "repeatable": true,
+      "datatype": "EI",
+      "name": "Dispense Tag Identifier",
+      "item": "3392"
+    }
+  ]
+}

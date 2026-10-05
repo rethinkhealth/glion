@@ -1,0 +1,131 @@
+{
+  "segmentId": "QRD",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "QRD-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Query Date/Time",
+      "item": "25"
+    },
+    {
+      "sequence": 2,
+      "id": "QRD-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70106",
+      "name": "Query Format Code",
+      "item": "26"
+    },
+    {
+      "sequence": 3,
+      "id": "QRD-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70091",
+      "name": "Query Priority",
+      "item": "27"
+    },
+    {
+      "sequence": 4,
+      "id": "QRD-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 10,
+      "name": "Query ID",
+      "item": "28"
+    },
+    {
+      "sequence": 5,
+      "id": "QRD-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70107",
+      "name": "Deferred Response Type",
+      "item": "29"
+    },
+    {
+      "sequence": 6,
+      "id": "QRD-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Deferred Response Date/Time",
+      "item": "30"
+    },
+    {
+      "sequence": 7,
+      "id": "QRD-7",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 10,
+      "table": "HL70126",
+      "name": "Quantity Limited Request",
+      "item": "31"
+    },
+    {
+      "sequence": 8,
+      "id": "QRD-8",
+      "required": true,
+      "repeatable": true,
+      "datatype": "XCN",
+      "maxLength": 60,
+      "name": "Who Subject Filter",
+      "item": "32"
+    },
+    {
+      "sequence": 9,
+      "id": "QRD-9",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 60,
+      "table": "HL70048",
+      "name": "What Subject Filter",
+      "item": "33"
+    },
+    {
+      "sequence": 10,
+      "id": "QRD-10",
+      "required": true,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "What Department Data Code",
+      "item": "34"
+    },
+    {
+      "sequence": 11,
+      "id": "QRD-11",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CM",
+      "maxLength": 20,
+      "name": "What Data Code Value Qualifier",
+      "item": "35"
+    },
+    {
+      "sequence": 12,
+      "id": "QRD-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70108",
+      "name": "Query Results Level",
+      "item": "36"
+    }
+  ]
+}

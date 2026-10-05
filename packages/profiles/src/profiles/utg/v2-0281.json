@@ -1,0 +1,69 @@
+{
+  "id": "v2-0281",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0281",
+  "oid": "2.16.840.1.113883.18.174",
+  "name": "ReferralType",
+  "title": "referralType",
+  "codes": [
+    {
+      "code": "Hom",
+      "display": "Home Care",
+      "status": "active"
+    },
+    {
+      "code": "HOM",
+      "display": "Home Care",
+      "status": "active"
+    },
+    {
+      "code": "Lab",
+      "display": "Laboratory",
+      "status": "active"
+    },
+    {
+      "code": "LAB",
+      "display": "Laboratory",
+      "status": "active"
+    },
+    {
+      "code": "Med",
+      "display": "Medical",
+      "status": "active"
+    },
+    {
+      "code": "MED",
+      "display": "Medical",
+      "status": "active"
+    },
+    {
+      "code": "Psy",
+      "display": "Psychiatric",
+      "status": "active"
+    },
+    {
+      "code": "PSY",
+      "display": "Psychiatric",
+      "status": "active"
+    },
+    {
+      "code": "Rad",
+      "display": "Radiology",
+      "status": "active"
+    },
+    {
+      "code": "RAD",
+      "display": "Radiology",
+      "status": "active"
+    },
+    {
+      "code": "Skn",
+      "display": "Skilled Nursing",
+      "status": "active"
+    },
+    {
+      "code": "SKN",
+      "display": "Skilled Nursing",
+      "status": "active"
+    }
+  ]
+}

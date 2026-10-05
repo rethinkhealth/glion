@@ -1,0 +1,26 @@
+{
+  "id": "PRL",
+  "version": "2.8.1",
+  "kind": "composite",
+  "title": "Parent Result Link",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Parent Observation Identifier",
+      "datatypeId": "CWE",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Parent Observation Sub-identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Parent Observation Value Descriptor",
+      "datatypeId": "TX",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "segmentId": "SPR",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "SPR-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 32,
+      "name": "Query Tag",
+      "item": "696"
+    },
+    {
+      "sequence": 2,
+      "id": "SPR-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70106",
+      "name": "Query/Response Format Code",
+      "item": "697"
+    },
+    {
+      "sequence": 3,
+      "id": "SPR-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Stored Procedure Name",
+      "item": "704"
+    },
+    {
+      "sequence": 4,
+      "id": "SPR-4",
+      "required": false,
+      "repeatable": true,
+      "datatype": "QIP",
+      "maxLength": 256,
+      "name": "Input Parameter List",
+      "item": "705"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "segmentId": "BLG",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "BLG-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CCD",
+      "maxLength": 40,
+      "table": "HL70100",
+      "name": "When to Charge",
+      "item": "234"
+    },
+    {
+      "sequence": 2,
+      "id": "BLG-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 50,
+      "table": "HL70122",
+      "name": "Charge Type",
+      "item": "235"
+    },
+    {
+      "sequence": 3,
+      "id": "BLG-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CX",
+      "maxLength": 100,
+      "name": "Account ID",
+      "item": "236"
+    }
+  ]
+}

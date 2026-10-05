@@ -1,0 +1,19 @@
+{
+  "id": "v2-0415",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0415",
+  "oid": "2.16.840.1.113883.18.257",
+  "name": "DrgTransferType",
+  "title": "drgTransferType",
+  "codes": [
+    {
+      "code": "E",
+      "display": "DRG Exempt",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "DRG Non Exempt",
+      "status": "active"
+    }
+  ]
+}

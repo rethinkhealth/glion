@@ -1,0 +1,24 @@
+{
+  "id": "v2-0776",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0776",
+  "oid": "2.16.840.1.113883.18.402",
+  "name": "ItemStatus",
+  "title": "itemStatus",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Active",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Inactive",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Pending Inactive",
+      "status": "active"
+    }
+  ]
+}

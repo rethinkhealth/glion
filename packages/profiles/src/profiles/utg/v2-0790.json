@@ -1,0 +1,19 @@
+{
+  "id": "v2-0790",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0790",
+  "oid": "2.16.840.1.113883.18.404",
+  "name": "ApprovingRegulatoryAgency",
+  "title": "approvingRegulatoryAgency",
+  "codes": [
+    {
+      "code": "AMA",
+      "display": "American Medical Association",
+      "status": "active"
+    },
+    {
+      "code": "FDA",
+      "display": "Food and Drug Administration",
+      "status": "active"
+    }
+  ]
+}

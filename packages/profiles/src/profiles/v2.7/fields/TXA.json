@@ -1,0 +1,250 @@
+{
+  "segmentId": "TXA",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "TXA-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID- TXA",
+      "item": "914"
+    },
+    {
+      "sequence": 2,
+      "id": "TXA-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70270",
+      "name": "Document Type",
+      "item": "915"
+    },
+    {
+      "sequence": 3,
+      "id": "TXA-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70191",
+      "name": "Document Content Presentation",
+      "item": "916"
+    },
+    {
+      "sequence": 4,
+      "id": "TXA-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Activity Date/Time",
+      "item": "917"
+    },
+    {
+      "sequence": 5,
+      "id": "TXA-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Primary Activity Provider Code/Name",
+      "item": "918"
+    },
+    {
+      "sequence": 6,
+      "id": "TXA-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Origination Date/Time",
+      "item": "919"
+    },
+    {
+      "sequence": 7,
+      "id": "TXA-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Transcription Date/Time",
+      "item": "920"
+    },
+    {
+      "sequence": 8,
+      "id": "TXA-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "DTM",
+      "name": "Edit Date/Time",
+      "item": "921"
+    },
+    {
+      "sequence": 9,
+      "id": "TXA-9",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Originator Code/Name",
+      "item": "922"
+    },
+    {
+      "sequence": 10,
+      "id": "TXA-10",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Assigned Document Authenticator",
+      "item": "923"
+    },
+    {
+      "sequence": 11,
+      "id": "TXA-11",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Transcriptionist Code/Name",
+      "item": "924"
+    },
+    {
+      "sequence": 12,
+      "id": "TXA-12",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Unique Document Number",
+      "item": "925"
+    },
+    {
+      "sequence": 13,
+      "id": "TXA-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Parent Document Number",
+      "item": "926"
+    },
+    {
+      "sequence": 14,
+      "id": "TXA-14",
+      "required": false,
+      "repeatable": true,
+      "datatype": "EI",
+      "name": "Placer Order Number",
+      "item": "216"
+    },
+    {
+      "sequence": 15,
+      "id": "TXA-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Filler Order Number",
+      "item": "217"
+    },
+    {
+      "sequence": 16,
+      "id": "TXA-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Unique Document File Name",
+      "item": "927"
+    },
+    {
+      "sequence": 17,
+      "id": "TXA-17",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70271",
+      "name": "Document Completion Status",
+      "item": "928"
+    },
+    {
+      "sequence": 18,
+      "id": "TXA-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70272",
+      "name": "Document Confidentiality Status",
+      "item": "929"
+    },
+    {
+      "sequence": 19,
+      "id": "TXA-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70273",
+      "name": "Document Availability Status",
+      "item": "930"
+    },
+    {
+      "sequence": 20,
+      "id": "TXA-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70275",
+      "name": "Document Storage Status",
+      "item": "932"
+    },
+    {
+      "sequence": 21,
+      "id": "TXA-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Document Change Reason",
+      "item": "933"
+    },
+    {
+      "sequence": 22,
+      "id": "TXA-22",
+      "required": false,
+      "repeatable": true,
+      "datatype": "PPN",
+      "name": "Authentication Person, Time Stamp (set)",
+      "item": "934"
+    },
+    {
+      "sequence": 23,
+      "id": "TXA-23",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Distributed Copies (Code and Name of Recipient(s) )",
+      "item": "935"
+    },
+    {
+      "sequence": 24,
+      "id": "TXA-24",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "name": "Folder Assignment",
+      "item": "2378"
+    },
+    {
+      "sequence": 25,
+      "id": "TXA-25",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "name": "Document Title",
+      "item": "3301"
+    },
+    {
+      "sequence": 26,
+      "id": "TXA-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Agreed Due Date/Time",
+      "item": "3302"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "v2-0275",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0275",
+  "oid": "2.16.840.1.113883.18.168",
+  "name": "DocumentStorageStatus",
+  "title": "documentStorageStatus",
+  "codes": [
+    {
+      "code": "AA",
+      "display": "Active and archived",
+      "status": "active"
+    },
+    {
+      "code": "AC",
+      "display": "Active",
+      "status": "active"
+    },
+    {
+      "code": "AR",
+      "display": "Archived (not active)",
+      "status": "active"
+    },
+    {
+      "code": "PU",
+      "display": "Purged",
+      "status": "active"
+    }
+  ]
+}

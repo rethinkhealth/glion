@@ -1,0 +1,24 @@
+{
+  "id": "v2-0500",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0500",
+  "oid": "2.16.840.1.113883.18.324",
+  "name": "ConsentDisclosureLevel",
+  "title": "consentDisclosureLevel",
+  "codes": [
+    {
+      "code": "F",
+      "display": "Full Disclosure",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "No Disclosure",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Partial Disclosure",
+      "status": "active"
+    }
+  ]
+}

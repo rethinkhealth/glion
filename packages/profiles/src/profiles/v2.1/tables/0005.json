@@ -1,0 +1,23 @@
+{
+  "id": "0005",
+  "description": "ETHNIC GROUP",
+  "type": "user",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Black"
+    },
+    {
+      "name": "C",
+      "description": "Caucasian"
+    },
+    {
+      "name": "H",
+      "description": "Hispanic"
+    },
+    {
+      "name": "R",
+      "description": "Oriental"
+    }
+  ]
+}

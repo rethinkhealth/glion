@@ -1,0 +1,23 @@
+{
+  "id": "0284",
+  "description": "Referral category",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Ambulatory"
+    },
+    {
+      "name": "E",
+      "description": "Emergency"
+    },
+    {
+      "name": "I",
+      "description": "Inpatient"
+    },
+    {
+      "name": "O",
+      "description": "Outpatient"
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "id": "v2-0368",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0368",
+  "oid": "2.16.840.1.113883.18.226",
+  "name": "RemoteControlCommand",
+  "title": "remoteControlCommand",
+  "codes": [
+    {
+      "code": "AB",
+      "display": "Abort",
+      "status": "active"
+    },
+    {
+      "code": "AF",
+      "display": "Aliquot From container",
+      "status": "active"
+    },
+    {
+      "code": "AT",
+      "display": "Aliquot To container",
+      "status": "active"
+    },
+    {
+      "code": "CL",
+      "display": "Clear",
+      "status": "active"
+    },
+    {
+      "code": "CN",
+      "display": "Clear Notification",
+      "status": "active"
+    },
+    {
+      "code": "DI",
+      "display": "Disable Sending Events",
+      "status": "active"
+    },
+    {
+      "code": "EN",
+      "display": "Enable Sending Events",
+      "status": "active"
+    },
+    {
+      "code": "ES",
+      "display": "Emergency -stop",
+      "status": "active"
+    },
+    {
+      "code": "EX",
+      "display": "Execute (command specified in field Parameters (ST) 01394)",
+      "status": "active"
+    },
+    {
+      "code": "IN",
+      "display": "Initialize/Initiate",
+      "status": "active"
+    },
+    {
+      "code": "LC",
+      "display": "Local Control Request",
+      "status": "active"
+    },
+    {
+      "code": "LK",
+      "display": "Lock",
+      "status": "active"
+    },
+    {
+      "code": "LO",
+      "display": "Load",
+      "status": "active"
+    },
+    {
+      "code": "PA",
+      "display": "Pause",
+      "status": "active"
+    },
+    {
+      "code": "RC",
+      "display": "Remote Control Request",
+      "status": "active"
+    },
+    {
+      "code": "RE",
+      "display": "Resume",
+      "status": "active"
+    },
+    {
+      "code": "SA",
+      "display": "Sampling",
+      "status": "active"
+    },
+    {
+      "code": "SU",
+      "display": "Setup",
+      "status": "active"
+    },
+    {
+      "code": "TT",
+      "display": "Transport To",
+      "status": "active"
+    },
+    {
+      "code": "UC",
+      "display": "Unlock",
+      "status": "active"
+    },
+    {
+      "code": "UN",
+      "display": "Unload",
+      "status": "active"
+    }
+  ]
+}

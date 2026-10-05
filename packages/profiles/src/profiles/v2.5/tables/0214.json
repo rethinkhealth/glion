@@ -1,0 +1,27 @@
+{
+  "id": "0214",
+  "description": "Special Program Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CH",
+      "description": "Child Health Assistance"
+    },
+    {
+      "name": "ES",
+      "description": "Elective Surgery Program"
+    },
+    {
+      "name": "FP",
+      "description": "Family Planning"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

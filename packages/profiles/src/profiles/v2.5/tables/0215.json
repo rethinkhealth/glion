@@ -1,0 +1,23 @@
+{
+  "id": "0215",
+  "description": "Publicity Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Family only"
+    },
+    {
+      "name": "N",
+      "description": "No Publicity"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

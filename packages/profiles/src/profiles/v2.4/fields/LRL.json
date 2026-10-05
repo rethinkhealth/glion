@@ -1,0 +1,67 @@
+{
+  "segmentId": "LRL",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "LRL-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "PL",
+      "maxLength": 200,
+      "name": "Primary Key Value - LRL",
+      "item": "943"
+    },
+    {
+      "sequence": 2,
+      "id": "LRL-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70206",
+      "name": "Segment Action Code",
+      "item": "763"
+    },
+    {
+      "sequence": 3,
+      "id": "LRL-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 80,
+      "name": "Segment Unique Key",
+      "item": "764"
+    },
+    {
+      "sequence": 4,
+      "id": "LRL-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70325",
+      "name": "Location Relationship ID",
+      "item": "1277"
+    },
+    {
+      "sequence": 5,
+      "id": "LRL-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XON",
+      "maxLength": 250,
+      "name": "Organizational Location Relationship Value",
+      "item": "1301"
+    },
+    {
+      "sequence": 6,
+      "id": "LRL-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PL",
+      "maxLength": 80,
+      "name": "Patient Location Relationship Value",
+      "item": "1292"
+    }
+  ]
+}

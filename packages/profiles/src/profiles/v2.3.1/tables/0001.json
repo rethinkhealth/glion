@@ -1,0 +1,23 @@
+{
+  "id": "0001",
+  "description": "Sex",
+  "type": "user",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Female"
+    },
+    {
+      "name": "M",
+      "description": "Male"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

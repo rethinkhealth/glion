@@ -1,0 +1,39 @@
+{
+  "id": "v2-0208",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0208",
+  "oid": "2.16.840.1.113883.18.113",
+  "name": "QueryResponseStatus",
+  "title": "queryResponseStatus",
+  "codes": [
+    {
+      "code": "AE",
+      "display": "Application error",
+      "status": "active"
+    },
+    {
+      "code": "AR",
+      "display": "Application reject",
+      "status": "active"
+    },
+    {
+      "code": "NF",
+      "display": "No data found, no errors",
+      "status": "active"
+    },
+    {
+      "code": "OK",
+      "display": "Data found, no errors (this is the default)",
+      "status": "active"
+    },
+    {
+      "code": "PD",
+      "display": "Protected data",
+      "status": "N"
+    },
+    {
+      "code": "TM",
+      "display": "Too much data found",
+      "status": "N"
+    }
+  ]
+}

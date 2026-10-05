@@ -1,0 +1,23 @@
+{
+  "id": "0478",
+  "description": "Formulary Status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "G",
+      "description": "Pharmaceutical substance is in the formulary, but guidelines apply"
+    },
+    {
+      "name": "N",
+      "description": "Pharmaceutical substance is NOT in the formulary"
+    },
+    {
+      "name": "R",
+      "description": "Pharmaceutical substance is in the formulary, but restrictions apply"
+    },
+    {
+      "name": "Y",
+      "description": "Pharmaceutical substance is in the formulary"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "0208",
+  "description": "Query Response Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "NF",
+      "description": "No data found, no errors"
+    },
+    {
+      "name": "OK",
+      "description": "Data found, no errors (this is the default)"
+    }
+  ]
+}

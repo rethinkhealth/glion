@@ -1,0 +1,26 @@
+{
+  "id": "AUI",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "authorization information",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "authorization number",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "date",
+      "datatypeId": "TS",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "source",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

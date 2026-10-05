@@ -1,0 +1,70 @@
+{
+  "segmentId": "SDD",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "SDD-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Lot Number",
+      "item": "2098"
+    },
+    {
+      "sequence": 2,
+      "id": "SDD-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Device Number",
+      "item": "2099"
+    },
+    {
+      "sequence": 3,
+      "id": "SDD-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Device Name",
+      "item": "2281"
+    },
+    {
+      "sequence": 4,
+      "id": "SDD-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70667",
+      "name": "Device Data State",
+      "item": "2100"
+    },
+    {
+      "sequence": 5,
+      "id": "SDD-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70669",
+      "name": "Load Status",
+      "item": "2101"
+    },
+    {
+      "sequence": 6,
+      "id": "SDD-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Control Code",
+      "item": "2102"
+    },
+    {
+      "sequence": 7,
+      "id": "SDD-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Operator Name",
+      "item": "2103"
+    }
+  ]
+}

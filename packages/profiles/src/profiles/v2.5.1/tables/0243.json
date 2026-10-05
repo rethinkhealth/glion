@@ -1,0 +1,19 @@
+{
+  "id": "0243",
+  "description": "Identity May Be Divulged",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "NA",
+      "description": "Not applicable"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

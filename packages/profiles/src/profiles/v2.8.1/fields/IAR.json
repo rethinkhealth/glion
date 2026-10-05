@@ -1,0 +1,43 @@
+{
+  "segmentId": "IAR",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "IAR-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Allergy Reaction Code",
+      "item": "3296"
+    },
+    {
+      "sequence": 2,
+      "id": "IAR-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70128",
+      "name": "Allergy Severity Code",
+      "item": "3297"
+    },
+    {
+      "sequence": 3,
+      "id": "IAR-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70436",
+      "name": "Sensitivity to Causative Agent Code",
+      "item": "3298"
+    },
+    {
+      "sequence": 4,
+      "id": "IAR-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Management",
+      "item": "3299"
+    }
+  ]
+}

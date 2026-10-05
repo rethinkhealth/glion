@@ -1,0 +1,23 @@
+{
+  "id": "0402",
+  "description": "School type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Dental"
+    },
+    {
+      "name": "G",
+      "description": "Graduate"
+    },
+    {
+      "name": "M",
+      "description": "Medical"
+    },
+    {
+      "name": "U",
+      "description": "Undergraduate"
+    }
+  ]
+}

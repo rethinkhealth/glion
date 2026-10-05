@@ -1,0 +1,19 @@
+{
+  "id": "0755",
+  "description": "Status Weight At Birth",
+  "type": "user",
+  "codes": [
+    {
+      "name": "0",
+      "description": "No weight reported at admission used for grouping"
+    },
+    {
+      "name": "1",
+      "description": "Weight reported at admission used for grouping"
+    },
+    {
+      "name": "2",
+      "description": "Default weight (>2499g) used for grouping"
+    }
+  ]
+}

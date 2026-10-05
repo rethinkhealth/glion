@@ -1,0 +1,11 @@
+{
+  "id": "0061",
+  "description": "CHECK DIGIT SCHEME",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "M11",
+      "description": "Mod 11 check digit scheme"
+    }
+  ]
+}

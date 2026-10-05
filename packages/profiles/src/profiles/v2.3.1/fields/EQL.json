@@ -1,0 +1,46 @@
+{
+  "segmentId": "EQL",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "EQL-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 32,
+      "name": "Query Tag",
+      "item": "696"
+    },
+    {
+      "sequence": 2,
+      "id": "EQL-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70106",
+      "name": "Query/ Response Format Code",
+      "item": "697"
+    },
+    {
+      "sequence": 3,
+      "id": "EQL-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "name": "EQL  Query Name",
+      "item": "709"
+    },
+    {
+      "sequence": 4,
+      "id": "EQL-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 4096,
+      "name": "EQL  Query Statement",
+      "item": "710"
+    }
+  ]
+}

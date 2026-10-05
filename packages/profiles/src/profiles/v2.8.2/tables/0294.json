@@ -1,0 +1,43 @@
+{
+  "id": "0294",
+  "description": "Time Selection Criteria Parameter Class Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "Fri",
+      "description": "An indicator that Friday is or is not preferred for the day on which the appointment will occur."
+    },
+    {
+      "name": "Mon",
+      "description": "An indicator that Monday is or is not preferred for the day on which the appointment will occur."
+    },
+    {
+      "name": "Prefend",
+      "description": "An indicator that there is a preferred end time for the appointment request, service or resource."
+    },
+    {
+      "name": "Prefstart",
+      "description": "An indicator that there is a preferred start time for the appointment request, service or resource."
+    },
+    {
+      "name": "Sat",
+      "description": "An indicator that Saturday is or is not preferred for the day on which the appointment will occur."
+    },
+    {
+      "name": "Sun",
+      "description": "An indicator that Sunday is or is not preferred for the day on which the appointment will occur."
+    },
+    {
+      "name": "Thu",
+      "description": "An indicator that Thursday is or is not preferred for the day on which the appointment will occur."
+    },
+    {
+      "name": "Tue",
+      "description": "An indicator that Tuesday is or is not preferred for the day on which the appointment will occur."
+    },
+    {
+      "name": "Wed",
+      "description": "An indicator that Wednesday is or is not preferred for the day on which the appointment will occur."
+    }
+  ]
+}

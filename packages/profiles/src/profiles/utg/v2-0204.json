@@ -1,0 +1,29 @@
+{
+  "id": "v2-0204",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0204",
+  "oid": "2.16.840.1.113883.18.109",
+  "name": "OrganizationalNameType",
+  "title": "organizationalNameType",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Alias name",
+      "status": "active"
+    },
+    {
+      "code": "D",
+      "display": "Display name",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Legal name",
+      "status": "active"
+    },
+    {
+      "code": "SL",
+      "display": "Stock exchange listing name",
+      "status": "active"
+    }
+  ]
+}

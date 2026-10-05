@@ -1,0 +1,36 @@
+{
+  "segmentId": "NTE",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "NTE-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "SET ID - NOTES AND COMMENTS",
+      "item": "573"
+    },
+    {
+      "sequence": 2,
+      "id": "NTE-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 8,
+      "table": "HL70105",
+      "name": "SOURCE OF COMMENT",
+      "item": "574"
+    },
+    {
+      "sequence": 3,
+      "id": "NTE-3",
+      "required": true,
+      "repeatable": true,
+      "datatype": "TX",
+      "maxLength": 120,
+      "name": "COMMENT",
+      "item": "575"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "v2-0757",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0757",
+  "oid": "2.16.840.1.113883.18.398",
+  "name": "DrgStatusRespirationMinutes",
+  "title": "drgStatusRespirationMinutes",
+  "codes": [
+    {
+      "code": "0",
+      "display": "Respiration minutes not used for grouping",
+      "status": "active"
+    },
+    {
+      "code": "1",
+      "display": "Listed respiration minutes used for grouping",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "OPS code value used for grouping",
+      "status": "active"
+    }
+  ]
+}

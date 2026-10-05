@@ -1,0 +1,23 @@
+{
+  "id": "0389",
+  "description": "Analyte Repeat Status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Repeated with dilution"
+    },
+    {
+      "name": "F",
+      "description": "Reflex test"
+    },
+    {
+      "name": "O",
+      "description": "Original, first run"
+    },
+    {
+      "name": "R",
+      "description": "Repeated without dilution"
+    }
+  ]
+}

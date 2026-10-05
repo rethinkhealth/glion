@@ -1,0 +1,34 @@
+{
+  "id": "v2-0914",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0914",
+  "oid": "2.16.840.1.113883.18.421",
+  "name": "RootCause",
+  "title": "rootCause",
+  "codes": [
+    {
+      "code": "AP",
+      "display": "Analysis Process",
+      "status": "active"
+    },
+    {
+      "code": "IM",
+      "display": "Information Management",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Laboratory",
+      "status": "active"
+    },
+    {
+      "code": "NA",
+      "display": "Not Applicable",
+      "status": "active"
+    },
+    {
+      "code": "PD",
+      "display": "Placer Data",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "v2-0615",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0615",
+  "oid": "2.16.840.1.113883.18.373",
+  "name": "UserAuthenticationCredentialType",
+  "title": "userAuthenticationCredentialType",
+  "codes": [
+    {
+      "code": "KERB",
+      "display": "Kerberos Service Ticket",
+      "status": "active"
+    },
+    {
+      "code": "SAML",
+      "display": "Authenticated User Identity Assertion",
+      "status": "active"
+    }
+  ]
+}

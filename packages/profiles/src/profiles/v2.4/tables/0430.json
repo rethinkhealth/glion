@@ -1,0 +1,35 @@
+{
+  "id": "0430",
+  "description": "Mode of arrival code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Ambulance"
+    },
+    {
+      "name": "C",
+      "description": "Car"
+    },
+    {
+      "name": "F",
+      "description": "On foot"
+    },
+    {
+      "name": "H",
+      "description": "Helicopter"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "P",
+      "description": "Public Transport"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

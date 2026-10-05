@@ -1,0 +1,31 @@
+{
+  "id": "0251",
+  "description": "Action taken in response to the event",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "DI",
+      "description": "Product dose or frequency of use increased"
+    },
+    {
+      "name": "DR",
+      "description": "Product dose or frequency of use reduced"
+    },
+    {
+      "name": "N",
+      "description": "None"
+    },
+    {
+      "name": "OT",
+      "description": "Other"
+    },
+    {
+      "name": "WP",
+      "description": "Product withdrawn permanently"
+    },
+    {
+      "name": "WT",
+      "description": "Product withdrawn temporarily"
+    }
+  ]
+}

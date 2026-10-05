@@ -1,0 +1,89 @@
+{
+  "id": "v2-0495",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0495",
+  "oid": "2.16.840.1.113883.18.319",
+  "name": "BodySiteModifier",
+  "title": "bodySiteModifier",
+  "codes": [
+    {
+      "code": "ANT",
+      "display": "Anterior",
+      "status": "active"
+    },
+    {
+      "code": "BIL",
+      "display": "Bilateral",
+      "status": "active"
+    },
+    {
+      "code": "DIS",
+      "display": "Distal",
+      "status": "active"
+    },
+    {
+      "code": "EXT",
+      "display": "External",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Left",
+      "status": "active"
+    },
+    {
+      "code": "LAT",
+      "display": "Lateral",
+      "status": "active"
+    },
+    {
+      "code": "LLQ",
+      "display": "Quadrant, Left Lower",
+      "status": "active"
+    },
+    {
+      "code": "LOW",
+      "display": "Lower",
+      "status": "active"
+    },
+    {
+      "code": "LUQ",
+      "display": "Quadrant, Left Upper",
+      "status": "active"
+    },
+    {
+      "code": "MED",
+      "display": "Medial",
+      "status": "active"
+    },
+    {
+      "code": "POS",
+      "display": "Posterior",
+      "status": "active"
+    },
+    {
+      "code": "PRO",
+      "display": "Proximal",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Right",
+      "status": "active"
+    },
+    {
+      "code": "RLQ",
+      "display": "Quadrant, Right Lower",
+      "status": "active"
+    },
+    {
+      "code": "RUQ",
+      "display": "Quadrant, Right Upper",
+      "status": "active"
+    },
+    {
+      "code": "UPP",
+      "display": "Upper",
+      "status": "active"
+    }
+  ]
+}

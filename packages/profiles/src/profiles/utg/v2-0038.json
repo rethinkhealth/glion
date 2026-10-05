@@ -1,0 +1,54 @@
+{
+  "id": "v2-0038",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0038",
+  "oid": "2.16.840.1.113883.18.18",
+  "name": "OrderStatus",
+  "title": "orderStatus",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Some, but not all, results available",
+      "status": "active"
+    },
+    {
+      "code": "CA",
+      "display": "Order was canceled",
+      "status": "active"
+    },
+    {
+      "code": "CM",
+      "display": "Order is completed",
+      "status": "active"
+    },
+    {
+      "code": "DC",
+      "display": "Order was discontinued",
+      "status": "active"
+    },
+    {
+      "code": "ER",
+      "display": "Error, order not found",
+      "status": "active"
+    },
+    {
+      "code": "HD",
+      "display": "Order is on hold",
+      "status": "active"
+    },
+    {
+      "code": "IP",
+      "display": "In process, unspecified",
+      "status": "active"
+    },
+    {
+      "code": "RP",
+      "display": "Order has been replaced",
+      "status": "active"
+    },
+    {
+      "code": "SC",
+      "display": "In process, scheduled",
+      "status": "active"
+    }
+  ]
+}

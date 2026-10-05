@@ -1,0 +1,20 @@
+{
+  "id": "EIP",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "parent order",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "parent´s placer order number",
+      "datatypeId": "EI",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "parent´s filler order number",
+      "datatypeId": "EI",
+      "required": false
+    }
+  ]
+}

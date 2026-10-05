@@ -1,0 +1,148 @@
+{
+  "segmentId": "ORC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "ORC-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 2,
+      "table": "HL70119",
+      "name": "ORDER CONTROL",
+      "item": "714"
+    },
+    {
+      "sequence": 2,
+      "id": "ORC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 75,
+      "name": "PLACER ORDER #",
+      "item": "715"
+    },
+    {
+      "sequence": 3,
+      "id": "ORC-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 75,
+      "name": "FILLER ORDER #",
+      "item": "716"
+    },
+    {
+      "sequence": 4,
+      "id": "ORC-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 75,
+      "name": "PLACER GROUP #",
+      "item": "717"
+    },
+    {
+      "sequence": 5,
+      "id": "ORC-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 2,
+      "table": "HL70038",
+      "name": "ORDER STATUS",
+      "item": "718"
+    },
+    {
+      "sequence": 6,
+      "id": "ORC-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 1,
+      "table": "HL70121",
+      "name": "RESPONSE FLAG",
+      "item": "719"
+    },
+    {
+      "sequence": 7,
+      "id": "ORC-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 200,
+      "name": "TIMING/QUANTITY",
+      "item": "720"
+    },
+    {
+      "sequence": 8,
+      "id": "ORC-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 200,
+      "name": "PARENT",
+      "item": "721"
+    },
+    {
+      "sequence": 9,
+      "id": "ORC-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 19,
+      "name": "DATE/TIME OF TRANSACTION",
+      "item": "722"
+    },
+    {
+      "sequence": 10,
+      "id": "ORC-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 80,
+      "name": "ENTERED BY",
+      "item": "723"
+    },
+    {
+      "sequence": 11,
+      "id": "ORC-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 80,
+      "name": "VERIFIED BY",
+      "item": "724"
+    },
+    {
+      "sequence": 12,
+      "id": "ORC-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CN",
+      "maxLength": 80,
+      "name": "ORDERING PROVIDER",
+      "item": "725"
+    },
+    {
+      "sequence": 13,
+      "id": "ORC-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CM",
+      "maxLength": 80,
+      "name": "ENTERER&apos;S LOCATION",
+      "item": "726"
+    },
+    {
+      "sequence": 14,
+      "id": "ORC-14",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TN",
+      "maxLength": 40,
+      "name": "CALL BACK PHONE NUMBER",
+      "item": "727"
+    }
+  ]
+}

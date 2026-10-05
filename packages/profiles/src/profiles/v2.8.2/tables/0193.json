@@ -1,0 +1,23 @@
+{
+  "id": "0193",
+  "description": "Amount Class",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AT",
+      "description": "Amount"
+    },
+    {
+      "name": "LM",
+      "description": "Limit"
+    },
+    {
+      "name": "PC",
+      "description": "Percentage"
+    },
+    {
+      "name": "UL",
+      "description": "Unlimited"
+    }
+  ]
+}

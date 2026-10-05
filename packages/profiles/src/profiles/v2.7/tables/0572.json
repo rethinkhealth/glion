@@ -1,0 +1,15 @@
+{
+  "id": "0572",
+  "description": "Tax status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "RVAT",
+      "description": "Registered in VAT register"
+    },
+    {
+      "name": "UVAT",
+      "description": "Unregistered in VAT register"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "v2-0389",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0389",
+  "oid": "2.16.840.1.113883.18.240",
+  "name": "AnalyteRepeatStatus",
+  "title": "analyteRepeatStatus",
+  "codes": [
+    {
+      "code": "D",
+      "display": "Repeated with dilution",
+      "status": "active"
+    },
+    {
+      "code": "F",
+      "display": "Reflex test",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Original, first run",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Repeated without dilution",
+      "status": "active"
+    }
+  ]
+}

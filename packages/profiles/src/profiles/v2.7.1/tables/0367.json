@@ -1,0 +1,27 @@
+{
+  "id": "0367",
+  "description": "Alert Level",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "…",
+      "description": "(null) No level change"
+    },
+    {
+      "name": "C",
+      "description": "Critical"
+    },
+    {
+      "name": "N",
+      "description": "Normal"
+    },
+    {
+      "name": "S",
+      "description": "Serious"
+    },
+    {
+      "name": "W",
+      "description": "Warning"
+    }
+  ]
+}

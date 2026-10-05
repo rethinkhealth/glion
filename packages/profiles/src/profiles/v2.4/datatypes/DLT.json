@@ -1,0 +1,32 @@
+{
+  "id": "DLT",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "delta check",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Range",
+      "datatypeId": "NR",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "numeric threshold",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "change computation",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "length of time-days",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

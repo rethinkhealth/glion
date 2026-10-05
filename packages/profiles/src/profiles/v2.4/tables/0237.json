@@ -1,0 +1,39 @@
+{
+  "id": "0237",
+  "description": "Event qualification",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Abuse"
+    },
+    {
+      "name": "B",
+      "description": "Unexpected beneficial effect"
+    },
+    {
+      "name": "D",
+      "description": "Dependency"
+    },
+    {
+      "name": "I",
+      "description": "Interaction"
+    },
+    {
+      "name": "L",
+      "description": "Lack of expect therapeutic effect"
+    },
+    {
+      "name": "M",
+      "description": "Misuse"
+    },
+    {
+      "name": "O",
+      "description": "Overdose"
+    },
+    {
+      "name": "W",
+      "description": "Drug withdrawal"
+    }
+  ]
+}

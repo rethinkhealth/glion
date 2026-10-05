@@ -1,0 +1,23 @@
+{
+  "id": "0286",
+  "description": "Provider role",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CP",
+      "description": "Consulting Provider"
+    },
+    {
+      "name": "PP",
+      "description": "Primary Care Provider"
+    },
+    {
+      "name": "RP",
+      "description": "Referring Provider"
+    },
+    {
+      "name": "RT",
+      "description": "Referred to Provider"
+    }
+  ]
+}

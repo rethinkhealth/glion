@@ -1,0 +1,31 @@
+{
+  "id": "0220",
+  "description": "Living Arrangement",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Alone"
+    },
+    {
+      "name": "F",
+      "description": "Family"
+    },
+    {
+      "name": "I",
+      "description": "Institution"
+    },
+    {
+      "name": "R",
+      "description": "Relative"
+    },
+    {
+      "name": "S",
+      "description": "Spouse Only"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

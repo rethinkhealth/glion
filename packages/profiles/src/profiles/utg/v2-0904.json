@@ -1,0 +1,24 @@
+{
+  "id": "v2-0904",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0904",
+  "oid": "2.16.840.1.113883.18.415",
+  "name": "SecurityCheckScheme",
+  "title": "securityCheckScheme",
+  "codes": [
+    {
+      "code": "BCV",
+      "display": "Bank Card Validation Number",
+      "status": "active"
+    },
+    {
+      "code": "CCS",
+      "display": "Credit Card Security code",
+      "status": "active"
+    },
+    {
+      "code": "VID",
+      "display": "Version ID",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "v2-0497",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0497",
+  "oid": "2.16.840.1.113883.18.321",
+  "name": "ConsentMode",
+  "title": "consentMode",
+  "codes": [
+    {
+      "code": "T",
+      "display": "Telephone",
+      "status": "active"
+    },
+    {
+      "code": "V",
+      "display": "Verbal",
+      "status": "active"
+    },
+    {
+      "code": "W",
+      "display": "Written",
+      "status": "active"
+    }
+  ]
+}

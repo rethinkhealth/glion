@@ -1,0 +1,34 @@
+{
+  "id": "v2-0206",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0206",
+  "oid": "2.16.840.1.113883.18.111",
+  "name": "SegmentAction",
+  "title": "segmentAction",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Add/Insert",
+      "status": "active"
+    },
+    {
+      "code": "D",
+      "display": "Delete",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "Used in Snapshot mode",
+      "status": "N"
+    },
+    {
+      "code": "U",
+      "display": "Update",
+      "status": "active"
+    },
+    {
+      "code": "X",
+      "display": "No Change",
+      "status": "active"
+    }
+  ]
+}

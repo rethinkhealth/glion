@@ -1,0 +1,304 @@
+{
+  "segmentId": "ORC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "ORC-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70119",
+      "name": "Order Control",
+      "item": "215"
+    },
+    {
+      "sequence": 2,
+      "id": "ORC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Placer Order Number",
+      "item": "216"
+    },
+    {
+      "sequence": 3,
+      "id": "ORC-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Filler Order Number",
+      "item": "217"
+    },
+    {
+      "sequence": 4,
+      "id": "ORC-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Placer Group Number",
+      "item": "218"
+    },
+    {
+      "sequence": 5,
+      "id": "ORC-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70038",
+      "name": "Order Status",
+      "item": "219"
+    },
+    {
+      "sequence": 6,
+      "id": "ORC-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70121",
+      "name": "Response Flag",
+      "item": "220"
+    },
+    {
+      "sequence": 7,
+      "id": "ORC-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EIP",
+      "name": "Parent",
+      "item": "222"
+    },
+    {
+      "sequence": 8,
+      "id": "ORC-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Date/Time of Transaction",
+      "item": "223"
+    },
+    {
+      "sequence": 9,
+      "id": "ORC-10",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Entered By",
+      "item": "224"
+    },
+    {
+      "sequence": 10,
+      "id": "ORC-11",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Verified By",
+      "item": "225"
+    },
+    {
+      "sequence": 11,
+      "id": "ORC-12",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Ordering Provider",
+      "item": "226"
+    },
+    {
+      "sequence": 12,
+      "id": "ORC-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PL",
+      "name": "Enterer's Location",
+      "item": "227"
+    },
+    {
+      "sequence": 13,
+      "id": "ORC-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XTN",
+      "name": "Call Back Phone Number",
+      "item": "228"
+    },
+    {
+      "sequence": 14,
+      "id": "ORC-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Order Effective Date/Time",
+      "item": "229"
+    },
+    {
+      "sequence": 15,
+      "id": "ORC-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Order Control Code Reason",
+      "item": "230"
+    },
+    {
+      "sequence": 16,
+      "id": "ORC-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Entering Organization",
+      "item": "231"
+    },
+    {
+      "sequence": 17,
+      "id": "ORC-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Entering Device",
+      "item": "232"
+    },
+    {
+      "sequence": 18,
+      "id": "ORC-19",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Action By",
+      "item": "233"
+    },
+    {
+      "sequence": 19,
+      "id": "ORC-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70339",
+      "name": "Advanced Beneficiary Notice Code",
+      "item": "1310"
+    },
+    {
+      "sequence": 20,
+      "id": "ORC-21",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XON",
+      "name": "Ordering Facility Name",
+      "item": "1311"
+    },
+    {
+      "sequence": 21,
+      "id": "ORC-22",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XAD",
+      "name": "Ordering Facility Address",
+      "item": "1312"
+    },
+    {
+      "sequence": 22,
+      "id": "ORC-23",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XTN",
+      "name": "Ordering Facility Phone Number",
+      "item": "1313"
+    },
+    {
+      "sequence": 23,
+      "id": "ORC-24",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XAD",
+      "name": "Ordering Provider Address",
+      "item": "1314"
+    },
+    {
+      "sequence": 24,
+      "id": "ORC-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Order Status Modifier",
+      "item": "1473"
+    },
+    {
+      "sequence": 25,
+      "id": "ORC-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70552",
+      "name": "Advanced Beneficiary Notice Override Reason",
+      "item": "1641"
+    },
+    {
+      "sequence": 26,
+      "id": "ORC-27",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Filler's Expected Availability Date/Time",
+      "item": "1642"
+    },
+    {
+      "sequence": 27,
+      "id": "ORC-28",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70177",
+      "name": "Confidentiality Code",
+      "item": "615"
+    },
+    {
+      "sequence": 28,
+      "id": "ORC-29",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70482",
+      "name": "Order Type",
+      "item": "1643"
+    },
+    {
+      "sequence": 29,
+      "id": "ORC-30",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70483",
+      "name": "Enterer Authorization Mode",
+      "item": "1644"
+    },
+    {
+      "sequence": 30,
+      "id": "ORC-31",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Parent Universal Service Identifier",
+      "item": "2287"
+    },
+    {
+      "sequence": 31,
+      "id": "ORC-32",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DT",
+      "name": "Advanced Beneficiary Notice Date",
+      "item": "2301"
+    },
+    {
+      "sequence": 32,
+      "id": "ORC-33",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CX",
+      "name": "Alternate Placer Order Number",
+      "item": "3300"
+    }
+  ]
+}
