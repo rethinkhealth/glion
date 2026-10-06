@@ -1,6 +1,6 @@
-import { memoize } from "../memoize";
 import type { ProfileStore } from "../profiles";
-import { tableImports } from "../profiles/table-manifest";
+import { memoize } from "../utils";
+import { lazyImport } from "./utils";
 
 /** Raw shape exported by generated table modules. */
 export type TableModule = Readonly<{
@@ -46,11 +46,9 @@ const index = memoize((raw: TableModule): TableDefinition => {
 /** The loader of table profiles. */
 export const tables: ProfileStore<TableDefinition> = {
   load: async (version, tableId) => {
-    const key = `v${version}/${tableId}`;
-    const importTable = tableImports[key];
-    if (!importTable) {
-      throw new Error(`Unknown tables profile: ${key}`);
-    }
-    return index(await importTable());
+    const raw = await lazyImport<TableModule>(
+      `../profiles/v${version}/tables/${tableId}.json`
+    );
+    return raw === undefined ? undefined : index(raw);
   },
 };

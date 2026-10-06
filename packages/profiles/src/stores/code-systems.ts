@@ -1,6 +1,5 @@
-import { memoize } from "../memoize";
-// @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-import { utgCodeSystemImports } from "../profiles/utg/manifest";
+import { memoize } from "../utils";
+import { lazyImport } from "./utils";
 
 /** Raw shape exported by generated UTG code system modules. */
 export type UtgCodeSystemModule = Readonly<{
@@ -36,11 +35,12 @@ export type CodeSystemDefinition = Readonly<{
 /** The loader of UTG code systems, which have no HL7v2 version. */
 export type CodeSystemStore = Readonly<{
   /**
-   * Loads the code system `id`, such as `"v2-0001"`.
+   * Loads the code system `id`, such as `"v2-0001"`, or `undefined` when no
+   * code system `id` is bundled.
    *
-   * @throws {Error} When no code system `id` is bundled.
+   * @throws {Error} When a bundled code system fails to load.
    */
-  load(id: string): Promise<CodeSystemDefinition>;
+  load(id: string): Promise<CodeSystemDefinition | undefined>;
 }>;
 
 const index = memoize((raw: UtgCodeSystemModule): CodeSystemDefinition => {
@@ -68,10 +68,9 @@ const index = memoize((raw: UtgCodeSystemModule): CodeSystemDefinition => {
 /** The loader of UTG code systems. */
 export const codeSystems: CodeSystemStore = {
   load: async (id) => {
-    const importCodeSystem = utgCodeSystemImports[`vutg/${id}`];
-    if (!importCodeSystem) {
-      throw new Error(`Unknown codeSystems profile: ${id}`);
-    }
-    return index(await importCodeSystem());
+    const raw = await lazyImport<UtgCodeSystemModule>(
+      `../profiles/utg/${id}.json`
+    );
+    return raw === undefined ? undefined : index(raw);
   },
 };

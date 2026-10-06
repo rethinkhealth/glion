@@ -1,6 +1,6 @@
 import type { Root } from "@glion/ast";
 import type { Definition } from "@glion/profiles";
-import { profiles, resolveMessageStructure } from "@glion/profiles";
+import { profiles } from "@glion/profiles";
 import { value } from "@glion/util-query";
 
 /**
@@ -17,16 +17,16 @@ export type ResolveResult =
 /**
  * Resolve an event profile definition from the tree.
  *
- * This is a **pure function** with no side effects — it does not report
- * to VFile or throw. It returns a {@link ResolveResult} that the caller
- * can handle as appropriate.
+ * Does not report to VFile. A missing version, structure, or profile is a
+ * failed {@link ResolveResult}; it rejects only when a bundled profile fails
+ * to load.
  *
  * **Resolution strategy** (wire value wins):
  *
  * 1. Reads `MSH-9.3` (message structure) directly from the AST.
  * 2. If MSH-9.3 is absent, falls back to resolving the canonical structure ID from
- *    `MSH-9.1` (message code) + `MSH-9.2` (trigger event) via
- *    `resolveMessageStructure()`.
+ *    `MSH-9.1` (message code) + `MSH-9.2` (trigger event) via the version's
+ *    event map (`profiles.eventMaps.load()`).
  * 3. Loads the profile via `profiles.events.load(version, structure)`.
  *
  * @param tree - The HL7v2 AST root node
@@ -51,11 +51,8 @@ export async function resolveDefinition(tree: Root): Promise<ResolveResult> {
     const triggerEvent = value(tree, "MSH-9.2")?.value || undefined;
 
     if (messageCode && triggerEvent) {
-      messageStructure = resolveMessageStructure(
-        version,
-        messageCode,
-        triggerEvent
-      );
+      const eventMap = await profiles.eventMaps.load(version);
+      messageStructure = eventMap?.[`${messageCode}_${triggerEvent}`];
     }
   }
 
@@ -68,13 +65,12 @@ export async function resolveDefinition(tree: Root): Promise<ResolveResult> {
   }
 
   // Load the profile definition (handles alias resolution internally)
-  try {
-    const definition = await profiles.events.load(version, messageStructure);
-    return { definition, ok: true };
-  } catch {
+  const definition = await profiles.events.load(version, messageStructure);
+  if (!definition) {
     return {
       ok: false,
       reason: `Cannot validate segment order: no profile found for ${messageStructure} (v${version})`,
     };
   }
+  return { definition, ok: true };
 }

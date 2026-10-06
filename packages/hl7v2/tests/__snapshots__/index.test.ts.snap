@@ -1474,7 +1474,7 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
           },
           "AIS" => {
             "id": "AIS",
-            "title": "Appointment Information - Service",
+            "title": "Appointment Information",
           },
           "AL1" => {
             "id": "AL1",
@@ -1602,7 +1602,7 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
           },
           "EQL" => {
             "id": "EQL",
-            "title": "EQL",
+            "title": "Embedded Query Language",
           },
           "EQP" => {
             "id": "EQP",
@@ -1614,7 +1614,7 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
           },
           "ERQ" => {
             "id": "ERQ",
-            "title": "ERQ",
+            "title": "Event Replay Query",
           },
           "ERR" => {
             "id": "ERR",
@@ -1814,7 +1814,7 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
           },
           "ORG" => {
             "id": "ORG",
-            "title": "General Clinical Order",
+            "title": "Practitioner Organization Unit",
           },
           "OVR" => {
             "id": "OVR",
@@ -1898,11 +1898,11 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
           },
           "QRD" => {
             "id": "QRD",
-            "title": "QRD",
+            "title": "Original-Style Query Definition",
           },
           "QRF" => {
             "id": "QRF",
-            "title": "QRF",
+            "title": "Original Style Query Filter",
           },
           "QRI" => {
             "id": "QRI",
@@ -1994,7 +1994,7 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
           },
           "SPR" => {
             "id": "SPR",
-            "title": "SPR",
+            "title": "Stored Procedure Request Definition",
           },
           "STF" => {
             "id": "STF",
@@ -2026,7 +2026,7 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
           },
           "UB2" => {
             "id": "UB2",
-            "title": "Uniform Billing Data",
+            "title": "UB92 Data",
           },
           "URD" => {
             "id": "URD",
@@ -2042,7 +2042,7 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
           },
           "VTQ" => {
             "id": "VTQ",
-            "title": "VTQ",
+            "title": "Virtual Table Query Request",
           },
         },
       },
@@ -2126,9 +2126,9 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
               "description": "The printable characters from the ISO 8859/9 Character set",
               "name": "8859/9",
             },
-            "ascii" => {
+            "ASCII" => {
               "description": "The printable 7-bit ASCII character set.",
-              "name": "ascii",
+              "name": "ASCII",
             },
             "BIG-5" => {
               "description": "Code for Taiwanese Character Set (BIG-5)",

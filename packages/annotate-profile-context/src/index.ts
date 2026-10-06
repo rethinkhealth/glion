@@ -195,11 +195,7 @@ function loadTables(
  * Returns an empty definition if the version is unknown.
  */
 async function loadSegments(version: string): Promise<SegmentDefinition> {
-  try {
-    return await loadSegmentDefinitions(version);
-  } catch {
-    return { byId: new Map() };
-  }
+  return (await loadSegmentDefinitions(version)) ?? { byId: new Map() };
 }
 
 // ---------------------------------------------------------------------------
@@ -207,21 +203,20 @@ async function loadSegments(version: string): Promise<SegmentDefinition> {
 // ---------------------------------------------------------------------------
 
 /**
- * Load profiles in parallel. Unknown profiles (errors starting with "Unknown ")
- * are silently skipped. All other errors are also silently skipped per R4.
+ * Load profiles in parallel. A profile the version does not bundle is
+ * skipped; a profile that fails to load rejects.
  */
 async function resolveAll<T>(
   ids: Set<string>,
-  loader: (id: string) => Promise<T>
+  loader: (id: string) => Promise<T | undefined>
 ): Promise<Map<string, T>> {
   const entries = [...ids];
-  const results = await Promise.allSettled(entries.map(loader));
+  const results = await Promise.all(entries.map(loader));
   const resolved = new Map<string, T>();
 
-  for (let i = 0; i < results.length; i++) {
-    const result = results[i]!;
-    if (result.status === "fulfilled") {
-      resolved.set(entries[i]!, result.value);
+  for (const [i, result] of results.entries()) {
+    if (result !== undefined) {
+      resolved.set(entries[i] as string, result);
     }
   }
 

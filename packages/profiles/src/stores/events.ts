@@ -1,15 +1,18 @@
 import type { Definition } from "../automata/types";
 import type { ProfileStore } from "../profiles";
-import { eventMaps } from "../profiles/event-map-manifest";
 import { profileImports } from "../profiles/profile-manifest";
+import { eventMaps } from "./event-maps";
 
 /** The loader of event profiles. Resolves a trigger event to its structure. */
 export const events: ProfileStore<Definition> = {
   load: async (version, id) => {
-    const key = `v${version}/${eventMaps[version]?.[id] ?? id}`;
-    const importEvent = profileImports[key];
+    const eventMap = await eventMaps.load(version);
+    if (!eventMap) {
+      return;
+    }
+    const importEvent = profileImports[`v${version}/${eventMap[id] ?? id}`];
     if (!importEvent) {
-      throw new Error(`Unknown events profile: ${key}`);
+      return;
     }
     return (await importEvent()) as unknown as Definition;
   },

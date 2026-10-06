@@ -1,4 +1,4 @@
-import { memoize } from "../src/memoize";
+import { memoize } from "../src/utils";
 
 describe("memoize", () => {
   it("calls fn once per argument object", () => {

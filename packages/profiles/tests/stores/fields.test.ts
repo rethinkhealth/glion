@@ -4,8 +4,8 @@ describe("fields", () => {
   it("loads the fields of a segment, keyed by sequence", async () => {
     const msh = await fields.load("2.5", "MSH");
 
-    expect(msh.segmentId).toBe("MSH");
-    expect(msh.bySequence.get(1)).toEqual({
+    expect(msh?.segmentId).toBe("MSH");
+    expect(msh?.bySequence.get(1)).toEqual({
       datatype: "ST",
       id: "MSH-1",
       item: "1",
@@ -20,14 +20,16 @@ describe("fields", () => {
   it("lists the sequences of the required fields", async () => {
     const msh = await fields.load("2.5", "MSH");
 
-    expect([...msh.requiredSequences]).toEqual([1, 2, 7, 9, 10, 11, 12]);
+    expect([...(msh?.requiredSequences ?? [])]).toEqual([
+      1, 2, 7, 9, 10, 11, 12,
+    ]);
   });
 
   it("loads the fields of the version asked for", async () => {
     const v21 = await fields.load("2.1", "PID");
     const v282 = await fields.load("2.8.2", "PID");
 
-    expect(v21.bySequence.size).toBeLessThan(v282.bySequence.size);
+    expect(v21?.bySequence.size).toBeLessThan(v282?.bySequence.size);
   });
 
   it("resolves the same value for repeated loads", async () => {
@@ -37,15 +39,11 @@ describe("fields", () => {
     expect(first).toBe(second);
   });
 
-  it("rejects a segment the version does not bundle", async () => {
-    await expect(fields.load("2.5", "ZZZ")).rejects.toThrow(
-      "Unknown fields profile: v2.5/ZZZ"
-    );
+  it("resolves undefined for a segment the version does not bundle", async () => {
+    await expect(fields.load("2.5", "ZZZ")).resolves.toBeUndefined();
   });
 
-  it("rejects a version that is not bundled", async () => {
-    await expect(fields.load("9.9", "PID")).rejects.toThrow(
-      "Unknown fields profile: v9.9/PID"
-    );
+  it("resolves undefined for a version that is not bundled", async () => {
+    await expect(fields.load("9.9", "PID")).resolves.toBeUndefined();
   });
 });

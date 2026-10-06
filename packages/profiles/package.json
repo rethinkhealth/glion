@@ -30,10 +30,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./event-maps": {
-      "types": "./dist/event-maps.d.ts",
-      "default": "./dist/event-maps.js"
     }
   },
   "publishConfig": {
@@ -62,6 +58,7 @@
     "@types/unist": "^3.0.3",
     "@vitest/coverage-v8": "4.1.11",
     "publint": "0.3.18",
+    "rolldown": "1.0.0-rc.17",
     "tsdown": "0.21.10",
     "typescript": "6.0.3",
     "unist": "^0.0.1",

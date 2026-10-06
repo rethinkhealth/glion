@@ -1,7 +1,7 @@
-import { memoize } from "../memoize";
-import { segmentImports } from "../profiles/segment-manifest";
+import { memoize } from "../utils";
+import { lazyImport } from "./utils";
 
-/** Raw shape exported by generated segment modules. */
+/** The raw segments of a version, as `segments.json` holds them. */
 export type SegmentModule = Readonly<{
   segments: readonly SegmentProfile[];
 }>;
@@ -34,16 +34,16 @@ const index = memoize((raw: SegmentModule): SegmentDefinition => {
 /**
  * Load and compile all segment definitions for an HL7v2 version.
  *
- * Later loads of the same version resolve the same value.
+ * Resolves `undefined` when `version` is not bundled. Later loads of the same
+ * version resolve the same value.
  *
- * @throws {Error} When `version` is not bundled.
+ * @throws {Error} When a bundled version's segments fail to load.
  */
 export const loadSegments = async (
   version: string
-): Promise<SegmentDefinition> => {
-  const importSegments = segmentImports[`v${version}`];
-  if (!importSegments) {
-    throw new Error(`Unknown segments profile: v${version}`);
-  }
-  return index(await importSegments());
+): Promise<SegmentDefinition | undefined> => {
+  const raw = await lazyImport<SegmentModule>(
+    `../profiles/v${version}/segments.json`
+  );
+  return raw === undefined ? undefined : index(raw);
 };

@@ -11,7 +11,7 @@ describe("codeSystems", () => {
       title: "administrativeSex",
       url: "http://terminology.hl7.org/CodeSystem/v2-0001",
     });
-    expect(sex.codes.get("F")).toEqual({
+    expect(sex?.codes.get("F")).toEqual({
       code: "F",
       display: "Female",
       status: "active",
@@ -21,7 +21,7 @@ describe("codeSystems", () => {
   it("keeps codes that are not active", async () => {
     const sex = await codeSystems.load("v2-0001");
 
-    expect(sex.codes.get("X")?.status).toBe("N");
+    expect(sex?.codes.get("X")?.status).toBe("N");
   });
 
   it("resolves the same value for repeated loads", async () => {
@@ -31,9 +31,7 @@ describe("codeSystems", () => {
     expect(first).toBe(second);
   });
 
-  it("rejects a code system that is not bundled", async () => {
-    await expect(codeSystems.load("v2-ZZZZ")).rejects.toThrow(
-      "Unknown codeSystems profile: v2-ZZZZ"
-    );
+  it("resolves undefined for a code system that is not bundled", async () => {
+    await expect(codeSystems.load("v2-ZZZZ")).resolves.toBeUndefined();
   });
 });

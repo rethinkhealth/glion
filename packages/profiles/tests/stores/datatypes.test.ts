@@ -10,7 +10,7 @@ describe("datatypes", () => {
       title: "Coded with Exceptions",
       version: "2.5",
     });
-    expect(cwe.componentsBySequence.get(1)).toEqual({
+    expect(cwe?.componentsBySequence.get(1)).toEqual({
       datatypeId: "ST",
       name: "Identifier",
       required: false,
@@ -21,22 +21,22 @@ describe("datatypes", () => {
   it("loads a primitive datatype with no components", async () => {
     const st = await datatypes.load("2.5", "ST");
 
-    expect(st.kind).toBe("primitive");
-    expect(st.componentsBySequence.size).toBe(0);
+    expect(st?.kind).toBe("primitive");
+    expect(st?.componentsBySequence.size).toBe(0);
   });
 
   it("lists the sequences of the required components", async () => {
     const rpt = await datatypes.load("2.6", "RPT");
 
-    expect([...rpt.requiredSequences]).toEqual([1]);
+    expect([...(rpt?.requiredSequences ?? [])]).toEqual([1]);
   });
 
   it("loads the datatype of the version asked for", async () => {
     const v21 = await datatypes.load("2.1", "CE");
     const v25 = await datatypes.load("2.5", "CE");
 
-    expect(v21.version).toBe("2.1");
-    expect(v25.version).toBe("2.5");
+    expect(v21?.version).toBe("2.1");
+    expect(v25?.version).toBe("2.5");
   });
 
   it("resolves the same value for repeated loads", async () => {
@@ -46,9 +46,11 @@ describe("datatypes", () => {
     expect(first).toBe(second);
   });
 
-  it("rejects a datatype the version does not bundle", async () => {
-    await expect(datatypes.load("2.5", "ZZZZZ")).rejects.toThrow(
-      "Unknown datatypes profile: v2.5/ZZZZZ"
-    );
+  it("resolves undefined for a datatype the version does not bundle", async () => {
+    await expect(datatypes.load("2.5", "ZZZZZ")).resolves.toBeUndefined();
+  });
+
+  it("resolves undefined for a version that is not bundled", async () => {
+    await expect(datatypes.load("9.9", "CWE")).resolves.toBeUndefined();
   });
 });
