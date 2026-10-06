@@ -19,7 +19,10 @@ function load(version: string): Promise<EventSchema | undefined> {
   return profiles.events.load(version, "ADT_A60");
 }
 
-function isAccepted(schema: EventSchema | undefined, symbols: string[]): boolean {
+function isAccepted(
+  schema: EventSchema | undefined,
+  symbols: string[]
+): boolean {
   return schema !== undefined && runner(schema, symbols).type === "matched";
 }
 
@@ -37,7 +40,9 @@ describe("ADT_A60 segment order — PV2 must follow PV1", () => {
 
     it(`v${version}: does not suggest PV2 from the PID state`, async () => {
       const def = await load(version);
-      if (def === undefined) throw new Error("schema not found");
+      if (def === undefined) {
+        throw new Error("schema not found");
+      }
       const result = runner(def, ["MSH", "EVN", "PID", "PV2"]);
       expect(result.type).toBe("mismatched");
       if (result.type === "mismatched") {
