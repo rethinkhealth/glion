@@ -9,6 +9,8 @@ import { runner } from "../../src/engine/runner";
 import type { EventSchema, EventSchemaElement } from "../../src/engine/types";
 
 const STRUCTURES = 3000;
+// Each message runs twice, with Z-segments allowed and not.
+const Z_STRUCTURES = STRUCTURES / 2;
 const MESSAGES_PER_STRUCTURE = 12;
 const NAMES = ["A", "B", "C"];
 // A Z-segment schemas may name, and one they never do.
@@ -115,12 +117,22 @@ describe("runner on random schemas", () => {
 
   it("agrees with the reference parser on Z-segments the schema does not name, allowed or not", () => {
     const random = seeded(20_261_006);
-    const names = [...NAMES, NAMED_Z_SEGMENT, "Hxx"];
+    // Hxx about one segment in twelve: a schema of mostly Hxx is ambiguous
+    // at every segment, which the backtracking reference pays for, and the
+    // bundled schemas hold at most one.
+    const names = [
+      ...NAMES,
+      ...NAMES,
+      ...NAMES,
+      NAMED_Z_SEGMENT,
+      NAMED_Z_SEGMENT,
+      "Hxx",
+    ];
     const disagreements: string[] = [];
     let compared = 0;
     let matchedWithZ = 0;
 
-    for (let s = 0; s < STRUCTURES; s += 1) {
+    for (let s = 0; s < Z_STRUCTURES; s += 1) {
       const schema: EventSchema = {
         elements: [
           { name: "MSH", optional: false, repeating: false, type: "segment" },
@@ -170,7 +182,7 @@ describe("runner on random schemas", () => {
     }
 
     expect(matchedWithZ).toBeGreaterThan(compared);
-    expect(compared).toBeGreaterThan(STRUCTURES / 3);
+    expect(compared).toBeGreaterThan(Z_STRUCTURES / 3);
     expect(disagreements).toEqual([]);
   });
 });
