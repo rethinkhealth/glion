@@ -1,7 +1,6 @@
 import { memoize } from "../memoize";
-import { segmentImports } from "../profiles/segment-manifest";
 
-/** Raw shape exported by generated segment modules. */
+/** The raw segments of a version, as `segments.json` holds them. */
 export type SegmentModule = Readonly<{
   segments: readonly SegmentProfile[];
 }>;
@@ -20,6 +19,11 @@ export type SegmentDefinition = Readonly<{
   /** O(1) lookup of segment profile by segment ID (e.g., "MSH", "PID"). */
   byId: ReadonlyMap<string, SegmentProfile>;
 }>;
+
+const segmentFiles = import.meta.glob<SegmentModule>(
+  "../profiles/v*/segments.json",
+  { import: "default" }
+);
 
 const index = memoize((raw: SegmentModule): SegmentDefinition => {
   const byId = new Map<string, SegmentProfile>();
@@ -41,7 +45,7 @@ const index = memoize((raw: SegmentModule): SegmentDefinition => {
 export const loadSegments = async (
   version: string
 ): Promise<SegmentDefinition> => {
-  const importSegments = segmentImports[`v${version}`];
+  const importSegments = segmentFiles[`../profiles/v${version}/segments.json`];
   if (!importSegments) {
     throw new Error(`Unknown segments profile: v${version}`);
   }

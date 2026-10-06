@@ -8,7 +8,7 @@ import { defineConfig } from "tsdown";
 // extension when numbering them.
 const MAX_DATA_CHUNK_SIZE = 100 * 1024;
 const VERSION_DATA =
-  /[\\/]src[\\/]profiles[\\/](v[^\\/]+)[\\/](?:(datatypes|fields|tables)[\\/][^\\/]+\.json|(segments)\.ts)$/;
+  /[\\/]src[\\/]profiles[\\/](v[^\\/]+)[\\/](?:(datatypes|fields|tables)[\\/][^\\/]+\.json|(segments)\.json)$/;
 const UTG_DATA = /[\\/]src[\\/]profiles[\\/]utg[\\/][^\\/]+\.json$/;
 // The event automata of a version stay one chunk, unsplit.
 const EVENT_DATA =
