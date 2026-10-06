@@ -1,0 +1,535 @@
+{
+  "id": "0391",
+  "description": "Segment Group",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ADMINISTRATION",
+      "description": ""
+    },
+    {
+      "name": "ALLERGY",
+      "description": ""
+    },
+    {
+      "name": "APP_STATS",
+      "description": ""
+    },
+    {
+      "name": "APP_STATUS",
+      "description": ""
+    },
+    {
+      "name": "ASSOCIATED_PERSON",
+      "description": ""
+    },
+    {
+      "name": "ASSOCIATED_RX_ADMIN",
+      "description": ""
+    },
+    {
+      "name": "ASSOCIATED_RX_ORDER",
+      "description": ""
+    },
+    {
+      "name": "AUTHORIZATION",
+      "description": ""
+    },
+    {
+      "name": "AUTHORIZATION_CONTACT",
+      "description": ""
+    },
+    {
+      "name": "CERTIFICATE",
+      "description": ""
+    },
+    {
+      "name": "CLOCK",
+      "description": ""
+    },
+    {
+      "name": "CLOCK_AND_STATISTICS",
+      "description": ""
+    },
+    {
+      "name": "CLOCK_AND_STATS_WITH_NOTES",
+      "description": ""
+    },
+    {
+      "name": "CLOCK_AND_STATS_WITH_NOTES_ALT",
+      "description": ""
+    },
+    {
+      "name": "COMMAND",
+      "description": ""
+    },
+    {
+      "name": "COMMAND_RESPONSE",
+      "description": ""
+    },
+    {
+      "name": "COMMON_ORDER",
+      "description": ""
+    },
+    {
+      "name": "COMPONENT",
+      "description": ""
+    },
+    {
+      "name": "COMPONENTS",
+      "description": ""
+    },
+    {
+      "name": "CONTAINER",
+      "description": ""
+    },
+    {
+      "name": "DEFINITION",
+      "description": ""
+    },
+    {
+      "name": "DIET",
+      "description": ""
+    },
+    {
+      "name": "DISPENSE",
+      "description": ""
+    },
+    {
+      "name": "ENCODED_ORDER",
+      "description": ""
+    },
+    {
+      "name": "ENCODING",
+      "description": ""
+    },
+    {
+      "name": "EXPERIENCE",
+      "description": ""
+    },
+    {
+      "name": "FINANCIAL",
+      "description": ""
+    },
+    {
+      "name": "FINANCIAL_COMMON_ORDER",
+      "description": ""
+    },
+    {
+      "name": "FINANCIAL_INSURANCE",
+      "description": ""
+    },
+    {
+      "name": "FINANCIAL_OBSERVATION",
+      "description": ""
+    },
+    {
+      "name": "FINANCIAL_ORDER",
+      "description": ""
+    },
+    {
+      "name": "FINANCIAL_PROCEDURE",
+      "description": ""
+    },
+    {
+      "name": "FINANCIAL_TIMING_QUANTITY",
+      "description": ""
+    },
+    {
+      "name": "GENERAL_RESOURCE",
+      "description": ""
+    },
+    {
+      "name": "GIVE",
+      "description": ""
+    },
+    {
+      "name": "GOAL",
+      "description": ""
+    },
+    {
+      "name": "GOAL_OBSERVATION",
+      "description": ""
+    },
+    {
+      "name": "GOAL_PATHWAY",
+      "description": ""
+    },
+    {
+      "name": "GOAL_ROLE",
+      "description": ""
+    },
+    {
+      "name": "GUARANTOR_INSURANCE",
+      "description": ""
+    },
+    {
+      "name": "INSURANCE",
+      "description": ""
+    },
+    {
+      "name": "LOCATION_RESOURCE",
+      "description": ""
+    },
+    {
+      "name": "MERGE_INFO",
+      "description": ""
+    },
+    {
+      "name": "MF",
+      "description": ""
+    },
+    {
+      "name": "MF_CDM",
+      "description": ""
+    },
+    {
+      "name": "MF_CLIN_STUDY",
+      "description": ""
+    },
+    {
+      "name": "MF_CLIN_STUDY_SCHED",
+      "description": ""
+    },
+    {
+      "name": "MF_INV_ITEM",
+      "description": ""
+    },
+    {
+      "name": "MF_LOC_DEPT",
+      "description": ""
+    },
+    {
+      "name": "MF_LOCATION",
+      "description": ""
+    },
+    {
+      "name": "MF_OBS_ATTRIBUTES",
+      "description": ""
+    },
+    {
+      "name": "MF_PHASE_SCHED_DETAIL",
+      "description": ""
+    },
+    {
+      "name": "MF_QUERY",
+      "description": ""
+    },
+    {
+      "name": "MF_SITE_DEFINED",
+      "description": ""
+    },
+    {
+      "name": "MF_STAFF",
+      "description": ""
+    },
+    {
+      "name": "MF_TEST",
+      "description": ""
+    },
+    {
+      "name": "MF_TEST_BATT_DETAIL",
+      "description": ""
+    },
+    {
+      "name": "MF_TEST_BATTERIES",
+      "description": ""
+    },
+    {
+      "name": "MF_TEST_CALC_DETAIL",
+      "description": ""
+    },
+    {
+      "name": "MF_TEST_CALCULATED",
+      "description": ""
+    },
+    {
+      "name": "MF_TEST_CAT_DETAIL",
+      "description": ""
+    },
+    {
+      "name": "MF_TEST_CATEGORICAL",
+      "description": ""
+    },
+    {
+      "name": "MF_TEST_NUMERIC",
+      "description": ""
+    },
+    {
+      "name": "NK1_TIMING_QTY",
+      "description": ""
+    },
+    {
+      "name": "NOTIFICATION",
+      "description": ""
+    },
+    {
+      "name": "OBSERVATION",
+      "description": ""
+    },
+    {
+      "name": "OBSERVATION_PRIOR",
+      "description": ""
+    },
+    {
+      "name": "OBSERVATION_REQUEST",
+      "description": ""
+    },
+    {
+      "name": "OMSERVATION",
+      "description": ""
+    },
+    {
+      "name": "ORDER",
+      "description": ""
+    },
+    {
+      "name": "ORDER_CHOICE",
+      "description": ""
+    },
+    {
+      "name": "ORDER_DETAIL",
+      "description": ""
+    },
+    {
+      "name": "ORDER_DETAIL_SUPPLEMENT",
+      "description": ""
+    },
+    {
+      "name": "ORDER_DIET",
+      "description": ""
+    },
+    {
+      "name": "ORDER_ENCODED",
+      "description": ""
+    },
+    {
+      "name": "ORDER_OBSERVATION",
+      "description": ""
+    },
+    {
+      "name": "ORDER_PRIOR",
+      "description": ""
+    },
+    {
+      "name": "ORDER_TRAY",
+      "description": ""
+    },
+    {
+      "name": "PATHWAY",
+      "description": ""
+    },
+    {
+      "name": "PATHWAY_ROLE",
+      "description": ""
+    },
+    {
+      "name": "PATIENT",
+      "description": ""
+    },
+    {
+      "name": "PATIENT_PRIOR",
+      "description": ""
+    },
+    {
+      "name": "PATIENT_RESULT",
+      "description": ""
+    },
+    {
+      "name": "PATIENT_VISIT",
+      "description": ""
+    },
+    {
+      "name": "PATIENT_VISIT_PRIOR",
+      "description": ""
+    },
+    {
+      "name": "PERSONNEL_RESOURCE",
+      "description": ""
+    },
+    {
+      "name": "PEX_CAUSE",
+      "description": ""
+    },
+    {
+      "name": "PEX_OBSERVATION",
+      "description": ""
+    },
+    {
+      "name": "PRIOR_RESULT",
+      "description": ""
+    },
+    {
+      "name": "PROBLEM",
+      "description": ""
+    },
+    {
+      "name": "PROBLEM_OBSERVATION",
+      "description": ""
+    },
+    {
+      "name": "PROBLEM_PATHWAY",
+      "description": ""
+    },
+    {
+      "name": "PROBLEM_ROLE",
+      "description": ""
+    },
+    {
+      "name": "PROCEDURE",
+      "description": ""
+    },
+    {
+      "name": "PRODUCT",
+      "description": ""
+    },
+    {
+      "name": "PRODUCT_STATUS",
+      "description": ""
+    },
+    {
+      "name": "PROVIDER",
+      "description": ""
+    },
+    {
+      "name": "PROVIDER_CONTACT",
+      "description": ""
+    },
+    {
+      "name": "QBP",
+      "description": ""
+    },
+    {
+      "name": "QRY_WITH_DETAIL",
+      "description": ""
+    },
+    {
+      "name": "QUERY_RESPONSE",
+      "description": ""
+    },
+    {
+      "name": "QUERY_RESULT_CLUSTER",
+      "description": ""
+    },
+    {
+      "name": "REQUEST",
+      "description": ""
+    },
+    {
+      "name": "RESOURCE",
+      "description": ""
+    },
+    {
+      "name": "RESOURCES",
+      "description": ""
+    },
+    {
+      "name": "RESPONSE",
+      "description": ""
+    },
+    {
+      "name": "RESULT",
+      "description": ""
+    },
+    {
+      "name": "RESULTS",
+      "description": ""
+    },
+    {
+      "name": "RESULTS_NOTES",
+      "description": ""
+    },
+    {
+      "name": "ROW_DEFINITION",
+      "description": ""
+    },
+    {
+      "name": "RX_ADMINISTRATION",
+      "description": ""
+    },
+    {
+      "name": "RX_ORDER",
+      "description": ""
+    },
+    {
+      "name": "SCHEDULE",
+      "description": ""
+    },
+    {
+      "name": "SERVICE",
+      "description": ""
+    },
+    {
+      "name": "SPECIMEN",
+      "description": ""
+    },
+    {
+      "name": "SPECIMEN_CONTAINER",
+      "description": ""
+    },
+    {
+      "name": "STAFF",
+      "description": ""
+    },
+    {
+      "name": "STUDY",
+      "description": ""
+    },
+    {
+      "name": "STUDY_OBSERVATION",
+      "description": ""
+    },
+    {
+      "name": "STUDY_PHASE",
+      "description": ""
+    },
+    {
+      "name": "STUDY_SCHEDULE",
+      "description": ""
+    },
+    {
+      "name": "TEST_CONFIGURATION",
+      "description": ""
+    },
+    {
+      "name": "TIMING",
+      "description": ""
+    },
+    {
+      "name": "TIMING_DIET",
+      "description": ""
+    },
+    {
+      "name": "TIMING_ENCODED",
+      "description": ""
+    },
+    {
+      "name": "TIMING_GIVE",
+      "description": ""
+    },
+    {
+      "name": "TIMING_PRIOR",
+      "description": ""
+    },
+    {
+      "name": "TIMING_QTY",
+      "description": ""
+    },
+    {
+      "name": "TIMING_QUANTITY",
+      "description": ""
+    },
+    {
+      "name": "TIMING_TRAY",
+      "description": ""
+    },
+    {
+      "name": "TREATMENT",
+      "description": ""
+    },
+    {
+      "name": "VISIT",
+      "description": ""
+    }
+  ]
+}

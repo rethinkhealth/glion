@@ -1,0 +1,68 @@
+{
+  "segmentId": "MFI",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "MFI-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 60,
+      "table": "HL70175",
+      "name": "Master File Identifier",
+      "item": "658"
+    },
+    {
+      "sequence": 2,
+      "id": "MFI-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "HD",
+      "maxLength": 180,
+      "name": "Master File Application Identifier",
+      "item": "659"
+    },
+    {
+      "sequence": 3,
+      "id": "MFI-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70178",
+      "name": "File-Level Event Code",
+      "item": "660"
+    },
+    {
+      "sequence": 4,
+      "id": "MFI-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Entered Date/Time",
+      "item": "661"
+    },
+    {
+      "sequence": 5,
+      "id": "MFI-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Effective Date/Time",
+      "item": "662"
+    },
+    {
+      "sequence": 6,
+      "id": "MFI-6",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70179",
+      "name": "Response Level Code",
+      "item": "663"
+    }
+  ]
+}

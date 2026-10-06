@@ -1,0 +1,23 @@
+{
+  "id": "0126",
+  "description": "QUANTITY LIMITED REQUEST",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CH",
+      "description": "Characters"
+    },
+    {
+      "name": "LI",
+      "description": "Lines"
+    },
+    {
+      "name": "PG",
+      "description": "Pages"
+    },
+    {
+      "name": "ZO",
+      "description": "Locally defined"
+    }
+  ]
+}

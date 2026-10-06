@@ -1,0 +1,35 @@
+{
+  "id": "0263",
+  "description": "Level of care",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Ambulatory"
+    },
+    {
+      "name": "C",
+      "description": "Critical care"
+    },
+    {
+      "name": "E",
+      "description": "Emergency"
+    },
+    {
+      "name": "F",
+      "description": "Isolation"
+    },
+    {
+      "name": "N",
+      "description": "Intensive care"
+    },
+    {
+      "name": "R",
+      "description": "Routine"
+    },
+    {
+      "name": "S",
+      "description": "Surgery"
+    }
+  ]
+}

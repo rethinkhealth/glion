@@ -1,0 +1,39 @@
+{
+  "id": "v2-0498",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0498",
+  "oid": "2.16.840.1.113883.18.322",
+  "name": "ConsentStatus",
+  "title": "consentStatus",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Active - Consent has been granted",
+      "status": "active"
+    },
+    {
+      "code": "B",
+      "display": "Bypassed (Consent not sought)",
+      "status": "active"
+    },
+    {
+      "code": "L",
+      "display": "Limited - Consent has been granted with limitations",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Pending - Consent has not yet been sought",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Refused - Consent has been refused",
+      "status": "active"
+    },
+    {
+      "code": "X",
+      "display": "Rescinded - Consent was initially granted, but was subsequently revoked or ended.",
+      "status": "active"
+    }
+  ]
+}

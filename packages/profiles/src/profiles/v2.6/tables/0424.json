@@ -1,0 +1,19 @@
+{
+  "id": "0424",
+  "description": "Gestation Category Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Premature / Pre-term"
+    },
+    {
+      "name": "2",
+      "description": "Full Term"
+    },
+    {
+      "name": "3",
+      "description": "Overdue / Post-term"
+    }
+  ]
+}

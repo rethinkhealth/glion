@@ -1,0 +1,39 @@
+{
+  "id": "v2-0404",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0404",
+  "oid": "2.16.840.1.113883.18.253",
+  "name": "LanguageProficiency",
+  "title": "languageProficiency",
+  "codes": [
+    {
+      "code": "1",
+      "display": "Excellent",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Good",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Fair",
+      "status": "active"
+    },
+    {
+      "code": "4",
+      "display": "Poor",
+      "status": "active"
+    },
+    {
+      "code": "5",
+      "display": "Some (level unknown)",
+      "status": "active"
+    },
+    {
+      "code": "6",
+      "display": "None",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "MO",
+  "version": "2.5",
+  "kind": "composite",
+  "title": "Money",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Quantity",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Denomination",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "v2-0778",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0778",
+  "oid": "2.16.840.1.113883.18.403",
+  "name": "ItemType",
+  "title": "itemType",
+  "codes": [
+    {
+      "code": "EQP",
+      "display": "Equipment",
+      "status": "active"
+    },
+    {
+      "code": "IMP",
+      "display": "Implant",
+      "status": "active"
+    },
+    {
+      "code": "MED",
+      "display": "Medication",
+      "status": "active"
+    },
+    {
+      "code": "SUP",
+      "display": "Supply",
+      "status": "active"
+    },
+    {
+      "code": "TDC",
+      "display": "Tubes, Drains, and Catheters",
+      "status": "active"
+    }
+  ]
+}

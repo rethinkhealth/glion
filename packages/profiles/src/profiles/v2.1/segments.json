@@ -1,0 +1,152 @@
+{
+  "segments": [
+    {
+      "id": "ACC",
+      "title": "Accident"
+    },
+    {
+      "id": "ADD",
+      "title": "Addendum"
+    },
+    {
+      "id": "BHS",
+      "title": "Batch Header"
+    },
+    {
+      "id": "BLG",
+      "title": "Billing"
+    },
+    {
+      "id": "BTS",
+      "title": "Batch Trailer"
+    },
+    {
+      "id": "DG1",
+      "title": "Diagnosis"
+    },
+    {
+      "id": "DSC",
+      "title": "Continuation Pointer"
+    },
+    {
+      "id": "DSP",
+      "title": "Display Data"
+    },
+    {
+      "id": "ERR",
+      "title": "Error"
+    },
+    {
+      "id": "EVN",
+      "title": "Event Type"
+    },
+    {
+      "id": "FHS",
+      "title": "File Header"
+    },
+    {
+      "id": "FT1",
+      "title": "Financial Transaction"
+    },
+    {
+      "id": "FTS",
+      "title": "File Trailer"
+    },
+    {
+      "id": "GT1",
+      "title": "Guarantor"
+    },
+    {
+      "id": "IN1",
+      "title": "Insurance"
+    },
+    {
+      "id": "MRG",
+      "title": "Merge Patient Information"
+    },
+    {
+      "id": "MSA",
+      "title": "Message Acknowledgment"
+    },
+    {
+      "id": "MSH",
+      "title": "Message Header"
+    },
+    {
+      "id": "NCK",
+      "title": "System Clock"
+    },
+    {
+      "id": "NK1",
+      "title": "Next of Kin"
+    },
+    {
+      "id": "NPU",
+      "title": "Non-Patient Update"
+    },
+    {
+      "id": "NSC",
+      "title": "Status Change"
+    },
+    {
+      "id": "NST",
+      "title": "Statistics"
+    },
+    {
+      "id": "NTE",
+      "title": "Notes and Comments"
+    },
+    {
+      "id": "OBR",
+      "title": "Observation Request"
+    },
+    {
+      "id": "OBX",
+      "title": "Result"
+    },
+    {
+      "id": "ORC",
+      "title": "Common Order"
+    },
+    {
+      "id": "ORO",
+      "title": "Order Other"
+    },
+    {
+      "id": "PID",
+      "title": "Patient Identification"
+    },
+    {
+      "id": "PR1",
+      "title": "Procedures"
+    },
+    {
+      "id": "PV1",
+      "title": "Patient Visit"
+    },
+    {
+      "id": "QRD",
+      "title": "Query Definition"
+    },
+    {
+      "id": "QRF",
+      "title": "Query Filter"
+    },
+    {
+      "id": "RX1",
+      "title": "Pharmacy Order"
+    },
+    {
+      "id": "UB1",
+      "title": "UB82 Data"
+    },
+    {
+      "id": "URD",
+      "title": "Results/Update Definition"
+    },
+    {
+      "id": "URS",
+      "title": "Unsolicited Selection"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "WVI",
+  "version": "2.7.1",
+  "kind": "composite",
+  "title": "Channel Identifier",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Channel Number",
+      "datatypeId": "NM",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Channel Name",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

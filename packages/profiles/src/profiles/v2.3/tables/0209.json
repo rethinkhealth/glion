@@ -1,0 +1,39 @@
+{
+  "id": "0209",
+  "description": "Relational Operator",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CT",
+      "description": "Contains"
+    },
+    {
+      "name": "EQ",
+      "description": "Equal"
+    },
+    {
+      "name": "GE",
+      "description": "Greater than or equal"
+    },
+    {
+      "name": "GN",
+      "description": "Generic"
+    },
+    {
+      "name": "GT",
+      "description": "Greater than"
+    },
+    {
+      "name": "LE",
+      "description": "Less than or equal"
+    },
+    {
+      "name": "LT",
+      "description": "Less than"
+    },
+    {
+      "name": "NE",
+      "description": "Not equal"
+    }
+  ]
+}

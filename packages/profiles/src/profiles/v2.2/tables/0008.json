@@ -1,0 +1,31 @@
+{
+  "id": "0008",
+  "description": "ACKNOWLEDGMENT CODE",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AA",
+      "description": "Application accept (original mode) / Application acknowledgement: accept (enhanced mode)"
+    },
+    {
+      "name": "AE",
+      "description": "Application error (original mode) / Application acknowledgement: error (enhanced mode)"
+    },
+    {
+      "name": "AR",
+      "description": "Application reject (original mode) / Application acknowledgement: reject (enhanced mode)"
+    },
+    {
+      "name": "CA",
+      "description": "Enhanced mode:  Application acknowledgement:  Commit Accept"
+    },
+    {
+      "name": "CE",
+      "description": "Enhanced mode:  Application acknowledgement:  Commit Error"
+    },
+    {
+      "name": "CR",
+      "description": "Enhanced mode:  Application acknowledgement:  Commit Reject"
+    }
+  ]
+}

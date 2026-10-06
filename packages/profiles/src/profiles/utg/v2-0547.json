@@ -1,0 +1,24 @@
+{
+  "id": "v2-0547",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0547",
+  "oid": "2.16.840.1.113883.18.354",
+  "name": "JurisdictionalBreadth",
+  "title": "jurisdictionalBreadth",
+  "codes": [
+    {
+      "code": "C",
+      "display": "County/Parish",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "Country",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "State/Province",
+      "status": "active"
+    }
+  ]
+}

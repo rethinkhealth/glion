@@ -1,0 +1,24 @@
+{
+  "id": "v2-0936",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0936",
+  "oid": "2.16.840.1.113883.18.439",
+  "name": "ObservationType",
+  "title": "observationType",
+  "codes": [
+    {
+      "code": "QST",
+      "display": "Question",
+      "status": "active"
+    },
+    {
+      "code": "RSLT",
+      "display": "Result",
+      "status": "active"
+    },
+    {
+      "code": "SCI",
+      "display": "Supporting Clinical Information",
+      "status": "active"
+    }
+  ]
+}

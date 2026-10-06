@@ -1,0 +1,20 @@
+{
+  "id": "MOC",
+  "version": "2.5",
+  "kind": "composite",
+  "title": "Money and Code",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Monetary Amount",
+      "datatypeId": "MO",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Charge Code",
+      "datatypeId": "CE",
+      "required": false
+    }
+  ]
+}

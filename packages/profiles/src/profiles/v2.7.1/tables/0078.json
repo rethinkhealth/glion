@@ -1,0 +1,127 @@
+{
+  "id": "0078",
+  "description": "Interpretation Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "<",
+      "description": "Below absolute low-off instrument scale"
+    },
+    {
+      "name": ">",
+      "description": "Above absolute high-off instrument scale"
+    },
+    {
+      "name": "A",
+      "description": "Abnormal (applies to non-numeric results)"
+    },
+    {
+      "name": "AA",
+      "description": "Very abnormal (applies to non-numeric units, analogous to panic limits for numeric units)"
+    },
+    {
+      "name": "AC",
+      "description": "Anti-complementary substances present"
+    },
+    {
+      "name": "B",
+      "description": "Better-use when direction not relevant"
+    },
+    {
+      "name": "D",
+      "description": "Significant change down"
+    },
+    {
+      "name": "DET",
+      "description": "Detected"
+    },
+    {
+      "name": "H",
+      "description": "Above high normal"
+    },
+    {
+      "name": "HH",
+      "description": "Above upper panic limits"
+    },
+    {
+      "name": "I",
+      "description": "Intermediate. Indicates for microbiology susceptibilities only."
+    },
+    {
+      "name": "IND",
+      "description": "Indeterminate"
+    },
+    {
+      "name": "L",
+      "description": "Below low normal"
+    },
+    {
+      "name": "LL",
+      "description": "Below lower panic limits"
+    },
+    {
+      "name": "MS",
+      "description": "Moderately susceptible. Indicates for microbiology susceptibilities only."
+    },
+    {
+      "name": "N",
+      "description": "Normal (applies to non-numeric results)"
+    },
+    {
+      "name": "ND",
+      "description": "Not Detected"
+    },
+    {
+      "name": "NEG",
+      "description": "Negative"
+    },
+    {
+      "name": "NR",
+      "description": "Non-reactive"
+    },
+    {
+      "name": "null",
+      "description": "No range defined, or normal ranges don't apply"
+    },
+    {
+      "name": "POS",
+      "description": "Positive"
+    },
+    {
+      "name": "QCF",
+      "description": "Quality Control Failure"
+    },
+    {
+      "name": "R",
+      "description": "Resistant. Indicates for microbiology susceptibilities only."
+    },
+    {
+      "name": "RR",
+      "description": "Reactive"
+    },
+    {
+      "name": "S",
+      "description": "Susceptible. Indicates for microbiology susceptibilities only."
+    },
+    {
+      "name": "TOX",
+      "description": "Cytotoxic substance present"
+    },
+    {
+      "name": "U",
+      "description": "Significant change up"
+    },
+    {
+      "name": "VS",
+      "description": "Very susceptible. Indicates for microbiology susceptibilities only."
+    },
+    {
+      "name": "W",
+      "description": "Worse-use when direction not relevant"
+    },
+    {
+      "name": "WR",
+      "description": "Weakly reactive"
+    }
+  ]
+}

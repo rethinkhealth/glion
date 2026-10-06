@@ -1,0 +1,23 @@
+{
+  "id": "0007",
+  "description": "Admission Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Accident"
+    },
+    {
+      "name": "E",
+      "description": "Emergency"
+    },
+    {
+      "name": "L",
+      "description": "Labor and Delivery"
+    },
+    {
+      "name": "R",
+      "description": "Routine"
+    }
+  ]
+}

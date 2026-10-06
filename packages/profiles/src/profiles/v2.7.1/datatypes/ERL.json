@@ -1,0 +1,44 @@
+{
+  "id": "ERL",
+  "version": "2.7.1",
+  "kind": "composite",
+  "title": "Error Location",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Segment ID",
+      "datatypeId": "ST",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Segment Sequence",
+      "datatypeId": "NM",
+      "required": true
+    },
+    {
+      "sequence": 3,
+      "name": "Field Position",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Field Repetition",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Component Number",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "Sub-Component Number",
+      "datatypeId": "NM",
+      "required": false
+    }
+  ]
+}

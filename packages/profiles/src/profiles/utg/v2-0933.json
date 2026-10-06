@@ -1,0 +1,74 @@
+{
+  "id": "v2-0933",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0933",
+  "oid": "2.16.840.1.113883.18.434",
+  "name": "IntendedProcedureType",
+  "title": "intendedProcedureType",
+  "codes": [
+    {
+      "code": "2RC",
+      "display": "Double Red Cells",
+      "status": "active"
+    },
+    {
+      "code": "GRN",
+      "display": "Granulocytes",
+      "status": "active"
+    },
+    {
+      "code": "HEM",
+      "display": "Hemachromatosis",
+      "status": "active"
+    },
+    {
+      "code": "HPC",
+      "display": "Hematopoietic Progenitor Cells",
+      "status": "active"
+    },
+    {
+      "code": "LYM",
+      "display": "Lymphocytes",
+      "status": "active"
+    },
+    {
+      "code": "PLS",
+      "display": "Plasma",
+      "status": "active"
+    },
+    {
+      "code": "PLT",
+      "display": "Platelets",
+      "status": "active"
+    },
+    {
+      "code": "PNP",
+      "display": "Platelets and Plasma",
+      "status": "active"
+    },
+    {
+      "code": "PNR",
+      "display": "Platelets and Red Cells",
+      "status": "active"
+    },
+    {
+      "code": "PPR",
+      "display": "Platelets, Plasma, and Red Cells",
+      "status": "active"
+    },
+    {
+      "code": "THA",
+      "display": "Therapeutic Apheresis",
+      "status": "active"
+    },
+    {
+      "code": "THW",
+      "display": "Therapeutic Whole Blood",
+      "status": "active"
+    },
+    {
+      "code": "WBL",
+      "display": "Whole Blood",
+      "status": "active"
+    }
+  ]
+}

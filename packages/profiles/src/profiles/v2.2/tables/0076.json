@@ -1,0 +1,147 @@
+{
+  "id": "0076",
+  "description": "MESSAGE TYPE",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ACK",
+      "description": "General acknowledgement message"
+    },
+    {
+      "name": "ADR",
+      "description": "ADT response"
+    },
+    {
+      "name": "ADT",
+      "description": "ADT message"
+    },
+    {
+      "name": "ARD",
+      "description": "Ancillary report (display)"
+    },
+    {
+      "name": "BAR",
+      "description": "Add / change billing account"
+    },
+    {
+      "name": "DFT",
+      "description": "Detail financial transaction"
+    },
+    {
+      "name": "DSR",
+      "description": "Display response"
+    },
+    {
+      "name": "MCF",
+      "description": "Delayed acknowledgement"
+    },
+    {
+      "name": "MFD",
+      "description": "Master files delayed application acknowledgement"
+    },
+    {
+      "name": "MFK",
+      "description": "Master file application acknowledgement"
+    },
+    {
+      "name": "MFN",
+      "description": "Master files notification"
+    },
+    {
+      "name": "MFR",
+      "description": "Master files response"
+    },
+    {
+      "name": "NMD",
+      "description": "Network management data"
+    },
+    {
+      "name": "NMQ",
+      "description": "Network management query"
+    },
+    {
+      "name": "NMR",
+      "description": "Network management response"
+    },
+    {
+      "name": "ORF",
+      "description": "Observational result (record response)"
+    },
+    {
+      "name": "ORM",
+      "description": "Order message"
+    },
+    {
+      "name": "ORR",
+      "description": "Order acknowledgement message"
+    },
+    {
+      "name": "ORU",
+      "description": "Observational result (unsolicited)"
+    },
+    {
+      "name": "OSQ",
+      "description": "Order status query"
+    },
+    {
+      "name": "QRY",
+      "description": "Query"
+    },
+    {
+      "name": "RAR",
+      "description": "Pharmacy administration information"
+    },
+    {
+      "name": "RAS",
+      "description": "Pharmacy administration message"
+    },
+    {
+      "name": "RDE",
+      "description": "Pharmacy encoded order message"
+    },
+    {
+      "name": "RDR",
+      "description": "Pharmacy dispense information"
+    },
+    {
+      "name": "RDS",
+      "description": "Pharmacy dispense message"
+    },
+    {
+      "name": "RER",
+      "description": "Pharmacy encoded order information"
+    },
+    {
+      "name": "RGR",
+      "description": "Pharmacy dose information"
+    },
+    {
+      "name": "RGV",
+      "description": "Pharmacy give message"
+    },
+    {
+      "name": "ROR",
+      "description": "Pharmacy prescription order response"
+    },
+    {
+      "name": "RRA",
+      "description": "Pharmacy administration acknowledgment"
+    },
+    {
+      "name": "RRD",
+      "description": "Pharmacy dispense acknowledgment"
+    },
+    {
+      "name": "RRE",
+      "description": "Pharmacy encoded order acknowledgment"
+    },
+    {
+      "name": "RRG",
+      "description": "Pharmacy give acknowledgment"
+    },
+    {
+      "name": "UDM",
+      "description": "Unsolicited display message"
+    }
+  ]
+}

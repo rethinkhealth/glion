@@ -1,0 +1,95 @@
+{
+  "segmentId": "NSC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "NSC-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 4,
+      "name": "Network Change Type",
+      "item": "758"
+    },
+    {
+      "sequence": 2,
+      "id": "NSC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "Current CPU",
+      "item": "759"
+    },
+    {
+      "sequence": 3,
+      "id": "NSC-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "Current Fileserver",
+      "item": "760"
+    },
+    {
+      "sequence": 4,
+      "id": "NSC-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "Current Application",
+      "item": "761"
+    },
+    {
+      "sequence": 5,
+      "id": "NSC-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "Current Facility",
+      "item": "762"
+    },
+    {
+      "sequence": 6,
+      "id": "NSC-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "New CPU",
+      "item": "763"
+    },
+    {
+      "sequence": 7,
+      "id": "NSC-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "New Fileserver",
+      "item": "764"
+    },
+    {
+      "sequence": 8,
+      "id": "NSC-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "New Application",
+      "item": "765"
+    },
+    {
+      "sequence": 9,
+      "id": "NSC-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 30,
+      "name": "New Facility",
+      "item": "766"
+    }
+  ]
+}

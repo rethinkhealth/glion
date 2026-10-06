@@ -1,0 +1,11 @@
+{
+  "id": "0106",
+  "description": "QUERY FORMAT CODE",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "R",
+      "description": "Response in Record-oriented format"
+    }
+  ]
+}

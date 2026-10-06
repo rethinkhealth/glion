@@ -1,0 +1,27 @@
+{
+  "id": "0403",
+  "description": "Language Ability",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Read"
+    },
+    {
+      "name": "2",
+      "description": "Write"
+    },
+    {
+      "name": "3",
+      "description": "Speak"
+    },
+    {
+      "name": "4",
+      "description": "Understand"
+    },
+    {
+      "name": "5",
+      "description": "Sign"
+    }
+  ]
+}

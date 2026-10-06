@@ -1,0 +1,29 @@
+{
+  "id": "v2-0402",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0402",
+  "oid": "2.16.840.1.113883.18.251",
+  "name": "SchoolType",
+  "title": "schoolType",
+  "codes": [
+    {
+      "code": "D",
+      "display": "Dental",
+      "status": "active"
+    },
+    {
+      "code": "G",
+      "display": "Graduate",
+      "status": "active"
+    },
+    {
+      "code": "M",
+      "display": "Medical",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Undergraduate",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "v2-0332",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0332",
+  "oid": "2.16.840.1.113883.18.203",
+  "name": "SourceType",
+  "title": "sourceType",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Accept",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Initiate",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "v2-0230",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0230",
+  "oid": "2.16.840.1.113883.18.130",
+  "name": "ProcedureFunctionalType",
+  "title": "procedureFunctionalType",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Anesthesia",
+      "status": "active"
+    },
+    {
+      "code": "D",
+      "display": "Diagnostic procedure",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Invasive procedure not classified elsewhere (e.g., IV, catheter, etc.)",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Procedure for treatment (therapeutic, including operations)",
+      "status": "active"
+    }
+  ]
+}

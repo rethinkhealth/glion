@@ -1,0 +1,15 @@
+{
+  "id": "0790",
+  "description": "Approving Regulatory Agency",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AMA",
+      "description": "American Medical Association"
+    },
+    {
+      "name": "FDA",
+      "description": "Food and Drug Administration"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "0091",
+  "description": "Query priority",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Deferred"
+    },
+    {
+      "name": "I",
+      "description": "Immediate"
+    }
+  ]
+}

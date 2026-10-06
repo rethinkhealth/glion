@@ -1,0 +1,15 @@
+{
+  "id": "0651",
+  "description": "Labor Calculation Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "CST",
+      "description": "Cost"
+    },
+    {
+      "name": "TME",
+      "description": "Time"
+    }
+  ]
+}

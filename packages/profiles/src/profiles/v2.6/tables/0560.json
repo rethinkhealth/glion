@@ -1,0 +1,27 @@
+{
+  "id": "0560",
+  "description": "Quantity Units",
+  "type": "user",
+  "codes": [
+    {
+      "name": "DY",
+      "description": "Days"
+    },
+    {
+      "name": "FL",
+      "description": "Units"
+    },
+    {
+      "name": "HS",
+      "description": "Hours"
+    },
+    {
+      "name": "MN",
+      "description": "Month"
+    },
+    {
+      "name": "YY",
+      "description": "Years"
+    }
+  ]
+}

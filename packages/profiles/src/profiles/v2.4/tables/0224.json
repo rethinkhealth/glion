@@ -1,0 +1,19 @@
+{
+  "id": "0224",
+  "description": "Transport arranged",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Arranged"
+    },
+    {
+      "name": "N",
+      "description": "Not Arranged"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

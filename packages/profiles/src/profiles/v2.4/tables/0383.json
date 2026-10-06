@@ -1,0 +1,51 @@
+{
+  "id": "0383",
+  "description": "Substance status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CE",
+      "description": "Calibration Error"
+    },
+    {
+      "name": "CW",
+      "description": "Calibration Warning"
+    },
+    {
+      "name": "EE",
+      "description": "Expired Error"
+    },
+    {
+      "name": "EW",
+      "description": "Expired Warning"
+    },
+    {
+      "name": "NE",
+      "description": "Not Available Error"
+    },
+    {
+      "name": "NW",
+      "description": "Not Available Warning"
+    },
+    {
+      "name": "OE",
+      "description": "Other Error"
+    },
+    {
+      "name": "OK",
+      "description": "OK Status"
+    },
+    {
+      "name": "OW",
+      "description": "Other Warning"
+    },
+    {
+      "name": "QE",
+      "description": "QC Error"
+    },
+    {
+      "name": "QW",
+      "description": "QC Warning"
+    }
+  ]
+}

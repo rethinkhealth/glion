@@ -1,0 +1,44 @@
+{
+  "id": "CF",
+  "version": "2.6",
+  "kind": "composite",
+  "title": "Coded Element with Formatted Values",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Formatted Text",
+      "datatypeId": "FT",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Name of Coding System",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Alternate Identifier",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Alternate Formatted Text",
+      "datatypeId": "FT",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "Name of Alternate Coding System",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

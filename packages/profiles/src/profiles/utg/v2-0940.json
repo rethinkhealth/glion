@@ -1,0 +1,29 @@
+{
+  "id": "v2-0940",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0940",
+  "oid": "2.16.840.1.113883.18.443",
+  "name": "LimitationTypeCode",
+  "title": "limitationTypeCode",
+  "codes": [
+    {
+      "code": "FLDP",
+      "display": "Frequency Limited Diagnostics Procedure",
+      "status": "active"
+    },
+    {
+      "code": "LCP",
+      "display": "Limited Coverage Policy",
+      "status": "active"
+    },
+    {
+      "code": "NFDA",
+      "display": "Non-FDA Approved Diagnositic Procedure",
+      "status": "active"
+    },
+    {
+      "code": "NT",
+      "display": "New Test - Limited Diagnostic History",
+      "status": "active"
+    }
+  ]
+}

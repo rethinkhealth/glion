@@ -1,0 +1,76 @@
+{
+  "segmentId": "RXC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RXC-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70166",
+      "name": "RX Component Type",
+      "item": "313"
+    },
+    {
+      "sequence": 2,
+      "id": "RXC-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Component Code",
+      "item": "314"
+    },
+    {
+      "sequence": 3,
+      "id": "RXC-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Component Amount",
+      "item": "315"
+    },
+    {
+      "sequence": 4,
+      "id": "RXC-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Component Units",
+      "item": "316"
+    },
+    {
+      "sequence": 5,
+      "id": "RXC-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Component Strength",
+      "item": "1124"
+    },
+    {
+      "sequence": 6,
+      "id": "RXC-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Component Strength Units",
+      "item": "1125"
+    },
+    {
+      "sequence": 7,
+      "id": "RXC-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Supplementary Code",
+      "item": "1476"
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "segmentId": "AIL",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "AIL-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - AIL",
+      "item": "902"
+    },
+    {
+      "sequence": 2,
+      "id": "AIL-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 3,
+      "table": "HL70206",
+      "name": "Segment Action Code",
+      "item": "763"
+    },
+    {
+      "sequence": 3,
+      "id": "AIL-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "PL",
+      "maxLength": 80,
+      "name": "Location Resource ID",
+      "item": "903"
+    },
+    {
+      "sequence": 4,
+      "id": "AIL-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 15,
+      "name": "Location Type",
+      "item": "904"
+    },
+    {
+      "sequence": 5,
+      "id": "AIL-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 200,
+      "name": "Location Group",
+      "item": "905"
+    },
+    {
+      "sequence": 6,
+      "id": "AIL-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Start Date/Time",
+      "item": "1202"
+    },
+    {
+      "sequence": 7,
+      "id": "AIL-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Start Date/Time Offset",
+      "item": "891"
+    },
+    {
+      "sequence": 8,
+      "id": "AIL-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 200,
+      "name": "Start Date/Time Offset Units",
+      "item": "892"
+    },
+    {
+      "sequence": 9,
+      "id": "AIL-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Duration",
+      "item": "893"
+    },
+    {
+      "sequence": 10,
+      "id": "AIL-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 200,
+      "name": "Duration Units",
+      "item": "894"
+    },
+    {
+      "sequence": 11,
+      "id": "AIL-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 10,
+      "table": "HL70279",
+      "name": "Allow Substitution Code",
+      "item": "895"
+    },
+    {
+      "sequence": 12,
+      "id": "AIL-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 200,
+      "table": "HL70278",
+      "name": "Filler Status Code",
+      "item": "889"
+    }
+  ]
+}

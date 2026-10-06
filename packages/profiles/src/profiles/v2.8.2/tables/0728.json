@@ -1,0 +1,27 @@
+{
+  "id": "0728",
+  "description": "CCL Value",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "0",
+      "description": "Nothing obvious"
+    },
+    {
+      "name": "1",
+      "description": "Low"
+    },
+    {
+      "name": "2",
+      "description": "Moderate"
+    },
+    {
+      "name": "3",
+      "description": "High"
+    },
+    {
+      "name": "4",
+      "description": "Very high"
+    }
+  ]
+}

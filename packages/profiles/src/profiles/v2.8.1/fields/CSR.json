@@ -1,0 +1,149 @@
+{
+  "segmentId": "CSR",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "CSR-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Sponsor Study ID",
+      "item": "1011"
+    },
+    {
+      "sequence": 2,
+      "id": "CSR-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Alternate Study ID",
+      "item": "1036"
+    },
+    {
+      "sequence": 3,
+      "id": "CSR-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Institution Registering the Patient",
+      "item": "1037"
+    },
+    {
+      "sequence": 4,
+      "id": "CSR-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CX",
+      "name": "Sponsor Patient ID",
+      "item": "1038"
+    },
+    {
+      "sequence": 5,
+      "id": "CSR-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CX",
+      "name": "Alternate Patient ID - CSR",
+      "item": "1039"
+    },
+    {
+      "sequence": 6,
+      "id": "CSR-6",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Date/Time of Patient Study Registration",
+      "item": "1040"
+    },
+    {
+      "sequence": 7,
+      "id": "CSR-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Person Performing Study Registration",
+      "item": "1041"
+    },
+    {
+      "sequence": 8,
+      "id": "CSR-8",
+      "required": true,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Study Authorizing Provider",
+      "item": "1042"
+    },
+    {
+      "sequence": 9,
+      "id": "CSR-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Date/Time Patient Study Consent Signed",
+      "item": "1043"
+    },
+    {
+      "sequence": 10,
+      "id": "CSR-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Patient Study Eligibility Status",
+      "item": "1044"
+    },
+    {
+      "sequence": 11,
+      "id": "CSR-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Study Randomization Date/time",
+      "item": "1045"
+    },
+    {
+      "sequence": 12,
+      "id": "CSR-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Randomized Study Arm",
+      "item": "1046"
+    },
+    {
+      "sequence": 13,
+      "id": "CSR-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Stratum for Study Randomization",
+      "item": "1047"
+    },
+    {
+      "sequence": 14,
+      "id": "CSR-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Patient Evaluability Status",
+      "item": "1048"
+    },
+    {
+      "sequence": 15,
+      "id": "CSR-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Date/Time Ended Study",
+      "item": "1049"
+    },
+    {
+      "sequence": 16,
+      "id": "CSR-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Reason Ended Study",
+      "item": "1050"
+    }
+  ]
+}

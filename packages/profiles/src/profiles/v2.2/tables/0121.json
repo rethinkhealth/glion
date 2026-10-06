@@ -1,0 +1,27 @@
+{
+  "id": "0121",
+  "description": "RESPONSE FLAG",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Same as R, also other associated segments"
+    },
+    {
+      "name": "E",
+      "description": "Report exceptions only"
+    },
+    {
+      "name": "F",
+      "description": "Same as D, plus confirmations explicitly"
+    },
+    {
+      "name": "N",
+      "description": "Only the MSA segment is returned"
+    },
+    {
+      "name": "R",
+      "description": "Same as E, also Replacement and Parent-Child"
+    }
+  ]
+}

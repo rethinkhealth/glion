@@ -1,0 +1,24 @@
+{
+  "id": "v2-0921",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0921",
+  "oid": "2.16.840.1.113883.18.427",
+  "name": "CertificationType",
+  "title": "certificationType",
+  "codes": [
+    {
+      "code": "ADM",
+      "display": "Admitting",
+      "status": "active"
+    },
+    {
+      "code": "PROC",
+      "display": "Procedure",
+      "status": "active"
+    },
+    {
+      "code": "SERV",
+      "display": "Service",
+      "status": "active"
+    }
+  ]
+}

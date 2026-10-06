@@ -1,0 +1,24 @@
+{
+  "id": "v2-0922",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0922",
+  "oid": "2.16.840.1.113883.18.428",
+  "name": "CertificationCategory",
+  "title": "certificationCategory",
+  "codes": [
+    {
+      "code": "IR",
+      "display": "Initial Request",
+      "status": "active"
+    },
+    {
+      "code": "RA",
+      "display": "Request for Appeal",
+      "status": "active"
+    },
+    {
+      "code": "RE",
+      "display": "Request for Extension",
+      "status": "active"
+    }
+  ]
+}

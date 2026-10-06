@@ -1,0 +1,19 @@
+{
+  "id": "0239",
+  "description": "Event expected",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "N",
+      "description": "No"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    },
+    {
+      "name": "Y",
+      "description": "Yes"
+    }
+  ]
+}

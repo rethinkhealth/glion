@@ -1,0 +1,24 @@
+{
+  "id": "v2-0225",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0225",
+  "oid": "2.16.840.1.113883.18.126",
+  "name": "EscortRequired",
+  "title": "escortRequired",
+  "codes": [
+    {
+      "code": "N",
+      "display": "Not Required",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Required",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    }
+  ]
+}

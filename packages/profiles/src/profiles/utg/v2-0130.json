@@ -1,0 +1,29 @@
+{
+  "id": "v2-0130",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0130",
+  "oid": "2.16.840.1.113883.18.56",
+  "name": "VisitUserCodes",
+  "title": "visitUserCodes",
+  "codes": [
+    {
+      "code": "HO",
+      "display": "Home",
+      "status": "active"
+    },
+    {
+      "code": "MO",
+      "display": "Mobile Unit",
+      "status": "active"
+    },
+    {
+      "code": "PH",
+      "display": "Phone",
+      "status": "active"
+    },
+    {
+      "code": "TE",
+      "display": "Teaching",
+      "status": "active"
+    }
+  ]
+}

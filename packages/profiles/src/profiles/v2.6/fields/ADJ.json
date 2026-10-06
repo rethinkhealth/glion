@@ -1,0 +1,159 @@
+{
+  "segmentId": "ADJ",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "ADJ-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 73,
+      "name": "Provider Adjustment Number",
+      "item": "2003"
+    },
+    {
+      "sequence": 2,
+      "id": "ADJ-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 73,
+      "name": "Payer Adjustment Number",
+      "item": "2004"
+    },
+    {
+      "sequence": 3,
+      "id": "ADJ-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Adjustment Sequence Number",
+      "item": "2005"
+    },
+    {
+      "sequence": 4,
+      "id": "ADJ-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 4,
+      "table": "HL70564",
+      "name": "Adjustment Category",
+      "item": "2006"
+    },
+    {
+      "sequence": 5,
+      "id": "ADJ-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CP",
+      "maxLength": 254,
+      "name": "Adjustment Amount",
+      "item": "2007"
+    },
+    {
+      "sequence": 6,
+      "id": "ADJ-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 222,
+      "table": "HL70560",
+      "name": "Adjustment Quantity",
+      "item": "2008"
+    },
+    {
+      "sequence": 7,
+      "id": "ADJ-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 211,
+      "table": "HL70565",
+      "name": "Adjustment Reason PA",
+      "item": "2009"
+    },
+    {
+      "sequence": 8,
+      "id": "ADJ-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 250,
+      "name": "Adjustment Description",
+      "item": "2010"
+    },
+    {
+      "sequence": 9,
+      "id": "ADJ-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 250,
+      "name": "Original Value",
+      "item": "2011"
+    },
+    {
+      "sequence": 10,
+      "id": "ADJ-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 250,
+      "name": "Substitute Value",
+      "item": "2012"
+    },
+    {
+      "sequence": 11,
+      "id": "ADJ-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "IS",
+      "maxLength": 4,
+      "table": "HL70569",
+      "name": "Adjustment Action",
+      "item": "2013"
+    },
+    {
+      "sequence": 12,
+      "id": "ADJ-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 73,
+      "name": "Provider Adjustment Number Cross Reference",
+      "item": "2014"
+    },
+    {
+      "sequence": 13,
+      "id": "ADJ-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 73,
+      "name": "Provider Product/Service Line Item Number Cross Reference",
+      "item": "2015"
+    },
+    {
+      "sequence": 14,
+      "id": "ADJ-14",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "maxLength": 26,
+      "name": "Adjustment Date",
+      "item": "2016"
+    },
+    {
+      "sequence": 15,
+      "id": "ADJ-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XON",
+      "maxLength": 183,
+      "name": "Responsible Organization",
+      "item": "2017"
+    }
+  ]
+}

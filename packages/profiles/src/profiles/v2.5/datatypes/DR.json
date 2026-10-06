@@ -1,0 +1,20 @@
+{
+  "id": "DR",
+  "version": "2.5",
+  "kind": "composite",
+  "title": "Date/Time Range",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Range Start Date/Time",
+      "datatypeId": "TS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Range End Date/Time",
+      "datatypeId": "TS",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "FN",
+  "version": "2.7",
+  "kind": "composite",
+  "title": "Family Name",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Surname",
+      "datatypeId": "ST",
+      "required": true
+    },
+    {
+      "sequence": 2,
+      "name": "Own Surname Prefix",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Own Surname",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Surname Prefix from Partner/Spouse",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "Surname from Partner/Spouse",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

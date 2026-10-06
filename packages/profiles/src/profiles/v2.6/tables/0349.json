@@ -1,0 +1,11 @@
+{
+  "id": "0349",
+  "description": "PSRO/UR Approval Indicator",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values"
+    }
+  ]
+}

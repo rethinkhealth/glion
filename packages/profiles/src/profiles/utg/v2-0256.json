@@ -1,0 +1,229 @@
+{
+  "id": "v2-0256",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0256",
+  "oid": "2.16.840.1.113883.18.151",
+  "name": "TimeDelayPostChallenge",
+  "title": "timeDelayPostChallenge",
+  "codes": [
+    {
+      "code": "10D",
+      "display": "10 days",
+      "status": "active"
+    },
+    {
+      "code": "10M",
+      "display": "10 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "12H",
+      "display": "12 hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "15M",
+      "display": "15 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "1H",
+      "display": "1 hour post challenge",
+      "status": "active"
+    },
+    {
+      "code": "1L",
+      "display": "1 month (30 days) post challenge",
+      "status": "active"
+    },
+    {
+      "code": "1M",
+      "display": "1 minute post challenge",
+      "status": "active"
+    },
+    {
+      "code": "1W",
+      "display": "1 week",
+      "status": "active"
+    },
+    {
+      "code": "2.5H",
+      "display": "2 1/2 hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "20M",
+      "display": "20 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "24H",
+      "display": "24 hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "25M",
+      "display": "25 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "2D",
+      "display": "2 days",
+      "status": "active"
+    },
+    {
+      "code": "2H",
+      "display": "2 hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "2L",
+      "display": "2 months (60 days) post challenge",
+      "status": "active"
+    },
+    {
+      "code": "2M",
+      "display": "2 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "2W",
+      "display": "2 weeks",
+      "status": "active"
+    },
+    {
+      "code": "30M",
+      "display": "30 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "3D",
+      "display": "3 days",
+      "status": "active"
+    },
+    {
+      "code": "3H",
+      "display": "3 hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "3L",
+      "display": "3 months (90 days) post challenge",
+      "status": "active"
+    },
+    {
+      "code": "3M",
+      "display": "3 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "3W",
+      "display": "3 weeks",
+      "status": "active"
+    },
+    {
+      "code": "4D",
+      "display": "4 days",
+      "status": "active"
+    },
+    {
+      "code": "4H",
+      "display": "4 hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "4M",
+      "display": "4 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "4W",
+      "display": "4 weeks",
+      "status": "active"
+    },
+    {
+      "code": "5D",
+      "display": "5 days",
+      "status": "active"
+    },
+    {
+      "code": "5H",
+      "display": "5  hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "5M",
+      "display": "5 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "6D",
+      "display": "6 days",
+      "status": "active"
+    },
+    {
+      "code": "6H",
+      "display": "6 hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "6M",
+      "display": "6 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "7D",
+      "display": "7 days",
+      "status": "active"
+    },
+    {
+      "code": "7H",
+      "display": "7 hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "7M",
+      "display": "7 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "8H",
+      "display": "8 hours post challenge",
+      "status": "active"
+    },
+    {
+      "code": "8H SHIFT",
+      "display": "8 hours aligned on nursing shifts",
+      "status": "active"
+    },
+    {
+      "code": "8M",
+      "display": "8 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "9M",
+      "display": "9 minutes post challenge",
+      "status": "active"
+    },
+    {
+      "code": "BS",
+      "display": "Baseline (time just before the challenge)",
+      "status": "active"
+    },
+    {
+      "code": "PEAK",
+      "display": "The time post drug dose at which the highest drug level is reached (differs by drug)",
+      "status": "active"
+    },
+    {
+      "code": "RANDOM",
+      "display": "Time from the challenge, or dose not specified. (random)",
+      "status": "active"
+    },
+    {
+      "code": "TROUGH",
+      "display": "The time post drug dose at which the lowest drug level is reached (varies with drug)",
+      "status": "active"
+    }
+  ]
+}

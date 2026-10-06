@@ -1,0 +1,15 @@
+{
+  "id": "0393",
+  "description": "Match algorithms",
+  "type": "user",
+  "codes": [
+    {
+      "name": "LINKSOFT_2.01",
+      "description": ""
+    },
+    {
+      "name": "MATCHWARE_1.2",
+      "description": ""
+    }
+  ]
+}

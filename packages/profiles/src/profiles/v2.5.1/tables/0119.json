@@ -1,0 +1,207 @@
+{
+  "id": "0119",
+  "description": "Order control codes",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AF",
+      "description": "Order/service refill request approval"
+    },
+    {
+      "name": "CA",
+      "description": "Cancel order/service request"
+    },
+    {
+      "name": "CH",
+      "description": "Child order/service"
+    },
+    {
+      "name": "CN",
+      "description": "Combined result"
+    },
+    {
+      "name": "CR",
+      "description": "Canceled as requested"
+    },
+    {
+      "name": "DC",
+      "description": "Discontinue order/service request"
+    },
+    {
+      "name": "DE",
+      "description": "Data errors"
+    },
+    {
+      "name": "DF",
+      "description": "Order/service refill request denied"
+    },
+    {
+      "name": "DR",
+      "description": "Discontinued as requested"
+    },
+    {
+      "name": "FU",
+      "description": "Order/service refilled, unsolicited"
+    },
+    {
+      "name": "HD",
+      "description": "Hold order request"
+    },
+    {
+      "name": "HR",
+      "description": "On hold as requested"
+    },
+    {
+      "name": "LI",
+      "description": "Link order/service to patient care problem or goal"
+    },
+    {
+      "name": "NA",
+      "description": "Number assigned"
+    },
+    {
+      "name": "NW",
+      "description": "New order/service"
+    },
+    {
+      "name": "OC",
+      "description": "Order/service canceled"
+    },
+    {
+      "name": "OD",
+      "description": "Order/service discontinued"
+    },
+    {
+      "name": "OE",
+      "description": "Order/service released"
+    },
+    {
+      "name": "OF",
+      "description": "Order/service refilled as requested"
+    },
+    {
+      "name": "OH",
+      "description": "Order/service held"
+    },
+    {
+      "name": "OK",
+      "description": "Order/service accepted & OK"
+    },
+    {
+      "name": "OP",
+      "description": "Notification of order for outside dispense"
+    },
+    {
+      "name": "OR",
+      "description": "Released as requested"
+    },
+    {
+      "name": "PA",
+      "description": "Parent order/service"
+    },
+    {
+      "name": "PR",
+      "description": "Previous Results with new order/service"
+    },
+    {
+      "name": "PY",
+      "description": "Notification of replacement order for outside dispense"
+    },
+    {
+      "name": "RE",
+      "description": "Observations/Performed Service to follow"
+    },
+    {
+      "name": "RF",
+      "description": "Refill order/service request"
+    },
+    {
+      "name": "RL",
+      "description": "Release previous hold"
+    },
+    {
+      "name": "RO",
+      "description": "Replacement order"
+    },
+    {
+      "name": "RP",
+      "description": "Order/service replace request"
+    },
+    {
+      "name": "RQ",
+      "description": "Replaced as requested"
+    },
+    {
+      "name": "RR",
+      "description": "Request received"
+    },
+    {
+      "name": "RU",
+      "description": "Replaced unsolicited"
+    },
+    {
+      "name": "SC",
+      "description": "Status changed"
+    },
+    {
+      "name": "SN",
+      "description": "Send order/service number"
+    },
+    {
+      "name": "SR",
+      "description": "Response to send order/service status request"
+    },
+    {
+      "name": "SS",
+      "description": "Send order/service status request"
+    },
+    {
+      "name": "UA",
+      "description": "Unable to accept order/service"
+    },
+    {
+      "name": "UC",
+      "description": "Unable to cancel"
+    },
+    {
+      "name": "UD",
+      "description": "Unable to discontinue"
+    },
+    {
+      "name": "UF",
+      "description": "Unable to refill"
+    },
+    {
+      "name": "UH",
+      "description": "Unable to put on hold"
+    },
+    {
+      "name": "UM",
+      "description": "Unable to replace"
+    },
+    {
+      "name": "UN",
+      "description": "Unlink order/service from patient care problem or goal"
+    },
+    {
+      "name": "UR",
+      "description": "Unable to release"
+    },
+    {
+      "name": "UX",
+      "description": "Unable to change"
+    },
+    {
+      "name": "XO",
+      "description": "Change order/service request"
+    },
+    {
+      "name": "XR",
+      "description": "Changed as requested"
+    },
+    {
+      "name": "XX",
+      "description": "Order/service changed, unsol."
+    }
+  ]
+}

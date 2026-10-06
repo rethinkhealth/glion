@@ -1,0 +1,19 @@
+{
+  "id": "v2-0938",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0938",
+  "oid": "2.16.840.1.113883.18.441",
+  "name": "CollectionEvent",
+  "title": "collectionEvent",
+  "codes": [
+    {
+      "code": "DRW",
+      "display": "Collecting the specimen",
+      "status": "active"
+    },
+    {
+      "code": "ORD",
+      "display": "Placing the order",
+      "status": "active"
+    }
+  ]
+}

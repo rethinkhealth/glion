@@ -1,0 +1,19 @@
+{
+  "id": "0617",
+  "description": "Address Usage",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Classification"
+    },
+    {
+      "name": "M",
+      "description": "Mailing"
+    },
+    {
+      "name": "V",
+      "description": "Visit"
+    }
+  ]
+}

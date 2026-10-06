@@ -1,0 +1,11 @@
+{
+  "id": "0218",
+  "description": "Patient Charge Adjustment",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

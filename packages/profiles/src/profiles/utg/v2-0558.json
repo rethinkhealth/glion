@@ -1,0 +1,29 @@
+{
+  "id": "v2-0558",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0558",
+  "oid": "2.16.840.1.113883.18.362",
+  "name": "PayeeRelationshipToInvoice",
+  "title": "payeeRelationshipToInvoice",
+  "codes": [
+    {
+      "code": "FM",
+      "display": "Family Member",
+      "status": "active"
+    },
+    {
+      "code": "GT",
+      "display": "Guarantor",
+      "status": "active"
+    },
+    {
+      "code": "PT",
+      "display": "Patient",
+      "status": "active"
+    },
+    {
+      "code": "SB",
+      "display": "Subscriber",
+      "status": "active"
+    }
+  ]
+}

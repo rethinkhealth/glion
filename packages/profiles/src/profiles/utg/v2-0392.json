@@ -1,0 +1,29 @@
+{
+  "id": "v2-0392",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0392",
+  "oid": "2.16.840.1.113883.18.243",
+  "name": "MatchReason",
+  "title": "matchReason",
+  "codes": [
+    {
+      "code": "DB",
+      "display": "Match on Date of Birth",
+      "status": "active"
+    },
+    {
+      "code": "NA",
+      "display": "Match on Name (Alpha Match)",
+      "status": "active"
+    },
+    {
+      "code": "NP",
+      "display": "Match on Name (Phonetic Match)",
+      "status": "active"
+    },
+    {
+      "code": "SS",
+      "display": "Match on Social Security Number",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "v2-0178",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0178",
+  "oid": "2.16.840.1.113883.18.93",
+  "name": "FileLevelEvent",
+  "title": "file-levelEvent",
+  "codes": [
+    {
+      "code": "REP",
+      "display": "Replace current version of this master file with the version contained in this message",
+      "status": "active"
+    },
+    {
+      "code": "UPD",
+      "display": "Change file records as defined in the record-level event codes for each record that follows",
+      "status": "active"
+    }
+  ]
+}

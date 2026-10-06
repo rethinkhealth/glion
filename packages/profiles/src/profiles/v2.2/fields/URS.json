@@ -1,0 +1,88 @@
+{
+  "segmentId": "URS",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "URS-1",
+      "required": true,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U Where Subject Definition",
+      "item": "52"
+    },
+    {
+      "sequence": 2,
+      "id": "URS-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "R/U when data start date / time",
+      "item": "53"
+    },
+    {
+      "sequence": 3,
+      "id": "URS-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "R/U when data end date / time",
+      "item": "54"
+    },
+    {
+      "sequence": 4,
+      "id": "URS-4",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U What User Qualifier",
+      "item": "55"
+    },
+    {
+      "sequence": 5,
+      "id": "URS-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 20,
+      "name": "R/U Other Results Subject Definition",
+      "item": "56"
+    },
+    {
+      "sequence": 6,
+      "id": "URS-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 12,
+      "table": "HL70156",
+      "name": "R/U which date / time qualifier",
+      "item": "57"
+    },
+    {
+      "sequence": 7,
+      "id": "URS-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 12,
+      "table": "HL70157",
+      "name": "R/U which date / time status qualifier",
+      "item": "58"
+    },
+    {
+      "sequence": 8,
+      "id": "URS-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ID",
+      "maxLength": 12,
+      "table": "HL70158",
+      "name": "R/U date / time selection qualifier",
+      "item": "59"
+    }
+  ]
+}

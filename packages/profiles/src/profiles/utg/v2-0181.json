@@ -1,0 +1,19 @@
+{
+  "id": "v2-0181",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0181",
+  "oid": "2.16.840.1.113883.18.96",
+  "name": "MfnRecordLevelErrorReturn",
+  "title": "mfnRecord-levelErrorReturn",
+  "codes": [
+    {
+      "code": "S",
+      "display": "Successful posting of the record defined by the MFE segment",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unsuccessful posting of the record defined by the MFE segment",
+      "status": "active"
+    }
+  ]
+}

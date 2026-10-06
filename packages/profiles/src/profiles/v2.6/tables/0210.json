@@ -1,0 +1,15 @@
+{
+  "id": "0210",
+  "description": "Relational conjunction",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AND",
+      "description": "Default"
+    },
+    {
+      "name": "OR",
+      "description": ""
+    }
+  ]
+}

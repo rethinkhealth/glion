@@ -1,0 +1,19 @@
+{
+  "id": "0739",
+  "description": "Status Patient",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Normal length of stay"
+    },
+    {
+      "name": "2",
+      "description": "Short length of stay"
+    },
+    {
+      "name": "3",
+      "description": "Long length of stay"
+    }
+  ]
+}

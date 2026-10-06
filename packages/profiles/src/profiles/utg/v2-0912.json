@@ -1,0 +1,269 @@
+{
+  "id": "v2-0912",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0912",
+  "oid": "2.16.840.1.113883.18.420",
+  "name": "Participation",
+  "title": "participation",
+  "codes": [
+    {
+      "code": "AAP",
+      "display": "Alert Acknowledging Provider",
+      "status": "active"
+    },
+    {
+      "code": "AC",
+      "display": "Administration Cosigner",
+      "status": "active"
+    },
+    {
+      "code": "AD",
+      "display": "Admitting Provider",
+      "status": "active"
+    },
+    {
+      "code": "AHP",
+      "display": "Authorized Performing Health Professional",
+      "status": "N"
+    },
+    {
+      "code": "AI",
+      "display": "Assistant/Alternate Interpreter",
+      "status": "active"
+    },
+    {
+      "code": "AP",
+      "display": "Administering Provider",
+      "status": "active"
+    },
+    {
+      "code": "APO",
+      "display": "Authorized Performing Provider Organization",
+      "status": "N"
+    },
+    {
+      "code": "ARI",
+      "display": "Assistant Result Interpreter",
+      "status": "active"
+    },
+    {
+      "code": "AT",
+      "display": "Attending Provider",
+      "status": "active"
+    },
+    {
+      "code": "AUT",
+      "display": "Author/Event Initiator",
+      "status": "active"
+    },
+    {
+      "code": "CLPO",
+      "display": "Collecting Provider Organization",
+      "status": "N"
+    },
+    {
+      "code": "CP",
+      "display": "Consulting Provider",
+      "status": "active"
+    },
+    {
+      "code": "DIE",
+      "display": "De-Identification Entity",
+      "status": "N"
+    },
+    {
+      "code": "DP",
+      "display": "Dispensing Provider",
+      "status": "active"
+    },
+    {
+      "code": "EARI",
+      "display": "Expected Assistant Result Interpreter",
+      "status": "N"
+    },
+    {
+      "code": "ED",
+      "display": "Entering Device",
+      "status": "N"
+    },
+    {
+      "code": "EO",
+      "display": "Entering Organization",
+      "status": "N"
+    },
+    {
+      "code": "EP",
+      "display": "Entering Person",
+      "status": "active"
+    },
+    {
+      "code": "EPRI",
+      "display": "Expected Principal Result Interpreter",
+      "status": "N"
+    },
+    {
+      "code": "EQUIP",
+      "display": "Equipment",
+      "status": "active"
+    },
+    {
+      "code": "FHCP",
+      "display": "Family Health Care Professional",
+      "status": "active"
+    },
+    {
+      "code": "FL",
+      "display": "From Location",
+      "status": "N"
+    },
+    {
+      "code": "MDIR",
+      "display": "Medical Director",
+      "status": "active"
+    },
+    {
+      "code": "OF",
+      "display": "Ordering Facility",
+      "status": "N"
+    },
+    {
+      "code": "OP",
+      "display": "Ordering Provider",
+      "status": "active"
+    },
+    {
+      "code": "OPO",
+      "display": "Ordering Provider Organization",
+      "status": "N"
+    },
+    {
+      "code": "OS",
+      "display": "Outside Site(s) Where Observation May Be Performed",
+      "status": "active"
+    },
+    {
+      "code": "PB",
+      "display": "Packed by",
+      "status": "active"
+    },
+    {
+      "code": "PH",
+      "display": "Pharmacist",
+      "status": "active"
+    },
+    {
+      "code": "PI",
+      "display": "Primary Interpreter",
+      "status": "active"
+    },
+    {
+      "code": "PO",
+      "display": "Performing Organization",
+      "status": "active"
+    },
+    {
+      "code": "POMD",
+      "display": "Performing Organization Medical Director",
+      "status": "active"
+    },
+    {
+      "code": "PP",
+      "display": "Primary Care Provider",
+      "status": "active"
+    },
+    {
+      "code": "PPH",
+      "display": "Patient Preferred Pharmacy",
+      "status": "N"
+    },
+    {
+      "code": "PRI",
+      "display": "Principal Result Interpreter",
+      "status": "active"
+    },
+    {
+      "code": "RCT",
+      "display": "Results Copies To",
+      "status": "active"
+    },
+    {
+      "code": "RHP",
+      "display": "Referring Health Professional",
+      "status": "N"
+    },
+    {
+      "code": "RIE",
+      "display": "Re-Identification Entity",
+      "status": "N"
+    },
+    {
+      "code": "RO",
+      "display": "Responsible Observer",
+      "status": "active"
+    },
+    {
+      "code": "RP",
+      "display": "Referring Provider",
+      "status": "active"
+    },
+    {
+      "code": "RPO",
+      "display": "Referring Provider Organization",
+      "status": "N"
+    },
+    {
+      "code": "RT",
+      "display": "Referred to Provider",
+      "status": "active"
+    },
+    {
+      "code": "SB",
+      "display": "Send by",
+      "status": "active"
+    },
+    {
+      "code": "SC",
+      "display": "Specimen Collector",
+      "status": "active"
+    },
+    {
+      "code": "TL",
+      "display": "To Location",
+      "status": "N"
+    },
+    {
+      "code": "TN",
+      "display": "Technician",
+      "status": "active"
+    },
+    {
+      "code": "TR",
+      "display": "Transcriptionist",
+      "status": "active"
+    },
+    {
+      "code": "VP",
+      "display": "Verifier (Verifying Person)",
+      "status": "active"
+    },
+    {
+      "code": "VPS",
+      "display": "Verifying Pharmaceutical Supplier   (not sure how to dissect Pharmacist/Treatment Supplier&#39;s Verifier ID)",
+      "status": "deprecated"
+    },
+    {
+      "code": "VTS",
+      "display": "Verifying Treatment Supplier   (not sure how to dissect Pharmacist/Treatment Supplier&#39;s Verifier ID)",
+      "status": "deprecated"
+    },
+    {
+      "code": "WAY",
+      "display": "Waypoint",
+      "status": "active"
+    },
+    {
+      "code": "WAYR",
+      "display": "Waypoint Recipient",
+      "status": "active"
+    }
+  ]
+}

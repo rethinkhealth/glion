@@ -1,0 +1,23 @@
+{
+  "id": "0236",
+  "description": "Event reported to",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Distributor"
+    },
+    {
+      "name": "L",
+      "description": "Local facility/user facility"
+    },
+    {
+      "name": "M",
+      "description": "Manufacturer"
+    },
+    {
+      "name": "R",
+      "description": "Regulatory agency"
+    }
+  ]
+}

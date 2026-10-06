@@ -1,0 +1,27 @@
+{
+  "id": "0475",
+  "description": "Charge Type Reason",
+  "type": "user",
+  "codes": [
+    {
+      "name": "01",
+      "description": "Allergy"
+    },
+    {
+      "name": "02",
+      "description": "Intolerance"
+    },
+    {
+      "name": "03",
+      "description": "Treatment Failure"
+    },
+    {
+      "name": "04",
+      "description": "Patient Request"
+    },
+    {
+      "name": "05",
+      "description": "No Exception"
+    }
+  ]
+}

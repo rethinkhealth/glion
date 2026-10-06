@@ -1,0 +1,39 @@
+{
+  "id": "v2-0530",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0530",
+  "oid": "2.16.840.1.113883.18.346",
+  "name": "OrganizationAgencyDepartment",
+  "title": "organization-Agency-Department",
+  "codes": [
+    {
+      "code": "AE",
+      "display": "American Express",
+      "status": "active"
+    },
+    {
+      "code": "DEA",
+      "display": "Drug Enforcement Agency",
+      "status": "active"
+    },
+    {
+      "code": "DOD",
+      "display": "Department of Defense",
+      "status": "active"
+    },
+    {
+      "code": "MC",
+      "display": "Master Card",
+      "status": "active"
+    },
+    {
+      "code": "VA",
+      "display": "Veterans Affairs",
+      "status": "active"
+    },
+    {
+      "code": "VI",
+      "display": "Visa",
+      "status": "active"
+    }
+  ]
+}

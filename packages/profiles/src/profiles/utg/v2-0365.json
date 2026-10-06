@@ -1,0 +1,109 @@
+{
+  "id": "v2-0365",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0365",
+  "oid": "2.16.840.1.113883.18.223",
+  "name": "EquipmentState",
+  "title": "equipmentState",
+  "codes": [
+    {
+      "code": "...",
+      "display": "(null) No state change",
+      "status": "deprecated"
+    },
+    {
+      "code": "&#x2026;",
+      "display": "(null) No state change",
+      "status": "deprecated"
+    },
+    {
+      "code": "CL",
+      "display": "Clearing",
+      "status": "active"
+    },
+    {
+      "code": "CO",
+      "display": "Configuring",
+      "status": "active"
+    },
+    {
+      "code": "DI",
+      "display": "Diagnose",
+      "status": "active"
+    },
+    {
+      "code": "ES",
+      "display": "E-stopped",
+      "status": "active"
+    },
+    {
+      "code": "FL",
+      "display": "Failure",
+      "status": "active"
+    },
+    {
+      "code": "ID",
+      "display": "Idle",
+      "status": "active"
+    },
+    {
+      "code": "IN",
+      "display": "Initializing",
+      "status": "active"
+    },
+    {
+      "code": "LT",
+      "display": "Limited test menu",
+      "status": "active"
+    },
+    {
+      "code": "MA",
+      "display": "Maintenance",
+      "status": "active"
+    },
+    {
+      "code": "OP",
+      "display": "Normal Operation",
+      "status": "active"
+    },
+    {
+      "code": "PA",
+      "display": "Pausing",
+      "status": "active"
+    },
+    {
+      "code": "PD",
+      "display": "Paused",
+      "status": "active"
+    },
+    {
+      "code": "PU",
+      "display": "Powered Up",
+      "status": "active"
+    },
+    {
+      "code": "RS",
+      "display": "Ready to start",
+      "status": "active"
+    },
+    {
+      "code": "SD",
+      "display": "Shutting down",
+      "status": "active"
+    },
+    {
+      "code": "SS",
+      "display": "Sampling stopped",
+      "status": "active"
+    },
+    {
+      "code": "TS",
+      "display": "Transport stopped",
+      "status": "active"
+    },
+    {
+      "code": "UNK",
+      "display": "Unknown",
+      "status": "active"
+    }
+  ]
+}

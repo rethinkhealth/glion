@@ -1,0 +1,19 @@
+{
+  "id": "0918",
+  "description": "PCA Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Continuous"
+    },
+    {
+      "name": "P",
+      "description": "PCA Only"
+    },
+    {
+      "name": "PC",
+      "description": "PCA + Continuous"
+    }
+  ]
+}

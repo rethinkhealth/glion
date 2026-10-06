@@ -1,0 +1,250 @@
+{
+  "segmentId": "IVT",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "IVT-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set Id - IVT",
+      "item": "2062"
+    },
+    {
+      "sequence": 2,
+      "id": "IVT-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Inventory Location Identifier",
+      "item": "2063"
+    },
+    {
+      "sequence": 3,
+      "id": "IVT-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Inventory Location Name",
+      "item": "2277"
+    },
+    {
+      "sequence": 4,
+      "id": "IVT-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Source Location Identifier",
+      "item": "2064"
+    },
+    {
+      "sequence": 5,
+      "id": "IVT-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Source Location Name",
+      "item": "2278"
+    },
+    {
+      "sequence": 6,
+      "id": "IVT-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70625",
+      "name": "Item Status",
+      "item": "2065"
+    },
+    {
+      "sequence": 7,
+      "id": "IVT-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "EI",
+      "name": "Bin Location Identifier",
+      "item": "2066"
+    },
+    {
+      "sequence": 8,
+      "id": "IVT-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70818",
+      "name": "Order Packaging",
+      "item": "2067"
+    },
+    {
+      "sequence": 9,
+      "id": "IVT-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Issue Packaging",
+      "item": "2068"
+    },
+    {
+      "sequence": 10,
+      "id": "IVT-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Default Inventory Asset Account",
+      "item": "2069"
+    },
+    {
+      "sequence": 11,
+      "id": "IVT-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70532",
+      "name": "Patient Chargeable Indicator",
+      "item": "2070"
+    },
+    {
+      "sequence": 12,
+      "id": "IVT-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70132",
+      "name": "Transaction Code",
+      "item": "361"
+    },
+    {
+      "sequence": 13,
+      "id": "IVT-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CP",
+      "name": "Transaction amount - unit",
+      "item": "366"
+    },
+    {
+      "sequence": 14,
+      "id": "IVT-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70634",
+      "name": "Item Importance Code",
+      "item": "2073"
+    },
+    {
+      "sequence": 15,
+      "id": "IVT-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70532",
+      "name": "Stocked Item Indicator",
+      "item": "2074"
+    },
+    {
+      "sequence": 16,
+      "id": "IVT-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70532",
+      "name": "Consignment Item Indicator",
+      "item": "2075"
+    },
+    {
+      "sequence": 17,
+      "id": "IVT-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70532",
+      "name": "Reusable Item Indicator",
+      "item": "2076"
+    },
+    {
+      "sequence": 18,
+      "id": "IVT-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CP",
+      "name": "Reusable Cost",
+      "item": "2077"
+    },
+    {
+      "sequence": 19,
+      "id": "IVT-19",
+      "required": false,
+      "repeatable": true,
+      "datatype": "EI",
+      "name": "Substitute Item Identifier",
+      "item": "2078"
+    },
+    {
+      "sequence": 20,
+      "id": "IVT-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Latex-Free Substitute Item Identifier",
+      "item": "2079"
+    },
+    {
+      "sequence": 21,
+      "id": "IVT-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70642",
+      "name": "Recommended Reorder Theory",
+      "item": "2080"
+    },
+    {
+      "sequence": 22,
+      "id": "IVT-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Recommended Safety Stock Days",
+      "item": "2081"
+    },
+    {
+      "sequence": 23,
+      "id": "IVT-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Recommended Maximum Days Inventory",
+      "item": "2082"
+    },
+    {
+      "sequence": 24,
+      "id": "IVT-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Recommended Order Point",
+      "item": "2083"
+    },
+    {
+      "sequence": 25,
+      "id": "IVT-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Recommended Order Amount",
+      "item": "2084"
+    },
+    {
+      "sequence": 26,
+      "id": "IVT-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70532",
+      "name": "Operating Room Par Level Indicator",
+      "item": "2085"
+    }
+  ]
+}

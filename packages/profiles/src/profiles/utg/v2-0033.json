@@ -1,0 +1,149 @@
+{
+  "id": "v2-0033",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0033",
+  "oid": "2.16.840.1.113883.18.16",
+  "name": "Route",
+  "title": "route",
+  "codes": [
+    {
+      "code": "AP",
+      "display": "Apply externally",
+      "status": "active"
+    },
+    {
+      "code": "CH",
+      "display": "Chew",
+      "status": "active"
+    },
+    {
+      "code": "DU",
+      "display": "Dust",
+      "status": "active"
+    },
+    {
+      "code": "EA",
+      "display": "Ear",
+      "status": "active"
+    },
+    {
+      "code": "EY",
+      "display": "Eye",
+      "status": "active"
+    },
+    {
+      "code": "IA",
+      "display": "Intro-arterial",
+      "status": "active"
+    },
+    {
+      "code": "ID",
+      "display": "Intra-dermal",
+      "status": "active"
+    },
+    {
+      "code": "IF",
+      "display": "Infiltrate",
+      "status": "active"
+    },
+    {
+      "code": "IH",
+      "display": "Inhalation",
+      "status": "active"
+    },
+    {
+      "code": "IM",
+      "display": "Intra-muscular",
+      "status": "active"
+    },
+    {
+      "code": "IN",
+      "display": "Intra-nasal",
+      "status": "active"
+    },
+    {
+      "code": "IR",
+      "display": "Irrigate",
+      "status": "active"
+    },
+    {
+      "code": "IS",
+      "display": "Inserted",
+      "status": "active"
+    },
+    {
+      "code": "IT",
+      "display": "Intrathecal",
+      "status": "active"
+    },
+    {
+      "code": "IV",
+      "display": "Intravenous",
+      "status": "active"
+    },
+    {
+      "code": "NB",
+      "display": "Nebulized",
+      "status": "active"
+    },
+    {
+      "code": "NG",
+      "display": "Nathogasic",
+      "status": "active"
+    },
+    {
+      "code": "PA",
+      "display": "Peri-anally",
+      "status": "active"
+    },
+    {
+      "code": "PT",
+      "display": "Paint",
+      "status": "active"
+    },
+    {
+      "code": "PU",
+      "display": "IV push",
+      "status": "active"
+    },
+    {
+      "code": "RC",
+      "display": "Rectally",
+      "status": "active"
+    },
+    {
+      "code": "SH",
+      "display": "Shampoo",
+      "status": "active"
+    },
+    {
+      "code": "SL",
+      "display": "Sublingual",
+      "status": "active"
+    },
+    {
+      "code": "SO",
+      "display": "Soak",
+      "status": "active"
+    },
+    {
+      "code": "SS",
+      "display": "IV soluset",
+      "status": "active"
+    },
+    {
+      "code": "TP",
+      "display": "Topically",
+      "status": "active"
+    },
+    {
+      "code": "WA",
+      "display": "Wash",
+      "status": "active"
+    },
+    {
+      "code": "WI",
+      "display": "Wipe",
+      "status": "active"
+    }
+  ]
+}

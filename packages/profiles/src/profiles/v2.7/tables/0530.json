@@ -1,0 +1,31 @@
+{
+  "id": "0530",
+  "description": "Organization, Agency, Department",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AE",
+      "description": "American Express"
+    },
+    {
+      "name": "DEA",
+      "description": "Drug Enforcement Agency"
+    },
+    {
+      "name": "DOD",
+      "description": "Department of Defense"
+    },
+    {
+      "name": "MC",
+      "description": "Master Card"
+    },
+    {
+      "name": "VA",
+      "description": "Veterans Affairs"
+    },
+    {
+      "name": "VI",
+      "description": "Visa"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "0506",
+  "description": "Service Request Relationship",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Compound"
+    },
+    {
+      "name": "E",
+      "description": "Exclusive"
+    },
+    {
+      "name": "N",
+      "description": "Nurse prerogative"
+    },
+    {
+      "name": "S",
+      "description": "Simultaneous"
+    },
+    {
+      "name": "T",
+      "description": "Tapering"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "v2-0920",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0920",
+  "oid": "2.16.840.1.113883.18.426",
+  "name": "PreferredSpecimenAttributeStatus",
+  "title": "preferredSpecimen-AttributeStatus",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Alternate",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Preferred",
+      "status": "active"
+    }
+  ]
+}

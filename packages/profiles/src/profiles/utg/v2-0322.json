@@ -1,0 +1,29 @@
+{
+  "id": "v2-0322",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0322",
+  "oid": "2.16.840.1.113883.18.195",
+  "name": "CompletionStatus",
+  "title": "completionStatus",
+  "codes": [
+    {
+      "code": "CP",
+      "display": "Complete",
+      "status": "active"
+    },
+    {
+      "code": "NA",
+      "display": "Not Administered",
+      "status": "active"
+    },
+    {
+      "code": "PA",
+      "display": "Partially Administered",
+      "status": "active"
+    },
+    {
+      "code": "RE",
+      "display": "Refused",
+      "status": "active"
+    }
+  ]
+}

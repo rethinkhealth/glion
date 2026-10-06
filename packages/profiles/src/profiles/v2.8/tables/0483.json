@@ -1,0 +1,47 @@
+{
+  "id": "0483",
+  "description": "Authorization Mode",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "EL",
+      "description": "Electronic"
+    },
+    {
+      "name": "EM",
+      "description": "E-mail"
+    },
+    {
+      "name": "FX",
+      "description": "Fax"
+    },
+    {
+      "name": "IP",
+      "description": "In Person"
+    },
+    {
+      "name": "MA",
+      "description": "Mail"
+    },
+    {
+      "name": "PA",
+      "description": "Paper"
+    },
+    {
+      "name": "PH",
+      "description": "Phone"
+    },
+    {
+      "name": "RE",
+      "description": "Reflexive (Automated system)"
+    },
+    {
+      "name": "VC",
+      "description": "Video-conference"
+    },
+    {
+      "name": "VO",
+      "description": "Voice"
+    }
+  ]
+}

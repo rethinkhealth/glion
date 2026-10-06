@@ -1,0 +1,804 @@
+{
+  "id": "v2-0076",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0076",
+  "oid": "2.16.840.1.113883.18.30",
+  "name": "MessageType",
+  "title": "messageType",
+  "codes": [
+    {
+      "code": "ACK",
+      "display": "General acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "ADR",
+      "display": "ADT response",
+      "status": "active"
+    },
+    {
+      "code": "ADT",
+      "display": "ADT message",
+      "status": "active"
+    },
+    {
+      "code": "ARD",
+      "display": "Ancillary RPT (display) (for backward compatibility only)",
+      "status": "active"
+    },
+    {
+      "code": "BAR",
+      "display": "Add/change billing account",
+      "status": "active"
+    },
+    {
+      "code": "BPS",
+      "display": "Blood product dispense status message",
+      "status": "active"
+    },
+    {
+      "code": "BRP",
+      "display": "Blood product dispense status acknowledgement message",
+      "status": "active"
+    },
+    {
+      "code": "BRT",
+      "display": "Blood product transfusion/disposition acknowledgement message",
+      "status": "active"
+    },
+    {
+      "code": "BTS",
+      "display": "Blood product transfusion/disposition message",
+      "status": "active"
+    },
+    {
+      "code": "CCF",
+      "display": "Collaborative Care Fetch",
+      "status": "active"
+    },
+    {
+      "code": "CCI",
+      "display": "Collaborative Care Information",
+      "status": "active"
+    },
+    {
+      "code": "CCM",
+      "display": "Collaborative Care Message",
+      "status": "active"
+    },
+    {
+      "code": "CCQ",
+      "display": "Collaborative Care Referral",
+      "status": "active"
+    },
+    {
+      "code": "CCU",
+      "display": "Collaborative Care Referral",
+      "status": "active"
+    },
+    {
+      "code": "CNQ",
+      "display": "Cancel query",
+      "status": "active"
+    },
+    {
+      "code": "CQU",
+      "display": "Collaborative Care Referral",
+      "status": "active"
+    },
+    {
+      "code": "CRM",
+      "display": "Clinical study registration message",
+      "status": "active"
+    },
+    {
+      "code": "CSU",
+      "display": "Unsolicited study data message",
+      "status": "active"
+    },
+    {
+      "code": "DBC",
+      "display": "Create Donor Record",
+      "status": "active"
+    },
+    {
+      "code": "DBU",
+      "display": "Update Donor Record",
+      "status": "active"
+    },
+    {
+      "code": "DEL",
+      "display": "Donor Eligibility",
+      "status": "active"
+    },
+    {
+      "code": "DEO",
+      "display": "Donor Eligibility Observation",
+      "status": "active"
+    },
+    {
+      "code": "DER",
+      "display": "Donor Eligibility Request",
+      "status": "active"
+    },
+    {
+      "code": "DFT",
+      "display": "Detail financial transactions",
+      "status": "active"
+    },
+    {
+      "code": "DOC",
+      "display": "Document response",
+      "status": "active"
+    },
+    {
+      "code": "DPR",
+      "display": "Donation Procedure",
+      "status": "active"
+    },
+    {
+      "code": "DRC",
+      "display": "Donor Request to Collect",
+      "status": "active"
+    },
+    {
+      "code": "DSR",
+      "display": "Display response",
+      "status": "active"
+    },
+    {
+      "code": "EAC",
+      "display": "Automated equipment command message",
+      "status": "active"
+    },
+    {
+      "code": "EAN",
+      "display": "Automated equipment notification message",
+      "status": "active"
+    },
+    {
+      "code": "EAR",
+      "display": "Automated equipment response message",
+      "status": "active"
+    },
+    {
+      "code": "EDR",
+      "display": "Enhanced display response",
+      "status": "active"
+    },
+    {
+      "code": "EHC",
+      "display": "Health Care Invoice",
+      "status": "active"
+    },
+    {
+      "code": "EQQ",
+      "display": "Embedded query language query",
+      "status": "active"
+    },
+    {
+      "code": "ERP",
+      "display": "Event replay response",
+      "status": "active"
+    },
+    {
+      "code": "ERQ",
+      "display": "Event replay query",
+      "status": "active"
+    },
+    {
+      "code": "ESR",
+      "display": "Automated equipment status update acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "ESU",
+      "display": "Automated equipment status update message",
+      "status": "active"
+    },
+    {
+      "code": "INR",
+      "display": "Automated equipment inventory request message",
+      "status": "active"
+    },
+    {
+      "code": "INU",
+      "display": "Automated equipment inventory update message",
+      "status": "active"
+    },
+    {
+      "code": "LSR",
+      "display": "Automated equipment log/service request message",
+      "status": "active"
+    },
+    {
+      "code": "LSU",
+      "display": "Automated equipment log/service update message",
+      "status": "active"
+    },
+    {
+      "code": "MCF",
+      "display": "Delayed Acknowledgment (Retained for backward compatibility only)",
+      "status": "active"
+    },
+    {
+      "code": "MDM",
+      "display": "Medical document management",
+      "status": "active"
+    },
+    {
+      "code": "MFD",
+      "display": "Master files delayed application acknowledgment",
+      "status": "active"
+    },
+    {
+      "code": "MFK",
+      "display": "Master files application acknowledgment",
+      "status": "active"
+    },
+    {
+      "code": "MFN",
+      "display": "Master files notification",
+      "status": "active"
+    },
+    {
+      "code": "MFQ",
+      "display": "Master files query",
+      "status": "active"
+    },
+    {
+      "code": "MFR",
+      "display": "Master files response",
+      "status": "active"
+    },
+    {
+      "code": "NMD",
+      "display": "Application management data message",
+      "status": "active"
+    },
+    {
+      "code": "NMQ",
+      "display": "Application management query message",
+      "status": "active"
+    },
+    {
+      "code": "NMR",
+      "display": "Application management response message",
+      "status": "active"
+    },
+    {
+      "code": "OMB",
+      "display": "Blood product order message",
+      "status": "active"
+    },
+    {
+      "code": "OMD",
+      "display": "Dietary order",
+      "status": "active"
+    },
+    {
+      "code": "OMG",
+      "display": "General clinical order message",
+      "status": "active"
+    },
+    {
+      "code": "OMI",
+      "display": "Imaging order",
+      "status": "active"
+    },
+    {
+      "code": "OML",
+      "display": "Laboratory order message",
+      "status": "active"
+    },
+    {
+      "code": "OMN",
+      "display": "Non-stock requisition order message",
+      "status": "active"
+    },
+    {
+      "code": "OMP",
+      "display": "Pharmacy/treatment order message",
+      "status": "active"
+    },
+    {
+      "code": "OMQ",
+      "display": "General order message with document payload",
+      "status": "active"
+    },
+    {
+      "code": "OMS",
+      "display": "Stock requisition order message",
+      "status": "active"
+    },
+    {
+      "code": "OPL",
+      "display": "Population/Location-Based Laboratory Order Message",
+      "status": "active"
+    },
+    {
+      "code": "OPR",
+      "display": "Population/Location-Based Laboratory Order Acknowledgment Message",
+      "status": "active"
+    },
+    {
+      "code": "OPU",
+      "display": "Unsolicited Population/Location-Based Laboratory Observation Message",
+      "status": "active"
+    },
+    {
+      "code": "ORA",
+      "display": "Observation Report Acknowledgment",
+      "status": "active"
+    },
+    {
+      "code": "ORB",
+      "display": "Blood product order acknowledgement message",
+      "status": "active"
+    },
+    {
+      "code": "ORD",
+      "display": "Dietary order acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "ORF",
+      "display": "Query for results of observation",
+      "status": "active"
+    },
+    {
+      "code": "ORG",
+      "display": "General clinical order acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "ORI",
+      "display": "Imaging order acknowledgement message",
+      "status": "active"
+    },
+    {
+      "code": "ORL",
+      "display": "Laboratory acknowledgment message (unsolicited)",
+      "status": "active"
+    },
+    {
+      "code": "ORM",
+      "display": "Pharmacy/treatment order message",
+      "status": "active"
+    },
+    {
+      "code": "ORN",
+      "display": "Non-stock requisition - General order acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "ORP",
+      "display": "Pharmacy/treatment order acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "ORR",
+      "display": "General order response message response to any ORM",
+      "status": "active"
+    },
+    {
+      "code": "ORS",
+      "display": "Stock requisition - Order acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "ORU",
+      "display": "Unsolicited transmission of an observation message",
+      "status": "active"
+    },
+    {
+      "code": "ORX",
+      "display": "General Order Message with Document Payload Acknowledgement",
+      "status": "active"
+    },
+    {
+      "code": "OSM",
+      "display": "Specimen Shipment Message",
+      "status": "active"
+    },
+    {
+      "code": "OSQ",
+      "display": "Query response for order status",
+      "status": "active"
+    },
+    {
+      "code": "OSR",
+      "display": "Query response for order status",
+      "status": "active"
+    },
+    {
+      "code": "OSU",
+      "display": "Order status update",
+      "status": "active"
+    },
+    {
+      "code": "OUL",
+      "display": "Unsolicited laboratory observation message",
+      "status": "active"
+    },
+    {
+      "code": "PEX",
+      "display": "Product experience message",
+      "status": "active"
+    },
+    {
+      "code": "PGL",
+      "display": "Patient goal message",
+      "status": "active"
+    },
+    {
+      "code": "PIN",
+      "display": "Patient insurance information",
+      "status": "active"
+    },
+    {
+      "code": "PMU",
+      "display": "Add personnel record",
+      "status": "active"
+    },
+    {
+      "code": "PPG",
+      "display": "Patient pathway message (goal-oriented)",
+      "status": "active"
+    },
+    {
+      "code": "PPP",
+      "display": "Patient pathway message (problem-oriented)",
+      "status": "active"
+    },
+    {
+      "code": "PPR",
+      "display": "Patient problem message",
+      "status": "active"
+    },
+    {
+      "code": "PPT",
+      "display": "Patient pathway goal-oriented response",
+      "status": "active"
+    },
+    {
+      "code": "PPV",
+      "display": "Patient goal response",
+      "status": "active"
+    },
+    {
+      "code": "PRR",
+      "display": "Patient problem response",
+      "status": "active"
+    },
+    {
+      "code": "PTR",
+      "display": "Patient pathway problem-oriented response",
+      "status": "active"
+    },
+    {
+      "code": "QBP",
+      "display": "Query by parameter",
+      "status": "active"
+    },
+    {
+      "code": "QCK",
+      "display": "Query general acknowledgment",
+      "status": "active"
+    },
+    {
+      "code": "QCN",
+      "display": "Cancel query",
+      "status": "active"
+    },
+    {
+      "code": "QRY",
+      "display": "Query, original mode",
+      "status": "active"
+    },
+    {
+      "code": "QSB",
+      "display": "Create subscription",
+      "status": "active"
+    },
+    {
+      "code": "QSX",
+      "display": "Cancel subscription/acknowledge message",
+      "status": "active"
+    },
+    {
+      "code": "QVR",
+      "display": "Query for previous events",
+      "status": "active"
+    },
+    {
+      "code": "RAR",
+      "display": "Pharmacy/treatment administration information",
+      "status": "active"
+    },
+    {
+      "code": "RAS",
+      "display": "Pharmacy/treatment administration message",
+      "status": "active"
+    },
+    {
+      "code": "RCI",
+      "display": "Return clinical information",
+      "status": "active"
+    },
+    {
+      "code": "RCL",
+      "display": "Return clinical list",
+      "status": "active"
+    },
+    {
+      "code": "RDE",
+      "display": "Pharmacy/treatment encoded order message",
+      "status": "active"
+    },
+    {
+      "code": "RDR",
+      "display": "Pharmacy/treatment dispense information",
+      "status": "active"
+    },
+    {
+      "code": "RDS",
+      "display": "Pharmacy/treatment dispense message",
+      "status": "active"
+    },
+    {
+      "code": "RDY",
+      "display": "Display based response",
+      "status": "active"
+    },
+    {
+      "code": "REF",
+      "display": "Patient referral",
+      "status": "active"
+    },
+    {
+      "code": "RER",
+      "display": "Pharmacy/treatment encoded order information",
+      "status": "active"
+    },
+    {
+      "code": "RGR",
+      "display": "Pharmacy/treatment dose information",
+      "status": "active"
+    },
+    {
+      "code": "RGV",
+      "display": "Pharmacy/treatment give message",
+      "status": "active"
+    },
+    {
+      "code": "ROC",
+      "display": "Request clinical information",
+      "status": "active"
+    },
+    {
+      "code": "ROD",
+      "display": "Request pateint demographics",
+      "status": "active"
+    },
+    {
+      "code": "ROR",
+      "display": "Pharmacy/treatment order response",
+      "status": "active"
+    },
+    {
+      "code": "RPA",
+      "display": "Return patient authorization",
+      "status": "active"
+    },
+    {
+      "code": "RPI",
+      "display": "Return patient information",
+      "status": "active"
+    },
+    {
+      "code": "RPL",
+      "display": "Return patient display list",
+      "status": "active"
+    },
+    {
+      "code": "RPR",
+      "display": "Return patient list",
+      "status": "active"
+    },
+    {
+      "code": "RQA",
+      "display": "Request patient authorization",
+      "status": "active"
+    },
+    {
+      "code": "RQC",
+      "display": "Request clinical information",
+      "status": "active"
+    },
+    {
+      "code": "RQI",
+      "display": "Request patient information",
+      "status": "active"
+    },
+    {
+      "code": "RQP",
+      "display": "Request patient demographics",
+      "status": "active"
+    },
+    {
+      "code": "RQQ",
+      "display": "Event replay query",
+      "status": "active"
+    },
+    {
+      "code": "RRA",
+      "display": "Pharmacy/treatment administration acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "RRD",
+      "display": "Pharmacy/treatment dispense acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "RRE",
+      "display": "Pharmacy/treatment encoded order acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "RRG",
+      "display": "Pharmacy/treatment give acknowledgment message",
+      "status": "active"
+    },
+    {
+      "code": "RRI",
+      "display": "Return referral information",
+      "status": "active"
+    },
+    {
+      "code": "RSP",
+      "display": "Segment pattern response",
+      "status": "active"
+    },
+    {
+      "code": "RTB",
+      "display": "Tabular response",
+      "status": "active"
+    },
+    {
+      "code": "SCN",
+      "display": "Notification of Anti-Microbial Device Cycle Data",
+      "status": "active"
+    },
+    {
+      "code": "SDN",
+      "display": "Notification of Anti-Microbial Device Data",
+      "status": "active"
+    },
+    {
+      "code": "SDR",
+      "display": "Sterilization anti-microbial device data request",
+      "status": "active"
+    },
+    {
+      "code": "SET",
+      "display": "Specimen Event Tracking",
+      "status": "N"
+    },
+    {
+      "code": "SIU",
+      "display": "Schedule information unsolicited",
+      "status": "active"
+    },
+    {
+      "code": "SLN",
+      "display": "Notification of New Sterilization Lot",
+      "status": "active"
+    },
+    {
+      "code": "SLR",
+      "display": "Sterilization lot request",
+      "status": "active"
+    },
+    {
+      "code": "SMD",
+      "display": "Sterilization anti-microbial device cycle data request",
+      "status": "active"
+    },
+    {
+      "code": "SPQ",
+      "display": "Stored procedure request",
+      "status": "active"
+    },
+    {
+      "code": "SQM",
+      "display": "Schedule query message",
+      "status": "active"
+    },
+    {
+      "code": "SQR",
+      "display": "Schedule query response",
+      "status": "active"
+    },
+    {
+      "code": "SRM",
+      "display": "Schedule request message",
+      "status": "active"
+    },
+    {
+      "code": "SRR",
+      "display": "Scheduled request response",
+      "status": "active"
+    },
+    {
+      "code": "SSR",
+      "display": "Specimen status request message",
+      "status": "active"
+    },
+    {
+      "code": "SSU",
+      "display": "Specimen status update message",
+      "status": "active"
+    },
+    {
+      "code": "STC",
+      "display": "Notification of Sterilization Configuration",
+      "status": "active"
+    },
+    {
+      "code": "STI",
+      "display": "Sterilization item request",
+      "status": "active"
+    },
+    {
+      "code": "SUR",
+      "display": "Summary product experience report",
+      "status": "active"
+    },
+    {
+      "code": "TBR",
+      "display": "Tabular data response",
+      "status": "active"
+    },
+    {
+      "code": "TCR",
+      "display": "Automated equipment test code settings request message",
+      "status": "active"
+    },
+    {
+      "code": "TCU",
+      "display": "Automated equipment test code settings update message",
+      "status": "active"
+    },
+    {
+      "code": "UDM",
+      "display": "Unsolicited display update message",
+      "status": "active"
+    },
+    {
+      "code": "VQQ",
+      "display": "Virtual table query",
+      "status": "active"
+    },
+    {
+      "code": "VXQ",
+      "display": "Query for vaccination record",
+      "status": "active"
+    },
+    {
+      "code": "VXR",
+      "display": "Vaccination record response",
+      "status": "active"
+    },
+    {
+      "code": "VXU",
+      "display": "Unsolicited vaccination record update",
+      "status": "active"
+    },
+    {
+      "code": "VXX",
+      "display": "Response for vaccination query with multiple PID matches",
+      "status": "active"
+    }
+  ]
+}

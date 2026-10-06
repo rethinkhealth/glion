@@ -1,0 +1,15 @@
+{
+  "id": "0107",
+  "description": "Deferred response type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Before the Date/Time specified"
+    },
+    {
+      "name": "L",
+      "description": "Later than the Date/Time specified"
+    }
+  ]
+}

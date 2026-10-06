@@ -1,0 +1,74 @@
+{
+  "id": "XPN",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "extended person name",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "family name",
+      "datatypeId": "FN",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "given name",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "second and further given names or initials thereof",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "suffix (e.g., JR or III)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "prefix (e.g., DR)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "degree (e.g., MD)",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 7,
+      "name": "name type code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 8,
+      "name": "Name Representation code",
+      "datatypeId": "ID",
+      "required": false
+    },
+    {
+      "sequence": 9,
+      "name": "name context",
+      "datatypeId": "CE",
+      "required": false
+    },
+    {
+      "sequence": 10,
+      "name": "name validity range",
+      "datatypeId": "DR",
+      "required": false
+    },
+    {
+      "sequence": 11,
+      "name": "name assembly order",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

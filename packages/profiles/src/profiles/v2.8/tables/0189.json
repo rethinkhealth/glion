@@ -1,0 +1,19 @@
+{
+  "id": "0189",
+  "description": "Ethnic Group",
+  "type": "user",
+  "codes": [
+    {
+      "name": "H",
+      "description": "Hispanic or Latino"
+    },
+    {
+      "name": "N",
+      "description": "Not Hispanic or Latino"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

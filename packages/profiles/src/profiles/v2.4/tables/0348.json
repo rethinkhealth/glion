@@ -1,0 +1,39 @@
+{
+  "id": "0348",
+  "description": "Special program indicator",
+  "type": "user",
+  "codes": [
+    {
+      "name": "01",
+      "description": "EPSDT-CHAP"
+    },
+    {
+      "name": "02",
+      "description": "Physically handicapped children's program"
+    },
+    {
+      "name": "03",
+      "description": "Special federal funding"
+    },
+    {
+      "name": "04",
+      "description": "Family planning"
+    },
+    {
+      "name": "05",
+      "description": "Disability"
+    },
+    {
+      "name": "06",
+      "description": "PPV/Medicare 100% payment"
+    },
+    {
+      "name": "07",
+      "description": "Induced abortion-danger to life"
+    },
+    {
+      "name": "08",
+      "description": "Induced abortion victim rape/incest"
+    }
+  ]
+}

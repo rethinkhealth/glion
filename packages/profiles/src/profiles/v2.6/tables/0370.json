@@ -1,0 +1,39 @@
+{
+  "id": "0370",
+  "description": "Container status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "I",
+      "description": "Identified"
+    },
+    {
+      "name": "L",
+      "description": "Left Equipment"
+    },
+    {
+      "name": "M",
+      "description": "Missing"
+    },
+    {
+      "name": "O",
+      "description": "In Process"
+    },
+    {
+      "name": "P",
+      "description": "In Position"
+    },
+    {
+      "name": "R",
+      "description": "Process Completed"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    },
+    {
+      "name": "X",
+      "description": "Container Unavailable"
+    }
+  ]
+}

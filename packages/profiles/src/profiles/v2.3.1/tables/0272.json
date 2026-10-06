@@ -1,0 +1,19 @@
+{
+  "id": "0272",
+  "description": "Document confidentiality status",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "R",
+      "description": "Restricted"
+    },
+    {
+      "name": "U",
+      "description": "Usual control"
+    },
+    {
+      "name": "V",
+      "description": "Very restricted"
+    }
+  ]
+}

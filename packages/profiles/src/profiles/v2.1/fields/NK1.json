@@ -1,0 +1,56 @@
+{
+  "segmentId": "NK1",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "NK1-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "SET ID - NEXT OF KIN",
+      "item": "712"
+    },
+    {
+      "sequence": 2,
+      "id": "NK1-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PN",
+      "maxLength": 48,
+      "name": "NEXT OF KIN NAME",
+      "item": "48"
+    },
+    {
+      "sequence": 3,
+      "id": "NK1-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 15,
+      "table": "HL70063",
+      "name": "NEXT OF KIN RELATIONSHIP",
+      "item": "47"
+    },
+    {
+      "sequence": 4,
+      "id": "NK1-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "AD",
+      "maxLength": 106,
+      "name": "NEXT OF KIN - ADDRESS",
+      "item": "225"
+    },
+    {
+      "sequence": 5,
+      "id": "NK1-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TN",
+      "maxLength": 40,
+      "name": "NEXT OF KIN - PHONE NUMBER",
+      "item": "230"
+    }
+  ]
+}

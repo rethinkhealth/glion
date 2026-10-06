@@ -1,0 +1,23 @@
+{
+  "id": "0557",
+  "description": "Payee Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "EMPL",
+      "description": "Employer"
+    },
+    {
+      "name": "ORG",
+      "description": "Payee Organization"
+    },
+    {
+      "name": "PERS",
+      "description": "Person"
+    },
+    {
+      "name": "PPER",
+      "description": "Pay Person"
+    }
+  ]
+}

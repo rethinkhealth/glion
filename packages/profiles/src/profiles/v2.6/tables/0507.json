@@ -1,0 +1,15 @@
+{
+  "id": "0507",
+  "description": "Observation Result Handling",
+  "type": "user",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Film-with-patient"
+    },
+    {
+      "name": "N",
+      "description": "Notify provider when ready"
+    }
+  ]
+}

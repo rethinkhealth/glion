@@ -1,0 +1,19 @@
+{
+  "id": "0516",
+  "description": "Error severity",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "E",
+      "description": "Error"
+    },
+    {
+      "name": "I",
+      "description": "Information"
+    },
+    {
+      "name": "W",
+      "description": "Warning"
+    }
+  ]
+}

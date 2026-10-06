@@ -1,0 +1,26 @@
+{
+  "id": "PI",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "person identifier",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "ID number (ST)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "type of ID number (IS)",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "other qualifying info",
+      "datatypeId": "ST",
+      "required": false
+    }
+  ]
+}

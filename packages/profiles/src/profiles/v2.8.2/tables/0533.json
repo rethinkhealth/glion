@@ -1,0 +1,11 @@
+{
+  "id": "0533",
+  "description": "Application Error Code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "0373",
+  "description": "Treatment",
+  "type": "user",
+  "codes": [
+    {
+      "name": "ACID",
+      "description": "Acidification"
+    },
+    {
+      "name": "ALK",
+      "description": "Alkalization"
+    },
+    {
+      "name": "DEFB",
+      "description": "Defibrination"
+    },
+    {
+      "name": "FILT",
+      "description": "Filtration"
+    },
+    {
+      "name": "LDLP",
+      "description": "LDL Precipitation"
+    },
+    {
+      "name": "NEUT",
+      "description": "Neutralization"
+    },
+    {
+      "name": "RECA",
+      "description": "Recalification"
+    },
+    {
+      "name": "UFIL",
+      "description": "Ultrafiltration"
+    }
+  ]
+}

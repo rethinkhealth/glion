@@ -1,0 +1,11 @@
+{
+  "id": "0285",
+  "description": "Insurance company ID codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

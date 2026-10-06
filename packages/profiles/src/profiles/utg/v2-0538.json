@@ -1,0 +1,29 @@
+{
+  "id": "v2-0538",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0538",
+  "oid": "2.16.840.1.113883.18.351",
+  "name": "InstitutionRelationshipType",
+  "title": "institutionRelationshipType",
+  "codes": [
+    {
+      "code": "CON",
+      "display": "Contractor",
+      "status": "active"
+    },
+    {
+      "code": "CST",
+      "display": "Consultant",
+      "status": "active"
+    },
+    {
+      "code": "EMP",
+      "display": "Employee",
+      "status": "active"
+    },
+    {
+      "code": "VOL",
+      "display": "Volunteer",
+      "status": "active"
+    }
+  ]
+}

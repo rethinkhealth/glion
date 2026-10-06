@@ -1,0 +1,179 @@
+{
+  "segmentId": "UB2",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "UB2-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - UB2",
+      "item": "553"
+    },
+    {
+      "sequence": 2,
+      "id": "UB2-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 3,
+      "name": "Co-Insurance Days (9)",
+      "item": "554"
+    },
+    {
+      "sequence": 3,
+      "id": "UB2-3",
+      "required": false,
+      "repeatable": true,
+      "datatype": "IS",
+      "maxLength": 2,
+      "table": "HL70043",
+      "name": "Condition Code (24-30)",
+      "item": "555"
+    },
+    {
+      "sequence": 4,
+      "id": "UB2-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 3,
+      "name": "Covered Days (7)",
+      "item": "556"
+    },
+    {
+      "sequence": 5,
+      "id": "UB2-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 4,
+      "name": "Non-Covered Days (8)",
+      "item": "557"
+    },
+    {
+      "sequence": 6,
+      "id": "UB2-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "UVC",
+      "maxLength": 11,
+      "table": "HL70153",
+      "name": "Value Amount &amp; Code",
+      "item": "558"
+    },
+    {
+      "sequence": 7,
+      "id": "UB2-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "OCD",
+      "maxLength": 11,
+      "table": "HL70350",
+      "name": "Occurrence Code &amp; Date (32-35)",
+      "item": "559"
+    },
+    {
+      "sequence": 8,
+      "id": "UB2-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "OSP",
+      "maxLength": 28,
+      "table": "HL70351",
+      "name": "Occurrence Span Code/Dates (36)",
+      "item": "560"
+    },
+    {
+      "sequence": 9,
+      "id": "UB2-9",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 29,
+      "name": "UB92 Locator 2 (State)",
+      "item": "561"
+    },
+    {
+      "sequence": 10,
+      "id": "UB2-10",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 12,
+      "name": "UB92 Locator 11 (State)",
+      "item": "562"
+    },
+    {
+      "sequence": 11,
+      "id": "UB2-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 5,
+      "name": "UB92 Locator 31 (National)",
+      "item": "563"
+    },
+    {
+      "sequence": 12,
+      "id": "UB2-12",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 23,
+      "name": "Document Control Number",
+      "item": "564"
+    },
+    {
+      "sequence": 13,
+      "id": "UB2-13",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 4,
+      "name": "UB92 Locator 49 (National)",
+      "item": "565"
+    },
+    {
+      "sequence": 14,
+      "id": "UB2-14",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 14,
+      "name": "UB92 Locator 56 (State)",
+      "item": "566"
+    },
+    {
+      "sequence": 15,
+      "id": "UB2-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 27,
+      "name": "UB92 Locator 57 (National)",
+      "item": "567"
+    },
+    {
+      "sequence": 16,
+      "id": "UB2-16",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 2,
+      "name": "UB92 Locator 78 (State)",
+      "item": "568"
+    },
+    {
+      "sequence": 17,
+      "id": "UB2-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 3,
+      "name": "Special Visit Count",
+      "item": "815"
+    }
+  ]
+}

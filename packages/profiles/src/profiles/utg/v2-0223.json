@@ -1,0 +1,49 @@
+{
+  "id": "v2-0223",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0223",
+  "oid": "2.16.840.1.113883.18.124",
+  "name": "LivingDependency2",
+  "title": "livingDependency2",
+  "codes": [
+    {
+      "code": "C",
+      "display": "Small Children Dependent",
+      "status": "active"
+    },
+    {
+      "code": "CB",
+      "display": "Common Bath",
+      "status": "active"
+    },
+    {
+      "code": "D",
+      "display": "Spouse dependent",
+      "status": "active"
+    },
+    {
+      "code": "M",
+      "display": "Medical Supervision Required",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Other",
+      "status": "active"
+    },
+    {
+      "code": "S",
+      "display": "Spouse Dependent",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unknown",
+      "status": "active"
+    },
+    {
+      "code": "WU",
+      "display": "Walk up",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "v2-0268",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0268",
+  "oid": "2.16.840.1.113883.18.161",
+  "name": "Override",
+  "title": "override",
+  "codes": [
+    {
+      "code": "A",
+      "display": "Override allowed",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Override required",
+      "status": "active"
+    },
+    {
+      "code": "X",
+      "display": "Override not allowed",
+      "status": "active"
+    }
+  ]
+}

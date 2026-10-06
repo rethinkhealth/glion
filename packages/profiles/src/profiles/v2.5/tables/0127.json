@@ -1,0 +1,39 @@
+{
+  "id": "0127",
+  "description": "Allergen Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AA",
+      "description": "Animal Allergy"
+    },
+    {
+      "name": "DA",
+      "description": "Drug allergy"
+    },
+    {
+      "name": "EA",
+      "description": "Environmental Allergy"
+    },
+    {
+      "name": "FA",
+      "description": "Food allergy"
+    },
+    {
+      "name": "LA",
+      "description": "Pollen Allergy"
+    },
+    {
+      "name": "MA",
+      "description": "Miscellaneous allergy"
+    },
+    {
+      "name": "MC",
+      "description": "Miscellaneous contraindication"
+    },
+    {
+      "name": "PA",
+      "description": "Plant Allergy"
+    }
+  ]
+}

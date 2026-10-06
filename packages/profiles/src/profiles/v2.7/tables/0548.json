@@ -1,0 +1,35 @@
+{
+  "id": "0548",
+  "description": "Signatory's Relationship to Subject",
+  "type": "user",
+  "codes": [
+    {
+      "name": "1",
+      "description": "Self"
+    },
+    {
+      "name": "2",
+      "description": "Parent"
+    },
+    {
+      "name": "3",
+      "description": "Next of Kin"
+    },
+    {
+      "name": "4",
+      "description": "Durable Power of Attorney in Healthcare Affairs"
+    },
+    {
+      "name": "5",
+      "description": "Conservator"
+    },
+    {
+      "name": "6",
+      "description": "Emergent Practitioner (practitioner judging case as emergency requiring care without a consent)"
+    },
+    {
+      "name": "7",
+      "description": "Non-Emergent Practitioner (i.e. medical ethics committee)"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "id": "0301",
+  "description": "Universal ID Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CLIA",
+      "description": "Clinical Laboratory Improvement Amendments. Allows for the ability to designate organization identifier as a \"CLIA\"\" assigned number (for labs)\""
+    },
+    {
+      "name": "CLIP",
+      "description": "Clinical laboratory Improvement Program. Allows for the ability to designate organization identifier as a \"CLIP\"\" assigned number (for labs).Â  Used by US Department of Defense.\""
+    },
+    {
+      "name": "DNS",
+      "description": "An Internet host name, in accordance with RFC 1035; or an IP address. Either in ASCII or as integers, with periods between components (\"dotted\"\" notation).\""
+    },
+    {
+      "name": "EUI64",
+      "description": " formally known as\""
+    },
+    {
+      "name": "GUID",
+      "description": "Same as UUID."
+    },
+    {
+      "name": "HCD",
+      "description": "The CEN Healthcare Coding Scheme Designator"
+    },
+    {
+      "name": "HL7",
+      "description": "HL7 registration schemes"
+    },
+    {
+      "name": "ISO",
+      "description": "An International Standards Organization Object Identifier (OID), in accordance with ISO/IEC 8824.  Formatted as decimal digits separated by periods; recommended limit of 64 characters"
+    },
+    {
+      "name": "L",
+      "description": ""
+    },
+    {
+      "name": "L,M,N",
+      "description": "Locally defined coding entity identifier."
+    },
+    {
+      "name": "M",
+      "description": ""
+    },
+    {
+      "name": "N",
+      "description": ""
+    },
+    {
+      "name": "Random",
+      "description": "Usually a base64 encoded string of random bits.<p>Note: Random IDs are typically used for instance identifiers, rather than an identifier of an Assigning Authority that issues instance identifiers"
+    },
+    {
+      "name": "URI",
+      "description": "Uniform Resource Identifier"
+    },
+    {
+      "name": "UUID",
+      "description": "The DCE Universal Unique Identifier, in accordance with RFC 4122. Recommended format is 32 hexadecimal digits separated by hyphens, in the digit grouping 8-4-4-4-12"
+    },
+    {
+      "name": "x400",
+      "description": "An X.400 MHS identifier. Recommended format is in accordance with RFC 1649"
+    },
+    {
+      "name": "x500",
+      "description": "An X.500 directory name"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "v2-0103",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0103",
+  "oid": "2.16.840.1.113883.18.40",
+  "name": "ProcessingId",
+  "title": "processingId",
+  "codes": [
+    {
+      "code": "D",
+      "display": "Debugging",
+      "status": "active"
+    },
+    {
+      "code": "N",
+      "display": "Non-Production Testing",
+      "status": "active"
+    },
+    {
+      "code": "P",
+      "display": "Production",
+      "status": "active"
+    },
+    {
+      "code": "T",
+      "display": "Training",
+      "status": "active"
+    },
+    {
+      "code": "V",
+      "display": "Validation",
+      "status": "active"
+    }
+  ]
+}

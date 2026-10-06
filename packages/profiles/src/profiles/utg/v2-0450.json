@@ -1,0 +1,19 @@
+{
+  "id": "v2-0450",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0450",
+  "oid": "2.16.840.1.113883.18.286",
+  "name": "EventType",
+  "title": "eventType",
+  "codes": [
+    {
+      "code": "LOG",
+      "display": "Log Event",
+      "status": "active"
+    },
+    {
+      "code": "SER",
+      "display": "Service Event",
+      "status": "active"
+    }
+  ]
+}

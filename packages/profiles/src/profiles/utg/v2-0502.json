@@ -1,0 +1,24 @@
+{
+  "id": "v2-0502",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0502",
+  "oid": "2.16.840.1.113883.18.326",
+  "name": "NonSubjectConsenterReason",
+  "title": "non-subjectConsenterReason",
+  "codes": [
+    {
+      "code": "LM",
+      "display": "Legally mandated",
+      "status": "active"
+    },
+    {
+      "code": "MIN",
+      "display": "Subject is a minor",
+      "status": "active"
+    },
+    {
+      "code": "NC",
+      "display": "Subject is not competent to consent",
+      "status": "active"
+    }
+  ]
+}

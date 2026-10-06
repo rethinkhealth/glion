@@ -1,0 +1,32 @@
+{
+  "id": "PTA",
+  "version": "2.5",
+  "kind": "composite",
+  "title": "Policy Type and Amount",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Policy Type",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Amount Class",
+      "datatypeId": "IS",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "Money or Percentage Quantity",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "Money or Percentage",
+      "datatypeId": "MOP",
+      "required": false
+    }
+  ]
+}

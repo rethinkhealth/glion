@@ -1,0 +1,19 @@
+{
+  "id": "0225",
+  "description": "Escort required",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "N",
+      "description": "Not Required"
+    },
+    {
+      "name": "R",
+      "description": "Required"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

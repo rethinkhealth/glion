@@ -1,0 +1,110 @@
+{
+  "segmentId": "SHP",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "SHP-1",
+      "required": true,
+      "repeatable": true,
+      "datatype": "EI",
+      "name": "Shipment ID",
+      "item": "2317"
+    },
+    {
+      "sequence": 2,
+      "id": "SHP-2",
+      "required": false,
+      "repeatable": true,
+      "datatype": "EI",
+      "name": "Internal Shipment ID",
+      "item": "2318"
+    },
+    {
+      "sequence": 3,
+      "id": "SHP-3",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70905",
+      "name": "Shipment Status",
+      "item": "2319"
+    },
+    {
+      "sequence": 4,
+      "id": "SHP-4",
+      "required": true,
+      "repeatable": true,
+      "datatype": "DTM",
+      "name": "Shipment Status Date/Time",
+      "item": "2320"
+    },
+    {
+      "sequence": 5,
+      "id": "SHP-5",
+      "required": false,
+      "repeatable": true,
+      "datatype": "TX",
+      "name": "Shipment Status Reason",
+      "item": "2321"
+    },
+    {
+      "sequence": 6,
+      "id": "SHP-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70906",
+      "name": "Shipment Priority",
+      "item": "2322"
+    },
+    {
+      "sequence": 7,
+      "id": "SHP-7",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70907",
+      "name": "Shipment Confidentiality",
+      "item": "2323"
+    },
+    {
+      "sequence": 8,
+      "id": "SHP-8",
+      "required": false,
+      "repeatable": true,
+      "datatype": "NM",
+      "name": "Number of Packages in Shipment",
+      "item": "2324"
+    },
+    {
+      "sequence": 9,
+      "id": "SHP-9",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70544",
+      "name": "Shipment Condition",
+      "item": "2325"
+    },
+    {
+      "sequence": 10,
+      "id": "SHP-10",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70376",
+      "name": "Shipment Handling Code",
+      "item": "2326"
+    },
+    {
+      "sequence": 11,
+      "id": "SHP-11",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "table": "HL70489",
+      "name": "Shipment Risk Code",
+      "item": "2327"
+    }
+  ]
+}

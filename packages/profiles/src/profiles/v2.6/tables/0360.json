@@ -1,0 +1,239 @@
+{
+  "id": "0360",
+  "description": "Degree/license/certificate",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AA",
+      "description": "Associate of Arts"
+    },
+    {
+      "name": "AAS",
+      "description": "Associate of Applied Science"
+    },
+    {
+      "name": "ABA",
+      "description": "Associate of Business Administration"
+    },
+    {
+      "name": "AE",
+      "description": "Associate of Engineering"
+    },
+    {
+      "name": "AS",
+      "description": "Associate of Science"
+    },
+    {
+      "name": "BA",
+      "description": "Bachelor of Arts"
+    },
+    {
+      "name": "BBA",
+      "description": "Bachelor of Business Administration"
+    },
+    {
+      "name": "BE",
+      "description": "Bachelor or Engineering"
+    },
+    {
+      "name": "BFA",
+      "description": "Bachelor of Fine Arts"
+    },
+    {
+      "name": "BN",
+      "description": "Bachelor of Nursing"
+    },
+    {
+      "name": "BS",
+      "description": "Bachelor of Science"
+    },
+    {
+      "name": "BSL",
+      "description": "Bachelor of Science - Law"
+    },
+    {
+      "name": "BSN",
+      "description": "Bachelor on Science - Nursing"
+    },
+    {
+      "name": "BT",
+      "description": "Bachelor of Theology"
+    },
+    {
+      "name": "CANP",
+      "description": "Certified Adult Nurse Practitioner"
+    },
+    {
+      "name": "CER",
+      "description": "Certificate"
+    },
+    {
+      "name": "CMA",
+      "description": "Certified Medical Assistant"
+    },
+    {
+      "name": "CNM",
+      "description": "Certified Nurse Midwife"
+    },
+    {
+      "name": "CNP",
+      "description": "Certified Nurse Practitioner"
+    },
+    {
+      "name": "CNS",
+      "description": "Certified Nurse Specialist"
+    },
+    {
+      "name": "CPNP",
+      "description": "Certified Pediatric Nurse Practitioner"
+    },
+    {
+      "name": "CRN",
+      "description": "Certified Registered Nurse"
+    },
+    {
+      "name": "DBA",
+      "description": "Doctor of Business Administration"
+    },
+    {
+      "name": "DED",
+      "description": "Doctor of Education"
+    },
+    {
+      "name": "DIP",
+      "description": "Diploma"
+    },
+    {
+      "name": "DO",
+      "description": "Doctor of Osteopathy"
+    },
+    {
+      "name": "EMT",
+      "description": "Emergency Medical Technician"
+    },
+    {
+      "name": "EMTP",
+      "description": "Emergency Medical Technician - Paramedic"
+    },
+    {
+      "name": "FPNP",
+      "description": "Family Practice Nurse Practitioner"
+    },
+    {
+      "name": "HS",
+      "description": "High School Graduate"
+    },
+    {
+      "name": "JD",
+      "description": "Juris Doctor"
+    },
+    {
+      "name": "MA",
+      "description": "Master of Arts"
+    },
+    {
+      "name": "MBA",
+      "description": "Master of Business Administration"
+    },
+    {
+      "name": "MCE",
+      "description": "Master of Civil Engineering"
+    },
+    {
+      "name": "MD",
+      "description": "Doctor of Medicine"
+    },
+    {
+      "name": "MDA",
+      "description": "Medical Assistant"
+    },
+    {
+      "name": "MDI",
+      "description": "Master of Divinity"
+    },
+    {
+      "name": "ME",
+      "description": "Master of Engineering"
+    },
+    {
+      "name": "MED",
+      "description": "Master of Education"
+    },
+    {
+      "name": "MEE",
+      "description": "Master of Electrical Engineering"
+    },
+    {
+      "name": "MFA",
+      "description": "Master of Fine Arts"
+    },
+    {
+      "name": "MME",
+      "description": "Master of Mechanical Engineering"
+    },
+    {
+      "name": "MS",
+      "description": "Master of Science"
+    },
+    {
+      "name": "MSL",
+      "description": "Master of Science - Law"
+    },
+    {
+      "name": "MSN",
+      "description": "Master of Science - Nursing"
+    },
+    {
+      "name": "MT",
+      "description": "Master of Theology"
+    },
+    {
+      "name": "NG",
+      "description": "Non-Graduate"
+    },
+    {
+      "name": "NP",
+      "description": "Nurse Practitioner"
+    },
+    {
+      "name": "PA",
+      "description": "Physician Assistant"
+    },
+    {
+      "name": "PharmD",
+      "description": "Doctor of Pharmacy"
+    },
+    {
+      "name": "PHD",
+      "description": "Doctor of Philosophy"
+    },
+    {
+      "name": "PHE",
+      "description": "Doctor of Engineering"
+    },
+    {
+      "name": "PHS",
+      "description": "Doctor of Science"
+    },
+    {
+      "name": "PN",
+      "description": "Advanced Practice Nurse"
+    },
+    {
+      "name": "RMA",
+      "description": "Registered Medical Assistant"
+    },
+    {
+      "name": "RPH",
+      "description": "Registered Pharmacist"
+    },
+    {
+      "name": "SEC",
+      "description": "Secretarial Certificate"
+    },
+    {
+      "name": "TS",
+      "description": "Trade School Graduate"
+    }
+  ]
+}

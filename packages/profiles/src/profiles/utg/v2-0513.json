@@ -1,0 +1,44 @@
+{
+  "id": "v2-0513",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0513",
+  "oid": "2.16.840.1.113883.18.335",
+  "name": "BloodProductTransfusionDispositionStatus",
+  "title": "bloodProductTransfusion-dispositionStatus",
+  "codes": [
+    {
+      "code": "RA",
+      "display": "Returned unused and unlinked",
+      "status": "active"
+    },
+    {
+      "code": "RL",
+      "display": "Returned unused but linked",
+      "status": "active"
+    },
+    {
+      "code": "TI",
+      "display": "Transfusion Interrupted",
+      "status": "N"
+    },
+    {
+      "code": "TR",
+      "display": "Transfusion Ended with Reactions",
+      "status": "active"
+    },
+    {
+      "code": "TS",
+      "display": "Transfusion Started",
+      "status": "N"
+    },
+    {
+      "code": "TX",
+      "display": "Transfusion Ended",
+      "status": "active"
+    },
+    {
+      "code": "WA",
+      "display": "Wasted",
+      "status": "active"
+    }
+  ]
+}

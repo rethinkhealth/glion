@@ -1,0 +1,44 @@
+{
+  "id": "v2-0144",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0144",
+  "oid": "2.16.840.1.113883.18.65",
+  "name": "EligibilitySource",
+  "title": "eligibilitySource",
+  "codes": [
+    {
+      "code": "1",
+      "display": "Insurance company",
+      "status": "active"
+    },
+    {
+      "code": "2",
+      "display": "Employer",
+      "status": "active"
+    },
+    {
+      "code": "3",
+      "display": "Insured presented policy",
+      "status": "active"
+    },
+    {
+      "code": "4",
+      "display": "Insured presented card",
+      "status": "active"
+    },
+    {
+      "code": "5",
+      "display": "Signed statement on file",
+      "status": "active"
+    },
+    {
+      "code": "6",
+      "display": "Verbal information",
+      "status": "active"
+    },
+    {
+      "code": "7",
+      "display": "None",
+      "status": "active"
+    }
+  ]
+}

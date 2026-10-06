@@ -1,0 +1,43 @@
+{
+  "id": "0004",
+  "description": "Patient Class",
+  "type": "user",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Obstetrics"
+    },
+    {
+      "name": "C",
+      "description": "Commercial Account"
+    },
+    {
+      "name": "E",
+      "description": "Emergency"
+    },
+    {
+      "name": "I",
+      "description": "Inpatient"
+    },
+    {
+      "name": "N",
+      "description": "Not Applicable"
+    },
+    {
+      "name": "O",
+      "description": "Outpatient"
+    },
+    {
+      "name": "P",
+      "description": "Preadmit"
+    },
+    {
+      "name": "R",
+      "description": "Recurring patient"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    }
+  ]
+}

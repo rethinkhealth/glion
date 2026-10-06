@@ -1,0 +1,11 @@
+{
+  "id": "0351",
+  "description": "Occurrence span",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "...",
+      "description": "use NUBC codes"
+    }
+  ]
+}

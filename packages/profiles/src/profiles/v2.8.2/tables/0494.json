@@ -1,0 +1,19 @@
+{
+  "id": "0494",
+  "description": "Specimen Child Role",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Aliquot"
+    },
+    {
+      "name": "C",
+      "description": "Component"
+    },
+    {
+      "name": "M",
+      "description": "Modified from original specimen"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "0438",
+  "description": "Allergy Clinical Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Confirmed or verified"
+    },
+    {
+      "name": "D",
+      "description": "Doubt raised"
+    },
+    {
+      "name": "E",
+      "description": "Erroneous"
+    },
+    {
+      "name": "I",
+      "description": "Confirmed but inactive"
+    },
+    {
+      "name": "P",
+      "description": "Pending"
+    },
+    {
+      "name": "S",
+      "description": "Suspect"
+    },
+    {
+      "name": "U",
+      "description": "Unconfirmed"
+    }
+  ]
+}

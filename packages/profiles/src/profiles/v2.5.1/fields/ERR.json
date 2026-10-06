@@ -1,0 +1,131 @@
+{
+  "segmentId": "ERR",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "ERR-1",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ELD",
+      "maxLength": 493,
+      "name": "Error Code and Location",
+      "item": "24"
+    },
+    {
+      "sequence": 2,
+      "id": "ERR-2",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ERL",
+      "maxLength": 18,
+      "name": "Error Location",
+      "item": "1812"
+    },
+    {
+      "sequence": 3,
+      "id": "ERR-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "table": "HL70357",
+      "name": "HL7 Error Code",
+      "item": "1813"
+    },
+    {
+      "sequence": 4,
+      "id": "ERR-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70516",
+      "name": "Severity",
+      "item": "1814"
+    },
+    {
+      "sequence": 5,
+      "id": "ERR-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "table": "HL70533",
+      "name": "Application Error Code",
+      "item": "1815"
+    },
+    {
+      "sequence": 6,
+      "id": "ERR-6",
+      "required": false,
+      "repeatable": true,
+      "datatype": "ST",
+      "maxLength": 80,
+      "name": "Application Error Parameter",
+      "item": "1816"
+    },
+    {
+      "sequence": 7,
+      "id": "ERR-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TX",
+      "maxLength": 2048,
+      "name": "Diagnostic Information",
+      "item": "1817"
+    },
+    {
+      "sequence": 8,
+      "id": "ERR-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TX",
+      "maxLength": 250,
+      "name": "User Message",
+      "item": "1818"
+    },
+    {
+      "sequence": 9,
+      "id": "ERR-9",
+      "required": false,
+      "repeatable": true,
+      "datatype": "IS",
+      "maxLength": 20,
+      "table": "HL70517",
+      "name": "Inform Person Indicator",
+      "item": "1819"
+    },
+    {
+      "sequence": 10,
+      "id": "ERR-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "table": "HL70518",
+      "name": "Override Type",
+      "item": "1820"
+    },
+    {
+      "sequence": 11,
+      "id": "ERR-11",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 705,
+      "table": "HL70519",
+      "name": "Override Reason Code",
+      "item": "1821"
+    },
+    {
+      "sequence": 12,
+      "id": "ERR-12",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XTN",
+      "maxLength": 652,
+      "name": "Help Desk Contact Point",
+      "item": "1822"
+    }
+  ]
+}

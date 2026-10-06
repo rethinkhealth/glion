@@ -1,0 +1,27 @@
+{
+  "id": "0147",
+  "description": "POLICY TYPE",
+  "type": "user",
+  "codes": [
+    {
+      "name": "2ANC",
+      "description": "Second Ancillary"
+    },
+    {
+      "name": "2MMD",
+      "description": "Second Major Medical"
+    },
+    {
+      "name": "3MMD",
+      "description": "Third Major Medical"
+    },
+    {
+      "name": "ANC",
+      "description": "Ancillary"
+    },
+    {
+      "name": "MMD",
+      "description": "Major Medical"
+    }
+  ]
+}

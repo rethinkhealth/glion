@@ -1,0 +1,31 @@
+{
+  "id": "0185",
+  "description": "Preferred method of contact",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Beeper Number"
+    },
+    {
+      "name": "C",
+      "description": "Cellular Phone Number"
+    },
+    {
+      "name": "E",
+      "description": "E-Mail Address (for backward compatibility)"
+    },
+    {
+      "name": "F",
+      "description": "FAX Number"
+    },
+    {
+      "name": "H",
+      "description": "Home Phone Number"
+    },
+    {
+      "name": "O",
+      "description": "Office Phone Number"
+    }
+  ]
+}

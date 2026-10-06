@@ -1,0 +1,19 @@
+{
+  "id": "v2-0377",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0377",
+  "oid": "2.16.840.1.113883.18.235",
+  "name": "EnvironmentalFactors",
+  "title": "environmentalFactors",
+  "codes": [
+    {
+      "code": "A60",
+      "display": "Opened container, indoor atmosphere, 60 minutes duration",
+      "status": "active"
+    },
+    {
+      "code": "ATM",
+      "display": "Opened container, atmosphere and duration unspecified",
+      "status": "active"
+    }
+  ]
+}

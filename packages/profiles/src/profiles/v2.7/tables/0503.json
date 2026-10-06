@@ -1,0 +1,19 @@
+{
+  "id": "0503",
+  "description": "Sequence/Results Flag",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Cyclical"
+    },
+    {
+      "name": "R",
+      "description": "Reserved for future use"
+    },
+    {
+      "name": "S",
+      "description": "Sequential"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "segmentId": "CM2",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "CM2-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID- CM2",
+      "item": "1024"
+    },
+    {
+      "sequence": 2,
+      "id": "CM2-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Scheduled Time Point",
+      "item": "1025"
+    },
+    {
+      "sequence": 3,
+      "id": "CM2-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 300,
+      "name": "Description of Time Point",
+      "item": "1026"
+    },
+    {
+      "sequence": 4,
+      "id": "CM2-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "name": "Events Scheduled This Time Point",
+      "item": "1027"
+    }
+  ]
+}

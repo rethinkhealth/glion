@@ -1,0 +1,43 @@
+{
+  "id": "0006",
+  "description": "RELIGION",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Atheist"
+    },
+    {
+      "name": "B",
+      "description": "Baptist"
+    },
+    {
+      "name": "C",
+      "description": "Catholic"
+    },
+    {
+      "name": "E",
+      "description": "Episcopalian"
+    },
+    {
+      "name": "J",
+      "description": "Judaism"
+    },
+    {
+      "name": "L",
+      "description": "Lutheran"
+    },
+    {
+      "name": "M",
+      "description": "Church of Latter Day Saints (Mormon)"
+    },
+    {
+      "name": "N",
+      "description": "Hindu"
+    },
+    {
+      "name": "P",
+      "description": "Protestant"
+    }
+  ]
+}

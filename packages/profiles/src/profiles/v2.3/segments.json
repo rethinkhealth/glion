@@ -1,0 +1,444 @@
+{
+  "segments": [
+    {
+      "id": "ACC",
+      "title": "Accident"
+    },
+    {
+      "id": "ADD",
+      "title": "Addendum"
+    },
+    {
+      "id": "AIG",
+      "title": "Appointment Information - General Resource"
+    },
+    {
+      "id": "AIL",
+      "title": "Appointment Information - Location Resource"
+    },
+    {
+      "id": "AIP",
+      "title": "Appointment Information - Personnel Resource"
+    },
+    {
+      "id": "AIS",
+      "title": "Appointment Information - Service"
+    },
+    {
+      "id": "AL1",
+      "title": "Patient Allergy Information"
+    },
+    {
+      "id": "APR",
+      "title": "Appointment Preferences"
+    },
+    {
+      "id": "ARQ",
+      "title": "Appointment Request"
+    },
+    {
+      "id": "AUT",
+      "title": "Authorization Information"
+    },
+    {
+      "id": "BHS",
+      "title": "Batch Header"
+    },
+    {
+      "id": "BLG",
+      "title": "Billing Segment"
+    },
+    {
+      "id": "BTS",
+      "title": "Batch Trailer"
+    },
+    {
+      "id": "CDM",
+      "title": "Charge Description Master"
+    },
+    {
+      "id": "CM0",
+      "title": "Clinical Study Master"
+    },
+    {
+      "id": "CM1",
+      "title": "Clinical Study Phase Master"
+    },
+    {
+      "id": "CM2",
+      "title": "Clinical Study Schedule Master"
+    },
+    {
+      "id": "CSP",
+      "title": "Clinical Study Phase"
+    },
+    {
+      "id": "CSR",
+      "title": "Clinical Study Registration"
+    },
+    {
+      "id": "CSS",
+      "title": "Clinical Study Data Schedule"
+    },
+    {
+      "id": "CTD",
+      "title": "Contact Data"
+    },
+    {
+      "id": "CTI",
+      "title": "Clinical Trial Identification"
+    },
+    {
+      "id": "DB1",
+      "title": "Disability Segment"
+    },
+    {
+      "id": "DG1",
+      "title": "Diagnosis"
+    },
+    {
+      "id": "DRG",
+      "title": "Diagnosis Related Group"
+    },
+    {
+      "id": "DSC",
+      "title": "Continuation Pointer"
+    },
+    {
+      "id": "DSP",
+      "title": "Display Data"
+    },
+    {
+      "id": "EQL",
+      "title": "Embedded Query Language"
+    },
+    {
+      "id": "ERQ",
+      "title": "Event Replay Query Segment"
+    },
+    {
+      "id": "ERR",
+      "title": "Error"
+    },
+    {
+      "id": "EVN",
+      "title": "Event Type"
+    },
+    {
+      "id": "FAC",
+      "title": "Facility"
+    },
+    {
+      "id": "FHS",
+      "title": "File Header"
+    },
+    {
+      "id": "FT1",
+      "title": "Financial Transaction"
+    },
+    {
+      "id": "FTS",
+      "title": "File Trailer"
+    },
+    {
+      "id": "GOL",
+      "title": "Goal Detail"
+    },
+    {
+      "id": "GT1",
+      "title": "Guarantor"
+    },
+    {
+      "id": "IN1",
+      "title": "Insurance"
+    },
+    {
+      "id": "IN2",
+      "title": "Insurance Additional Info"
+    },
+    {
+      "id": "IN3",
+      "title": "Insurance Additional Info - Certification"
+    },
+    {
+      "id": "LCC",
+      "title": "Location Charge Code"
+    },
+    {
+      "id": "LCH",
+      "title": "Location Characteristic"
+    },
+    {
+      "id": "LDP",
+      "title": "Location Department"
+    },
+    {
+      "id": "LOC",
+      "title": "Location Identification"
+    },
+    {
+      "id": "LRL",
+      "title": "Location Relationship"
+    },
+    {
+      "id": "MFA",
+      "title": "Master File Acknowledgement"
+    },
+    {
+      "id": "MFE",
+      "title": "Master File Entry"
+    },
+    {
+      "id": "MFI",
+      "title": "Master File Identification"
+    },
+    {
+      "id": "MRG",
+      "title": "Merge Patient Information"
+    },
+    {
+      "id": "MSA",
+      "title": "Message Acknowledgement"
+    },
+    {
+      "id": "MSH",
+      "title": "Message Header"
+    },
+    {
+      "id": "NCK",
+      "title": "System Clock"
+    },
+    {
+      "id": "NK1",
+      "title": "Next of Kin"
+    },
+    {
+      "id": "NPU",
+      "title": "Bed Status Update"
+    },
+    {
+      "id": "NSC",
+      "title": "Status Change"
+    },
+    {
+      "id": "NST",
+      "title": "Statistics"
+    },
+    {
+      "id": "NTE",
+      "title": "Notes and Comments"
+    },
+    {
+      "id": "OBR",
+      "title": "Observation Request"
+    },
+    {
+      "id": "OBX",
+      "title": "Observation"
+    },
+    {
+      "id": "ODS",
+      "title": "Dietary Orders, Supplements, and Preferences"
+    },
+    {
+      "id": "ODT",
+      "title": "Diet Tray Instructions"
+    },
+    {
+      "id": "OM1",
+      "title": "General - Fields That Apply to Most Observations"
+    },
+    {
+      "id": "OM2",
+      "title": "Numeric Observation"
+    },
+    {
+      "id": "OM3",
+      "title": "Categorical Test/Observation"
+    },
+    {
+      "id": "OM4",
+      "title": "Observations That Require Specimens"
+    },
+    {
+      "id": "OM5",
+      "title": "Observation Batteries"
+    },
+    {
+      "id": "OM6",
+      "title": "Observations That Are Calculated from Other Observations"
+    },
+    {
+      "id": "ORC",
+      "title": "Common Order"
+    },
+    {
+      "id": "PCR",
+      "title": "Possible Causal Relationship"
+    },
+    {
+      "id": "PD1",
+      "title": "Patient Demographic"
+    },
+    {
+      "id": "PDC",
+      "title": "Product Detail Country"
+    },
+    {
+      "id": "PEO",
+      "title": "Product Experience Observation"
+    },
+    {
+      "id": "PES",
+      "title": "Product Experience Sender"
+    },
+    {
+      "id": "PID",
+      "title": "Patient Identification"
+    },
+    {
+      "id": "PR1",
+      "title": "Procedures"
+    },
+    {
+      "id": "PRA",
+      "title": "Practitioner Detail"
+    },
+    {
+      "id": "PRB",
+      "title": "Problem Detail"
+    },
+    {
+      "id": "PRC",
+      "title": "Pricing"
+    },
+    {
+      "id": "PRD",
+      "title": "Provider Data"
+    },
+    {
+      "id": "PSH",
+      "title": "Product Summary Header"
+    },
+    {
+      "id": "PTH",
+      "title": "Pathway"
+    },
+    {
+      "id": "PV1",
+      "title": "Patient Visit"
+    },
+    {
+      "id": "PV2",
+      "title": "Patient Visit - Additional Information"
+    },
+    {
+      "id": "QAK",
+      "title": "Query Acknowledgement"
+    },
+    {
+      "id": "QRD",
+      "title": "Query Definition"
+    },
+    {
+      "id": "QRF",
+      "title": "Query Filter"
+    },
+    {
+      "id": "RDF",
+      "title": "Table Row Definition"
+    },
+    {
+      "id": "RDT",
+      "title": "Table Row Data"
+    },
+    {
+      "id": "RF1",
+      "title": "Referral Information Segment"
+    },
+    {
+      "id": "RGS",
+      "title": "Resource Group"
+    },
+    {
+      "id": "ROL",
+      "title": "Role"
+    },
+    {
+      "id": "RQ1",
+      "title": "Requisition Detail-1"
+    },
+    {
+      "id": "RQD",
+      "title": "Requisition Detail"
+    },
+    {
+      "id": "RXA",
+      "title": "Pharmacy Administration"
+    },
+    {
+      "id": "RXC",
+      "title": "Pharmacy Component Order"
+    },
+    {
+      "id": "RXD",
+      "title": "Pharmacy Dispense"
+    },
+    {
+      "id": "RXE",
+      "title": "Pharmacy Encoded Order"
+    },
+    {
+      "id": "RXG",
+      "title": "Pharmacy Give"
+    },
+    {
+      "id": "RXO",
+      "title": "Pharmacy Prescription Order"
+    },
+    {
+      "id": "RXR",
+      "title": "Pharmacy Route"
+    },
+    {
+      "id": "SCH",
+      "title": "Schedule Activity Information"
+    },
+    {
+      "id": "SPR",
+      "title": "Stored Procedure Request Definition"
+    },
+    {
+      "id": "STF",
+      "title": "Staff Identification"
+    },
+    {
+      "id": "TXA",
+      "title": "Document Notification"
+    },
+    {
+      "id": "UB1",
+      "title": "UB82 Data"
+    },
+    {
+      "id": "UB2",
+      "title": "UB92 Data"
+    },
+    {
+      "id": "URD",
+      "title": "Results/Update Definition"
+    },
+    {
+      "id": "URS",
+      "title": "Unsolicited Selection"
+    },
+    {
+      "id": "VAR",
+      "title": "Variance"
+    },
+    {
+      "id": "VTQ",
+      "title": "Virtual Table Query Request"
+    }
+  ]
+}

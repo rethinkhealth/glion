@@ -1,0 +1,467 @@
+{
+  "id": "0076",
+  "description": "Message type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ACK",
+      "description": "General acknowledgment message"
+    },
+    {
+      "name": "ADR",
+      "description": "ADT response"
+    },
+    {
+      "name": "ADT",
+      "description": "ADT message"
+    },
+    {
+      "name": "BAR",
+      "description": "Add/change billing account"
+    },
+    {
+      "name": "CRM",
+      "description": "Clinical study registration message"
+    },
+    {
+      "name": "CSU",
+      "description": "Unsolicited study data message"
+    },
+    {
+      "name": "DFT",
+      "description": "Detail financial transactions"
+    },
+    {
+      "name": "DOC",
+      "description": "Document response"
+    },
+    {
+      "name": "DSR",
+      "description": "Display response"
+    },
+    {
+      "name": "EAC",
+      "description": "Automated equipment command message"
+    },
+    {
+      "name": "EAN",
+      "description": "Automated equipment notification message"
+    },
+    {
+      "name": "EAR",
+      "description": "Automated equipment response message"
+    },
+    {
+      "name": "EDR",
+      "description": "Enhanced display response"
+    },
+    {
+      "name": "EQQ",
+      "description": "Embedded query language query"
+    },
+    {
+      "name": "ERP",
+      "description": "Event replay response"
+    },
+    {
+      "name": "ESR",
+      "description": "Automated equipment status update acknowledgement message"
+    },
+    {
+      "name": "ESU",
+      "description": "Automated equipment status update message"
+    },
+    {
+      "name": "INR",
+      "description": "Automated equipment inventory request message"
+    },
+    {
+      "name": "INU",
+      "description": "Automated equipment inventory update message"
+    },
+    {
+      "name": "LSR",
+      "description": "Automated equipment log/service request message"
+    },
+    {
+      "name": "LSU",
+      "description": "Automated equipment log/service update message"
+    },
+    {
+      "name": "MCF",
+      "description": "Delayed Acknowledgement (Retained for backward compatibility only)"
+    },
+    {
+      "name": "MDM",
+      "description": "Medical document management"
+    },
+    {
+      "name": "MFD",
+      "description": "Master files delayed application acknowledgment"
+    },
+    {
+      "name": "MFK",
+      "description": "Master files application acknowledgment"
+    },
+    {
+      "name": "MFN",
+      "description": "Master files notification"
+    },
+    {
+      "name": "MFQ",
+      "description": "Master files query"
+    },
+    {
+      "name": "MFR",
+      "description": "Master files response"
+    },
+    {
+      "name": "NMD",
+      "description": "Application management data message"
+    },
+    {
+      "name": "NMQ",
+      "description": "Application management query message"
+    },
+    {
+      "name": "NMR",
+      "description": "Application management response message"
+    },
+    {
+      "name": "OMD",
+      "description": "Dietary order"
+    },
+    {
+      "name": "OMG",
+      "description": "General clinical order message"
+    },
+    {
+      "name": "OML",
+      "description": "Laboratory order message"
+    },
+    {
+      "name": "OMN",
+      "description": "Non-stock requisition order message"
+    },
+    {
+      "name": "OMP",
+      "description": "Pharmacy/treatment order message"
+    },
+    {
+      "name": "OMS",
+      "description": "Stock requisition order message"
+    },
+    {
+      "name": "ORD",
+      "description": "Dietary order - General order acknowledgment message"
+    },
+    {
+      "name": "ORF",
+      "description": "Query for results of observation"
+    },
+    {
+      "name": "ORG",
+      "description": "General clinical order acknowledgement message"
+    },
+    {
+      "name": "ORL",
+      "description": "Laboratory acknowledgement message (unsolicited)"
+    },
+    {
+      "name": "ORM",
+      "description": "Pharmacy/treatment order message"
+    },
+    {
+      "name": "ORN",
+      "description": "Non-stock requisition - General order acknowledgment message"
+    },
+    {
+      "name": "ORP",
+      "description": "Pharmacy/treatment order acknowledgement message"
+    },
+    {
+      "name": "ORR",
+      "description": "General order response message response to any ORM"
+    },
+    {
+      "name": "ORS",
+      "description": "Stock requisition - General order acknowledgment message"
+    },
+    {
+      "name": "ORU",
+      "description": "Unsolicited transmission of an observation message"
+    },
+    {
+      "name": "OSQ",
+      "description": "Query response for order status"
+    },
+    {
+      "name": "OSR",
+      "description": "Query response for order status"
+    },
+    {
+      "name": "OUL",
+      "description": "Unsolicited laboratory observation message"
+    },
+    {
+      "name": "PEX",
+      "description": "Product experience message"
+    },
+    {
+      "name": "PGL",
+      "description": "Patient goal message"
+    },
+    {
+      "name": "PIN",
+      "description": "Patient insurance information"
+    },
+    {
+      "name": "PMU",
+      "description": "Add personnel record"
+    },
+    {
+      "name": "PPG",
+      "description": "Patient pathway message (goal-oriented)"
+    },
+    {
+      "name": "PPP",
+      "description": "Patient pathway message (problem-oriented)"
+    },
+    {
+      "name": "PPR",
+      "description": "Patient problem message"
+    },
+    {
+      "name": "PPT",
+      "description": "Patient pathway goal-oriented response"
+    },
+    {
+      "name": "PPV",
+      "description": "Patient goal response"
+    },
+    {
+      "name": "PRR",
+      "description": "Patient problem response"
+    },
+    {
+      "name": "PTR",
+      "description": "Patient pathway problem-oriented response"
+    },
+    {
+      "name": "QBP",
+      "description": "Query by parameter"
+    },
+    {
+      "name": "QCK",
+      "description": "Deferred query"
+    },
+    {
+      "name": "QCN",
+      "description": "Cancel query"
+    },
+    {
+      "name": "QRY",
+      "description": "Query, original mode"
+    },
+    {
+      "name": "QSB",
+      "description": "Create subscription"
+    },
+    {
+      "name": "QSX",
+      "description": "Cancel subscription/acknowledge message"
+    },
+    {
+      "name": "QVR",
+      "description": "Query for previous events"
+    },
+    {
+      "name": "RAR",
+      "description": "Pharmacy/treatment administration information"
+    },
+    {
+      "name": "RAS",
+      "description": "Pharmacy/treatment administration message"
+    },
+    {
+      "name": "RCI",
+      "description": "Return clinical information"
+    },
+    {
+      "name": "RCL",
+      "description": "Return clinical list"
+    },
+    {
+      "name": "RDE",
+      "description": "Pharmacy/treatment encoded order message"
+    },
+    {
+      "name": "RDR",
+      "description": "Pharmacy/treatment dispense information"
+    },
+    {
+      "name": "RDS",
+      "description": "Pharmacy/treatment dispense message"
+    },
+    {
+      "name": "RDY",
+      "description": "Display based response"
+    },
+    {
+      "name": "REF",
+      "description": "Patient referral"
+    },
+    {
+      "name": "RER",
+      "description": "Pharmacy/treatment encoded order information"
+    },
+    {
+      "name": "RGR",
+      "description": "Pharmacy/treatment dose information"
+    },
+    {
+      "name": "RGV",
+      "description": "Pharmacy/treatment give message"
+    },
+    {
+      "name": "ROR",
+      "description": "Pharmacy/treatment order response"
+    },
+    {
+      "name": "RPA",
+      "description": "Return patient authorization"
+    },
+    {
+      "name": "RPI",
+      "description": "Return patient information"
+    },
+    {
+      "name": "RPL",
+      "description": "Return patient display list"
+    },
+    {
+      "name": "RPR",
+      "description": "Return patient list"
+    },
+    {
+      "name": "RQA",
+      "description": "Request patient authorization"
+    },
+    {
+      "name": "RQC",
+      "description": "Request clinical information"
+    },
+    {
+      "name": "RQI",
+      "description": "Request patient information"
+    },
+    {
+      "name": "RQP",
+      "description": "Request patient demographics"
+    },
+    {
+      "name": "RQQ",
+      "description": "Event replay query"
+    },
+    {
+      "name": "RRA",
+      "description": "Pharmacy/treatment administration acknowledgement message"
+    },
+    {
+      "name": "RRD",
+      "description": "Pharmacy/treatment dispense acknowledgment message"
+    },
+    {
+      "name": "RRE",
+      "description": "Pharmacy/treatment encoded order acknowledgment message"
+    },
+    {
+      "name": "RRG",
+      "description": "Pharmacy/treatment give acknowledgment message"
+    },
+    {
+      "name": "RRI",
+      "description": "Return referral information"
+    },
+    {
+      "name": "RSP",
+      "description": "Segment pattern response"
+    },
+    {
+      "name": "RTB",
+      "description": "Tabular response"
+    },
+    {
+      "name": "SIU",
+      "description": "Schedule information unsolicited"
+    },
+    {
+      "name": "SPQ",
+      "description": "Stored procedure request"
+    },
+    {
+      "name": "SQM",
+      "description": "Schedule query message"
+    },
+    {
+      "name": "SQR",
+      "description": "Schedule query response"
+    },
+    {
+      "name": "SRM",
+      "description": "Schedule request message"
+    },
+    {
+      "name": "SRR",
+      "description": "Scheduled request response"
+    },
+    {
+      "name": "SSR",
+      "description": "Specimen status request message"
+    },
+    {
+      "name": "SSU",
+      "description": "Specimen status update message"
+    },
+    {
+      "name": "SUR",
+      "description": "Summary product experience report"
+    },
+    {
+      "name": "TBR",
+      "description": "Tabular data response"
+    },
+    {
+      "name": "TCR",
+      "description": "Automated equipment test code settings request message"
+    },
+    {
+      "name": "TCU",
+      "description": "Automated equipment test code settings update message"
+    },
+    {
+      "name": "UDM",
+      "description": "Unsolicited display update message"
+    },
+    {
+      "name": "VQQ",
+      "description": "Virtual table query"
+    },
+    {
+      "name": "VXQ",
+      "description": "Query for vaccination record"
+    },
+    {
+      "name": "VXR",
+      "description": "Vaccination record response"
+    },
+    {
+      "name": "VXU",
+      "description": "Unsolicited vaccination record update"
+    },
+    {
+      "name": "VXX",
+      "description": "Response for vaccination query with multiple PID matches"
+    }
+  ]
+}

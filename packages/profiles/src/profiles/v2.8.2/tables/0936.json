@@ -1,0 +1,19 @@
+{
+  "id": "0936",
+  "description": "Observation Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "QST",
+      "description": "Question"
+    },
+    {
+      "name": "RSLT",
+      "description": "Result"
+    },
+    {
+      "name": "SCI",
+      "description": "Supporting Clinical Information"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "0919",
+  "description": "Exclusive Test",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "D",
+      "description": "In some cases, this test should be only exclusively with like tests (examples are cyto or pathology)"
+    },
+    {
+      "name": "N",
+      "description": "This test can be included with any number of other tests"
+    },
+    {
+      "name": "Y",
+      "description": "This test should be exclusive"
+    }
+  ]
+}

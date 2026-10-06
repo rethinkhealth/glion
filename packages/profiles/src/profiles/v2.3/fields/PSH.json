@@ -1,0 +1,147 @@
+{
+  "segmentId": "PSH",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PSH-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 60,
+      "name": "Report Type",
+      "item": "1233"
+    },
+    {
+      "sequence": 2,
+      "id": "PSH-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "maxLength": 60,
+      "name": "Report Form Identifier",
+      "item": "1234"
+    },
+    {
+      "sequence": 3,
+      "id": "PSH-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Report Date",
+      "item": "1235"
+    },
+    {
+      "sequence": 4,
+      "id": "PSH-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Report Interval Start Date",
+      "item": "1236"
+    },
+    {
+      "sequence": 5,
+      "id": "PSH-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Report Interval End Date",
+      "item": "1237"
+    },
+    {
+      "sequence": 6,
+      "id": "PSH-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 12,
+      "name": "Quantity Manufactured",
+      "item": "1238"
+    },
+    {
+      "sequence": 7,
+      "id": "PSH-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 12,
+      "name": "Quantity Distributed",
+      "item": "1239"
+    },
+    {
+      "sequence": 8,
+      "id": "PSH-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70329",
+      "name": "Quantity Distributed Method",
+      "item": "1240"
+    },
+    {
+      "sequence": 9,
+      "id": "PSH-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "FT",
+      "maxLength": 600,
+      "name": "Quantity Distributed Comment",
+      "item": "1241"
+    },
+    {
+      "sequence": 10,
+      "id": "PSH-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "maxLength": 12,
+      "name": "Quantity in Use",
+      "item": "1242"
+    },
+    {
+      "sequence": 11,
+      "id": "PSH-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70329",
+      "name": "Quantity in Use Method",
+      "item": "1243"
+    },
+    {
+      "sequence": 12,
+      "id": "PSH-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "FT",
+      "maxLength": 600,
+      "name": "Quantity in Use Comment",
+      "item": "1244"
+    },
+    {
+      "sequence": 13,
+      "id": "PSH-13",
+      "required": false,
+      "repeatable": true,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "Number of Product Experience Reports Filed by Facility",
+      "item": "1245"
+    },
+    {
+      "sequence": 14,
+      "id": "PSH-14",
+      "required": false,
+      "repeatable": true,
+      "datatype": "NM",
+      "maxLength": 2,
+      "name": "Number of Product Experience Reports Filed by Distributor",
+      "item": "1246"
+    }
+  ]
+}

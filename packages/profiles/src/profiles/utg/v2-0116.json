@@ -1,0 +1,39 @@
+{
+  "id": "v2-0116",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0116",
+  "oid": "2.16.840.1.113883.18.47",
+  "name": "BedStatus",
+  "title": "bedStatus",
+  "codes": [
+    {
+      "code": "C",
+      "display": "Closed",
+      "status": "active"
+    },
+    {
+      "code": "H",
+      "display": "Housekeeping",
+      "status": "active"
+    },
+    {
+      "code": "I",
+      "display": "Isolated",
+      "status": "active"
+    },
+    {
+      "code": "K",
+      "display": "Contaminated",
+      "status": "active"
+    },
+    {
+      "code": "O",
+      "display": "Occupied",
+      "status": "active"
+    },
+    {
+      "code": "U",
+      "display": "Unoccupied",
+      "status": "active"
+    }
+  ]
+}

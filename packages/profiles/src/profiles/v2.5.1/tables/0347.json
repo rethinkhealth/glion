@@ -1,0 +1,11 @@
+{
+  "id": "0347",
+  "description": "State/province",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

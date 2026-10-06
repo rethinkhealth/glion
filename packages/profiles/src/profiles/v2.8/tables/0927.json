@@ -1,0 +1,19 @@
+{
+  "id": "0927",
+  "description": "Arm Stick",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Both Arms"
+    },
+    {
+      "name": "L",
+      "description": "Left Arm"
+    },
+    {
+      "name": "R",
+      "description": "Right Arm"
+    }
+  ]
+}

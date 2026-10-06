@@ -1,0 +1,15 @@
+{
+  "id": "0917",
+  "description": "Bolus Type",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Supplemental"
+    },
+    {
+      "name": "L",
+      "description": "Loading"
+    }
+  ]
+}

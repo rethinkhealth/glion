@@ -1,0 +1,15 @@
+{
+  "id": "0183",
+  "description": "Active/inactive",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "A",
+      "description": "Active Staff"
+    },
+    {
+      "name": "I",
+      "description": "Inactive Staff"
+    }
+  ]
+}

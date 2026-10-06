@@ -1,0 +1,20 @@
+{
+  "id": "TS",
+  "version": "2.5",
+  "kind": "composite",
+  "title": "Time Stamp",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "Time",
+      "datatypeId": "DTM",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "Degree of Precision",
+      "datatypeId": "ID",
+      "required": false
+    }
+  ]
+}

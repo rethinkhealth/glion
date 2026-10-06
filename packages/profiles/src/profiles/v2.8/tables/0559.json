@@ -1,0 +1,19 @@
+{
+  "id": "0559",
+  "description": "Product/Service Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "D",
+      "description": "Denied"
+    },
+    {
+      "name": "P",
+      "description": "Processed"
+    },
+    {
+      "name": "R",
+      "description": "Rejected"
+    }
+  ]
+}

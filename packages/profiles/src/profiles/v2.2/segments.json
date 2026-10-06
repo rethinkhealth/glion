@@ -1,0 +1,252 @@
+{
+  "segments": [
+    {
+      "id": "ACC",
+      "title": "Accident"
+    },
+    {
+      "id": "ADD",
+      "title": "Addendum"
+    },
+    {
+      "id": "AL1",
+      "title": "Patient Allergy Information"
+    },
+    {
+      "id": "BHS",
+      "title": "Batch Header"
+    },
+    {
+      "id": "BLG",
+      "title": "Billing"
+    },
+    {
+      "id": "BTS",
+      "title": "Batch Trailer"
+    },
+    {
+      "id": "DG1",
+      "title": "Diagnosis"
+    },
+    {
+      "id": "DSC",
+      "title": "Continuation Pointer"
+    },
+    {
+      "id": "DSP",
+      "title": "Display Data"
+    },
+    {
+      "id": "ERR",
+      "title": "Error"
+    },
+    {
+      "id": "EVN",
+      "title": "Event Type"
+    },
+    {
+      "id": "FHS",
+      "title": "File Header"
+    },
+    {
+      "id": "FT1",
+      "title": "Financial Transaction"
+    },
+    {
+      "id": "FTS",
+      "title": "File Trailer"
+    },
+    {
+      "id": "GT1",
+      "title": "Guarantor"
+    },
+    {
+      "id": "IN1",
+      "title": "Insurance"
+    },
+    {
+      "id": "IN2",
+      "title": "Insurance Additional Info"
+    },
+    {
+      "id": "IN3",
+      "title": "Insurance Additional Info-Certification"
+    },
+    {
+      "id": "MFA",
+      "title": "Master File Acknowledgement"
+    },
+    {
+      "id": "MFE",
+      "title": "Master File Entry"
+    },
+    {
+      "id": "MFI",
+      "title": "Master File Identification"
+    },
+    {
+      "id": "MRG",
+      "title": "Merge Patient Information"
+    },
+    {
+      "id": "MSA",
+      "title": "Message Acknowledgment"
+    },
+    {
+      "id": "MSH",
+      "title": "Message Header"
+    },
+    {
+      "id": "NCK",
+      "title": "System Clock"
+    },
+    {
+      "id": "NK1",
+      "title": "Next of Kin"
+    },
+    {
+      "id": "NPU",
+      "title": "Bed Status Update"
+    },
+    {
+      "id": "NSC",
+      "title": "Status Change"
+    },
+    {
+      "id": "NST",
+      "title": "Statistics"
+    },
+    {
+      "id": "NTE",
+      "title": "Notes and Comments"
+    },
+    {
+      "id": "OBR",
+      "title": "Observation Request"
+    },
+    {
+      "id": "OBX",
+      "title": "Observation Result"
+    },
+    {
+      "id": "ODS",
+      "title": "Dietary Orders, Supplements, and Preferences"
+    },
+    {
+      "id": "ODT",
+      "title": "Diet Tray Instruction"
+    },
+    {
+      "id": "OM1",
+      "title": "General - Fields That Apply to Most Observations"
+    },
+    {
+      "id": "OM2",
+      "title": "Numeric Observation"
+    },
+    {
+      "id": "OM3",
+      "title": "Categorical Test/Observation"
+    },
+    {
+      "id": "OM4",
+      "title": "Observations That Require Specimens"
+    },
+    {
+      "id": "OM5",
+      "title": "Observation Batteries"
+    },
+    {
+      "id": "OM6",
+      "title": "Observations That Are Calculated from Other Observations"
+    },
+    {
+      "id": "ORC",
+      "title": "Common Order"
+    },
+    {
+      "id": "PID",
+      "title": "Patient Identification"
+    },
+    {
+      "id": "PR1",
+      "title": "Procedures"
+    },
+    {
+      "id": "PRA",
+      "title": "Practitioner Detail"
+    },
+    {
+      "id": "PV1",
+      "title": "Patient Visit"
+    },
+    {
+      "id": "PV2",
+      "title": "Patient Visit - Additional Information"
+    },
+    {
+      "id": "QRD",
+      "title": "Query Definition"
+    },
+    {
+      "id": "QRF",
+      "title": "Query Filter"
+    },
+    {
+      "id": "RQ1",
+      "title": "Requisition Detail-1"
+    },
+    {
+      "id": "RQD",
+      "title": "Requisition Detail"
+    },
+    {
+      "id": "RXA",
+      "title": "Pharmacy Administration"
+    },
+    {
+      "id": "RXC",
+      "title": "Pharmacy Component Order"
+    },
+    {
+      "id": "RXD",
+      "title": "Pharmacy Dispense"
+    },
+    {
+      "id": "RXE",
+      "title": "Pharmacy Encoded Order"
+    },
+    {
+      "id": "RXG",
+      "title": "Pharmacy Give"
+    },
+    {
+      "id": "RXO",
+      "title": "Pharmacy Prescription Order"
+    },
+    {
+      "id": "RXR",
+      "title": "Pharmacy Route"
+    },
+    {
+      "id": "STF",
+      "title": "Staff Identification"
+    },
+    {
+      "id": "UB1",
+      "title": "UB82 Data"
+    },
+    {
+      "id": "UB2",
+      "title": "UB92 Data"
+    },
+    {
+      "id": "URD",
+      "title": "Results/Update Definition"
+    },
+    {
+      "id": "URS",
+      "title": "Unsolicited Selection"
+    }
+  ]
+}

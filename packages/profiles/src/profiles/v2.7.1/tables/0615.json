@@ -1,0 +1,15 @@
+{
+  "id": "0615",
+  "description": "User Authentication Credential Type Code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "KERB",
+      "description": "Kerberos Service Ticket"
+    },
+    {
+      "name": "SAML",
+      "description": "Authenticated User Identity Assertion"
+    }
+  ]
+}

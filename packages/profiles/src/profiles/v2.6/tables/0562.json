@@ -1,0 +1,31 @@
+{
+  "id": "0562",
+  "description": "Processing Consideration Codes",
+  "type": "user",
+  "codes": [
+    {
+      "name": "DFADJ",
+      "description": "Deferred Adjudication Processing"
+    },
+    {
+      "name": "EFORM",
+      "description": "Electronic form to follow"
+    },
+    {
+      "name": "FAX",
+      "description": "Fax to follow"
+    },
+    {
+      "name": "PAPER",
+      "description": "Paper documentation to follow"
+    },
+    {
+      "name": "PYRDELAY",
+      "description": "Delayed by a Previous Payer"
+    },
+    {
+      "name": "RTADJ",
+      "description": "Real Time Adjudication Processing"
+    }
+  ]
+}

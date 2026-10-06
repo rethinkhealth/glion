@@ -1,0 +1,457 @@
+{
+  "segmentId": "SAC",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "SAC-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 80,
+      "name": "External Accession Identifier",
+      "item": "1329"
+    },
+    {
+      "sequence": 2,
+      "id": "SAC-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 80,
+      "name": "Accession Identifier",
+      "item": "1330"
+    },
+    {
+      "sequence": 3,
+      "id": "SAC-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 80,
+      "name": "Container Identifier",
+      "item": "1331"
+    },
+    {
+      "sequence": 4,
+      "id": "SAC-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 80,
+      "name": "Primary (parent) Container Identifier",
+      "item": "1332"
+    },
+    {
+      "sequence": 5,
+      "id": "SAC-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 80,
+      "name": "Equipment Container Identifier",
+      "item": "1333"
+    },
+    {
+      "sequence": 6,
+      "id": "SAC-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SPS",
+      "maxLength": 300,
+      "name": "Specimen Source",
+      "item": "249"
+    },
+    {
+      "sequence": 7,
+      "id": "SAC-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "TS",
+      "maxLength": 26,
+      "name": "Registration Date/Time",
+      "item": "1334"
+    },
+    {
+      "sequence": 8,
+      "id": "SAC-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70370",
+      "name": "Container Status",
+      "item": "1335"
+    },
+    {
+      "sequence": 9,
+      "id": "SAC-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70378",
+      "name": "Carrier Type",
+      "item": "1336"
+    },
+    {
+      "sequence": 10,
+      "id": "SAC-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 80,
+      "name": "Carrier Identifier",
+      "item": "1337"
+    },
+    {
+      "sequence": 11,
+      "id": "SAC-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NA",
+      "maxLength": 80,
+      "name": "Position in Carrier",
+      "item": "1338"
+    },
+    {
+      "sequence": 12,
+      "id": "SAC-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70379",
+      "name": "Tray Type - SAC",
+      "item": "1339"
+    },
+    {
+      "sequence": 13,
+      "id": "SAC-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "maxLength": 80,
+      "name": "Tray Identifier",
+      "item": "1340"
+    },
+    {
+      "sequence": 14,
+      "id": "SAC-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NA",
+      "maxLength": 80,
+      "name": "Position in Tray",
+      "item": "1341"
+    },
+    {
+      "sequence": 15,
+      "id": "SAC-15",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Location",
+      "item": "1342"
+    },
+    {
+      "sequence": 16,
+      "id": "SAC-16",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Container Height",
+      "item": "1343"
+    },
+    {
+      "sequence": 17,
+      "id": "SAC-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Container Diameter",
+      "item": "1344"
+    },
+    {
+      "sequence": 18,
+      "id": "SAC-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Barrier Delta",
+      "item": "1345"
+    },
+    {
+      "sequence": 19,
+      "id": "SAC-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Bottom Delta",
+      "item": "1346"
+    },
+    {
+      "sequence": 20,
+      "id": "SAC-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Container Height/Diameter/Delta Units",
+      "item": "1347"
+    },
+    {
+      "sequence": 21,
+      "id": "SAC-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Container Volume",
+      "item": "644"
+    },
+    {
+      "sequence": 22,
+      "id": "SAC-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Available Specimen Volume",
+      "item": "1349"
+    },
+    {
+      "sequence": 23,
+      "id": "SAC-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Initial Specimen Volume",
+      "item": "1350"
+    },
+    {
+      "sequence": 24,
+      "id": "SAC-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Volume Units",
+      "item": "1351"
+    },
+    {
+      "sequence": 25,
+      "id": "SAC-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70380",
+      "name": "Separator Type",
+      "item": "1352"
+    },
+    {
+      "sequence": 26,
+      "id": "SAC-26",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70381",
+      "name": "Cap Type",
+      "item": "1353"
+    },
+    {
+      "sequence": 27,
+      "id": "SAC-27",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70371",
+      "name": "Additive",
+      "item": "647"
+    },
+    {
+      "sequence": 28,
+      "id": "SAC-28",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Specimen Component",
+      "item": "1355"
+    },
+    {
+      "sequence": 29,
+      "id": "SAC-29",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SN",
+      "maxLength": 20,
+      "name": "Dilution Factor",
+      "item": "1356"
+    },
+    {
+      "sequence": 30,
+      "id": "SAC-30",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70373",
+      "name": "Treatment",
+      "item": "1357"
+    },
+    {
+      "sequence": 31,
+      "id": "SAC-31",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SN",
+      "maxLength": 20,
+      "name": "Temperature",
+      "item": "1358"
+    },
+    {
+      "sequence": 32,
+      "id": "SAC-32",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Hemolysis Index",
+      "item": "1359"
+    },
+    {
+      "sequence": 33,
+      "id": "SAC-33",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Hemolysis Index Units",
+      "item": "1360"
+    },
+    {
+      "sequence": 34,
+      "id": "SAC-34",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Lipemia Index",
+      "item": "1361"
+    },
+    {
+      "sequence": 35,
+      "id": "SAC-35",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Lipemia Index Units",
+      "item": "1362"
+    },
+    {
+      "sequence": 36,
+      "id": "SAC-36",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Icterus Index",
+      "item": "1363"
+    },
+    {
+      "sequence": 37,
+      "id": "SAC-37",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Icterus Index Units",
+      "item": "1364"
+    },
+    {
+      "sequence": 38,
+      "id": "SAC-38",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "maxLength": 20,
+      "name": "Fibrin Index",
+      "item": "1365"
+    },
+    {
+      "sequence": 39,
+      "id": "SAC-39",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "name": "Fibrin Index Units",
+      "item": "1366"
+    },
+    {
+      "sequence": 40,
+      "id": "SAC-40",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70374",
+      "name": "System Induced Contaminants",
+      "item": "1367"
+    },
+    {
+      "sequence": 41,
+      "id": "SAC-41",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70382",
+      "name": "Drug Interference",
+      "item": "1368"
+    },
+    {
+      "sequence": 42,
+      "id": "SAC-42",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70375",
+      "name": "Artificial Blood",
+      "item": "1369"
+    },
+    {
+      "sequence": 43,
+      "id": "SAC-43",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CWE",
+      "maxLength": 250,
+      "table": "HL70376",
+      "name": "Special Handling Code",
+      "item": "1370"
+    },
+    {
+      "sequence": 44,
+      "id": "SAC-44",
+      "required": false,
+      "repeatable": true,
+      "datatype": "CE",
+      "maxLength": 250,
+      "table": "HL70377",
+      "name": "Other Environmental Factors",
+      "item": "1371"
+    }
+  ]
+}

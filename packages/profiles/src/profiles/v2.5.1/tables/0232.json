@@ -1,0 +1,19 @@
+{
+  "id": "0232",
+  "description": "Insurance Company Contact Reason",
+  "type": "user",
+  "codes": [
+    {
+      "name": "01",
+      "description": "Medicare claim status"
+    },
+    {
+      "name": "02",
+      "description": "Medicaid claim status"
+    },
+    {
+      "name": "03",
+      "description": "Name/address change"
+    }
+  ]
+}

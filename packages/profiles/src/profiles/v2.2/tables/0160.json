@@ -1,0 +1,27 @@
+{
+  "id": "0160",
+  "description": "TRAY TYPE",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "EARLY",
+      "description": "Early tray"
+    },
+    {
+      "name": "GUEST",
+      "description": "Guest tray"
+    },
+    {
+      "name": "LATE",
+      "description": "Late tray"
+    },
+    {
+      "name": "MSG",
+      "description": "Tray message only"
+    },
+    {
+      "name": "NO",
+      "description": "No tray"
+    }
+  ]
+}

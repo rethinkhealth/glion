@@ -1,0 +1,23 @@
+{
+  "id": "0258",
+  "description": "Relationship modifier",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "BPU",
+      "description": "Blood product unit"
+    },
+    {
+      "name": "CONTROL",
+      "description": "Control"
+    },
+    {
+      "name": "DONOR",
+      "description": "Donor"
+    },
+    {
+      "name": "PATIENT",
+      "description": "Patient"
+    }
+  ]
+}

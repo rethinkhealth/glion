@@ -1,0 +1,415 @@
+{
+  "id": "0254",
+  "description": "Kind of Quantity",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ABS",
+      "description": "Absorbance"
+    },
+    {
+      "name": "ACNC",
+      "description": "Concentration, Arbitrary Substance"
+    },
+    {
+      "name": "ACT",
+      "description": "Activity"
+    },
+    {
+      "name": "APER",
+      "description": "Appearance"
+    },
+    {
+      "name": "ARB",
+      "description": "Arbitrary"
+    },
+    {
+      "name": "AREA",
+      "description": "Area"
+    },
+    {
+      "name": "ASPECT",
+      "description": "Aspect"
+    },
+    {
+      "name": "CACT",
+      "description": "Catalytic Activity"
+    },
+    {
+      "name": "CCNT",
+      "description": "Catalytic Content"
+    },
+    {
+      "name": "CCRTO",
+      "description": "Catalytic Concentration Ratio"
+    },
+    {
+      "name": "CFR",
+      "description": "Catalytic Fraction"
+    },
+    {
+      "name": "CLAS",
+      "description": "Class"
+    },
+    {
+      "name": "CNC",
+      "description": "Catalytic Concentration"
+    },
+    {
+      "name": "CNST",
+      "description": "Constant"
+    },
+    {
+      "name": "COEF",
+      "description": "Coefficient"
+    },
+    {
+      "name": "COLOR",
+      "description": "Color"
+    },
+    {
+      "name": "CONS",
+      "description": "Consistency"
+    },
+    {
+      "name": "CRAT",
+      "description": "Catalytic Rate"
+    },
+    {
+      "name": "CRTO",
+      "description": "Catalytic Ratio"
+    },
+    {
+      "name": "DEN",
+      "description": "Density"
+    },
+    {
+      "name": "DEV",
+      "description": "Device"
+    },
+    {
+      "name": "DIFF",
+      "description": "Difference"
+    },
+    {
+      "name": "ELAS",
+      "description": "Elasticity"
+    },
+    {
+      "name": "ELPOT",
+      "description": "Electrical Potential (Voltage)"
+    },
+    {
+      "name": "ELRAT",
+      "description": "Electrical current (amperage)"
+    },
+    {
+      "name": "ELRES",
+      "description": "Electrical Resistance"
+    },
+    {
+      "name": "ENGR",
+      "description": "Energy"
+    },
+    {
+      "name": "ENT",
+      "description": "Entitic"
+    },
+    {
+      "name": "ENTCAT",
+      "description": "Entitic Catalytic Activity"
+    },
+    {
+      "name": "ENTNUM",
+      "description": "Entitic Number"
+    },
+    {
+      "name": "ENTSUB",
+      "description": "Entitic Substance of Amount"
+    },
+    {
+      "name": "ENTVOL",
+      "description": "Entitic Volume"
+    },
+    {
+      "name": "EQL",
+      "description": "Equilibrium"
+    },
+    {
+      "name": "FORCE",
+      "description": "Mechanical force"
+    },
+    {
+      "name": "FREQ",
+      "description": "Frequency"
+    },
+    {
+      "name": "IMP",
+      "description": "Impression/ interpretation of study"
+    },
+    {
+      "name": "KINV",
+      "description": "Kinematic Viscosity"
+    },
+    {
+      "name": "LEN",
+      "description": "Length"
+    },
+    {
+      "name": "LINC",
+      "description": "Length Increment"
+    },
+    {
+      "name": "LIQ",
+      "description": "Liquifaction"
+    },
+    {
+      "name": "MASS",
+      "description": "Mass"
+    },
+    {
+      "name": "MCNC",
+      "description": "Mass Concentration"
+    },
+    {
+      "name": "MCNT",
+      "description": "Mass Content"
+    },
+    {
+      "name": "MCRTO",
+      "description": "Mass Concentration Ratio"
+    },
+    {
+      "name": "MFR",
+      "description": "Mass Fraction"
+    },
+    {
+      "name": "MGFLUX",
+      "description": "Magnetic flux"
+    },
+    {
+      "name": "MINC",
+      "description": "Mass Increment"
+    },
+    {
+      "name": "MORPH",
+      "description": "Morphology"
+    },
+    {
+      "name": "MOTIL",
+      "description": "Motility"
+    },
+    {
+      "name": "MRAT",
+      "description": "Mass Rate"
+    },
+    {
+      "name": "MRTO",
+      "description": "Mass Ratio"
+    },
+    {
+      "name": "NCNC",
+      "description": "Number Concentration"
+    },
+    {
+      "name": "NCNT",
+      "description": "Number Content"
+    },
+    {
+      "name": "NFR",
+      "description": "Number Fraction"
+    },
+    {
+      "name": "NRTO",
+      "description": "Number Ratio"
+    },
+    {
+      "name": "NUM",
+      "description": "Number"
+    },
+    {
+      "name": "OD",
+      "description": "Optical density"
+    },
+    {
+      "name": "OSMOL",
+      "description": "Osmolality"
+    },
+    {
+      "name": "PRES",
+      "description": "Pressure (Partial)"
+    },
+    {
+      "name": "PRID",
+      "description": "Presence/Identity/Existence"
+    },
+    {
+      "name": "PWR",
+      "description": "Power (wattage)"
+    },
+    {
+      "name": "RANGE",
+      "description": "Ranges"
+    },
+    {
+      "name": "RATIO",
+      "description": "Ratios"
+    },
+    {
+      "name": "RCRLTM",
+      "description": "Reciprocal Relative Time"
+    },
+    {
+      "name": "RDEN",
+      "description": "Relative Density"
+    },
+    {
+      "name": "REL",
+      "description": "Relative"
+    },
+    {
+      "name": "RLMCNC",
+      "description": "Relative Mass Concentration"
+    },
+    {
+      "name": "RLSCNC",
+      "description": "Relative Substance Concentration"
+    },
+    {
+      "name": "RLTM",
+      "description": "Relative Time"
+    },
+    {
+      "name": "SATFR",
+      "description": "Saturation Fraction"
+    },
+    {
+      "name": "SCNC",
+      "description": "Substance Concentration"
+    },
+    {
+      "name": "SCNCIN",
+      "description": "Substance Concentration Increment"
+    },
+    {
+      "name": "SCNT",
+      "description": "Substance Content"
+    },
+    {
+      "name": "SCNTR",
+      "description": "Substance Content Rate"
+    },
+    {
+      "name": "SCRTO",
+      "description": "Substance Concentration Ratio"
+    },
+    {
+      "name": "SFR",
+      "description": "Substance Fraction"
+    },
+    {
+      "name": "SHAPE",
+      "description": "Shape"
+    },
+    {
+      "name": "SMELL",
+      "description": "Smell"
+    },
+    {
+      "name": "SRAT",
+      "description": "Substance Rate"
+    },
+    {
+      "name": "SRTO",
+      "description": "Substance Ratio"
+    },
+    {
+      "name": "SUB",
+      "description": "Substance Amount"
+    },
+    {
+      "name": "SUSC",
+      "description": "Susceptibility"
+    },
+    {
+      "name": "TASTE",
+      "description": "Taste"
+    },
+    {
+      "name": "TEMP",
+      "description": "Temperature"
+    },
+    {
+      "name": "TEMPDF",
+      "description": "Temperature Difference"
+    },
+    {
+      "name": "TEMPIN",
+      "description": "Temperature Increment"
+    },
+    {
+      "name": "THRMCNC",
+      "description": "Threshold Mass Concentration"
+    },
+    {
+      "name": "THRSCNC",
+      "description": "Threshold Substance Concentration"
+    },
+    {
+      "name": "TIME",
+      "description": "Time (e.g. seconds)"
+    },
+    {
+      "name": "TITR",
+      "description": "Dilution Factor (Titer)"
+    },
+    {
+      "name": "TMDF",
+      "description": "Time Difference"
+    },
+    {
+      "name": "TMSTP",
+      "description": "Time Stamp -- Date and Time"
+    },
+    {
+      "name": "TRTO",
+      "description": "Time Ratio"
+    },
+    {
+      "name": "TYPE",
+      "description": "Type"
+    },
+    {
+      "name": "VCNT",
+      "description": "Volume Content"
+    },
+    {
+      "name": "VEL",
+      "description": "Velocity"
+    },
+    {
+      "name": "VELRT",
+      "description": "Velocity Ratio"
+    },
+    {
+      "name": "VFR",
+      "description": "Volume Fraction"
+    },
+    {
+      "name": "VISC",
+      "description": "Viscosity"
+    },
+    {
+      "name": "VOL",
+      "description": "Volume"
+    },
+    {
+      "name": "VRAT",
+      "description": "Volume Rate"
+    },
+    {
+      "name": "VRTO",
+      "description": "Volume Ratio"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "0394",
+  "description": "Response Modality",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Batch"
+    },
+    {
+      "name": "R",
+      "description": "Real Time"
+    },
+    {
+      "name": "T",
+      "description": "Bolus (a series of responses sent at the same time without use of batch formatting)"
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+{
+  "segmentId": "SCH",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "SCH-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Placer Appointment ID",
+      "item": "860"
+    },
+    {
+      "sequence": 2,
+      "id": "SCH-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Filler Appointment ID",
+      "item": "861"
+    },
+    {
+      "sequence": 3,
+      "id": "SCH-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Occurrence Number",
+      "item": "862"
+    },
+    {
+      "sequence": 4,
+      "id": "SCH-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EIP",
+      "name": "Placer Group Number",
+      "item": "218"
+    },
+    {
+      "sequence": 5,
+      "id": "SCH-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Schedule ID",
+      "item": "864"
+    },
+    {
+      "sequence": 6,
+      "id": "SCH-6",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Event Reason",
+      "item": "883"
+    },
+    {
+      "sequence": 7,
+      "id": "SCH-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70276",
+      "name": "Appointment Reason",
+      "item": "866"
+    },
+    {
+      "sequence": 8,
+      "id": "SCH-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70277",
+      "name": "Appointment Type",
+      "item": "867"
+    },
+    {
+      "sequence": 9,
+      "id": "SCH-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "name": "Appointment Duration Units",
+      "item": "869"
+    },
+    {
+      "sequence": 10,
+      "id": "SCH-12",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Placer Contact Person",
+      "item": "874"
+    },
+    {
+      "sequence": 11,
+      "id": "SCH-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XTN",
+      "name": "Placer Contact Phone Number",
+      "item": "875"
+    },
+    {
+      "sequence": 12,
+      "id": "SCH-14",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XAD",
+      "name": "Placer Contact Address",
+      "item": "876"
+    },
+    {
+      "sequence": 13,
+      "id": "SCH-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PL",
+      "name": "Placer Contact Location",
+      "item": "877"
+    },
+    {
+      "sequence": 14,
+      "id": "SCH-16",
+      "required": true,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Filler Contact Person",
+      "item": "885"
+    },
+    {
+      "sequence": 15,
+      "id": "SCH-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "XTN",
+      "name": "Filler Contact Phone Number",
+      "item": "886"
+    },
+    {
+      "sequence": 16,
+      "id": "SCH-18",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XAD",
+      "name": "Filler Contact Address",
+      "item": "887"
+    },
+    {
+      "sequence": 17,
+      "id": "SCH-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PL",
+      "name": "Filler Contact Location",
+      "item": "888"
+    },
+    {
+      "sequence": 18,
+      "id": "SCH-20",
+      "required": true,
+      "repeatable": true,
+      "datatype": "XCN",
+      "name": "Entered By Person",
+      "item": "878"
+    },
+    {
+      "sequence": 19,
+      "id": "SCH-21",
+      "required": false,
+      "repeatable": true,
+      "datatype": "XTN",
+      "name": "Entered By Phone Number",
+      "item": "879"
+    },
+    {
+      "sequence": 20,
+      "id": "SCH-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "PL",
+      "name": "Entered By Location",
+      "item": "880"
+    },
+    {
+      "sequence": 21,
+      "id": "SCH-23",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Parent Placer Appointment ID",
+      "item": "881"
+    },
+    {
+      "sequence": 22,
+      "id": "SCH-24",
+      "required": false,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Parent Filler Appointment ID",
+      "item": "882"
+    },
+    {
+      "sequence": 23,
+      "id": "SCH-25",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "table": "HL70278",
+      "name": "Filler Status Code",
+      "item": "889"
+    },
+    {
+      "sequence": 24,
+      "id": "SCH-26",
+      "required": false,
+      "repeatable": true,
+      "datatype": "EI",
+      "name": "Placer Order Number",
+      "item": "216"
+    },
+    {
+      "sequence": 25,
+      "id": "SCH-27",
+      "required": false,
+      "repeatable": true,
+      "datatype": "EI",
+      "name": "Filler Order Number",
+      "item": "217"
+    }
+  ]
+}

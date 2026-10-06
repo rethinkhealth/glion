@@ -1,0 +1,15 @@
+{
+  "id": "0210",
+  "description": "Relational Conjunction",
+  "type": "user",
+  "codes": [
+    {
+      "name": "AND",
+      "description": "Default"
+    },
+    {
+      "name": "OR",
+      "description": ""
+    }
+  ]
+}

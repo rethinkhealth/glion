@@ -1,0 +1,14 @@
+{
+  "id": "v2-0793",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0793",
+  "oid": "2.16.840.1.113883.18.405",
+  "name": "RulingAct",
+  "title": "rulingAct",
+  "codes": [
+    {
+      "code": "SMDA",
+      "display": "Safe Medical Devices Act",
+      "status": "active"
+    }
+  ]
+}

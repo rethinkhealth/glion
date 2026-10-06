@@ -1,0 +1,29 @@
+{
+  "id": "v2-0150",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0150",
+  "oid": "2.16.840.1.113883.18.71",
+  "name": "CertificationPatientType",
+  "title": "certificationPatientType",
+  "codes": [
+    {
+      "code": "ER",
+      "display": "Emergency",
+      "status": "active"
+    },
+    {
+      "code": "IPE",
+      "display": "Inpatient elective",
+      "status": "active"
+    },
+    {
+      "code": "OPE",
+      "display": "Outpatient elective",
+      "status": "active"
+    },
+    {
+      "code": "UR",
+      "display": "Urgent",
+      "status": "active"
+    }
+  ]
+}

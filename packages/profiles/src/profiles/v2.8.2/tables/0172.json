@@ -1,0 +1,11 @@
+{
+  "id": "0172",
+  "description": "Veterans Military Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested values defined"
+    }
+  ]
+}

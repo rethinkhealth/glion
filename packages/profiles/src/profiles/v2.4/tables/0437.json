@@ -1,0 +1,19 @@
+{
+  "id": "0437",
+  "description": "Alert device code",
+  "type": "user",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Bracelet"
+    },
+    {
+      "name": "N",
+      "description": "Necklace"
+    },
+    {
+      "name": "W",
+      "description": "Wallet Card"
+    }
+  ]
+}

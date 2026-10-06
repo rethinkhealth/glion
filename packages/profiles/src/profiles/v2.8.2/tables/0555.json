@@ -1,0 +1,47 @@
+{
+  "id": "0555",
+  "description": "Invoice Type",
+  "type": "user",
+  "codes": [
+    {
+      "name": "BK",
+      "description": "Block"
+    },
+    {
+      "name": "FN",
+      "description": "Final"
+    },
+    {
+      "name": "FS",
+      "description": "Fee for Service"
+    },
+    {
+      "name": "GP",
+      "description": "Group"
+    },
+    {
+      "name": "IN",
+      "description": "Information Only"
+    },
+    {
+      "name": "NP",
+      "description": "Non Patient"
+    },
+    {
+      "name": "PA",
+      "description": "Partial"
+    },
+    {
+      "name": "SL",
+      "description": "Salary"
+    },
+    {
+      "name": "SS",
+      "description": "By Session"
+    },
+    {
+      "name": "SU",
+      "description": "Supplemental"
+    }
+  ]
+}

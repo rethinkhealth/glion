@@ -1,0 +1,23 @@
+{
+  "id": "0124",
+  "description": "Transportation mode",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "CART",
+      "description": "Cart - patient travels on cart or gurney"
+    },
+    {
+      "name": "PORT",
+      "description": "The examining device goes to patient’s location"
+    },
+    {
+      "name": "WALK",
+      "description": "Patient walks to diagnostic service"
+    },
+    {
+      "name": "WHLC",
+      "description": "Wheelchair"
+    }
+  ]
+}

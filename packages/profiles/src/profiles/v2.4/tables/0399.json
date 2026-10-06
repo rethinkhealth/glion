@@ -1,0 +1,959 @@
+{
+  "id": "0399",
+  "description": "Country code",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "ABW",
+      "description": "ARUBA"
+    },
+    {
+      "name": "AFG",
+      "description": "AFGHANISTAN"
+    },
+    {
+      "name": "AFT",
+      "description": "FRENCH SOUTHERN TERRITORIES"
+    },
+    {
+      "name": "AGO",
+      "description": "ANGOLA"
+    },
+    {
+      "name": "AIA",
+      "description": "ANGUILLA"
+    },
+    {
+      "name": "ALB",
+      "description": "ALBANIA"
+    },
+    {
+      "name": "AND",
+      "description": "ANDORRA"
+    },
+    {
+      "name": "ANT",
+      "description": "NETHERLANDS ANTILLES"
+    },
+    {
+      "name": "ARE",
+      "description": "UNITED ARAB EMIRATES"
+    },
+    {
+      "name": "ARG",
+      "description": "ARGENTINA"
+    },
+    {
+      "name": "ARM",
+      "description": "ARMENIA"
+    },
+    {
+      "name": "ASM",
+      "description": "AMERICAN SAMOA"
+    },
+    {
+      "name": "ATA",
+      "description": "ANTARCTICA"
+    },
+    {
+      "name": "ATG",
+      "description": "ANTIGUA AND BARBUDA"
+    },
+    {
+      "name": "AUS",
+      "description": "AUSTRALIA"
+    },
+    {
+      "name": "AUT",
+      "description": "AUSTRIA"
+    },
+    {
+      "name": "AZE",
+      "description": "AZERBAIJAN"
+    },
+    {
+      "name": "BDI",
+      "description": "BURUNDI"
+    },
+    {
+      "name": "BEL",
+      "description": "BELGIUM"
+    },
+    {
+      "name": "BEN",
+      "description": "BENIN"
+    },
+    {
+      "name": "BFA",
+      "description": "BURKINA FASO"
+    },
+    {
+      "name": "BGD",
+      "description": "BANGLADESH"
+    },
+    {
+      "name": "BGR",
+      "description": "BULGARIA"
+    },
+    {
+      "name": "BHR",
+      "description": "BAHRAIN"
+    },
+    {
+      "name": "BHS",
+      "description": "BAHAMAS"
+    },
+    {
+      "name": "BIH",
+      "description": "BOSNIA AND HERZEGOVINA"
+    },
+    {
+      "name": "BLR",
+      "description": "BELARUS"
+    },
+    {
+      "name": "BLZ",
+      "description": "BELIZE"
+    },
+    {
+      "name": "BMU",
+      "description": "BERMUDA"
+    },
+    {
+      "name": "BOL",
+      "description": "BOLIVIA"
+    },
+    {
+      "name": "BRA",
+      "description": "BRAZIL"
+    },
+    {
+      "name": "BRB",
+      "description": "BARBADOS"
+    },
+    {
+      "name": "BRN",
+      "description": "BRUNEI DARUSSALAM"
+    },
+    {
+      "name": "BTN",
+      "description": "BHUTAN"
+    },
+    {
+      "name": "BVT",
+      "description": "BOUVET ISLAND"
+    },
+    {
+      "name": "BWA",
+      "description": "BOTSWANA"
+    },
+    {
+      "name": "CAF",
+      "description": "CENTRAL AFRICAN REPUBLIC"
+    },
+    {
+      "name": "CAN",
+      "description": "CANADA"
+    },
+    {
+      "name": "CCK",
+      "description": "COCOS (KEELING) ISLANDS"
+    },
+    {
+      "name": "CHE",
+      "description": "SWITZERLAND"
+    },
+    {
+      "name": "CHL",
+      "description": "CHILE"
+    },
+    {
+      "name": "CHN",
+      "description": "CHINA"
+    },
+    {
+      "name": "CIV",
+      "description": "COTE D'VOIRE"
+    },
+    {
+      "name": "CMR",
+      "description": "CAMEROON"
+    },
+    {
+      "name": "COD",
+      "description": "CONGO, THE DEMOCRATIC REPUBLIC OF THE"
+    },
+    {
+      "name": "COG",
+      "description": "CONGO"
+    },
+    {
+      "name": "COK",
+      "description": "COOK ISLAND"
+    },
+    {
+      "name": "COL",
+      "description": "COLOMBIA"
+    },
+    {
+      "name": "COM",
+      "description": "COMOROS"
+    },
+    {
+      "name": "CPV",
+      "description": "CAPE VERDE"
+    },
+    {
+      "name": "CRI",
+      "description": "COSTA RICA"
+    },
+    {
+      "name": "CUB",
+      "description": "CUBA"
+    },
+    {
+      "name": "CXR",
+      "description": "CHRISTMAS ISLAND"
+    },
+    {
+      "name": "CYM",
+      "description": "CAYMAN ISLANDS"
+    },
+    {
+      "name": "CYP",
+      "description": "CYPRUS"
+    },
+    {
+      "name": "CZE",
+      "description": "CZECH REPUBLIC"
+    },
+    {
+      "name": "DEU",
+      "description": "GERMANY"
+    },
+    {
+      "name": "DJI",
+      "description": "DJIBOUTI"
+    },
+    {
+      "name": "DMA",
+      "description": "DOMINICA"
+    },
+    {
+      "name": "DNK",
+      "description": "DENMARK"
+    },
+    {
+      "name": "DOM",
+      "description": "DOMINICAN REPUBLIC"
+    },
+    {
+      "name": "DZA",
+      "description": "ALGERIA"
+    },
+    {
+      "name": "ECU",
+      "description": "ECUADOR"
+    },
+    {
+      "name": "EGY",
+      "description": "EGYPT"
+    },
+    {
+      "name": "ERI",
+      "description": "ERITREA"
+    },
+    {
+      "name": "ESH",
+      "description": "WESTERN SAHARA"
+    },
+    {
+      "name": "ESP",
+      "description": "SPAIN"
+    },
+    {
+      "name": "EST",
+      "description": "ESTONIA"
+    },
+    {
+      "name": "ETH",
+      "description": "ETHIOPIA"
+    },
+    {
+      "name": "FIN",
+      "description": "FINLAND"
+    },
+    {
+      "name": "FJI",
+      "description": "FIJI"
+    },
+    {
+      "name": "FLK",
+      "description": "FALKLAND ISLANDS (MALVINAS)"
+    },
+    {
+      "name": "FRA",
+      "description": "FRANCE"
+    },
+    {
+      "name": "FRO",
+      "description": "FAROE ISLANDS"
+    },
+    {
+      "name": "FSM",
+      "description": "MICRONESIA, FEDERATED STATES OF"
+    },
+    {
+      "name": "GAB",
+      "description": "GABON"
+    },
+    {
+      "name": "GBR",
+      "description": "UNITED KINGDOM"
+    },
+    {
+      "name": "GEO",
+      "description": "GEORGIA"
+    },
+    {
+      "name": "GHA",
+      "description": "GHANA"
+    },
+    {
+      "name": "GIB",
+      "description": "GIBRALTAR"
+    },
+    {
+      "name": "GIN",
+      "description": "GUINEA"
+    },
+    {
+      "name": "GLP",
+      "description": "GUADELOUPE"
+    },
+    {
+      "name": "GMB",
+      "description": "GAMBIA"
+    },
+    {
+      "name": "GNB",
+      "description": "GUINEA-BISSAU"
+    },
+    {
+      "name": "GNQ",
+      "description": "EQUATORIAL GUINEA"
+    },
+    {
+      "name": "GRC",
+      "description": "GREECE"
+    },
+    {
+      "name": "GRD",
+      "description": "GRENADA"
+    },
+    {
+      "name": "GRL",
+      "description": "GREENLAND"
+    },
+    {
+      "name": "GTM",
+      "description": "GUATEMALA"
+    },
+    {
+      "name": "GUF",
+      "description": "FRENCH GUIANA"
+    },
+    {
+      "name": "GUM",
+      "description": "GUAM"
+    },
+    {
+      "name": "GUY",
+      "description": "GUYANA"
+    },
+    {
+      "name": "HKG",
+      "description": "HONG KONG"
+    },
+    {
+      "name": "HMD",
+      "description": "HEARD ISLAND AND MCDONALD ISLANDS"
+    },
+    {
+      "name": "HND",
+      "description": "HONDURAS"
+    },
+    {
+      "name": "HRV",
+      "description": "CROATIA"
+    },
+    {
+      "name": "HTI",
+      "description": "HAITI"
+    },
+    {
+      "name": "HUN",
+      "description": "HUNGARY"
+    },
+    {
+      "name": "IDN",
+      "description": "INDONESIA"
+    },
+    {
+      "name": "IND",
+      "description": "INDIA"
+    },
+    {
+      "name": "IOT",
+      "description": "BRITISH INDIAN OCEAN TERRITORY"
+    },
+    {
+      "name": "IRL",
+      "description": "IRELAND"
+    },
+    {
+      "name": "IRN",
+      "description": "IRAN, ISLAMIC REPUBLIC OF"
+    },
+    {
+      "name": "IRQ",
+      "description": "IRAQ"
+    },
+    {
+      "name": "ISL",
+      "description": "ICELAND"
+    },
+    {
+      "name": "ISR",
+      "description": "ISRAEL"
+    },
+    {
+      "name": "ITA",
+      "description": "ITALY"
+    },
+    {
+      "name": "JAM",
+      "description": "JAMAICA"
+    },
+    {
+      "name": "JOR",
+      "description": "JORDAN"
+    },
+    {
+      "name": "JPN",
+      "description": "JAPAN"
+    },
+    {
+      "name": "KAZ",
+      "description": "KAZAKSTAN"
+    },
+    {
+      "name": "KEN",
+      "description": "KENYA"
+    },
+    {
+      "name": "KGZ",
+      "description": "KYRGYZSTAN"
+    },
+    {
+      "name": "KHM",
+      "description": "CAMBODIA"
+    },
+    {
+      "name": "KIR",
+      "description": "KIRIBATI"
+    },
+    {
+      "name": "KNA",
+      "description": "SAINT KITTS AND NEVIS"
+    },
+    {
+      "name": "KOR",
+      "description": "KOREA, REPUBLIC OF"
+    },
+    {
+      "name": "KWT",
+      "description": "KUWAIT"
+    },
+    {
+      "name": "LAO",
+      "description": "LAO PEOPLE'S DEMOCRATIC REPUBLIC"
+    },
+    {
+      "name": "LBN",
+      "description": "LEBANNON"
+    },
+    {
+      "name": "LBR",
+      "description": "LIBERIA"
+    },
+    {
+      "name": "LBY",
+      "description": "LIBYAN ARAB JAMAHIRIYA"
+    },
+    {
+      "name": "LCA",
+      "description": "SAINT LUCIA"
+    },
+    {
+      "name": "LIE",
+      "description": "LIECHTENSTEIN"
+    },
+    {
+      "name": "LKA",
+      "description": "SRI LANKA"
+    },
+    {
+      "name": "LSO",
+      "description": "LESOTHO"
+    },
+    {
+      "name": "LTU",
+      "description": "LITHUANIA"
+    },
+    {
+      "name": "LUX",
+      "description": "LUXEMBOURG"
+    },
+    {
+      "name": "LVA",
+      "description": "LATIVA"
+    },
+    {
+      "name": "MAC",
+      "description": "MACAU"
+    },
+    {
+      "name": "MAR",
+      "description": "MOROCCO"
+    },
+    {
+      "name": "MCO",
+      "description": "MONACO"
+    },
+    {
+      "name": "MDA",
+      "description": "MOLDOVA, REPUBLIC OF"
+    },
+    {
+      "name": "MDG",
+      "description": "MADAGASCAR"
+    },
+    {
+      "name": "MDV",
+      "description": "MALDIVES"
+    },
+    {
+      "name": "MEX",
+      "description": "MEXICO"
+    },
+    {
+      "name": "MHL",
+      "description": "MARSHALL ISLANDS"
+    },
+    {
+      "name": "MKD",
+      "description": "MACEDONIA, THE FORMER YUGOSLAV REPUBLIC OF"
+    },
+    {
+      "name": "MLI",
+      "description": "MALI"
+    },
+    {
+      "name": "MLT",
+      "description": "MALTA"
+    },
+    {
+      "name": "MMR",
+      "description": "MYANMAR"
+    },
+    {
+      "name": "MNG",
+      "description": "MONGOLIA"
+    },
+    {
+      "name": "MNP",
+      "description": "NORTHERN MARIANA ISLANDS"
+    },
+    {
+      "name": "MOZ",
+      "description": "MOZAMBIQUE"
+    },
+    {
+      "name": "MRT",
+      "description": "MAURITANIA"
+    },
+    {
+      "name": "MSR",
+      "description": "MONTSERRAT"
+    },
+    {
+      "name": "MTQ",
+      "description": "MARTINIQUE"
+    },
+    {
+      "name": "MUS",
+      "description": "MAURITUS"
+    },
+    {
+      "name": "MWI",
+      "description": "MALAWI"
+    },
+    {
+      "name": "MYS",
+      "description": "MALAYSIA"
+    },
+    {
+      "name": "MYT",
+      "description": "MAYOTTE"
+    },
+    {
+      "name": "NAM",
+      "description": "NAMIBIA"
+    },
+    {
+      "name": "NCL",
+      "description": "NEW CALEDONIA"
+    },
+    {
+      "name": "NER",
+      "description": "NIGER"
+    },
+    {
+      "name": "NFK",
+      "description": "NORFOLK ISLAND"
+    },
+    {
+      "name": "NGA",
+      "description": "NIGERIA"
+    },
+    {
+      "name": "NIC",
+      "description": "NICARAGUA"
+    },
+    {
+      "name": "NIU",
+      "description": "NIUE"
+    },
+    {
+      "name": "NLD",
+      "description": "NETHERLANDS"
+    },
+    {
+      "name": "NOR",
+      "description": "NORWAY"
+    },
+    {
+      "name": "NPL",
+      "description": "NEPAL"
+    },
+    {
+      "name": "NRU",
+      "description": "NAURU"
+    },
+    {
+      "name": "NZL",
+      "description": "NEW ZEALAND"
+    },
+    {
+      "name": "OMN",
+      "description": "OMAN"
+    },
+    {
+      "name": "PAK",
+      "description": "PAKISTAN"
+    },
+    {
+      "name": "PAN",
+      "description": "PANAMA"
+    },
+    {
+      "name": "PCN",
+      "description": "PITCAIRN"
+    },
+    {
+      "name": "PER",
+      "description": "PERU"
+    },
+    {
+      "name": "PHL",
+      "description": "PHILIPPINES"
+    },
+    {
+      "name": "PLW",
+      "description": "PALAU"
+    },
+    {
+      "name": "PNG",
+      "description": "PAPUA NEW GUINEA"
+    },
+    {
+      "name": "POL",
+      "description": "POLAND"
+    },
+    {
+      "name": "PRI",
+      "description": "PUERTO RICO"
+    },
+    {
+      "name": "PRK",
+      "description": "KOREA, DEMOCRATIC PEOPLE'S REPUBLIC OF"
+    },
+    {
+      "name": "PRT",
+      "description": "PORTUGAL"
+    },
+    {
+      "name": "PRY",
+      "description": "PARAGUAY"
+    },
+    {
+      "name": "PYF",
+      "description": "FRENCH POLYNESIA"
+    },
+    {
+      "name": "QAT",
+      "description": "QATAR"
+    },
+    {
+      "name": "REU",
+      "description": "REUNION"
+    },
+    {
+      "name": "ROM",
+      "description": "ROMANIA"
+    },
+    {
+      "name": "RUS",
+      "description": "RUSSIAN FEDERATION"
+    },
+    {
+      "name": "RWA",
+      "description": "RWANDA"
+    },
+    {
+      "name": "SAU",
+      "description": "SAUDI ARABIA"
+    },
+    {
+      "name": "SDN",
+      "description": "SUDAN"
+    },
+    {
+      "name": "SEN",
+      "description": "SENEGAL"
+    },
+    {
+      "name": "SGP",
+      "description": "SINGAPORE"
+    },
+    {
+      "name": "SGS",
+      "description": "SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS"
+    },
+    {
+      "name": "SHN",
+      "description": "SAINT HELENA"
+    },
+    {
+      "name": "SJM",
+      "description": "SVALBARD AND JAN MAYEN"
+    },
+    {
+      "name": "SLB",
+      "description": "SOLOMON ISLANDS"
+    },
+    {
+      "name": "SLE",
+      "description": "SIERRA LEONE"
+    },
+    {
+      "name": "SLV",
+      "description": "EL SALVADOR"
+    },
+    {
+      "name": "SMR",
+      "description": "SAN MARINO"
+    },
+    {
+      "name": "SOM",
+      "description": "SOMALIA"
+    },
+    {
+      "name": "SPM",
+      "description": "SAINT PIERRE AND MIQUELON"
+    },
+    {
+      "name": "STP",
+      "description": "SAO TOME AND PRINCIPE"
+    },
+    {
+      "name": "SUR",
+      "description": "SURINAME"
+    },
+    {
+      "name": "SVK",
+      "description": "SLOVAKIA"
+    },
+    {
+      "name": "SVN",
+      "description": "SLOVENIA"
+    },
+    {
+      "name": "SWE",
+      "description": "SWEDEN"
+    },
+    {
+      "name": "SWZ",
+      "description": "SWAZILAND"
+    },
+    {
+      "name": "SYC",
+      "description": "SEYCHELLES"
+    },
+    {
+      "name": "SYR",
+      "description": "SYRIAN ARAB REPUBLIC"
+    },
+    {
+      "name": "TCA",
+      "description": "TURKS AND CAICOS ISLANDS"
+    },
+    {
+      "name": "TCD",
+      "description": "CHAD"
+    },
+    {
+      "name": "TGO",
+      "description": "TOGO"
+    },
+    {
+      "name": "THA",
+      "description": "THAILAND"
+    },
+    {
+      "name": "TJK",
+      "description": "TAJIKISTAN"
+    },
+    {
+      "name": "TKL",
+      "description": "TOKELAU"
+    },
+    {
+      "name": "TKM",
+      "description": "TURKMENISTAN"
+    },
+    {
+      "name": "TMP",
+      "description": "EAST TIMOR"
+    },
+    {
+      "name": "TON",
+      "description": "TONGA"
+    },
+    {
+      "name": "TTO",
+      "description": "TRINIDAD AND TOBAGO"
+    },
+    {
+      "name": "TUN",
+      "description": "TUNISIA"
+    },
+    {
+      "name": "TUR",
+      "description": "TURKEY"
+    },
+    {
+      "name": "TUV",
+      "description": "TUVALU"
+    },
+    {
+      "name": "TWN",
+      "description": "TAIWAN, PROVINCE OF CHINA"
+    },
+    {
+      "name": "TZA",
+      "description": "TANZANIA, UNITED REPUBLIC OF"
+    },
+    {
+      "name": "UGA",
+      "description": "UGANDA"
+    },
+    {
+      "name": "UKR",
+      "description": "UKRAINE"
+    },
+    {
+      "name": "UMI",
+      "description": "UNITED STATES MINOR OUTLYING ISLANDS"
+    },
+    {
+      "name": "URY",
+      "description": "URUGUAY"
+    },
+    {
+      "name": "USA",
+      "description": "UNITED STATES"
+    },
+    {
+      "name": "UZB",
+      "description": "UZBEKISTAN"
+    },
+    {
+      "name": "VAT",
+      "description": "HOLY SEE  (VATICAN CITY STATE)"
+    },
+    {
+      "name": "VCT",
+      "description": "SAINT VINCENT AND THE GRENADINES"
+    },
+    {
+      "name": "VEN",
+      "description": "VENEZUELA"
+    },
+    {
+      "name": "VGB",
+      "description": "VIRGIN ISLANDS, BRITISH"
+    },
+    {
+      "name": "VIR",
+      "description": "VIRGIN ISLANDS, U.S."
+    },
+    {
+      "name": "VNM",
+      "description": "VIET NAM"
+    },
+    {
+      "name": "VUT",
+      "description": "VANUATU"
+    },
+    {
+      "name": "WLF",
+      "description": "WALLIS AND FUTUNA"
+    },
+    {
+      "name": "WSM",
+      "description": "SAMOA"
+    },
+    {
+      "name": "YEM",
+      "description": "YEMEN"
+    },
+    {
+      "name": "YUG",
+      "description": "YUGOSLAVIA"
+    },
+    {
+      "name": "ZAF",
+      "description": "SOUTH AFRICA"
+    },
+    {
+      "name": "ZMB",
+      "description": "ZAMBIA"
+    },
+    {
+      "name": "ZWE",
+      "description": "ZIMBABWE"
+    }
+  ]
+}

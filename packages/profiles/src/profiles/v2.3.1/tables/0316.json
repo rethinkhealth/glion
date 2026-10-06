@@ -1,0 +1,23 @@
+{
+  "id": "0316",
+  "description": "Organ donor",
+  "type": "user",
+  "codes": [
+    {
+      "name": "F",
+      "description": "Yes, patient is a donor, but card is not on file"
+    },
+    {
+      "name": "I",
+      "description": "No, patient does not have a living will but information was provided"
+    },
+    {
+      "name": "U",
+      "description": "Unknown"
+    },
+    {
+      "name": "Y",
+      "description": "Yes, patient is a donor and card is on file"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "0501",
+  "description": "Consent Non-Disclosure Reason",
+  "type": "user",
+  "codes": [
+    {
+      "name": "E",
+      "description": "Emergency"
+    },
+    {
+      "name": "PR",
+      "description": "Patient Request"
+    },
+    {
+      "name": "RX",
+      "description": "Rx Private"
+    }
+  ]
+}

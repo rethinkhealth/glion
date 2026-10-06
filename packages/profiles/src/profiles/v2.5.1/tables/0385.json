@@ -1,0 +1,11 @@
+{
+  "id": "0385",
+  "description": "Manufacturer identifier",
+  "type": "user",
+  "codes": [
+    {
+      "name": "...",
+      "description": "No suggested value defined"
+    }
+  ]
+}

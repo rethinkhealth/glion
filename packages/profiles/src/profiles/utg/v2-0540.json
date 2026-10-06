@@ -1,0 +1,24 @@
+{
+  "id": "v2-0540",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0540",
+  "oid": "2.16.840.1.113883.18.352",
+  "name": "InactiveReason",
+  "title": "inactiveReason",
+  "codes": [
+    {
+      "code": "L",
+      "display": "Leave of Absence",
+      "status": "active"
+    },
+    {
+      "code": "R",
+      "display": "Retired",
+      "status": "active"
+    },
+    {
+      "code": "T",
+      "display": "Termination",
+      "status": "active"
+    }
+  ]
+}

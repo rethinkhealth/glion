@@ -1,0 +1,24 @@
+{
+  "segmentId": "SGH",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "SGH-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "SI",
+      "maxLength": 4,
+      "name": "Set ID - SGH",
+      "item": "3389"
+    },
+    {
+      "sequence": 2,
+      "id": "SGH-2",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ST",
+      "name": "Segment Group Name",
+      "item": "3390"
+    }
+  ]
+}

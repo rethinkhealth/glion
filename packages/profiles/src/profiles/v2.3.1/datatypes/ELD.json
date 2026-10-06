@@ -1,0 +1,32 @@
+{
+  "id": "ELD",
+  "version": "2.3.1",
+  "kind": "composite",
+  "title": "error",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "segment ID",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "sequence",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "field position",
+      "datatypeId": "NM",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "code identifying error",
+      "datatypeId": "CE",
+      "required": false
+    }
+  ]
+}

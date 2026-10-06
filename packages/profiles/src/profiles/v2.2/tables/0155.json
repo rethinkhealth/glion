@@ -1,0 +1,23 @@
+{
+  "id": "0155",
+  "description": "ACCEPT/APPLICATION ACKNOWLEDGEMENT CONDITIONS",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "AL",
+      "description": "Always"
+    },
+    {
+      "name": "ER",
+      "description": "Error / reject conditions only"
+    },
+    {
+      "name": "NE",
+      "description": "Never"
+    },
+    {
+      "name": "SU",
+      "description": "Successful completion only"
+    }
+  ]
+}

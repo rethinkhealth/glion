@@ -1,0 +1,209 @@
+{
+  "segmentId": "RXV",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "RXV-1",
+      "required": false,
+      "repeatable": false,
+      "datatype": "SI",
+      "name": "Set ID - RXV",
+      "item": "3318"
+    },
+    {
+      "sequence": 2,
+      "id": "RXV-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 1,
+      "table": "HL70917",
+      "name": "Bolus Type",
+      "item": "3319"
+    },
+    {
+      "sequence": 3,
+      "id": "RXV-3",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Bolus Dose Amount",
+      "item": "3320"
+    },
+    {
+      "sequence": 4,
+      "id": "RXV-4",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Bolus Dose Amount Units",
+      "item": "3321"
+    },
+    {
+      "sequence": 5,
+      "id": "RXV-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Bolus Dose Volume",
+      "item": "3322"
+    },
+    {
+      "sequence": 6,
+      "id": "RXV-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Bolus Dose Volume Units",
+      "item": "3323"
+    },
+    {
+      "sequence": 7,
+      "id": "RXV-7",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70918",
+      "name": "PCA Type",
+      "item": "3324"
+    },
+    {
+      "sequence": 8,
+      "id": "RXV-8",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "PCA Dose Amount",
+      "item": "3325"
+    },
+    {
+      "sequence": 9,
+      "id": "RXV-9",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "PCA Dose Amount Units",
+      "item": "3326"
+    },
+    {
+      "sequence": 10,
+      "id": "RXV-10",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "PCA Dose Amount Volume",
+      "item": "3327"
+    },
+    {
+      "sequence": 11,
+      "id": "RXV-11",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "PCA Dose Amount Volume Units",
+      "item": "3328"
+    },
+    {
+      "sequence": 12,
+      "id": "RXV-12",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Max Dose Amount",
+      "item": "3329"
+    },
+    {
+      "sequence": 13,
+      "id": "RXV-13",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Max Dose Amount Units",
+      "item": "3330"
+    },
+    {
+      "sequence": 14,
+      "id": "RXV-14",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Max Dose Amount Volume",
+      "item": "3331"
+    },
+    {
+      "sequence": 15,
+      "id": "RXV-15",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Max Dose Amount Volume Units",
+      "item": "3332"
+    },
+    {
+      "sequence": 16,
+      "id": "RXV-16",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CQ",
+      "name": "Max Dose per Time",
+      "item": "3333"
+    },
+    {
+      "sequence": 17,
+      "id": "RXV-17",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CQ",
+      "name": "Lockout Interval",
+      "item": "3334"
+    },
+    {
+      "sequence": 18,
+      "id": "RXV-18",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Syringe Manufacturer",
+      "item": "3339"
+    },
+    {
+      "sequence": 19,
+      "id": "RXV-19",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Syringe Model Number",
+      "item": "3385"
+    },
+    {
+      "sequence": 20,
+      "id": "RXV-20",
+      "required": false,
+      "repeatable": false,
+      "datatype": "NM",
+      "name": "Syringe Size",
+      "item": "3386"
+    },
+    {
+      "sequence": 21,
+      "id": "RXV-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Syringe Size Units",
+      "item": "3431"
+    },
+    {
+      "sequence": 22,
+      "id": "RXV-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "ID",
+      "maxLength": 2,
+      "table": "HL70206",
+      "name": "Action Code",
+      "item": "816"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "0116",
+  "description": "Bed Status",
+  "type": "user",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Closed"
+    },
+    {
+      "name": "H",
+      "description": "Housekeeping"
+    },
+    {
+      "name": "I",
+      "description": "Isolated"
+    },
+    {
+      "name": "K",
+      "description": "Contaminated"
+    },
+    {
+      "name": "O",
+      "description": "Occupied"
+    },
+    {
+      "name": "U",
+      "description": "Unoccupied"
+    }
+  ]
+}

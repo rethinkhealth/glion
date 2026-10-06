@@ -1,0 +1,19 @@
+{
+  "id": "0229",
+  "description": "DRG payor",
+  "type": "user",
+  "codes": [
+    {
+      "name": "C",
+      "description": "Champus"
+    },
+    {
+      "name": "G",
+      "description": "Managed Care Organization"
+    },
+    {
+      "name": "M",
+      "description": "Medicare"
+    }
+  ]
+}

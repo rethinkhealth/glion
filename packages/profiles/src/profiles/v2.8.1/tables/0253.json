@@ -1,0 +1,27 @@
+{
+  "id": "0253",
+  "description": "Indirect Exposure Mechanism",
+  "type": "hl7",
+  "codes": [
+    {
+      "name": "B",
+      "description": "Breast milk"
+    },
+    {
+      "name": "F",
+      "description": "Father"
+    },
+    {
+      "name": "O",
+      "description": "Other"
+    },
+    {
+      "name": "P",
+      "description": "Transplacental"
+    },
+    {
+      "name": "X",
+      "description": "Blood product"
+    }
+  ]
+}

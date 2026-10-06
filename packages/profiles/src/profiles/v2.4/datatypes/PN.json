@@ -1,0 +1,44 @@
+{
+  "id": "PN",
+  "version": "2.4",
+  "kind": "composite",
+  "title": "person name",
+  "components": [
+    {
+      "sequence": 1,
+      "name": "family name",
+      "datatypeId": "FN",
+      "required": false
+    },
+    {
+      "sequence": 2,
+      "name": "given name",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 3,
+      "name": "second and further given names or initials thereof",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 4,
+      "name": "suffix (e.g., JR or III)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 5,
+      "name": "prefix (e.g., DR)",
+      "datatypeId": "ST",
+      "required": false
+    },
+    {
+      "sequence": 6,
+      "name": "degree (e.g., MD)",
+      "datatypeId": "IS",
+      "required": false
+    }
+  ]
+}

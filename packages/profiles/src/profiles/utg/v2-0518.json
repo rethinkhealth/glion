@@ -1,0 +1,24 @@
+{
+  "id": "v2-0518",
+  "url": "http://terminology.hl7.org/CodeSystem/v2-0518",
+  "oid": "2.16.840.1.113883.18.339",
+  "name": "OverrideType",
+  "title": "overrideType",
+  "codes": [
+    {
+      "code": "EQV",
+      "display": "Equivalence Override",
+      "status": "active"
+    },
+    {
+      "code": "EXTN",
+      "display": "Extension Override",
+      "status": "active"
+    },
+    {
+      "code": "INLV",
+      "display": "Interval Override",
+      "status": "active"
+    }
+  ]
+}

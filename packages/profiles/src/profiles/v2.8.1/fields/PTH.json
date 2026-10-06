@@ -1,0 +1,70 @@
+{
+  "segmentId": "PTH",
+  "fields": [
+    {
+      "sequence": 1,
+      "id": "PTH-1",
+      "required": true,
+      "repeatable": false,
+      "datatype": "ID",
+      "table": "HL70206",
+      "name": "Action Code",
+      "item": "816"
+    },
+    {
+      "sequence": 2,
+      "id": "PTH-2",
+      "required": true,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Pathway ID",
+      "item": "1207"
+    },
+    {
+      "sequence": 3,
+      "id": "PTH-3",
+      "required": true,
+      "repeatable": false,
+      "datatype": "EI",
+      "name": "Pathway Instance ID",
+      "item": "1208"
+    },
+    {
+      "sequence": 4,
+      "id": "PTH-4",
+      "required": true,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Pathway Established Date/Time",
+      "item": "1209"
+    },
+    {
+      "sequence": 5,
+      "id": "PTH-5",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CWE",
+      "name": "Pathway Life Cycle Status",
+      "item": "1210"
+    },
+    {
+      "sequence": 6,
+      "id": "PTH-6",
+      "required": false,
+      "repeatable": false,
+      "datatype": "DTM",
+      "name": "Change Pathway Life Cycle Status Date/Time",
+      "item": "1211"
+    },
+    {
+      "sequence": 7,
+      "id": "PTH-7",
+      "required": false,
+      "repeatable": false,
+      "datatype": "CNE",
+      "table": "HL70725",
+      "name": "Mood Code",
+      "item": "2239"
+    }
+  ]
+}
