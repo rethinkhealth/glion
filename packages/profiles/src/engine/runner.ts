@@ -48,12 +48,17 @@ import type {
   SegmentMatch,
 } from "./types";
 
+// ---------------------------------------------------------------------------
+// Constants and types
+// ---------------------------------------------------------------------------
+
 // The segment ID that matches any segment in the schema.
 const ANY_SEGMENT = "Hxx";
 
 // HL7v2 reserves segment IDs that start with Z for locally defined segments.
 const Z_SEGMENT_PREFIX = "Z";
 
+// One entry of a reading's log.
 type Step =
   | Readonly<{ kind: "consumed" }>
   | Readonly<{ kind: "passed-over" }>
@@ -70,6 +75,10 @@ interface OpenGroup {
   name: string;
   children: SegmentMatch[];
 }
+
+// ---------------------------------------------------------------------------
+// Runner
+// ---------------------------------------------------------------------------
 
 /**
  * Runs the segment IDs in `input` through `schema`: validates their order
@@ -104,12 +113,15 @@ export function runner(
   input: readonly string[],
   options?: RunnerOptions
 ): RunnerResult {
+  // Setup: the compiled program, and the state of this run.
   const { edges, final, groups, segments, start } = compile(schema);
   const allowZSegments = options?.allowZSegments ?? true;
   const opens: readonly Step[] = groups.map((name) => ({ kind: "open", name }));
   const visited = new Int32Array(segments.length).fill(-1);
   let generation = 0;
   let threads: Thread[] = [];
+
+  // Helpers: closures over that state.
 
   const follow = (state: number, log?: Log): void => {
     if (visited[state] === generation) {
@@ -152,6 +164,8 @@ export function runner(
     return [...found].toSorted();
   };
 
+  // The run: one generation per segment, then the outcome.
+
   follow(start);
   for (const [index, name] of input.entries()) {
     const current = threads;
@@ -175,6 +189,12 @@ export function runner(
     : { expected: expected(threads), type: "incomplete" };
 }
 
+// ---------------------------------------------------------------------------
+// Nesting
+// ---------------------------------------------------------------------------
+
+// The accepted reading's segments, nested in the groups its log opens and
+// closes.
 function nest(log: Log | undefined): SegmentMatch[] {
   const steps: Step[] = [];
   for (let entry = log; entry; entry = entry.previous) {
