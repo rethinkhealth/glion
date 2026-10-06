@@ -64,20 +64,16 @@ export const hl7v2AnnotateProfileFieldsCodeSystems: Plugin<[], Root, Root> =
       entries.map(([, csId]) => profiles.codeSystems.load(csId))
     );
 
-    for (let i = 0; i < results.length; i++) {
-      const result = results[i]!;
-      const [tableRef] = entries[i]!;
-      if (result.status === "fulfilled") {
-        codeSystems.set(tableRef, result.value);
-      } else if (
-        !(result.reason instanceof Error) ||
-        !result.reason.message.startsWith("Unknown ")
-      ) {
+    for (const [i, result] of results.entries()) {
+      const [tableRef] = entries[i] as (typeof entries)[number];
+      if (result.status === "rejected") {
         const msg = file.message(
           `Failed to load code system for table '${tableRef}'`
         );
         msg.source = "hl7v2-annotate-profile-fields-code-systems";
         msg.cause = result.reason;
+      } else if (result.value) {
+        codeSystems.set(tableRef, result.value);
       }
     }
 

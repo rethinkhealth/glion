@@ -49,9 +49,6 @@ export const tables: ProfileStore<TableDefinition> = {
     const raw = await lazyImport<TableModule>(
       `../profiles/v${version}/tables/${tableId}.json`
     );
-    if (!raw) {
-      throw new Error(`Unknown tables profile: v${version}/${tableId}`);
-    }
-    return index(raw);
+    return raw === undefined ? undefined : index(raw);
   },
 };

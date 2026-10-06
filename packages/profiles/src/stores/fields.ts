@@ -57,9 +57,6 @@ export const fields: ProfileStore<FieldDefinition> = {
     const raw = await lazyImport<FieldModule>(
       `../profiles/v${version}/fields/${segmentId}.json`
     );
-    if (!raw) {
-      throw new Error(`Unknown fields profile: v${version}/${segmentId}`);
-    }
-    return index(raw);
+    return raw === undefined ? undefined : index(raw);
   },
 };

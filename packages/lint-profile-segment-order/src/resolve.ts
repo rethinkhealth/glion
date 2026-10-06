@@ -17,9 +17,9 @@ export type ResolveResult =
 /**
  * Resolve an event profile definition from the tree.
  *
- * This is a **pure function** with no side effects — it does not report
- * to VFile or throw. It returns a {@link ResolveResult} that the caller
- * can handle as appropriate.
+ * Does not report to VFile. A missing version, structure, or profile is a
+ * failed {@link ResolveResult}; it rejects only when a bundled profile fails
+ * to load.
  *
  * **Resolution strategy** (wire value wins):
  *
@@ -51,12 +51,8 @@ export async function resolveDefinition(tree: Root): Promise<ResolveResult> {
     const triggerEvent = value(tree, "MSH-9.2")?.value || undefined;
 
     if (messageCode && triggerEvent) {
-      try {
-        const eventMap = await profiles.eventMaps.load(version);
-        messageStructure = eventMap[`${messageCode}_${triggerEvent}`];
-      } catch {
-        // An unbundled version has no event map, so MSH-9 names no structure.
-      }
+      const eventMap = await profiles.eventMaps.load(version);
+      messageStructure = eventMap?.[`${messageCode}_${triggerEvent}`];
     }
   }
 
@@ -69,13 +65,12 @@ export async function resolveDefinition(tree: Root): Promise<ResolveResult> {
   }
 
   // Load the profile definition (handles alias resolution internally)
-  try {
-    const definition = await profiles.events.load(version, messageStructure);
-    return { definition, ok: true };
-  } catch {
+  const definition = await profiles.events.load(version, messageStructure);
+  if (!definition) {
     return {
       ok: false,
       reason: `Cannot validate segment order: no profile found for ${messageStructure} (v${version})`,
     };
   }
+  return { definition, ok: true };
 }

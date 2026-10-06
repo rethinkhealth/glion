@@ -20,11 +20,11 @@ describe("loadSegments", () => {
   it("loads the segments of a version, keyed by segment ID", async () => {
     const segments = await loadSegments("2.5");
 
-    expect(segments.byId.get("MSH")).toEqual({
+    expect(segments?.byId.get("MSH")).toEqual({
       id: "MSH",
       title: "Message Header",
     });
-    expect(segments.byId.get("PID")).toEqual({
+    expect(segments?.byId.get("PID")).toEqual({
       id: "PID",
       title: "Patient Identification",
     });
@@ -33,20 +33,20 @@ describe("loadSegments", () => {
   it("holds no Z-segments", async () => {
     const segments = await loadSegments("2.5");
 
-    expect(segments.byId.has("ZZZ")).toBe(false);
+    expect(segments?.byId.has("ZZZ")).toBe(false);
   });
 
   it("loads the segments of the version asked for", async () => {
     const v21 = await loadSegments("2.1");
     const v282 = await loadSegments("2.8.2");
 
-    expect(v21.byId.size).toBeLessThan(v282.byId.size);
+    expect(v21?.byId.size).toBeLessThan(v282?.byId.size);
   });
 
   it("loads every bundled version", async () => {
     for (const version of VERSIONS) {
       const segments = await loadSegments(version);
-      expect(segments.byId.has("MSH")).toBe(true);
+      expect(segments?.byId.has("MSH")).toBe(true);
     }
   });
 
@@ -57,9 +57,7 @@ describe("loadSegments", () => {
     expect(first).toBe(second);
   });
 
-  it("rejects a version that is not bundled", async () => {
-    await expect(loadSegments("99.99")).rejects.toThrow(
-      "Unknown segments profile: v99.99"
-    );
+  it("resolves undefined for a version that is not bundled", async () => {
+    await expect(loadSegments("99.99")).resolves.toBeUndefined();
   });
 });

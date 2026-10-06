@@ -16,15 +16,15 @@ const index = memoize(
 /** The loader of event maps, one per HL7v2 version. */
 export type EventMapStore = Readonly<{
   /**
-   * Loads the event map of `version`. Later loads of the same version resolve
-   * the same value.
+   * Loads the event map of `version`, or `undefined` when `version` is not
+   * bundled. Later loads of the same version resolve the same value.
    *
    * The map has no prototype, so a key read from a message, such as
    * `"__proto__"` or `"constructor"`, has no entry.
    *
-   * @throws {Error} When `version` is not bundled.
+   * @throws {Error} When a bundled event map fails to load.
    */
-  load(version: string): Promise<EventMap>;
+  load(version: string): Promise<EventMap | undefined>;
 }>;
 
 /** The loader of event maps. */
@@ -33,9 +33,6 @@ export const eventMaps: EventMapStore = {
     const raw = await lazyImport<Record<string, string>>(
       `../profiles/v${version}/event-map.json`
     );
-    if (!raw) {
-      throw new Error(`Unknown event map: v${version}`);
-    }
-    return index(raw);
+    return raw === undefined ? undefined : index(raw);
   },
 };

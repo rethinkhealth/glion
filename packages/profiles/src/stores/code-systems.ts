@@ -35,11 +35,12 @@ export type CodeSystemDefinition = Readonly<{
 /** The loader of UTG code systems, which have no HL7v2 version. */
 export type CodeSystemStore = Readonly<{
   /**
-   * Loads the code system `id`, such as `"v2-0001"`.
+   * Loads the code system `id`, such as `"v2-0001"`, or `undefined` when no
+   * code system `id` is bundled.
    *
-   * @throws {Error} When no code system `id` is bundled.
+   * @throws {Error} When a bundled code system fails to load.
    */
-  load(id: string): Promise<CodeSystemDefinition>;
+  load(id: string): Promise<CodeSystemDefinition | undefined>;
 }>;
 
 const index = memoize((raw: UtgCodeSystemModule): CodeSystemDefinition => {
@@ -70,9 +71,6 @@ export const codeSystems: CodeSystemStore = {
     const raw = await lazyImport<UtgCodeSystemModule>(
       `../profiles/utg/${id}.json`
     );
-    if (!raw) {
-      throw new Error(`Unknown codeSystems profile: ${id}`);
-    }
-    return index(raw);
+    return raw === undefined ? undefined : index(raw);
   },
 };

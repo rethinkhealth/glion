@@ -7,10 +7,12 @@ import { eventMaps } from "./event-maps";
 export const events: ProfileStore<Definition> = {
   load: async (version, id) => {
     const eventMap = await eventMaps.load(version);
-    const key = `v${version}/${eventMap[id] ?? id}`;
-    const importEvent = profileImports[key];
+    if (!eventMap) {
+      return;
+    }
+    const importEvent = profileImports[`v${version}/${eventMap[id] ?? id}`];
     if (!importEvent) {
-      throw new Error(`Unknown events profile: ${key}`);
+      return;
     }
     return (await importEvent()) as unknown as Definition;
   },

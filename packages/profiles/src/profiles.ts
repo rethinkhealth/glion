@@ -14,12 +14,13 @@ import type { TableDefinition } from "./stores/tables";
 /** The loader of one kind of profile. */
 export type ProfileStore<T> = Readonly<{
   /**
-   * Loads the profile `id` of `version`. Later loads of the same profile
-   * resolve the same value.
+   * Loads the profile `id` of `version`, or `undefined` when `version`
+   * bundles no profile `id`. Later loads of the same profile resolve the same
+   * value.
    *
-   * @throws {Error} When `version` bundles no profile `id`.
+   * @throws {Error} When a bundled profile fails to load.
    */
-  load(version: string, id: string): Promise<T>;
+  load(version: string, id: string): Promise<T | undefined>;
 }>;
 
 /** The profile stores. */

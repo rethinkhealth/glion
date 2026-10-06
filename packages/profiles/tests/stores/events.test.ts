@@ -4,6 +4,9 @@ import { events } from "../../src/stores/events";
 describe("events", () => {
   it("loads the definition of a message structure", async () => {
     const adtA01 = await events.load("2.5", "ADT_A01");
+    if (!adtA01) {
+      throw new Error("ADT_A01 is not bundled in 2.5");
+    }
     const r = runner(adtA01);
 
     for (const segment of ["MSH", "EVN", "PID", "PV1"]) {
@@ -27,9 +30,7 @@ describe("events", () => {
     expect(first).toBe(second);
   });
 
-  it("rejects an event the version does not bundle", async () => {
-    await expect(events.load("2.5", "ZZZ_Z99")).rejects.toThrow(
-      "Unknown events profile: v2.5/ZZZ_Z99"
-    );
+  it("resolves undefined for an event the version does not bundle", async () => {
+    await expect(events.load("2.5", "ZZZ_Z99")).resolves.toBeUndefined();
   });
 });

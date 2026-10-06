@@ -62,9 +62,6 @@ export const datatypes: ProfileStore<DatatypeDefinition> = {
     const raw = await lazyImport<DatatypeModule>(
       `../profiles/v${version}/datatypes/${datatypeId}.json`
     );
-    if (!raw) {
-      throw new Error(`Unknown datatypes profile: v${version}/${datatypeId}`);
-    }
-    return index(raw);
+    return raw === undefined ? undefined : index(raw);
   },
 };

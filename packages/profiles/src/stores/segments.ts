@@ -34,18 +34,16 @@ const index = memoize((raw: SegmentModule): SegmentDefinition => {
 /**
  * Load and compile all segment definitions for an HL7v2 version.
  *
- * Later loads of the same version resolve the same value.
+ * Resolves `undefined` when `version` is not bundled. Later loads of the same
+ * version resolve the same value.
  *
- * @throws {Error} When `version` is not bundled.
+ * @throws {Error} When a bundled version's segments fail to load.
  */
 export const loadSegments = async (
   version: string
-): Promise<SegmentDefinition> => {
+): Promise<SegmentDefinition | undefined> => {
   const raw = await lazyImport<SegmentModule>(
     `../profiles/v${version}/segments.json`
   );
-  if (!raw) {
-    throw new Error(`Unknown segments profile: v${version}`);
-  }
-  return index(raw);
+  return raw === undefined ? undefined : index(raw);
 };
