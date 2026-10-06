@@ -8,7 +8,7 @@
       "repeatable": false,
       "datatype": "ID",
       "maxLength": 2,
-      "table": "HL70206",
+      "table": "HL70287",
       "name": "Action Code",
       "item": "816"
     },

@@ -16,7 +16,7 @@
       "required": true,
       "repeatable": false,
       "datatype": "ID",
-      "table": "HL70206",
+      "table": "HL70287",
       "name": "Action Code",
       "item": "816"
     },
