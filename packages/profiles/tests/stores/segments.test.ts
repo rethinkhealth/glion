@@ -50,6 +50,13 @@ describe("loadSegments", () => {
     }
   });
 
+  it("resolves the same value for repeated loads", async () => {
+    const first = await loadSegments("2.5");
+    const second = await loadSegments("2.5");
+
+    expect(first).toBe(second);
+  });
+
   it("rejects a version that is not bundled", async () => {
     await expect(loadSegments("99.99")).rejects.toThrow(
       "Unknown segments profile: v99.99"
