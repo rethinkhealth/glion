@@ -20,13 +20,13 @@
 // A Z-segment the schema does not name fits anywhere when allowed: each
 // thread consumes it if its state can (an `Hxx`), then passes over it and
 // keeps its state. Consuming before passing over keeps the readings in the
-// order backtracking tries them. build() places a segment passed over right
+// order backtracking tries them. nest() places a segment passed over right
 // after the segment before it, in that segment's group, whichever thread
 // passed over it.
 //
 // Outcomes
 //
-//   matched     a thread reached final after the last segment: build() replays
+//   matched     a thread reached final after the last segment: nest() replays
 //               its log into the groups
 //   mismatched  no thread accepted the segment at `index`; `expected` is what
 //               the threads before it could consume
@@ -171,11 +171,11 @@ export function runner(
 
   const accepted = threads.find((thread) => thread.state === final);
   return accepted
-    ? { groups: build(accepted.log), type: "matched" }
+    ? { groups: nest(accepted.log), type: "matched" }
     : { expected: expected(threads), type: "incomplete" };
 }
 
-function build(log: Log | undefined): SegmentMatch[] {
+function nest(log: Log | undefined): SegmentMatch[] {
   const steps: Step[] = [];
   for (let entry = log; entry; entry = entry.previous) {
     steps.push(entry.step);
