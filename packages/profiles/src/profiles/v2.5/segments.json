@@ -1,0 +1,604 @@
+{
+  "segments": [
+    {
+      "id": "ABS",
+      "title": "Abstract"
+    },
+    {
+      "id": "ACC",
+      "title": "Accident"
+    },
+    {
+      "id": "ADD",
+      "title": "Addendum"
+    },
+    {
+      "id": "AFF",
+      "title": "Professional Affiliation"
+    },
+    {
+      "id": "AIG",
+      "title": "Appointment Information - General Resource"
+    },
+    {
+      "id": "AIL",
+      "title": "Appointment Information - Location Resource"
+    },
+    {
+      "id": "AIP",
+      "title": "Appointment Information - Personnel Resource"
+    },
+    {
+      "id": "AIS",
+      "title": "Appointment Information"
+    },
+    {
+      "id": "AL1",
+      "title": "Patient Allergy Information"
+    },
+    {
+      "id": "APR",
+      "title": "Appointment Preferences"
+    },
+    {
+      "id": "ARQ",
+      "title": "Appointment Request"
+    },
+    {
+      "id": "AUT",
+      "title": "Authorization Information"
+    },
+    {
+      "id": "BHS",
+      "title": "Batch Header"
+    },
+    {
+      "id": "BLC",
+      "title": "Blood Code"
+    },
+    {
+      "id": "BLG",
+      "title": "Billing"
+    },
+    {
+      "id": "BPO",
+      "title": "Blood Product Order"
+    },
+    {
+      "id": "BPX",
+      "title": "Blood Product Dispense Status"
+    },
+    {
+      "id": "BTS",
+      "title": "Batch Trailer"
+    },
+    {
+      "id": "BTX",
+      "title": "Blood Product Transfusion/Disposition"
+    },
+    {
+      "id": "CDM",
+      "title": "Charge Description Master"
+    },
+    {
+      "id": "CER",
+      "title": "Certificate Detail"
+    },
+    {
+      "id": "CM0",
+      "title": "Clinical Study Master"
+    },
+    {
+      "id": "CM1",
+      "title": "Clinical Study Phase Master"
+    },
+    {
+      "id": "CM2",
+      "title": "Clinical Study Schedule Master"
+    },
+    {
+      "id": "CNS",
+      "title": "Clear Notification"
+    },
+    {
+      "id": "CON",
+      "title": "Consent Segment"
+    },
+    {
+      "id": "CSP",
+      "title": "Clinical Study Phase"
+    },
+    {
+      "id": "CSR",
+      "title": "Clinical Study Registration"
+    },
+    {
+      "id": "CSS",
+      "title": "Clinical Study Data Schedule Segment"
+    },
+    {
+      "id": "CTD",
+      "title": "Contact Data"
+    },
+    {
+      "id": "CTI",
+      "title": "Clinical Trial Identification"
+    },
+    {
+      "id": "DB1",
+      "title": "Disability"
+    },
+    {
+      "id": "DG1",
+      "title": "Diagnosis"
+    },
+    {
+      "id": "DRG",
+      "title": "Diagnosis Related Group"
+    },
+    {
+      "id": "DSC",
+      "title": "Continuation Pointer"
+    },
+    {
+      "id": "DSP",
+      "title": "Display Data"
+    },
+    {
+      "id": "ECD",
+      "title": "Equipment Command"
+    },
+    {
+      "id": "ECR",
+      "title": "Equipment Command Response"
+    },
+    {
+      "id": "EDU",
+      "title": "Educational Detail"
+    },
+    {
+      "id": "EQL",
+      "title": "Embedded Query Language"
+    },
+    {
+      "id": "EQP",
+      "title": "Equipment/Log Service"
+    },
+    {
+      "id": "EQU",
+      "title": "Equipment Detail"
+    },
+    {
+      "id": "ERQ",
+      "title": "Event Replay Query"
+    },
+    {
+      "id": "ERR",
+      "title": "Error"
+    },
+    {
+      "id": "EVN",
+      "title": "Event Type"
+    },
+    {
+      "id": "FAC",
+      "title": "Facility"
+    },
+    {
+      "id": "FHS",
+      "title": "File Header"
+    },
+    {
+      "id": "FT1",
+      "title": "Financial Transaction"
+    },
+    {
+      "id": "FTS",
+      "title": "File Trailer"
+    },
+    {
+      "id": "GOL",
+      "title": "Goal Detail"
+    },
+    {
+      "id": "GP1",
+      "title": "Grouping/Reimbursement - Visit"
+    },
+    {
+      "id": "GP2",
+      "title": "Grouping/Reimbursement - Procedure Line Item"
+    },
+    {
+      "id": "GT1",
+      "title": "Guarantor"
+    },
+    {
+      "id": "IAM",
+      "title": "Patient Adverse Reaction Information"
+    },
+    {
+      "id": "IIM",
+      "title": "Inventory Item Master"
+    },
+    {
+      "id": "IN1",
+      "title": "Insurance"
+    },
+    {
+      "id": "IN2",
+      "title": "Insurance Additional Information"
+    },
+    {
+      "id": "IN3",
+      "title": "Insurance Additional Information, Certification"
+    },
+    {
+      "id": "INV",
+      "title": "Inventory Detail"
+    },
+    {
+      "id": "IPC",
+      "title": "Imaging Procedure Control Segment"
+    },
+    {
+      "id": "ISD",
+      "title": "Interaction Status Detail"
+    },
+    {
+      "id": "LAN",
+      "title": "Language Detail"
+    },
+    {
+      "id": "LCC",
+      "title": "Location Charge Code"
+    },
+    {
+      "id": "LCH",
+      "title": "Location Characteristic"
+    },
+    {
+      "id": "LDP",
+      "title": "Location Department"
+    },
+    {
+      "id": "LOC",
+      "title": "Location Identification"
+    },
+    {
+      "id": "LRL",
+      "title": "Location Relationship"
+    },
+    {
+      "id": "MFA",
+      "title": "Master File Acknowledgment"
+    },
+    {
+      "id": "MFE",
+      "title": "Master File Entry"
+    },
+    {
+      "id": "MFI",
+      "title": "Master File Identification"
+    },
+    {
+      "id": "MRG",
+      "title": "Merge Patient Information"
+    },
+    {
+      "id": "MSA",
+      "title": "Message Acknowledgment"
+    },
+    {
+      "id": "MSH",
+      "title": "Message Header"
+    },
+    {
+      "id": "NCK",
+      "title": "System Clock"
+    },
+    {
+      "id": "NDS",
+      "title": "Notification Detail"
+    },
+    {
+      "id": "NK1",
+      "title": "Next of Kin / Associated Parties"
+    },
+    {
+      "id": "NPU",
+      "title": "Bed Status Update"
+    },
+    {
+      "id": "NSC",
+      "title": "Application Status Change"
+    },
+    {
+      "id": "NST",
+      "title": "Application Control Level Statistics"
+    },
+    {
+      "id": "NTE",
+      "title": "Notes and Comments"
+    },
+    {
+      "id": "OBR",
+      "title": "Observation Request"
+    },
+    {
+      "id": "OBX",
+      "title": "Observation/Result"
+    },
+    {
+      "id": "ODS",
+      "title": "Dietary Orders, Supplements, and Preferences"
+    },
+    {
+      "id": "ODT",
+      "title": "Diet Tray Instructions"
+    },
+    {
+      "id": "OM1",
+      "title": "General Segment"
+    },
+    {
+      "id": "OM2",
+      "title": "Numeric Observation"
+    },
+    {
+      "id": "OM3",
+      "title": "Categorical Service/Test/Observation"
+    },
+    {
+      "id": "OM4",
+      "title": "Observations That Require Specimens"
+    },
+    {
+      "id": "OM5",
+      "title": "Observation Batteries (Sets)"
+    },
+    {
+      "id": "OM6",
+      "title": "Observations That Are Calculated from Other Observations"
+    },
+    {
+      "id": "OM7",
+      "title": "Additional Basic Attributes"
+    },
+    {
+      "id": "ORC",
+      "title": "Common Order"
+    },
+    {
+      "id": "ORG",
+      "title": "Practitioner Organization Unit"
+    },
+    {
+      "id": "OVR",
+      "title": "Override Segment"
+    },
+    {
+      "id": "PCR",
+      "title": "Possible Causal Relationship"
+    },
+    {
+      "id": "PD1",
+      "title": "Patient Additional Demographic"
+    },
+    {
+      "id": "PDA",
+      "title": "Patient Death and Autopsy"
+    },
+    {
+      "id": "PDC",
+      "title": "Product Detail Country"
+    },
+    {
+      "id": "PEO",
+      "title": "Product Experience Observation"
+    },
+    {
+      "id": "PES",
+      "title": "Product Experience Sender"
+    },
+    {
+      "id": "PID",
+      "title": "Patient Identification"
+    },
+    {
+      "id": "PR1",
+      "title": "Procedures"
+    },
+    {
+      "id": "PRA",
+      "title": "Practitioner Detail"
+    },
+    {
+      "id": "PRB",
+      "title": "Problem Details"
+    },
+    {
+      "id": "PRC",
+      "title": "Pricing"
+    },
+    {
+      "id": "PRD",
+      "title": "Provider Data"
+    },
+    {
+      "id": "PSH",
+      "title": "Product Summary Header"
+    },
+    {
+      "id": "PTH",
+      "title": "Pathway"
+    },
+    {
+      "id": "PV1",
+      "title": "Patient Visit"
+    },
+    {
+      "id": "PV2",
+      "title": "Patient Visit - Additional Information"
+    },
+    {
+      "id": "QAK",
+      "title": "Query Acknowledgment"
+    },
+    {
+      "id": "QID",
+      "title": "Query Identification"
+    },
+    {
+      "id": "QPD",
+      "title": "Query Parameter Definition"
+    },
+    {
+      "id": "QRD",
+      "title": "Original-Style Query Definition"
+    },
+    {
+      "id": "QRF",
+      "title": "Original Style Query Filter"
+    },
+    {
+      "id": "QRI",
+      "title": "Query Response Instance"
+    },
+    {
+      "id": "RCP",
+      "title": "Response Control Parameter"
+    },
+    {
+      "id": "RDF",
+      "title": "Table Row Definition"
+    },
+    {
+      "id": "RDT",
+      "title": "Table Row Data"
+    },
+    {
+      "id": "RF1",
+      "title": "Referral Information"
+    },
+    {
+      "id": "RGS",
+      "title": "Resource Group"
+    },
+    {
+      "id": "RMI",
+      "title": "Risk Management Incident"
+    },
+    {
+      "id": "ROL",
+      "title": "Role"
+    },
+    {
+      "id": "RQ1",
+      "title": "Requisition Detail-1"
+    },
+    {
+      "id": "RQD",
+      "title": "Requisition Detail"
+    },
+    {
+      "id": "RXA",
+      "title": "Pharmacy/Treatment Administration"
+    },
+    {
+      "id": "RXC",
+      "title": "Pharmacy/Treatment Component Order"
+    },
+    {
+      "id": "RXD",
+      "title": "Pharmacy/Treatment Dispense"
+    },
+    {
+      "id": "RXE",
+      "title": "Pharmacy/Treatment Encoded Order"
+    },
+    {
+      "id": "RXG",
+      "title": "Pharmacy/Treatment Give"
+    },
+    {
+      "id": "RXO",
+      "title": "Pharmacy/Treatment Order"
+    },
+    {
+      "id": "RXR",
+      "title": "Pharmacy/Treatment Route"
+    },
+    {
+      "id": "SAC",
+      "title": "Specimen Container Detail"
+    },
+    {
+      "id": "SCH",
+      "title": "Scheduling Activity Information"
+    },
+    {
+      "id": "SFT",
+      "title": "Software Segment"
+    },
+    {
+      "id": "SID",
+      "title": "Substance Identifier"
+    },
+    {
+      "id": "SPM",
+      "title": "Specimen"
+    },
+    {
+      "id": "SPR",
+      "title": "Stored Procedure Request Definition"
+    },
+    {
+      "id": "STF",
+      "title": "Staff Identification"
+    },
+    {
+      "id": "TCC",
+      "title": "Test Code Configuration"
+    },
+    {
+      "id": "TCD",
+      "title": "Test Code Detail"
+    },
+    {
+      "id": "TQ1",
+      "title": "Timing/Quantity"
+    },
+    {
+      "id": "TQ2",
+      "title": "Timing/Quantity Relationship"
+    },
+    {
+      "id": "TXA",
+      "title": "Transcription Document Header"
+    },
+    {
+      "id": "UB1",
+      "title": "UB82"
+    },
+    {
+      "id": "UB2",
+      "title": "UB92 Data"
+    },
+    {
+      "id": "URD",
+      "title": "Results/Update Definition"
+    },
+    {
+      "id": "URS",
+      "title": "Unsolicited Selection"
+    },
+    {
+      "id": "VAR",
+      "title": "Variance"
+    },
+    {
+      "id": "VTQ",
+      "title": "Virtual Table Query Request"
+    }
+  ]
+}
