@@ -1,9 +1,39 @@
+import { memoize } from "../memoize";
+import type { ProfileStore } from "../profiles";
 import { fieldImports } from "../profiles/field-manifest";
-import type { ProfileStoreConfig } from "../store";
-import type { FieldDefinition, FieldModule } from "./types";
 
-/** Compile raw field module into indexed definition. */
-const compileFields = (raw: FieldModule): FieldDefinition => {
+/** Raw shape exported by generated field modules. */
+export type FieldModule = Readonly<{
+  segmentId: string;
+  fields: readonly FieldProfile[];
+}>;
+
+/** Field validation constraints for a single field within a segment. */
+export type FieldProfile = Readonly<{
+  sequence: number;
+  id: string;
+  required: boolean;
+  repeatable: boolean;
+  datatype: string;
+  maxLength?: number;
+  table?: string;
+  name?: string;
+  item?: string;
+}>;
+
+/**
+ * Compiled field definition for a segment.
+ * Returned by `profiles.fields.load()`.
+ */
+export type FieldDefinition = Readonly<{
+  segmentId: string;
+  /** O(1) lookup of field profile by sequence number. */
+  bySequence: ReadonlyMap<number, FieldProfile>;
+  /** O(1) check for required field sequences. */
+  requiredSequences: ReadonlySet<number>;
+}>;
+
+const index = memoize((raw: FieldModule): FieldDefinition => {
   const bySequence = new Map<number, (typeof raw.fields)[number]>();
   const requiredSequences = new Set<number>();
 
@@ -19,11 +49,16 @@ const compileFields = (raw: FieldModule): FieldDefinition => {
     requiredSequences,
     segmentId: raw.segmentId,
   };
-};
+});
 
-/** Store configuration for segment field profiles. */
-export const fieldsConfig: ProfileStoreConfig<FieldModule, FieldDefinition> = {
-  compile: compileFields,
-  manifest: fieldImports,
-  namespace: "fields",
+/** The loader of segment field profiles. */
+export const fields: ProfileStore<FieldDefinition> = {
+  load: async (version, segmentId) => {
+    const key = `v${version}/${segmentId}`;
+    const importFields = fieldImports[key];
+    if (!importFields) {
+      throw new Error(`Unknown fields profile: ${key}`);
+    }
+    return index(await importFields());
+  },
 };

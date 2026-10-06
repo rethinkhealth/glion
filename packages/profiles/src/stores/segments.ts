@@ -1,46 +1,27 @@
-import type { SegmentDefinition, SegmentModule, SegmentProfile } from "./types";
+import { memoize } from "../memoize";
+import { segmentImports } from "../profiles/segment-manifest";
 
-// ---------------------------------------------------------------------------
-// Manifest — lazy imports keyed by HL7v2 version
-// ---------------------------------------------------------------------------
+/** Raw shape exported by generated segment modules. */
+export type SegmentModule = Readonly<{
+  segments: readonly SegmentProfile[];
+}>;
 
-type SegmentImportFactory = () => Promise<SegmentModule>;
+/** Segment metadata from the HL7v2 specification. */
+export type SegmentProfile = Readonly<{
+  id: string;
+  title: string;
+}>;
 
-const manifest: Record<string, SegmentImportFactory> = {
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.1": () => import("../profiles/v2.1/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.2": () => import("../profiles/v2.2/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.3": () => import("../profiles/v2.3/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.3.1": () => import("../profiles/v2.3.1/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.4": () => import("../profiles/v2.4/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.5": () => import("../profiles/v2.5/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.5.1": () => import("../profiles/v2.5.1/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.6": () => import("../profiles/v2.6/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.7": () => import("../profiles/v2.7/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.7.1": () => import("../profiles/v2.7.1/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.8": () => import("../profiles/v2.8/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.8.1": () => import("../profiles/v2.8.1/segments"),
-  // @ts-expect-error — Resolved by bundler; tsc build excludes profile data for performance
-  "v2.8.2": () => import("../profiles/v2.8.2/segments"),
-};
+/**
+ * Compiled segment definition for a version.
+ * Returned by `loadSegments()`.
+ */
+export type SegmentDefinition = Readonly<{
+  /** O(1) lookup of segment profile by segment ID (e.g., "MSH", "PID"). */
+  byId: ReadonlyMap<string, SegmentProfile>;
+}>;
 
-// ---------------------------------------------------------------------------
-// Compilation
-// ---------------------------------------------------------------------------
-
-/** Compile raw segment module into indexed definition. */
-const compile = (raw: SegmentModule): SegmentDefinition => {
+const index = memoize((raw: SegmentModule): SegmentDefinition => {
   const byId = new Map<string, SegmentProfile>();
 
   for (const segment of raw.segments) {
@@ -48,29 +29,21 @@ const compile = (raw: SegmentModule): SegmentDefinition => {
   }
 
   return { byId };
-};
-
-// ---------------------------------------------------------------------------
-// Loader
-// ---------------------------------------------------------------------------
+});
 
 /**
  * Load and compile all segment definitions for an HL7v2 version.
  *
- * Segment definitions are small (just id + title per segment) and are
- * loaded all-at-once per version via a single lazy import. The ES module
- * runtime caches the dynamic import, so repeated calls for the same
- * version don't re-fetch the module.
+ * Later loads of the same version resolve the same value.
  *
- * @throws When the version is not in the manifest.
+ * @throws {Error} When `version` is not bundled.
  */
 export const loadSegments = async (
   version: string
 ): Promise<SegmentDefinition> => {
-  const factory = manifest[`v${version}`];
-  if (!factory) {
+  const importSegments = segmentImports[`v${version}`];
+  if (!importSegments) {
     throw new Error(`Unknown segments profile: v${version}`);
   }
-  const raw = await factory();
-  return compile(raw);
+  return index(await importSegments());
 };
