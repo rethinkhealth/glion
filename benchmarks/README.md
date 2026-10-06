@@ -51,6 +51,7 @@ Local numbers and CI numbers are different instruments; compare local against lo
 | `@glion/mllp`                                                             | `suites/mllp-handle.bench.ts`                                          | routing/middleware via `handle()`, no TCP                                                                                    |
 | `@glion/mllp-client`                                                      | `suites/mllp-client.bench.ts`                                          | `send()` round-trip over the in-memory wire (`fixtures/memory-wire.ts`)                                                      |
 | `@glion/profiles`                                                         | `suites/profiles-runner.bench.ts`, `lab/event-schema-scaling.bench.ts` | the runner (order and grouping) on ORU_R01 inputs, and a schema's first use; a 10 → 100,000-segment scaling sweep in the lab |
+| `@glion/transform-profile-groups`                                         | `suites/transform-profile-groups.bench.ts`                             | grouping parsed ORU_R01 trees                                                                                                |
 
 Deliberately unbenchmarked: pure-vocabulary and config packages (`@glion/ack`, `@glion/ast`, `@glion/config`, `@glion/utils`, semver/timestamp/uid utils — no hot path) and the individual escape/delimiter plugins (covered inside the pipeline suite). If one of these grows a hot path, it earns a suite — absence should be a decision, not an accident.
 

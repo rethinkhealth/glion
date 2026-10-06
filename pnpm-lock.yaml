@@ -126,6 +126,9 @@ importers:
       '@glion/to-hl7v2':
         specifier: workspace:*
         version: link:../packages/to-hl7v2
+      '@glion/transform-profile-groups':
+        specifier: workspace:*
+        version: link:../packages/transform-profile-groups
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../tools/tsconfig
