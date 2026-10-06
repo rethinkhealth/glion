@@ -190,7 +190,9 @@ Canonical path grammar:
 - `SEGMENT-FIELD[REP]` — field repetition (e.g., `PID-5[2]`)
 - `SEGMENT-FIELD[REP].COMP` — component (e.g., `PID-5[1].2`)
 - `SEGMENT-FIELD[REP].COMP.SUB` — subcomponent (e.g., `PID-5[1].2.1`)
-- `GROUP[N]-...` — qualify with group name and optional repetition (e.g., `ORDERS[2]-OBX-5`)
+- `GROUP[N]-...` — qualify with group name and optional repetition (e.g., `ORDER_OBSERVATION[2]-OBX-5`)
+
+A segment or group name is an uppercase letter followed by uppercase letters, digits, and underscores, such as `PID` or `PATIENT_RESULT`.
 
 Repetition indexes are **1-based**. If you omit `[n]`, `select`/`value`/`matches` assume `[1]`.
 
