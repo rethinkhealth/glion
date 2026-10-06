@@ -111,7 +111,7 @@ export interface SegmentOrderOptions {
         context: SegmentOrderContext
       ) => EventSchema | undefined | Promise<EventSchema | undefined>);
   /**
-   * Whether a Z-segment, a segment ID that starts with `Z`, that the event
+   * Whether a Z-segment (a segment ID that starts with `Z`) that the event
    * schema does not name fits at any position. HL7v2 allows local Z-segments
    * in any message and segment group (v2.5.1 §2.11). When `false`, the rule
    * reports such a segment as unexpected. Default: `true`.

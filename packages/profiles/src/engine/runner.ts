@@ -1,6 +1,5 @@
 // Runs a message's segment IDs through its schema: it validates their
-// order and groups them. The segment-order lint rule reads a failure; the
-// group transform reads the groups.
+// order and groups them.
 //
 // The model
 //
@@ -9,7 +8,7 @@
 // MSH can be NTE or PID. The runner keeps one thread per state the reading can
 // be in, and replaces that set with each segment it consumes. A thread
 // carries a log of what its reading did: each segment it consumed and each
-// group boundary it crossed.
+// group boundary it crossed, as a Step.
 //
 // follow() walks from a state across the edges that consume nothing, first to
 // last, and adds a thread at every state that consumes a segment, plus final.
@@ -18,12 +17,12 @@
 //
 // Z-segments
 //
-// A Z-segment the schema does not name fits anywhere when allowed. Each thread
-// first consumes it if its state can (an `Hxx`), then keeps its state and
-// logs Z_SEGMENT, which keeps the readings in the order backtracking tries
-// them: at one point of the schema, consuming comes before passing over.
-// build() places a Z_SEGMENT right after the segment before it, in that
-// segment's group, whichever thread logged it.
+// A Z-segment the schema does not name fits anywhere when allowed: each
+// thread consumes it if its state can (an `Hxx`), then passes over it and
+// keeps its state. Consuming before passing over keeps the readings in the
+// order backtracking tries them. build() places a segment passed over right
+// after the segment before it, in that segment's group, whichever thread
+// passed over it.
 //
 // Outcomes
 //
@@ -55,13 +54,17 @@ const ANY_SEGMENT = "Hxx";
 // HL7v2 reserves segment IDs that start with Z for locally defined segments.
 const Z_SEGMENT_PREFIX = "Z";
 
-// A step in a reading's log: SEGMENT for a consumed segment, Z_SEGMENT for a
-// Z-segment the schema does not name, otherwise the boundary of the edge taken
-// (see EventSchemaEdge), which never reaches Z_SEGMENT.
-const SEGMENT = 0;
-const Z_SEGMENT = Number.MAX_SAFE_INTEGER;
+type Step =
+  | Readonly<{ kind: "consumed" }>
+  | Readonly<{ kind: "passed-over" }>
+  | Readonly<{ kind: "open"; name: string }>
+  | Readonly<{ kind: "close" }>;
 
-type Log = Readonly<{ step: number; previous: Log | undefined }>;
+const CONSUMED: Step = { kind: "consumed" };
+const PASSED_OVER: Step = { kind: "passed-over" };
+const CLOSE: Step = { kind: "close" };
+
+type Log = Readonly<{ step: Step; previous: Log | undefined }>;
 type Thread = Readonly<{ state: number; log: Log | undefined }>;
 interface OpenGroup {
   name: string;
@@ -84,12 +87,11 @@ interface OpenGroup {
  * that holds no segment is left out of the groups. A segment named `Hxx` in the
  * schema matches any segment ID.
  *
- * A Z-segment, a segment ID that starts with `Z`, that the schema does not
+ * A Z-segment (a segment ID that starts with `Z`) that the schema does not
  * name fits at any position unless `options.allowZSegments` is `false`. It is
  * grouped right after the segment before it, in that segment's group, and
- * never makes a group occurrence that holds no other segment. An `Hxx` takes
- * it like any other segment; at one point of the schema, taking it comes
- * before passing over it, and readings otherwise keep the priorities above.
+ * never makes a group occurrence that holds no other segment. A reading that
+ * reaches an `Hxx` takes the Z-segment there rather than pass over it.
  *
  * Runs in time proportional to the input length times the schema size.
  *
@@ -102,10 +104,9 @@ export function runner(
   input: readonly string[],
   options?: RunnerOptions
 ): RunnerResult {
-  const program = compile(schema);
-  const { edges, final, segments } = program;
+  const { edges, final, groups, segments, start } = compile(schema);
   const allowZSegments = options?.allowZSegments ?? true;
-  let named: ReadonlySet<string | null> | undefined;
+  const opens: readonly Step[] = groups.map((name) => ({ kind: "open", name }));
   const visited = new Int32Array(segments.length).fill(-1);
   let generation = 0;
   let threads: Thread[] = [];
@@ -119,24 +120,23 @@ export function runner(
       threads.push({ log, state });
     }
     for (const [target, boundary] of edges[state] ?? []) {
-      follow(target, boundary === 0 ? log : { previous: log, step: boundary });
+      if (boundary === 0) {
+        follow(target, log);
+      } else {
+        const step = boundary > 0 ? (opens[boundary - 1] as Step) : CLOSE;
+        follow(target, { previous: log, step });
+      }
     }
   };
 
-  // Moves `thread` past the segment `name`: consumes it if its state can, then,
-  // for a Z-segment the schema does not name, keeps its state.
-  const advance = (
-    { log, state }: Thread,
-    name: string,
-    unnamedZSegment: boolean
-  ): void => {
-    const consumed = segments[state];
-    if (consumed === name || consumed === ANY_SEGMENT) {
-      follow(state + 1, { previous: log, step: SEGMENT });
+  // A thread sits at a segment state or at final, neither of which has edges,
+  // so follow() keeping its state adds it back and goes nowhere.
+  const advance = ({ log, state }: Thread, name: string, passable: boolean) => {
+    if (segments[state] === name || segments[state] === ANY_SEGMENT) {
+      follow(state + 1, { previous: log, step: CONSUMED });
     }
-    if (unnamedZSegment && visited[state] !== generation) {
-      visited[state] = generation;
-      threads.push({ log: { previous: log, step: Z_SEGMENT }, state });
+    if (passable) {
+      follow(state, { previous: log, step: PASSED_OVER });
     }
   };
 
@@ -149,20 +149,20 @@ export function runner(
         found.add(name);
       }
     }
-    return [...found].toSorted((a, b) => a.localeCompare(b));
+    return [...found].toSorted();
   };
 
-  follow(program.start);
+  follow(start);
   for (const [index, name] of input.entries()) {
     const current = threads;
     threads = [];
     generation += 1;
-    const unnamedZSegment =
+    const passable =
       allowZSegments &&
       name.startsWith(Z_SEGMENT_PREFIX) &&
-      !(named ??= new Set(segments)).has(name);
+      !segments.includes(name);
     for (const thread of current) {
-      advance(thread, name, unnamedZSegment);
+      advance(thread, name, passable);
     }
     if (threads.length === 0) {
       return { expected: expected(current), index, type: "mismatched" };
@@ -171,40 +171,43 @@ export function runner(
 
   const accepted = threads.find((thread) => thread.state === final);
   return accepted
-    ? { groups: build(program.groups, accepted.log), type: "matched" }
+    ? { groups: build(accepted.log), type: "matched" }
     : { expected: expected(threads), type: "incomplete" };
 }
 
-function build(
-  groups: readonly string[],
-  log: Log | undefined
-): SegmentMatch[] {
-  const steps: number[] = [];
+function build(log: Log | undefined): SegmentMatch[] {
+  const steps: Step[] = [];
   for (let entry = log; entry; entry = entry.previous) {
     steps.push(entry.step);
   }
 
   const root: SegmentMatch[] = [];
   const open: OpenGroup[] = [];
-  // Where the last segment went: a Z_SEGMENT goes right after it.
-  let last = root;
+  let previousSiblings = root;
   let index = 0;
   for (const step of steps.toReversed()) {
-    const siblings = open.at(-1)?.children ?? root;
-    if (step === SEGMENT) {
-      siblings.push(index);
-      last = siblings;
-      index += 1;
-    } else if (step === Z_SEGMENT) {
-      last.push(index);
-      index += 1;
-    } else if (step > 0) {
-      open.push({ children: [], name: groups[step - 1] as string });
-    } else {
-      const group = open.pop() as OpenGroup;
-      const parent = open.at(-1)?.children ?? root;
-      if (group.children.length > 0) {
-        parent.push(group);
+    switch (step.kind) {
+      case "consumed": {
+        previousSiblings = open.at(-1)?.children ?? root;
+        previousSiblings.push(index);
+        index += 1;
+        break;
+      }
+      case "passed-over": {
+        previousSiblings.push(index);
+        index += 1;
+        break;
+      }
+      case "open": {
+        open.push({ children: [], name: step.name });
+        break;
+      }
+      case "close": {
+        const group = open.pop() as OpenGroup;
+        if (group.children.length > 0) {
+          (open.at(-1)?.children ?? root).push(group);
+        }
+        break;
       }
     }
   }

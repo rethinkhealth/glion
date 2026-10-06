@@ -144,6 +144,33 @@ export function nearMiss(message, names, random) {
 // ---------------------------------------------------------------------------
 
 /**
+ * The segment IDs `elements` name, at any depth.
+ *
+ * @param {readonly EventSchemaElement[]} elements - The elements to walk.
+ * @returns {Set<string>} The segment IDs.
+ */
+function segmentIds(elements, ids = new Set()) {
+  for (const element of elements) {
+    if (element.type === "segment") {
+      ids.add(element.name);
+    } else {
+      segmentIds(element.elements ?? element.alternatives, ids);
+    }
+  }
+  return ids;
+}
+
+/**
+ * Whether `name` is a Z-segment that is not in `named`.
+ *
+ * @param {string | undefined} name - A segment ID.
+ * @param {ReadonlySet<string>} named - The segment IDs a schema names.
+ * @returns {boolean} Whether `name` starts with `Z` and is not in `named`.
+ */
+const isUnnamedZSegment = (name, named) =>
+  name?.startsWith("Z") === true && !named.has(name);
+
+/**
  * The grouping of `input` under `schema`, or `undefined` when `input` does
  * not fit it.
  *
@@ -164,21 +191,9 @@ export function nearMiss(message, names, random) {
  */
 // oxlint-disable-next-line complexity/complexity -- backtracking grammar parser: the branches are the schema's element kinds and the greedy occurrence order
 export function referenceMatch(schema, input, options = {}) {
-  const named = new Set();
-  const collect = (elements) => {
-    for (const element of elements) {
-      if (element.type === "segment") {
-        named.add(element.name);
-      } else {
-        collect(element.elements ?? element.alternatives);
-      }
-    }
-  };
-  collect(schema.elements);
+  const named = segmentIds(schema.elements);
   const passable = (at) =>
-    (options.allowZSegments ?? true) &&
-    input[at]?.startsWith("Z") === true &&
-    !named.has(input[at]);
+    (options.allowZSegments ?? true) && isUnnamedZSegment(input[at], named);
 
   /** @typedef {(at: number) => boolean} Next */
   /** @type {(number | { open: string } | { z: number } | "close")[]} */
@@ -434,12 +449,17 @@ async function problemsInBundle() {
     const schema = await profiles.events.load(version, id);
     const random = seeded(version.length * 31 + id.length);
     const names = [...new Set(validMessage(schema, random))];
+    const named = segmentIds(schema.elements);
 
     for (let n = 0; n < MESSAGES_PER_SCHEMA; n += 1) {
       const valid = validMessage(schema, random);
       const miss = nearMiss(valid, names, random);
 
-      for (const allowZSegments of [true, false]) {
+      // Strict matching differs only on a message with an unnamed Z-segment.
+      const strictDiffers = [...valid, ...miss].some((name) =>
+        isUnnamedZSegment(name, named)
+      );
+      for (const allowZSegments of strictDiffers ? [true, false] : [true]) {
         const options = { allowZSegments };
         const label = `v${version}/${id} (allowZSegments ${allowZSegments})`;
         const result = runner(schema, valid, options);

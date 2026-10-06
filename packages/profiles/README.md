@@ -109,7 +109,7 @@ runner(schema, ["MSH", "PID", "OBR", "MSH"]);
 
 #### Z-segments
 
-A Z-segment, a segment ID that starts with `Z`, that the schema does not name fits at any position, as HL7v2 allows local Z-segments in any message and segment group. It is grouped right after the segment before it, in that segment's group. A Z-segment the schema names is matched like any other segment. An `Hxx` takes a Z-segment like any other segment; at one point of the schema, taking it comes before passing over it.
+A Z-segment (a segment ID that starts with `Z`) that the schema does not name fits at any position, as HL7v2 allows local Z-segments in any message and segment group. It is grouped right after the segment before it, in that segment's group. A Z-segment the schema names is matched like any other segment. A reading that reaches an `Hxx` takes the Z-segment there rather than pass over it.
 
 | Option           | Type      | Default | Description                                                                                           |
 | ---------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------- |
