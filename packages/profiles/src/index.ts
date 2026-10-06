@@ -1,18 +1,21 @@
 /** Biome-ignore-all lint/performance/noBarrelFile: public API surface */
 
-// Automata engine (unchanged)
-export { runner } from "./automata/runner";
+// Event schemas
+export { runner } from "./engine/runner";
 export type {
-  Definition,
-  Effects,
-  NFA,
-  Runner,
-  RunnerEvent,
-  RunnerInvalidEvent,
-  RunnerStepEvent,
-  TransitionMap,
-} from "./automata/types";
-export { RunnerState } from "./automata/types";
+  ChoiceElement,
+  GroupElement,
+  GroupMatch,
+  EventSchema,
+  Occurrence,
+  RunnerIncomplete,
+  RunnerMatched,
+  RunnerMismatched,
+  RunnerResult,
+  SegmentElement,
+  EventSchemaElement,
+  SegmentMatch,
+} from "./engine/types";
 
 // Profiles API
 export { profiles } from "./profiles";

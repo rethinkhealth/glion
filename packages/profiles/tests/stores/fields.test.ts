@@ -29,7 +29,7 @@ describe("fields", () => {
     const v21 = await fields.load("2.1", "PID");
     const v282 = await fields.load("2.8.2", "PID");
 
-    expect(v21?.bySequence.size).toBeLessThan(v282?.bySequence.size);
+    expect(v21?.bySequence.size).toBeLessThan(v282?.bySequence.size ?? 0);
   });
 
   it("resolves the same value for repeated loads", async () => {

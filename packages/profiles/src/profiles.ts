@@ -1,4 +1,4 @@
-import type { Definition } from "./automata/types";
+import type { EventSchema } from "./engine/types";
 import { codeSystems } from "./stores/code-systems";
 import type { CodeSystemStore } from "./stores/code-systems";
 import { datatypes } from "./stores/datatypes";
@@ -25,13 +25,13 @@ export type ProfileStore<T> = Readonly<{
 
 /** The profile stores. */
 export type Profiles = Readonly<{
-  /** DFA definitions for message structure validation. */
-  events: ProfileStore<Definition>;
-  /** Event maps: the message structure each event uses, by version. */
+  /** Event schemas, such as `ORU_R01`, by version and schema ID. */
+  events: ProfileStore<EventSchema>;
+  /** Event maps: the event schema each event uses, by version. */
   eventMaps: EventMapStore;
   /** Segment field metadata (required, repeatable, maxLength, datatype). */
   fields: ProfileStore<FieldDefinition>;
-  /** Component structure and constraints for datatypes. */
+  /** Component schema and constraints for datatypes. */
   datatypes: ProfileStore<DatatypeDefinition>;
   /** HL7-defined and user-defined table value sets. */
   tables: ProfileStore<TableDefinition>;
@@ -40,12 +40,12 @@ export type Profiles = Readonly<{
 }>;
 
 /**
- * The profile stores: event profiles, event maps, fields, datatypes, and
+ * The profile stores: event schemas, event maps, fields, datatypes, and
  * tables by version, and UTG code systems.
  *
  * @example
  *   ```ts
- *   const def = await profiles.events.load("2.5", "ADT_A01");
+ *   const schema = await profiles.events.load("2.5", "ADT_A04");
  *   const eventMap = await profiles.eventMaps.load("2.5");
  *   const fields = await profiles.fields.load("2.5", "PID");
  *   const table = await profiles.tables.load("2.5", "0001");

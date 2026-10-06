@@ -22,7 +22,7 @@ describe("tables", () => {
     const v21 = await tables.load("2.1", "0001");
     const v25 = await tables.load("2.5", "0001");
 
-    expect(v21?.codes.size).toBeLessThan(v25?.codes.size);
+    expect(v21?.codes.size).toBeLessThan(v25?.codes.size ?? 0);
   });
 
   it("resolves the same value for repeated loads", async () => {
