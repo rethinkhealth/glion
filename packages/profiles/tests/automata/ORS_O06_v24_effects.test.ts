@@ -30,7 +30,9 @@ describe("ORS_O06 v2.4 event schema group identifiers", () => {
     );
     expect(response).toBeDefined();
     expect(response!.type).toBe("group");
-    if (response!.type !== "group") {return;}
+    if (response!.type !== "group") {
+      return;
+    }
     const childGroups = groupNames(response!.elements);
     expect(childGroups).toContain("PATIENT");
     expect(childGroups).toContain("ORDER");
