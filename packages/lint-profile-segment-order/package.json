@@ -1,7 +1,7 @@
 {
-  "name": "@glion/lint-profile-events-segments-order",
+  "name": "@glion/lint-profile-segment-order",
   "version": "0.20.0",
-  "description": "Linting based on events profiles for segment orders",
+  "description": "Lints the segment order of an HL7v2 message against its message structure",
   "keywords": [
     "health",
     "healthcare",
@@ -19,7 +19,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rethinkhealth/glion.git",
-    "directory": "packages/lint-profile-events-segments-order"
+    "directory": "packages/lint-profile-segment-order"
   },
   "files": [
     "dist"

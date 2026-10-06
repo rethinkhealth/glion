@@ -1,4 +1,4 @@
-# @glion/lint-profile-events-segments-order
+# @glion/lint-profile-segment-order
 
 Lint rule that validates HL7v2 segment order against the message structure defined by the profile.
 
@@ -9,7 +9,7 @@ Walks the parsed tree segment-by-segment, feeding each segment name into a DFA (
 ## Install
 
 ```bash
-npm install @glion/lint-profile-events-segments-order
+npm install @glion/lint-profile-segment-order
 ```
 
 ## Use
@@ -18,7 +18,7 @@ npm install @glion/lint-profile-events-segments-order
 import { hl7v2AnnotateMessage } from "@glion/annotate-message";
 import { hl7v2AnnotateMessageStructure } from "@glion/annotate-message-structure";
 import { hl7v2Parser } from "@glion/parser";
-import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
+import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import { unified } from "unified";
 import { reporter } from "vfile-reporter";
 
@@ -42,7 +42,7 @@ With an explicit DFA definition (skips automatic resolution):
 
 ```ts
 import { profiles } from "@glion/profiles";
-import hl7v2LintSegmentOrder from "@glion/lint-profile-events-segments-order";
+import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import { unified } from "unified";
 
 const definition = await profiles.events.load("2.5", "ADT_A01");
@@ -148,7 +148,7 @@ Resolution errors cause validation to be skipped entirely.
 
 ## Part of Glion
 
-`@glion/lint-profile-events-segments-order` is part of **[Glion]**, the application framework for HL7v2. See the [Glion README] for the full package catalog and architecture.
+`@glion/lint-profile-segment-order` is part of **[Glion]**, the application framework for HL7v2. See the [Glion README] for the full package catalog and architecture.
 
 [Glion]: https://github.com/rethinkhealth/glion#readme
 [Glion README]: https://github.com/rethinkhealth/glion#readme
