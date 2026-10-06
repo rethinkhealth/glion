@@ -152,14 +152,36 @@ export function nearMiss(message, names, random) {
  * polynomial. Only failures are memoized, so the first success in priority
  * order is still the one returned.
  *
+ * A Z-segment the schema does not name fits anywhere unless
+ * `allowZSegments` is `false`: at each segment, matching it comes first, then
+ * passing over it. It is placed right after the segment before it, in that
+ * segment's group.
+ *
  * @param {EventSchema} schema - The schema to match against.
  * @param {readonly string[]} input - The message's segment names.
+ * @param {{ allowZSegments?: boolean }} [options] - As `runner`'s.
  * @returns {SegmentMatch[] | undefined} Segment indexes nested in groups.
  */
 // oxlint-disable-next-line complexity/complexity -- backtracking grammar parser: the branches are the schema's element kinds and the greedy occurrence order
-export function referenceMatch(schema, input) {
+export function referenceMatch(schema, input, options = {}) {
+  const named = new Set();
+  const collect = (elements) => {
+    for (const element of elements) {
+      if (element.type === "segment") {
+        named.add(element.name);
+      } else {
+        collect(element.elements ?? element.alternatives);
+      }
+    }
+  };
+  collect(schema.elements);
+  const passable = (at) =>
+    (options.allowZSegments ?? true) &&
+    input[at]?.startsWith("Z") === true &&
+    !named.has(input[at]);
+
   /** @typedef {(at: number) => boolean} Next */
-  /** @type {(number | { open: string } | "close")[]} */
+  /** @type {(number | { open: string } | { z: number } | "close")[]} */
   const ops = [];
   /** @type {WeakMap<object, number>} */
   const ids = new WeakMap();
@@ -245,18 +267,33 @@ export function referenceMatch(schema, input) {
     return count >= min && run(next, at);
   };
 
+  /**
+   * Matches `element` at the first segment from `at` it names, passing over
+   * the Z-segments before it: at each position, matching comes first.
+   */
+  const segment = (element, at, next) => {
+    const mark = ops.length;
+    for (let j = at; input[j] !== undefined; j += 1) {
+      if (element.name === "Hxx" || element.name === input[j]) {
+        ops.length = mark;
+        ops.push(...Array.from({ length: j - at }, (_, k) => ({ z: at + k })));
+        ops.push(j);
+        if (run(next, j + 1)) {
+          return true;
+        }
+      }
+      if (!passable(j)) {
+        break;
+      }
+    }
+    ops.length = mark;
+    return false;
+  };
+
   const once = (element, at, next) => {
     switch (element.type) {
       case "segment": {
-        const name = input[at];
-        if (
-          name === undefined ||
-          (element.name !== "Hxx" && element.name !== name)
-        ) {
-          return false;
-        }
-        ops.push(at);
-        return run(next, at + 1);
+        return segment(element, at, next);
       }
       case "group": {
         ops.push({ open: element.name });
@@ -283,7 +320,17 @@ export function referenceMatch(schema, input) {
   };
 
   /** @type {Next} */
-  const end = (at) => at === input.length;
+  const end = (at) => {
+    for (let z = at; z < input.length; z += 1) {
+      if (!passable(z)) {
+        return false;
+      }
+    }
+    for (let z = at; z < input.length; z += 1) {
+      ops.push({ z });
+    }
+    return true;
+  };
   if (!sequence(schema.elements, 0, 0, end)) {
     return;
   }
@@ -292,10 +339,14 @@ export function referenceMatch(schema, input) {
   const root = [];
   /** @type {{ name: string; children: SegmentMatch[] }[]} */
   const open = [];
+  let last = root;
   for (const op of ops) {
     const siblings = open.at(-1)?.children ?? root;
     if (typeof op === "number") {
       siblings.push(op);
+      last = siblings;
+    } else if (typeof op === "object" && "z" in op) {
+      last.push(op.z);
     } else if (op === "close") {
       const group = open.pop();
       if (group && group.children.length > 0) {
@@ -387,23 +438,26 @@ async function problemsInBundle() {
     for (let n = 0; n < MESSAGES_PER_SCHEMA; n += 1) {
       const valid = validMessage(schema, random);
       const miss = nearMiss(valid, names, random);
-      const result = runner(schema, valid);
 
-      if (result.type !== "matched") {
-        problems.push(`v${version}/${id} rejects ${valid.join(" ")}`);
-      } else if (
-        JSON.stringify(result.groups) !==
-        JSON.stringify(referenceMatch(schema, valid))
-      ) {
-        problems.push(
-          `v${version}/${id} groups ${valid.join(" ")} differently`
-        );
-      }
-      if (
-        (runner(schema, miss).type === "matched") !==
-        (referenceMatch(schema, miss) !== undefined)
-      ) {
-        problems.push(`v${version}/${id} disagrees on ${miss.join(" ")}`);
+      for (const allowZSegments of [true, false]) {
+        const options = { allowZSegments };
+        const label = `v${version}/${id} (allowZSegments ${allowZSegments})`;
+        const result = runner(schema, valid, options);
+
+        if (result.type !== "matched") {
+          problems.push(`${label} rejects ${valid.join(" ")}`);
+        } else if (
+          JSON.stringify(result.groups) !==
+          JSON.stringify(referenceMatch(schema, valid, options))
+        ) {
+          problems.push(`${label} groups ${valid.join(" ")} differently`);
+        }
+        if (
+          (runner(schema, miss, options).type === "matched") !==
+          (referenceMatch(schema, miss, options) !== undefined)
+        ) {
+          problems.push(`${label} disagrees on ${miss.join(" ")}`);
+        }
       }
     }
   }

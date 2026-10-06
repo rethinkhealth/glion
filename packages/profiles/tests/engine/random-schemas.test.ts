@@ -11,6 +11,9 @@ import type { EventSchema, EventSchemaElement } from "../../src/engine/types";
 const STRUCTURES = 3000;
 const MESSAGES_PER_STRUCTURE = 12;
 const NAMES = ["A", "B", "C"];
+// A Z-segment schemas may name, and one they never do.
+const NAMED_Z_SEGMENT = "ZA";
+const UNNAMED_Z_SEGMENT = "ZQ";
 const MAX_DEPTH = 3;
 const MAX_WIDTH = 3;
 
@@ -22,16 +25,20 @@ const occurrence = (random: Random) => ({
   repeating: random() < 0.4,
 });
 
-function element(depth: number, random: Random): EventSchemaElement {
+function element(
+  depth: number,
+  random: Random,
+  names: readonly string[] = NAMES
+): EventSchemaElement {
   const roll = random();
   if (depth >= MAX_DEPTH || roll < 0.5) {
     return {
       ...occurrence(random),
-      name: pick(NAMES, random),
+      name: pick(names, random),
       type: "segment",
     };
   }
-  const children = elements(depth + 1, random);
+  const children = elements(depth + 1, random, names);
   if (roll < 0.8) {
     return {
       ...occurrence(random),
@@ -43,9 +50,13 @@ function element(depth: number, random: Random): EventSchemaElement {
   return { ...occurrence(random), alternatives: children, type: "choice" };
 }
 
-function elements(depth: number, random: Random): EventSchemaElement[] {
+function elements(
+  depth: number,
+  random: Random,
+  names: readonly string[] = NAMES
+): EventSchemaElement[] {
   const width = 1 + Math.floor(random() * MAX_WIDTH);
-  return Array.from({ length: width }, () => element(depth, random));
+  return Array.from({ length: width }, () => element(depth, random, names));
 }
 
 const matchesNothing = (item: EventSchemaElement): boolean =>
@@ -98,6 +109,67 @@ describe("runner on random schemas", () => {
       }
     }
 
+    expect(compared).toBeGreaterThan(STRUCTURES / 3);
+    expect(disagreements).toEqual([]);
+  });
+
+  it("agrees with the reference parser on Z-segments the schema does not name, allowed or not", () => {
+    const random = seeded(20_261_006);
+    const names = [...NAMES, NAMED_Z_SEGMENT, "Hxx"];
+    const disagreements: string[] = [];
+    let compared = 0;
+    let matchedWithZ = 0;
+
+    for (let s = 0; s < STRUCTURES; s += 1) {
+      const schema: EventSchema = {
+        elements: [
+          { name: "MSH", optional: false, repeating: false, type: "segment" },
+          ...elements(0, random, names),
+        ],
+        id: `Z${s}`,
+      };
+      if (hasEmptyAlternative(schema.elements)) {
+        continue;
+      }
+      compared += 1;
+
+      for (let n = 0; n < MESSAGES_PER_STRUCTURE; n += 1) {
+        const input = validMessage(schema, random).slice(0, 14);
+        // Up to three runs of one to three Z-segments.
+        for (let run = Math.floor(random() * 4); run > 0; run -= 1) {
+          const at = Math.floor(random() * (input.length + 1));
+          const length = 1 + Math.floor(random() * 3);
+          input.splice(
+            at,
+            0,
+            ...Array.from({ length }, () => UNNAMED_Z_SEGMENT)
+          );
+        }
+        for (const allowZSegments of [true, false]) {
+          const result = runner(schema, input, { allowZSegments });
+          if (
+            allowZSegments &&
+            result.type === "matched" &&
+            input.includes(UNNAMED_Z_SEGMENT)
+          ) {
+            matchedWithZ += 1;
+          }
+          const got = JSON.stringify(
+            result.type === "matched" ? result.groups : undefined
+          );
+          const want = JSON.stringify(
+            referenceMatch(schema, input, { allowZSegments })
+          );
+          if (got !== want && disagreements.length < 5) {
+            disagreements.push(
+              `${JSON.stringify(schema.elements)} on ${input.join(" ")} (allowZSegments ${allowZSegments}): vm ${got} ref ${want}`
+            );
+          }
+        }
+      }
+    }
+
+    expect(matchedWithZ).toBeGreaterThan(compared);
     expect(compared).toBeGreaterThan(STRUCTURES / 3);
     expect(disagreements).toEqual([]);
   });

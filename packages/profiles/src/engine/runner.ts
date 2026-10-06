@@ -16,6 +16,15 @@
 // The first walk to reach a state keeps it, so the thread kept is the reading
 // with the highest priority. The three priorities are compile.ts's.
 //
+// Z-segments
+//
+// A Z-segment the schema does not name fits anywhere when allowed. Each thread
+// first consumes it if its state can (an `Hxx`), then keeps its state and
+// logs Z_SEGMENT, which keeps the readings in the order backtracking tries
+// them: at one point of the schema, consuming comes before passing over.
+// build() places a Z_SEGMENT right after the segment before it, in that
+// segment's group, whichever thread logged it.
+//
 // Outcomes
 //
 //   matched     a thread reached final after the last segment: build() replays
@@ -33,14 +42,24 @@
 // shared between threads, so a step costs one small object, not a copy.
 
 import { compile } from "./compile";
-import type { EventSchema, RunnerResult, SegmentMatch } from "./types";
+import type {
+  EventSchema,
+  RunnerOptions,
+  RunnerResult,
+  SegmentMatch,
+} from "./types";
 
 // The segment ID that matches any segment in the schema.
 const ANY_SEGMENT = "Hxx";
 
-// A step in a reading's log: SEGMENT for a consumed segment, otherwise the
-// boundary of the edge taken (see EventSchemaEdge).
+// HL7v2 reserves segment IDs that start with Z for locally defined segments.
+const Z_SEGMENT_PREFIX = "Z";
+
+// A step in a reading's log: SEGMENT for a consumed segment, Z_SEGMENT for a
+// Z-segment the schema does not name, otherwise the boundary of the edge taken
+// (see EventSchemaEdge), which never reaches Z_SEGMENT.
 const SEGMENT = 0;
+const Z_SEGMENT = Number.MAX_SAFE_INTEGER;
 
 type Log = Readonly<{ step: number; previous: Log | undefined }>;
 type Thread = Readonly<{ state: number; log: Log | undefined }>;
@@ -65,6 +84,13 @@ interface OpenGroup {
  * that holds no segment is left out of the groups. A segment named `Hxx` in the
  * schema matches any segment ID.
  *
+ * A Z-segment, a segment ID that starts with `Z`, that the schema does not
+ * name fits at any position unless `options.allowZSegments` is `false`. It is
+ * grouped right after the segment before it, in that segment's group, and
+ * never makes a group occurrence that holds no other segment. An `Hxx` takes
+ * it like any other segment; at one point of the schema, taking it comes
+ * before passing over it, and readings otherwise keep the priorities above.
+ *
  * Runs in time proportional to the input length times the schema size.
  *
  * @throws {Error} When `schema` has no elements, a segment or group has no
@@ -73,10 +99,13 @@ interface OpenGroup {
  */
 export function runner(
   schema: EventSchema,
-  input: readonly string[]
+  input: readonly string[],
+  options?: RunnerOptions
 ): RunnerResult {
   const program = compile(schema);
   const { edges, final, segments } = program;
+  const allowZSegments = options?.allowZSegments ?? true;
+  let named: ReadonlySet<string | null> | undefined;
   const visited = new Int32Array(segments.length).fill(-1);
   let generation = 0;
   let threads: Thread[] = [];
@@ -91,6 +120,23 @@ export function runner(
     }
     for (const [target, boundary] of edges[state] ?? []) {
       follow(target, boundary === 0 ? log : { previous: log, step: boundary });
+    }
+  };
+
+  // Moves `thread` past the segment `name`: consumes it if its state can, then,
+  // for a Z-segment the schema does not name, keeps its state.
+  const advance = (
+    { log, state }: Thread,
+    name: string,
+    unnamedZSegment: boolean
+  ): void => {
+    const consumed = segments[state];
+    if (consumed === name || consumed === ANY_SEGMENT) {
+      follow(state + 1, { previous: log, step: SEGMENT });
+    }
+    if (unnamedZSegment && visited[state] !== generation) {
+      visited[state] = generation;
+      threads.push({ log: { previous: log, step: Z_SEGMENT }, state });
     }
   };
 
@@ -111,11 +157,12 @@ export function runner(
     const current = threads;
     threads = [];
     generation += 1;
-    for (const { log, state } of current) {
-      const consumed = segments[state];
-      if (consumed === name || consumed === ANY_SEGMENT) {
-        follow(state + 1, { previous: log, step: SEGMENT });
-      }
+    const unnamedZSegment =
+      allowZSegments &&
+      name.startsWith(Z_SEGMENT_PREFIX) &&
+      !(named ??= new Set(segments)).has(name);
+    for (const thread of current) {
+      advance(thread, name, unnamedZSegment);
     }
     if (threads.length === 0) {
       return { expected: expected(current), index, type: "mismatched" };
@@ -139,11 +186,17 @@ function build(
 
   const root: SegmentMatch[] = [];
   const open: OpenGroup[] = [];
+  // Where the last segment went: a Z_SEGMENT goes right after it.
+  let last = root;
   let index = 0;
   for (const step of steps.toReversed()) {
     const siblings = open.at(-1)?.children ?? root;
     if (step === SEGMENT) {
       siblings.push(index);
+      last = siblings;
+      index += 1;
+    } else if (step === Z_SEGMENT) {
+      last.push(index);
       index += 1;
     } else if (step > 0) {
       open.push({ children: [], name: groups[step - 1] as string });

@@ -297,6 +297,109 @@ describe("runner: grouping", () => {
   });
 });
 
+describe("runner: Z-segments", () => {
+  it("groups a Z-segment the schema does not name right after the segment before it, in that segment's group", () => {
+    expect(
+      match(ORU_R01_V2_5, "MSH PID ZPI OBR ZDS OBX ZRS ORC OBR OBX")
+    ).toEqual([
+      0,
+      g(
+        "PATIENT_RESULT",
+        g("PATIENT", 1, 2),
+        g("ORDER_OBSERVATION", 3, 4, g("OBSERVATION", 5, 6)),
+        g("ORDER_OBSERVATION", 7, 8, g("OBSERVATION", 9))
+      ),
+    ]);
+  });
+
+  it("keeps consecutive Z-segments together, in order", () => {
+    expect(match(ADT_A01_V2_5, "MSH ZA1 ZA2 EVN PID PV1 IN1 ZI1 ZI2")).toEqual([
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      g("INSURANCE", 6, 7, 8),
+    ]);
+  });
+
+  it("places a Z-segment before the first segment, or after the last, at the top level", () => {
+    expect(match(ADT_A01_V2_5, "ZA1 MSH EVN PID PV1 ZA2")).toEqual([
+      0, 1, 2, 3, 4, 5,
+    ]);
+  });
+
+  it("forms no group occurrence that holds only Z-segments", () => {
+    expect(match(ORU_R01_V2_5, "MSH ZA1 OBR OBX")).toEqual([
+      0,
+      1,
+      g("PATIENT_RESULT", g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3))),
+    ]);
+  });
+
+  it("reports a Z-segment the schema does not name as a mismatch when Z-segments are not allowed", () => {
+    expect(
+      runner(ADT_A01_V2_5, ["MSH", "EVN", "ZA1", "PID", "PV1"], {
+        allowZSegments: false,
+      })
+    ).toEqual({ expected: ["PID"], index: 2, type: "mismatched" });
+  });
+
+  it("still reports a Z-segment the schema names where the schema does not allow it", () => {
+    const schema = schemaOf(
+      segment("MSH"),
+      segment("ZPV", { optional: true }),
+      segment("PID")
+    );
+
+    expect(runner(schema, ["MSH", "PID", "ZPV"])).toEqual({
+      expected: [],
+      index: 2,
+      type: "mismatched",
+    });
+  });
+
+  it("lets an Hxx take a Z-segment before passing over it", () => {
+    const schema = schemaOf(segment("MSH"), {
+      elements: [segment("Hxx")],
+      name: "QUERY",
+      optional: true,
+      repeating: false,
+      type: "group",
+    });
+
+    expect(match(schema, "MSH ZQ1")).toEqual([0, g("QUERY", 1)]);
+  });
+
+  it("keeps the schema's priorities between a reading that takes a Z-segment in an Hxx and one that passes over it", () => {
+    const schema = schemaOf(
+      segment("MSH"),
+      segment("A", { optional: true }),
+      {
+        elements: [segment("Hxx")],
+        name: "QUERY",
+        optional: true,
+        repeating: true,
+        type: "group",
+      },
+      segment("A", { optional: true })
+    );
+
+    // Entering the first optional A outranks skipping it, and that reading
+    // passes over ZQ1 before its A.
+    expect(match(schema, "MSH ZQ1 A")).toEqual([0, 1, 2]);
+  });
+
+  it("reports a later mismatch by its index in the input, Z-segments included", () => {
+    expect(runner(ORU_R01_V2_5, ["MSH", "PID", "ZPI", "OBX"])).toEqual({
+      expected: ["NK1", "NTE", "OBR", "ORC", "PD1", "PV1"],
+      index: 3,
+      type: "mismatched",
+    });
+  });
+});
+
 describe("runner agrees with the reference parser", () => {
   const MESSAGES_PER_STRUCTURE = 300;
   const schemas = [

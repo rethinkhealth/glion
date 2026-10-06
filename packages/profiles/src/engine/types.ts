@@ -78,6 +78,17 @@ export type ChoiceElement = Occurrence &
  */
 export type SegmentMatch = number | GroupMatch;
 
+/** Options for `runner()`. */
+export type RunnerOptions = Readonly<{
+  /**
+   * Whether a Z-segment, a segment ID that starts with `Z`, that the schema
+   * does not name fits at any position. HL7v2 allows local Z-segments in any
+   * message and segment group (v2.5.1 §2.11). When `false`, such a segment is
+   * a mismatch, like any segment the schema does not allow. Default: `true`.
+   */
+  allowZSegments?: boolean;
+}>;
+
 /** What `runner()` returns, discriminated by `type`. */
 export type RunnerResult = RunnerMatched | RunnerMismatched | RunnerIncomplete;
 
