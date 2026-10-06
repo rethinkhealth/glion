@@ -6,13 +6,14 @@ This workspace tests the distributed product as a consumer would — importing p
 
 ## Quality Layers
 
-| Test Suite  | File                        | What it verifies                                                  |
-| ----------- | --------------------------- | ----------------------------------------------------------------- |
-| Conformance | `tests/conformance.test.ts` | Golden-file snapshots for all common message types and edge cases |
-| Diagnostics | `tests/diagnostics.test.ts` | Exact diagnostic output for known violations (truth-table style)  |
-| Fuzz        | `tests/fuzz.test.ts`        | Parser never throws on arbitrary input (property-based)           |
-| Round-trip  | `tests/round-trip.test.ts`  | `parse(S) → serialize = S` for valid messages                     |
-| Performance | `tests/performance.test.ts` | Hard time thresholds at hospital-scale message volumes            |
+| Test Suite    | File                          | What it verifies                                                                  |
+| ------------- | ----------------------------- | --------------------------------------------------------------------------------- |
+| Conformance   | `tests/conformance.test.ts`   | Golden-file snapshots for all common message types and edge cases                 |
+| Diagnostics   | `tests/diagnostics.test.ts`   | Exact diagnostic output for known violations (truth-table style)                  |
+| Fuzz          | `tests/fuzz.test.ts`          | Parser never throws on arbitrary input (property-based)                           |
+| Round-trip    | `tests/round-trip.test.ts`    | `parse(S) → serialize = S` for valid messages                                     |
+| Performance   | `tests/performance.test.ts`   | Hard time thresholds at hospital-scale message volumes                            |
+| Grouped trees | `tests/grouped-trees.test.ts` | Lint, annotation, and serialization read a grouped tree as they read the flat one |
 
 ## Running
 
@@ -42,3 +43,4 @@ Drop a `.hl7` file into `qa/fixtures/` — the conformance test auto-discovers i
 - `arbHL7v2MessageCustomDelimiters` — valid messages with randomized delimiter sets
 - `arbMutatedMessage` — valid messages with random corruption
 - `arbAdversarialInput` — Unicode, null bytes, delimiter-only strings, long payloads
+- `arbEventSchemaMessage(schema, version)` — messages whose segments fit an event schema
