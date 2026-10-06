@@ -249,6 +249,62 @@ describe("runner: grouping", () => {
     ]);
   });
 
+  describe("a second order in an ORU_R01, which may start a new order or a new patient result", () => {
+    // PATIENT is optional in each PATIENT_RESULT, so both readings fit. A new
+    // PATIENT_RESULT starts only with a PID, as HAPI groups it.
+
+    it("puts a second order that starts with ORC in the same patient result", () => {
+      expect(match(ORU_R01_V2_5, "MSH PID OBR OBX ORC OBR OBX")).toEqual([
+        0,
+        g(
+          "PATIENT_RESULT",
+          g("PATIENT", 1),
+          g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3)),
+          g("ORDER_OBSERVATION", 4, 5, g("OBSERVATION", 6))
+        ),
+      ]);
+    });
+
+    it("puts a second order that starts with OBR in the same patient result", () => {
+      expect(match(ORU_R01_V2_5, "MSH PID OBR OBX OBR OBX")).toEqual([
+        0,
+        g(
+          "PATIENT_RESULT",
+          g("PATIENT", 1),
+          g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3)),
+          g("ORDER_OBSERVATION", 4, g("OBSERVATION", 5))
+        ),
+      ]);
+    });
+
+    it("keeps orders without any PID in one patient result", () => {
+      expect(match(ORU_R01_V2_5, "MSH OBR OBX OBR OBX")).toEqual([
+        0,
+        g(
+          "PATIENT_RESULT",
+          g("ORDER_OBSERVATION", 1, g("OBSERVATION", 2)),
+          g("ORDER_OBSERVATION", 3, g("OBSERVATION", 4))
+        ),
+      ]);
+    });
+
+    it("starts a new patient result with a PID", () => {
+      expect(match(ORU_R01_V2_5, "MSH PID OBR OBX PID OBR OBX")).toEqual([
+        0,
+        g(
+          "PATIENT_RESULT",
+          g("PATIENT", 1),
+          g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3))
+        ),
+        g(
+          "PATIENT_RESULT",
+          g("PATIENT", 4),
+          g("ORDER_OBSERVATION", 5, g("OBSERVATION", 6))
+        ),
+      ]);
+    });
+  });
+
   it("accepts any one alternative of a choice without adding a group", () => {
     expect(match(ORM_O01_V2_5, "MSH PID ORC RXO")).toEqual([
       0,
