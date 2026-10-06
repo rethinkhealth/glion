@@ -1,7 +1,7 @@
 import type { Definition } from "../automata/types";
+import type { ProfileStore } from "../profiles";
 import { eventMaps } from "../profiles/event-map-manifest";
 import { profileImports } from "../profiles/profile-manifest";
-import type { ProfileStore } from "../types";
 
 /** The loader of event profiles. Resolves a trigger event to its structure. */
 export const events: ProfileStore<Definition> = {

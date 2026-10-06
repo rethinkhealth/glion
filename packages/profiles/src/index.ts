@@ -23,21 +23,30 @@ export { loadSegments } from "./stores/segments";
 // Domain types
 export type {
   CodeSystemDefinition,
+  CodeSystemStore,
+  UtgCodeEntry,
+  UtgCodeSystemModule,
+} from "./stores/code-systems";
+export type {
   ComponentProfile,
   DatatypeDefinition,
   DatatypeModule,
+} from "./stores/datatypes";
+export type {
   FieldDefinition,
   FieldModule,
   FieldProfile,
+} from "./stores/fields";
+export type {
   SegmentDefinition,
   SegmentModule,
   SegmentProfile,
+} from "./stores/segments";
+export type {
   TableCodeEntry,
   TableDefinition,
   TableModule,
-  UtgCodeEntry,
-  UtgCodeSystemModule,
-} from "./stores/types";
+} from "./stores/tables";
 
 // Event maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
 export { eventMaps } from "./profiles/event-map-manifest";
@@ -46,4 +55,4 @@ export { eventMaps } from "./profiles/event-map-manifest";
 export { resolveMessageStructure } from "./resolve-message-structure";
 
 // Profiles API types
-export type { CodeSystemStore, ProfileStore, Profiles } from "./types";
+export type { ProfileStore, Profiles } from "./profiles";

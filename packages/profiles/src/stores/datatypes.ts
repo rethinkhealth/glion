@@ -1,11 +1,39 @@
 import { memoize } from "../memoize";
+import type { ProfileStore } from "../profiles";
 import { datatypeImports } from "../profiles/datatype-manifest";
-import type { ProfileStore } from "../types";
-import type {
-  ComponentProfile,
-  DatatypeDefinition,
-  DatatypeModule,
-} from "./types";
+
+/** Raw shape exported by generated datatype modules. */
+export type DatatypeModule = Readonly<{
+  id: string;
+  version: string;
+  kind: string;
+  title?: string;
+  components: readonly ComponentProfile[];
+}>;
+
+/** Component validation constraints within a composite datatype. */
+export type ComponentProfile = Readonly<{
+  sequence: number;
+  name: string;
+  datatypeId: string;
+  required: boolean;
+  maxLength?: number;
+}>;
+
+/**
+ * Compiled datatype definition.
+ * Returned by `profiles.datatypes.load()`.
+ */
+export type DatatypeDefinition = Readonly<{
+  id: string;
+  version: string;
+  kind: string;
+  title?: string;
+  /** O(1) lookup of component profile by sequence number. */
+  componentsBySequence: ReadonlyMap<number, ComponentProfile>;
+  /** O(1) check for required component sequences. */
+  requiredSequences: ReadonlySet<number>;
+}>;
 
 const index = memoize((raw: DatatypeModule): DatatypeDefinition => {
   const componentsBySequence = new Map<number, ComponentProfile>();

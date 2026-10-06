@@ -1,7 +1,37 @@
 import { memoize } from "../memoize";
+import type { ProfileStore } from "../profiles";
 import { fieldImports } from "../profiles/field-manifest";
-import type { ProfileStore } from "../types";
-import type { FieldDefinition, FieldModule } from "./types";
+
+/** Raw shape exported by generated field modules. */
+export type FieldModule = Readonly<{
+  segmentId: string;
+  fields: readonly FieldProfile[];
+}>;
+
+/** Field validation constraints for a single field within a segment. */
+export type FieldProfile = Readonly<{
+  sequence: number;
+  id: string;
+  required: boolean;
+  repeatable: boolean;
+  datatype: string;
+  maxLength?: number;
+  table?: string;
+  name?: string;
+  item?: string;
+}>;
+
+/**
+ * Compiled field definition for a segment.
+ * Returned by `profiles.fields.load()`.
+ */
+export type FieldDefinition = Readonly<{
+  segmentId: string;
+  /** O(1) lookup of field profile by sequence number. */
+  bySequence: ReadonlyMap<number, FieldProfile>;
+  /** O(1) check for required field sequences. */
+  requiredSequences: ReadonlySet<number>;
+}>;
 
 const index = memoize((raw: FieldModule): FieldDefinition => {
   const bySequence = new Map<number, (typeof raw.fields)[number]>();
