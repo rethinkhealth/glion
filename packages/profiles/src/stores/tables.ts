@@ -1,7 +1,6 @@
 import { memoize } from "../memoize";
 import type { ProfileStore } from "../profiles";
-import type { ProfileIndex } from "./import-from-index";
-import { importFromIndex } from "./import-from-index";
+import { lazyImport } from "./utils";
 
 /** Raw shape exported by generated table modules. */
 export type TableModule = Readonly<{
@@ -44,18 +43,11 @@ const index = memoize((raw: TableModule): TableDefinition => {
   };
 });
 
-const tableIndexes = import.meta.glob<ProfileIndex<TableModule>>(
-  "../profiles/v*/tables/index.ts",
-  { import: "default" }
-);
-
 /** The loader of table profiles. */
 export const tables: ProfileStore<TableDefinition> = {
   load: async (version, tableId) => {
-    const raw = await importFromIndex(
-      tableIndexes,
-      `../profiles/v${version}/tables`,
-      tableId
+    const raw = await lazyImport<TableModule>(
+      `../profiles/v${version}/tables/${tableId}.json`
     );
     if (!raw) {
       throw new Error(`Unknown tables profile: v${version}/${tableId}`);

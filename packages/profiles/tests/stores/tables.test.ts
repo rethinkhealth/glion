@@ -37,4 +37,10 @@ describe("tables", () => {
       "Unknown tables profile: v2.5/ZZZZ"
     );
   });
+
+  it("rejects a version that is not bundled", async () => {
+    await expect(tables.load("9.9", "0001")).rejects.toThrow(
+      "Unknown tables profile: v9.9/0001"
+    );
+  });
 });

@@ -1,6 +1,5 @@
 import { memoize } from "../memoize";
-import type { ProfileIndex } from "./import-from-index";
-import { importFromIndex } from "./import-from-index";
+import { lazyImport } from "./utils";
 
 /** Raw shape exported by generated UTG code system modules. */
 export type UtgCodeSystemModule = Readonly<{
@@ -65,15 +64,12 @@ const index = memoize((raw: UtgCodeSystemModule): CodeSystemDefinition => {
   return result;
 });
 
-const codeSystemIndexes = import.meta.glob<ProfileIndex<UtgCodeSystemModule>>(
-  "../profiles/utg/index.ts",
-  { import: "default" }
-);
-
 /** The loader of UTG code systems. */
 export const codeSystems: CodeSystemStore = {
   load: async (id) => {
-    const raw = await importFromIndex(codeSystemIndexes, "../profiles/utg", id);
+    const raw = await lazyImport<UtgCodeSystemModule>(
+      `../profiles/utg/${id}.json`
+    );
     if (!raw) {
       throw new Error(`Unknown codeSystems profile: ${id}`);
     }

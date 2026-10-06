@@ -1,7 +1,6 @@
 import { memoize } from "../memoize";
 import type { ProfileStore } from "../profiles";
-import type { ProfileIndex } from "./import-from-index";
-import { importFromIndex } from "./import-from-index";
+import { lazyImport } from "./utils";
 
 /** Raw shape exported by generated datatype modules. */
 export type DatatypeModule = Readonly<{
@@ -57,18 +56,11 @@ const index = memoize((raw: DatatypeModule): DatatypeDefinition => {
   };
 });
 
-const datatypeIndexes = import.meta.glob<ProfileIndex<DatatypeModule>>(
-  "../profiles/v*/datatypes/index.ts",
-  { import: "default" }
-);
-
 /** The loader of datatype profiles. */
 export const datatypes: ProfileStore<DatatypeDefinition> = {
   load: async (version, datatypeId) => {
-    const raw = await importFromIndex(
-      datatypeIndexes,
-      `../profiles/v${version}/datatypes`,
-      datatypeId
+    const raw = await lazyImport<DatatypeModule>(
+      `../profiles/v${version}/datatypes/${datatypeId}.json`
     );
     if (!raw) {
       throw new Error(`Unknown datatypes profile: v${version}/${datatypeId}`);

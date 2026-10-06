@@ -51,4 +51,10 @@ describe("datatypes", () => {
       "Unknown datatypes profile: v2.5/ZZZZZ"
     );
   });
+
+  it("rejects a version that is not bundled", async () => {
+    await expect(datatypes.load("9.9", "CWE")).rejects.toThrow(
+      "Unknown datatypes profile: v9.9/CWE"
+    );
+  });
 });
