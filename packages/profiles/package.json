@@ -30,10 +30,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./event-maps": {
-      "types": "./dist/event-maps.d.ts",
-      "default": "./dist/event-maps.js"
     }
   },
   "publishConfig": {

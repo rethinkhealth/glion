@@ -1,4 +1,5 @@
-import { memoize } from "../memoize";
+import { memoize } from "../utils";
+import { lazyImport } from "./utils";
 
 /** The raw segments of a version, as `segments.json` holds them. */
 export type SegmentModule = Readonly<{
@@ -20,11 +21,6 @@ export type SegmentDefinition = Readonly<{
   byId: ReadonlyMap<string, SegmentProfile>;
 }>;
 
-const segmentFiles = import.meta.glob<SegmentModule>(
-  "../profiles/v*/segments.json",
-  { import: "default" }
-);
-
 const index = memoize((raw: SegmentModule): SegmentDefinition => {
   const byId = new Map<string, SegmentProfile>();
 
@@ -45,9 +41,11 @@ const index = memoize((raw: SegmentModule): SegmentDefinition => {
 export const loadSegments = async (
   version: string
 ): Promise<SegmentDefinition> => {
-  const importSegments = segmentFiles[`../profiles/v${version}/segments.json`];
-  if (!importSegments) {
+  const raw = await lazyImport<SegmentModule>(
+    `../profiles/v${version}/segments.json`
+  );
+  if (!raw) {
     throw new Error(`Unknown segments profile: v${version}`);
   }
-  return index(await importSegments());
+  return index(raw);
 };

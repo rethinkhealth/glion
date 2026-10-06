@@ -48,11 +48,8 @@ export type {
   TableModule,
 } from "./stores/tables";
 
-// Event maps (version → messageCode_triggerEvent (e.g. "ADT_A04") → canonical structure ID)
-export { eventMaps } from "./event-maps";
-
-// Resolution utility
-export { resolveMessageStructure } from "./resolve-message-structure";
+// Event maps (version → messageCode_triggerEvent, such as "ADT_A04" → "ADT_A01")
+export type { EventMap, EventMapStore } from "./stores/event-maps";
 
 // Profiles API types
 export type { ProfileStore, Profiles } from "./profiles";

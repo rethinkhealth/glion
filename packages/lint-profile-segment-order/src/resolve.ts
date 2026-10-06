@@ -1,6 +1,6 @@
 import type { Root } from "@glion/ast";
 import type { Definition } from "@glion/profiles";
-import { profiles, resolveMessageStructure } from "@glion/profiles";
+import { profiles } from "@glion/profiles";
 import { value } from "@glion/util-query";
 
 /**
@@ -25,8 +25,8 @@ export type ResolveResult =
  *
  * 1. Reads `MSH-9.3` (message structure) directly from the AST.
  * 2. If MSH-9.3 is absent, falls back to resolving the canonical structure ID from
- *    `MSH-9.1` (message code) + `MSH-9.2` (trigger event) via
- *    `resolveMessageStructure()`.
+ *    `MSH-9.1` (message code) + `MSH-9.2` (trigger event) via the version's
+ *    event map (`profiles.eventMaps.load()`).
  * 3. Loads the profile via `profiles.events.load(version, structure)`.
  *
  * @param tree - The HL7v2 AST root node
@@ -51,11 +51,12 @@ export async function resolveDefinition(tree: Root): Promise<ResolveResult> {
     const triggerEvent = value(tree, "MSH-9.2")?.value || undefined;
 
     if (messageCode && triggerEvent) {
-      messageStructure = resolveMessageStructure(
-        version,
-        messageCode,
-        triggerEvent
-      );
+      try {
+        const eventMap = await profiles.eventMaps.load(version);
+        messageStructure = eventMap[`${messageCode}_${triggerEvent}`];
+      } catch {
+        // An unbundled version has no event map, so MSH-9 names no structure.
+      }
     }
   }
 

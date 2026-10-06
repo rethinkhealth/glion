@@ -1,5 +1,5 @@
-import { memoize } from "../memoize";
 import type { ProfileStore } from "../profiles";
+import { memoize } from "../utils";
 import { lazyImport } from "./utils";
 
 /** Raw shape exported by generated field modules. */

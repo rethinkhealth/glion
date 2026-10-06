@@ -6,12 +6,6 @@
     "limit": "12 kB"
   },
   {
-    "name": "@glion/profiles/event-maps: import { eventMaps }",
-    "path": "packages/profiles/dist/event-maps.js",
-    "import": "{ eventMaps }",
-    "limit": "3 kB"
-  },
-  {
     "name": "@glion/profiles: largest events chunk",
     "path": "packages/profiles/dist/events-v2.8.2.js",
     "webpack": false,

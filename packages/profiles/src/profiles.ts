@@ -3,6 +3,8 @@ import { codeSystems } from "./stores/code-systems";
 import type { CodeSystemStore } from "./stores/code-systems";
 import { datatypes } from "./stores/datatypes";
 import type { DatatypeDefinition } from "./stores/datatypes";
+import { eventMaps } from "./stores/event-maps";
+import type { EventMapStore } from "./stores/event-maps";
 import { events } from "./stores/events";
 import { fields } from "./stores/fields";
 import type { FieldDefinition } from "./stores/fields";
@@ -24,6 +26,8 @@ export type ProfileStore<T> = Readonly<{
 export type Profiles = Readonly<{
   /** DFA definitions for message structure validation. */
   events: ProfileStore<Definition>;
+  /** Event maps: the message structure each event uses, by version. */
+  eventMaps: EventMapStore;
   /** Segment field metadata (required, repeatable, maxLength, datatype). */
   fields: ProfileStore<FieldDefinition>;
   /** Component structure and constraints for datatypes. */
@@ -35,12 +39,13 @@ export type Profiles = Readonly<{
 }>;
 
 /**
- * The profile stores: event profiles, fields, datatypes, and tables by
- * version, and UTG code systems.
+ * The profile stores: event profiles, event maps, fields, datatypes, and
+ * tables by version, and UTG code systems.
  *
  * @example
  *   ```ts
  *   const def = await profiles.events.load("2.5", "ADT_A01");
+ *   const eventMap = await profiles.eventMaps.load("2.5");
  *   const fields = await profiles.fields.load("2.5", "PID");
  *   const table = await profiles.tables.load("2.5", "0001");
  *   const codeSystem = await profiles.codeSystems.load("v2-0001");
@@ -49,6 +54,7 @@ export type Profiles = Readonly<{
 export const profiles: Profiles = {
   codeSystems,
   datatypes,
+  eventMaps,
   events,
   fields,
   tables,

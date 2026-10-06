@@ -1,4 +1,4 @@
-import { memoize } from "../memoize";
+import { memoize } from "../utils";
 import { lazyImport } from "./utils";
 
 /** Raw shape exported by generated UTG code system modules. */

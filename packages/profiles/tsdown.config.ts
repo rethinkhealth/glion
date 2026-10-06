@@ -31,7 +31,6 @@ const eventChunk = (id: string): string | null => {
 export default defineConfig({
   dts: false,
   entry: {
-    "event-maps": "src/event-maps.ts",
     index: "src/index.ts",
   },
   fixedExtension: false,

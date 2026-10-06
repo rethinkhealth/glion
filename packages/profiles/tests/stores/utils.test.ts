@@ -13,6 +13,18 @@ describe("lazyImport", () => {
     ).toMatchObject({ id: "v2-0001" });
   });
 
+  it("imports a file of a version itself", async () => {
+    const segments = await lazyImport<{ segments: { id: string }[] }>(
+      "../profiles/v2.5/segments.json"
+    );
+
+    expect(segments?.segments.some(({ id }) => id === "PID")).toBe(true);
+  });
+
+  it("resolves undefined for a file a version does not bundle", async () => {
+    expect(await lazyImport("../profiles/v9.9/segments.json")).toBeUndefined();
+  });
+
   it("resolves the same value for repeated imports", async () => {
     const first = await lazyImport("../profiles/v2.5/tables/0001.json");
     const second = await lazyImport("../profiles/v2.5/tables/0001.json");
