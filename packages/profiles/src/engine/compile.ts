@@ -28,6 +28,7 @@
 // no run reaches them.
 
 import { invariant } from "../invariant";
+import { memoize } from "../utils";
 import type { EventSchema, EventSchemaElement } from "./types";
 
 /** An event schema compiled to instructions, indexed by program counter. */
@@ -58,6 +59,9 @@ export const ANY_SEGMENT = "Hxx";
 
 /** The segment ID that matches any Z-segment in a schema. */
 export const ANY_Z_SEGMENT = "anyZSegment";
+
+/** The prefix HL7v2 reserves for locally defined segment IDs. */
+export const Z_SEGMENT_PREFIX = "Z";
 
 /** A compiled element: enter at `start`, leave from the split `end`. */
 type Fragment = readonly [start: number, end: number];
@@ -251,6 +255,14 @@ export function compile(schema: EventSchema): EventSchemaProgram {
   }
   return { code, segmentIds, start: landing(code, start) };
 }
+
+/**
+ * The program `compile()` builds for `schema`, compiled on its first call and
+ * kept for the object. `schema` MUST NOT change after its first call.
+ *
+ * @throws {Error} As `compile()`.
+ */
+export const compileOnce = memoize(compile);
 
 // The program counter a chain of single-target splits from `pc` lands on.
 function landing(code: readonly Draft[], pc: number): number {

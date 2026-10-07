@@ -2,13 +2,19 @@ import type { Random } from "../../scripts/check-bundle.mjs";
 import {
   nearMiss,
   referenceMatch,
+  repaired,
   seeded,
   validMessage,
 } from "../../scripts/check-bundle.mjs";
+import { repair } from "../../src/engine/repair";
 import { runner } from "../../src/engine/runner";
 import type { EventSchema, EventSchemaElement } from "../../src/engine/types";
 
 const STRUCTURES = 3000;
+const REPAIR_STRUCTURES = 1000;
+const REPAIR_MESSAGES_PER_STRUCTURE = 6;
+// Up to this many random insertions or deletions make a message to repair.
+const MAX_EDITS_MADE = 3;
 // Each message runs twice, with Z-segments allowed and not.
 const Z_STRUCTURES = STRUCTURES / 2;
 const MESSAGES_PER_STRUCTURE = 12;
@@ -190,6 +196,145 @@ describe("runner on random schemas", { timeout: SWEEP_TIMEOUT_MS }, () => {
 
     expect(matchedWithZ).toBeGreaterThan(compared);
     expect(compared).toBeGreaterThan(Z_STRUCTURES / 3);
+    expect(disagreements).toEqual([]);
+  });
+});
+
+// Whether one deletion, or one insertion of a segment in `names`, makes
+// `input` fit `schema`.
+const oneEditFits = (
+  schema: EventSchema,
+  input: readonly string[],
+  names: readonly string[]
+): boolean =>
+  input.some((_, at) => referenceMatch(schema, input.toSpliced(at, 1))) ||
+  input.some((_, at) =>
+    names.some((name) => referenceMatch(schema, input.toSpliced(at, 0, name)))
+  ) ||
+  names.some((name) => referenceMatch(schema, [...input, name]));
+
+describe("repair on random schemas", { timeout: SWEEP_TIMEOUT_MS }, () => {
+  it("finds no edit exactly when the reference parser accepts, and then groups as it does", () => {
+    const random = seeded(20_261_007);
+    const disagreements: string[] = [];
+    let repairedCount = 0;
+
+    for (let s = 0; s < REPAIR_STRUCTURES; s += 1) {
+      const schema: EventSchema = {
+        elements: [
+          { name: "MSH", optional: false, repeating: false, type: "segment" },
+          ...elements(0, random),
+        ],
+        id: `P${s}`,
+      };
+      if (hasEmptyAlternative(schema.elements)) {
+        continue;
+      }
+      for (let n = 0; n < REPAIR_MESSAGES_PER_STRUCTURE; n += 1) {
+        let input = validMessage(schema, random).slice(0, 14);
+        for (let made = n % (MAX_EDITS_MADE + 1); made > 0; made -= 1) {
+          input = nearMiss(input, NAMES, random);
+        }
+        const { edits, groups } = repair(schema, input);
+        const reference = referenceMatch(schema, input);
+        const want = edits.length === 0 ? JSON.stringify(groups) : undefined;
+        if (want !== JSON.stringify(reference) && disagreements.length < 5) {
+          disagreements.push(
+            `${JSON.stringify(schema.elements)} on ${input.join(" ")}: ${edits.length} edits, groups ${want} ref ${JSON.stringify(reference)}`
+          );
+        }
+        repairedCount += edits.length > 0 ? 1 : 0;
+      }
+    }
+
+    expect(repairedCount).toBeGreaterThan(REPAIR_STRUCTURES);
+    expect(disagreements).toEqual([]);
+  });
+
+  it("makes every message fit with no more edits than made it, and with two edits, where no one edit would do", () => {
+    const random = seeded(20_261_008);
+    const failures: string[] = [];
+    let twoEdits = 0;
+
+    for (let s = 0; s < REPAIR_STRUCTURES; s += 1) {
+      const schema: EventSchema = {
+        elements: [
+          { name: "MSH", optional: false, repeating: false, type: "segment" },
+          ...elements(0, random),
+        ],
+        id: `Q${s}`,
+      };
+      if (hasEmptyAlternative(schema.elements)) {
+        continue;
+      }
+      for (let n = 0; n < REPAIR_MESSAGES_PER_STRUCTURE; n += 1) {
+        // Not truncated: a cut would be an edit of its own.
+        let input = validMessage(schema, random);
+        const made = n % (MAX_EDITS_MADE + 1);
+        for (let k = made; k > 0; k -= 1) {
+          input = nearMiss(input, NAMES, random);
+        }
+        const { edits } = repair(schema, input);
+        const label = `${JSON.stringify(schema.elements)} on ${input.join(" ")}`;
+        if (referenceMatch(schema, repaired(input, edits)) === undefined) {
+          failures.push(`${label}: the repaired message does not fit`);
+        }
+        if (edits.length > made) {
+          failures.push(`${label}: ${edits.length} edits for ${made} made`);
+        }
+        if (edits.length === 2) {
+          twoEdits += 1;
+          if (oneEditFits(schema, input, ["MSH", ...NAMES])) {
+            failures.push(`${label}: two edits where one fits`);
+          }
+        }
+      }
+    }
+
+    expect(twoEdits).toBeGreaterThan(REPAIR_STRUCTURES / 10);
+    expect(failures.slice(0, 5)).toEqual([]);
+  });
+
+  it("agrees with the reference parser on Z-segments the schema does not name, allowed or not", () => {
+    const random = seeded(20_261_009);
+    const disagreements: string[] = [];
+
+    for (let s = 0; s < REPAIR_STRUCTURES; s += 1) {
+      const schema: EventSchema = {
+        elements: [
+          { name: "MSH", optional: false, repeating: false, type: "segment" },
+          ...elements(0, random, [...NAMES, NAMED_Z_SEGMENT]),
+        ],
+        id: `ZP${s}`,
+      };
+      if (hasEmptyAlternative(schema.elements)) {
+        continue;
+      }
+      for (let n = 0; n < REPAIR_MESSAGES_PER_STRUCTURE; n += 1) {
+        const input = nearMiss(
+          validMessage(schema, random).slice(0, 14),
+          [...NAMES, UNNAMED_Z_SEGMENT],
+          random
+        );
+        for (const allowZSegments of [true, false]) {
+          const options = { allowZSegments };
+          const { edits } = repair(schema, input, options);
+          const fits = referenceMatch(schema, input, options) !== undefined;
+          const fixed =
+            referenceMatch(schema, repaired(input, edits), options) !==
+            undefined;
+          if (
+            ((edits.length === 0) !== fits || !fixed) &&
+            disagreements.length < 5
+          ) {
+            disagreements.push(
+              `${JSON.stringify(schema.elements)} on ${input.join(" ")} (allowZSegments ${allowZSegments}): ${JSON.stringify(edits)}`
+            );
+          }
+        }
+      }
+    }
+
     expect(disagreements).toEqual([]);
   });
 });

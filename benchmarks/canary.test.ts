@@ -12,7 +12,7 @@ import { MllpClient } from "@glion/mllp-client";
 import { frame, unframe } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetLintProfileRecommended from "@glion/preset-lint-profile-recommended";
-import { profiles, runner } from "@glion/profiles";
+import { profiles, repair, runner } from "@glion/profiles";
 import { hl7v2TransformProfileGroups } from "@glion/transform-profile-groups";
 import { unified } from "unified";
 import { VFile } from "vfile";
@@ -48,6 +48,23 @@ describe("canary — suites measure real work", () => {
       const result = runner(schema, segmentIds);
       expect(result.type).toBe("matched");
       expect(JSON.stringify(result)).toContain('"id":"ORDER_OBSERVATION"');
+    }
+  });
+
+  it("profiles-repair: ORU_R01 fixtures without their first OBR repair with one missing OBR", async () => {
+    const schema = await profiles.events.load("2.5.1", "ORU_R01");
+    if (!schema) {
+      throw new Error("ORU_R01 is not bundled in 2.5.1");
+    }
+    for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
+      const segmentIds = parseHL7v2(message).children.map((node) =>
+        node.type === "segment" ? node.name : ""
+      );
+      const input = segmentIds.toSpliced(segmentIds.indexOf("OBR"), 1);
+      const { edits } = repair(schema, input);
+      expect(edits).toEqual([
+        expect.objectContaining({ segment: "OBR", type: "missing" }),
+      ]);
     }
   });
 

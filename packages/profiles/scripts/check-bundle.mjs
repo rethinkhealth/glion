@@ -10,6 +10,9 @@
  * 3. Every schema loads, compiles, and accepts messages generated from it.
  * 4. `runner` groups those messages exactly as `referenceMatch` does, and the two
  *    agree on near misses.
+ * 5. `repair` finds no edit in a near miss exactly when `referenceMatch` accepts
+ *    it, at most the one edit that made it, and a repair `referenceMatch`
+ *    accepts once applied.
  *
  * `referenceMatch` is a second implementation of the grouping semantics, a
  * backtracking parser over the schema data that shares no code with the
@@ -25,6 +28,8 @@
  * @typedef {import("../src/engine/types").EventSchemaElement} EventSchemaElement
  *
  * @typedef {import("../src/engine/types").SegmentMatch} SegmentMatch
+ *
+ * @typedef {import("../src/engine/types").RepairEdit} RepairEdit
  *
  * @typedef {() => number} Random
  */
@@ -156,6 +161,33 @@ export function nearMiss(message, names, random) {
     out.splice(Math.min(at, out.length - 1), 1);
   } else {
     out.splice(at, 0, names[Math.floor(random() * names.length)] ?? "ZZ1");
+  }
+  return out;
+}
+
+/**
+ * `input` with `edits` applied: each missing segment inserted where it goes,
+ * each unexpected segment removed. A missing `Hxx` or `anyZSegment` is
+ * inserted as a stand-in segment ID.
+ *
+ * @param {readonly string[]} input - The message's segment names.
+ * @param {readonly RepairEdit[]} edits - A repair's edits, in input order.
+ * @returns {string[]} The repaired message.
+ */
+export function repaired(input, edits) {
+  /** @type {string[]} */
+  const out = [];
+  let next = 0;
+  for (let index = 0; index <= input.length; index += 1) {
+    while (edits[next]?.index === index && edits[next]?.type === "missing") {
+      out.push(generatedId(edits[next]?.segment ?? ""));
+      next += 1;
+    }
+    if (edits[next]?.index === index) {
+      next += 1;
+    } else if (index < input.length) {
+      out.push(input[index] ?? "");
+    }
   }
   return out;
 }
@@ -431,10 +463,10 @@ const bundledEventSchemas = () =>
     });
 
 /** The problems found in the bundle; empty when there are none. */
-// oxlint-disable-next-line complexity/complexity -- four independent checks over the same file list, each a loop with its own failure branches
+// oxlint-disable-next-line complexity/complexity -- five independent checks over the same file list, each a loop with its own failure branches
 async function problemsInBundle() {
   const { Ajv } = await import("ajv");
-  const { profiles, runner } = await import("../dist/index.js");
+  const { profiles, repair, runner } = await import("../dist/index.js");
 
   const bundled = bundledEventSchemas();
   /** @type {string[]} */
@@ -480,7 +512,7 @@ async function problemsInBundle() {
     }
   }
 
-  // 3 and 4. The engine runs every schema as the reference does.
+  // 3, 4, and 5. The engine runs every schema as the reference does.
   for (const { id, version } of bundled) {
     const schema = await profiles.events.load(version, id);
     const random = seeded(version.length * 31 + id.length);
@@ -508,11 +540,19 @@ async function problemsInBundle() {
         ) {
           problems.push(`${label} groups ${valid.join(" ")} differently`);
         }
-        if (
-          (runner(schema, miss, options).type === "matched") !==
-          (referenceMatch(schema, miss, options) !== undefined)
-        ) {
+        const accepted = referenceMatch(schema, miss, options) !== undefined;
+        if ((runner(schema, miss, options).type === "matched") !== accepted) {
           problems.push(`${label} disagrees on ${miss.join(" ")}`);
+        }
+        const { edits } = repair(schema, miss, options);
+        if ((edits.length === 0) !== accepted || edits.length > 1) {
+          problems.push(
+            `${label} repairs ${miss.join(" ")} with ${edits.length} edits`
+          );
+        } else if (
+          referenceMatch(schema, repaired(miss, edits), options) === undefined
+        ) {
+          problems.push(`${label} repairs ${miss.join(" ")} to a misfit`);
         }
       }
     }
