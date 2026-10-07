@@ -26,6 +26,51 @@ const MSH_PID_PV1: EventSchema = {
   id: "TEST",
 };
 
+/**
+ * MSH PATIENT { ORDER } [DSC], where PATIENT is `PID [PD1]`, ORDER is
+ * `[ORC] OBR [{ RESULT }]`, and RESULT is `OBX [{ NTE }]`.
+ */
+const LAB: EventSchema = {
+  elements: [
+    { name: "MSH", optional: false, repeating: false, type: "segment" },
+    {
+      elements: [
+        { name: "PID", optional: false, repeating: false, type: "segment" },
+        { name: "PD1", optional: true, repeating: false, type: "segment" },
+      ],
+      id: "PATIENT",
+      name: "Patient",
+      optional: false,
+      repeating: false,
+      type: "group",
+    },
+    {
+      elements: [
+        { name: "ORC", optional: true, repeating: false, type: "segment" },
+        { name: "OBR", optional: false, repeating: false, type: "segment" },
+        {
+          elements: [
+            { name: "OBX", optional: false, repeating: false, type: "segment" },
+            { name: "NTE", optional: true, repeating: true, type: "segment" },
+          ],
+          id: "RESULT",
+          name: "Result",
+          optional: true,
+          repeating: true,
+          type: "group",
+        },
+      ],
+      id: "ORDER",
+      name: "Order",
+      optional: false,
+      repeating: true,
+      type: "group",
+    },
+    { name: "DSC", optional: true, repeating: false, type: "segment" },
+  ],
+  id: "LAB",
+};
+
 describe("hl7v2LintSegmentOrder", () => {
   describe("valid messages", () => {
     it("accepts correct segment order", async () => {
@@ -115,12 +160,11 @@ describe("hl7v2LintSegmentOrder", () => {
 
       await unified()
         .use(hl7v2LintSegmentOrder, {
-          definition: () => profiles.events.load("2.5", "ADT_A01"),
+          definition: async () => await Promise.resolve(MSH_PID_PV1),
         })
         .run(tree, file);
 
       expect(file.messages.map((message) => message.reason)).toEqual([
-        "Missing segment 'EVN' (before 'PV1')",
         "Missing segment 'PID' (before 'PV1')",
       ]);
     });
@@ -227,30 +271,32 @@ describe("hl7v2LintSegmentOrder", () => {
   });
 
   describe("reports in groups", () => {
-    const lintOru = async (...segmentIds: string[]) => {
-      const schema = await profiles.events.load("2.5", "ORU_R01");
+    const lintLab = async (...segmentIds: string[]) => {
       const file = new VFile();
       await unified()
-        .use(hl7v2LintSegmentOrder, { definition: schema })
+        .use(hl7v2LintSegmentOrder, { definition: LAB })
         .run(m(...segmentIds.map((id) => s(id))), file);
       return file.messages.map((message) => message.reason);
     };
 
     it("names the groups a missing segment belongs in", async () => {
-      expect(await lintOru("MSH", "PID", "OBX", "OBX")).toEqual([
-        "Missing segment 'OBR' (before 'OBX', in PATIENT_RESULT > ORDER_OBSERVATION)",
+      expect(await lintLab("MSH", "OBR", "OBX")).toEqual([
+        "Missing segment 'PID' (before 'OBR', in PATIENT)",
+      ]);
+      expect(await lintLab("MSH", "PID", "OBX", "OBX")).toEqual([
+        "Missing segment 'OBR' (before 'OBX', in ORDER)",
       ]);
     });
 
     it("names the groups of the segment before an unexpected one", async () => {
-      expect(await lintOru("MSH", "PID", "OBR", "OBX", "PV1", "OBX")).toEqual([
-        "Unexpected segment 'PV1' (after 'OBX', in PATIENT_RESULT > ORDER_OBSERVATION > OBSERVATION)",
+      expect(await lintLab("MSH", "PID", "OBR", "OBX", "PV1", "OBX")).toEqual([
+        "Unexpected segment 'PV1' (after 'OBX', in ORDER > RESULT)",
       ]);
     });
 
     it("reads a segment that starts a new group as that group's, with its first segment missing", async () => {
-      expect(await lintOru("MSH", "PID", "OBR", "OBX", "ORC", "OBX")).toEqual([
-        "Missing segment 'OBR' (before 'OBX', in PATIENT_RESULT > ORDER_OBSERVATION)",
+      expect(await lintLab("MSH", "PID", "OBR", "OBX", "ORC", "OBX")).toEqual([
+        "Missing segment 'OBR' (before 'OBX', in ORDER)",
       ]);
     });
   });
