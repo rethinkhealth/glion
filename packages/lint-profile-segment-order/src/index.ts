@@ -127,10 +127,11 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
         const { ancestors, node } = segments[
           result.index
         ] as (typeof segments)[number];
-        file.message(
-          `Unexpected segment '${node.name}'. Expected: ${result.expected.join(", ")}`,
-          { ancestors, place: node.position }
-        );
+        const reason =
+          result.expected.length > 0
+            ? `Unexpected segment '${node.name}'. Expected: ${result.expected.join(", ")}`
+            : `Unexpected segment '${node.name}'`;
+        file.message(reason, { ancestors, place: node.position });
         break;
       }
       case "incomplete": {
