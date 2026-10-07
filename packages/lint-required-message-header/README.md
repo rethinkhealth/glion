@@ -72,7 +72,7 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 Reported message:
 
 ```
-Message header (MSH) segment is required as the first segment — received 'PID' instead
+The first segment is `PID`; a message must start with the message header segment (`MSH`).
 ```
 
 A segment with an empty Segment ID first, such as an input that starts with the field separator:
@@ -84,16 +84,16 @@ A segment with an empty Segment ID first, such as an input that starts with the 
 Reported message:
 
 ```
-Message header (MSH) segment is required as the first segment — received a segment with an empty Segment ID instead
+The first segment has an empty Segment ID; a message must start with the message header segment (`MSH`).
 ```
 
 An empty input (`""`), which parses to a tree with no segments, is reported as:
 
 ```
-Message header (MSH) segment is required as the first segment — received an empty message instead
+The message has no segments; it must start with the message header segment (`MSH`).
 ```
 
-The Segment ID of the first segment found is interpolated into the message. The rule reports at most one message per tree.
+The rule reports at most one message per tree. Each message sets `expected` to `['MSH']` and, when the message has a first segment, `actual` to its Segment ID.
 
 ## Part of Glion
 

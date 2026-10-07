@@ -81,7 +81,7 @@ describe("QR2: diagnostic precision", () => {
 
       expect(headerDiag).toBeDefined();
       expect(headerDiag!.message).toBe(
-        "Message header (MSH) segment is required as the first segment — received 'PID' instead"
+        "The first segment is `PID`; a message must start with the message header segment (`MSH`)."
       );
       expectOffsetContains(source, headerDiag!, "PID");
     });

@@ -26,8 +26,9 @@ describe("a message with no segments", () => {
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0]).toMatchObject({
       message:
-        "Message header (MSH) segment is required as the first segment — received an empty message instead",
+        "The message has no segments; it must start with the message header segment (`MSH`).",
       ruleId: "segment-required-message-header",
     });
+    expect(file.messages[0]?.expected).toEqual(["MSH"]);
   });
 });

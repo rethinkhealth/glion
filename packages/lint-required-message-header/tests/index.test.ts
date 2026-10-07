@@ -36,9 +36,11 @@ describe("hl7v2-lint:required-message-header", () => {
     await unified().use([hl7v2LintRequiredMessageHeader]).run(tree, file);
 
     expect(file.messages).toHaveLength(1);
-    expect(file.messages[0].message).toContain(
-      "Message header (MSH) segment is required as the first segment — received 'PID' instead"
+    expect(file.messages[0]?.message).toBe(
+      "The first segment is `PID`; a message must start with the message header segment (`MSH`)."
     );
+    expect(file.messages[0]?.actual).toBe("PID");
+    expect(file.messages[0]?.expected).toEqual(["MSH"]);
   });
 
   it("warns when first segment in a group is not MSH", async () => {
@@ -48,9 +50,11 @@ describe("hl7v2-lint:required-message-header", () => {
     await unified().use([hl7v2LintRequiredMessageHeader]).run(tree, file);
 
     expect(file.messages).toHaveLength(1);
-    expect(file.messages[0].message).toContain(
-      "Message header (MSH) segment is required as the first segment — received 'PID' instead"
+    expect(file.messages[0]?.message).toBe(
+      "The first segment is `PID`; a message must start with the message header segment (`MSH`)."
     );
+    expect(file.messages[0]?.actual).toBe("PID");
+    expect(file.messages[0]?.expected).toEqual(["MSH"]);
   });
 
   it("should have no issues when MSH is before groups", async () => {
@@ -91,9 +95,11 @@ describe("hl7v2-lint:required-message-header", () => {
     await unified().use([hl7v2LintRequiredMessageHeader]).run(tree, file);
 
     expect(file.messages).toHaveLength(1);
-    expect(file.messages[0].message).toContain(
-      "Message header (MSH) segment is required as the first segment — received 'PID' instead"
+    expect(file.messages[0]?.message).toBe(
+      "The first segment is `PID`; a message must start with the message header segment (`MSH`)."
     );
+    expect(file.messages[0]?.actual).toBe("PID");
+    expect(file.messages[0]?.expected).toEqual(["MSH"]);
   });
 
   it("names an empty Segment ID in the report", async () => {
@@ -104,7 +110,9 @@ describe("hl7v2-lint:required-message-header", () => {
 
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0]?.message).toBe(
-      "Message header (MSH) segment is required as the first segment — received a segment with an empty Segment ID instead"
+      "The first segment has an empty Segment ID; a message must start with the message header segment (`MSH`)."
     );
+    expect(file.messages[0]?.actual).toBe("");
+    expect(file.messages[0]?.expected).toEqual(["MSH"]);
   });
 });
