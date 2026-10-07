@@ -94,6 +94,7 @@ Composable plugins that annotate, enrich, and transform the AST.
 - **[@glion/annotate-profile-fields-code-systems][glion-annotate-profile-fields-code-systems]** — annotate field-level coded values with UTG code system metadata.
 - **[@glion/decode-escapes][glion-decode-escapes]** — decode HL7v2 escape sequences (`\F\`, `\S\`, `\T\`, `\Xdd\`, `\.br\`) into their literal values.
 - **[@glion/encode-escapes][glion-encode-escapes]** — encode delimiter characters in subcomponent values as HL7v2 escape sequences before serialization.
+- **[@glion/transform-profile-groups][glion-transform-profile-groups]** — nest segments in the segment groups their event schema defines, such as `PATIENT_RESULT` and `ORDER_OBSERVATION`.
 
 #### Linting
 
@@ -216,6 +217,7 @@ This program is licensed to you under the terms of the [MIT License](https://ope
 [glion-preset-lint-recommended]: https://github.com/rethinkhealth/glion/tree/main/packages/preset-lint-recommended#readme
 [glion-profiles]: https://github.com/rethinkhealth/glion/tree/main/packages/profiles#readme
 [glion-to-hl7v2]: https://github.com/rethinkhealth/glion/tree/main/packages/to-hl7v2#readme
+[glion-transform-profile-groups]: https://github.com/rethinkhealth/glion/tree/main/packages/transform-profile-groups#readme
 [glion-util-charset]: https://github.com/rethinkhealth/glion/tree/main/packages/util-charset#readme
 [glion-util-query]: https://github.com/rethinkhealth/glion/tree/main/packages/util-query#readme
 [glion-util-semver]: https://github.com/rethinkhealth/glion/tree/main/packages/util-semver#readme
