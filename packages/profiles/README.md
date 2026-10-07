@@ -251,7 +251,7 @@ type EventSchemaElement =
 
 ### Event schema JSON Schema
 
-`@glion/profiles/event-schema.schema.json` is the JSON Schema (draft-07) of an event schema, with `$id` `https://glion.dev/schemas/event-schema/v1.json`. Every bundled schema names it by that `$id` in `$schema` and conforms to it. The schema checks the shape; `runner` also requires that every choice alternative matches at least one segment.
+`@glion/profiles/event-schema.schema.json` is the JSON Schema (draft-07) of an event schema, with `$id` `https://glion.dev/schemas/event-schema/v2.json`. Every bundled schema names it by that `$id` in `$schema` and conforms to it. The schema checks the shape; `runner` also requires that every choice alternative matches at least one segment.
 
 ```ts
 import schema from "@glion/profiles/event-schema.schema.json" with { type: "json" };
