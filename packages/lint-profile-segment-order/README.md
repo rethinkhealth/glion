@@ -168,6 +168,27 @@ Unexpected segment 'PID'. Expected: EVN, SFT
 
 The offending segment name and the segments valid at that position, sorted, are interpolated.
 
+### Invalid — segment after the end of the message
+
+`DSC` ends an `ORU_R01`, so no segment may follow it:
+
+```hl7
+MSH|^~\&|LAB|FAC|EMR|RFAC|20250601120000||ORU^R01^ORU_R01|MSG00001|P|2.5
+PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
+OBR|1|ORD1||CBC
+OBX|1|NM|WBC||5.0
+DSC|1
+PID|2||PATID5678^^^HOSP^MR||DOE^JOHN||19750101|M
+```
+
+Reported message:
+
+```
+Unexpected segment 'PID'
+```
+
+When no segment is valid at that position, the message lists none.
+
 ### Invalid — message ended prematurely
 
 All segments were consumed but the schema still requires more; an `ADT_A01` needs a `PV1`:

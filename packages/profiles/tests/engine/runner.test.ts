@@ -175,6 +175,12 @@ describe("runner: segment order", () => {
       type: "incomplete",
     });
   });
+
+  it("expects no segment after the end of the message", () => {
+    expect(
+      runner(ORU_R01_V2_5, ["MSH", "PID", "OBR", "OBX", "DSC", "PID"])
+    ).toEqual({ expected: [], index: 5, type: "mismatched" });
+  });
 });
 
 describe("runner: grouping", () => {
