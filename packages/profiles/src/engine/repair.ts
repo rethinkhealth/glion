@@ -63,7 +63,8 @@ interface Search {
   readonly settled: Int32Array;
 }
 
-// A move from one state to another, what it costs, and the event it records.
+// A move from one state to another, what it costs, and the last event it
+// records, linked to the move's earlier events, if any.
 type Move = Readonly<{ pc: number; at: number; cost: number; event?: Event }>;
 
 // A state the forward walk has reached, and the last event on its way there.
@@ -100,8 +101,9 @@ type SettleQueue = Readonly<{
  * groups them. Of repairs with as many edits, it returns one with the fewest
  * unexpected segments; of those, the first in `runner()`'s priority order,
  * where at each segment the schema's reading comes first, then passing over a
- * Z-segment, then a missing segment, then an unexpected one. When `input` fits
- * `schema`, there are no edits and the groups are `runner()`'s.
+ * Z-segment, then the segment as unexpected in place of the schema's segment
+ * there, as missing, then a missing segment, then an unexpected one. When
+ * `input` fits `schema`, there are no edits and the groups are `runner()`'s.
  *
  * An unexpected segment is grouped right after the segment before it, in that
  * segment's group. A missing segment has no index in the groups. A Z-segment
@@ -179,6 +181,7 @@ function moves(search: Search, pc: number, at: number): Move[] {
     case "z": {
       return [
         ...reading(search, pc, at),
+        ...displacing(search, instruction, at),
         {
           at,
           cost: search.stride,
@@ -224,6 +227,32 @@ function reading(search: Search, pc: number, at: number): Move[] {
     });
   }
   return found;
+}
+
+// The move that reads the segment at `at` as unexpected in place of the
+// segment `instruction` stands for, taken as missing, if there is one: an
+// edit-distance substitution, as its two edits.
+function displacing(
+  search: Search,
+  instruction: Extract<Instruction, { op: "segment" | "any" | "z" }>,
+  at: number
+): Move[] {
+  if (at >= search.input.length) {
+    return [];
+  }
+  const missing: Event = {
+    id: missingId(instruction),
+    kind: "missing",
+    previous: undefined,
+  };
+  return [
+    {
+      at: at + 1,
+      cost: 2 * search.stride + 1,
+      event: { kind: "unexpected", previous: missing },
+      pc: instruction.next,
+    },
+  ];
 }
 
 // The move that reads the segment at `at` as unexpected, if there is one.
@@ -507,9 +536,17 @@ function onCheapestPath(search: Search, { at, last, pc }: Visit): Visit[] {
     .filter((move) => move.cost + costOf(search, move.pc, move.at) === cost)
     .map((move) => ({
       at: move.at,
-      last: move.event ? { ...move.event, previous: last } : last,
+      last: move.event ? after(move.event, last) : last,
       pc: move.pc,
     }));
+}
+
+// `event` and the events before it in its move, linked after `last`.
+function after(event: Event, last: Event | undefined): Event {
+  return {
+    ...event,
+    previous: event.previous ? after(event.previous, last) : last,
+  };
 }
 
 // ---------------------------------------------------------------------------

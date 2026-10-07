@@ -156,7 +156,7 @@ repair(schema, ["MSH", "PID", "OBR", "OBX", "PV1", "OBX"]);
 //   groups: [0, { id: "PATIENT_RESULT", … }] }
 ```
 
-Of repairs with as many edits, `repair` returns one with the fewest unexpected segments; of those, the first in the runner's order, where at each segment the schema's reading comes first, then passing over a Z-segment, then a missing segment, then an unexpected one. `MSH PID OBR OBX ORC OBX` reads as an `OBR` missing before the last `OBX`, not as an unexpected `ORC`. A Z-segment the schema does not name costs no edit unless `allowZSegments` is `false`, as for `runner`. Runs in time and memory proportional to the number of segments times the size of the schema, and shares the compiled schema with `runner`.
+Of repairs with as many edits, `repair` returns one with the fewest unexpected segments; of those, the first in the runner's order, where at each segment the schema's reading comes first, then passing over a Z-segment, then the segment as unexpected in place of the schema's segment there, as missing, then a missing segment, then an unexpected one. A segment out of place is reported next to the segment it displaces: in `ADT_A01`, `MSH PIDX PV` reads as `EVN` missing and `PIDX` unexpected, then `PID` missing and `PV` unexpected, then `PV1` missing at the end. `MSH PID OBR OBX ORC OBX` reads as an `OBR` missing before the last `OBX`, not as an unexpected `ORC`. A Z-segment the schema does not name costs no edit unless `allowZSegments` is `false`, as for `runner`. Runs in time and memory proportional to the number of segments times the size of the schema, and shares the compiled schema with `runner`.
 
 ## Glossary
 

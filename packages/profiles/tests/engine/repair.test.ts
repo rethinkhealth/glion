@@ -152,6 +152,16 @@ describe("repair: the repair it chooses", () => {
     ]);
   });
 
+  it("reports a segment out of place next to the schema segment it displaces", () => {
+    expect(repairOf(ADT_A01_V2_5, "MSH PIDX PV").edits).toEqual([
+      { index: 1, path: [], segment: "EVN", type: "missing" },
+      { index: 1, path: [], segment: "PIDX", type: "unexpected" },
+      { index: 2, path: [], segment: "PID", type: "missing" },
+      { index: 2, path: [], segment: "PV", type: "unexpected" },
+      { index: 3, path: [], segment: "PV1", type: "missing" },
+    ]);
+  });
+
   it("prefers fewer edits to fewer unexpected segments", () => {
     // Two missing segments, or one unexpected B.
     const schema = schemaOf(segment("MSH"), segment("A", { optional: true }));
