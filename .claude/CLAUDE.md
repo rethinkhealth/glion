@@ -270,6 +270,15 @@ Beyond what the linter catches, write code that is **type-safe, explicit, and di
 - No `console.log` / `debugger` / `alert` in any code path. (See Design Philosophy §8.)
 - Prefer early returns over nested error-case conditionals.
 
+### Message strings
+
+Lint findings and thrown errors follow ADR 0026. Invoke the `glion-messages` skill before writing or changing one.
+
+- One complete sentence per cause, written out in full. Never assemble a message from a shared prefix, a ternary-chosen clause, or fragments joined with `—`.
+- A lint rule keeps its messages in a `messages` catalog at the top of its module; a thrown error keeps its sentence in its class.
+- Sentence case, present tense, closing period: what was found, then what HL7v2 requires. HL7v2 terms only; values in backticks; an empty value is described in words.
+- Values also go in fields: `actual` and `expected` on a lint finding, typed properties on an error. The `ruleId` or `code` is the contract, not the text.
+
 ### Code organization
 
 - Branch on a discriminated union with one construct: an exhaustive `switch` over the discriminant, every arm listed, no `default`. Never mix an `if` chain, a ternary, and a `switch` on the same discriminant in one function — pick the `switch`.
