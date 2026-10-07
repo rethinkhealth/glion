@@ -17,16 +17,22 @@ import type { Preset } from "unified";
  *
  * ## Rules included
  *
- * - **required-fields** — validates required fields are present and non-empty
- * - **field-max-length** — validates field value lengths against maxLength
- * - **field-repetition** — flags non-repeatable fields with multiple repetitions
- * - **required-components** — validates required components in composite
- *   datatypes
- * - **table-values** — validates coded values against HL7-type tables
- * - **extra-fields** — warns when segments have fields beyond the profile maximum
- * - **extra-components** — warns when composite fields have components beyond the
- *   datatype maximum
- * - **segment-order** — validates segment order against event schema profiles
+ * Errors:
+ *
+ * - **required-fields** — a required field is missing or empty
+ * - **field-repetition** — a non-repeatable field has multiple repetitions
+ * - **required-components** — a required component of a composite datatype is
+ *   missing or empty
+ * - **segment-order** — a segment is out of the event schema's order, or the
+ *   message ends before a required segment
+ *
+ * Warnings:
+ *
+ * - **field-max-length** — a field value is longer than its maxLength
+ * - **table-values** — a coded value is not in its HL7-type table
+ * - **extra-fields** — a segment has fields beyond the profile maximum
+ * - **extra-components** — a composite field has components beyond the datatype
+ *   maximum
  *
  * All rules read the HL7v2 version from MSH-12 and load profiles accordingly.
  * Unknown segments (Z-segments) are silently skipped.
@@ -48,14 +54,14 @@ import type { Preset } from "unified";
 const hl7v2PresetLintProfileRecommended: Preset = {
   plugins: [
     hl7v2AnnotateProfileContext,
-    hl7v2LintRequiredFields,
+    [hl7v2LintRequiredFields, ["error"]],
     hl7v2LintFieldMaxLength,
-    hl7v2LintFieldRepetition,
-    hl7v2LintRequiredComponents,
+    [hl7v2LintFieldRepetition, ["error"]],
+    [hl7v2LintRequiredComponents, ["error"]],
     hl7v2LintTableValues,
     hl7v2LintExtraFields,
     hl7v2LintExtraComponents,
-    hl7v2LintSegmentOrder,
+    [hl7v2LintSegmentOrder, ["error"]],
   ],
 };
 
