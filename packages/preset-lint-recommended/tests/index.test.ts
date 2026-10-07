@@ -82,6 +82,40 @@ describe("hl7v2-preset-lint-recommended", () => {
     expect(file.messages[0].fatal).toBeTruthy();
   });
 
+  it("errors when a Z-segment precedes the message header", async () => {
+    const tree = m(
+      s("ZA1", f("1")),
+      s(
+        "MSH",
+        f("|"),
+        f("^~\\&"),
+        f("SENDER"),
+        f("FAC"),
+        f("RCVR"),
+        f("FAC"),
+        f("20250101010101"),
+        f(""),
+        f(c("ADT"), c("A01"), c("ADT_A01")),
+        f("MSG00001"),
+        f("P"),
+        f("2.5")
+      ),
+      s("EVN", f("A01")),
+      s("PID", f("1"), f("John Doe")),
+      s("PV1", f("1"), f("I"))
+    );
+    const file = new VFile();
+
+    await unified().use(hl7v2PresetLintRecommended).run(tree, file);
+
+    expect(file.messages).toHaveLength(1);
+    expect(file.messages[0].message).toBe(
+      "Message header (MSH) segment is required as the first segment — received 'ZA1' instead"
+    );
+    expect(file.messages[0].ruleId).toBe("segment-required-message-header");
+    expect(file.messages[0].fatal).toBe(true);
+  });
+
   it("errors when message version is missing", async () => {
     const tree = m(
       s(
