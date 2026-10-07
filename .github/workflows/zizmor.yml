@@ -2,7 +2,11 @@ name: zizmor
 
 on:
   push:
-    branches: ["**"]
+    branches:
+      - "**"
+      # changesets/action commits through the GitHub API on this scratch
+      # branch and deletes it seconds later, before the SARIF upload runs.
+      - "!changesets-ghcommit-temp/**"
   pull_request:
     types: [opened, synchronize, reopened]
 
