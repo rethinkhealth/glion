@@ -162,6 +162,12 @@ Every PR and every commit on `main` publishes preview packages to [pkg.pr.new](h
 
 <!-- omit in toc -->
 
+## GitHub Releases
+
+Every publish creates one GitHub release, `v<version>`, for the whole `@glion/*` group, from `.github/workflows/release.yml`. Its notes come from the Changesets changelogs of every public package: an entry shared by several packages appears once with the packages it changed, and dependency-only entries are left out. A prerelease version is marked as a prerelease and never becomes Latest. Run `pnpm release:notes <version>` to print the notes for a version.
+
+<!-- omit in toc -->
+
 ## Attribution
 
 This guide is based on the **contributing-gen**. [Make your own](https://github.com/bttger/contributing-gen)!
