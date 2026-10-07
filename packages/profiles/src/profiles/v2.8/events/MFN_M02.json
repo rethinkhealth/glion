@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "MF_STAFF",
-      "name": "MF_STAFF",
+      "name": "Master File Staff",
       "optional": false,
       "repeating": true,
       "elements": [

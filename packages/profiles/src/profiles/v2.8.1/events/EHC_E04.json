@@ -40,7 +40,7 @@
         {
           "type": "group",
           "id": "PRODUCT_SERVICE_SECTION",
-          "name": "PRODUCT_SERVICE_SECTION",
+          "name": "Product Service Section",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -53,7 +53,7 @@
             {
               "type": "group",
               "id": "PRODUCT_SERVICE_GROUP",
-              "name": "PRODUCT_SERVICE_GROUP",
+              "name": "Product Service Group",
               "optional": true,
               "repeating": true,
               "elements": [

@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "PROVIDER",
-      "name": "PROVIDER",
+      "name": "Provider",
       "optional": false,
       "repeating": true,
       "elements": [

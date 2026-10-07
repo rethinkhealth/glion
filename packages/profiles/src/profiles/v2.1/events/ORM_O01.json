@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -44,7 +44,7 @@
     {
       "type": "group",
       "id": "ORDER",
-      "name": "ORDER",
+      "name": "Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -57,7 +57,7 @@
         {
           "type": "group",
           "id": "ORDER_DETAIL",
-          "name": "ORDER_DETAIL",
+          "name": "Order Detail",
           "optional": true,
           "repeating": false,
           "elements": [

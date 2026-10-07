@@ -41,14 +41,14 @@
     {
       "type": "group",
       "id": "RESPONSE",
-      "name": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -69,7 +69,7 @@
         {
           "type": "group",
           "id": "ORDER_DIET",
-          "name": "ORDER_DIET",
+          "name": "Order Diet",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -82,7 +82,7 @@
             {
               "type": "group",
               "id": "TIMING_DIET",
-              "name": "TIMING_DIET",
+              "name": "Timing Diet",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -117,7 +117,7 @@
         {
           "type": "group",
           "id": "ORDER_TRAY",
-          "name": "ORDER_TRAY",
+          "name": "Order Tray",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -130,7 +130,7 @@
             {
               "type": "group",
               "id": "TIMING_TRAY",
-              "name": "TIMING_TRAY",
+              "name": "Timing Tray",
               "optional": true,
               "repeating": true,
               "elements": [

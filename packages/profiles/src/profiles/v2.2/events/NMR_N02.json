@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "CLOCK_AND_STATS_WITH_NOTES_ALT",
-      "name": "CLOCK_AND_STATS_WITH_NOTES_ALT",
+      "name": "Clock and Statistics with Notes Alternate",
       "optional": false,
       "repeating": true,
       "elements": [

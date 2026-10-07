@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "COMMAND_RESPONSE",
-      "name": "COMMAND_RESPONSE",
+      "name": "Command Response",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -36,7 +36,7 @@
         {
           "type": "group",
           "id": "SPECIMEN_CONTAINER",
-          "name": "SPECIMEN_CONTAINER",
+          "name": "Specimen Container",
           "optional": true,
           "repeating": false,
           "elements": [

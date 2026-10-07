@@ -34,15 +34,15 @@
     },
     {
       "type": "group",
-      "id": "PIDNTEORCOBRNTETQ1TQ2CTDOBXNTECTI_SUPPGRP",
-      "name": "PIDNTEORCOBRNTETQ1TQ2CTDOBXNTECTI_SUPPGRP",
+      "id": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
-          "id": "PIDNTE_SUPPGRP",
-          "name": "PIDNTE_SUPPGRP",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -62,8 +62,8 @@
         },
         {
           "type": "group",
-          "id": "ORCOBRNTETQ1TQ2CTDOBXNTECTI_SUPPGRP",
-          "name": "ORCOBRNTETQ1TQ2CTDOBXNTECTI_SUPPGRP",
+          "id": "ORDER",
+          "name": "Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -87,8 +87,8 @@
             },
             {
               "type": "group",
-              "id": "TQ1TQ2_SUPPGRP",
-              "name": "TQ1TQ2_SUPPGRP",
+              "id": "TIMING_QTY",
+              "name": "Timing Quantity",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -114,8 +114,8 @@
             },
             {
               "type": "group",
-              "id": "OBXNTE_SUPPGRP",
-              "name": "OBXNTE_SUPPGRP",
+              "id": "OBSERVATION",
+              "name": "Observation",
               "optional": false,
               "repeating": true,
               "elements": [

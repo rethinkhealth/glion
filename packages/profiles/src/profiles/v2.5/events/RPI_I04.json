@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "PROVIDER",
-      "name": "PROVIDER",
+      "name": "Provider",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -56,7 +56,7 @@
     {
       "type": "group",
       "id": "GUARANTOR_INSURANCE",
-      "name": "GUARANTOR_INSURANCE",
+      "name": "Guarantor Insurance",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -69,7 +69,7 @@
         {
           "type": "group",
           "id": "INSURANCE",
-          "name": "INSURANCE",
+          "name": "Insurance",
           "optional": false,
           "repeating": true,
           "elements": [

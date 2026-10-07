@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "SPECIMEN_CONTAINER",
-      "name": "SPECIMEN_CONTAINER",
+      "name": "Specimen Container",
       "optional": false,
       "repeating": true,
       "elements": [

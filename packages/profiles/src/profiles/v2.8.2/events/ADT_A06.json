@@ -119,7 +119,7 @@
     {
       "type": "group",
       "id": "PROCEDURE",
-      "name": "PROCEDURE",
+      "name": "Procedure",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -146,7 +146,7 @@
     {
       "type": "group",
       "id": "INSURANCE",
-      "name": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [

@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "VISIT",
-      "name": "VISIT",
+      "name": "Visit",
       "optional": false,
       "repeating": true,
       "elements": [

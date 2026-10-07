@@ -247,7 +247,7 @@ type EventSchemaElement =
     };
 ```
 
-`optional` is the standard's `[ ]` and `repeating` its `{ }`. A group's `id`, such as `PATIENT_VISIT`, holds only uppercase letters, digits, and `_`; its `name` is the group name as the standard spells it, such as `PATIENT VISIT` in v2.6, and equals the `id` for most groups. A `choice` is the standard's `< A | B >`: exactly one alternative per occurrence, and every alternative matches at least one segment.
+`optional` is the standard's `[ ]` and `repeating` its `{ }`. A group's `id`, such as `PATIENT_VISIT`, holds only uppercase letters, digits, and `_`; its `name` is the group name for display, in title case with abbreviations spelled out, such as `Patient Visit` or `Master File Test Battery Detail`. A `choice` is the standard's `< A | B >`: exactly one alternative per occurrence, and every alternative matches at least one segment.
 
 ### Event schema JSON Schema
 

@@ -41,7 +41,7 @@
     {
       "type": "group",
       "id": "MERGE_INFO",
-      "name": "MERGE_INFO",
+      "name": "Merge Information",
       "optional": false,
       "repeating": true,
       "elements": [

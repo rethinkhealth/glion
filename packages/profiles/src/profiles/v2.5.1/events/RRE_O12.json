@@ -35,14 +35,14 @@
     {
       "type": "group",
       "id": "RESPONSE",
-      "name": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -63,7 +63,7 @@
         {
           "type": "group",
           "id": "ORDER",
-          "name": "ORDER",
+          "name": "Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -76,7 +76,7 @@
             {
               "type": "group",
               "id": "TIMING",
-              "name": "TIMING",
+              "name": "Timing",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -97,7 +97,7 @@
             {
               "type": "group",
               "id": "ENCODING",
-              "name": "ENCODING",
+              "name": "Encoding",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -110,7 +110,7 @@
                 {
                   "type": "group",
                   "id": "TIMING_ENCODED",
-                  "name": "TIMING_ENCODED",
+                  "name": "Timing Encoded",
                   "optional": false,
                   "repeating": true,
                   "elements": [

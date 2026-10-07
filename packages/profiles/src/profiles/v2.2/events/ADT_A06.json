@@ -77,7 +77,7 @@
     {
       "type": "group",
       "id": "INSURANCE",
-      "name": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [

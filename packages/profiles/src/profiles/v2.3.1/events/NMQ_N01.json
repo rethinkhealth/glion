@@ -11,7 +11,7 @@
     {
       "type": "group",
       "id": "QRY_WITH_DETAIL",
-      "name": "QRY_WITH_DETAIL",
+      "name": "QRY with Detail",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -32,7 +32,7 @@
     {
       "type": "group",
       "id": "CLOCK_AND_STATISTICS",
-      "name": "CLOCK_AND_STATISTICS",
+      "name": "Clock and Statistics",
       "optional": false,
       "repeating": true,
       "elements": [

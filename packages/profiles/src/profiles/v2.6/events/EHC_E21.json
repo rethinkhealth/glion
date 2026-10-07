@@ -34,7 +34,7 @@
         {
           "type": "group",
           "id": "PSL_ITEM_INFO",
-          "name": "PSL_ITEM_INFO",
+          "name": "PSL Item Information",
           "optional": false,
           "repeating": true,
           "elements": [

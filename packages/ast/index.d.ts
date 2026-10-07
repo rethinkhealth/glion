@@ -216,8 +216,7 @@ export interface Group extends Parent {
    */
   id: string;
   /**
-   * Group name as the standard spells it (e.g., "ORDER_OBSERVATION",
-   * "PATIENT VISIT").
+   * Group name, for display (e.g., "Order Observation", "Patient Visit").
    */
   name: string;
   /**

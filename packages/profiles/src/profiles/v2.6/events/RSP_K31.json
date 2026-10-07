@@ -53,14 +53,14 @@
     {
       "type": "group",
       "id": "RESPONSE",
-      "name": "RESPONSE",
+      "name": "Response",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -91,7 +91,7 @@
             {
               "type": "group",
               "id": "PATIENT_VISIT",
-              "name": "PATIENT_VISIT",
+              "name": "Patient Visit",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -114,7 +114,7 @@
         {
           "type": "group",
           "id": "ORDER",
-          "name": "ORDER",
+          "name": "Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -127,7 +127,7 @@
             {
               "type": "group",
               "id": "TIMING",
-              "name": "TIMING",
+              "name": "Timing",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -148,7 +148,7 @@
             {
               "type": "group",
               "id": "ORDER_DETAIL",
-              "name": "ORDER_DETAIL",
+              "name": "Order Detail",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -173,7 +173,7 @@
                 {
                   "type": "group",
                   "id": "COMPONENTS",
-                  "name": "COMPONENTS",
+                  "name": "Components",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -196,7 +196,7 @@
             {
               "type": "group",
               "id": "ENCODING",
-              "name": "ENCODING",
+              "name": "Encoding",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -209,7 +209,7 @@
                 {
                   "type": "group",
                   "id": "TIMING_ENCODED",
-                  "name": "TIMING_ENCODED",
+                  "name": "Timing Encoded",
                   "optional": false,
                   "repeating": true,
                   "elements": [
@@ -262,7 +262,7 @@
             {
               "type": "group",
               "id": "OBSERVATION",
-              "name": "OBSERVATION",
+              "name": "Observation",
               "optional": false,
               "repeating": true,
               "elements": [

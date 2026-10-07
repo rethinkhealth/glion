@@ -77,7 +77,7 @@
     {
       "type": "group",
       "id": "REQUEST",
-      "name": "REQUEST",
+      "name": "Request",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -102,7 +102,7 @@
         {
           "type": "group",
           "id": "RESPONSE",
-          "name": "RESPONSE",
+          "name": "Response",
           "optional": false,
           "repeating": true,
           "elements": [

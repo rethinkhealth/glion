@@ -11,7 +11,7 @@
     {
       "type": "group",
       "id": "FACILITY",
-      "name": "FACILITY",
+      "name": "Facility",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -24,7 +24,7 @@
         {
           "type": "group",
           "id": "PRODUCT",
-          "name": "PRODUCT",
+          "name": "Product",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -51,7 +51,7 @@
         {
           "type": "group",
           "id": "FACILITY_DETAIL",
-          "name": "FACILITY_DETAIL",
+          "name": "Facility Detail",
           "optional": false,
           "repeating": true,
           "elements": [

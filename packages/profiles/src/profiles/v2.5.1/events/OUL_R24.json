@@ -22,8 +22,8 @@
     },
     {
       "type": "group",
-      "id": "PIDPD1NTE_SUPPGRP",
-      "name": "PIDPD1NTE_SUPPGRP",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -49,8 +49,8 @@
     },
     {
       "type": "group",
-      "id": "PV1PV2_SUPPGRP",
-      "name": "PV1PV2_SUPPGRP",
+      "id": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -71,7 +71,7 @@
     {
       "type": "group",
       "id": "ORDER",
-      "name": "ORDER",
+      "name": "Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -95,8 +95,8 @@
         },
         {
           "type": "group",
-          "id": "TQ1TQ2_SUPPGRP",
-          "name": "TQ1TQ2_SUPPGRP",
+          "id": "TIMING_QTY",
+          "name": "Timing Quantity",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -116,8 +116,8 @@
         },
         {
           "type": "group",
-          "id": "SPMOBXSACINV_SUPPGRP",
-          "name": "SPMOBXSACINV_SUPPGRP",
+          "id": "SPECIMEN",
+          "name": "Specimen",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -136,7 +136,7 @@
             {
               "type": "group",
               "id": "CONTAINER",
-              "name": "CONTAINER",
+              "name": "Container",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -158,8 +158,8 @@
         },
         {
           "type": "group",
-          "id": "OBXTCDSIDNTE_SUPPGRP",
-          "name": "OBXTCDSIDNTE_SUPPGRP",
+          "id": "RESULT",
+          "name": "Result",
           "optional": true,
           "repeating": true,
           "elements": [

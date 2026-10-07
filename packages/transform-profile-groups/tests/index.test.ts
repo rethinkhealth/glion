@@ -93,7 +93,7 @@ describe("hl7v2TransformProfileGroups", () => {
       ]);
     });
 
-    it("gives each group its ID and its name as the standard spells it", async () => {
+    it("gives each group its ID and its name in title case", async () => {
       const tree = await grouped(
         message(
           "MSH|^~\\&|EMR|FAC|EMR|RFAC|20241201120000||REF^I12^REF_I12|MSG9|P|2.6",
@@ -105,7 +105,7 @@ describe("hl7v2TransformProfileGroups", () => {
       );
 
       expect(selectAll(tree, "PATIENT_VISIT").map(({ node }) => node)).toEqual([
-        expect.objectContaining({ id: "PATIENT_VISIT", name: "PATIENT VISIT" }),
+        expect.objectContaining({ id: "PATIENT_VISIT", name: "Patient Visit" }),
       ]);
     });
 

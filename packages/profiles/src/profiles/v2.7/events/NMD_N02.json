@@ -23,14 +23,14 @@
     {
       "type": "group",
       "id": "CLOCK_AND_STATS_WITH_NOTES",
-      "name": "CLOCK_AND_STATS_WITH_NOTES",
+      "name": "Clock and Statistics with Notes",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
           "id": "CLOCK",
-          "name": "CLOCK",
+          "name": "Clock",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -51,7 +51,7 @@
         {
           "type": "group",
           "id": "APP_STATS",
-          "name": "APP_STATS",
+          "name": "Application Statistics",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -72,7 +72,7 @@
         {
           "type": "group",
           "id": "APP_STATUS",
-          "name": "APP_STATUS",
+          "name": "Application Status",
           "optional": true,
           "repeating": false,
           "elements": [

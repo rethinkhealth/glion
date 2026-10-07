@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "MF_CDM",
-      "name": "MF_CDM",
+      "name": "Master File CDM",
       "optional": false,
       "repeating": true,
       "elements": [

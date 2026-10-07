@@ -47,7 +47,7 @@
     {
       "type": "group",
       "id": "DONOR",
-      "name": "DONOR",
+      "name": "Donor",
       "optional": true,
       "repeating": false,
       "elements": [

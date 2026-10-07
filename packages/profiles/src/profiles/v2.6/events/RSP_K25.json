@@ -53,7 +53,7 @@
     {
       "type": "group",
       "id": "STAFF",
-      "name": "STAFF",
+      "name": "Staff",
       "optional": false,
       "repeating": true,
       "elements": [

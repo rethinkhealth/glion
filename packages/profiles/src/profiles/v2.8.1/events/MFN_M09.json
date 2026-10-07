@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "MF_TEST_CATEGORICAL",
-      "name": "MF_TEST_CATEGORICAL",
+      "name": "Master File Test Categorical",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -54,7 +54,7 @@
         {
           "type": "group",
           "id": "MF_TEST_CAT_DETAIL",
-          "name": "MF_TEST_CAT_DETAIL",
+          "name": "Master File Test Categorical Detail",
           "optional": true,
           "repeating": false,
           "elements": [

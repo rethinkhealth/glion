@@ -71,7 +71,7 @@
     {
       "type": "group",
       "id": "COMMON_ORDER",
-      "name": "COMMON_ORDER",
+      "name": "Common Order",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -84,7 +84,7 @@
         {
           "type": "group",
           "id": "TIMING_QUANTITY",
-          "name": "TIMING_QUANTITY",
+          "name": "Timing Quantity",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -105,7 +105,7 @@
         {
           "type": "group",
           "id": "ORDER",
-          "name": "ORDER",
+          "name": "Order",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -126,7 +126,7 @@
         {
           "type": "group",
           "id": "OBSERVATION",
-          "name": "OBSERVATION",
+          "name": "Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -149,7 +149,7 @@
     {
       "type": "group",
       "id": "FINANCIAL",
-      "name": "FINANCIAL",
+      "name": "Financial",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -168,7 +168,7 @@
         {
           "type": "group",
           "id": "FINANCIAL_PROCEDURE",
-          "name": "FINANCIAL_PROCEDURE",
+          "name": "Financial Procedure",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -189,7 +189,7 @@
         {
           "type": "group",
           "id": "FINANCIAL_COMMON_ORDER",
-          "name": "FINANCIAL_COMMON_ORDER",
+          "name": "Financial Common Order",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -202,7 +202,7 @@
             {
               "type": "group",
               "id": "FINANCIAL_TIMING_QUANTITY",
-              "name": "FINANCIAL_TIMING_QUANTITY",
+              "name": "Financial Timing Quantity",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -223,7 +223,7 @@
             {
               "type": "group",
               "id": "FINANCIAL_ORDER",
-              "name": "FINANCIAL_ORDER",
+              "name": "Financial Order",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -244,7 +244,7 @@
             {
               "type": "group",
               "id": "FINANCIAL_OBSERVATION",
-              "name": "FINANCIAL_OBSERVATION",
+              "name": "Financial Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -287,7 +287,7 @@
     {
       "type": "group",
       "id": "INSURANCE",
-      "name": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [

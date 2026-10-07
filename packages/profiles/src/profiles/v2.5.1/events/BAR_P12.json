@@ -47,7 +47,7 @@
     {
       "type": "group",
       "id": "PROCEDURE",
-      "name": "PROCEDURE",
+      "name": "Procedure",
       "optional": true,
       "repeating": true,
       "elements": [

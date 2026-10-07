@@ -53,7 +53,7 @@
     {
       "type": "group",
       "id": "ORDER_STATUS",
-      "name": "ORDER_STATUS",
+      "name": "Order Status",
       "optional": false,
       "repeating": true,
       "elements": [

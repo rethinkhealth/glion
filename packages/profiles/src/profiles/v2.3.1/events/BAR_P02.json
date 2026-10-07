@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": false,
       "repeating": true,
       "elements": [

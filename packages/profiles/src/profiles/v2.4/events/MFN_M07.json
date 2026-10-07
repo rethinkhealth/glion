@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "MF_CLIN_STUDY_SCHED",
-      "name": "MF_CLIN_STUDY_SCHED",
+      "name": "Master File Clinical Study Schedule",
       "optional": false,
       "repeating": true,
       "elements": [

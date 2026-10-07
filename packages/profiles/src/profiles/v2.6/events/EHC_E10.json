@@ -35,7 +35,7 @@
     {
       "type": "group",
       "id": "INVOICE_PROCESSING_RESULTS_INFO",
-      "name": "INVOICE_PROCESSING_RESULTS_INFO",
+      "name": "Invoice Processing Results Information",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -78,7 +78,7 @@
         {
           "type": "group",
           "id": "PRODUCT_SERVICE_SECTION",
-          "name": "PRODUCT_SERVICE_SECTION",
+          "name": "Product Service Section",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -91,7 +91,7 @@
             {
               "type": "group",
               "id": "PRODUCT_SERVICE_GROUP",
-              "name": "PRODUCT_SERVICE_GROUP",
+              "name": "Product Service Group",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -104,7 +104,7 @@
                 {
                   "type": "group",
                   "id": "PRODUCT_SERVICE_LINE_INFO",
-                  "name": "PRODUCT/SERVICE LINE_INFO",
+                  "name": "Product Service Line Information",
                   "optional": false,
                   "repeating": true,
                   "elements": [

@@ -52,7 +52,7 @@
         {
           "type": "group",
           "id": "PAT_INFO",
-          "name": "PAT_INFO",
+          "name": "Patient Information",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -71,7 +71,7 @@
             {
               "type": "group",
               "id": "INSURANCE",
-              "name": "INSURANCE",
+              "name": "Insurance",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -92,7 +92,7 @@
             {
               "type": "group",
               "id": "DIAGNOSIS",
-              "name": "DIAGNOSIS",
+              "name": "Diagnosis",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -121,7 +121,7 @@
         {
           "type": "group",
           "id": "PSL_ITEM_INFO",
-          "name": "PSL_ITEM_INFO",
+          "name": "PSL Item Information",
           "optional": false,
           "repeating": true,
           "elements": [

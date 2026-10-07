@@ -81,7 +81,7 @@ type Outline = string | [string, ...Outline[]];
 const outline = (node: Group | Segment): Outline => {
   switch (node.type) {
     case "group": {
-      return [node.name, ...node.children.map(outline)];
+      return [node.id, ...node.children.map(outline)];
     }
     case "segment": {
       return node.name;
@@ -176,7 +176,7 @@ describe("QR6: grouped trees", () => {
           "PV1",
           "TXA",
           [
-            "OBXNTE_SUPPGRP",
+            "OBSERVATION",
             "OBX",
           ],
         ],

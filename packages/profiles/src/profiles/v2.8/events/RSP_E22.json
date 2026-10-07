@@ -52,7 +52,7 @@
         {
           "type": "group",
           "id": "AUTHORIZATION_INFO",
-          "name": "AUTHORIZATION_INFO",
+          "name": "Authorization Information",
           "optional": false,
           "repeating": false,
           "elements": [
@@ -71,7 +71,7 @@
             {
               "type": "group",
               "id": "PSL_ITEM_INFO",
-              "name": "PSL_ITEM_INFO",
+              "name": "PSL Item Information",
               "optional": false,
               "repeating": true,
               "elements": [

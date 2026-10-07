@@ -41,7 +41,7 @@
     {
       "type": "group",
       "id": "CERTIFICATE",
-      "name": "CERTIFICATE",
+      "name": "Certificate",
       "optional": true,
       "repeating": true,
       "elements": [

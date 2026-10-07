@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "MF_TEST_NUMERIC",
-      "name": "MF_TEST_NUMERIC",
+      "name": "Master File Test Numeric",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -36,7 +36,7 @@
         {
           "type": "group",
           "id": "MF_NUMERIC_OBSERVATION",
-          "name": "MF_NUMERIC_OBSERVATION",
+          "name": "Master File Numeric Observation",
           "optional": true,
           "repeating": false,
           "elements": [

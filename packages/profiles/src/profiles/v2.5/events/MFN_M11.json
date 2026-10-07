@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "MF_TEST_CALCULATED",
-      "name": "MF_TEST_CALCULATED",
+      "name": "Master File Test Calculated",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -42,7 +42,7 @@
         {
           "type": "group",
           "id": "MF_TEST_CALC_DETAIL",
-          "name": "MF_TEST_CALC_DETAIL",
+          "name": "Master File Test Calculated Detail",
           "optional": true,
           "repeating": false,
           "elements": [

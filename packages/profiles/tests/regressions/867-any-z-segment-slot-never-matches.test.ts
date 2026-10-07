@@ -24,7 +24,7 @@ describe("the anyZSegment slot of v2.2 MFN_M01", () => {
     expect(
       runner(MFN_M01, ["MSH", "MFI", "MFE", "ZL1"], { allowZSegments: false })
     ).toEqual({
-      groups: [0, 1, { children: [2, 3], id: "MF", name: "MF" }],
+      groups: [0, 1, { children: [2, 3], id: "MF", name: "Master File" }],
       type: "matched",
     });
   });
@@ -35,8 +35,8 @@ describe("the anyZSegment slot of v2.2 MFN_M01", () => {
         groups: [
           0,
           1,
-          { children: [2, 3], id: "MF", name: "MF" },
-          { children: [4, 5], id: "MF", name: "MF" },
+          { children: [2, 3], id: "MF", name: "Master File" },
+          { children: [4, 5], id: "MF", name: "Master File" },
         ],
         type: "matched",
       }

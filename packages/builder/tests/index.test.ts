@@ -156,11 +156,11 @@ describe("builder", () => {
     });
 
     it("should build a group whose name differs from its ID", () => {
-      const group = g({ id: "PATIENT_VISIT", name: "PATIENT VISIT" });
+      const group = g({ id: "PATIENT_VISIT", name: "Patient Visit" });
       expect(group).toStrictEqual({
         children: [],
         id: "PATIENT_VISIT",
-        name: "PATIENT VISIT",
+        name: "Patient Visit",
         type: "group",
       });
     });

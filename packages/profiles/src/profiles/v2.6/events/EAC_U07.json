@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "COMMAND",
-      "name": "COMMAND",
+      "name": "Command",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -48,7 +48,7 @@
         {
           "type": "group",
           "id": "SPECIMEN_CONTAINER",
-          "name": "SPECIMEN_CONTAINER",
+          "name": "Specimen Container",
           "optional": true,
           "repeating": false,
           "elements": [

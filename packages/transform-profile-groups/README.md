@@ -147,7 +147,7 @@ When the event schema is invalid: it has no elements, a segment has no name, a g
 
 ## Behavior
 
-- Each `Group` has `type: "group"`, the group's `id`, such as `ORDER_OBSERVATION` or `PATIENT_VISIT`, its `name` as the standard spells it, such as `ORDER_OBSERVATION` or `PATIENT VISIT`, and a `position` from the start of its first segment to the end of its last.
+- Each `Group` has `type: "group"`, the group's `id`, such as `ORDER_OBSERVATION` or `PATIENT_VISIT`, its `name` in title case, such as `Order Observation` or `Patient Visit`, and a `position` from the start of its first segment to the end of its last.
 - Each occurrence of a repeating group is its own `Group` node: two results give two `OBSERVATION` nodes.
 - A choice, the standard's `< OBR | RXO >`, adds no node: the chosen segment sits in the enclosing group.
 - A group occurrence that holds no segment is left out.

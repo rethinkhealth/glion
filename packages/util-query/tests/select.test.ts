@@ -175,13 +175,13 @@ describe(select, () => {
   describe("with a group whose name differs from its ID", () => {
     const message = m(
       s("MSH", f("|")),
-      g({ id: "PATIENT_VISIT", name: "PATIENT VISIT" }, s("PV1", f("1")))
+      g({ id: "PATIENT_VISIT", name: "Patient Visit" }, s("PV1", f("1")))
     );
 
     it("names the group by its ID", () => {
       const result = select(message, "PATIENT_VISIT-PV1");
       expect((result?.node as Segment).name).toBe("PV1");
-      expect((result?.ancestors[1] as Group).name).toBe("PATIENT VISIT");
+      expect((result?.ancestors[1] as Group).name).toBe("Patient Visit");
     });
 
     it("selects the group itself by its ID", () => {

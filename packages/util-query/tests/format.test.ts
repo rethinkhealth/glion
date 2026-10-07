@@ -149,7 +149,7 @@ describe(format, () => {
   });
 
   describe("with groups whose name differs from their ID", () => {
-    const visit = { id: "PATIENT_VISIT", name: "PATIENT VISIT" };
+    const visit = { id: "PATIENT_VISIT", name: "Patient Visit" };
     const message = m(
       s("MSH", f("|")),
       g(visit, s("PV1", f("1"))),

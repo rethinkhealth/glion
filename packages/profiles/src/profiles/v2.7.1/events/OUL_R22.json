@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -60,7 +60,7 @@
         {
           "type": "group",
           "id": "PATIENT_OBSERVATION",
-          "name": "PATIENT_OBSERVATION",
+          "name": "Patient Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -81,7 +81,7 @@
         {
           "type": "group",
           "id": "VISIT",
-          "name": "VISIT",
+          "name": "Visit",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -116,7 +116,7 @@
     {
       "type": "group",
       "id": "SPECIMEN",
-      "name": "SPECIMEN",
+      "name": "Specimen",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -129,7 +129,7 @@
         {
           "type": "group",
           "id": "SPECIMEN_OBSERVATION",
-          "name": "SPECIMEN_OBSERVATION",
+          "name": "Specimen Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -150,7 +150,7 @@
         {
           "type": "group",
           "id": "CONTAINER",
-          "name": "CONTAINER",
+          "name": "Container",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -171,7 +171,7 @@
         {
           "type": "group",
           "id": "ORDER",
-          "name": "ORDER",
+          "name": "Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -202,7 +202,7 @@
             {
               "type": "group",
               "id": "TIMING_QTY",
-              "name": "TIMING_QTY",
+              "name": "Timing Quantity",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -223,7 +223,7 @@
             {
               "type": "group",
               "id": "RESULT",
-              "name": "RESULT",
+              "name": "Result",
               "optional": true,
               "repeating": true,
               "elements": [

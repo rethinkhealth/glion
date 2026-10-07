@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -50,7 +50,7 @@
     {
       "type": "group",
       "id": "VISIT",
-      "name": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -71,7 +71,7 @@
     {
       "type": "group",
       "id": "SPECIMEN",
-      "name": "SPECIMEN",
+      "name": "Specimen",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -90,7 +90,7 @@
         {
           "type": "group",
           "id": "CONTAINER",
-          "name": "CONTAINER",
+          "name": "Container",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -109,7 +109,7 @@
             {
               "type": "group",
               "id": "ORDER",
-              "name": "ORDER",
+              "name": "Order",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -134,7 +134,7 @@
                 {
                   "type": "group",
                   "id": "TIMING_QTY",
-                  "name": "TIMING_QTY",
+                  "name": "Timing Quantity",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -155,7 +155,7 @@
                 {
                   "type": "group",
                   "id": "RESULT",
-                  "name": "RESULT",
+                  "name": "Result",
                   "optional": true,
                   "repeating": true,
                   "elements": [

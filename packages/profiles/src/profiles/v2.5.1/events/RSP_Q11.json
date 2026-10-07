@@ -41,7 +41,7 @@
     {
       "type": "group",
       "id": "QUERY_RESULT_CLUSTER",
-      "name": "QUERY_RESULT_CLUSTER",
+      "name": "Query Result Cluster",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -72,7 +72,7 @@
         {
           "type": "group",
           "id": "MF_LOC_DEPT",
-          "name": "MF_LOC_DEPT",
+          "name": "Master File Location Department",
           "optional": false,
           "repeating": true,
           "elements": [

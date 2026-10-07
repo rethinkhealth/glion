@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "PROVIDER_CONTACT",
-      "name": "PROVIDER_CONTACT",
+      "name": "Provider Contact",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -50,7 +50,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -77,7 +77,7 @@
     {
       "type": "group",
       "id": "INSURANCE",
-      "name": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -104,7 +104,7 @@
     {
       "type": "group",
       "id": "APPOINTMENT_HISTORY",
-      "name": "APPOINTMENT_HISTORY",
+      "name": "Appointment History",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -117,7 +117,7 @@
         {
           "type": "group",
           "id": "RESOURCES",
-          "name": "RESOURCES",
+          "name": "Resources",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -130,7 +130,7 @@
             {
               "type": "group",
               "id": "RESOURCE_DETAIL",
-              "name": "RESOURCE_DETAIL",
+              "name": "Resource Detail",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -180,7 +180,7 @@
     {
       "type": "group",
       "id": "CLINICAL_HISTORY",
-      "name": "CLINICAL_HISTORY",
+      "name": "Clinical History",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -193,7 +193,7 @@
         {
           "type": "group",
           "id": "CLINICAL_HISTORY_DETAIL",
-          "name": "CLINICAL_HISTORY_DETAIL",
+          "name": "Clinical History Detail",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -287,7 +287,7 @@
         {
           "type": "group",
           "id": "ROLE_CLINICAL_HISTORY",
-          "name": "ROLE_CLINICAL_HISTORY",
+          "name": "Role Clinical History",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -329,7 +329,7 @@
     {
       "type": "group",
       "id": "PATIENT_VISITS",
-      "name": "PATIENT_VISITS",
+      "name": "Patient Visits",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -350,7 +350,7 @@
     {
       "type": "group",
       "id": "MEDICATION_HISTORY",
-      "name": "MEDICATION_HISTORY",
+      "name": "Medication History",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -363,7 +363,7 @@
         {
           "type": "group",
           "id": "MEDICATION_ORDER_DETAIL",
-          "name": "MEDICATION_ORDER_DETAIL",
+          "name": "Medication Order Detail",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -396,7 +396,7 @@
         {
           "type": "group",
           "id": "MEDICATION_ENCODING_DETAIL",
-          "name": "MEDICATION_ENCODING_DETAIL",
+          "name": "Medication Encoding Detail",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -429,7 +429,7 @@
         {
           "type": "group",
           "id": "MEDICATION_ADMINISTRATION_DETAIL",
-          "name": "MEDICATION_ADMINISTRATION_DETAIL",
+          "name": "Medication Administration Detail",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -464,7 +464,7 @@
     {
       "type": "group",
       "id": "PROBLEM",
-      "name": "PROBLEM",
+      "name": "Problem",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -483,7 +483,7 @@
         {
           "type": "group",
           "id": "ROLE_PROBLEM",
-          "name": "ROLE_PROBLEM",
+          "name": "Role Problem",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -525,7 +525,7 @@
     {
       "type": "group",
       "id": "GOAL",
-      "name": "GOAL",
+      "name": "Goal",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -544,7 +544,7 @@
         {
           "type": "group",
           "id": "ROLE_GOAL",
-          "name": "ROLE_GOAL",
+          "name": "Role Goal",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -586,7 +586,7 @@
     {
       "type": "group",
       "id": "PATHWAY",
-      "name": "PATHWAY",
+      "name": "Pathway",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -605,7 +605,7 @@
         {
           "type": "group",
           "id": "ROLE_PATHWAY",
-          "name": "ROLE_PATHWAY",
+          "name": "Role Pathway",
           "optional": true,
           "repeating": true,
           "elements": [

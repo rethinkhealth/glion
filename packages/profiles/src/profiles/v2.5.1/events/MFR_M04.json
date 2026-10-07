@@ -53,7 +53,7 @@
     {
       "type": "group",
       "id": "MF_QUERY",
-      "name": "MF_QUERY",
+      "name": "Master File Query",
       "optional": false,
       "repeating": true,
       "elements": [

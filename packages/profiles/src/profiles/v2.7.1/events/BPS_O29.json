@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -60,7 +60,7 @@
         {
           "type": "group",
           "id": "PATIENT_VISIT",
-          "name": "PATIENT_VISIT",
+          "name": "Patient Visit",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -83,7 +83,7 @@
     {
       "type": "group",
       "id": "ORDER",
-      "name": "ORDER",
+      "name": "Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -96,7 +96,7 @@
         {
           "type": "group",
           "id": "TIMING",
-          "name": "TIMING",
+          "name": "Timing",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -129,7 +129,7 @@
         {
           "type": "group",
           "id": "PRODUCT",
-          "name": "PRODUCT",
+          "name": "Product",
           "optional": true,
           "repeating": true,
           "elements": [

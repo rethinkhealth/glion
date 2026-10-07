@@ -79,7 +79,7 @@
         },
         "name": {
           "type": "string",
-          "description": "The group name as the standard spells it, such as `PATIENT_RESULT` or `PATIENT VISIT`.",
+          "description": "The group name in title case, such as `Patient Result`.",
           "minLength": 1
         },
         "optional": {

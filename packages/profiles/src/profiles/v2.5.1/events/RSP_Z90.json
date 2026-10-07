@@ -47,14 +47,14 @@
     {
       "type": "group",
       "id": "QUERY_RESPONSE",
-      "name": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -85,7 +85,7 @@
             {
               "type": "group",
               "id": "VISIT",
-              "name": "VISIT",
+              "name": "Visit",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -108,7 +108,7 @@
         {
           "type": "group",
           "id": "COMMON_ORDER",
-          "name": "COMMON_ORDER",
+          "name": "Common Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -121,7 +121,7 @@
             {
               "type": "group",
               "id": "TIMING",
-              "name": "TIMING",
+              "name": "Timing",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -160,7 +160,7 @@
             {
               "type": "group",
               "id": "OBSERVATION",
-              "name": "OBSERVATION",
+              "name": "Observation",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -183,7 +183,7 @@
         {
           "type": "group",
           "id": "SPECIMEN",
-          "name": "SPECIMEN",
+          "name": "Specimen",
           "optional": true,
           "repeating": true,
           "elements": [

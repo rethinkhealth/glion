@@ -47,14 +47,14 @@
     {
       "type": "group",
       "id": "QUERY_RESPONSE",
-      "name": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -87,7 +87,7 @@
         {
           "type": "group",
           "id": "COMMON_ORDER",
-          "name": "COMMON_ORDER",
+          "name": "Common Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -100,7 +100,7 @@
             {
               "type": "group",
               "id": "TIMING",
-              "name": "TIMING",
+              "name": "Timing",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -121,7 +121,7 @@
             {
               "type": "group",
               "id": "ORDER_DETAIL",
-              "name": "ORDER_DETAIL",
+              "name": "Order Detail",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -148,7 +148,7 @@
             {
               "type": "group",
               "id": "ENCODED_ORDER",
-              "name": "ENCODED ORDER",
+              "name": "Encoded Order",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -161,7 +161,7 @@
                 {
                   "type": "group",
                   "id": "TIMING_ENCODED",
-                  "name": "TIMING_ENCODED",
+                  "name": "Timing Encoded",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -196,7 +196,7 @@
             {
               "type": "group",
               "id": "DISPENSE",
-              "name": "DISPENSE",
+              "name": "Dispense",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -223,7 +223,7 @@
             {
               "type": "group",
               "id": "GIVE",
-              "name": "GIVE",
+              "name": "Give",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -250,7 +250,7 @@
             {
               "type": "group",
               "id": "ADMINISTRATION",
-              "name": "ADMINISTRATION",
+              "name": "Administration",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -277,7 +277,7 @@
             {
               "type": "group",
               "id": "OBSERVATION",
-              "name": "OBSERVATION",
+              "name": "Observation",
               "optional": false,
               "repeating": true,
               "elements": [

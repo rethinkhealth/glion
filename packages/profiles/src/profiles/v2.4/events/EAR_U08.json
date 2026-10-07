@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "COMMAND_RESPONSE",
-      "name": "COMMAND_RESPONSE",
+      "name": "Command Response",
       "optional": false,
       "repeating": true,
       "elements": [

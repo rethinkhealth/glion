@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "AUTHORIZATION",
-      "name": "AUTHORIZATION",
+      "name": "Authorization",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -50,7 +50,7 @@
     {
       "type": "group",
       "id": "PROVIDER",
-      "name": "PROVIDER",
+      "name": "Provider",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -83,7 +83,7 @@
     {
       "type": "group",
       "id": "GUARANTOR_INSURANCE",
-      "name": "GUARANTOR_INSURANCE",
+      "name": "Guarantor Insurance",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -96,7 +96,7 @@
         {
           "type": "group",
           "id": "INSURANCE",
-          "name": "INSURANCE",
+          "name": "Insurance",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -149,7 +149,7 @@
     {
       "type": "group",
       "id": "PROCEDURE",
-      "name": "PROCEDURE",
+      "name": "Procedure",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -162,7 +162,7 @@
         {
           "type": "group",
           "id": "AUTHORIZATION2",
-          "name": "AUTHORIZATION2",
+          "name": "Authorization 2",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -185,7 +185,7 @@
     {
       "type": "group",
       "id": "OBSERVATION",
-      "name": "OBSERVATION",
+      "name": "Observation",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -204,7 +204,7 @@
         {
           "type": "group",
           "id": "RESULTS",
-          "name": "RESULTS",
+          "name": "Results",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -227,7 +227,7 @@
     {
       "type": "group",
       "id": "VISIT",
-      "name": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [

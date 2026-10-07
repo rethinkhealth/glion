@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "MF_OBS_ATTRIBUTES",
-      "name": "MF_OBS_ATTRIBUTES",
+      "name": "Master File Observation Attributes",
       "optional": false,
       "repeating": true,
       "elements": [

@@ -59,7 +59,7 @@
     {
       "type": "group",
       "id": "ADVERSE_REACTION_GROUP",
-      "name": "ADVERSE_REACTION_GROUP",
+      "name": "Adverse Reaction Group",
       "optional": true,
       "repeating": true,
       "elements": [

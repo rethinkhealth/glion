@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "MF_TEST",
-      "name": "MF_TEST",
+      "name": "Master File Test",
       "optional": false,
       "repeating": true,
       "elements": [

@@ -34,8 +34,8 @@
     },
     {
       "type": "group",
-      "id": "EVNPIDPV1TXAOBX_SUPPGRP",
-      "name": "EVNPIDPV1TXAOBX_SUPPGRP",
+      "id": "RESULT",
+      "name": "Result",
       "optional": false,
       "repeating": true,
       "elements": [

@@ -35,7 +35,7 @@
     {
       "type": "group",
       "id": "RESULT",
-      "name": "RESULT",
+      "name": "Result",
       "optional": false,
       "repeating": true,
       "elements": [

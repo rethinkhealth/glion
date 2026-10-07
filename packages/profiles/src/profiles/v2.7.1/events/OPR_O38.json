@@ -41,14 +41,14 @@
     {
       "type": "group",
       "id": "RESPONSE",
-      "name": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
           "id": "ORDER",
-          "name": "ORDER",
+          "name": "Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -73,7 +73,7 @@
             {
               "type": "group",
               "id": "SPECIMEN",
-              "name": "SPECIMEN",
+              "name": "Specimen",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -86,7 +86,7 @@
                 {
                   "type": "group",
                   "id": "SPECIMEN_OBSERVATION",
-                  "name": "SPECIMEN_OBSERVATION",
+                  "name": "Specimen Observation",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -113,7 +113,7 @@
                 {
                   "type": "group",
                   "id": "OBSERVATION_REQUEST",
-                  "name": "OBSERVATION_REQUEST",
+                  "name": "Observation Request",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -140,7 +140,7 @@
                 {
                   "type": "group",
                   "id": "TIMING",
-                  "name": "TIMING",
+                  "name": "Timing",
                   "optional": true,
                   "repeating": true,
                   "elements": [

@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "AUTHORIZATION",
-      "name": "AUTHORIZATION",
+      "name": "Authorization",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -50,7 +50,7 @@
     {
       "type": "group",
       "id": "PROVIDER",
-      "name": "PROVIDER",
+      "name": "Provider",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -89,7 +89,7 @@
     {
       "type": "group",
       "id": "INSURANCE",
-      "name": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -140,7 +140,7 @@
     {
       "type": "group",
       "id": "PROCEDURE",
-      "name": "PROCEDURE",
+      "name": "Procedure",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -152,8 +152,8 @@
         },
         {
           "type": "group",
-          "id": "AUTCTD_SUPPGRP2",
-          "name": "AUTCTD_SUPPGRP2",
+          "id": "AUTHORIZATION",
+          "name": "Authorization",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -176,7 +176,7 @@
     {
       "type": "group",
       "id": "OBSERVATION",
-      "name": "OBSERVATION",
+      "name": "Observation",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -195,7 +195,7 @@
         {
           "type": "group",
           "id": "RESULTS",
-          "name": "RESULTS",
+          "name": "Results",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -218,7 +218,7 @@
     {
       "type": "group",
       "id": "VISIT",
-      "name": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [

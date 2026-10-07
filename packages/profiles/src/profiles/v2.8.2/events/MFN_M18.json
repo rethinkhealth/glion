@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "MF_PAYER",
-      "name": "MF_PAYER",
+      "name": "Master File Payer",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -42,7 +42,7 @@
         {
           "type": "group",
           "id": "PAYER_MF_ENTRY",
-          "name": "PAYER_MF_ENTRY",
+          "name": "Payer Master File Entry",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -55,7 +55,7 @@
             {
               "type": "group",
               "id": "PAYER_MF_COVERAGE",
-              "name": "PAYER_MF_COVERAGE",
+              "name": "Payer Master File Coverage",
               "optional": false,
               "repeating": true,
               "elements": [

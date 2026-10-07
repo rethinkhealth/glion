@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "SHIPMENT",
-      "name": "SHIPMENT",
+      "name": "Shipment",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -42,7 +42,7 @@
         {
           "type": "group",
           "id": "SHIPPING_OBSERVATION",
-          "name": "SHIPPING_OBSERVATION",
+          "name": "Shipping Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -63,7 +63,7 @@
         {
           "type": "group",
           "id": "PACKAGE",
-          "name": "PACKAGE",
+          "name": "Package",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -82,7 +82,7 @@
             {
               "type": "group",
               "id": "SPECIMEN",
-              "name": "SPECIMEN",
+              "name": "Specimen",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -101,7 +101,7 @@
                 {
                   "type": "group",
                   "id": "SPECIMEN_OBSERVATION",
-                  "name": "SPECIMEN_OBSERVATION",
+                  "name": "Specimen Observation",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -122,7 +122,7 @@
                 {
                   "type": "group",
                   "id": "CONTAINER",
-                  "name": "CONTAINER",
+                  "name": "Container",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -135,7 +135,7 @@
                     {
                       "type": "group",
                       "id": "CONTAINER_OBSERVATION",
-                      "name": "CONTAINER_OBSERVATION",
+                      "name": "Container Observation",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -158,7 +158,7 @@
                 {
                   "type": "group",
                   "id": "SUBJECT_PERSON_ANIMAL_IDENTIFICATION",
-                  "name": "SUBJECT_PERSON_ANIMAL_IDENTIFICATION",
+                  "name": "Subject Person Animal Identification",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -177,7 +177,7 @@
                     {
                       "type": "group",
                       "id": "PATIENT_OBSERVATION",
-                      "name": "PATIENT_OBSERVATION",
+                      "name": "Patient Observation",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -206,7 +206,7 @@
                 {
                   "type": "group",
                   "id": "SUBJECT_POPULATION_LOCATION_IDENTIFICATION",
-                  "name": "SUBJECT_POPULATION_LOCATION_IDENTIFICATION",
+                  "name": "Subject Population Location Identification",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -225,7 +225,7 @@
                     {
                       "type": "group",
                       "id": "PATIENT_VISIT_OBSERVATION",
-                      "name": "PATIENT_VISIT_OBSERVATION",
+                      "name": "Patient Visit Observation",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -246,7 +246,7 @@
                     {
                       "type": "group",
                       "id": "PATIENT_INFORMATION",
-                      "name": "PATIENT_INFORMATION",
+                      "name": "Patient Information",
                       "optional": true,
                       "repeating": false,
                       "elements": [

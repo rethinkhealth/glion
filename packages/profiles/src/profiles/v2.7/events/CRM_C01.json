@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -42,7 +42,7 @@
         {
           "type": "group",
           "id": "PATIENT_VISIT",
-          "name": "PATIENT_VISIT",
+          "name": "Patient Visit",
           "optional": true,
           "repeating": false,
           "elements": [

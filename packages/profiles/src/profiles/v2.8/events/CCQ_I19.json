@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "PROVIDER_CONTACT",
-      "name": "PROVIDER_CONTACT",
+      "name": "Provider Contact",
       "optional": true,
       "repeating": true,
       "elements": [

@@ -20,10 +20,11 @@ import {
   PPP_PCB_V2_3_1,
 } from "./fixtures";
 
+// A group occurrence by its ID; its name is checked where a test names it.
 const g = (id: string, ...children: SegmentMatch[]) => ({
   children,
   id,
-  name: id,
+  name: expect.any(String),
 });
 
 const schemaOf = (...elements: EventSchemaElement[]): EventSchema => ({
@@ -177,6 +178,20 @@ describe("runner: segment order", () => {
 });
 
 describe("runner: grouping", () => {
+  it("gives each group occurrence its ID and its name", () => {
+    expect(match(ORU_R01_V2_5, "MSH PID OBR")).toEqual([
+      0,
+      {
+        children: [
+          { children: [1], id: "PATIENT", name: "Patient" },
+          { children: [2], id: "ORDER_OBSERVATION", name: "Order Observation" },
+        ],
+        id: "PATIENT_RESULT",
+        name: "Patient Result",
+      },
+    ]);
+  });
+
   it("nests each group inside the group that contains it", () => {
     expect(match(ORU_R01_V2_5, "MSH PID PV1 ORC OBR OBX OBX")).toEqual([
       0,

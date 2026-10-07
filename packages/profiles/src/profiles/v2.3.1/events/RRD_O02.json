@@ -29,14 +29,14 @@
     {
       "type": "group",
       "id": "RESPONSE",
-      "name": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -57,7 +57,7 @@
         {
           "type": "group",
           "id": "ORDER",
-          "name": "ORDER",
+          "name": "Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -70,7 +70,7 @@
             {
               "type": "group",
               "id": "DISPENSE",
-              "name": "DISPENSE",
+              "name": "Dispense",
               "optional": true,
               "repeating": false,
               "elements": [

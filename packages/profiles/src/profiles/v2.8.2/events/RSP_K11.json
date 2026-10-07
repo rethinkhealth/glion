@@ -47,7 +47,7 @@
     {
       "type": "group",
       "id": "SEGMENT_PATTERN",
-      "name": "SEGMENT_PATTERN",
+      "name": "Segment Pattern",
       "optional": true,
       "repeating": false,
       "elements": [

@@ -10,8 +10,8 @@
  * Resolution: a group carries an ID and a name. The generator spells a space
  * or a `/` of the name as `_` in the ID and rejects any other ID outside
  * `[A-Z][A-Z0-9_]*`; the event schema JSON Schema, which the build checks
- * every bundled schema against, requires that pattern of the ID. The name
- * keeps the standard's spelling.
+ * every bundled schema against, requires that pattern of the ID. The name is
+ * the ID in title case.
  */
 
 import { describe, expect, it } from "vitest";
@@ -54,21 +54,21 @@ const load = async (id: string): Promise<EventSchema> => {
 };
 
 describe("v2.6 group IDs", () => {
-  it("spell REF_I12's patient visit PATIENT_VISIT, as v2.5.1 does, and keep its name PATIENT VISIT", async () => {
+  it("spell REF_I12's patient visit PATIENT_VISIT, as v2.5.1 does, and name it Patient Visit", async () => {
     const { elements } = await load("REF_I12");
 
     expect(groupsOf(elements)).toContainEqual({
       id: "PATIENT_VISIT",
-      name: "PATIENT VISIT",
+      name: "Patient Visit",
     });
   });
 
-  it("spell EHC_E10's product/service line PRODUCT_SERVICE_LINE_INFO, as v2.7 does, and keep its name", async () => {
+  it("spell EHC_E10's product/service line PRODUCT_SERVICE_LINE_INFO, as v2.7 does, and name it in title case", async () => {
     const { elements } = await load("EHC_E10");
 
     expect(groupsOf(elements)).toContainEqual({
       id: "PRODUCT_SERVICE_LINE_INFO",
-      name: "PRODUCT/SERVICE LINE_INFO",
+      name: "Product Service Line Information",
     });
   });
 

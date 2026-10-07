@@ -47,7 +47,7 @@
     {
       "type": "group",
       "id": "VISIT",
-      "name": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -68,7 +68,7 @@
     {
       "type": "group",
       "id": "EXPERIENCE",
-      "name": "EXPERIENCE",
+      "name": "Experience",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -81,7 +81,7 @@
         {
           "type": "group",
           "id": "PEX_OBSERVATION",
-          "name": "PEX_OBSERVATION",
+          "name": "PEX Observation",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -94,7 +94,7 @@
             {
               "type": "group",
               "id": "PEX_CAUSE",
-              "name": "PEX_CAUSE",
+              "name": "PEX Cause",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -107,7 +107,7 @@
                 {
                   "type": "group",
                   "id": "RX_ORDER",
-                  "name": "RX_ORDER",
+                  "name": "Pharmacy Order",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -120,7 +120,7 @@
                     {
                       "type": "group",
                       "id": "TIMING_QTY",
-                      "name": "TIMING_QTY",
+                      "name": "Timing Quantity",
                       "optional": false,
                       "repeating": true,
                       "elements": [
@@ -149,7 +149,7 @@
                 {
                   "type": "group",
                   "id": "RX_ADMINISTRATION",
-                  "name": "RX_ADMINISTRATION",
+                  "name": "Pharmacy Administration",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -188,7 +188,7 @@
                 {
                   "type": "group",
                   "id": "ASSOCIATED_PERSON",
-                  "name": "ASSOCIATED_PERSON",
+                  "name": "Associated Person",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -201,7 +201,7 @@
                     {
                       "type": "group",
                       "id": "ASSOCIATED_RX_ORDER",
-                      "name": "ASSOCIATED_RX_ORDER",
+                      "name": "Associated Pharmacy Order",
                       "optional": true,
                       "repeating": false,
                       "elements": [
@@ -214,7 +214,7 @@
                         {
                           "type": "group",
                           "id": "NK1_TIMING_QTY",
-                          "name": "NK1_TIMING_QTY",
+                          "name": "NK1 Timing Quantity",
                           "optional": false,
                           "repeating": true,
                           "elements": [
@@ -243,7 +243,7 @@
                     {
                       "type": "group",
                       "id": "ASSOCIATED_RX_ADMIN",
-                      "name": "ASSOCIATED_RX_ADMIN",
+                      "name": "Associated Pharmacy Administration",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -278,7 +278,7 @@
                 {
                   "type": "group",
                   "id": "STUDY",
-                  "name": "STUDY",
+                  "name": "Study",
                   "optional": true,
                   "repeating": true,
                   "elements": [

@@ -47,7 +47,7 @@
     {
       "type": "group",
       "id": "DONOR",
-      "name": "DONOR",
+      "name": "Donor",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -90,7 +90,7 @@
         {
           "type": "group",
           "id": "DONOR_REGISTRATION",
-          "name": "DONOR_REGISTRATION",
+          "name": "Donor Registration",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -113,7 +113,7 @@
     {
       "type": "group",
       "id": "DONATION",
-      "name": "DONATION",
+      "name": "Donation",
       "optional": true,
       "repeating": false,
       "elements": [

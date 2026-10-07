@@ -17,14 +17,14 @@
     {
       "type": "group",
       "id": "MF_TEST_BATTERIES",
-      "name": "MF_TEST_BATTERIES",
+      "name": "Master File Test Batteries",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
           "id": "MF_TEST_BATT_DETAIL",
-          "name": "MF_TEST_BATT_DETAIL",
+          "name": "Master File Test Battery Detail",
           "optional": true,
           "repeating": false,
           "elements": [

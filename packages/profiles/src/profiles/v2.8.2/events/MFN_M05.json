@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "MF_LOCATION",
-      "name": "MF_LOCATION",
+      "name": "Master File Location",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -60,7 +60,7 @@
         {
           "type": "group",
           "id": "MF_LOC_DEPT",
-          "name": "MF_LOC_DEPT",
+          "name": "Master File Location Department",
           "optional": false,
           "repeating": true,
           "elements": [

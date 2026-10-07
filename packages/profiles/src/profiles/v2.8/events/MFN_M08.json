@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "MF_TEST_NUMERIC",
-      "name": "MF_TEST_NUMERIC",
+      "name": "Master File Test Numeric",
       "optional": false,
       "repeating": true,
       "elements": [

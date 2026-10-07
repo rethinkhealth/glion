@@ -47,7 +47,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -60,7 +60,7 @@
         {
           "type": "group",
           "id": "PATIENT_VISIT",
-          "name": "PATIENT_VISIT",
+          "name": "Patient Visit",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -81,7 +81,7 @@
         {
           "type": "group",
           "id": "PATHWAY",
-          "name": "PATHWAY",
+          "name": "Pathway",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -106,7 +106,7 @@
             {
               "type": "group",
               "id": "PATHWAY_ROLE",
-              "name": "PATHWAY_ROLE",
+              "name": "Pathway Role",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -127,7 +127,7 @@
             {
               "type": "group",
               "id": "PROBLEM",
-              "name": "PROBLEM",
+              "name": "Problem",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -152,7 +152,7 @@
                 {
                   "type": "group",
                   "id": "PROBLEM_ROLE",
-                  "name": "PROBLEM_ROLE",
+                  "name": "Problem Role",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -173,7 +173,7 @@
                 {
                   "type": "group",
                   "id": "PROBLEM_OBSERVATION",
-                  "name": "PROBLEM_OBSERVATION",
+                  "name": "Problem Observation",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -194,7 +194,7 @@
                 {
                   "type": "group",
                   "id": "GOAL",
-                  "name": "GOAL",
+                  "name": "Goal",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -219,7 +219,7 @@
                     {
                       "type": "group",
                       "id": "GOAL_ROLE",
-                      "name": "GOAL_ROLE",
+                      "name": "Goal Role",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -240,7 +240,7 @@
                     {
                       "type": "group",
                       "id": "GOAL_OBSERVATION",
-                      "name": "GOAL_OBSERVATION",
+                      "name": "Goal Observation",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -263,7 +263,7 @@
                 {
                   "type": "group",
                   "id": "ORDER",
-                  "name": "ORDER",
+                  "name": "Order",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -276,7 +276,7 @@
                     {
                       "type": "group",
                       "id": "ORDER_DETAIL",
-                      "name": "ORDER_DETAIL",
+                      "name": "Order Detail",
                       "optional": true,
                       "repeating": false,
                       "elements": [
@@ -314,7 +314,7 @@
                         {
                           "type": "group",
                           "id": "ORDER_OBSERVATION",
-                          "name": "ORDER_OBSERVATION",
+                          "name": "Order Observation",
                           "optional": true,
                           "repeating": true,
                           "elements": [

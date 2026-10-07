@@ -41,14 +41,14 @@
     {
       "type": "group",
       "id": "QUERY_RESPONSE",
-      "name": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -73,7 +73,7 @@
             {
               "type": "group",
               "id": "VISIT",
-              "name": "VISIT",
+              "name": "Visit",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -86,7 +86,7 @@
                 {
                   "type": "group",
                   "id": "PATIENT_VISIT",
-                  "name": "PATIENT_VISIT",
+                  "name": "Patient Visit",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -109,7 +109,7 @@
             {
               "type": "group",
               "id": "COMMON_ORDER",
-              "name": "COMMON_ORDER",
+              "name": "Common Order",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -122,7 +122,7 @@
                 {
                   "type": "group",
                   "id": "ORDER_DETAIL",
-                  "name": "ORDER_DETAIL",
+                  "name": "Order Detail",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -147,7 +147,7 @@
                     {
                       "type": "group",
                       "id": "TREATMENT",
-                      "name": "TREATMENT",
+                      "name": "Treatment",
                       "optional": true,
                       "repeating": false,
                       "elements": [
@@ -170,7 +170,7 @@
                 {
                   "type": "group",
                   "id": "ENCODED_ORDER",
-                  "name": "ENCODED_ORDER",
+                  "name": "Encoded Order",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -215,7 +215,7 @@
                 {
                   "type": "group",
                   "id": "OBSERVATION",
-                  "name": "OBSERVATION",
+                  "name": "Observation",
                   "optional": false,
                   "repeating": true,
                   "elements": [

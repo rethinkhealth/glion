@@ -35,7 +35,7 @@
     {
       "type": "group",
       "id": "ROW_DEFINITION",
-      "name": "ROW_DEFINITION",
+      "name": "Row Definition",
       "optional": true,
       "repeating": false,
       "elements": [

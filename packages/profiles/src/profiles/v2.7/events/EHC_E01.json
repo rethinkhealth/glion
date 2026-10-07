@@ -64,7 +64,7 @@
         {
           "type": "group",
           "id": "PRODUCT_SERVICE_SECTION",
-          "name": "PRODUCT_SERVICE_SECTION",
+          "name": "Product Service Section",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -77,7 +77,7 @@
             {
               "type": "group",
               "id": "PRODUCT_SERVICE_GROUP",
-              "name": "PRODUCT_SERVICE_GROUP",
+              "name": "Product Service Group",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -102,7 +102,7 @@
                 {
                   "type": "group",
                   "id": "PATIENT_INFO",
-                  "name": "PATIENT_INFO",
+                  "name": "Patient Information",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -133,7 +133,7 @@
                     {
                       "type": "group",
                       "id": "INSURANCE",
-                      "name": "INSURANCE",
+                      "name": "Insurance",
                       "optional": false,
                       "repeating": true,
                       "elements": [
@@ -154,7 +154,7 @@
                     {
                       "type": "group",
                       "id": "DIAGNOSIS",
-                      "name": "DIAGNOSIS",
+                      "name": "Diagnosis",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -183,7 +183,7 @@
                 {
                   "type": "group",
                   "id": "PRODUCT_SERVICE_LINE_ITEM",
-                  "name": "PRODUCT_SERVICE_LINE_ITEM",
+                  "name": "Product Service Line Item",
                   "optional": false,
                   "repeating": true,
                   "elements": [
@@ -228,7 +228,7 @@
                 {
                   "type": "group",
                   "id": "PROCEDURE",
-                  "name": "PROCEDURE",
+                  "name": "Procedure",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -255,7 +255,7 @@
                 {
                   "type": "group",
                   "id": "INVOICE_PROCESSING",
-                  "name": "INVOICE_PROCESSING",
+                  "name": "Invoice Processing",
                   "optional": true,
                   "repeating": true,
                   "elements": [

@@ -41,14 +41,14 @@
     {
       "type": "group",
       "id": "RESPONSE",
-      "name": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -69,7 +69,7 @@
         {
           "type": "group",
           "id": "ORDER",
-          "name": "ORDER",
+          "name": "Order",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -88,7 +88,7 @@
             {
               "type": "group",
               "id": "TIMING",
-              "name": "TIMING",
+              "name": "Timing",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -109,7 +109,7 @@
             {
               "type": "group",
               "id": "OBSERVATION_REQUEST",
-              "name": "OBSERVATION_REQUEST",
+              "name": "Observation Request",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -128,7 +128,7 @@
                 {
                   "type": "group",
                   "id": "SPECIMEN_SHIPMENT",
-                  "name": "SPECIMEN_SHIPMENT",
+                  "name": "Specimen Shipment",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -141,7 +141,7 @@
                     {
                       "type": "group",
                       "id": "PACKAGE",
-                      "name": "PACKAGE",
+                      "name": "Package",
                       "optional": false,
                       "repeating": true,
                       "elements": [
@@ -154,7 +154,7 @@
                         {
                           "type": "group",
                           "id": "SPECIMEN_IN_PACKAGE",
-                          "name": "SPECIMEN_IN_PACKAGE",
+                          "name": "Specimen in Package",
                           "optional": true,
                           "repeating": true,
                           "elements": [
@@ -167,7 +167,7 @@
                             {
                               "type": "group",
                               "id": "SPECIMEN_CONTAINER_IN_PACKAGE",
-                              "name": "SPECIMEN_CONTAINER_IN_PACKAGE",
+                              "name": "Specimen Container in Package",
                               "optional": true,
                               "repeating": true,
                               "elements": [

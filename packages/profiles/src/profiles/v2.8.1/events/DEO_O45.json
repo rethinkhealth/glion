@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "DONOR",
-      "name": "DONOR",
+      "name": "Donor",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -54,7 +54,7 @@
         {
           "type": "group",
           "id": "DONOR_REGISTRATION",
-          "name": "DONOR_REGISTRATION",
+          "name": "Donor Registration",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -77,7 +77,7 @@
     {
       "type": "group",
       "id": "DONATION_ORDER",
-      "name": "DONATION_ORDER",
+      "name": "Donation Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -96,7 +96,7 @@
         {
           "type": "group",
           "id": "DONATION_OBSERVATION",
-          "name": "DONATION_OBSERVATION",
+          "name": "Donation Observation",
           "optional": true,
           "repeating": true,
           "elements": [

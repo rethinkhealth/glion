@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "MF_INV_ITEM",
-      "name": "MF_INV_ITEM",
+      "name": "Master File Inventory Item",
       "optional": false,
       "repeating": true,
       "elements": [

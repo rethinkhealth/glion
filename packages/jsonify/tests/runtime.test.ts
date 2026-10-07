@@ -76,17 +76,17 @@ describe(toJsonRuntime, () => {
     ]);
   });
 
-  it("emits a group's ID and its name, as the standard spells it", () => {
+  it("emits a group's ID and its name", () => {
     const tree = m(
       s("MSH", f("|")),
-      g({ id: "PATIENT_VISIT", name: "PATIENT VISIT" }, s("PV1", f("1")))
+      g({ id: "PATIENT_VISIT", name: "Patient Visit" }, s("PV1", f("1")))
     );
     expect(toJsonRuntime(tree)).toStrictEqual([
       { fields: ["|"], segment: "MSH" },
       {
         children: [{ fields: ["1"], segment: "PV1" }],
         group: "PATIENT_VISIT",
-        name: "PATIENT VISIT",
+        name: "Patient Visit",
       },
     ]);
   });

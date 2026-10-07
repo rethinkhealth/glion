@@ -65,7 +65,7 @@
     {
       "type": "group",
       "id": "REQUEST",
-      "name": "REQUEST",
+      "name": "Request",
       "optional": false,
       "repeating": true,
       "elements": [

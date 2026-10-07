@@ -52,7 +52,7 @@
         {
           "type": "group",
           "id": "PRODUCT_SERVICE_SECTION",
-          "name": "PRODUCT_SERVICE_SECTION",
+          "name": "Product Service Section",
           "optional": false,
           "repeating": true,
           "elements": [

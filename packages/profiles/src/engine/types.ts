@@ -56,8 +56,7 @@ export type GroupElement = Occurrence &
     /** The group ID, such as `PATIENT_RESULT`. */
     id: string;
     /**
-     * The group name as the standard spells it, such as `PATIENT_RESULT` or
-     * `PATIENT VISIT`.
+     * The group name, such as `Patient Result`.
      */
     name: string;
     /** The elements of the group, in order. At least one. */
@@ -131,7 +130,7 @@ export type RunnerIncomplete = Readonly<{
 export type GroupMatch = Readonly<{
   /** The group ID, such as `PATIENT_RESULT`. */
   id: string;
-  /** The group name as the standard spells it, such as `PATIENT VISIT`. */
+  /** The group name, such as `Patient Result`. */
   name: string;
   /** The segment indexes and nested group occurrences, in input order. */
   children: readonly SegmentMatch[];

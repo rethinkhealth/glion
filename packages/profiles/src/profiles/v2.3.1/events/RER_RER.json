@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "DEFINITION",
-      "name": "DEFINITION",
+      "name": "Definition",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -42,7 +42,7 @@
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -63,7 +63,7 @@
         {
           "type": "group",
           "id": "ORDER",
-          "name": "ORDER",
+          "name": "Order",
           "optional": false,
           "repeating": true,
           "elements": [

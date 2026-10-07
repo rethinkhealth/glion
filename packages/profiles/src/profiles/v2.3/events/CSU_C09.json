@@ -11,7 +11,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -36,7 +36,7 @@
         {
           "type": "group",
           "id": "VISIT",
-          "name": "VISIT",
+          "name": "Visit",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -63,7 +63,7 @@
         {
           "type": "group",
           "id": "STUDY_PHASE",
-          "name": "STUDY_PHASE",
+          "name": "Study Phase",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -76,7 +76,7 @@
             {
               "type": "group",
               "id": "STUDY_SCHEDULE",
-              "name": "STUDY_SCHEDULE",
+              "name": "Study Schedule",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -89,7 +89,7 @@
                 {
                   "type": "group",
                   "id": "STUDY_OBSERVATION",
-                  "name": "STUDY_OBSERVATION",
+                  "name": "Study Observation",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -116,7 +116,7 @@
                 {
                   "type": "group",
                   "id": "STUDY_PHARM",
-                  "name": "STUDY_PHARM",
+                  "name": "Study Pharmacy",
                   "optional": false,
                   "repeating": true,
                   "elements": [
@@ -129,7 +129,7 @@
                     {
                       "type": "group",
                       "id": "RX_ADMIN",
-                      "name": "RX_ADMIN",
+                      "name": "Pharmacy Administration",
                       "optional": false,
                       "repeating": true,
                       "elements": [

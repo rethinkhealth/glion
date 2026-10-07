@@ -42,7 +42,7 @@
     {
       "type": "group",
       "id": "PAYMENT_REMITTANCE_DETAIL_INFO",
-      "name": "PAYMENT_REMITTANCE_DETAIL_INFO",
+      "name": "Payment Remittance Detail Information",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -61,7 +61,7 @@
         {
           "type": "group",
           "id": "PRODUCT_SERVICE_SECTION",
-          "name": "PRODUCT_SERVICE_SECTION",
+          "name": "Product Service Section",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -74,7 +74,7 @@
             {
               "type": "group",
               "id": "PRODUCT_SERVICE_GROUP",
-              "name": "PRODUCT_SERVICE_GROUP",
+              "name": "Product Service Group",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -87,7 +87,7 @@
                 {
                   "type": "group",
                   "id": "PSL_ITEM_INFO",
-                  "name": "PSL_ITEM_INFO",
+                  "name": "PSL Item Information",
                   "optional": false,
                   "repeating": true,
                   "elements": [
@@ -114,7 +114,7 @@
     {
       "type": "group",
       "id": "ADJUSTMENT_PAYEE",
-      "name": "ADJUSTMENT_PAYEE",
+      "name": "Adjustment Payee",
       "optional": true,
       "repeating": true,
       "elements": [

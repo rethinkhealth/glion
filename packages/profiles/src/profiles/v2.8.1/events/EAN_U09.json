@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "NOTIFICATION",
-      "name": "NOTIFICATION",
+      "name": "Notification",
       "optional": false,
       "repeating": true,
       "elements": [

@@ -29,7 +29,7 @@
     {
       "type": "group",
       "id": "AUTHORIZATION_CONTACT",
-      "name": "AUTHORIZATION_CONTACT",
+      "name": "Authorization Contact",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -50,7 +50,7 @@
     {
       "type": "group",
       "id": "PROVIDER_CONTACT",
-      "name": "PROVIDER_CONTACT",
+      "name": "Provider Contact",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -101,7 +101,7 @@
     {
       "type": "group",
       "id": "PROCEDURE",
-      "name": "PROCEDURE",
+      "name": "Procedure",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -113,8 +113,8 @@
         },
         {
           "type": "group",
-          "id": "AUTCTD_SUPPGRP2",
-          "name": "AUTCTD_SUPPGRP2",
+          "id": "AUTHORIZATION_CONTACT",
+          "name": "Authorization Contact",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -137,7 +137,7 @@
     {
       "type": "group",
       "id": "OBSERVATION",
-      "name": "OBSERVATION",
+      "name": "Observation",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -156,7 +156,7 @@
         {
           "type": "group",
           "id": "RESULTS_NOTES",
-          "name": "RESULTS_NOTES",
+          "name": "Results Notes",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -179,7 +179,7 @@
     {
       "type": "group",
       "id": "PATIENT_VISIT",
-      "name": "PATIENT_VISIT",
+      "name": "Patient Visit",
       "optional": true,
       "repeating": false,
       "elements": [

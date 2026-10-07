@@ -35,14 +35,14 @@
     {
       "type": "group",
       "id": "QUERY_RESPONSE",
-      "name": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
           "id": "PATIENT",
-          "name": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -63,7 +63,7 @@
         {
           "type": "group",
           "id": "ORDER",
-          "name": "ORDER",
+          "name": "Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -88,7 +88,7 @@
             {
               "type": "group",
               "id": "TIMING_QTY",
-              "name": "TIMING_QTY",
+              "name": "Timing Quantity",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -115,7 +115,7 @@
             {
               "type": "group",
               "id": "OBSERVATION",
-              "name": "OBSERVATION",
+              "name": "Observation",
               "optional": false,
               "repeating": true,
               "elements": [

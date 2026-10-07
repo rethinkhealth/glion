@@ -17,7 +17,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -44,7 +44,7 @@
     {
       "type": "group",
       "id": "VISIT",
-      "name": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -65,14 +65,14 @@
     {
       "type": "group",
       "id": "ORDER_OBSERVATION",
-      "name": "ORDER_OBSERVATION",
+      "name": "Order Observation",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
           "id": "CONTAINER",
-          "name": "CONTAINER",
+          "name": "Container",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -117,7 +117,7 @@
         {
           "type": "group",
           "id": "OBSERVATION",
-          "name": "OBSERVATION",
+          "name": "Observation",
           "optional": false,
           "repeating": true,
           "elements": [

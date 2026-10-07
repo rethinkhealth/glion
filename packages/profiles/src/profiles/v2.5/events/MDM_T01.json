@@ -35,7 +35,7 @@
     {
       "type": "group",
       "id": "COMMON_ORDER",
-      "name": "COMMON_ORDER",
+      "name": "Common Order",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -48,7 +48,7 @@
         {
           "type": "group",
           "id": "TIMING",
-          "name": "TIMING",
+          "name": "Timing",
           "optional": true,
           "repeating": true,
           "elements": [

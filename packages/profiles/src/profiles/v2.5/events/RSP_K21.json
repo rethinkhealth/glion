@@ -41,7 +41,7 @@
     {
       "type": "group",
       "id": "QUERY_RESPONSE",
-      "name": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": true,
       "repeating": true,
       "elements": [

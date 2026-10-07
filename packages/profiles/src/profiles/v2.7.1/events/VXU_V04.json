@@ -41,7 +41,7 @@
     {
       "type": "group",
       "id": "PATIENT",
-      "name": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -68,7 +68,7 @@
     {
       "type": "group",
       "id": "INSURANCE",
-      "name": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -95,7 +95,7 @@
     {
       "type": "group",
       "id": "ORDER",
-      "name": "ORDER",
+      "name": "Order",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -108,7 +108,7 @@
         {
           "type": "group",
           "id": "TIMING",
-          "name": "TIMING",
+          "name": "Timing",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -141,7 +141,7 @@
         {
           "type": "group",
           "id": "OBSERVATION",
-          "name": "OBSERVATION",
+          "name": "Observation",
           "optional": true,
           "repeating": true,
           "elements": [

@@ -39,7 +39,7 @@ describe("compile", () => {
               },
             ],
             id: "",
-            name: "PATIENT VISIT",
+            name: "Patient Visit",
             optional: false,
             repeating: false,
             type: "group",
@@ -227,7 +227,7 @@ describe("compile", () => {
   it("opens and closes each group of the schema once", () => {
     const { code } = compile(ORU_R01_V2_5);
     const opened = code.flatMap((instruction) =>
-      instruction.op === "open" ? [instruction.name] : []
+      instruction.op === "open" ? [instruction.id] : []
     );
 
     expect(opened.toSorted()).toEqual([

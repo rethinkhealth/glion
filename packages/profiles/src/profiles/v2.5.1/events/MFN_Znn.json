@@ -23,7 +23,7 @@
     {
       "type": "group",
       "id": "MF_SITE_DEFINED",
-      "name": "MF_SITE_DEFINED",
+      "name": "Master File Site Defined",
       "optional": false,
       "repeating": true,
       "elements": [
