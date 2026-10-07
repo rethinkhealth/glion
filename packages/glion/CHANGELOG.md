@@ -1,5 +1,18 @@
 # @glion/cli
 
+## 0.22.0
+
+### Patch Changes
+
+- Updated dependencies [[`93dbb80`](https://github.com/rethinkhealth/glion/commit/93dbb8053acfdf46f72dba2932950cf260e75ab7)]:
+  - @glion/ast@0.22.0
+  - @glion/util-query@0.22.0
+  - @glion/ack@0.22.0
+  - @glion/mllp@0.22.0
+  - @glion/mllp-client@0.22.0
+  - @glion/parser@0.22.0
+  - @glion/to-hl7v2@0.22.0
+
 ## 0.21.0
 
 ### Patch Changes

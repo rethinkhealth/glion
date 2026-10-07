@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-profile-segment-order",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "Lints the segment order of an HL7v2 message against its message structure",
   "keywords": [
     "health",
