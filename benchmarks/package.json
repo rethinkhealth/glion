@@ -28,6 +28,7 @@
     "@glion/preset-lint-profile-recommended": "workspace:*",
     "@glion/profiles": "workspace:*",
     "@glion/to-hl7v2": "workspace:*",
+    "@glion/transform-profile-groups": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "@glion/util-query": "workspace:*",
     "@types/node": "25.6.0",

@@ -13,6 +13,7 @@ import { frame, unframe } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetLintProfileRecommended from "@glion/preset-lint-profile-recommended";
 import { profiles, runner } from "@glion/profiles";
+import { hl7v2TransformProfileGroups } from "@glion/transform-profile-groups";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -55,6 +56,16 @@ describe("canary — suites measure real work", () => {
     const file = new VFile();
     await processor.run(parseHL7v2(hl7File("adt-a01-violations")), file);
     expect(file.messages.length).toBeGreaterThan(0);
+  });
+
+  it("transform-profile-groups: ORU_R01 fixtures group into ORDER_OBSERVATION", async () => {
+    const transform = unified().use(hl7v2TransformProfileGroups);
+    for (const message of [ORU_R01_MEDIUM, ORU_R01_LARGE]) {
+      const tree = parseHL7v2(message);
+      await transform.run(tree, new VFile());
+      expect(tree.children.some((node) => node.type === "group")).toBe(true);
+      expect(JSON.stringify(tree)).toContain('"name":"ORDER_OBSERVATION"');
+    }
   });
 
   it("annotate-profile: fields get profile metadata", async () => {
