@@ -23,6 +23,7 @@
 import { invariant } from "../invariant";
 import { memoize } from "../utils";
 import { ANY_SEGMENT, ANY_Z_SEGMENT, compile } from "./compile";
+import type { Instruction } from "./compile";
 import type {
   EventSchema,
   RunnerOptions,
@@ -51,6 +52,8 @@ type Thread = Readonly<{ pc: number; last: Event | undefined }>;
 
 // The state of one run.
 interface Run {
+  // The schema's program.
+  readonly code: readonly Instruction[];
   // The threads still possible, in priority order.
   threads: Thread[];
   // How many segments have been stepped over.
@@ -118,6 +121,7 @@ export function runner(
   const { code, segmentIds, start } = compileOnce(schema);
   const allowZSegments = options?.allowZSegments ?? true;
   const run: Run = {
+    code,
     generation: 0,
     pendingEvents: [],
     pendingPcs: [],
@@ -126,142 +130,9 @@ export function runner(
   };
 
   // ----------------------------------------------------------------
-  // Helpers
-
-  // Moves a thread from `pc` through the instructions that consume nothing,
-  // and adds it at every instruction that consumes a segment, and at match.
-  // Depth first, most preferred target first: the first thread to reach an
-  // instruction wins. Cox's addthread.
-  const addThread = (pc: number, last?: Event): void => {
-    run.pendingPcs.push(pc);
-    run.pendingEvents.push(last);
-    for (
-      let next = run.pendingPcs.pop();
-      next !== undefined;
-      next = run.pendingPcs.pop()
-    ) {
-      explore(next, run.pendingEvents.pop());
-    }
-  };
-
-  // Explores from one pending thread. It goes on along the most preferred
-  // target itself and pushes the others, least preferred first, so the next
-  // one popped is the next preferred.
-  const explore = (from: number, fromLast: Event | undefined): void => {
-    let pc = from;
-    let last = fromLast;
-    for (;;) {
-      // Already reached for this segment by a preferred thread; this also
-      // ends a cycle of splits.
-      if (run.visited[pc] === run.generation) {
-        return;
-      }
-      run.visited[pc] = run.generation;
-      const instruction = code[pc];
-      invariant(instruction !== undefined, "a program counter is out of range");
-      switch (instruction.op) {
-        case "segment":
-        case "any":
-        case "z":
-        case "match": {
-          run.threads.push({ last, pc });
-          return;
-        }
-        case "split": {
-          const { targets } = instruction;
-          for (let index = targets.length - 1; index > 0; index -= 1) {
-            const target = targets[index];
-            invariant(target !== undefined, "a split target is out of range");
-            run.pendingPcs.push(target);
-            run.pendingEvents.push(last);
-          }
-          const [first] = targets;
-          invariant(first !== undefined, "a split has no target");
-          pc = first;
-          break;
-        }
-        case "open": {
-          last = { kind: "open", name: instruction.name, previous: last };
-          pc = instruction.next;
-          break;
-        }
-        case "close": {
-          last = { kind: "close", previous: last };
-          pc = instruction.next;
-          break;
-        }
-      }
-    }
-  };
-
-  // Steps a thread over segment `name`: consumes it if its instruction can,
-  // then passes over it if `passable` (the thread stays where it is).
-  const step = ({ last, pc }: Thread, name: string, passable: boolean) => {
-    const instruction = code[pc];
-    invariant(instruction !== undefined, "a program counter is out of range");
-    switch (instruction.op) {
-      case "segment": {
-        if (instruction.id === name) {
-          addThread(instruction.next, { kind: "consumed", previous: last });
-        }
-        break;
-      }
-      case "any": {
-        addThread(instruction.next, { kind: "consumed", previous: last });
-        break;
-      }
-      case "z": {
-        if (name.startsWith(Z_SEGMENT_PREFIX)) {
-          addThread(instruction.next, { kind: "consumed", previous: last });
-        }
-        break;
-      }
-      case "match":
-      case "split":
-      case "open":
-      case "close": {
-        break;
-      }
-    }
-    if (passable) {
-      addThread(pc, { kind: "passed-over", previous: last });
-    }
-  };
-
-  // The segment IDs the threads can consume next, deduplicated and sorted.
-  const expected = (from: readonly Thread[]): string[] => {
-    const found = new Set<string>();
-    for (const { pc } of from) {
-      const instruction = code[pc];
-      invariant(instruction !== undefined, "a program counter is out of range");
-      switch (instruction.op) {
-        case "segment": {
-          found.add(instruction.id);
-          break;
-        }
-        case "any": {
-          found.add(ANY_SEGMENT);
-          break;
-        }
-        case "z": {
-          found.add(ANY_Z_SEGMENT);
-          break;
-        }
-        case "match":
-        case "split":
-        case "open":
-        case "close": {
-          break;
-        }
-      }
-    }
-    return [...found].toSorted();
-  };
-
-  // ----------------------------------------------------------------
   // Run
 
-  addThread(start);
+  addThread(run, start);
   for (const [index, name] of input.entries()) {
     const current = run.threads;
     run.threads = [];
@@ -271,17 +142,159 @@ export function runner(
       name.startsWith(Z_SEGMENT_PREFIX) &&
       !segmentIds.has(name);
     for (const thread of current) {
-      step(thread, name, passable);
+      step(run, thread, name, passable);
     }
     if (run.threads.length === 0) {
-      return { expected: expected(current), index, type: "mismatched" };
+      return { expected: expected(code, current), index, type: "mismatched" };
     }
   }
 
   const accepted = run.threads.find(({ pc }) => code[pc]?.op === "match");
   return accepted
     ? { groups: nest(accepted.last), type: "matched" }
-    : { expected: expected(run.threads), type: "incomplete" };
+    : { expected: expected(code, run.threads), type: "incomplete" };
+}
+
+// ---------------------------------------------------------------------------
+// Threads
+// ---------------------------------------------------------------------------
+
+// Moves a thread from `pc` through the instructions that consume nothing,
+// and adds it at every instruction that consumes a segment, and at match.
+// Depth first, most preferred target first: the first thread to reach an
+// instruction wins. Cox's addthread.
+function addThread(run: Run, pc: number, last?: Event): void {
+  run.pendingPcs.push(pc);
+  run.pendingEvents.push(last);
+  for (
+    let next = run.pendingPcs.pop();
+    next !== undefined;
+    next = run.pendingPcs.pop()
+  ) {
+    explore(run, next, run.pendingEvents.pop());
+  }
+}
+
+// Explores from one pending thread. It goes on along the most preferred
+// target itself and pushes the others, least preferred first, so the next
+// one popped is the next preferred.
+function explore(run: Run, from: number, fromLast: Event | undefined): void {
+  let pc = from;
+  let last = fromLast;
+  for (;;) {
+    // Already reached for this segment by a preferred thread; this also
+    // ends a cycle of splits.
+    if (run.visited[pc] === run.generation) {
+      return;
+    }
+    run.visited[pc] = run.generation;
+    const instruction = run.code[pc];
+    invariant(instruction !== undefined, "a program counter is out of range");
+    switch (instruction.op) {
+      case "segment":
+      case "any":
+      case "z":
+      case "match": {
+        run.threads.push({ last, pc });
+        return;
+      }
+      case "split": {
+        const { targets } = instruction;
+        for (let index = targets.length - 1; index > 0; index -= 1) {
+          const target = targets[index];
+          invariant(target !== undefined, "a split target is out of range");
+          run.pendingPcs.push(target);
+          run.pendingEvents.push(last);
+        }
+        const [first] = targets;
+        invariant(first !== undefined, "a split has no target");
+        pc = first;
+        break;
+      }
+      case "open": {
+        last = { kind: "open", name: instruction.name, previous: last };
+        pc = instruction.next;
+        break;
+      }
+      case "close": {
+        last = { kind: "close", previous: last };
+        pc = instruction.next;
+        break;
+      }
+    }
+  }
+}
+
+// Steps a thread over segment `name`: consumes it if its instruction can,
+// then passes over it if `passable` (the thread stays where it is).
+function step(
+  run: Run,
+  { last, pc }: Thread,
+  name: string,
+  passable: boolean
+): void {
+  const instruction = run.code[pc];
+  invariant(instruction !== undefined, "a program counter is out of range");
+  switch (instruction.op) {
+    case "segment": {
+      if (instruction.id === name) {
+        addThread(run, instruction.next, { kind: "consumed", previous: last });
+      }
+      break;
+    }
+    case "any": {
+      addThread(run, instruction.next, { kind: "consumed", previous: last });
+      break;
+    }
+    case "z": {
+      if (name.startsWith(Z_SEGMENT_PREFIX)) {
+        addThread(run, instruction.next, { kind: "consumed", previous: last });
+      }
+      break;
+    }
+    case "match":
+    case "split":
+    case "open":
+    case "close": {
+      break;
+    }
+  }
+  if (passable) {
+    addThread(run, pc, { kind: "passed-over", previous: last });
+  }
+}
+
+// The segment IDs the threads can consume next, deduplicated and sorted.
+function expected(
+  code: readonly Instruction[],
+  from: readonly Thread[]
+): string[] {
+  const found = new Set<string>();
+  for (const { pc } of from) {
+    const instruction = code[pc];
+    invariant(instruction !== undefined, "a program counter is out of range");
+    switch (instruction.op) {
+      case "segment": {
+        found.add(instruction.id);
+        break;
+      }
+      case "any": {
+        found.add(ANY_SEGMENT);
+        break;
+      }
+      case "z": {
+        found.add(ANY_Z_SEGMENT);
+        break;
+      }
+      case "match":
+      case "split":
+      case "open":
+      case "close": {
+        break;
+      }
+    }
+  }
+  return [...found].toSorted();
 }
 
 // ---------------------------------------------------------------------------

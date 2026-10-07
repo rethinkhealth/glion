@@ -24,9 +24,8 @@
 //   sequence(elements)    occurrences() of each element, in order
 //
 // Joining fragments leaves splits with a single target, which only jump. A
-// last pass, compact(), points every instruction past them and keeps only the
-// instructions a run can reach, renumbered from 0 in the order a run meets
-// them.
+// last pass points every instruction past them; they stay in the program, and
+// no run reaches them.
 
 import { invariant } from "../invariant";
 import type { EventSchema, EventSchemaElement } from "./types";
@@ -96,8 +95,8 @@ const canMatchNothing = (element: EventSchemaElement): boolean => {
  *
  * The program prefers, in order: entering an optional element over skipping
  * it, repeating an element over leaving it, and earlier choice alternatives
- * over later ones. The program starts at 0, holds only the instructions a run
- * can reach, and no instruction targets a split with a single target.
+ * over later ones. Neither `start` nor any instruction targets a split with a
+ * single target.
  *
  * @throws {Error} When `schema` has no elements, a segment or group has no
  *   name, a group has no elements, a choice has no alternatives, or a choice
@@ -215,108 +214,45 @@ export function compile(schema: EventSchema): EventSchemaProgram {
     return [start, end];
   };
 
-  // The program counter a chain of single-target splits from `pc` lands on.
-  const landing = (pc: number): number => {
-    let at = pc;
-    for (let hops = 0; ; hops += 1) {
-      const instruction = code[at];
-      if (instruction?.op !== "split" || instruction.targets.length !== 1) {
-        return at;
-      }
-      invariant(hops < code.length, "a cycle of jumps");
-      at = instruction.targets[0] ?? at;
-    }
-  };
-
-  // Keeps only the instructions a run can reach from `from`, numbered in the
-  // order a depth-first walk meets them, most preferred successor first, and
-  // points every instruction past single-target splits. Such a split has one
-  // way out, and renumbering keeps the walk's order, so neither changes which
-  // instructions a thread reaches nor in what order.
-  const compact = (from: number): Instruction[] => {
-    // By old program counter, its new one (-1: not reached).
-    const renumbered = new Int32Array(code.length).fill(-1);
-    const order: Draft[] = [];
-    const pending = [from];
-    for (let pc = pending.pop(); pc !== undefined; pc = pending.pop()) {
-      const instruction = code[pc];
-      invariant(instruction !== undefined, "a successor is out of range");
-      if (renumbered[pc] !== -1) {
-        continue;
-      }
-      renumbered[pc] = order.length;
-      order.push(instruction);
-      switch (instruction.op) {
-        case "split": {
-          for (
-            let index = instruction.targets.length - 1;
-            index >= 0;
-            index -= 1
-          ) {
-            pending.push(landing(instruction.targets[index] ?? pc));
-          }
-          break;
-        }
-        case "segment":
-        case "any":
-        case "z":
-        case "open":
-        case "close": {
-          pending.push(landing(instruction.next));
-          break;
-        }
-        case "match": {
-          break;
-        }
-      }
-    }
-    const to = (pc: number): number => {
-      const renumberedPc = renumbered[landing(pc)] ?? -1;
-      invariant(renumberedPc !== -1, "a successor was not reached");
-      return renumberedPc;
-    };
-    const program: Instruction[] = [];
-    for (const instruction of order) {
-      switch (instruction.op) {
-        case "split": {
-          program.push({ op: "split", targets: instruction.targets.map(to) });
-          break;
-        }
-        case "segment": {
-          program.push({
-            id: instruction.id,
-            next: to(instruction.next),
-            op: "segment",
-          });
-          break;
-        }
-        case "any":
-        case "z":
-        case "close": {
-          program.push({ next: to(instruction.next), op: instruction.op });
-          break;
-        }
-        case "open": {
-          program.push({
-            name: instruction.name,
-            next: to(instruction.next),
-            op: "open",
-          });
-          break;
-        }
-        case "match": {
-          program.push(instruction);
-          break;
-        }
-      }
-    }
-    return program;
-  };
-
   if (schema.elements.length === 0) {
     throw invalid("it has no elements");
   }
   const [start, end] = sequence(schema.elements);
   jump(end, emit({ op: "match" }));
-  return { code: compact(landing(start)), segmentIds, start: 0 };
+  for (const instruction of code) {
+    switch (instruction.op) {
+      case "split": {
+        const { targets } = instruction;
+        for (const [index, target] of targets.entries()) {
+          targets[index] = landing(code, target);
+        }
+        break;
+      }
+      case "segment":
+      case "any":
+      case "z":
+      case "open":
+      case "close": {
+        instruction.next = landing(code, instruction.next);
+        break;
+      }
+      case "match": {
+        break;
+      }
+    }
+  }
+  return { code, segmentIds, start: landing(code, start) };
+}
+
+// The program counter a chain of single-target splits from `pc` lands on.
+function landing(code: readonly Draft[], pc: number): number {
+  let at = pc;
+  for (let hops = 0; ; hops += 1) {
+    const instruction = code[at];
+    if (instruction?.op !== "split" || instruction.targets.length !== 1) {
+      return at;
+    }
+    invariant(hops < code.length, "a cycle of jumps");
+    at = instruction.targets[0] ?? at;
+  }
 }
