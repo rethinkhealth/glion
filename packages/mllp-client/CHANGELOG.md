@@ -1,5 +1,18 @@
 # @glion/mllp-client
 
+## 0.21.0
+
+### Patch Changes
+
+- Updated dependencies [[`e38396e`](https://github.com/rethinkhealth/glion/commit/e38396e9962e203986aa27fc205c3f5bf992d153)]:
+  - @glion/util-query@0.21.0
+  - @glion/to-hl7v2@0.21.0
+  - @glion/ack@0.21.0
+  - @glion/ast@0.21.0
+  - @glion/mllp-codec@0.21.0
+  - @glion/parser@0.21.0
+  - @glion/util-charset@0.21.0
+
 ## 0.20.0
 
 ### Minor Changes

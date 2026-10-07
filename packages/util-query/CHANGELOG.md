@@ -1,5 +1,14 @@
 # @rethinkhealth/hl7v2-util-query
 
+## 0.21.0
+
+### Patch Changes
+
+- [#872](https://github.com/rethinkhealth/glion/pull/872) [`e38396e`](https://github.com/rethinkhealth/glion/commit/e38396e9962e203986aa27fc205c3f5bf992d153) Thanks [@meleksomai](https://github.com/meleksomai)! - A path can name a group whose name holds an underscore, such as `PATIENT_RESULT-ORDER_OBSERVATION[2]-OBX-5`. Such paths threw "Invalid HL7 path format" before, which left most of the standard's segment groups unaddressable ([#865](https://github.com/rethinkhealth/glion/issues/865)).
+- Updated dependencies []:
+  - @glion/ast@0.21.0
+  - @glion/utils@0.21.0
+
 ## 0.20.0
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@glion/transform-profile-groups",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "Unified plugin to group HL7v2 segments into the segment groups their event schema defines",
   "keywords": [
     "group",

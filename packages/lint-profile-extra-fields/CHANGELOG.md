@@ -1,5 +1,13 @@
 # @rethinkhealth/hl7v2-lint-profile-extra-fields
 
+## 0.21.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/ast@0.21.0
+  - @glion/util-visit@0.21.0
+
 ## 0.20.0
 
 ### Patch Changes
