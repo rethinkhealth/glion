@@ -1,0 +1,9 @@
+{
+  "extends": "@glion/tsconfig/library.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": ["src", "tests", "vitest.config.ts"]
+}
