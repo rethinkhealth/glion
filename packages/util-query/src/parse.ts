@@ -32,7 +32,7 @@ import type { GroupLocator, PathParts } from "./types";
  * - `ORDER-ORC-1` → ORDER is navigation, ORC is segment (has field access)
  */
 const PATH_REGEX =
-  /^((?:[A-Z][A-Z0-9]*(?:\[\d+\])?-)*)([A-Z][A-Z0-9]*)(?:\[(\d+)\])?(?:-(\d+)(?:(?:\[(\d+)\])?(?:\.(\d+)(?:\.(\d+))?)?)?)?$/;
+  /^((?:[A-Z][A-Z0-9_]*(?:\[\d+\])?-)*)([A-Z][A-Z0-9_]*)(?:\[(\d+)\])?(?:-(\d+)(?:(?:\[(\d+)\])?(?:\.(\d+)(?:\.(\d+))?)?)?)?$/;
 
 /**
  * Cache for parsed paths to avoid re-parsing the same path multiple times.
@@ -160,7 +160,7 @@ function parseImpl(path: string): PathParts {
   if (groupsRaw) {
     const groups: GroupLocator[] = [];
     for (const groupMatch of groupsRaw.matchAll(
-      /([A-Z][A-Z0-9]*)(?:\[(\d+)\])?-/g
+      /([A-Z][A-Z0-9_]*)(?:\[(\d+)\])?-/g
     )) {
       const name = groupMatch[1];
       if (!name) {
