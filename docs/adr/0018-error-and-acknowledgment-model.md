@@ -172,8 +172,8 @@ it must stand on its own there. This mirrors the lint-diagnostic style of
 - **Never leak secrets or full payloads** into the message; identifiers
   (control IDs, host/port) are fine, message bodies are not.
 
-Structure follows ADR 0003: `<what failed, with context> — <why / next step>`.
-Worked example (an actual fix this ADR motivated):
+The form of the string, whole sentences with the fact first and the next step in a second sentence, is set by [ADR 0026](./0026-message-strings.md), which replaces the `<what failed> — <why / next step>` structure of ADR 0003.
+Worked example (an actual fix this ADR motivated; its `—` predates ADR 0026):
 
 ```ts
 // Weak: no next step.
