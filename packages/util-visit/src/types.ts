@@ -45,10 +45,11 @@ export type Predicate = (node: Nodes, ancestors: Nodes[]) => boolean;
  * Based on unist-util-is Test but specialized for HL7v2 AST.
  *
  * Can be:
- * - string: matches `node.type`
- * - object: matches properties (partial match)
- * - function: predicate returning boolean or type guard
- * - null: matches everything
+ *
+ * - String: matches `node.type`
+ * - Object: matches properties (partial match)
+ * - Function: predicate returning boolean or type guard
+ * - Null: matches everything
  */
 export type Test<T extends Nodes = Nodes> =
   | string

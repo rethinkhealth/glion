@@ -8,6 +8,7 @@ import { parseHL7v2 } from "../src/parser";
  * Empty fields/components/repetitions are represented as `children: []`.
  *
  * Test organization:
+ *
  * 1. Basic structure creation
  * 2. Delimiter handling
  * 3. Empty node behavior

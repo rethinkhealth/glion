@@ -36,9 +36,7 @@
  * ```json
  * {
  *   "$schema": "https://raw.githubusercontent.com/rethinkhealth/hl7v2/main/packages/hl7v2-config/schema.json",
- *   "plugins": [
- *     "preset-lint-recommended"
- *   ],
+ *   "plugins": ["preset-lint-recommended"],
  *   "settings": {
  *     "delimiters": { "field": "|" }
  *   }

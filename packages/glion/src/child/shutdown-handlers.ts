@@ -24,9 +24,10 @@ type Exit = (code: number) => void;
  * of the MLLP server and then exit.
  *
  * Shutdown sequence on the first signal:
+ *
  * 1. Emit `closing` so the parent TUI updates status.
- * 2. Await `server.close()` — stops accepting new connections and
- * waits for in-flight messages to drain.
+ * 2. Await `server.close()` — stops accepting new connections and waits for
+ *    in-flight messages to drain.
  * 3. Emit `closed`, then `exit` with code 0 and the signal name.
  * 4. Call exit(0).
  *

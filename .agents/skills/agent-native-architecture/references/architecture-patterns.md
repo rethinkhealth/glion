@@ -118,12 +118,13 @@ main                        # Shared features, bug fixes
 ```
 
 **Change flow:**
-| Change Type | Work On | Then |
-|-------------|---------|------|
-| Core features | main | Merge to instance branches |
-| Bug fixes | main | Merge to instance branches |
-| Instance config | instance branch | Done |
-| Instance data | instance branch | Done |
+
+| Change Type     | Work On         | Then                       |
+| --------------- | --------------- | -------------------------- |
+| Core features   | main            | Merge to instance branches |
+| Bug fixes       | main            | Merge to instance branches |
+| Instance config | instance branch | Done                       |
+| Instance data   | instance branch | Done                       |
 
 **Sync tools:**
 

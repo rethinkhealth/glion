@@ -42,6 +42,7 @@ function tableIdToCodeSystemId(tableRef: string): string {
  * datatype (CWE/CNE), the table constrains CWE.1 — the first component's
  * first subcomponent. This plugin reads that value from each repetition,
  * resolves it against the UTG code system, and attaches:
+ *
  * - `field.data.codeSystem` — code system identity (same for all reps)
  * - `rep.data.code` — resolved value entry (different per rep)
  *

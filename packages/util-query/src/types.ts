@@ -108,4 +108,4 @@ export type InferNodeType<Path extends string> =
                   ? Field
                   : Segment | Group
                 : // No hyphen at all, could be segment or group
-                    Segment | Group;
+                  Segment | Group;

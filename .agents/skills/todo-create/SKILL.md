@@ -76,8 +76,8 @@ Load the `todo-triage` skill for an interactive approval workflow.
 ### Managing Dependencies
 
 ```yaml
-dependencies: ["002", "005"]  # Blocked by these issues
-dependencies: []               # No blockers
+dependencies: ["002", "005"] # Blocked by these issues
+dependencies: [] # No blockers
 ```
 
 To check blockers: search for `{dep_id}-complete-*.md` in both paths. Missing matches = incomplete blockers.

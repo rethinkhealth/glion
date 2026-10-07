@@ -68,7 +68,7 @@
     "husky": "9.1.7",
     "lint-staged": "16.4.0",
     "only-allow": "1.2.2",
-    "oxfmt": "0.47.0",
+    "oxfmt": "0.67.0",
     "oxlint": "1.62.0",
     "oxlint-plugin-complexity": "^2.1.8",
     "pkg-pr-new": "0.0.88",

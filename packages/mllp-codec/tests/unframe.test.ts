@@ -388,7 +388,7 @@ describe("unframe", () => {
           payloads.flatMap((p) => [VT, ...p, FS, CR])
         );
         const chunks: Uint8Array[] = [];
-        for (let at = 0; at < wire.length; ) {
+        for (let at = 0; at < wire.length;) {
           if (rand(10) === 0) {
             chunks.push(new Uint8Array(0));
           }

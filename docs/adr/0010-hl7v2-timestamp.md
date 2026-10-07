@@ -112,13 +112,7 @@ Precision is tracked as a 7-level union type and preserved through all operation
 
 ```typescript
 type Precision =
-  | "year"
-  | "month"
-  | "day"
-  | "hour"
-  | "minute"
-  | "second"
-  | "millisecond";
+  "year" | "month" | "day" | "hour" | "minute" | "second" | "millisecond";
 ```
 
 **Key behaviors:**
