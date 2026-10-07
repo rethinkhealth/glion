@@ -21,7 +21,7 @@ import { concatFrames, source, tilePayload } from "../fixtures/streams";
 const SMALL_MESSAGE_BYTES = new TextEncoder().encode(ADT_A01_MINIMAL);
 const SMALL_FRAME = frame(SMALL_MESSAGE_BYTES);
 const THOUSAND_SMALL_FRAMES = Array.from({ length: 1000 }, () => SMALL_FRAME);
-const TEN_SMALL_FRAMES_COALESCED = [concatFrames(SMALL_FRAME, 10)];
+const THOUSAND_SMALL_FRAMES_COALESCED = [concatFrames(SMALL_FRAME, 1000)];
 
 const TWO_MB_PAYLOAD = tilePayload(SMALL_MESSAGE_BYTES, 2 * 1024 * 1024);
 
@@ -60,8 +60,9 @@ describe("mllp-codec", () => {
     await drain(THOUSAND_SMALL_FRAMES);
   });
 
-  bench("mllp-codec: unframe 10 frames, 1 coalesced chunk", async () => {
-    await drain(TEN_SMALL_FRAMES_COALESCED);
+  // Ratio pair with the bench above: the same 1000 frames in one read.
+  bench("mllp-codec: unframe 1000 small frames, one coalesced chunk", async () => {
+    await drain(THOUSAND_SMALL_FRAMES_COALESCED);
   });
 
   // Ratio pair: same bytes, one chunk vs ~1024 chunks. Warm read together —
