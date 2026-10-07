@@ -11,8 +11,8 @@
 // Unlike Cox's VM, a match must cover the whole message, and a thread keeps its
 // full history rather than capture slots, so every occurrence of a group is
 // kept. As in RE2 and Rust's regex-automata, a schema is compiled once and its
-// program reused with its own scratch space, and addThread() walks with an
-// explicit stack rather than recursion, so a schema of any size fits.
+// program reused, and addThread() walks with an explicit stack rather than
+// recursion, so a schema of any size fits.
 //
 // A Z-segment the schema does not name may be passed over: the thread stays at
 // its instruction, and nest() places the segment after the one before it.
@@ -21,8 +21,8 @@
 // linear in the segment count times the program size.
 
 import { invariant } from "../invariant";
+import { memoize } from "../utils";
 import { ANY_SEGMENT, ANY_Z_SEGMENT, compile } from "./compile";
-import type { EventSchemaProgram } from "./compile";
 import type {
   EventSchema,
   RunnerOptions,
@@ -37,9 +37,6 @@ import type {
 // HL7v2 reserves segment IDs that start with Z for locally defined segments.
 const Z_SEGMENT_PREFIX = "Z";
 
-/** The largest generation a machine's `visited` marks can hold. */
-export const MAX_GENERATION = 2 ** 31 - 1;
-
 // One event in a thread's history, linked to the one before it.
 type Event = Readonly<{ previous: Event | undefined }> &
   (
@@ -52,71 +49,28 @@ type Event = Readonly<{ previous: Event | undefined }> &
 // A reading of the message so far: its program counter and its last event.
 type Thread = Readonly<{ pc: number; last: Event | undefined }>;
 
-// A schema's program and the scratch space its runs reuse. Every run of the
-// schema shares it, so a run MUST NOT call out or wait before it returns.
-interface Machine {
-  readonly program: EventSchemaProgram;
-  // The segment IDs the program names.
-  readonly named: ReadonlySet<string>;
+// The state of one run.
+interface Run {
+  // The threads still possible, in priority order.
+  threads: Thread[];
+  // How many segments have been stepped over.
+  generation: number;
   // By instruction, the generation that last reached it (-1: never). Bumping
   // the generation clears every mark at once.
   readonly visited: Int32Array;
-  generation: number;
   // Threads addThread() has yet to explore, most preferred on top, as two
   // parallel stacks: a pending thread costs no object.
   readonly pendingPcs: number[];
   readonly pendingEvents: (Event | undefined)[];
 }
 
+// A schema's program, compiled on its first run and reused for the object.
+const compileOnce = memoize(compile);
+
 interface OpenGroup {
   name: string;
   children: SegmentMatch[];
 }
-
-// ---------------------------------------------------------------------------
-// Machines: one per schema, compiled on its first run
-// ---------------------------------------------------------------------------
-
-const machines = new WeakMap<EventSchema, Machine>();
-
-/** The machine `schema` runs on: compiled on its first run, then reused. */
-export const machineOf = (schema: EventSchema): Machine => {
-  const known = machines.get(schema);
-  if (known) {
-    return known;
-  }
-  const program = compile(schema);
-  const named = new Set<string>();
-  for (const instruction of program.code) {
-    if (instruction.op === "segment") {
-      named.add(instruction.id);
-    }
-  }
-  const fresh: Machine = {
-    generation: 0,
-    named,
-    pendingEvents: [],
-    pendingPcs: [],
-    program,
-    visited: new Int32Array(program.code.length).fill(-1),
-  };
-  machines.set(schema, fresh);
-  return fresh;
-};
-
-/**
- * Readies `machine` for a run of `segments` segments: empties the stacks a
- * run that threw left behind, and clears the visited marks when the run's
- * generations would pass {@link MAX_GENERATION}.
- */
-export const beginRun = (machine: Machine, segments: number): void => {
-  machine.pendingPcs.length = 0;
-  machine.pendingEvents.length = 0;
-  if (machine.generation > MAX_GENERATION - segments - 1) {
-    machine.visited.fill(-1);
-    machine.generation = 0;
-  }
-};
 
 // ---------------------------------------------------------------------------
 // Runner
@@ -161,12 +115,15 @@ export function runner(
   // ----------------------------------------------------------------
   // Setup
 
-  const machine = machineOf(schema);
-  const { code, start } = machine.program;
+  const { code, segmentIds, start } = compileOnce(schema);
   const allowZSegments = options?.allowZSegments ?? true;
-  let threads: Thread[] = [];
-
-  beginRun(machine, input.length);
+  const run: Run = {
+    generation: 0,
+    pendingEvents: [],
+    pendingPcs: [],
+    threads: [],
+    visited: new Int32Array(code.length).fill(-1),
+  };
 
   // ----------------------------------------------------------------
   // Helpers
@@ -176,14 +133,14 @@ export function runner(
   // Depth first, most preferred target first: the first thread to reach an
   // instruction wins. Cox's addthread.
   const addThread = (pc: number, last?: Event): void => {
-    machine.pendingPcs.push(pc);
-    machine.pendingEvents.push(last);
+    run.pendingPcs.push(pc);
+    run.pendingEvents.push(last);
     for (
-      let next = machine.pendingPcs.pop();
+      let next = run.pendingPcs.pop();
       next !== undefined;
-      next = machine.pendingPcs.pop()
+      next = run.pendingPcs.pop()
     ) {
-      explore(next, machine.pendingEvents.pop());
+      explore(next, run.pendingEvents.pop());
     }
   };
 
@@ -196,10 +153,10 @@ export function runner(
     for (;;) {
       // Already reached for this segment by a preferred thread; this also
       // ends a cycle of splits.
-      if (machine.visited[pc] === machine.generation) {
+      if (run.visited[pc] === run.generation) {
         return;
       }
-      machine.visited[pc] = machine.generation;
+      run.visited[pc] = run.generation;
       const instruction = code[pc];
       invariant(instruction !== undefined, "a program counter is out of range");
       switch (instruction.op) {
@@ -207,7 +164,7 @@ export function runner(
         case "any":
         case "z":
         case "match": {
-          threads.push({ last, pc });
+          run.threads.push({ last, pc });
           return;
         }
         case "split": {
@@ -215,8 +172,8 @@ export function runner(
           for (let index = targets.length - 1; index > 0; index -= 1) {
             const target = targets[index];
             invariant(target !== undefined, "a split target is out of range");
-            machine.pendingPcs.push(target);
-            machine.pendingEvents.push(last);
+            run.pendingPcs.push(target);
+            run.pendingEvents.push(last);
           }
           const [first] = targets;
           invariant(first !== undefined, "a split has no target");
@@ -304,28 +261,27 @@ export function runner(
   // ----------------------------------------------------------------
   // Run
 
-  machine.generation += 1;
   addThread(start);
   for (const [index, name] of input.entries()) {
-    const current = threads;
-    threads = [];
-    machine.generation += 1;
+    const current = run.threads;
+    run.threads = [];
+    run.generation += 1;
     const passable =
       allowZSegments &&
       name.startsWith(Z_SEGMENT_PREFIX) &&
-      !machine.named.has(name);
+      !segmentIds.has(name);
     for (const thread of current) {
       step(thread, name, passable);
     }
-    if (threads.length === 0) {
+    if (run.threads.length === 0) {
       return { expected: expected(current), index, type: "mismatched" };
     }
   }
 
-  const accepted = threads.find(({ pc }) => code[pc]?.op === "match");
+  const accepted = run.threads.find(({ pc }) => code[pc]?.op === "match");
   return accepted
     ? { groups: nest(accepted.last), type: "matched" }
-    : { expected: expected(threads), type: "incomplete" };
+    : { expected: expected(run.threads), type: "incomplete" };
 }
 
 // ---------------------------------------------------------------------------

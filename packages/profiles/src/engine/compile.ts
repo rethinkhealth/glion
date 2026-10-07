@@ -23,8 +23,10 @@
 //   occurrences(element)  once(), wrapped for optional and repeating
 //   sequence(elements)    occurrences() of each element, in order
 //
-// Joining fragments leaves splits with a single target, which only jump. A
-// last pass, shrink(), points every instruction past them.
+// Joining fragments leaves splits with a single target, which only jump.
+// shrink() points every instruction past them, and compact() keeps only the
+// instructions a run can reach, renumbered from 0 in the order a run meets
+// them.
 
 import { invariant } from "../invariant";
 import type { EventSchema, EventSchemaElement } from "./types";
@@ -35,6 +37,8 @@ export type EventSchemaProgram = Readonly<{
   code: readonly Instruction[];
   /** The program counter a message starts at. */
   start: number;
+  /** The segment IDs the `segment` instructions consume. */
+  segmentIds: ReadonlySet<string>;
 }>;
 
 /**
@@ -69,17 +73,21 @@ type Draft =
   | { op: "close"; next: number }
   | { op: "match" };
 
-/** The instruction that consumes the segment a schema names `id`. */
-const consuming = (id: string, next: number): Draft => {
-  switch (id) {
-    case ANY_SEGMENT: {
-      return { next, op: "any" };
+/** The program counters `instruction` goes to, most preferred first. */
+const successors = (instruction: Draft): readonly number[] => {
+  switch (instruction.op) {
+    case "split": {
+      return instruction.targets;
     }
-    case ANY_Z_SEGMENT: {
-      return { next, op: "z" };
+    case "segment":
+    case "any":
+    case "z":
+    case "open":
+    case "close": {
+      return [instruction.next];
     }
-    default: {
-      return { id, next, op: "segment" };
+    case "match": {
+      return [];
     }
   }
 };
@@ -107,7 +115,8 @@ const canMatchNothing = (element: EventSchemaElement): boolean => {
  *
  * The program prefers, in order: entering an optional element over skipping
  * it, repeating an element over leaving it, and earlier choice alternatives
- * over later ones. No instruction targets a split with a single target.
+ * over later ones. The program starts at 0, holds only the instructions a run
+ * can reach, and no instruction targets a split with a single target.
  *
  * @throws {Error} When `schema` has no elements, a segment or group has no
  *   name, a group has no elements, a choice has no alternatives, or a choice
@@ -118,11 +127,28 @@ export function compile(schema: EventSchema): EventSchemaProgram {
     new Error(`Invalid event schema ${schema.id}: ${reason}`);
 
   const code: Draft[] = [];
+  const segmentIds = new Set<string>();
 
   // Adds an instruction and returns its program counter.
   const emit = (instruction: Draft): number => code.push(instruction) - 1;
 
   const split = (): number => emit({ op: "split", targets: [] });
+
+  // The instruction that consumes the segment a schema names `id`.
+  const consuming = (id: string, next: number): Draft => {
+    switch (id) {
+      case ANY_SEGMENT: {
+        return { next, op: "any" };
+      }
+      case ANY_Z_SEGMENT: {
+        return { next, op: "z" };
+      }
+      default: {
+        segmentIds.add(id);
+        return { id, next, op: "segment" };
+      }
+    }
+  };
 
   // Adds a target to the split at `from`. Call order is priority order.
   const jump = (from: number, target: number): void => {
@@ -246,11 +272,58 @@ export function compile(schema: EventSchema): EventSchemaProgram {
     }
   };
 
+  // Keeps only the instructions a run can reach from `from`, numbered in the
+  // order a depth-first walk meets them, most preferred successor first.
+  // Renumbering changes neither which instructions a thread reaches nor in
+  // what order.
+  const compact = (from: number): Instruction[] => {
+    // By old program counter, its new one (-1: not reached).
+    const renumbered = new Int32Array(code.length).fill(-1);
+    const order: Draft[] = [];
+    const pending = [from];
+    for (let pc = pending.pop(); pc !== undefined; pc = pending.pop()) {
+      const instruction = code[pc];
+      invariant(instruction !== undefined, "a successor is out of range");
+      if (renumbered[pc] === -1) {
+        renumbered[pc] = order.length;
+        order.push(instruction);
+        pending.push(...successors(instruction).toReversed());
+      }
+    }
+    const to = (pc: number): number => {
+      const renumberedPc = renumbered[pc] ?? -1;
+      invariant(renumberedPc !== -1, "a successor was not reached");
+      return renumberedPc;
+    };
+    const program: Instruction[] = [];
+    for (const instruction of order) {
+      switch (instruction.op) {
+        case "split": {
+          program.push({ op: "split", targets: instruction.targets.map(to) });
+          break;
+        }
+        case "segment":
+        case "any":
+        case "z":
+        case "open":
+        case "close": {
+          program.push({ ...instruction, next: to(instruction.next) });
+          break;
+        }
+        case "match": {
+          program.push(instruction);
+          break;
+        }
+      }
+    }
+    return program;
+  };
+
   if (schema.elements.length === 0) {
     throw invalid("it has no elements");
   }
   const [start, end] = sequence(schema.elements);
   jump(end, emit({ op: "match" }));
   shrink();
-  return { code, start: landing(start) };
+  return { code: compact(landing(start)), segmentIds, start: 0 };
 }

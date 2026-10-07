@@ -247,6 +247,38 @@ describe("compile", () => {
     }
   });
 
+  it("starts at 0 and holds only instructions a run can reach", () => {
+    const { code, start } = compile(ORU_R01_V2_5);
+    const reached = new Set<number>();
+    const pending = [start];
+    for (let pc = pending.pop(); pc !== undefined; pc = pending.pop()) {
+      const instruction = code[pc];
+      if (instruction && !reached.has(pc)) {
+        reached.add(pc);
+        switch (instruction.op) {
+          case "split": {
+            pending.push(...instruction.targets);
+            break;
+          }
+          case "segment":
+          case "any":
+          case "z":
+          case "open":
+          case "close": {
+            pending.push(instruction.next);
+            break;
+          }
+          case "match": {
+            break;
+          }
+        }
+      }
+    }
+
+    expect(start).toBe(0);
+    expect(reached.size).toBe(code.length);
+  });
+
   it("ends every program in one match instruction", () => {
     expect(
       compile(ORU_R01_V2_5).code.filter(({ op }) => op === "match")

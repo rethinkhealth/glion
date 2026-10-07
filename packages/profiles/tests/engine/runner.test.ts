@@ -4,12 +4,7 @@ import {
   seeded,
   validMessage,
 } from "../../scripts/check-bundle.mjs";
-import {
-  MAX_GENERATION,
-  beginRun,
-  machineOf,
-  runner,
-} from "../../src/engine/runner";
+import { runner } from "../../src/engine/runner";
 import type {
   EventSchema,
   EventSchemaElement,
@@ -462,33 +457,6 @@ describe("runner: Z-segments", () => {
 });
 
 describe("runner: a schema run more than once", () => {
-  it("compiles a schema object once", () => {
-    const schema = { ...ORU_R01_V2_5 };
-
-    expect(machineOf(schema)).toBe(machineOf(schema));
-    expect(machineOf(schema)).not.toBe(machineOf({ ...ORU_R01_V2_5 }));
-  });
-
-  it("clears the visited marks before a run's generations would pass the largest one", () => {
-    const machine = machineOf({ ...ORU_R01_V2_5 });
-    machine.generation = MAX_GENERATION - 3;
-    machine.visited.fill(MAX_GENERATION - 4);
-
-    beginRun(machine, 10);
-
-    expect(machine.generation).toBe(0);
-    expect(machine.visited.every((mark) => mark === -1)).toBe(true);
-  });
-
-  it("keeps the visited marks while a run's generations fit", () => {
-    const machine = machineOf({ ...ORU_R01_V2_5 });
-    machine.generation = MAX_GENERATION - 20;
-
-    beginRun(machine, 10);
-
-    expect(machine.generation).toBe(MAX_GENERATION - 20);
-  });
-
   it("gives a run after a mismatch the same result as a run on a fresh copy", () => {
     const schema = { ...ORU_R01_V2_5 };
     const message = ["MSH", "PID", "OBR", "OBX", "ORC", "OBR", "OBX"];
