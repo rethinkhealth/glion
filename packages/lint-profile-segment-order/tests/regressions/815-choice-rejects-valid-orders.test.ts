@@ -58,8 +58,13 @@ describe("ORM_O01 order detail choice", () => {
       "ODT|T"
     );
 
+    // Each further alternative reads as a new order without its ORC.
     expect(reasons).toEqual([
-      "Unexpected segment 'RQD'. Expected: BLG, CTD, CTI, DG1, FT1, NTE, OBX, ORC",
+      "Missing segment 'ORC' (before 'RQD', in ORDER)",
+      "Missing segment 'ORC' (before 'RQ1', in ORDER)",
+      "Missing segment 'ORC' (before 'RXO', in ORDER)",
+      "Missing segment 'ORC' (before 'ODS', in ORDER)",
+      "Missing segment 'ORC' (before 'ODT', in ORDER)",
     ]);
   });
 });

@@ -1,6 +1,6 @@
 import type { Nodes, Root, Segment } from "@glion/ast";
-import type { EventSchema } from "@glion/profiles";
-import { profiles, runner } from "@glion/profiles";
+import type { EventSchema, RepairEdit } from "@glion/profiles";
+import { profiles, repair, runner } from "@glion/profiles";
 import { value } from "@glion/util-query";
 import { SKIP, visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
@@ -49,9 +49,12 @@ export interface SegmentOrderOptions {
  * and MSH-9.2 when MSH-9.3 is empty. If the schema is unavailable, the rule
  * reports nothing.
  *
- * **Behavior**: Reports at most one order error per message: the first segment
- * the schema does not allow. A Z-segment the schema does not name is allowed
- * anywhere unless `allowZSegments` is `false`.
+ * **Behavior**: When the segments do not fit the schema, reports each edit of
+ * the repair with the fewest: each segment the schema requires and the message
+ * does not have, on the segment it comes before or on the message at its end,
+ * and each segment the message has and the schema does not allow there, on
+ * that segment. A Z-segment the schema does not name is allowed anywhere
+ * unless `allowZSegments` is `false`.
  *
  * @example
  *   ```typescript
@@ -91,6 +94,26 @@ const schemaOf = async (tree: Root): Promise<EventSchema | undefined> => {
   return await profiles.events.load(version, id);
 };
 
+/**
+ * The report for one edit of a repair: the segment, where it is in the
+ * message, and the IDs of the groups it sits in.
+ */
+const reasonOf = (edit: RepairEdit, input: readonly string[]): string => {
+  const groups = edit.path.length > 0 ? `, in ${edit.path.join(" > ")}` : "";
+  switch (edit.type) {
+    case "missing": {
+      const before = input[edit.index];
+      const where = before === undefined ? "at the end" : `before '${before}'`;
+      return `Missing segment '${edit.segment}' (${where}${groups})`;
+    }
+    case "unexpected": {
+      const after = input[edit.index - 1];
+      const where = after === undefined ? "at the start" : `after '${after}'`;
+      return `Unexpected segment '${edit.segment}' (${where}${groups})`;
+    }
+  }
+};
+
 const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
   {
     origin: "hl7v2-lint:segment-order",
@@ -113,34 +136,19 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
       return SKIP;
     });
 
-    const result = runner(
-      schema,
-      segments.map(({ node }) => node.name),
-      { allowZSegments: options?.allowZSegments }
-    );
+    const input = segments.map(({ node }) => node.name);
+    const runOptions = { allowZSegments: options?.allowZSegments };
+    if (runner(schema, input, runOptions).type === "matched") {
+      return;
+    }
 
-    switch (result.type) {
-      case "matched": {
-        break;
-      }
-      case "mismatched": {
-        const { ancestors, node } = segments[
-          result.index
-        ] as (typeof segments)[number];
-        const reason =
-          result.expected.length > 0
-            ? `Unexpected segment '${node.name}'. Expected: ${result.expected.join(", ")}`
-            : `Unexpected segment '${node.name}'`;
-        file.message(reason, { ancestors, place: node.position });
-        break;
-      }
-      case "incomplete": {
-        file.message(
-          `Message ended prematurely. Expected: ${result.expected.join(", ")}`,
-          { ancestors: [tree], place: tree.position }
-        );
-        break;
-      }
+    for (const edit of repair(schema, input, runOptions).edits) {
+      // A missing segment at the end is reported on the message.
+      const { ancestors, node } = segments[edit.index] ?? {
+        ancestors: [tree],
+        node: tree,
+      };
+      file.message(reasonOf(edit, input), { ancestors, place: node.position });
     }
   }
 );

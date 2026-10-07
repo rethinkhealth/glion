@@ -4,7 +4,7 @@ Lint rule that validates HL7v2 segment order against the event schema defined by
 
 ## What it does
 
-Walks the parsed tree segment-by-segment, feeding each segment name to a runner over the event schema from `@glion/profiles`. Reports one message for the first segment that is not valid at its position, or for a message that ends before the schema is complete. When no `definition` is given, the rule resolves the schema from MSH-9 and MSH-12.
+Runs the message's segment IDs through the event schema from `@glion/profiles`. When they do not fit, reads the message as the one the schema accepts with the fewest edits and reports each edit: a segment the schema requires and the message does not have, or a segment the message has and the schema does not allow there. When no `definition` is given, the rule resolves the schema from MSH-9 and MSH-12.
 
 ## Install
 
@@ -124,7 +124,7 @@ declare const hl7v2LintSegmentOrder: Plugin<[SegmentOrderOptions?], Root>;
 export default hl7v2LintSegmentOrder;
 ```
 
-All messages use `ruleId: "segment-order"` and `source: "hl7v2-lint"`. The rule reports at most one order error per message: the first segment the schema does not allow.
+All messages use `ruleId: "segment-order"` and `source: "hl7v2-lint"`. The rule reports each edit of the repair with the fewest edits, as `repair` in `@glion/profiles` finds it.
 
 ## What it checks
 
@@ -151,24 +151,44 @@ ZPD|1|site patient data
 PV1|1|I|WARD^101^1
 ```
 
-### Invalid — unexpected segment
+### Invalid — missing segment
 
-`PID` appears before `EVN` in an `ADT_A01`:
+An `ORU_R01` order with results and no `OBR`:
+
+```hl7
+MSH|^~\&|LAB|FAC|EMR|RFAC|20250601120000||ORU^R01^ORU_R01|MSG00001|P|2.5
+PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
+OBX|1|NM|WBC||5.0
+OBX|2|NM|RBC||4.5
+```
+
+Reported message:
+
+```
+Missing segment 'OBR' (before 'OBX', in PATIENT_RESULT > ORDER_OBSERVATION)
+```
+
+A missing segment is reported on the segment it comes before, with the IDs of the groups it belongs in, outermost first.
+
+### Invalid — more than one missing segment
+
+An `ADT_A01` without its `EVN` and its `PV1`:
 
 ```hl7
 MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5
 PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 ```
 
-Reported message:
+Reported messages:
 
 ```
-Unexpected segment 'PID'. Expected: EVN, SFT
+Missing segment 'EVN' (before 'PID')
+Missing segment 'PV1' (at the end)
 ```
 
-The offending segment name and the segments valid at that position, sorted, are interpolated.
+A segment missing at the end of the message is reported on the message.
 
-### Invalid — segment after the end of the message
+### Invalid — unexpected segment
 
 `DSC` ends an `ORU_R01`, so no segment may follow it:
 
@@ -184,28 +204,14 @@ PID|2||PATID5678^^^HOSP^MR||DOE^JOHN||19750101|M
 Reported message:
 
 ```
-Unexpected segment 'PID'
+Unexpected segment 'PID' (after 'DSC')
 ```
 
-When no segment is valid at that position, the message lists none.
+An unexpected segment is reported on itself, with the segment before it and the IDs of that segment's groups. A segment in place of a required one is reported as unexpected, and the required one as missing.
 
-### Invalid — message ended prematurely
+### Which edits
 
-All segments were consumed but the schema still requires more; an `ADT_A01` needs a `PV1`:
-
-```hl7
-MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5
-EVN|A01|20250601120000
-PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
-```
-
-Reported message:
-
-```
-Message ended prematurely. Expected: NK1, PD1, PV1, ROL
-```
-
-The list is the segments valid after the last one, sorted. Only reported when no other validation error was emitted.
+Of the repairs with the fewest edits, the rule reports one with the fewest unexpected segments: in `ORU_R01`, `MSH PID OBR OBX ORC OBX` reports `OBR` missing before the last `OBX`, not `ORC` unexpected.
 
 ### No schema
 

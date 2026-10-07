@@ -72,7 +72,7 @@ describe("hl7v2LintSegmentOrder", () => {
       expect(file.messages).toHaveLength(0);
     });
 
-    it("reports an unexpected segment nested in a group", async () => {
+    it("reports segments out of order nested in a group", async () => {
       const tree = m(s("MSH"), g("PATIENT", s("PV1"), s("PID")));
       const file = new VFile();
 
@@ -80,10 +80,10 @@ describe("hl7v2LintSegmentOrder", () => {
         .use(hl7v2LintSegmentOrder, { definition: MSH_PID_PV1 })
         .run(tree, file);
 
-      expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]?.message).toBe(
-        "Unexpected segment 'PV1'. Expected: PID"
-      );
+      expect(file.messages.map((message) => message.reason)).toEqual([
+        "Missing segment 'PID' (before 'PV1')",
+        "Unexpected segment 'PID' (after 'PV1')",
+      ]);
     });
   });
 
@@ -104,7 +104,8 @@ describe("hl7v2LintSegmentOrder", () => {
 
       expect(seen).toEqual([tree, file]);
       expect(file.messages.map((message) => message.reason)).toEqual([
-        "Unexpected segment 'PV1'. Expected: PID",
+        "Missing segment 'PID' (before 'PV1')",
+        "Unexpected segment 'PV1' (after 'MSH')",
       ]);
     });
 
@@ -119,7 +120,8 @@ describe("hl7v2LintSegmentOrder", () => {
         .run(tree, file);
 
       expect(file.messages.map((message) => message.reason)).toEqual([
-        expect.stringMatching(/^Unexpected segment 'PV1'\. Expected: /),
+        "Missing segment 'EVN' (before 'PV1')",
+        "Missing segment 'PID' (before 'PV1')",
       ]);
     });
 
@@ -151,13 +153,13 @@ describe("hl7v2LintSegmentOrder", () => {
 
       // ADT_A01 requires PV1 after PID: the report proves the fallback loaded.
       expect(file.messages.map((message) => message.reason)).toEqual([
-        expect.stringMatching(/^Message ended prematurely\. Expected: .*PV1/),
+        "Missing segment 'PV1' (at the end)",
       ]);
     });
   });
 
   describe("invalid segment order", () => {
-    it("reports unexpected segment", async () => {
+    it("reports a segment in place of a required one as unexpected, and the required one as missing", async () => {
       const tree = m(s("MSH"), s("INVALID"));
       const file = new VFile();
 
@@ -165,12 +167,18 @@ describe("hl7v2LintSegmentOrder", () => {
         .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
-      expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]).toMatchObject({
-        message: "Unexpected segment 'INVALID'. Expected: PID",
-        ruleId: "segment-order",
-        source: "hl7v2-lint",
-      });
+      expect(file.messages).toMatchObject([
+        {
+          message: "Missing segment 'PID' (before 'INVALID')",
+          ruleId: "segment-order",
+          source: "hl7v2-lint",
+        },
+        {
+          message: "Unexpected segment 'INVALID' (after 'MSH')",
+          ruleId: "segment-order",
+          source: "hl7v2-lint",
+        },
+      ]);
     });
 
     it("reports a segment with an empty ID as unexpected", async () => {
@@ -182,11 +190,12 @@ describe("hl7v2LintSegmentOrder", () => {
         .run(tree, file);
 
       expect(file.messages.map((message) => message.reason)).toEqual([
-        "Unexpected segment ''. Expected: PID",
+        "Missing segment 'PID' (before '')",
+        "Unexpected segment '' (after 'MSH')",
       ]);
     });
 
-    it("reports a malformed segment ID once, and nothing after it", async () => {
+    it("reports a malformed segment ID as unexpected, and the segment it stands for as missing", async () => {
       const tree = m(s("MSH"), s("PIDX"), s("PV1"));
       const file = new VFile();
 
@@ -195,11 +204,12 @@ describe("hl7v2LintSegmentOrder", () => {
         .run(tree, file);
 
       expect(file.messages.map((message) => message.reason)).toEqual([
-        "Unexpected segment 'PIDX'. Expected: PID",
+        "Missing segment 'PID' (before 'PIDX')",
+        "Unexpected segment 'PIDX' (after 'MSH')",
       ]);
     });
 
-    it("stops at first invalid segment", async () => {
+    it("reports each missing and each unexpected segment, not only the first", async () => {
       const tree = m(s("MSH"), s("WRONG1"), s("WRONG2"));
       const file = new VFile();
 
@@ -207,14 +217,46 @@ describe("hl7v2LintSegmentOrder", () => {
         .use(hl7v2LintSegmentOrder, { definition: MSH_PID_PV1 })
         .run(tree, file);
 
-      // Only reports the first invalid segment
-      expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]?.message).toContain("WRONG1");
+      expect(file.messages.map((message) => message.reason)).toEqual([
+        "Missing segment 'PID' (before 'WRONG1')",
+        "Missing segment 'PV1' (before 'WRONG1')",
+        "Unexpected segment 'WRONG1' (after 'MSH')",
+        "Unexpected segment 'WRONG2' (after 'WRONG1')",
+      ]);
     });
   });
 
-  describe("premature end", () => {
-    it("reports missing required segments", async () => {
+  describe("reports in groups", () => {
+    const lintOru = async (...segmentIds: string[]) => {
+      const schema = await profiles.events.load("2.5", "ORU_R01");
+      const file = new VFile();
+      await unified()
+        .use(hl7v2LintSegmentOrder, { definition: schema })
+        .run(m(...segmentIds.map((id) => s(id))), file);
+      return file.messages.map((message) => message.reason);
+    };
+
+    it("names the groups a missing segment belongs in", async () => {
+      expect(await lintOru("MSH", "PID", "OBX", "OBX")).toEqual([
+        "Missing segment 'OBR' (before 'OBX', in PATIENT_RESULT > ORDER_OBSERVATION)",
+      ]);
+    });
+
+    it("names the groups of the segment before an unexpected one", async () => {
+      expect(await lintOru("MSH", "PID", "OBR", "OBX", "PV1", "OBX")).toEqual([
+        "Unexpected segment 'PV1' (after 'OBX', in PATIENT_RESULT > ORDER_OBSERVATION > OBSERVATION)",
+      ]);
+    });
+
+    it("reads a segment that starts a new group as that group's, with its first segment missing", async () => {
+      expect(await lintOru("MSH", "PID", "OBR", "OBX", "ORC", "OBX")).toEqual([
+        "Missing segment 'OBR' (before 'OBX', in PATIENT_RESULT > ORDER_OBSERVATION)",
+      ]);
+    });
+  });
+
+  describe("missing at the end", () => {
+    it("reports a required segment missing at the end, on the message", async () => {
       const tree = m(s("MSH"));
       const file = new VFile();
 
@@ -222,15 +264,17 @@ describe("hl7v2LintSegmentOrder", () => {
         .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
-      expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]).toMatchObject({
-        message: "Message ended prematurely. Expected: PID",
-        ruleId: "segment-order",
-        source: "hl7v2-lint",
-      });
+      expect(file.messages).toMatchObject([
+        {
+          message: "Missing segment 'PID' (at the end)",
+          place: tree.position,
+          ruleId: "segment-order",
+          source: "hl7v2-lint",
+        },
+      ]);
     });
 
-    it("reports for empty message", async () => {
+    it("reports every required segment of an empty message as missing", async () => {
       const tree = m();
       const file = new VFile();
 
@@ -238,15 +282,15 @@ describe("hl7v2LintSegmentOrder", () => {
         .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
-      expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]?.message).toContain(
-        "Message ended prematurely. Expected: MSH"
-      );
+      expect(file.messages.map((message) => message.reason)).toEqual([
+        "Missing segment 'MSH' (at the end)",
+        "Missing segment 'PID' (at the end)",
+      ]);
     });
   });
 
   describe("position tracking", () => {
-    it("attaches segment position to error", async () => {
+    it("places a missing segment's report on the segment it comes before, and an unexpected segment's on itself", async () => {
       const mshSegment = s("MSH");
       mshSegment.position = {
         end: { column: 10, line: 1, offset: 9 },
@@ -266,11 +310,10 @@ describe("hl7v2LintSegmentOrder", () => {
         .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
-      expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]?.place).toStrictEqual({
-        end: { column: 20, line: 2, offset: 29 },
-        start: { column: 1, line: 2, offset: 10 },
-      });
+      expect(file.messages.map((message) => message.place)).toStrictEqual([
+        invalidSegment.position,
+        invalidSegment.position,
+      ]);
     });
 
     it("handles segment without position gracefully", async () => {
@@ -281,8 +324,10 @@ describe("hl7v2LintSegmentOrder", () => {
         .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
-      expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]?.place).toBeUndefined();
+      expect(file.messages.map((message) => message.place)).toStrictEqual([
+        undefined,
+        undefined,
+      ]);
     });
   });
 
@@ -322,7 +367,7 @@ describe("hl7v2LintSegmentOrder", () => {
 
       // ADT_A01 requires PV1 after PID: the report proves the schema loaded.
       expect(file.messages.map((message) => message.reason)).toEqual([
-        expect.stringMatching(/^Message ended prematurely\. Expected: .*PV1/),
+        "Missing segment 'PV1' (at the end)",
       ]);
     });
 
@@ -424,7 +469,7 @@ describe("hl7v2LintSegmentOrder", () => {
 
       // ADT_A01 requires PV1 after PID: the report proves the schema loaded.
       expect(file.messages.map((message) => message.reason)).toEqual([
-        expect.stringMatching(/^Message ended prematurely\. Expected: .*PV1/),
+        "Missing segment 'PV1' (at the end)",
       ]);
     });
   });

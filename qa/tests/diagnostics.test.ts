@@ -190,14 +190,19 @@ describe("QR2: diagnostic precision", () => {
       expect(file.messages[0]!.ruleId).toBe("message-version");
     });
 
-    it("invalid-segment-header-length.hl7 produces exactly 3 diagnostics", async () => {
+    it("invalid-segment-header-length.hl7 produces exactly 7 diagnostics", async () => {
       const source = readFixture("invalid-segment-header-length.hl7");
       const file = await parseHL7v2.process(source);
 
-      expect(file.messages).toHaveLength(3);
+      // segment-order: EVN, PID, and PV1 missing; PIDX and PV unexpected.
+      expect(file.messages).toHaveLength(7);
       expect(file.messages.map((m) => m.ruleId)).toStrictEqual([
         "segment-header-length",
         "segment-header-length",
+        "segment-order",
+        "segment-order",
+        "segment-order",
+        "segment-order",
         "segment-order",
       ]);
     });
