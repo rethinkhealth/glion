@@ -8,6 +8,6 @@
     "types": ["node", "vitest/globals"],
     "allowJs": true
   },
-  "include": [".", "../src"],
+  "include": [".", "../src", "../scripts/compile-schema.ts"],
   "exclude": ["../src/profiles/v*", "../src/profiles/utg"]
 }

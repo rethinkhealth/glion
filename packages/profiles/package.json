@@ -45,7 +45,8 @@
     "publint": "publint --strict",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "schema:compile": "tsx scripts/compile-schema.ts"
   },
   "dependencies": {
     "@glion/utils": "workspace:*",
@@ -64,6 +65,7 @@
     "publint": "0.3.18",
     "rolldown": "1.0.0-rc.17",
     "tsdown": "0.21.10",
+    "tsx": "4.23.13",
     "typescript": "6.0.3",
     "unist": "^0.0.1",
     "vitest": "4.1.11"
