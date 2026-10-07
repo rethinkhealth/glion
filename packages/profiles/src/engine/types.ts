@@ -115,7 +115,10 @@ export type RunnerMismatched = Readonly<{
   type: "mismatched";
   /** The index in the input of the first segment that does not fit. */
   index: number;
-  /** The segment IDs valid at that position, sorted. */
+  /**
+   * The segment IDs valid at that position, sorted. Empty when the message is
+   * complete before that segment.
+   */
   expected: readonly string[];
 }>;
 
