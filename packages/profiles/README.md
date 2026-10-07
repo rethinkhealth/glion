@@ -131,14 +131,13 @@ runner(schema, ["MSH", "PID", "ZPI", "OBR", "OBX"], { allowZSegments: false });
 
 ### `repair(schema, segmentIds[, options])`
 
-Reads a message's segment IDs as the message the event schema accepts with the fewest edits. An edit is a missing segment, one the schema requires and the message does not have, or an unexpected segment, one the message has and the schema does not allow there. Returns:
+Reads a message's segment IDs as the message the event schema accepts with the fewest edits, and returns the edits in message order; none when the segments fit. An edit is a missing segment, one the schema requires and the message does not have, or an unexpected segment, one the message has and the schema does not allow there:
 
-| Field    | Meaning                                                                                                                                                     |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `edits`  | The edits, in message order; empty when the segments fit. Each has `type` (`"missing"` or `"unexpected"`), `segment` (the segment ID), `index`, and `path`. |
-| `groups` | The segment indexes nested in the groups of the repaired message. For a message that fits, the groups `runner` returns.                                     |
-
-For a missing segment, `index` is the index of the segment it comes before, or the number of segments when it comes at the end, and `path` holds the IDs of the groups it belongs in, outermost first. A missing segment has no index in `groups`. For an unexpected segment, `index` is its own index, and `path` holds the IDs of the groups of the segment before it, where `groups` places it.
+| Field     | Missing (`type: "missing"`)                                                                                 | Unexpected (`type: "unexpected"`)                               |
+| --------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `segment` | The segment ID, as the schema names it                                                                      | The segment ID                                                  |
+| `index`   | Where it would be inserted, as by `segmentIds.splice(index, 0, segment)`; the number of segments at the end | Its index in `segmentIds`                                       |
+| `path`    | The IDs of the groups it belongs in, outermost first                                                        | The IDs of the groups of the segment before it, outermost first |
 
 ```ts
 import { profiles, repair } from "@glion/profiles";
@@ -146,14 +145,12 @@ import { profiles, repair } from "@glion/profiles";
 const schema = await profiles.events.load("2.5", "ORU_R01");
 
 repair(schema, ["MSH", "PID", "OBX", "OBX"]);
-// { edits: [{ type: "missing", segment: "OBR", index: 2,
-//             path: ["PATIENT_RESULT", "ORDER_OBSERVATION"] }],
-//   groups: [0, { id: "PATIENT_RESULT", … }] }
+// [{ type: "missing", segment: "OBR", index: 2,
+//    path: ["PATIENT_RESULT", "ORDER_OBSERVATION"] }]
 
 repair(schema, ["MSH", "PID", "OBR", "OBX", "PV1", "OBX"]);
-// { edits: [{ type: "unexpected", segment: "PV1", index: 4,
-//             path: ["PATIENT_RESULT", "ORDER_OBSERVATION", "OBSERVATION"] }],
-//   groups: [0, { id: "PATIENT_RESULT", … }] }
+// [{ type: "unexpected", segment: "PV1", index: 4,
+//    path: ["PATIENT_RESULT", "ORDER_OBSERVATION", "OBSERVATION"] }]
 ```
 
 Of repairs with as many edits, `repair` returns one with the fewest unexpected segments; of those, the first in the runner's order, where at each segment the schema's reading comes first, then passing over a Z-segment, then the segment as unexpected in place of the schema's segment there, as missing, then a missing segment, then an unexpected one. A segment out of place is reported next to the segment it displaces: in `ADT_A01`, `MSH PIDX PV` reads as `EVN` missing and `PIDX` unexpected, then `PID` missing and `PV` unexpected, then `PV1` missing at the end. `MSH PID OBR OBX ORC OBX` reads as an `OBR` missing before the last `OBX`, not as an unexpected `ORC`. A Z-segment the schema does not name costs no edit unless `allowZSegments` is `false`, as for `runner`. Runs in time and memory proportional to the number of segments times the size of the schema, and shares the compiled schema with `runner`.
@@ -177,20 +174,20 @@ Of repairs with as many edits, `repair` returns one with the fewest unexpected s
 
 ### Glion names
 
-| Name                                            | Meaning                                                                                                                                                                                                                   |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Profile                                         | The data this package bundles about one thing in one version: an event schema, a segment's fields, a datatype, a table, or the version's segments. Code systems are the one kind without a version.                       |
-| Event schema (`EventSchema`)                    | The structure an event's messages follow: its segments in order, nested in groups and choices, as the standard defines it. Its `id` is the message structure ID.                                                          |
-| Event map (`EventMap`)                          | For each version, the event schema ID each event and each schema ID maps to, such as `ADT_A04` → `ADT_A01`.                                                                                                               |
-| Element (`EventSchemaElement`)                  | One node of an event schema: a segment (`SegmentElement`), a named group of elements (`GroupElement`), or a choice between alternatives (`ChoiceElement`).                                                                |
-| Occurrence (`Occurrence`)                       | Every element's `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). An element that is neither occurs exactly once.                                                                                            |
-| Z-segment                                       | A locally defined segment: its ID starts with `Z`. HL7v2 allows one in any message and segment group.                                                                                                                     |
-| `anyZSegment`                                   | A segment element that matches any Z-segment. The HL7 v2 XML schemas use it for a site's Z-segment, as in MFN_M01.                                                                                                        |
-| `Hxx`                                           | A segment element that matches any segment ID.                                                                                                                                                                            |
-| Runner (`runner`)                               | Runs a message's segment IDs through an event schema once: validates their order and groups them. Its result (`RunnerResult`) is `matched`, `mismatched`, or `incomplete`.                                                |
-| Repair (`repair`)                               | Reads a message's segment IDs as the message an event schema accepts with the fewest edits (`RepairEdit`): missing segments (`RepairMissing`) and unexpected segments (`RepairUnexpected`). Its result is `RepairResult`. |
-| Groups (`SegmentMatch`, `GroupMatch`)           | What a `matched` result carries: each segment's index in the message, nested in the group occurrences (`GroupMatch`) it belongs to.                                                                                       |
-| Store (`profiles.events`, `profiles.fields`, …) | The loader of one kind of profile: `load(version, id)` resolves the profile, or `undefined` for one it does not bundle.                                                                                                   |
+| Name                                            | Meaning                                                                                                                                                                                                           |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Profile                                         | The data this package bundles about one thing in one version: an event schema, a segment's fields, a datatype, a table, or the version's segments. Code systems are the one kind without a version.               |
+| Event schema (`EventSchema`)                    | The structure an event's messages follow: its segments in order, nested in groups and choices, as the standard defines it. Its `id` is the message structure ID.                                                  |
+| Event map (`EventMap`)                          | For each version, the event schema ID each event and each schema ID maps to, such as `ADT_A04` → `ADT_A01`.                                                                                                       |
+| Element (`EventSchemaElement`)                  | One node of an event schema: a segment (`SegmentElement`), a named group of elements (`GroupElement`), or a choice between alternatives (`ChoiceElement`).                                                        |
+| Occurrence (`Occurrence`)                       | Every element's `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). An element that is neither occurs exactly once.                                                                                    |
+| Z-segment                                       | A locally defined segment: its ID starts with `Z`. HL7v2 allows one in any message and segment group.                                                                                                             |
+| `anyZSegment`                                   | A segment element that matches any Z-segment. The HL7 v2 XML schemas use it for a site's Z-segment, as in MFN_M01.                                                                                                |
+| `Hxx`                                           | A segment element that matches any segment ID.                                                                                                                                                                    |
+| Runner (`runner`)                               | Runs a message's segment IDs through an event schema once: validates their order and groups them. Its result (`RunnerResult`) is `matched`, `mismatched`, or `incomplete`.                                        |
+| Repair (`repair`)                               | Reads a message's segment IDs as the message an event schema accepts with the fewest edits (`RepairEdit`): missing segments (`RepairMissing`) and unexpected segments (`RepairUnexpected`). It returns the edits. |
+| Groups (`SegmentMatch`, `GroupMatch`)           | What a `matched` result carries: each segment's index in the message, nested in the group occurrences (`GroupMatch`) it belongs to.                                                                               |
+| Store (`profiles.events`, `profiles.fields`, …) | The loader of one kind of profile: `load(version, id)` resolves the profile, or `undefined` for one it does not bundle.                                                                                           |
 
 ### Naming convention
 

@@ -11,7 +11,6 @@ export type {
   Occurrence,
   RepairEdit,
   RepairMissing,
-  RepairResult,
   RepairUnexpected,
   RunnerIncomplete,
   RunnerMatched,

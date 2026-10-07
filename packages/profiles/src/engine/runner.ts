@@ -28,13 +28,25 @@ import {
   compileOnce,
 } from "./compile";
 import type { Instruction } from "./compile";
-import { nest } from "./history";
-import type { Event } from "./history";
-import type { EventSchema, RunnerOptions, RunnerResult } from "./types";
+import type {
+  EventSchema,
+  RunnerOptions,
+  RunnerResult,
+  SegmentMatch,
+} from "./types";
 
 // ---------------------------------------------------------------------------
 // Constants and types
 // ---------------------------------------------------------------------------
+
+// One event in a thread's history, linked to the one before it.
+type Event = Readonly<{ previous: Event | undefined }> &
+  (
+    | Readonly<{ kind: "consumed" }>
+    | Readonly<{ kind: "passed-over" }>
+    | Readonly<{ kind: "open"; id: string; name: string }>
+    | Readonly<{ kind: "close" }>
+  );
 
 // A reading of the message so far: its program counter and its last event.
 type Thread = Readonly<{ pc: number; last: Event | undefined }>;
@@ -54,6 +66,12 @@ interface Run {
   // parallel stacks: a pending thread costs no object.
   readonly pendingPcs: number[];
   readonly pendingEvents: (Event | undefined)[];
+}
+
+interface OpenGroup {
+  id: string;
+  name: string;
+  children: SegmentMatch[];
 }
 
 // ---------------------------------------------------------------------------
@@ -282,4 +300,49 @@ function expected(
     }
   }
   return [...found].toSorted();
+}
+
+// ---------------------------------------------------------------------------
+// Nesting
+// ---------------------------------------------------------------------------
+
+// Replays the accepted thread's events into nested groups.
+function nest(last: Event | undefined): SegmentMatch[] {
+  const events: Event[] = [];
+  for (let event = last; event; event = event.previous) {
+    events.push(event);
+  }
+
+  const root: SegmentMatch[] = [];
+  const open: OpenGroup[] = [];
+  let previousSiblings = root;
+  let index = 0;
+  for (const event of events.toReversed()) {
+    switch (event.kind) {
+      case "consumed": {
+        previousSiblings = open.at(-1)?.children ?? root;
+        previousSiblings.push(index);
+        index += 1;
+        break;
+      }
+      case "passed-over": {
+        previousSiblings.push(index);
+        index += 1;
+        break;
+      }
+      case "open": {
+        open.push({ children: [], id: event.id, name: event.name });
+        break;
+      }
+      case "close": {
+        const group = open.pop();
+        invariant(group !== undefined, "an event closes a group never opened");
+        if (group.children.length > 0) {
+          (open.at(-1)?.children ?? root).push(group);
+        }
+        break;
+      }
+    }
+  }
+  return root;
 }

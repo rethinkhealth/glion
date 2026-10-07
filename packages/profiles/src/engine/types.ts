@@ -129,22 +129,24 @@ export type RunnerIncomplete = Readonly<{
   expected: readonly string[];
 }>;
 
-// ---------------------------------------------------------------------------
-// Repair result
-// ---------------------------------------------------------------------------
-
-/** What `repair()` returns: the fewest edits that make the segments fit. */
-export type RepairResult = Readonly<{
-  /** The edits, in input order. Empty when the segments fit the schema. */
-  edits: readonly RepairEdit[];
-  /**
-   * The segment indexes and group occurrences of the repaired message, in
-   * input order. A missing segment has no index.
-   */
-  groups: readonly SegmentMatch[];
+/** One occurrence of a group in a match. Holds at least one segment. */
+export type GroupMatch = Readonly<{
+  /** The group ID, such as `PATIENT_RESULT`. */
+  id: string;
+  /** The group name, such as `Patient Result`. */
+  name: string;
+  /** The segment indexes and nested group occurrences, in input order. */
+  children: readonly SegmentMatch[];
 }>;
 
-/** One edit of a repair, discriminated by `type`. */
+// ---------------------------------------------------------------------------
+// Repair
+// ---------------------------------------------------------------------------
+
+/**
+ * One edit of what `repair()` returns, discriminated by `type`: the fewest
+ * edits that make the segments fit.
+ */
 export type RepairEdit = RepairMissing | RepairUnexpected;
 
 /** A segment the schema requires and the message does not have. */
@@ -153,8 +155,8 @@ export type RepairMissing = Readonly<{
   /** The segment ID, as the schema names it, such as `OBR`. */
   segment: string;
   /**
-   * The index in the input of the segment it comes before; the input length
-   * when it comes at the end.
+   * Where it goes: the index in the input it would be inserted at, as by
+   * `input.splice(index, 0, segment)`, the input length at the end.
    */
   index: number;
   /** The IDs of the groups it belongs in, outermost first. */
@@ -169,18 +171,9 @@ export type RepairUnexpected = Readonly<{
   /** The index of the segment in the input. */
   index: number;
   /**
-   * The IDs of the groups of the segment before it, outermost first. Empty
-   * when that segment is in no group, or when there is none.
+   * The IDs of the groups it is read in, those of the segment before it,
+   * outermost first. Empty when that segment is in no group, or when there is
+   * none.
    */
   path: readonly string[];
-}>;
-
-/** One occurrence of a group in a match. Holds at least one segment. */
-export type GroupMatch = Readonly<{
-  /** The group ID, such as `PATIENT_RESULT`. */
-  id: string;
-  /** The group name, such as `Patient Result`. */
-  name: string;
-  /** The segment indexes and nested group occurrences, in input order. */
-  children: readonly SegmentMatch[];
 }>;

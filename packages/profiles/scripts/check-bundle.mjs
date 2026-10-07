@@ -544,7 +544,7 @@ async function problemsInBundle() {
         if ((runner(schema, miss, options).type === "matched") !== accepted) {
           problems.push(`${label} disagrees on ${miss.join(" ")}`);
         }
-        const { edits } = repair(schema, miss, options);
+        const edits = repair(schema, miss, options);
         if ((edits.length === 0) !== accepted || edits.length > 1) {
           problems.push(
             `${label} repairs ${miss.join(" ")} with ${edits.length} edits`

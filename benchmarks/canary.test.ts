@@ -61,7 +61,7 @@ describe("canary — suites measure real work", () => {
         node.type === "segment" ? node.name : ""
       );
       const input = segmentIds.toSpliced(segmentIds.indexOf("OBR"), 1);
-      const { edits } = repair(schema, input);
+      const edits = repair(schema, input);
       expect(edits).toEqual([
         expect.objectContaining({ segment: "OBR", type: "missing" }),
       ]);

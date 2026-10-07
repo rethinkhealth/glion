@@ -214,7 +214,7 @@ const oneEditFits = (
   names.some((name) => referenceMatch(schema, [...input, name]));
 
 describe("repair on random schemas", { timeout: SWEEP_TIMEOUT_MS }, () => {
-  it("finds no edit exactly when the reference parser accepts, and then groups as it does", () => {
+  it("finds no edit exactly when the reference parser accepts", () => {
     const random = seeded(20_261_007);
     const disagreements: string[] = [];
     let repairedCount = 0;
@@ -235,12 +235,11 @@ describe("repair on random schemas", { timeout: SWEEP_TIMEOUT_MS }, () => {
         for (let made = n % (MAX_EDITS_MADE + 1); made > 0; made -= 1) {
           input = nearMiss(input, NAMES, random);
         }
-        const { edits, groups } = repair(schema, input);
-        const reference = referenceMatch(schema, input);
-        const want = edits.length === 0 ? JSON.stringify(groups) : undefined;
-        if (want !== JSON.stringify(reference) && disagreements.length < 5) {
+        const edits = repair(schema, input);
+        const fits = referenceMatch(schema, input) !== undefined;
+        if ((edits.length === 0) !== fits && disagreements.length < 5) {
           disagreements.push(
-            `${JSON.stringify(schema.elements)} on ${input.join(" ")}: ${edits.length} edits, groups ${want} ref ${JSON.stringify(reference)}`
+            `${JSON.stringify(schema.elements)} on ${input.join(" ")}: ${edits.length} edits, reference ${fits ? "accepts" : "rejects"}`
           );
         }
         repairedCount += edits.length > 0 ? 1 : 0;
@@ -274,7 +273,7 @@ describe("repair on random schemas", { timeout: SWEEP_TIMEOUT_MS }, () => {
         for (let k = made; k > 0; k -= 1) {
           input = nearMiss(input, NAMES, random);
         }
-        const { edits } = repair(schema, input);
+        const edits = repair(schema, input);
         const label = `${JSON.stringify(schema.elements)} on ${input.join(" ")}`;
         if (referenceMatch(schema, repaired(input, edits)) === undefined) {
           failures.push(`${label}: the repaired message does not fit`);
@@ -318,7 +317,7 @@ describe("repair on random schemas", { timeout: SWEEP_TIMEOUT_MS }, () => {
         );
         for (const allowZSegments of [true, false]) {
           const options = { allowZSegments };
-          const { edits } = repair(schema, input, options);
+          const edits = repair(schema, input, options);
           const fits = referenceMatch(schema, input, options) !== undefined;
           const fixed =
             referenceMatch(schema, repaired(input, edits), options) !==

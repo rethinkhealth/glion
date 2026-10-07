@@ -16,8 +16,7 @@
 // depth first, trying each state's moves in the runner's priority order and
 // following only those that keep to a cheapest path, with a state never
 // visited twice, as the runner's addThread() does. Of the cheapest repairs it
-// therefore returns the first in that order, and for a message that fits, the
-// runner's reading.
+// therefore returns the first in that order.
 //
 // Cost: each pass handles each state once, so a repair is linear in the
 // segment count times the program size.
@@ -31,18 +30,22 @@ import {
   compileOnce,
 } from "./compile";
 import type { EventSchemaProgram, Instruction } from "./compile";
-import { nest, replay } from "./history";
-import type { Event } from "./history";
-import type {
-  EventSchema,
-  RepairEdit,
-  RepairResult,
-  RunnerOptions,
-} from "./types";
+import type { EventSchema, RepairEdit, RunnerOptions } from "./types";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+// One event in a reading's history, linked to the one before it.
+type Event = Readonly<{ previous: Event | undefined }> &
+  (
+    | Readonly<{ kind: "consumed" }>
+    | Readonly<{ kind: "passed-over" }>
+    | Readonly<{ kind: "unexpected" }>
+    | Readonly<{ kind: "missing"; id: string }>
+    | Readonly<{ kind: "open"; id: string }>
+    | Readonly<{ kind: "close" }>
+  );
 
 // The state of one repair.
 interface Search {
@@ -97,18 +100,16 @@ type SettleQueue = Readonly<{
  * fewest edits: segments missing from `input`, and segments `input` has that
  * the schema does not allow there.
  *
- * Returns the edits in input order, and the segments grouped as that message
- * groups them. Of repairs with as many edits, it returns one with the fewest
- * unexpected segments; of those, the first in `runner()`'s priority order,
- * where at each segment the schema's reading comes first, then passing over a
- * Z-segment, then the segment as unexpected in place of the schema's segment
- * there, as missing, then a missing segment, then an unexpected one. When
- * `input` fits `schema`, there are no edits and the groups are `runner()`'s.
+ * Returns the edits in input order; none when `input` fits `schema`, as
+ * `runner()` matches it. Of repairs with as many edits, it returns one with
+ * the fewest unexpected segments; of those, the first in `runner()`'s
+ * priority order, where at each segment the schema's reading comes first,
+ * then passing over a Z-segment, then the segment as unexpected in place of
+ * the schema's segment there, as missing, then a missing segment, then an
+ * unexpected one.
  *
- * An unexpected segment is grouped right after the segment before it, in that
- * segment's group. A missing segment has no index in the groups. A Z-segment
- * the schema does not name costs no edit unless `options.allowZSegments` is
- * `false`, and is grouped as an unexpected segment is.
+ * A Z-segment the schema does not name costs no edit unless
+ * `options.allowZSegments` is `false`.
  *
  * Compiles `schema` on its first use by `runner()` or `repair()` and reuses
  * the program. `schema` MUST NOT change after its first use. Runs in time and
@@ -120,7 +121,7 @@ export function repair(
   schema: EventSchema,
   input: readonly string[],
   options?: RunnerOptions
-): RepairResult {
+): RepairEdit[] {
   const program = compileOnce(schema);
   const { code, segmentIds } = program;
   const allowZSegments = options?.allowZSegments ?? true;
@@ -139,8 +140,7 @@ export function repair(
   };
 
   costsToGo(search, predecessorsOnce(program));
-  const last = cheapest(search, program.start);
-  return { edits: edits(last, input), groups: nest(last) };
+  return edits(cheapest(search, program.start), input);
 }
 
 // ---------------------------------------------------------------------------
@@ -156,12 +156,12 @@ function moves(search: Search, pc: number, at: number): Move[] {
       return instruction.targets.map((target) => ({ at, cost: 0, pc: target }));
     }
     case "open": {
-      const { id, name, next } = instruction;
+      const { id, next } = instruction;
       return [
         {
           at,
           cost: 0,
-          event: { id, kind: "open", name, previous: undefined },
+          event: { id, kind: "open", previous: undefined },
           pc: next,
         },
       ];
@@ -553,6 +553,15 @@ function after(event: Event, last: Event | undefined): Event {
 // Edits
 // ---------------------------------------------------------------------------
 
+// The events that end in `last`, first to last.
+function replay(last: Event | undefined): Event[] {
+  const events: Event[] = [];
+  for (let event = last; event; event = event.previous) {
+    events.push(event);
+  }
+  return events.toReversed();
+}
+
 // The edits in the history that ends in `last`, each with the IDs of the
 // groups it sits in.
 function edits(
@@ -561,8 +570,8 @@ function edits(
 ): RepairEdit[] {
   const found: RepairEdit[] = [];
   const open: string[] = [];
-  // The groups of the last segment consumed: where a segment passed over or
-  // unexpected goes.
+  // The groups of the last segment consumed, which an unexpected segment
+  // after it is read in.
   let previousPath: readonly string[] = [];
   let index = 0;
   for (const event of replay(last)) {
