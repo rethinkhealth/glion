@@ -2834,8 +2834,8 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
   },
   "history": [],
   "messages": [
-    [2:1-2:50: Missing segment 'EVN' (before 'PID')],
-    [1:1-2:50: Missing segment 'PV1' (at the end)],
+    [2:1: Missing segment 'EVN' (before 'PID')],
+    [2:50: Missing segment 'PV1' (at the end)],
   ],
   "result": [
     {

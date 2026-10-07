@@ -256,7 +256,7 @@ describe("hl7v2LintSegmentOrder", () => {
   });
 
   describe("missing at the end", () => {
-    it("reports a required segment missing at the end, on the message", async () => {
+    it("reports a required segment missing at the end", async () => {
       const tree = m(s("MSH"));
       const file = new VFile();
 
@@ -267,7 +267,6 @@ describe("hl7v2LintSegmentOrder", () => {
       expect(file.messages).toMatchObject([
         {
           message: "Missing segment 'PID' (at the end)",
-          place: tree.position,
           ruleId: "segment-order",
           source: "hl7v2-lint",
         },
@@ -289,34 +288,87 @@ describe("hl7v2LintSegmentOrder", () => {
     });
   });
 
-  describe("position tracking", () => {
-    it("places a missing segment's report on the segment it comes before, and an unexpected segment's on itself", async () => {
-      const mshSegment = s("MSH");
-      mshSegment.position = {
-        end: { column: 10, line: 1, offset: 9 },
+  describe("report fields", () => {
+    const positioned = (name: string, line: number) => {
+      const node = s(name);
+      node.position = {
+        end: { column: 4, line, offset: (line - 1) * 5 + 3 },
+        start: { column: 1, line, offset: (line - 1) * 5 },
+      };
+      return node;
+    };
+
+    it("places a missing segment at the start of the segment it comes before, with expected its ID", async () => {
+      const msh = positioned("MSH", 1);
+      const pv1 = positioned("PV1", 2);
+      const tree = m(msh, pv1);
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID_PV1 })
+        .run(tree, file);
+
+      const [missing] = file.messages;
+      expect(missing?.reason).toBe("Missing segment 'PID' (before 'PV1')");
+      expect(missing?.place).toStrictEqual(pv1.position?.start);
+      expect(missing?.ancestors).toStrictEqual([tree]);
+      expect(missing?.expected).toStrictEqual(["PID"]);
+      expect(missing?.actual).toBeUndefined();
+    });
+
+    it("places a missing segment at the end of the message after the last segment", async () => {
+      const tree = m(positioned("MSH", 1));
+      tree.position = {
+        end: { column: 4, line: 1, offset: 3 },
         start: { column: 1, line: 1, offset: 0 },
       };
-
-      const invalidSegment = s("INVALID");
-      invalidSegment.position = {
-        end: { column: 20, line: 2, offset: 29 },
-        start: { column: 1, line: 2, offset: 10 },
-      };
-
-      const tree = m(mshSegment, invalidSegment);
       const file = new VFile();
 
       await unified()
         .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
         .run(tree, file);
 
-      expect(file.messages.map((message) => message.place)).toStrictEqual([
-        invalidSegment.position,
-        invalidSegment.position,
-      ]);
+      const [missing] = file.messages;
+      expect(missing?.reason).toBe("Missing segment 'PID' (at the end)");
+      expect(missing?.place).toStrictEqual(tree.position.end);
+      expect(missing?.ancestors).toStrictEqual([tree]);
     });
 
-    it("handles segment without position gracefully", async () => {
+    it("gives a missing segment the ancestors of the point it goes at", async () => {
+      const pv1 = s("PV1");
+      const patient = g("PATIENT", pv1);
+      const tree = m(s("MSH"), patient);
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID_PV1 })
+        .run(tree, file);
+
+      expect(file.messages[0]?.ancestors).toStrictEqual([tree, patient]);
+    });
+
+    it("places an unexpected segment on itself, with actual its ID", async () => {
+      const invalid = positioned("INVALID", 2);
+      const tree = m(positioned("MSH", 1), invalid);
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
+        .run(tree, file);
+
+      const unexpected = file.messages.find(
+        (message) => message.actual !== undefined
+      );
+      expect(unexpected?.reason).toBe(
+        "Unexpected segment 'INVALID' (after 'MSH')"
+      );
+      expect(unexpected?.place).toStrictEqual(invalid.position);
+      expect(unexpected?.ancestors).toStrictEqual([tree, invalid]);
+      expect(unexpected?.actual).toBe("INVALID");
+      expect(unexpected?.expected).toBeUndefined();
+    });
+
+    it("reports without a place when the segments have no position", async () => {
       const tree = m(s("MSH"), s("INVALID"));
       const file = new VFile();
 

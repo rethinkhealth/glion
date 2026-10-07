@@ -741,16 +741,9 @@ exports[`QR1: message conformance > edge-crlf-line-endings.hl7 — pipeline outp
     {
       "message": "Missing segment 'EVN' (before 'PID')",
       "place": {
-        "end": {
-          "column": 41,
-          "line": 2,
-          "offset": 106,
-        },
-        "start": {
-          "column": 1,
-          "line": 2,
-          "offset": 66,
-        },
+        "column": 1,
+        "line": 2,
+        "offset": 66,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -829,16 +822,9 @@ exports[`QR1: message conformance > edge-custom-delimiters.hl7 — pipeline outp
     {
       "message": "Missing segment 'EVN' (before 'PID')",
       "place": {
-        "end": {
-          "column": 43,
-          "line": 2,
-          "offset": 108,
-        },
-        "start": {
-          "column": 1,
-          "line": 2,
-          "offset": 66,
-        },
+        "column": 1,
+        "line": 2,
+        "offset": 66,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -846,16 +832,9 @@ exports[`QR1: message conformance > edge-custom-delimiters.hl7 — pipeline outp
     {
       "message": "Missing segment 'PV1' (at the end)",
       "place": {
-        "end": {
-          "column": 43,
-          "line": 2,
-          "offset": 108,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
+        "column": 43,
+        "line": 2,
+        "offset": 108,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1048,16 +1027,9 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
     {
       "message": "Missing segment 'EVN' (before 'PID')",
       "place": {
-        "end": {
-          "column": 20,
-          "line": 2,
-          "offset": 85,
-        },
-        "start": {
-          "column": 1,
-          "line": 2,
-          "offset": 66,
-        },
+        "column": 1,
+        "line": 2,
+        "offset": 66,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1183,16 +1155,9 @@ exports[`QR1: message conformance > edge-escaped-delimiters.hl7 — pipeline out
     {
       "message": "Missing segment 'EVN' (before 'PID')",
       "place": {
-        "end": {
-          "column": 56,
-          "line": 2,
-          "offset": 121,
-        },
-        "start": {
-          "column": 1,
-          "line": 2,
-          "offset": 66,
-        },
+        "column": 1,
+        "line": 2,
+        "offset": 66,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1200,16 +1165,9 @@ exports[`QR1: message conformance > edge-escaped-delimiters.hl7 — pipeline out
     {
       "message": "Missing segment 'PV1' (before 'OBX')",
       "place": {
-        "end": {
-          "column": 117,
-          "line": 3,
-          "offset": 238,
-        },
-        "start": {
-          "column": 1,
-          "line": 3,
-          "offset": 122,
-        },
+        "column": 1,
+        "line": 3,
+        "offset": 122,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1292,16 +1250,9 @@ exports[`QR1: message conformance > edge-field-repetitions.hl7 — pipeline outp
     {
       "message": "Missing segment 'EVN' (before 'PID')",
       "place": {
-        "end": {
-          "column": 188,
-          "line": 2,
-          "offset": 253,
-        },
-        "start": {
-          "column": 1,
-          "line": 2,
-          "offset": 66,
-        },
+        "column": 1,
+        "line": 2,
+        "offset": 66,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1309,16 +1260,9 @@ exports[`QR1: message conformance > edge-field-repetitions.hl7 — pipeline outp
     {
       "message": "Missing segment 'PV1' (at the end)",
       "place": {
-        "end": {
-          "column": 188,
-          "line": 2,
-          "offset": 253,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
+        "column": 188,
+        "line": 2,
+        "offset": 253,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1410,16 +1354,9 @@ exports[`QR1: message conformance > edge-non-ascii.hl7 — pipeline output match
     {
       "message": "Missing segment 'EVN' (before 'PID')",
       "place": {
-        "end": {
-          "column": 92,
-          "line": 2,
-          "offset": 157,
-        },
-        "start": {
-          "column": 1,
-          "line": 2,
-          "offset": 66,
-        },
+        "column": 1,
+        "line": 2,
+        "offset": 66,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1427,16 +1364,9 @@ exports[`QR1: message conformance > edge-non-ascii.hl7 — pipeline output match
     {
       "message": "Missing segment 'PV1' (at the end)",
       "place": {
-        "end": {
-          "column": 27,
-          "line": 3,
-          "offset": 184,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
+        "column": 27,
+        "line": 3,
+        "offset": 184,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1525,16 +1455,9 @@ exports[`QR1: message conformance > edge-z-segments.hl7 — pipeline output matc
     {
       "message": "Missing segment 'EVN' (before 'PID')",
       "place": {
-        "end": {
-          "column": 45,
-          "line": 2,
-          "offset": 114,
-        },
-        "start": {
-          "column": 1,
-          "line": 2,
-          "offset": 70,
-        },
+        "column": 1,
+        "line": 2,
+        "offset": 70,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1542,16 +1465,9 @@ exports[`QR1: message conformance > edge-z-segments.hl7 — pipeline output matc
     {
       "message": "Missing segment 'PV1' (at the end)",
       "place": {
-        "end": {
-          "column": 74,
-          "line": 4,
-          "offset": 234,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
+        "column": 74,
+        "line": 4,
+        "offset": 234,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -2317,16 +2233,9 @@ exports[`QR1: message conformance > siu-s12-schedule.hl7 — pipeline output mat
     {
       "message": "Missing segment 'RGS' (before 'AIG', in RESOURCES)",
       "place": {
-        "end": {
-          "column": 40,
-          "line": 5,
-          "offset": 309,
-        },
-        "start": {
-          "column": 1,
-          "line": 5,
-          "offset": 270,
-        },
+        "column": 1,
+        "line": 5,
+        "offset": 270,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",

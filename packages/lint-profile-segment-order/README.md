@@ -124,7 +124,7 @@ declare const hl7v2LintSegmentOrder: Plugin<[SegmentOrderOptions?], Root>;
 export default hl7v2LintSegmentOrder;
 ```
 
-All messages use `ruleId: "segment-order"` and `source: "hl7v2-lint"`. The rule reports each edit of the repair with the fewest edits, as `repair` in `@glion/profiles` finds it.
+All messages use `ruleId: "segment-order"` and `source: "hl7v2-lint"`. The rule reports each edit of the repair with the fewest edits, as `repair` in `@glion/profiles` finds it. A missing segment's message has `place` a point, where the segment would be inserted, `ancestors` the nodes that hold that point, and `expected` the segment ID. An unexpected segment's message has `place` the segment's position, `ancestors` the segment and its ancestors, and `actual` the segment ID.
 
 ## What it checks
 
@@ -168,7 +168,7 @@ Reported message:
 Missing segment 'OBR' (before 'OBX', in PATIENT_RESULT > ORDER_OBSERVATION)
 ```
 
-A missing segment is reported on the segment it comes before, with the IDs of the groups it belongs in, outermost first.
+A missing segment is reported at the start of the segment it comes before, with the IDs of the groups it belongs in, outermost first.
 
 ### Invalid — more than one missing segment
 
@@ -186,7 +186,7 @@ Missing segment 'EVN' (before 'PID')
 Missing segment 'PV1' (at the end)
 ```
 
-A segment missing at the end of the message is reported on the message.
+A segment missing at the end of the message is reported at the end of the message.
 
 ### Invalid — unexpected segment
 
