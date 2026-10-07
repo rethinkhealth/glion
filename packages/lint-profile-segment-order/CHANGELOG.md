@@ -1,5 +1,47 @@
 # @rethinkhealth/hl7v2-lint-profile-events-segments-order
 
+## 0.22.0
+
+### Patch Changes
+
+- Updated dependencies [[`93dbb80`](https://github.com/rethinkhealth/glion/commit/93dbb8053acfdf46f72dba2932950cf260e75ab7)]:
+  - @glion/ast@0.22.0
+  - @glion/profiles@0.22.0
+  - @glion/util-query@0.22.0
+  - @glion/util-visit@0.22.0
+
+## 0.21.0
+
+### Minor Changes
+
+- [#856](https://github.com/rethinkhealth/glion/pull/856) [`2aae517`](https://github.com/rethinkhealth/glion/commit/2aae517e8d131b4ed0dd1c3b86d9d9783d730b3c) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** `@glion/lint-profile-events-segments-order` is renamed `@glion/lint-profile-segment-order`, after the `segment-order` rule it reports; the old package is deprecated.
+
+- [#870](https://github.com/rethinkhealth/glion/pull/870) [`b44a96c`](https://github.com/rethinkhealth/glion/commit/b44a96c7de072383e0fea57b016dd9ec108f73aa) Thanks [@meleksomai](https://github.com/meleksomai)! - The rule no longer reports a Z-segment the event schema does not name, such as a `ZPI` after the `PID` of an `ORU_R01`: HL7v2 allows local Z-segments in any message and segment group (v2.5.1 §2.11). Set the new `allowZSegments` option to `false` to report them as unexpected, as before ([#868](https://github.com/rethinkhealth/glion/issues/868)).
+
+- [#860](https://github.com/rethinkhealth/glion/pull/860) [`2eb9b4b`](https://github.com/rethinkhealth/glion/commit/2eb9b4b12ec6acafff0d13386cc6787402191c74) Thanks [@meleksomai](https://github.com/meleksomai)! - Event schemas are the bundled data, and one engine validates segment order and groups segments.
+
+  Each bundled event schema is a JSON file holding the schema as the standard defines it: segments, groups, and choices, each `optional` and `repeating`. `profiles.events.load()` returns that `EventSchema`. `runner(schema, segmentIds)` runs a message's segment IDs through its schema in one pass: it returns `matched` with the segment indexes nested in the groups the schema defines, `mismatched` with the index of the first segment that does not fit and the segment IDs expected there, or `incomplete` with the segment IDs that can come next.
+
+  `@glion/profiles/event-schema.schema.json` is the JSON Schema of an event schema; every bundled schema names it in `$schema` by its `$id`, `https://glion.dev/schemas/event-schema/v1.json`. A schema of your own is plain data of the same shape and works wherever a bundled one does. `runner()` throws for a schema with no elements, a segment or group with no name, a group with no elements, a choice with no alternatives, or a choice alternative that can match no segment.
+
+  A choice such as ORM*O01's `< OBR | RQD | RQ1 | RXO | ODS | ODT >` accepts exactly one alternative, where it used to demand all six in a row, so `lint-profile-segment-order` no longer reports valid lab and pharmacy orders ([#815](https://github.com/rethinkhealth/glion/issues/815)); 108 schemas change. A segment the schema names elsewhere may fill an `Hxx` position, as in QBP_Q11 ([#816](https://github.com/rethinkhealth/glion/issues/816)); 32 schemas change. Every `xsd:choice` is read as a choice; in 18 chapter 16 and 17 groups (`EHC*\*`, `QBP_E03`, `QBP_E22`, `RSP_E03`, `RSP_E22`, `SDR_S31`, `SDR_S32`) this differs from HAPI, which reads them as sequences, so an `EHC_E01`invoice that carries more than one of`IVC`, `PYE`, `CTD`, … is reported as out of order until [#838](https://github.com/rethinkhealth/glion/issues/838) settles what the standard says. The rule's messages are otherwise unchanged.
+
+  `lint-profile-segment-order` reports a segment with an empty ID as unexpected, like any segment the schema does not allow, where it reported "Segment has empty segment name".
+
+  **Breaking:** the DFA is removed from the bundled profiles. `Definition`, `TransitionMap`, `NFA`, `RunnerState`, and the group `effects` API are removed; `runner(schema, segmentIds)` replaces the stateful runner: it takes a message's segment IDs at once and returns `matched`, `mismatched`, or `incomplete`, and `Runner`, `RunnerState`, `consume()`, `accepted`, `expected`, and the step and invalid events are removed. `lint-profile-segment-order`'s `definition` option takes an `EventSchema`, or a function `({ tree, file }) => EventSchema | undefined` (sync or async) that chooses one per message; the rule no longer exports `ResolveResult`. When the function returns `undefined`, the rule uses the schema MSH-9 names. The rule resolves the schema itself, so it no longer reads `file.data.profile` and no longer needs `@glion/annotate-profile-context` in the pipeline.
+
+### Patch Changes
+
+- [#858](https://github.com/rethinkhealth/glion/pull/858) [`38928ab`](https://github.com/rethinkhealth/glion/commit/38928ab64b253669ad399001e00aaf1ba4575ca9) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** a store's `load`, `profiles.eventMaps.load`, and `loadSegments` resolve `undefined` for a version or profile the package does not bundle, where they rejected. They reject only when a bundled profile fails to load.
+
+  `@glion/annotate-profile-context` and `@glion/lint-profile-segment-order` skip a profile the version does not bundle, as before, and no longer swallow a profile that fails to load: the plugin rejects with that error. `@glion/annotate-profile-fields-code-systems` tells an unbundled code system from a failed load by the `undefined` it resolves, not by the error's message.
+
+- Updated dependencies [[`38928ab`](https://github.com/rethinkhealth/glion/commit/38928ab64b253669ad399001e00aaf1ba4575ca9), [`2eb9b4b`](https://github.com/rethinkhealth/glion/commit/2eb9b4b12ec6acafff0d13386cc6787402191c74), [`38928ab`](https://github.com/rethinkhealth/glion/commit/38928ab64b253669ad399001e00aaf1ba4575ca9), [`38928ab`](https://github.com/rethinkhealth/glion/commit/38928ab64b253669ad399001e00aaf1ba4575ca9), [`07d09ec`](https://github.com/rethinkhealth/glion/commit/07d09ec2c35cfce7dd145a2232ea079600dbd791), [`b44a96c`](https://github.com/rethinkhealth/glion/commit/b44a96c7de072383e0fea57b016dd9ec108f73aa), [`8ac4236`](https://github.com/rethinkhealth/glion/commit/8ac42365f7c887db980f9da98bbde4f5286593bb), [`b44a96c`](https://github.com/rethinkhealth/glion/commit/b44a96c7de072383e0fea57b016dd9ec108f73aa), [`e38396e`](https://github.com/rethinkhealth/glion/commit/e38396e9962e203986aa27fc205c3f5bf992d153)]:
+  - @glion/profiles@0.21.0
+  - @glion/util-query@0.21.0
+  - @glion/ast@0.21.0
+  - @glion/util-visit@0.21.0
+
 ## 0.20.0
 
 ### Patch Changes

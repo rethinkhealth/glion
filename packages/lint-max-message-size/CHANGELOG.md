@@ -1,5 +1,13 @@
 # @rethinkhealth/hl7v2-lint-max-message-size
 
+## 0.22.0
+
+No changes in this release.
+
+## 0.21.0
+
+No changes in this release.
+
 ## 0.20.0
 
 No changes in this release.

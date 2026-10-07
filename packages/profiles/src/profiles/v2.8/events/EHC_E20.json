@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "EHC_E20",
   "elements": [
     {
@@ -51,7 +51,8 @@
         },
         {
           "type": "group",
-          "name": "PAT_INFO",
+          "id": "PAT_INFO",
+          "name": "Patient Information",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -69,7 +70,8 @@
             },
             {
               "type": "group",
-              "name": "INSURANCE",
+              "id": "INSURANCE",
+              "name": "Insurance",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -89,7 +91,8 @@
             },
             {
               "type": "group",
-              "name": "DIAGNOSIS",
+              "id": "DIAGNOSIS",
+              "name": "Diagnosis",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -117,7 +120,8 @@
         },
         {
           "type": "group",
-          "name": "PSL_ITEM_INFO",
+          "id": "PSL_ITEM_INFO",
+          "name": "PSL Item Information",
           "optional": false,
           "repeating": true,
           "elements": [

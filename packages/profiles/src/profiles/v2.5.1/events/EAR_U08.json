@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "EAR_U08",
   "elements": [
     {
@@ -22,7 +22,8 @@
     },
     {
       "type": "group",
-      "name": "COMMAND_RESPONSE",
+      "id": "COMMAND_RESPONSE",
+      "name": "Command Response",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -34,7 +35,8 @@
         },
         {
           "type": "group",
-          "name": "SPECIMEN_CONTAINER",
+          "id": "SPECIMEN_CONTAINER",
+          "name": "Specimen Container",
           "optional": true,
           "repeating": false,
           "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "CQU_I19",
   "elements": [
     {
@@ -40,7 +40,8 @@
     },
     {
       "type": "group",
-      "name": "PROVIDER_CONTACT",
+      "id": "PROVIDER_CONTACT",
+      "name": "Provider Contact",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -60,7 +61,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -86,7 +88,8 @@
     },
     {
       "type": "group",
-      "name": "INSURANCE",
+      "id": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -112,7 +115,8 @@
     },
     {
       "type": "group",
-      "name": "APPOINTMENT_HISTORY",
+      "id": "APPOINTMENT_HISTORY",
+      "name": "Appointment History",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -124,7 +128,8 @@
         },
         {
           "type": "group",
-          "name": "RESOURCES",
+          "id": "RESOURCES",
+          "name": "Resources",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -136,7 +141,8 @@
             },
             {
               "type": "group",
-              "name": "RESOURCE_DETAIL",
+              "id": "RESOURCE_DETAIL",
+              "name": "Resource Detail",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -173,7 +179,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "RESOURCE_OBSERVATION",
+                  "id": "RESOURCE_OBSERVATION",
+                  "name": "Resource Observation",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -199,7 +206,8 @@
     },
     {
       "type": "group",
-      "name": "CLINICAL_HISTORY",
+      "id": "CLINICAL_HISTORY",
+      "name": "Clinical History",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -211,7 +219,8 @@
         },
         {
           "type": "group",
-          "name": "CLINICAL_HISTORY_DETAIL",
+          "id": "CLINICAL_HISTORY_DETAIL",
+          "name": "Clinical History Detail",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -296,7 +305,8 @@
             },
             {
               "type": "group",
-              "name": "CLINICAL_HISTORY_OBSERVATION",
+              "id": "CLINICAL_HISTORY_OBSERVATION",
+              "name": "Clinical History Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -318,7 +328,8 @@
         },
         {
           "type": "group",
-          "name": "ROLE_CLINICAL_HISTORY",
+          "id": "ROLE_CLINICAL_HISTORY",
+          "name": "Role Clinical History",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -359,7 +370,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT_VISITS",
+      "id": "PATIENT_VISITS",
+      "name": "Patient Visits",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -379,7 +391,8 @@
     },
     {
       "type": "group",
-      "name": "MEDICATION_HISTORY",
+      "id": "MEDICATION_HISTORY",
+      "name": "Medication History",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -391,7 +404,8 @@
         },
         {
           "type": "group",
-          "name": "MEDICATION_ORDER_DETAIL",
+          "id": "MEDICATION_ORDER_DETAIL",
+          "name": "Medication Order Detail",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -415,7 +429,8 @@
             },
             {
               "type": "group",
-              "name": "MEDICATION_ORDER_OBSERVATION",
+              "id": "MEDICATION_ORDER_OBSERVATION",
+              "name": "Medication Order Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -437,7 +452,8 @@
         },
         {
           "type": "group",
-          "name": "MEDICATION_ENCODING_DETAIL",
+          "id": "MEDICATION_ENCODING_DETAIL",
+          "name": "Medication Encoding Detail",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -461,7 +477,8 @@
             },
             {
               "type": "group",
-              "name": "MEDICATION_ENCODING_OBSERVATION",
+              "id": "MEDICATION_ENCODING_OBSERVATION",
+              "name": "Medication Encoding Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -483,7 +500,8 @@
         },
         {
           "type": "group",
-          "name": "MEDICATION_ADMINISTRATION_DETAIL",
+          "id": "MEDICATION_ADMINISTRATION_DETAIL",
+          "name": "Medication Administration Detail",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -501,7 +519,8 @@
             },
             {
               "type": "group",
-              "name": "MEDICATION_ADMINISTRATION_OBSERVATION",
+              "id": "MEDICATION_ADMINISTRATION_OBSERVATION",
+              "name": "Medication Administration Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -531,7 +550,8 @@
     },
     {
       "type": "group",
-      "name": "PROBLEM",
+      "id": "PROBLEM",
+      "name": "Problem",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -549,7 +569,8 @@
         },
         {
           "type": "group",
-          "name": "ROLE_PROBLEM",
+          "id": "ROLE_PROBLEM",
+          "name": "Role Problem",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -582,7 +603,8 @@
         },
         {
           "type": "group",
-          "name": "PROBLEM_OBSERVATION",
+          "id": "PROBLEM_OBSERVATION",
+          "name": "Problem Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -604,7 +626,8 @@
     },
     {
       "type": "group",
-      "name": "GOAL",
+      "id": "GOAL",
+      "name": "Goal",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -622,7 +645,8 @@
         },
         {
           "type": "group",
-          "name": "ROLE_GOAL",
+          "id": "ROLE_GOAL",
+          "name": "Role Goal",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -655,7 +679,8 @@
         },
         {
           "type": "group",
-          "name": "GOAL_OBSERVATION",
+          "id": "GOAL_OBSERVATION",
+          "name": "Goal Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -677,7 +702,8 @@
     },
     {
       "type": "group",
-      "name": "PATHWAY",
+      "id": "PATHWAY",
+      "name": "Pathway",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -695,7 +721,8 @@
         },
         {
           "type": "group",
-          "name": "ROLE_PATHWAY",
+          "id": "ROLE_PATHWAY",
+          "name": "Role Pathway",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -728,7 +755,8 @@
         },
         {
           "type": "group",
-          "name": "PATHWAY_OBSERVATION",
+          "id": "PATHWAY_OBSERVATION",
+          "name": "Pathway Observation",
           "optional": true,
           "repeating": true,
           "elements": [

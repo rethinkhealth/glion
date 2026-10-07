@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "EHC_E01",
   "elements": [
     {
@@ -63,7 +63,8 @@
         },
         {
           "type": "group",
-          "name": "PRODUCT_SERVICE_SECTION",
+          "id": "PRODUCT_SERVICE_SECTION",
+          "name": "Product Service Section",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -75,7 +76,8 @@
             },
             {
               "type": "group",
-              "name": "PRODUCT_SERVICE_GROUP",
+              "id": "PRODUCT_SERVICE_GROUP",
+              "name": "Product Service Group",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -99,7 +101,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "PATIENT_INFO",
+                  "id": "PATIENT_INFO",
+                  "name": "Patient Information",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -129,7 +132,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "INSURANCE",
+                      "id": "INSURANCE",
+                      "name": "Insurance",
                       "optional": false,
                       "repeating": true,
                       "elements": [
@@ -149,7 +153,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "DIAGNOSIS",
+                      "id": "DIAGNOSIS",
+                      "name": "Diagnosis",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -177,7 +182,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "PRODUCT_SERVICE_LINE_ITEM",
+                  "id": "PRODUCT_SERVICE_LINE_ITEM",
+                  "name": "Product Service Line Item",
                   "optional": false,
                   "repeating": true,
                   "elements": [
@@ -221,7 +227,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "PROCEDURE",
+                  "id": "PROCEDURE",
+                  "name": "Procedure",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -247,7 +254,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "INVOICE_PROCESSING",
+                  "id": "INVOICE_PROCESSING",
+                  "name": "Invoice Processing",
                   "optional": true,
                   "repeating": true,
                   "elements": [

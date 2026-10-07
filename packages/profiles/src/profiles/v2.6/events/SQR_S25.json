@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "SQR_S25",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "SCHEDULE",
+      "id": "SCHEDULE",
+      "name": "Schedule",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -52,7 +53,8 @@
         },
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -84,7 +86,8 @@
         },
         {
           "type": "group",
-          "name": "RESOURCES",
+          "id": "RESOURCES",
+          "name": "Resources",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -96,7 +99,8 @@
             },
             {
               "type": "group",
-              "name": "SERVICE",
+              "id": "SERVICE",
+              "name": "Service",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -116,7 +120,8 @@
             },
             {
               "type": "group",
-              "name": "GENERAL_RESOURCE",
+              "id": "GENERAL_RESOURCE",
+              "name": "General Resource",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -136,7 +141,8 @@
             },
             {
               "type": "group",
-              "name": "PERSONNEL_RESOURCE",
+              "id": "PERSONNEL_RESOURCE",
+              "name": "Personnel Resource",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -156,7 +162,8 @@
             },
             {
               "type": "group",
-              "name": "LOCATION_RESOURCE",
+              "id": "LOCATION_RESOURCE",
+              "name": "Location Resource",
               "optional": true,
               "repeating": true,
               "elements": [

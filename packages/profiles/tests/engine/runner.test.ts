@@ -20,9 +20,11 @@ import {
   PPP_PCB_V2_3_1,
 } from "./fixtures";
 
-const g = (name: string, ...children: SegmentMatch[]) => ({
+// A group occurrence by its ID; its name is checked where a test names it.
+const g = (id: string, ...children: SegmentMatch[]) => ({
   children,
-  name,
+  id,
+  name: expect.any(String),
 });
 
 const schemaOf = (...elements: EventSchemaElement[]): EventSchema => ({
@@ -119,6 +121,7 @@ describe("runner: segment order", () => {
       segment("SFT", { optional: true, repeating: true }),
       {
         elements: [segment("PV1"), segment("PV2", { optional: true })],
+        id: "VISIT",
         name: "VISIT",
         optional: true,
         repeating: false,
@@ -175,6 +178,20 @@ describe("runner: segment order", () => {
 });
 
 describe("runner: grouping", () => {
+  it("gives each group occurrence its ID and its name", () => {
+    expect(match(ORU_R01_V2_5, "MSH PID OBR")).toEqual([
+      0,
+      {
+        children: [
+          { children: [1], id: "PATIENT", name: "Patient" },
+          { children: [2], id: "ORDER_OBSERVATION", name: "Order Observation" },
+        ],
+        id: "PATIENT_RESULT",
+        name: "Patient Result",
+      },
+    ]);
+  });
+
   it("nests each group inside the group that contains it", () => {
     expect(match(ORU_R01_V2_5, "MSH PID PV1 ORC OBR OBX OBX")).toEqual([
       0,
@@ -419,6 +436,7 @@ describe("runner: Z-segments", () => {
   it("lets an Hxx take a Z-segment before passing over it", () => {
     const schema = schemaOf(segment("MSH"), {
       elements: [segment("Hxx")],
+      id: "QUERY",
       name: "QUERY",
       optional: true,
       repeating: false,
@@ -434,6 +452,7 @@ describe("runner: Z-segments", () => {
       segment("A", { optional: true }),
       {
         elements: [segment("Hxx")],
+        id: "QUERY",
         name: "QUERY",
         optional: true,
         repeating: true,

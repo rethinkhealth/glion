@@ -141,6 +141,7 @@ describe("builder", () => {
             type: "segment",
           },
         ],
+        id: "PATIENT",
         name: "PATIENT",
         type: "group",
       });
@@ -149,8 +150,19 @@ describe("builder", () => {
     it("should build an empty group", () => {
       const group = g("EMPTY_GROUP");
       expect(group.type).toBe("group");
+      expect(group.id).toBe("EMPTY_GROUP");
       expect(group.name).toBe("EMPTY_GROUP");
       expect(group.children).toStrictEqual([]);
+    });
+
+    it("should build a group whose name differs from its ID", () => {
+      const group = g({ id: "PATIENT_VISIT", name: "Patient Visit" });
+      expect(group).toStrictEqual({
+        children: [],
+        id: "PATIENT_VISIT",
+        name: "Patient Visit",
+        type: "group",
+      });
     });
   });
 

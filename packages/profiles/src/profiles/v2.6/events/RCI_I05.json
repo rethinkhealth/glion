@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RCI_I05",
   "elements": [
     {
@@ -40,7 +40,8 @@
     },
     {
       "type": "group",
-      "name": "PROVIDER",
+      "id": "PROVIDER",
+      "name": "Provider",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -84,7 +85,8 @@
     },
     {
       "type": "group",
-      "name": "OBSERVATION",
+      "id": "OBSERVATION",
+      "name": "Observation",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -102,7 +104,8 @@
         },
         {
           "type": "group",
-          "name": "RESULTS",
+          "id": "RESULTS",
+          "name": "Results",
           "optional": true,
           "repeating": true,
           "elements": [

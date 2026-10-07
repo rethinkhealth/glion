@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ORF_R04",
   "elements": [
     {
@@ -16,7 +16,8 @@
     },
     {
       "type": "group",
-      "name": "QUERY_RESPONSE",
+      "id": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -48,7 +49,8 @@
     },
     {
       "type": "group",
-      "name": "ORDER",
+      "id": "ORDER",
+      "name": "Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -72,7 +74,8 @@
         },
         {
           "type": "group",
-          "name": "OBSERVATION",
+          "id": "OBSERVATION",
+          "name": "Observation",
           "optional": false,
           "repeating": true,
           "elements": [

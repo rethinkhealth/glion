@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RSP_E03",
   "elements": [
     {
@@ -51,7 +51,8 @@
         },
         {
           "type": "group",
-          "name": "INVOICE_PROCESSING_RESULTS_INFO",
+          "id": "INVOICE_PROCESSING_RESULTS_INFO",
+          "name": "Invoice Processing Results Information",
           "optional": false,
           "repeating": true,
           "elements": [

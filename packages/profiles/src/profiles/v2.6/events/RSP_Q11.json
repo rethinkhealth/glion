@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RSP_Q11",
   "elements": [
     {
@@ -46,7 +46,8 @@
     },
     {
       "type": "group",
-      "name": "QUERY_RESULT_CLUSTER",
+      "id": "QUERY_RESULT_CLUSTER",
+      "name": "Query Result Cluster",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -76,7 +77,8 @@
         },
         {
           "type": "group",
-          "name": "MF_LOC_DEPT",
+          "id": "MF_LOC_DEPT",
+          "name": "Master File Location Department",
           "optional": false,
           "repeating": true,
           "elements": [

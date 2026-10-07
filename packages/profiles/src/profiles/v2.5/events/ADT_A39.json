@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ADT_A39",
   "elements": [
     {
@@ -22,7 +22,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": false,
       "repeating": true,
       "elements": [

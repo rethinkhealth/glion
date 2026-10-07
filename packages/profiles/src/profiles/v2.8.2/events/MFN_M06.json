@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "MFN_M06",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "MF_CLIN_STUDY",
+      "id": "MF_CLIN_STUDY",
+      "name": "Master File Clinical Study",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -46,7 +47,8 @@
         },
         {
           "type": "group",
-          "name": "MF_PHASE_SCHED_DETAIL",
+          "id": "MF_PHASE_SCHED_DETAIL",
+          "name": "Master File Phase Schedule Detail",
           "optional": true,
           "repeating": true,
           "elements": [

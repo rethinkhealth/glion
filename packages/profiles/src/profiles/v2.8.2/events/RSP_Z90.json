@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RSP_Z90",
   "elements": [
     {
@@ -52,13 +52,15 @@
     },
     {
       "type": "group",
-      "name": "QUERY_RESPONSE",
+      "id": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -88,7 +90,8 @@
             },
             {
               "type": "group",
-              "name": "VISIT",
+              "id": "VISIT",
+              "name": "Visit",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -110,7 +113,8 @@
         },
         {
           "type": "group",
-          "name": "COMMON_ORDER",
+          "id": "COMMON_ORDER",
+          "name": "Common Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -122,7 +126,8 @@
             },
             {
               "type": "group",
-              "name": "TIMING",
+              "id": "TIMING",
+              "name": "Timing",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -160,7 +165,8 @@
             },
             {
               "type": "group",
-              "name": "OBSERVATION",
+              "id": "OBSERVATION",
+              "name": "Observation",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -182,7 +188,8 @@
         },
         {
           "type": "group",
-          "name": "SPECIMEN",
+          "id": "SPECIMEN",
+          "name": "Specimen",
           "optional": true,
           "repeating": true,
           "elements": [

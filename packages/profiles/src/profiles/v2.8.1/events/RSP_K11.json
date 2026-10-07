@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RSP_K11",
   "elements": [
     {
@@ -46,7 +46,8 @@
     },
     {
       "type": "group",
-      "name": "SEGMENT_PATTERN",
+      "id": "SEGMENT_PATTERN",
+      "name": "Segment Pattern",
       "optional": true,
       "repeating": false,
       "elements": [

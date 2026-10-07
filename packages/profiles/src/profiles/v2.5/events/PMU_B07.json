@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "PMU_B07",
   "elements": [
     {
@@ -34,7 +34,8 @@
     },
     {
       "type": "group",
-      "name": "CERTIFICATE",
+      "id": "CERTIFICATE",
+      "name": "Certificate",
       "optional": true,
       "repeating": true,
       "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "OUL_R22",
   "elements": [
     {
@@ -22,7 +22,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -48,7 +49,8 @@
     },
     {
       "type": "group",
-      "name": "VISIT",
+      "id": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -68,7 +70,8 @@
     },
     {
       "type": "group",
-      "name": "SPECIMEN",
+      "id": "SPECIMEN",
+      "name": "Specimen",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -86,7 +89,8 @@
         },
         {
           "type": "group",
-          "name": "CONTAINER",
+          "id": "CONTAINER",
+          "name": "Container",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -106,7 +110,8 @@
         },
         {
           "type": "group",
-          "name": "ORDER",
+          "id": "ORDER",
+          "name": "Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -130,7 +135,8 @@
             },
             {
               "type": "group",
-              "name": "TIMING_QTY",
+              "id": "TIMING_QTY",
+              "name": "Timing Quantity",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -150,7 +156,8 @@
             },
             {
               "type": "group",
-              "name": "OBXTCDSIDNTE_SUPPGRP",
+              "id": "RESULT",
+              "name": "Result",
               "optional": true,
               "repeating": true,
               "elements": [

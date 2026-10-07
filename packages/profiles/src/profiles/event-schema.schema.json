@@ -1,5 +1,5 @@
 {
-  "$id": "https://glion.dev/schemas/event-schema/v1.json",
+  "$id": "https://glion.dev/schemas/event-schema/v2.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$ref": "#/definitions/EventSchema",
   "definitions": {
@@ -72,9 +72,15 @@
           "type": "string",
           "const": "group"
         },
+        "id": {
+          "type": "string",
+          "description": "The group ID, such as `PATIENT_RESULT`.",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
         "name": {
           "type": "string",
-          "pattern": "^[A-Z][A-Z0-9_]*$"
+          "description": "The group name in title case, such as `Patient Result`.",
+          "minLength": 1
         },
         "optional": {
           "type": "boolean",
@@ -92,7 +98,7 @@
           "minItems": 1
         }
       },
-      "required": ["type", "name", "optional", "repeating", "elements"],
+      "required": ["type", "id", "name", "optional", "repeating", "elements"],
       "additionalProperties": false,
       "description": "A segment group, such as `PATIENT_RESULT`."
     },

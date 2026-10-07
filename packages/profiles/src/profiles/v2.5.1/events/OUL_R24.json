@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "OUL_R24",
   "elements": [
     {
@@ -22,7 +22,8 @@
     },
     {
       "type": "group",
-      "name": "PIDPD1NTE_SUPPGRP",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -48,7 +49,8 @@
     },
     {
       "type": "group",
-      "name": "PV1PV2_SUPPGRP",
+      "id": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -68,7 +70,8 @@
     },
     {
       "type": "group",
-      "name": "ORDER",
+      "id": "ORDER",
+      "name": "Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -92,7 +95,8 @@
         },
         {
           "type": "group",
-          "name": "TQ1TQ2_SUPPGRP",
+          "id": "TIMING_QTY",
+          "name": "Timing Quantity",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -112,7 +116,8 @@
         },
         {
           "type": "group",
-          "name": "SPMOBXSACINV_SUPPGRP",
+          "id": "SPECIMEN",
+          "name": "Specimen",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -130,7 +135,8 @@
             },
             {
               "type": "group",
-              "name": "CONTAINER",
+              "id": "CONTAINER",
+              "name": "Container",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -152,7 +158,8 @@
         },
         {
           "type": "group",
-          "name": "OBXTCDSIDNTE_SUPPGRP",
+          "id": "RESULT",
+          "name": "Result",
           "optional": true,
           "repeating": true,
           "elements": [

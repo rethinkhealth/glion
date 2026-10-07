@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RTB_K13",
   "elements": [
     {
@@ -46,7 +46,8 @@
     },
     {
       "type": "group",
-      "name": "ROW_DEFINITION",
+      "id": "ROW_DEFINITION",
+      "name": "Row Definition",
       "optional": true,
       "repeating": false,
       "elements": [

@@ -43,7 +43,7 @@ type Event = Readonly<{ previous: Event | undefined }> &
   (
     | Readonly<{ kind: "consumed" }>
     | Readonly<{ kind: "passed-over" }>
-    | Readonly<{ kind: "open"; name: string }>
+    | Readonly<{ kind: "open"; id: string; name: string }>
     | Readonly<{ kind: "close" }>
   );
 
@@ -71,6 +71,7 @@ interface Run {
 const compileOnce = memoize(compile);
 
 interface OpenGroup {
+  id: string;
   name: string;
   children: SegmentMatch[];
 }
@@ -106,9 +107,9 @@ interface OpenGroup {
  * of the same object. `schema` MUST NOT change after its first run. Runs in
  * time proportional to the input length times the schema size.
  *
- * @throws {Error} When `schema` has no elements, a segment or group has no
- *   name, a group has no elements, a choice has no alternatives, or a choice
- *   alternative can match no segment.
+ * @throws {Error} When `schema` has no elements, a segment has no name, a
+ *   group has no ID, no name, or no elements, a choice has no alternatives,
+ *   or a choice alternative can match no segment.
  */
 export function runner(
   schema: EventSchema,
@@ -212,7 +213,12 @@ function explore(run: Run, from: number, fromLast: Event | undefined): void {
         break;
       }
       case "open": {
-        last = { kind: "open", name: instruction.name, previous: last };
+        last = {
+          id: instruction.id,
+          kind: "open",
+          name: instruction.name,
+          previous: last,
+        };
         pc = instruction.next;
         break;
       }
@@ -326,7 +332,7 @@ function nest(last: Event | undefined): SegmentMatch[] {
         break;
       }
       case "open": {
-        open.push({ children: [], name: event.name });
+        open.push({ children: [], id: event.id, name: event.name });
         break;
       }
       case "close": {

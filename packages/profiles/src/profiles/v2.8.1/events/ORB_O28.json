@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ORB_O28",
   "elements": [
     {
@@ -40,13 +40,15 @@
     },
     {
       "type": "group",
-      "name": "RESPONSE",
+      "id": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -70,7 +72,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER",
+              "id": "ORDER",
+              "name": "Order",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -88,7 +91,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "TIMING",
+                  "id": "TIMING",
+                  "name": "Timing",
                   "optional": true,
                   "repeating": true,
                   "elements": [

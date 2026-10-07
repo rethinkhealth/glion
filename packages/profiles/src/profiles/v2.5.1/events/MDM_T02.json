@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "MDM_T02",
   "elements": [
     {
@@ -34,7 +34,8 @@
     },
     {
       "type": "group",
-      "name": "COMMON_ORDER",
+      "id": "COMMON_ORDER",
+      "name": "Common Order",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -46,7 +47,8 @@
         },
         {
           "type": "group",
-          "name": "TIMING",
+          "id": "TIMING",
+          "name": "Timing",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -86,7 +88,8 @@
     },
     {
       "type": "group",
-      "name": "OBXNTE_SUPPGRP",
+      "id": "OBSERVATION",
+      "name": "Observation",
       "optional": false,
       "repeating": true,
       "elements": [

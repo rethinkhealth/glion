@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ORL_O22",
   "elements": [
     {
@@ -40,7 +40,8 @@
     },
     {
       "type": "group",
-      "name": "RESPONSE",
+      "id": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -64,7 +65,8 @@
         },
         {
           "type": "group",
-          "name": "ORDER",
+          "id": "ORDER",
+          "name": "Order",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -82,7 +84,8 @@
             },
             {
               "type": "group",
-              "name": "TIMING",
+              "id": "TIMING",
+              "name": "Timing",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -102,7 +105,8 @@
             },
             {
               "type": "group",
-              "name": "OBSERVATION_REQUEST",
+              "id": "OBSERVATION_REQUEST",
+              "name": "Observation Request",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -120,7 +124,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "SPECIMEN",
+                  "id": "SPECIMEN",
+                  "name": "Specimen",
                   "optional": true,
                   "repeating": true,
                   "elements": [

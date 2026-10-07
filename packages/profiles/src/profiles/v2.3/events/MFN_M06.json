@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "MFN_M06",
   "elements": [
     {
@@ -16,7 +16,8 @@
     },
     {
       "type": "group",
-      "name": "MF_CDM",
+      "id": "MF_CDM",
+      "name": "Master File CDM",
       "optional": false,
       "repeating": true,
       "elements": [

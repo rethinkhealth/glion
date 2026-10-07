@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RSP_E22",
   "elements": [
     {
@@ -51,7 +51,8 @@
         },
         {
           "type": "group",
-          "name": "AUTHORIZATION_INFO",
+          "id": "AUTHORIZATION_INFO",
+          "name": "Authorization Information",
           "optional": false,
           "repeating": false,
           "elements": [
@@ -69,7 +70,8 @@
             },
             {
               "type": "group",
-              "name": "PSL_ITEM_INFO",
+              "id": "PSL_ITEM_INFO",
+              "name": "PSL Item Information",
               "optional": false,
               "repeating": true,
               "elements": [

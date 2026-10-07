@@ -172,6 +172,26 @@ describe(select, () => {
     });
   });
 
+  describe("with a group whose name differs from its ID", () => {
+    const message = m(
+      s("MSH", f("|")),
+      g({ id: "PATIENT_VISIT", name: "Patient Visit" }, s("PV1", f("1")))
+    );
+
+    it("names the group by its ID", () => {
+      const result = select(message, "PATIENT_VISIT-PV1");
+      expect((result?.node as Segment).name).toBe("PV1");
+      expect((result?.ancestors[1] as Group).name).toBe("Patient Visit");
+    });
+
+    it("selects the group itself by its ID", () => {
+      expect(select(message, "PATIENT_VISIT")?.node).toMatchObject({
+        id: "PATIENT_VISIT",
+        type: "group",
+      });
+    });
+  });
+
   describe("with nested groups", () => {
     const message = m(
       s("MSH", f("|")),
@@ -330,6 +350,36 @@ describe(select, () => {
 });
 
 describe(selectAll, () => {
+  it("follows a group prefix only into groups with that ID", () => {
+    const message = m(
+      s("MSH", f("|")),
+      g("ORDER", s("OBX", f("order"))),
+      g("RESULT", s("OBX", f("result")))
+    );
+
+    expect(
+      selectAll(message, "ORDER-OBX").map(({ node }) => node.name)
+    ).toEqual(["OBX"]);
+    expect(selectAll(message, "ORDER-OBX")[0]?.ancestors[1]).toMatchObject({
+      id: "ORDER",
+    });
+  });
+
+  it("follows a nested group prefix only into groups with that ID", () => {
+    const message = m(
+      s("MSH", f("|")),
+      g(
+        "PATIENT",
+        g("ORDER", s("OBX", f("order"))),
+        g("RESULT", s("OBX", f("result")))
+      )
+    );
+
+    const results = selectAll(message, "PATIENT-ORDER-OBX");
+    expect(results).toHaveLength(1);
+    expect(results[0]?.ancestors[2]).toMatchObject({ id: "ORDER" });
+  });
+
   it("returns all matching segments", () => {
     const message = m(
       s("MSH", f("|")),

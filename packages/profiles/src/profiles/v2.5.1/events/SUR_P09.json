@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "SUR_P09",
   "elements": [
     {
@@ -10,7 +10,8 @@
     },
     {
       "type": "group",
-      "name": "FACPSHPDCPSHFACPDCNTEED_SUPPGRP",
+      "id": "FACILITY",
+      "name": "Facility",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -22,7 +23,8 @@
         },
         {
           "type": "group",
-          "name": "PSHPDC_SUPPGRP",
+          "id": "PRODUCT",
+          "name": "Product",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -48,7 +50,8 @@
         },
         {
           "type": "group",
-          "name": "FACPDCNTE_SUPPGRP",
+          "id": "FACILITY_DETAIL",
+          "name": "Facility Detail",
           "optional": false,
           "repeating": true,
           "elements": [

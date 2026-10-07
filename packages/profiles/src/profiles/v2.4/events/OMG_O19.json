@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "OMG_O19",
   "elements": [
     {
@@ -16,7 +16,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -40,7 +41,8 @@
         },
         {
           "type": "group",
-          "name": "PATIENT_VISIT",
+          "id": "PATIENT_VISIT",
+          "name": "Patient Visit",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -60,7 +62,8 @@
         },
         {
           "type": "group",
-          "name": "INSURANCE",
+          "id": "INSURANCE",
+          "name": "Insurance",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -100,7 +103,8 @@
     },
     {
       "type": "group",
-      "name": "ORDER",
+      "id": "ORDER",
+      "name": "Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -136,7 +140,8 @@
         },
         {
           "type": "group",
-          "name": "OBSERVATION",
+          "id": "OBSERVATION",
+          "name": "Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -156,13 +161,15 @@
         },
         {
           "type": "group",
-          "name": "PRIOR_RESULT",
+          "id": "PRIOR_RESULT",
+          "name": "Prior Result",
           "optional": true,
           "repeating": true,
           "elements": [
             {
               "type": "group",
-              "name": "PATIENT_PRIOR",
+              "id": "PATIENT_PRIOR",
+              "name": "Patient Prior",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -182,7 +189,8 @@
             },
             {
               "type": "group",
-              "name": "PATIENT_VISIT_PRIOR",
+              "id": "PATIENT_VISIT_PRIOR",
+              "name": "Patient Visit Prior",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -208,7 +216,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER_PRIOR",
+              "id": "ORDER_PRIOR",
+              "name": "Order Prior",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -238,7 +247,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "OBSERVATION_PRIOR",
+                  "id": "OBSERVATION_PRIOR",
+                  "name": "Observation Prior",
                   "optional": false,
                   "repeating": true,
                   "elements": [

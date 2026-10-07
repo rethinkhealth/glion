@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "OPL_O37",
   "elements": [
     {
@@ -34,7 +34,8 @@
     },
     {
       "type": "group",
-      "name": "GUARANTOR",
+      "id": "GUARANTOR",
+      "name": "Guarantor",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -54,7 +55,8 @@
     },
     {
       "type": "group",
-      "name": "ORDER",
+      "id": "ORDER",
+      "name": "Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -66,7 +68,8 @@
         },
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -96,7 +99,8 @@
             },
             {
               "type": "group",
-              "name": "OBSERVATIONS_ON_PATIENT",
+              "id": "OBSERVATIONS_ON_PATIENT",
+              "name": "Observations on Patient",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -116,7 +120,8 @@
             },
             {
               "type": "group",
-              "name": "INSURANCE",
+              "id": "INSURANCE",
+              "name": "Insurance",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -150,7 +155,8 @@
         },
         {
           "type": "group",
-          "name": "SPECIMEN",
+          "id": "SPECIMEN",
+          "name": "Specimen",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -162,7 +168,8 @@
             },
             {
               "type": "group",
-              "name": "SPECIMEN_OBSERVATION",
+              "id": "SPECIMEN_OBSERVATION",
+              "name": "Specimen Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -182,7 +189,8 @@
             },
             {
               "type": "group",
-              "name": "CONTAINER",
+              "id": "CONTAINER",
+              "name": "Container",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -194,7 +202,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "CONTAINER_OBSERVATION",
+                  "id": "CONTAINER_OBSERVATION",
+                  "name": "Container Observation",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -216,7 +225,8 @@
             },
             {
               "type": "group",
-              "name": "OBSERVATION_REQUEST",
+              "id": "OBSERVATION_REQUEST",
+              "name": "Observation Request",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -246,7 +256,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "TIMING",
+                  "id": "TIMING",
+                  "name": "Timing",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -278,7 +289,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "ORDER_RELATED_OBSERVATION",
+                  "id": "ORDER_RELATED_OBSERVATION",
+                  "name": "Order Related Observation",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -302,7 +314,8 @@
         },
         {
           "type": "group",
-          "name": "PRIOR_RESULT",
+          "id": "PRIOR_RESULT",
+          "name": "Prior Result",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -314,7 +327,8 @@
             },
             {
               "type": "group",
-              "name": "PATIENT_PRIOR",
+              "id": "PATIENT_PRIOR",
+              "name": "Patient Prior",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -346,7 +360,8 @@
             },
             {
               "type": "group",
-              "name": "PATIENT_VISIT_PRIOR",
+              "id": "PATIENT_VISIT_PRIOR",
+              "name": "Patient Visit Prior",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -378,7 +393,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER_PRIOR",
+              "id": "ORDER_PRIOR",
+              "name": "Order Prior",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -402,7 +418,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "TIMING",
+                  "id": "TIMING",
+                  "name": "Timing",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -422,7 +439,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "OBSERVATION_RESULT_GROUP",
+                  "id": "OBSERVATION_RESULT_GROUP",
+                  "name": "Observation Result Group",
                   "optional": false,
                   "repeating": true,
                   "elements": [

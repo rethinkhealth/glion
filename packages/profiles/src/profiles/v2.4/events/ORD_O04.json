@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ORD_O04",
   "elements": [
     {
@@ -28,13 +28,15 @@
     },
     {
       "type": "group",
-      "name": "RESPONSE",
+      "id": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -54,7 +56,8 @@
         },
         {
           "type": "group",
-          "name": "ORDER_DIET",
+          "id": "ORDER_DIET",
+          "name": "Order Diet",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -80,7 +83,8 @@
         },
         {
           "type": "group",
-          "name": "ORDER_TRAY",
+          "id": "ORDER_TRAY",
+          "name": "Order Tray",
           "optional": true,
           "repeating": true,
           "elements": [

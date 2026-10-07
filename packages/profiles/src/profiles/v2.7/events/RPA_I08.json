@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RPA_I08",
   "elements": [
     {
@@ -34,7 +34,8 @@
     },
     {
       "type": "group",
-      "name": "AUTHORIZATION",
+      "id": "AUTHORIZATION",
+      "name": "Authorization",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -54,7 +55,8 @@
     },
     {
       "type": "group",
-      "name": "PROVIDER",
+      "id": "PROVIDER",
+      "name": "Provider",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -92,7 +94,8 @@
     },
     {
       "type": "group",
-      "name": "INSURANCE",
+      "id": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -142,7 +145,8 @@
     },
     {
       "type": "group",
-      "name": "PROCEDURE",
+      "id": "PROCEDURE",
+      "name": "Procedure",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -154,7 +158,8 @@
         },
         {
           "type": "group",
-          "name": "AUTHORIZATION2",
+          "id": "AUTHORIZATION2",
+          "name": "Authorization 2",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -176,7 +181,8 @@
     },
     {
       "type": "group",
-      "name": "OBSERVATION",
+      "id": "OBSERVATION",
+      "name": "Observation",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -194,7 +200,8 @@
         },
         {
           "type": "group",
-          "name": "RESULTS",
+          "id": "RESULTS",
+          "name": "Results",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -216,7 +223,8 @@
     },
     {
       "type": "group",
-      "name": "VISIT",
+      "id": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [

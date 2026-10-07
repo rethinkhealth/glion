@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ORL_O36",
   "elements": [
     {
@@ -40,7 +40,8 @@
     },
     {
       "type": "group",
-      "name": "RESPONSE",
+      "id": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -64,7 +65,8 @@
         },
         {
           "type": "group",
-          "name": "SPECIMEN",
+          "id": "SPECIMEN",
+          "name": "Specimen",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -76,7 +78,8 @@
             },
             {
               "type": "group",
-              "name": "SPECIMEN_OBSERVATION",
+              "id": "SPECIMEN_OBSERVATION",
+              "name": "Specimen Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -102,7 +105,8 @@
             },
             {
               "type": "group",
-              "name": "SPECIMEN_CONTAINER",
+              "id": "SPECIMEN_CONTAINER",
+              "name": "Specimen Container",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -114,7 +118,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "ORDER",
+                  "id": "ORDER",
+                  "name": "Order",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -132,7 +137,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "TIMING",
+                      "id": "TIMING",
+                      "name": "Timing",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -152,7 +158,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "OBSERVATION_REQUEST",
+                      "id": "OBSERVATION_REQUEST",
+                      "name": "Observation Request",
                       "optional": true,
                       "repeating": false,
                       "elements": [

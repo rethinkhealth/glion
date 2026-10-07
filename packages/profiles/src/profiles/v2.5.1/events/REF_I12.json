@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "REF_I12",
   "elements": [
     {
@@ -22,7 +22,8 @@
     },
     {
       "type": "group",
-      "name": "AUTHORIZATION_CONTACT",
+      "id": "AUTHORIZATION_CONTACT",
+      "name": "Authorization Contact",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -42,7 +43,8 @@
     },
     {
       "type": "group",
-      "name": "PROVIDER_CONTACT",
+      "id": "PROVIDER_CONTACT",
+      "name": "Provider Contact",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -80,7 +82,8 @@
     },
     {
       "type": "group",
-      "name": "INSURANCE",
+      "id": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -130,7 +133,8 @@
     },
     {
       "type": "group",
-      "name": "PROCEDURE",
+      "id": "PROCEDURE",
+      "name": "Procedure",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -142,7 +146,8 @@
         },
         {
           "type": "group",
-          "name": "AUTCTD_SUPPGRP2",
+          "id": "AUTHORIZATION_CONTACT",
+          "name": "Authorization Contact",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -164,7 +169,8 @@
     },
     {
       "type": "group",
-      "name": "OBSERVATION",
+      "id": "OBSERVATION",
+      "name": "Observation",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -182,7 +188,8 @@
         },
         {
           "type": "group",
-          "name": "RESULTS_NOTES",
+          "id": "RESULTS_NOTES",
+          "name": "Results Notes",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -204,7 +211,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT_VISIT",
+      "id": "PATIENT_VISIT",
+      "name": "Patient Visit",
       "optional": true,
       "repeating": false,
       "elements": [

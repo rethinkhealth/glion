@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "DER_O44",
   "elements": [
     {
@@ -22,7 +22,8 @@
     },
     {
       "type": "group",
-      "name": "DONOR",
+      "id": "DONOR",
+      "name": "Donor",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -64,7 +65,8 @@
         },
         {
           "type": "group",
-          "name": "DONOR_REGISTRATION",
+          "id": "DONOR_REGISTRATION",
+          "name": "Donor Registration",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -86,7 +88,8 @@
     },
     {
       "type": "group",
-      "name": "DONOR_ORDER",
+      "id": "DONOR_ORDER",
+      "name": "Donor Order",
       "optional": false,
       "repeating": true,
       "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ADT_A45",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "MERGE_INFO",
+      "id": "MERGE_INFO",
+      "name": "Merge Information",
       "optional": false,
       "repeating": true,
       "elements": [

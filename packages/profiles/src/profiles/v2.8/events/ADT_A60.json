@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ADT_A60",
   "elements": [
     {
@@ -40,7 +40,8 @@
     },
     {
       "type": "group",
-      "name": "VISIT",
+      "id": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -66,7 +67,8 @@
     },
     {
       "type": "group",
-      "name": "ADVERSE_REACTION_GROUP",
+      "id": "ADVERSE_REACTION_GROUP",
+      "name": "Adverse Reaction Group",
       "optional": true,
       "repeating": true,
       "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "OSM_R26",
   "elements": [
     {
@@ -22,7 +22,8 @@
     },
     {
       "type": "group",
-      "name": "SHIPMENT",
+      "id": "SHIPMENT",
+      "name": "Shipment",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -40,7 +41,8 @@
         },
         {
           "type": "group",
-          "name": "SHIPPING_OBSERVATION",
+          "id": "SHIPPING_OBSERVATION",
+          "name": "Shipping Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -60,7 +62,8 @@
         },
         {
           "type": "group",
-          "name": "PACKAGE",
+          "id": "PACKAGE",
+          "name": "Package",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -78,7 +81,8 @@
             },
             {
               "type": "group",
-              "name": "SPECIMEN",
+              "id": "SPECIMEN",
+              "name": "Specimen",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -96,7 +100,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "SPECIMEN_OBSERVATION",
+                  "id": "SPECIMEN_OBSERVATION",
+                  "name": "Specimen Observation",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -116,7 +121,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "CONTAINER",
+                  "id": "CONTAINER",
+                  "name": "Container",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -128,7 +134,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "CONTAINER_OBSERVATION",
+                      "id": "CONTAINER_OBSERVATION",
+                      "name": "Container Observation",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -150,7 +157,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "SUBJECT_PERSON_ANIMAL_IDENTIFICATION",
+                  "id": "SUBJECT_PERSON_ANIMAL_IDENTIFICATION",
+                  "name": "Subject Person Animal Identification",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -168,7 +176,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "PATIENT_OBSERVATION",
+                      "id": "PATIENT_OBSERVATION",
+                      "name": "Patient Observation",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -196,7 +205,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "SUBJECT_POPULATION_LOCATION_IDENTIFICATION",
+                  "id": "SUBJECT_POPULATION_LOCATION_IDENTIFICATION",
+                  "name": "Subject Population Location Identification",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -214,7 +224,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "PATIENT_VISIT_OBSERVATION",
+                      "id": "PATIENT_VISIT_OBSERVATION",
+                      "name": "Patient Visit Observation",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -234,7 +245,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "PATIENT_INFORMATION",
+                      "id": "PATIENT_INFORMATION",
+                      "name": "Patient Information",
                       "optional": true,
                       "repeating": false,
                       "elements": [

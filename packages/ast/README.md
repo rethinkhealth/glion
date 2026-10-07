@@ -89,6 +89,7 @@ interface Segment <: Parent {
 
 interface Group <: Parent {
   type: 'group'
+  id: string
   name: string
   children: [Segment]
 }
@@ -118,7 +119,7 @@ interface Subcomponent <: Literal {
 }
 ```
 
-`Segment.name` carries the segment identifier (for example `"MSH"`, `"PID"`, `"OBX"`) so visitors can filter without traversing the field hierarchy. `Group.name` names the logical group (for example `"ORDER_OBSERVATION"`).
+`Segment.name` carries the segment identifier (for example `"MSH"`, `"PID"`, `"OBX"`) so visitors can filter without traversing the field hierarchy. `Group.id` identifies the logical group (for example `"ORDER_OBSERVATION"`, `"PATIENT_VISIT"`) and holds only uppercase letters, digits, and `_`; `Group.name` is the group name for display, in title case (for example `"Order Observation"`).
 
 ### Position
 

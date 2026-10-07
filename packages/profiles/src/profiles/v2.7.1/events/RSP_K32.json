@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RSP_K32",
   "elements": [
     {
@@ -40,7 +40,8 @@
     },
     {
       "type": "group",
-      "name": "QUERY_RESPONSE",
+      "id": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": true,
       "repeating": true,
       "elements": [
