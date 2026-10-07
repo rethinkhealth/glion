@@ -72,14 +72,14 @@ describe("hl7v2-preset-lint-recommended", () => {
 
     await unified().use(hl7v2PresetLintRecommended).run(tree, file);
 
-    // Should have error for missing MSH (and possibly missing version)
-    expect(file.messages.length).toBeGreaterThanOrEqual(1);
-    expect(
-      file.messages.some((msg) =>
-        msg.message.includes("Message header (MSH) segment is required")
-      )
-    ).toBeTruthy();
-    expect(file.messages[0].fatal).toBeTruthy();
+    const header = file.messages.find(
+      (msg) => msg.ruleId === "segment-required-message-header"
+    );
+    expect(header).toMatchObject({
+      fatal: true,
+      message:
+        "The first segment is `PID`; a message must start with the message header segment (`MSH`).",
+    });
   });
 
   it("errors when a Z-segment precedes the message header", async () => {
@@ -110,7 +110,7 @@ describe("hl7v2-preset-lint-recommended", () => {
 
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0].message).toBe(
-      "Message header (MSH) segment is required as the first segment — received 'ZA1' instead"
+      "The first segment is `ZA1`; a message must start with the message header segment (`MSH`)."
     );
     expect(file.messages[0].ruleId).toBe("segment-required-message-header");
     expect(file.messages[0].fatal).toBe(true);
