@@ -75,7 +75,11 @@ const hasEmptyAlternative = (items: readonly EventSchemaElement[]): boolean =>
       (item.type === "group" && hasEmptyAlternative(item.elements))
   );
 
-describe("runner on random schemas", () => {
+// Thousands of schemas each: well under a second locally, and up to ten times
+// slower on CI under coverage.
+const SWEEP_TIMEOUT_MS = 60_000;
+
+describe("runner on random schemas", { timeout: SWEEP_TIMEOUT_MS }, () => {
   it("agrees with the reference parser on nested, nullable, and ambiguous schemas", () => {
     const random = seeded(20_260_919);
     const disagreements: string[] = [];
