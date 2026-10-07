@@ -27,6 +27,9 @@ importers:
       '@glion/mutation-report':
         specifier: workspace:*
         version: link:tools/mutation-report
+      '@glion/release-notes':
+        specifier: workspace:*
+        version: link:tools/release-notes
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:tools/tsconfig
@@ -2682,6 +2685,27 @@ importers:
         version: 4.1.11(@types/node@25.6.0)(@vitest/coverage-v8@4.1.11)(vite@7.3.6(@types/node@25.6.0)(jiti@2.6.1)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
 
   tools/mutation-report:
+    devDependencies:
+      '@glion/testing':
+        specifier: workspace:*
+        version: link:../testing
+      '@glion/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
+      '@vitest/coverage-v8':
+        specifier: 4.1.11
+        version: 4.1.11(vitest@4.1.11)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@25.6.0)(@vitest/coverage-v8@4.1.11)(vite@7.3.6(@types/node@25.6.0)(jiti@2.6.1)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
+
+  tools/release-notes:
     devDependencies:
       '@glion/testing':
         specifier: workspace:*
