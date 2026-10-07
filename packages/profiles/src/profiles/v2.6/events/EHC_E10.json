@@ -100,7 +100,7 @@
                 },
                 {
                   "type": "group",
-                  "name": "PRODUCT/SERVICE LINE_INFO",
+                  "name": "PRODUCT_SERVICE_LINE_INFO",
                   "optional": false,
                   "repeating": true,
                   "elements": [

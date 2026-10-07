@@ -142,7 +142,7 @@
             },
             {
               "type": "group",
-              "name": "ENCODED ORDER",
+              "name": "ENCODED_ORDER",
               "optional": true,
               "repeating": false,
               "elements": [

@@ -162,7 +162,7 @@
             },
             {
               "type": "group",
-              "name": "OBSERVATION REQUEST",
+              "name": "OBSERVATION_REQUEST",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -240,7 +240,7 @@
             },
             {
               "type": "group",
-              "name": "PATIENT PRIOR",
+              "name": "PATIENT_PRIOR",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -260,7 +260,7 @@
             },
             {
               "type": "group",
-              "name": "PATIENT VISIT PRIOR",
+              "name": "PATIENT_VISIT_PRIOR",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -286,7 +286,7 @@
             },
             {
               "type": "group",
-              "name": "ORDER PRIOR",
+              "name": "ORDER_PRIOR",
               "optional": false,
               "repeating": true,
               "elements": [

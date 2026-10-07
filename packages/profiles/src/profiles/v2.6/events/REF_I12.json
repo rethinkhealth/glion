@@ -210,7 +210,7 @@
     },
     {
       "type": "group",
-      "name": "PATIENT VISIT",
+      "name": "PATIENT_VISIT",
       "optional": true,
       "repeating": false,
       "elements": [
