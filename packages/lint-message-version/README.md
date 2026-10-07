@@ -4,7 +4,7 @@ Lint rule that checks an HL7v2 message's `MSH-12` version satisfies a semver ran
 
 ## What it does
 
-Reads `MSH-12.1` from the tree and evaluates it against the configured `expression` using `@glion/util-semver`. Reports a message when `MSH-12` is missing or empty, when the value is not a valid semver-like version, or when it falls outside the allowed range. The default expression (`"<3.0.0 >=2.3"`) accepts HL7v2 versions 2.3 through 2.9 and excludes future v3 values.
+Reads `MSH-12.1` from the tree and evaluates it against the configured `expression` using `@glion/util-semver`. Reports a message when `MSH-12` is missing, when it is empty, when the value is not a valid semver-like version, or when it falls outside the allowed range. The default expression (`"<3.0.0 >=2.3"`) accepts HL7v2 versions 2.3 through 2.9 and excludes future v3 values.
 
 ## Install
 
@@ -78,22 +78,28 @@ MSH|^~\&|SENDER|FAC|RCVR|FAC|20250101010101||ADT^A01^ADT_A01|MSG00001|P|2.2
 Reported message:
 
 ```
-MSH-12 (version) field value '2.2' does not satisfy expression '<3.0.0 >=2.3'
+The version in `MSH-12` (Version ID) is `2.2`; it must satisfy `<3.0.0 >=2.3`.
 ```
 
 `MSH-12` is missing:
 
 ```
-Required MSH-12 (version) field is missing or empty
+The message has no `MSH-12` (Version ID); a message must declare its HL7v2 version.
+```
+
+`MSH-12` is present but empty:
+
+```
+The version in `MSH-12` (Version ID) is empty; a message must declare its HL7v2 version.
 ```
 
 `MSH-12` contains a value that cannot be parsed as semver:
 
 ```
-MSH-12 (version) field value 'abc' is not valid
+The version in `MSH-12` (Version ID) is `abc`; a version must be numbers separated by dots, such as `2.5` or `2.5.1`.
 ```
 
-Both the offending value and the configured expression are interpolated into the message. The rule reports at most one message per tree and exits as soon as the first problem is detected.
+Each report on a value sets `actual` to that value; a version outside the range also sets `expected` to the configured expression. The rule reports at most one message per tree and exits as soon as the first problem is detected.
 
 ## Part of Glion
 

@@ -72,10 +72,10 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F||
 Reported message:
 
 ```
-Segment has 2 trailing empty fields
+Segment `PID` ends with 2 empty fields; a segment should end at its last field with a value.
 ```
 
-The count of trailing fields is interpolated with pluralization (`1 trailing empty field`, `2 trailing empty fields`). One message is reported per offending segment.
+A segment with an empty Segment ID is reported as `A segment with an empty Segment ID ends with 2 empty fields; …`. One message is reported per offending segment.
 
 ## Part of Glion
 

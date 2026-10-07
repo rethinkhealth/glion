@@ -98,7 +98,7 @@ describe("QR2: diagnostic precision", () => {
 
       expect(versionDiag).toBeDefined();
       expect(versionDiag!.message).toBe(
-        "MSH-12 (version) field value '1.0' does not satisfy expression '<3.0.0 >=2.3'"
+        "The version in `MSH-12` (Version ID) is `1.0`; it must satisfy `<3.0.0 >=2.3`."
       );
 
       // Offset should point to the "1.0" value in the source
@@ -115,7 +115,7 @@ describe("QR2: diagnostic precision", () => {
 
       expect(versionDiag).toBeDefined();
       expect(versionDiag!.message).toBe(
-        "Required MSH-12 (version) field is missing or empty"
+        "The message has no `MSH-12` (Version ID); a message must declare its HL7v2 version."
       );
     });
   });
@@ -133,13 +133,13 @@ describe("QR2: diagnostic precision", () => {
 
       // PIDX — 4 chars, too long
       expect(headerDiags[0]!.message).toBe(
-        "Unexpected 4 header length, expected 3 characters, remove 1 character"
+        "The Segment ID `PIDX` is 4 characters long; a Segment ID must be exactly 3 characters."
       );
       expectOffsetContains(source, headerDiags[0]!, "PIDX");
 
       // PV — 2 chars, too short
       expect(headerDiags[1]!.message).toBe(
-        "Unexpected 2 header length, expected 3 characters, add 1 character"
+        "The Segment ID `PV` is 2 characters long; a Segment ID must be exactly 3 characters."
       );
       expectOffsetContains(source, headerDiags[1]!, "PV|");
     });
@@ -158,13 +158,13 @@ describe("QR2: diagnostic precision", () => {
 
       // EVN — 2 trailing empty fields
       expect(trailingDiags[0]!.message).toBe(
-        "Segment has 2 trailing empty fields"
+        "Segment `EVN` ends with 2 empty fields; a segment should end at its last field with a value."
       );
       expectOffsetContains(source, trailingDiags[0]!, "||");
 
       // PID — 6 trailing empty fields
       expect(trailingDiags[1]!.message).toBe(
-        "Segment has 6 trailing empty fields"
+        "Segment `PID` ends with 6 empty fields; a segment should end at its last field with a value."
       );
       expectOffsetContains(source, trailingDiags[1]!, "||||||");
     });

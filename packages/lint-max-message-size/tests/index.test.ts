@@ -29,9 +29,10 @@ describe("hl7v2-lint:max-message-size", () => {
       .run(tree, file);
 
     expect(file.messages).toHaveLength(1);
-    expect(file.messages[0].message).toContain(
-      'Message size 9 bytes exceeds 1 byte limit — trim payload or raise "maxBytes"'
+    expect(file.messages[0].message).toBe(
+      "The message is 9 bytes; the configured limit is 1 byte. Shorten the message or raise `maxBytes`."
     );
+    expect(file.messages[0].actual).toBe("9");
   });
 
   it("warns when message has too many segments", async () => {
@@ -47,9 +48,10 @@ describe("hl7v2-lint:max-message-size", () => {
       .run(tree, file);
 
     expect(file.messages).toHaveLength(1);
-    expect(file.messages[0].message).toContain(
-      'Message contains 3 segments (limit 1 segment) — reduce segment count or raise "maxSegments"'
+    expect(file.messages[0].message).toBe(
+      "The message has 3 segments; the configured limit is 1 segment. Remove segments or raise `maxSegments`."
     );
+    expect(file.messages[0].actual).toBe("3");
   });
 
   it("warns when message with groups has too many segments", async () => {
@@ -69,9 +71,10 @@ describe("hl7v2-lint:max-message-size", () => {
       .run(tree, file);
 
     expect(file.messages).toHaveLength(1);
-    expect(file.messages[0].message).toContain(
-      'Message contains 5 segments (limit 2 segments) — reduce segment count or raise "maxSegments"'
+    expect(file.messages[0].message).toBe(
+      "The message has 5 segments; the configured limit is 2 segments. Remove segments or raise `maxSegments`."
     );
+    expect(file.messages[0].actual).toBe("5");
   });
 
   it("warns when message has too many segments and size exceeds the limit", async () => {
@@ -88,11 +91,13 @@ describe("hl7v2-lint:max-message-size", () => {
       .run(tree, file);
 
     expect(file.messages).toHaveLength(2);
-    expect(file.messages[0].message).toContain(
-      'Message size 9 bytes exceeds 1 byte limit — trim payload or raise "maxBytes"'
+    expect(file.messages[0].message).toBe(
+      "The message is 9 bytes; the configured limit is 1 byte. Shorten the message or raise `maxBytes`."
     );
-    expect(file.messages[1].message).toContain(
-      'Message contains 3 segments (limit 1 segment) — reduce segment count or raise "maxSegments"'
+    expect(file.messages[0].actual).toBe("9");
+    expect(file.messages[1].message).toBe(
+      "The message has 3 segments; the configured limit is 1 segment. Remove segments or raise `maxSegments`."
     );
+    expect(file.messages[1].actual).toBe("3");
   });
 });
