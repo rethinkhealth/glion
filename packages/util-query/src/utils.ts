@@ -84,8 +84,8 @@ export function followGroups(
 
   for (const locator of groups) {
     const matchedGroups = children.filter(
-      (node): node is Group =>
-        node.type === "group" && node.name === locator.name
+      // Stryker disable next-line ConditionalExpression: only a group has an id; the type check narrows for TypeScript
+      (node): node is Group => node.type === "group" && node.id === locator.name
     );
 
     if (matchedGroups.length === 0) {
@@ -132,7 +132,8 @@ export function collectAllScopes(
   const children = filterSegmentsAndGroups(root.children);
   const matchingGroups = children.filter(
     (node): node is Group =>
-      node.type === "group" && node.name === firstLocator.name
+      // Stryker disable next-line ConditionalExpression: only a group has an id; the type check narrows for TypeScript
+      node.type === "group" && node.id === firstLocator.name
   );
 
   // If a specific repetition is requested, only follow that one
@@ -184,7 +185,8 @@ export function collectAllScopesRecursive(
   const filteredChildren = filterSegmentsAndGroups(children);
   const matchingGroups = filteredChildren.filter(
     (node): node is Group =>
-      node.type === "group" && node.name === firstLocator.name
+      // Stryker disable next-line ConditionalExpression: only a group has an id; the type check narrows for TypeScript
+      node.type === "group" && node.id === firstLocator.name
   );
 
   // If a specific repetition is requested, only follow that one
@@ -248,13 +250,14 @@ export function collectSegments(
 
 export function collectGroups(
   nodes: (Segment | Group)[],
-  targetGroupName: string,
+  targetGroupId: string,
   ancestors: Nodes[]
 ): { group: Group; ancestors: Nodes[] }[] {
   const result: { group: Group; ancestors: Nodes[] }[] = [];
 
   for (const node of nodes) {
-    if (node.type === "group" && node.name === targetGroupName) {
+    // Stryker disable next-line ConditionalExpression: only a group has an id; the type check narrows for TypeScript
+    if (node.type === "group" && node.id === targetGroupId) {
       result.push({ ancestors: [...ancestors], group: node });
     }
 
@@ -263,7 +266,7 @@ export function collectGroups(
       result.push(
         ...collectGroups(
           filterSegmentsAndGroups(node.children),
-          targetGroupName,
+          targetGroupId,
           nextAncestors
         )
       );

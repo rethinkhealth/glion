@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "MFN_M16",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "MATERIAL_ITEM_RECORD",
+      "id": "MATERIAL_ITEM_RECORD",
+      "name": "Material Item Record",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -52,7 +53,8 @@
         },
         {
           "type": "group",
-          "name": "STERILIZATION",
+          "id": "STERILIZATION",
+          "name": "Sterilization",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -72,7 +74,8 @@
         },
         {
           "type": "group",
-          "name": "PURCHASING_VENDOR",
+          "id": "PURCHASING_VENDOR",
+          "name": "Purchasing Vendor",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -84,7 +87,8 @@
             },
             {
               "type": "group",
-              "name": "PACKAGING",
+              "id": "PACKAGING",
+              "name": "Packaging",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -106,7 +110,8 @@
         },
         {
           "type": "group",
-          "name": "MATERIAL_LOCATION",
+          "id": "MATERIAL_LOCATION",
+          "name": "Material Location",
           "optional": true,
           "repeating": true,
           "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "MFN_M18",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "MF_PAYER",
+      "id": "MF_PAYER",
+      "name": "Master File Payer",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -40,7 +41,8 @@
         },
         {
           "type": "group",
-          "name": "PAYER_MF_ENTRY",
+          "id": "PAYER_MF_ENTRY",
+          "name": "Payer Master File Entry",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -52,7 +54,8 @@
             },
             {
               "type": "group",
-              "name": "PAYER_MF_COVERAGE",
+              "id": "PAYER_MF_COVERAGE",
+              "name": "Payer Master File Coverage",
               "optional": false,
               "repeating": true,
               "elements": [

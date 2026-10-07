@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "MFN_M08",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "MF_TEST_NUMERIC",
+      "id": "MF_TEST_NUMERIC",
+      "name": "Master File Test Numeric",
       "optional": false,
       "repeating": true,
       "elements": [

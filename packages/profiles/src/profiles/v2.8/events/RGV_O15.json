@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RGV_O15",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -58,7 +59,8 @@
         },
         {
           "type": "group",
-          "name": "PATIENT_VISIT",
+          "id": "PATIENT_VISIT",
+          "name": "Patient Visit",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -92,7 +94,8 @@
     },
     {
       "type": "group",
-      "name": "ORDER",
+      "id": "ORDER",
+      "name": "Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -110,7 +113,8 @@
         },
         {
           "type": "group",
-          "name": "TIMING",
+          "id": "TIMING",
+          "name": "Timing",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -130,7 +134,8 @@
         },
         {
           "type": "group",
-          "name": "ORDER_DETAIL",
+          "id": "ORDER_DETAIL",
+          "name": "Order Detail",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -148,7 +153,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER_DETAIL_SUPPLEMENT",
+              "id": "ORDER_DETAIL_SUPPLEMENT",
+              "name": "Order Detail Supplement",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -166,7 +172,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "COMPONENTS",
+                  "id": "COMPONENTS",
+                  "name": "Components",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -190,7 +197,8 @@
         },
         {
           "type": "group",
-          "name": "ENCODING",
+          "id": "ENCODING",
+          "name": "Encoding",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -214,7 +222,8 @@
             },
             {
               "type": "group",
-              "name": "TIMING_ENCODED",
+              "id": "TIMING_ENCODED",
+              "name": "Timing Encoded",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -248,7 +257,8 @@
         },
         {
           "type": "group",
-          "name": "GIVE",
+          "id": "GIVE",
+          "name": "Give",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -260,7 +270,8 @@
             },
             {
               "type": "group",
-              "name": "TIMING_GIVE",
+              "id": "TIMING_GIVE",
+              "name": "Timing Give",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -298,7 +309,8 @@
             },
             {
               "type": "group",
-              "name": "OBSERVATION",
+              "id": "OBSERVATION",
+              "name": "Observation",
               "optional": true,
               "repeating": true,
               "elements": [

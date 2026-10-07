@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RSP_Z86",
   "elements": [
     {
@@ -46,13 +46,15 @@
     },
     {
       "type": "group",
-      "name": "QUERY_RESPONSE",
+      "id": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -84,7 +86,8 @@
         },
         {
           "type": "group",
-          "name": "COMMON_ORDER",
+          "id": "COMMON_ORDER",
+          "name": "Common Order",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -96,7 +99,8 @@
             },
             {
               "type": "group",
-              "name": "TIMING",
+              "id": "TIMING",
+              "name": "Timing",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -116,7 +120,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER_DETAIL",
+              "id": "ORDER_DETAIL",
+              "name": "Order Detail",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -142,7 +147,8 @@
             },
             {
               "type": "group",
-              "name": "ENCODED_ORDER",
+              "id": "ENCODED_ORDER",
+              "name": "Encoded Order",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -154,7 +160,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "TIMING_ENCODED",
+                  "id": "TIMING_ENCODED",
+                  "name": "Timing Encoded",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -188,7 +195,8 @@
             },
             {
               "type": "group",
-              "name": "DISPENSE",
+              "id": "DISPENSE",
+              "name": "Dispense",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -214,7 +222,8 @@
             },
             {
               "type": "group",
-              "name": "GIVE",
+              "id": "GIVE",
+              "name": "Give",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -240,7 +249,8 @@
             },
             {
               "type": "group",
-              "name": "ADMINISTRATION",
+              "id": "ADMINISTRATION",
+              "name": "Administration",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -266,7 +276,8 @@
             },
             {
               "type": "group",
-              "name": "OBSERVATION",
+              "id": "OBSERVATION",
+              "name": "Observation",
               "optional": false,
               "repeating": true,
               "elements": [

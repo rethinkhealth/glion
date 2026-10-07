@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "DBC_O41",
   "elements": [
     {
@@ -22,7 +22,8 @@
     },
     {
       "type": "group",
-      "name": "DONOR",
+      "id": "DONOR",
+      "name": "Donor",
       "optional": true,
       "repeating": false,
       "elements": [

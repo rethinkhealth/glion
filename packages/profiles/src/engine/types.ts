@@ -53,7 +53,11 @@ export type SegmentElement = Occurrence &
 export type GroupElement = Occurrence &
   Readonly<{
     type: "group";
-    /** The group name, such as `PATIENT_RESULT`. */
+    /** The group ID, such as `PATIENT_RESULT`. */
+    id: string;
+    /**
+     * The group name, such as `Patient Result`.
+     */
     name: string;
     /** The elements of the group, in order. At least one. */
     elements: readonly EventSchemaElement[];
@@ -124,7 +128,9 @@ export type RunnerIncomplete = Readonly<{
 
 /** One occurrence of a group in a match. Holds at least one segment. */
 export type GroupMatch = Readonly<{
-  /** The group name, such as `PATIENT_RESULT`. */
+  /** The group ID, such as `PATIENT_RESULT`. */
+  id: string;
+  /** The group name, such as `Patient Result`. */
   name: string;
   /** The segment indexes and nested group occurrences, in input order. */
   children: readonly SegmentMatch[];

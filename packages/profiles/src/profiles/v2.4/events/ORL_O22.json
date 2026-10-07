@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ORL_O22",
   "elements": [
     {
@@ -28,13 +28,15 @@
     },
     {
       "type": "group",
-      "name": "RESPONSE",
+      "id": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -46,13 +48,15 @@
             },
             {
               "type": "group",
-              "name": "GENERAL_ORDER",
+              "id": "GENERAL_ORDER",
+              "name": "General Order",
               "optional": false,
               "repeating": true,
               "elements": [
                 {
                   "type": "group",
-                  "name": "CONTAINER",
+                  "id": "CONTAINER",
+                  "name": "Container",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -72,7 +76,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "ORDER",
+                  "id": "ORDER",
+                  "name": "Order",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -84,7 +89,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "OBSERVATION_REQUEST",
+                      "id": "OBSERVATION_REQUEST",
+                      "name": "Observation Request",
                       "optional": true,
                       "repeating": false,
                       "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ORU_R30",
   "elements": [
     {
@@ -46,7 +46,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT_OBSERVATION",
+      "id": "PATIENT_OBSERVATION",
+      "name": "Patient Observation",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -66,7 +67,8 @@
     },
     {
       "type": "group",
-      "name": "VISIT",
+      "id": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -122,7 +124,8 @@
     },
     {
       "type": "group",
-      "name": "TIMING_QTY",
+      "id": "TIMING_QTY",
+      "name": "Timing Quantity",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -142,7 +145,8 @@
     },
     {
       "type": "group",
-      "name": "OBSERVATION",
+      "id": "OBSERVATION",
+      "name": "Observation",
       "optional": false,
       "repeating": true,
       "elements": [

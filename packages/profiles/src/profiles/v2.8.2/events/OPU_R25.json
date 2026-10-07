@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "OPU_R25",
   "elements": [
     {
@@ -46,7 +46,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT_VISIT_OBSERVATION",
+      "id": "PATIENT_VISIT_OBSERVATION",
+      "name": "Patient Visit Observation",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -72,7 +73,8 @@
     },
     {
       "type": "group",
-      "name": "ACCESSION_DETAIL",
+      "id": "ACCESSION_DETAIL",
+      "name": "Accession Detail",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -84,7 +86,8 @@
         },
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -114,7 +117,8 @@
             },
             {
               "type": "group",
-              "name": "PATIENT_OBSERVATION",
+              "id": "PATIENT_OBSERVATION",
+              "name": "Patient Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -142,7 +146,8 @@
         },
         {
           "type": "group",
-          "name": "SPECIMEN",
+          "id": "SPECIMEN",
+          "name": "Specimen",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -154,7 +159,8 @@
             },
             {
               "type": "group",
-              "name": "SPECIMEN_OBSERVATION",
+              "id": "SPECIMEN_OBSERVATION",
+              "name": "Specimen Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -180,7 +186,8 @@
             },
             {
               "type": "group",
-              "name": "CONTAINER",
+              "id": "CONTAINER",
+              "name": "Container",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -200,7 +207,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER",
+              "id": "ORDER",
+              "name": "Order",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -218,7 +226,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "COMMON_ORDER",
+                  "id": "COMMON_ORDER",
+                  "name": "Common Order",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -244,7 +253,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "TIMING_QTY",
+                  "id": "TIMING_QTY",
+                  "name": "Timing Quantity",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -264,7 +274,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "RESULT",
+                  "id": "RESULT",
+                  "name": "Result",
                   "optional": false,
                   "repeating": true,
                   "elements": [

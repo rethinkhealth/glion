@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "RSP_Z88",
   "elements": [
     {
@@ -40,13 +40,15 @@
     },
     {
       "type": "group",
-      "name": "QUERY_RESPONSE",
+      "id": "QUERY_RESPONSE",
+      "name": "Query Response",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -70,7 +72,8 @@
             },
             {
               "type": "group",
-              "name": "ALLERGY",
+              "id": "ALLERGY",
+              "name": "Allergy",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -82,7 +85,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "VISIT",
+                  "id": "VISIT",
+                  "name": "Visit",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -104,7 +108,8 @@
             },
             {
               "type": "group",
-              "name": "COMMON_ORDER",
+              "id": "COMMON_ORDER",
+              "name": "Common Order",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -116,7 +121,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "ORDER_DETAIL",
+                  "id": "ORDER_DETAIL",
+                  "name": "Order Detail",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -140,7 +146,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "COMPONENT",
+                      "id": "COMPONENT",
+                      "name": "Component",
                       "optional": true,
                       "repeating": false,
                       "elements": [
@@ -162,7 +169,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "ORDER_ENCODED",
+                  "id": "ORDER_ENCODED",
+                  "name": "Order Encoded",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -206,7 +214,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "OBSERVATION",
+                  "id": "OBSERVATION",
+                  "name": "Observation",
                   "optional": false,
                   "repeating": true,
                   "elements": [

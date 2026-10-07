@@ -14,10 +14,16 @@ export function m(...children: RootContent[]): Root {
   return u("root", children);
 }
 
-export function g(name: string, ...children: (Segment | Group)[]): Group {
-  const group = u("group", children) as Group;
-  group.name = name;
-  return group;
+/**
+ * A group of `children`. A string `group` is both the group's ID and its name.
+ */
+export function g(
+  group: string | { id: string; name: string },
+  ...children: (Segment | Group)[]
+): Group {
+  const { id, name } =
+    typeof group === "string" ? { id: group, name: group } : group;
+  return u("group", { id, name }, children);
 }
 
 // TODO: Add support for string[]

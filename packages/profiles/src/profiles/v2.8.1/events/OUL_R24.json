@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "OUL_R24",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -64,7 +65,8 @@
         },
         {
           "type": "group",
-          "name": "PATIENT_OBSERVATION",
+          "id": "PATIENT_OBSERVATION",
+          "name": "Patient Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -84,7 +86,8 @@
         },
         {
           "type": "group",
-          "name": "VISIT",
+          "id": "VISIT",
+          "name": "Visit",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -118,7 +121,8 @@
     },
     {
       "type": "group",
-      "name": "ORDER",
+      "id": "ORDER",
+      "name": "Order",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -136,7 +140,8 @@
         },
         {
           "type": "group",
-          "name": "COMMON_ORDER",
+          "id": "COMMON_ORDER",
+          "name": "Common Order",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -154,7 +159,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER_DOCUMENT",
+              "id": "ORDER_DOCUMENT",
+              "name": "Order Document",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -188,7 +194,8 @@
         },
         {
           "type": "group",
-          "name": "TIMING_QTY",
+          "id": "TIMING_QTY",
+          "name": "Timing Quantity",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -208,7 +215,8 @@
         },
         {
           "type": "group",
-          "name": "SPECIMEN",
+          "id": "SPECIMEN",
+          "name": "Specimen",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -220,7 +228,8 @@
             },
             {
               "type": "group",
-              "name": "SPECIMEN_OBSERVATION",
+              "id": "SPECIMEN_OBSERVATION",
+              "name": "Specimen Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -240,7 +249,8 @@
             },
             {
               "type": "group",
-              "name": "CONTAINER",
+              "id": "CONTAINER",
+              "name": "Container",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -262,7 +272,8 @@
         },
         {
           "type": "group",
-          "name": "RESULT",
+          "id": "RESULT",
+          "name": "Result",
           "optional": true,
           "repeating": true,
           "elements": [

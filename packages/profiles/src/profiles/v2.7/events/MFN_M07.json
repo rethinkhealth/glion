@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "MFN_M07",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "MF_CLIN_STUDY_SCHED",
+      "id": "MF_CLIN_STUDY_SCHED",
+      "name": "Master File Clinical Study Schedule",
       "optional": false,
       "repeating": true,
       "elements": [

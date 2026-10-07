@@ -6,7 +6,10 @@ export interface SegmentJson {
 }
 
 export interface GroupJson {
+  /** The group ID, such as `PATIENT_VISIT`. */
   group: string;
+  /** The group name, such as `Patient Visit`. */
+  name: string;
   children: (SegmentJson | GroupJson)[]; // Groups can contain segments and nested groups
 }
 

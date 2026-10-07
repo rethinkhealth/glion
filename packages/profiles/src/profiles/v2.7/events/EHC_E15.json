@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "EHC_E15",
   "elements": [
     {
@@ -41,7 +41,8 @@
     },
     {
       "type": "group",
-      "name": "PAYMENT_REMITTANCE_DETAIL_INFO",
+      "id": "PAYMENT_REMITTANCE_DETAIL_INFO",
+      "name": "Payment Remittance Detail Information",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -59,7 +60,8 @@
         },
         {
           "type": "group",
-          "name": "PRODUCT_SERVICE_SECTION",
+          "id": "PRODUCT_SERVICE_SECTION",
+          "name": "Product Service Section",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -71,7 +73,8 @@
             },
             {
               "type": "group",
-              "name": "PRODUCT_SERVICE_GROUP",
+              "id": "PRODUCT_SERVICE_GROUP",
+              "name": "Product Service Group",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -83,7 +86,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "PSL_ITEM_INFO",
+                  "id": "PSL_ITEM_INFO",
+                  "name": "PSL Item Information",
                   "optional": false,
                   "repeating": true,
                   "elements": [
@@ -109,7 +113,8 @@
     },
     {
       "type": "group",
-      "name": "ADJUSTMENT_PAYEE",
+      "id": "ADJUSTMENT_PAYEE",
+      "name": "Adjustment Payee",
       "optional": true,
       "repeating": true,
       "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "CSU_C09",
   "elements": [
     {
@@ -16,7 +16,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -40,7 +41,8 @@
         },
         {
           "type": "group",
-          "name": "VISIT",
+          "id": "VISIT",
+          "name": "Visit",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -66,7 +68,8 @@
         },
         {
           "type": "group",
-          "name": "STUDY_PHASE",
+          "id": "STUDY_PHASE",
+          "name": "Study Phase",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -78,7 +81,8 @@
             },
             {
               "type": "group",
-              "name": "STUDY_SCHEDULE",
+              "id": "STUDY_SCHEDULE",
+              "name": "Study Schedule",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -90,7 +94,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "STUDY_OBSERVATION",
+                  "id": "STUDY_OBSERVATION",
+                  "name": "Study Observation",
                   "optional": false,
                   "repeating": true,
                   "elements": [
@@ -108,7 +113,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "TIMING_QTY",
+                      "id": "TIMING_QTY",
+                      "name": "Timing Quantity",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -136,7 +142,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "ORCRXARXR_SUPPGRP",
+                  "id": "STUDY_PHARM",
+                  "name": "Study Pharmacy",
                   "optional": false,
                   "repeating": true,
                   "elements": [
@@ -148,7 +155,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "RXARXR_SUPPGRP",
+                      "id": "RX_ADMIN",
+                      "name": "Pharmacy Administration",
                       "optional": false,
                       "repeating": true,
                       "elements": [

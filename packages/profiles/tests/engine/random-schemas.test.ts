@@ -42,10 +42,12 @@ function element(
   }
   const children = elements(depth + 1, random, names);
   if (roll < 0.8) {
+    const id = `G${depth}${Math.floor(random() * 10)}`;
     return {
       ...occurrence(random),
       elements: children,
-      name: `G${depth}${Math.floor(random() * 10)}`,
+      id,
+      name: id,
       type: "group",
     };
   }

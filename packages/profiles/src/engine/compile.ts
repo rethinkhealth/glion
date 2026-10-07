@@ -49,7 +49,7 @@ export type Instruction =
   | Readonly<{ op: "any"; next: number }>
   | Readonly<{ op: "z"; next: number }>
   | Readonly<{ op: "split"; targets: readonly number[] }>
-  | Readonly<{ op: "open"; name: string; next: number }>
+  | Readonly<{ op: "open"; id: string; name: string; next: number }>
   | Readonly<{ op: "close"; next: number }>
   | Readonly<{ op: "match" }>;
 
@@ -68,7 +68,7 @@ type Draft =
   | { op: "any"; next: number }
   | { op: "z"; next: number }
   | { op: "split"; targets: number[] }
-  | { op: "open"; name: string; next: number }
+  | { op: "open"; id: string; name: string; next: number }
   | { op: "close"; next: number }
   | { op: "match" };
 
@@ -98,9 +98,9 @@ const canMatchNothing = (element: EventSchemaElement): boolean => {
  * over later ones. Neither `start` nor any instruction targets a split with a
  * single target.
  *
- * @throws {Error} When `schema` has no elements, a segment or group has no
- *   name, a group has no elements, a choice has no alternatives, or a choice
- *   alternative can match no segment.
+ * @throws {Error} When `schema` has no elements, a segment has no name, a
+ *   group has no ID, no name, or no elements, a choice has no alternatives,
+ *   or a choice alternative can match no segment.
  */
 export function compile(schema: EventSchema): EventSchemaProgram {
   const invalid = (reason: string): Error =>
@@ -158,16 +158,24 @@ export function compile(schema: EventSchema): EventSchemaProgram {
         return [emit(consuming(element.name, end)), end];
       }
       case "group": {
+        if (!element.id) {
+          throw invalid("a group has no ID");
+        }
         if (!element.name) {
-          throw invalid("a group has no name");
+          throw invalid(`group ${element.id} has no name`);
         }
         if (element.elements.length === 0) {
-          throw invalid(`group ${element.name} has no elements`);
+          throw invalid(`group ${element.id} has no elements`);
         }
         const [first, last] = sequence(element.elements);
         const end = split();
         jump(last, emit({ next: end, op: "close" }));
-        const start = emit({ name: element.name, next: first, op: "open" });
+        const start = emit({
+          id: element.id,
+          name: element.name,
+          next: first,
+          op: "open",
+        });
         return [start, end];
       }
       case "choice": {

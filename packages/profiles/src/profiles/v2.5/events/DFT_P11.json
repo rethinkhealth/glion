@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "DFT_P11",
   "elements": [
     {
@@ -64,7 +64,8 @@
     },
     {
       "type": "group",
-      "name": "COMMON_ORDER",
+      "id": "COMMON_ORDER",
+      "name": "Common Order",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -76,7 +77,8 @@
         },
         {
           "type": "group",
-          "name": "TIMING_QUANTITY",
+          "id": "TIMING_QUANTITY",
+          "name": "Timing Quantity",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -96,7 +98,8 @@
         },
         {
           "type": "group",
-          "name": "ORDER",
+          "id": "ORDER",
+          "name": "Order",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -116,7 +119,8 @@
         },
         {
           "type": "group",
-          "name": "OBSERVATION",
+          "id": "OBSERVATION",
+          "name": "Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -156,7 +160,8 @@
     },
     {
       "type": "group",
-      "name": "INSURANCE",
+      "id": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -194,7 +199,8 @@
     },
     {
       "type": "group",
-      "name": "FINANCIAL",
+      "id": "FINANCIAL",
+      "name": "Financial",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -206,7 +212,8 @@
         },
         {
           "type": "group",
-          "name": "FINANCIAL_PROCEDURE",
+          "id": "FINANCIAL_PROCEDURE",
+          "name": "Financial Procedure",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -226,7 +233,8 @@
         },
         {
           "type": "group",
-          "name": "FINANCIAL_COMMON_ORDER",
+          "id": "FINANCIAL_COMMON_ORDER",
+          "name": "Financial Common Order",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -238,7 +246,8 @@
             },
             {
               "type": "group",
-              "name": "FINANCIAL_TIMING_QUANTITY",
+              "id": "FINANCIAL_TIMING_QUANTITY",
+              "name": "Financial Timing Quantity",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -258,7 +267,8 @@
             },
             {
               "type": "group",
-              "name": "FINANCIAL_ORDER",
+              "id": "FINANCIAL_ORDER",
+              "name": "Financial Order",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -278,7 +288,8 @@
             },
             {
               "type": "group",
-              "name": "FINANCIAL_OBSERVATION",
+              "id": "FINANCIAL_OBSERVATION",
+              "name": "Financial Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -318,7 +329,8 @@
         },
         {
           "type": "group",
-          "name": "FINANCIAL_INSURANCE",
+          "id": "FINANCIAL_INSURANCE",
+          "name": "Financial Insurance",
           "optional": true,
           "repeating": true,
           "elements": [

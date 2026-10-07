@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "VXR_V03",
   "elements": [
     {
@@ -46,7 +46,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT_VISIT",
+      "id": "PATIENT_VISIT",
+      "name": "Patient Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -66,7 +67,8 @@
     },
     {
       "type": "group",
-      "name": "INSURANCE",
+      "id": "INSURANCE",
+      "name": "Insurance",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -92,7 +94,8 @@
     },
     {
       "type": "group",
-      "name": "ORDER",
+      "id": "ORDER",
+      "name": "Order",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -116,7 +119,8 @@
         },
         {
           "type": "group",
-          "name": "OBSERVATION",
+          "id": "OBSERVATION",
+          "name": "Observation",
           "optional": true,
           "repeating": true,
           "elements": [

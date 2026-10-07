@@ -47,7 +47,7 @@ describe("canary — suites measure real work", () => {
       );
       const result = runner(schema, segmentIds);
       expect(result.type).toBe("matched");
-      expect(JSON.stringify(result)).toContain('"name":"ORDER_OBSERVATION"');
+      expect(JSON.stringify(result)).toContain('"id":"ORDER_OBSERVATION"');
     }
   });
 
@@ -64,7 +64,7 @@ describe("canary — suites measure real work", () => {
       const tree = parseHL7v2(message);
       await transform.run(tree, new VFile());
       expect(tree.children.some((node) => node.type === "group")).toBe(true);
-      expect(JSON.stringify(tree)).toContain('"name":"ORDER_OBSERVATION"');
+      expect(JSON.stringify(tree)).toContain('"id":"ORDER_OBSERVATION"');
     }
   });
 

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "NMQ_N01",
   "elements": [
     {
@@ -10,7 +10,8 @@
     },
     {
       "type": "group",
-      "name": "QRY_WITH_DETAIL",
+      "id": "QRY_WITH_DETAIL",
+      "name": "QRY with Detail",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -30,7 +31,8 @@
     },
     {
       "type": "group",
-      "name": "CLOCK_AND_STATISTICS",
+      "id": "CLOCK_AND_STATISTICS",
+      "name": "Clock and Statistics",
       "optional": false,
       "repeating": true,
       "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "EHC_E24",
   "elements": [
     {
@@ -45,7 +45,8 @@
         },
         {
           "type": "group",
-          "name": "PSL_ITEM_INFO",
+          "id": "PSL_ITEM_INFO",
+          "name": "PSL Item Information",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -63,7 +64,8 @@
             },
             {
               "type": "group",
-              "name": "PAYER_ADJUSTMENT",
+              "id": "PAYER_ADJUSTMENT",
+              "name": "Payer Adjustment",
               "optional": true,
               "repeating": true,
               "elements": [

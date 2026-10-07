@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "OUL_R21",
   "elements": [
     {
@@ -16,7 +16,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -42,7 +43,8 @@
     },
     {
       "type": "group",
-      "name": "VISIT",
+      "id": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -62,13 +64,15 @@
     },
     {
       "type": "group",
-      "name": "ORDER_OBSERVATION",
+      "id": "ORDER_OBSERVATION",
+      "name": "Order Observation",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
-          "name": "CONTAINER",
+          "id": "CONTAINER",
+          "name": "Container",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -112,7 +116,8 @@
         },
         {
           "type": "group",
-          "name": "OBSERVATION",
+          "id": "OBSERVATION",
+          "name": "Observation",
           "optional": false,
           "repeating": true,
           "elements": [

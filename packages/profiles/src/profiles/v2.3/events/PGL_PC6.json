@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "PGL_PC6",
   "elements": [
     {
@@ -16,7 +16,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT_VISIT",
+      "id": "PATIENT_VISIT",
+      "name": "Patient Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -36,7 +37,8 @@
     },
     {
       "type": "group",
-      "name": "GOAL",
+      "id": "GOAL",
+      "name": "Goal",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -60,7 +62,8 @@
         },
         {
           "type": "group",
-          "name": "GOAL_ROLE",
+          "id": "GOAL_ROLE",
+          "name": "Goal Role",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -80,7 +83,8 @@
         },
         {
           "type": "group",
-          "name": "PATHWAY",
+          "id": "PATHWAY",
+          "name": "Pathway",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -100,7 +104,8 @@
         },
         {
           "type": "group",
-          "name": "OBSERVATION",
+          "id": "OBSERVATION",
+          "name": "Observation",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -120,7 +125,8 @@
         },
         {
           "type": "group",
-          "name": "PROBLEM",
+          "id": "PROBLEM",
+          "name": "Problem",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -144,7 +150,8 @@
             },
             {
               "type": "group",
-              "name": "PROBLEM_ROLE",
+              "id": "PROBLEM_ROLE",
+              "name": "Problem Role",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -164,7 +171,8 @@
             },
             {
               "type": "group",
-              "name": "PROBLEM_OBSERVATION",
+              "id": "PROBLEM_OBSERVATION",
+              "name": "Problem Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -186,7 +194,8 @@
         },
         {
           "type": "group",
-          "name": "ORDER",
+          "id": "ORDER",
+          "name": "Order",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -198,7 +207,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER_DETAIL",
+              "id": "ORDER_DETAIL",
+              "name": "Order Detail",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -222,7 +232,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "ORDER_OBSERVATION",
+                  "id": "ORDER_OBSERVATION",
+                  "name": "Order Observation",
                   "optional": true,
                   "repeating": true,
                   "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "PEX_P07",
   "elements": [
     {
@@ -40,7 +40,8 @@
     },
     {
       "type": "group",
-      "name": "VISIT",
+      "id": "VISIT",
+      "name": "Visit",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -60,7 +61,8 @@
     },
     {
       "type": "group",
-      "name": "EXPERIENCE",
+      "id": "EXPERIENCE",
+      "name": "Experience",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -72,7 +74,8 @@
         },
         {
           "type": "group",
-          "name": "PEX_OBSERVATION",
+          "id": "PEX_OBSERVATION",
+          "name": "PEX Observation",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -84,7 +87,8 @@
             },
             {
               "type": "group",
-              "name": "PEX_CAUSE",
+              "id": "PEX_CAUSE",
+              "name": "PEX Cause",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -96,7 +100,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "RX_ORDER",
+                  "id": "RX_ORDER",
+                  "name": "Pharmacy Order",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -108,7 +113,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "TIMING_QTY",
+                      "id": "TIMING_QTY",
+                      "name": "Timing Quantity",
                       "optional": false,
                       "repeating": true,
                       "elements": [
@@ -136,7 +142,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "RX_ADMINISTRATION",
+                  "id": "RX_ADMINISTRATION",
+                  "name": "Pharmacy Administration",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -174,7 +181,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "ASSOCIATED_PERSON",
+                  "id": "ASSOCIATED_PERSON",
+                  "name": "Associated Person",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -186,7 +194,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "ASSOCIATED_RX_ORDER",
+                      "id": "ASSOCIATED_RX_ORDER",
+                      "name": "Associated Pharmacy Order",
                       "optional": true,
                       "repeating": false,
                       "elements": [
@@ -198,7 +207,8 @@
                         },
                         {
                           "type": "group",
-                          "name": "NK1_TIMING_QTY",
+                          "id": "NK1_TIMING_QTY",
+                          "name": "NK1 Timing Quantity",
                           "optional": false,
                           "repeating": true,
                           "elements": [
@@ -226,7 +236,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "ASSOCIATED_RX_ADMIN",
+                      "id": "ASSOCIATED_RX_ADMIN",
+                      "name": "Associated Pharmacy Administration",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -260,7 +271,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "STUDY",
+                  "id": "STUDY",
+                  "name": "Study",
                   "optional": true,
                   "repeating": true,
                   "elements": [

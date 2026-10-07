@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "NMD_N02",
   "elements": [
     {
@@ -10,13 +10,15 @@
     },
     {
       "type": "group",
-      "name": "CLOCK_AND_STATS_WITH_NOTES",
+      "id": "CLOCK_AND_STATS_WITH_NOTES",
+      "name": "Clock and Statistics with Notes",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
-          "name": "CLOCK",
+          "id": "CLOCK",
+          "name": "Clock",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -36,7 +38,8 @@
         },
         {
           "type": "group",
-          "name": "APP_STATS",
+          "id": "APP_STATS",
+          "name": "Application Statistics",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -56,7 +59,8 @@
         },
         {
           "type": "group",
-          "name": "APP_STATUS",
+          "id": "APP_STATUS",
+          "name": "Application Status",
           "optional": true,
           "repeating": false,
           "elements": [

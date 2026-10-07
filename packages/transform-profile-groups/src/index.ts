@@ -73,7 +73,12 @@ const nodeOf = (
     return segment;
   }
   const children = match.children.map((child) => nodeOf(child, segments));
-  const group: Group = { children, name: match.name, type: "group" };
+  const group: Group = {
+    children,
+    id: match.id,
+    name: match.name,
+    type: "group",
+  };
   const start = children[0]?.position?.start;
   const end = children.at(-1)?.position?.end;
   if (start && end) {

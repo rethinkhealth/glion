@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "BRT_O32",
   "elements": [
     {
@@ -34,7 +34,8 @@
     },
     {
       "type": "group",
-      "name": "RESPONSE",
+      "id": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -46,7 +47,8 @@
         },
         {
           "type": "group",
-          "name": "ORDER",
+          "id": "ORDER",
+          "name": "Order",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -58,7 +60,8 @@
             },
             {
               "type": "group",
-              "name": "TIMING",
+              "id": "TIMING",
+              "name": "Timing",
               "optional": true,
               "repeating": true,
               "elements": [

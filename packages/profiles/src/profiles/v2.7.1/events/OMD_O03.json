@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "OMD_O03",
   "elements": [
     {
@@ -28,7 +28,8 @@
     },
     {
       "type": "group",
-      "name": "PATIENT",
+      "id": "PATIENT",
+      "name": "Patient",
       "optional": true,
       "repeating": false,
       "elements": [
@@ -58,7 +59,8 @@
         },
         {
           "type": "group",
-          "name": "PATIENT_VISIT",
+          "id": "PATIENT_VISIT",
+          "name": "Patient Visit",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -78,7 +80,8 @@
         },
         {
           "type": "group",
-          "name": "INSURANCE",
+          "id": "INSURANCE",
+          "name": "Insurance",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -118,7 +121,8 @@
     },
     {
       "type": "group",
-      "name": "ORDER_DIET",
+      "id": "ORDER_DIET",
+      "name": "Order Diet",
       "optional": false,
       "repeating": true,
       "elements": [
@@ -130,7 +134,8 @@
         },
         {
           "type": "group",
-          "name": "TIMING_DIET",
+          "id": "TIMING_DIET",
+          "name": "Timing Diet",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -150,7 +155,8 @@
         },
         {
           "type": "group",
-          "name": "DIET",
+          "id": "DIET",
+          "name": "Diet",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -168,7 +174,8 @@
             },
             {
               "type": "group",
-              "name": "OBSERVATION",
+              "id": "OBSERVATION",
+              "name": "Observation",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -192,7 +199,8 @@
     },
     {
       "type": "group",
-      "name": "ORDER_TRAY",
+      "id": "ORDER_TRAY",
+      "name": "Order Tray",
       "optional": true,
       "repeating": true,
       "elements": [
@@ -204,7 +212,8 @@
         },
         {
           "type": "group",
-          "name": "TIMING_TRAY",
+          "id": "TIMING_TRAY",
+          "name": "Timing Tray",
           "optional": true,
           "repeating": true,
           "elements": [

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "EHC_E02",
   "elements": [
     {
@@ -51,7 +51,8 @@
         },
         {
           "type": "group",
-          "name": "PRODUCT_SERVICE_SECTION",
+          "id": "PRODUCT_SERVICE_SECTION",
+          "name": "Product Service Section",
           "optional": false,
           "repeating": true,
           "elements": [
@@ -63,6 +64,7 @@
             },
             {
               "type": "group",
+              "id": "PSG",
               "name": "PSG",
               "optional": true,
               "repeating": true,

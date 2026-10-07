@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v1.json",
+  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
   "id": "ORL_O40",
   "elements": [
     {
@@ -40,13 +40,15 @@
     },
     {
       "type": "group",
-      "name": "RESPONSE",
+      "id": "RESPONSE",
+      "name": "Response",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
-          "name": "PATIENT",
+          "id": "PATIENT",
+          "name": "Patient",
           "optional": true,
           "repeating": false,
           "elements": [
@@ -70,7 +72,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER",
+              "id": "ORDER",
+              "name": "Order",
               "optional": true,
               "repeating": true,
               "elements": [
@@ -88,7 +91,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "TIMING",
+                  "id": "TIMING",
+                  "name": "Timing",
                   "optional": true,
                   "repeating": true,
                   "elements": [
@@ -108,7 +112,8 @@
                 },
                 {
                   "type": "group",
-                  "name": "OBSERVATION_REQUEST",
+                  "id": "OBSERVATION_REQUEST",
+                  "name": "Observation Request",
                   "optional": true,
                   "repeating": false,
                   "elements": [
@@ -126,7 +131,8 @@
                     },
                     {
                       "type": "group",
-                      "name": "SPECIMEN_SHIPMENT",
+                      "id": "SPECIMEN_SHIPMENT",
+                      "name": "Specimen Shipment",
                       "optional": true,
                       "repeating": true,
                       "elements": [
@@ -138,7 +144,8 @@
                         },
                         {
                           "type": "group",
-                          "name": "PACKAGE",
+                          "id": "PACKAGE",
+                          "name": "Package",
                           "optional": false,
                           "repeating": true,
                           "elements": [
@@ -150,7 +157,8 @@
                             },
                             {
                               "type": "group",
-                              "name": "SPECIMEN_IN_PACKAGE",
+                              "id": "SPECIMEN_IN_PACKAGE",
+                              "name": "Specimen in Package",
                               "optional": true,
                               "repeating": true,
                               "elements": [
@@ -162,7 +170,8 @@
                                 },
                                 {
                                   "type": "group",
-                                  "name": "SPECIMEN_CONTAINER_IN_PACKAGE",
+                                  "id": "SPECIMEN_CONTAINER_IN_PACKAGE",
+                                  "name": "Specimen Container in Package",
                                   "optional": true,
                                   "repeating": true,
                                   "elements": [
