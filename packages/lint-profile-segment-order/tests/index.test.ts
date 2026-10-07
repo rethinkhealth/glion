@@ -209,7 +209,7 @@ describe("hl7v2LintSegmentOrder", () => {
       ]);
     });
 
-    it("reports each missing and each unexpected segment, not only the first", async () => {
+    it("reports each segment out of place next to the required one it displaces", async () => {
       const tree = m(s("MSH"), s("WRONG1"), s("WRONG2"));
       const file = new VFile();
 
@@ -219,8 +219,8 @@ describe("hl7v2LintSegmentOrder", () => {
 
       expect(file.messages.map((message) => message.reason)).toEqual([
         "Missing segment 'PID' (before 'WRONG1')",
-        "Missing segment 'PV1' (before 'WRONG1')",
         "Unexpected segment 'WRONG1' (after 'MSH')",
+        "Missing segment 'PV1' (before 'WRONG2')",
         "Unexpected segment 'WRONG2' (after 'WRONG1')",
       ]);
     });
