@@ -104,7 +104,7 @@
         },
         {
           "type": "group",
-          "name": "GENERAL RESOURCE",
+          "name": "GENERAL_RESOURCE",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -130,7 +130,7 @@
         },
         {
           "type": "group",
-          "name": "LOCATION RESOURCE",
+          "name": "LOCATION_RESOURCE",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -156,7 +156,7 @@
         },
         {
           "type": "group",
-          "name": "PERSONNEL RESOURCE",
+          "name": "PERSONNEL_RESOURCE",
           "optional": true,
           "repeating": true,
           "elements": [

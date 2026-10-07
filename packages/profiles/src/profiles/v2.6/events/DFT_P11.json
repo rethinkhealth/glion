@@ -232,7 +232,7 @@
         },
         {
           "type": "group",
-          "name": "FINANCIAL_COMMON ORDER",
+          "name": "FINANCIAL_COMMON_ORDER",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -244,7 +244,7 @@
             },
             {
               "type": "group",
-              "name": "FINANCIAL_TIMING QUANTITY",
+              "name": "FINANCIAL_TIMING_QUANTITY",
               "optional": true,
               "repeating": true,
               "elements": [

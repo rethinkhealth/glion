@@ -74,7 +74,7 @@
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "pattern": "^[A-Z][A-Z0-9_]*$"
         },
         "optional": {
           "type": "boolean",
