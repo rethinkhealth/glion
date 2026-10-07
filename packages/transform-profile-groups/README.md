@@ -81,6 +81,7 @@ const definition: EventSchema = {
     { type: "segment", name: "PID", optional: false, repeating: false },
     {
       type: "group",
+      id: "VISIT",
       name: "VISIT",
       optional: false,
       repeating: false,
@@ -142,11 +143,11 @@ Async transformer. Mutates the tree in place and returns it.
 
 ###### Throws
 
-When the event schema is invalid: it has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment. When a bundled event schema fails to load.
+When the event schema is invalid: it has no elements, a segment has no name, a group has no ID, no name, or no elements, a choice has no alternatives, or a choice alternative can match no segment. When a bundled event schema fails to load.
 
 ## Behavior
 
-- Each `Group` has `type: "group"`, the group's `name` from the standard, such as `ORDER_OBSERVATION`, and a `position` from the start of its first segment to the end of its last.
+- Each `Group` has `type: "group"`, the group's `id`, such as `ORDER_OBSERVATION` or `PATIENT_VISIT`, its `name` as the standard spells it, such as `ORDER_OBSERVATION` or `PATIENT VISIT`, and a `position` from the start of its first segment to the end of its last.
 - Each occurrence of a repeating group is its own `Group` node: two results give two `OBSERVATION` nodes.
 - A choice, the standard's `< OBR | RXO >`, adds no node: the chosen segment sits in the enclosing group.
 - A group occurrence that holds no segment is left out.

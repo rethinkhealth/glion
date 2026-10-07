@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "RESULT",
       "name": "RESULT",
       "optional": false,
       "repeating": true,

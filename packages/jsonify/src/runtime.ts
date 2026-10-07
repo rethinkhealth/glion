@@ -52,7 +52,7 @@ function processGroup(group: Group): GroupJson {
     }
   }
 
-  return { children, group: group.name ?? "" };
+  return { children, group: group.id, name: group.name };
 }
 
 // Convert a Field into JSON-friendly value: string or nested arrays representing reps/components/subcomponents

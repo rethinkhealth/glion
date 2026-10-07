@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "MF_TEST_CATEGORICAL",
       "name": "MF_TEST_CATEGORICAL",
       "optional": false,
       "repeating": true,
@@ -28,6 +29,7 @@
         },
         {
           "type": "group",
+          "id": "MF_TEST_CAT_DETAIL",
           "name": "MF_TEST_CAT_DETAIL",
           "optional": true,
           "repeating": false,

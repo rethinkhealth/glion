@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "MF_OBS_ATTRIBUTES",
       "name": "MF_OBS_ATTRIBUTES",
       "optional": false,
       "repeating": true,

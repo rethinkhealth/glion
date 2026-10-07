@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "QUERY_RESPONSE",
       "name": "QUERY_RESPONSE",
       "optional": false,
       "repeating": true,
@@ -48,6 +49,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER",
       "name": "ORDER",
       "optional": false,
       "repeating": true,
@@ -72,6 +74,7 @@
         },
         {
           "type": "group",
+          "id": "OBSERVATION",
           "name": "OBSERVATION",
           "optional": false,
           "repeating": true,

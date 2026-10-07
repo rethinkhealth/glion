@@ -22,6 +22,7 @@
     },
     {
       "type": "group",
+      "id": "VISIT",
       "name": "VISIT",
       "optional": false,
       "repeating": true,

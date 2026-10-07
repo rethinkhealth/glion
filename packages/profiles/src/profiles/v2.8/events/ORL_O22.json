@@ -40,6 +40,7 @@
     },
     {
       "type": "group",
+      "id": "RESPONSE",
       "name": "RESPONSE",
       "optional": true,
       "repeating": false,
@@ -64,6 +65,7 @@
         },
         {
           "type": "group",
+          "id": "ORDER",
           "name": "ORDER",
           "optional": true,
           "repeating": true,
@@ -82,6 +84,7 @@
             },
             {
               "type": "group",
+              "id": "TIMING",
               "name": "TIMING",
               "optional": true,
               "repeating": true,
@@ -102,6 +105,7 @@
             },
             {
               "type": "group",
+              "id": "OBSERVATION_REQUEST",
               "name": "OBSERVATION_REQUEST",
               "optional": true,
               "repeating": false,
@@ -120,6 +124,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "SPECIMEN",
                   "name": "SPECIMEN",
                   "optional": true,
                   "repeating": true,

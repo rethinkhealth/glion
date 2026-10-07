@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "NOTIFICATION",
       "name": "NOTIFICATION",
       "optional": false,
       "repeating": true,

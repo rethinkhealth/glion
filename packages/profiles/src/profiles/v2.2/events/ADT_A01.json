@@ -70,6 +70,7 @@
     },
     {
       "type": "group",
+      "id": "INSURANCE",
       "name": "INSURANCE",
       "optional": true,
       "repeating": true,

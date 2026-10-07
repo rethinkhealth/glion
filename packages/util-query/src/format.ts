@@ -1,4 +1,8 @@
-import type { Nodes } from "@glion/ast";
+import type { Group, Nodes, Segment } from "@glion/ast";
+
+/** What a path names a node by: a segment's name, or a group's ID. */
+const keyOf = (node: Segment | Group): string | undefined =>
+  node.type === "group" ? node.id : node.name;
 
 /**
  * Format a node and its ancestor chain into a canonical HL7v2 path string.
@@ -39,7 +43,7 @@ export function format(node: Nodes, ancestors: Nodes[]): string | null {
       case "group":
       case "segment": {
         const pos = positionOf(current, parent);
-        result = (result ?? "") + current.name;
+        result = (result ?? "") + keyOf(current);
         if (pos > 1) {
           result += `[${pos}]`;
         }
@@ -80,9 +84,8 @@ export function format(node: Nodes, ancestors: Nodes[]): string | null {
 /**
  * Compute the 1-based position of a node among its parent's children.
  *
- * For named nodes (segments, groups), counts only same-name siblings
- * because segments are identified by name: the 2nd PID in [MSH, PID, OBX, PID]
- * is PID[2], not PID[4].
+ * For segments and groups, counts only siblings with the same name (a
+ * group's ID): the 2nd PID in [MSH, PID, OBX, PID] is PID[2], not PID[4].
  *
  * For positional nodes (fields, repetitions, components, subcomponents),
  * uses the array index directly.
@@ -94,16 +97,16 @@ function positionOf(node: Nodes, parent: Nodes | undefined): number {
 
   const children = parent.children as Nodes[];
 
-  // Named nodes: count same-name siblings before this node
-  if ("name" in node) {
-    const name = node.name as string;
-    const { type } = node;
+  // Named nodes: count siblings with the same key before this node
+  // Stryker disable next-line ConditionalExpression: a positional node's siblings share its type and have no name, so counting them equals its index
+  if (node.type === "group" || node.type === "segment") {
+    const key = keyOf(node);
     let count = 0;
-    for (const child of children) {
+    for (const child of children as (Segment | Group)[]) {
       if (child === node) {
         return count + 1;
       }
-      if (child.type === type && "name" in child && child.name === name) {
+      if (child.type === node.type && keyOf(child) === key) {
         count++;
       }
     }

@@ -22,6 +22,7 @@
     },
     {
       "type": "group",
+      "id": "SHIPMENT",
       "name": "SHIPMENT",
       "optional": false,
       "repeating": true,
@@ -40,6 +41,7 @@
         },
         {
           "type": "group",
+          "id": "SHIPPING_OBSERVATION",
           "name": "SHIPPING_OBSERVATION",
           "optional": true,
           "repeating": true,
@@ -60,6 +62,7 @@
         },
         {
           "type": "group",
+          "id": "PACKAGE",
           "name": "PACKAGE",
           "optional": false,
           "repeating": true,
@@ -78,6 +81,7 @@
             },
             {
               "type": "group",
+              "id": "SPECIMEN",
               "name": "SPECIMEN",
               "optional": true,
               "repeating": true,
@@ -96,6 +100,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "SPECIMEN_OBSERVATION",
                   "name": "SPECIMEN_OBSERVATION",
                   "optional": true,
                   "repeating": true,
@@ -116,6 +121,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "CONTAINER",
                   "name": "CONTAINER",
                   "optional": true,
                   "repeating": true,
@@ -128,6 +134,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "CONTAINER_OBSERVATION",
                       "name": "CONTAINER_OBSERVATION",
                       "optional": true,
                       "repeating": true,
@@ -150,6 +157,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "SUBJECT_PERSON_ANIMAL_IDENTIFICATION",
                   "name": "SUBJECT_PERSON_ANIMAL_IDENTIFICATION",
                   "optional": true,
                   "repeating": false,
@@ -168,6 +176,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "PATIENT_OBSERVATION",
                       "name": "PATIENT_OBSERVATION",
                       "optional": true,
                       "repeating": true,
@@ -196,6 +205,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "SUBJECT_POPULATION_LOCATION_IDENTIFICATION",
                   "name": "SUBJECT_POPULATION_LOCATION_IDENTIFICATION",
                   "optional": true,
                   "repeating": false,
@@ -214,6 +224,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "PATIENT_VISIT_OBSERVATION",
                       "name": "PATIENT_VISIT_OBSERVATION",
                       "optional": true,
                       "repeating": true,

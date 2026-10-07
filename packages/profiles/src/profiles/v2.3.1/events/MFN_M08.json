@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "MF_TEST_NUMERIC",
       "name": "MF_TEST_NUMERIC",
       "optional": false,
       "repeating": true,
@@ -34,6 +35,7 @@
         },
         {
           "type": "group",
+          "id": "MF_NUMERIC_OBSERVATION",
           "name": "MF_NUMERIC_OBSERVATION",
           "optional": true,
           "repeating": false,

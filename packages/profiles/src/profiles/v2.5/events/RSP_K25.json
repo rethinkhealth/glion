@@ -46,6 +46,7 @@
     },
     {
       "type": "group",
+      "id": "STAFF",
       "name": "STAFF",
       "optional": false,
       "repeating": true,

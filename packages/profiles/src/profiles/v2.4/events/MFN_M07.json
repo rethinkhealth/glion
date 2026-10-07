@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "MF_CLIN_STUDY_SCHED",
       "name": "MF_CLIN_STUDY_SCHED",
       "optional": false,
       "repeating": true,

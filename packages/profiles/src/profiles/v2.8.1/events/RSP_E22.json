@@ -51,6 +51,7 @@
         },
         {
           "type": "group",
+          "id": "AUTHORIZATION_INFO",
           "name": "AUTHORIZATION_INFO",
           "optional": false,
           "repeating": false,
@@ -69,6 +70,7 @@
             },
             {
               "type": "group",
+              "id": "PSL_ITEM_INFO",
               "name": "PSL_ITEM_INFO",
               "optional": false,
               "repeating": true,

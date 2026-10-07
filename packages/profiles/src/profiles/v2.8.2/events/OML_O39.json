@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": false,
@@ -70,6 +71,7 @@
         },
         {
           "type": "group",
+          "id": "PATIENT_VISIT",
           "name": "PATIENT_VISIT",
           "optional": true,
           "repeating": false,
@@ -96,6 +98,7 @@
         },
         {
           "type": "group",
+          "id": "INSURANCE",
           "name": "INSURANCE",
           "optional": true,
           "repeating": true,
@@ -136,6 +139,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER",
       "name": "ORDER",
       "optional": false,
       "repeating": true,
@@ -154,6 +158,7 @@
         },
         {
           "type": "group",
+          "id": "TIMING",
           "name": "TIMING",
           "optional": true,
           "repeating": true,
@@ -174,6 +179,7 @@
         },
         {
           "type": "group",
+          "id": "OBSERVATION_REQUEST",
           "name": "OBSERVATION_REQUEST",
           "optional": true,
           "repeating": false,
@@ -216,6 +222,7 @@
             },
             {
               "type": "group",
+              "id": "OBSERVATION",
               "name": "OBSERVATION",
               "optional": true,
               "repeating": true,
@@ -248,6 +255,7 @@
             },
             {
               "type": "group",
+              "id": "SPECIMEN_SHIPMENT",
               "name": "SPECIMEN_SHIPMENT",
               "optional": true,
               "repeating": true,
@@ -260,6 +268,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "SHIPMENT_OBSERVATION",
                   "name": "SHIPMENT_OBSERVATION",
                   "optional": true,
                   "repeating": true,
@@ -280,6 +289,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "PACKAGE",
                   "name": "PACKAGE",
                   "optional": false,
                   "repeating": true,
@@ -292,6 +302,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "SPECIMEN_IN_PACKAGE",
                       "name": "SPECIMEN_IN_PACKAGE",
                       "optional": true,
                       "repeating": true,
@@ -304,6 +315,7 @@
                         },
                         {
                           "type": "group",
+                          "id": "SPECIMEN_OBSERVATION",
                           "name": "SPECIMEN_OBSERVATION",
                           "optional": true,
                           "repeating": true,
@@ -324,6 +336,7 @@
                         },
                         {
                           "type": "group",
+                          "id": "SPECIMEN_CONTAINER_IN_PACKAGE",
                           "name": "SPECIMEN_CONTAINER_IN_PACKAGE",
                           "optional": true,
                           "repeating": true,
@@ -336,6 +349,7 @@
                             },
                             {
                               "type": "group",
+                              "id": "CONTAINER_OBSERVATION",
                               "name": "CONTAINER_OBSERVATION",
                               "optional": true,
                               "repeating": true,

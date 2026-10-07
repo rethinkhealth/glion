@@ -64,6 +64,7 @@
     },
     {
       "type": "group",
+      "id": "REQUEST",
       "name": "REQUEST",
       "optional": false,
       "repeating": true,

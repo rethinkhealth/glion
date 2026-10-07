@@ -10,6 +10,7 @@
     },
     {
       "type": "group",
+      "id": "FACPSHPDCPSHFACPDCNTEED_SUPPGRP",
       "name": "FACPSHPDCPSHFACPDCNTEED_SUPPGRP",
       "optional": false,
       "repeating": true,
@@ -22,6 +23,7 @@
         },
         {
           "type": "group",
+          "id": "PSHPDC_SUPPGRP",
           "name": "PSHPDC_SUPPGRP",
           "optional": false,
           "repeating": true,
@@ -48,6 +50,7 @@
         },
         {
           "type": "group",
+          "id": "FACPDCNTE_SUPPGRP",
           "name": "FACPDCNTE_SUPPGRP",
           "optional": false,
           "repeating": true,

@@ -40,6 +40,7 @@
     },
     {
       "type": "group",
+      "id": "MF",
       "name": "MF",
       "optional": false,
       "repeating": true,

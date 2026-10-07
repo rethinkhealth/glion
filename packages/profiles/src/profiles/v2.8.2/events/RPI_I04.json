@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "PROVIDER",
       "name": "PROVIDER",
       "optional": false,
       "repeating": true,
@@ -60,6 +61,7 @@
     },
     {
       "type": "group",
+      "id": "GUARANTOR_INSURANCE",
       "name": "GUARANTOR_INSURANCE",
       "optional": true,
       "repeating": false,
@@ -72,6 +74,7 @@
         },
         {
           "type": "group",
+          "id": "INSURANCE",
           "name": "INSURANCE",
           "optional": false,
           "repeating": true,

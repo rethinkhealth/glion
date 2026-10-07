@@ -25,6 +25,31 @@ describe("compile", () => {
     ).toThrow("Invalid event schema ZZZ_Z11: a segment has no name");
   });
 
+  it("rejects a group with no ID", () => {
+    expect(() =>
+      compile({
+        elements: [
+          {
+            elements: [
+              {
+                name: "PID",
+                optional: false,
+                repeating: false,
+                type: "segment",
+              },
+            ],
+            id: "",
+            name: "PATIENT VISIT",
+            optional: false,
+            repeating: false,
+            type: "group",
+          },
+        ],
+        id: "ZZZ_Z12",
+      })
+    ).toThrow("Invalid event schema ZZZ_Z12: a group has no ID");
+  });
+
   it("rejects a group with no name", () => {
     expect(() =>
       compile({
@@ -38,15 +63,16 @@ describe("compile", () => {
                 type: "segment",
               },
             ],
+            id: "PATIENT_VISIT",
             name: "",
             optional: false,
             repeating: false,
             type: "group",
           },
         ],
-        id: "ZZZ_Z12",
+        id: "ZZZ_Z14",
       })
-    ).toThrow("Invalid event schema ZZZ_Z12: a group has no name");
+    ).toThrow("Invalid event schema ZZZ_Z14: group PATIENT_VISIT has no name");
   });
 
   it("rejects a group with no elements", () => {
@@ -55,6 +81,7 @@ describe("compile", () => {
         elements: [
           {
             elements: [],
+            id: "VISIT",
             name: "VISIT",
             optional: false,
             repeating: false,
@@ -130,6 +157,7 @@ describe("compile", () => {
                     type: "segment",
                   },
                 ],
+                id: "NOTES",
                 name: "NOTES",
                 optional: false,
                 repeating: false,
@@ -174,6 +202,7 @@ describe("compile", () => {
                   type: "segment",
                 },
               ],
+              id: "ORDER",
               name: "ORDER",
               optional: false,
               repeating: false,
@@ -190,7 +219,7 @@ describe("compile", () => {
     };
 
     expect(runner(schema, ["OBR", "NTE"])).toEqual({
-      groups: [{ children: [0, 1], name: "ORDER" }],
+      groups: [{ children: [0, 1], id: "ORDER", name: "ORDER" }],
       type: "matched",
     });
   });

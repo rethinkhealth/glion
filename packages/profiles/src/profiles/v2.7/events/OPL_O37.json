@@ -34,6 +34,7 @@
     },
     {
       "type": "group",
+      "id": "GUARANTOR",
       "name": "GUARANTOR",
       "optional": true,
       "repeating": false,
@@ -54,6 +55,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER",
       "name": "ORDER",
       "optional": false,
       "repeating": true,
@@ -66,6 +68,7 @@
         },
         {
           "type": "group",
+          "id": "PATIENT",
           "name": "PATIENT",
           "optional": true,
           "repeating": false,
@@ -90,6 +93,7 @@
             },
             {
               "type": "group",
+              "id": "OBSERVATIONS_ON_PATIENT",
               "name": "OBSERVATIONS_ON_PATIENT",
               "optional": true,
               "repeating": true,
@@ -110,6 +114,7 @@
             },
             {
               "type": "group",
+              "id": "INSURANCE",
               "name": "INSURANCE",
               "optional": true,
               "repeating": true,
@@ -144,6 +149,7 @@
         },
         {
           "type": "group",
+          "id": "SPECIMEN",
           "name": "SPECIMEN",
           "optional": false,
           "repeating": true,
@@ -156,6 +162,7 @@
             },
             {
               "type": "group",
+              "id": "SPECIMEN_OBSERVATION",
               "name": "SPECIMEN_OBSERVATION",
               "optional": true,
               "repeating": true,
@@ -176,6 +183,7 @@
             },
             {
               "type": "group",
+              "id": "CONTAINER",
               "name": "CONTAINER",
               "optional": true,
               "repeating": true,
@@ -188,6 +196,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "CONTAINER_OBSERVATION",
                   "name": "CONTAINER_OBSERVATION",
                   "optional": true,
                   "repeating": true,
@@ -210,6 +219,7 @@
             },
             {
               "type": "group",
+              "id": "OBSERVATION_REQUEST",
               "name": "OBSERVATION_REQUEST",
               "optional": false,
               "repeating": true,
@@ -234,6 +244,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "TIMING",
                   "name": "TIMING",
                   "optional": true,
                   "repeating": true,
@@ -266,6 +277,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "ORDER_RELATED_OBSERVATION",
                   "name": "ORDER_RELATED_OBSERVATION",
                   "optional": true,
                   "repeating": true,
@@ -290,6 +302,7 @@
         },
         {
           "type": "group",
+          "id": "PRIOR_RESULT",
           "name": "PRIOR_RESULT",
           "optional": true,
           "repeating": false,
@@ -302,6 +315,7 @@
             },
             {
               "type": "group",
+              "id": "PATIENT_PRIOR",
               "name": "PATIENT_PRIOR",
               "optional": true,
               "repeating": false,
@@ -328,6 +342,7 @@
             },
             {
               "type": "group",
+              "id": "PATIENT_VISIT_PRIOR",
               "name": "PATIENT_VISIT_PRIOR",
               "optional": true,
               "repeating": false,
@@ -360,6 +375,7 @@
             },
             {
               "type": "group",
+              "id": "ORDER_PRIOR",
               "name": "ORDER_PRIOR",
               "optional": false,
               "repeating": true,
@@ -384,6 +400,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "TIMING2",
                   "name": "TIMING2",
                   "optional": true,
                   "repeating": false,
@@ -404,6 +421,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "OBSERVATION_RESULT_GROUP",
                   "name": "OBSERVATION_RESULT_GROUP",
                   "optional": false,
                   "repeating": true,

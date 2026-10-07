@@ -34,6 +34,7 @@
     },
     {
       "type": "group",
+      "id": "CERTIFICATE",
       "name": "CERTIFICATE",
       "optional": true,
       "repeating": true,

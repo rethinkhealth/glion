@@ -16,12 +16,14 @@
     },
     {
       "type": "group",
+      "id": "MF_TEST_BATTERIES",
       "name": "MF_TEST_BATTERIES",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
+          "id": "MF_TEST_BATT_DETAIL",
           "name": "MF_TEST_BATT_DETAIL",
           "optional": true,
           "repeating": false,

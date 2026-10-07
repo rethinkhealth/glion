@@ -28,12 +28,14 @@
     },
     {
       "type": "group",
+      "id": "RESPONSE",
       "name": "RESPONSE",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
+          "id": "PATIENT",
           "name": "PATIENT",
           "optional": true,
           "repeating": false,
@@ -46,12 +48,14 @@
             },
             {
               "type": "group",
+              "id": "GENERAL_ORDER",
               "name": "GENERAL_ORDER",
               "optional": false,
               "repeating": true,
               "elements": [
                 {
                   "type": "group",
+                  "id": "CONTAINER",
                   "name": "CONTAINER",
                   "optional": true,
                   "repeating": false,
@@ -72,6 +76,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "ORDER",
                   "name": "ORDER",
                   "optional": true,
                   "repeating": true,
@@ -84,6 +89,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "OBSERVATION_REQUEST",
                       "name": "OBSERVATION_REQUEST",
                       "optional": true,
                       "repeating": false,

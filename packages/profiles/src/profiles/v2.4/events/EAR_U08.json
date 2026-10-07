@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "COMMAND_RESPONSE",
       "name": "COMMAND_RESPONSE",
       "optional": false,
       "repeating": true,

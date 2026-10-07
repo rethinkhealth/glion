@@ -20,9 +20,10 @@ import {
   PPP_PCB_V2_3_1,
 } from "./fixtures";
 
-const g = (name: string, ...children: SegmentMatch[]) => ({
+const g = (id: string, ...children: SegmentMatch[]) => ({
   children,
-  name,
+  id,
+  name: id,
 });
 
 const schemaOf = (...elements: EventSchemaElement[]): EventSchema => ({
@@ -119,6 +120,7 @@ describe("runner: segment order", () => {
       segment("SFT", { optional: true, repeating: true }),
       {
         elements: [segment("PV1"), segment("PV2", { optional: true })],
+        id: "VISIT",
         name: "VISIT",
         optional: true,
         repeating: false,
@@ -419,6 +421,7 @@ describe("runner: Z-segments", () => {
   it("lets an Hxx take a Z-segment before passing over it", () => {
     const schema = schemaOf(segment("MSH"), {
       elements: [segment("Hxx")],
+      id: "QUERY",
       name: "QUERY",
       optional: true,
       repeating: false,
@@ -434,6 +437,7 @@ describe("runner: Z-segments", () => {
       segment("A", { optional: true }),
       {
         elements: [segment("Hxx")],
+        id: "QUERY",
         name: "QUERY",
         optional: true,
         repeating: true,

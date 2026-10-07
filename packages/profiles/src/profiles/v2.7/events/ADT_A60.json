@@ -58,6 +58,7 @@
     },
     {
       "type": "group",
+      "id": "ADVERSE_REACTION_GROUP",
       "name": "ADVERSE_REACTION_GROUP",
       "optional": true,
       "repeating": true,

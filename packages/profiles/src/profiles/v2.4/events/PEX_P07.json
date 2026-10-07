@@ -34,6 +34,7 @@
     },
     {
       "type": "group",
+      "id": "VISIT",
       "name": "VISIT",
       "optional": true,
       "repeating": false,
@@ -54,6 +55,7 @@
     },
     {
       "type": "group",
+      "id": "EXPERIENCE",
       "name": "EXPERIENCE",
       "optional": false,
       "repeating": true,
@@ -66,6 +68,7 @@
         },
         {
           "type": "group",
+          "id": "PEX_OBSERVATION",
           "name": "PEX_OBSERVATION",
           "optional": false,
           "repeating": true,
@@ -78,6 +81,7 @@
             },
             {
               "type": "group",
+              "id": "PEX_CAUSE",
               "name": "PEX_CAUSE",
               "optional": false,
               "repeating": true,
@@ -90,6 +94,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "RX_ORDER",
                   "name": "RX_ORDER",
                   "optional": true,
                   "repeating": false,
@@ -110,6 +115,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "RX_ADMINISTRATION",
                   "name": "RX_ADMINISTRATION",
                   "optional": true,
                   "repeating": true,
@@ -148,6 +154,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "ASSOCIATED_PERSON",
                   "name": "ASSOCIATED_PERSON",
                   "optional": true,
                   "repeating": false,
@@ -160,6 +167,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "ASSOCIATED_RX_ORDER",
                       "name": "ASSOCIATED_RX_ORDER",
                       "optional": true,
                       "repeating": false,
@@ -180,6 +188,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "ASSOCIATED_RX_ADMIN",
                       "name": "ASSOCIATED_RX_ADMIN",
                       "optional": true,
                       "repeating": true,
@@ -214,6 +223,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "STUDY",
                   "name": "STUDY",
                   "optional": true,
                   "repeating": true,

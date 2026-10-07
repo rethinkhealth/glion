@@ -58,6 +58,7 @@
     },
     {
       "type": "group",
+      "id": "MF_QUERY",
       "name": "MF_QUERY",
       "optional": false,
       "repeating": true,

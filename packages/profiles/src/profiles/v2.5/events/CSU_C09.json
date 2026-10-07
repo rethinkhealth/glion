@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": false,
       "repeating": true,
@@ -40,6 +41,7 @@
         },
         {
           "type": "group",
+          "id": "VISIT",
           "name": "VISIT",
           "optional": true,
           "repeating": false,
@@ -66,6 +68,7 @@
         },
         {
           "type": "group",
+          "id": "STUDY_PHASE",
           "name": "STUDY_PHASE",
           "optional": false,
           "repeating": true,
@@ -78,6 +81,7 @@
             },
             {
               "type": "group",
+              "id": "STUDY_SCHEDULE",
               "name": "STUDY_SCHEDULE",
               "optional": false,
               "repeating": true,
@@ -90,6 +94,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "STUDY_OBSERVATION",
                   "name": "STUDY_OBSERVATION",
                   "optional": false,
                   "repeating": true,
@@ -108,6 +113,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "TIMING_QTY",
                       "name": "TIMING_QTY",
                       "optional": true,
                       "repeating": true,
@@ -136,6 +142,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "STUDY_PHARM",
                   "name": "STUDY_PHARM",
                   "optional": false,
                   "repeating": true,
@@ -148,6 +155,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "RX_ADMIN",
                       "name": "RX_ADMIN",
                       "optional": false,
                       "repeating": true,

@@ -46,6 +46,7 @@
     },
     {
       "type": "group",
+      "id": "PROCEDURE",
       "name": "PROCEDURE",
       "optional": true,
       "repeating": true,

@@ -51,6 +51,7 @@
         },
         {
           "type": "group",
+          "id": "PAT_INFO",
           "name": "PAT_INFO",
           "optional": false,
           "repeating": true,
@@ -69,6 +70,7 @@
             },
             {
               "type": "group",
+              "id": "INSURANCE",
               "name": "INSURANCE",
               "optional": false,
               "repeating": true,
@@ -89,6 +91,7 @@
             },
             {
               "type": "group",
+              "id": "DIAGNOSIS",
               "name": "DIAGNOSIS",
               "optional": true,
               "repeating": true,
@@ -117,6 +120,7 @@
         },
         {
           "type": "group",
+          "id": "PSL_ITEM_INFO",
           "name": "PSL_ITEM_INFO",
           "optional": false,
           "repeating": true,

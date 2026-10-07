@@ -34,6 +34,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": false,
       "repeating": true,
@@ -46,6 +47,7 @@
         },
         {
           "type": "group",
+          "id": "PATIENT_VISIT",
           "name": "PATIENT_VISIT",
           "optional": true,
           "repeating": false,
@@ -66,6 +68,7 @@
         },
         {
           "type": "group",
+          "id": "PROBLEM",
           "name": "PROBLEM",
           "optional": false,
           "repeating": true,
@@ -90,6 +93,7 @@
             },
             {
               "type": "group",
+              "id": "PROBLEM_ROLE",
               "name": "PROBLEM_ROLE",
               "optional": true,
               "repeating": true,
@@ -110,6 +114,7 @@
             },
             {
               "type": "group",
+              "id": "PROBLEM_PATHWAY",
               "name": "PROBLEM_PATHWAY",
               "optional": true,
               "repeating": true,
@@ -130,6 +135,7 @@
             },
             {
               "type": "group",
+              "id": "PROBLEM_OBSERVATION",
               "name": "PROBLEM_OBSERVATION",
               "optional": true,
               "repeating": true,
@@ -150,6 +156,7 @@
             },
             {
               "type": "group",
+              "id": "GOAL",
               "name": "GOAL",
               "optional": true,
               "repeating": true,
@@ -174,6 +181,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "GOAL_ROLE",
                   "name": "GOAL_ROLE",
                   "optional": true,
                   "repeating": true,
@@ -194,6 +202,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "GOAL_OBSERVATION",
                   "name": "GOAL_OBSERVATION",
                   "optional": true,
                   "repeating": true,
@@ -216,6 +225,7 @@
             },
             {
               "type": "group",
+              "id": "ORDER",
               "name": "ORDER",
               "optional": true,
               "repeating": true,
@@ -228,6 +238,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "ORDER_DETAIL",
                   "name": "ORDER_DETAIL",
                   "optional": true,
                   "repeating": false,
@@ -265,6 +276,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "ORDER_OBSERVATION",
                       "name": "ORDER_OBSERVATION",
                       "optional": true,
                       "repeating": true,

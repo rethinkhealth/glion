@@ -76,6 +76,7 @@
     },
     {
       "type": "group",
+      "id": "REQUEST",
       "name": "REQUEST",
       "optional": false,
       "repeating": true,
@@ -100,6 +101,7 @@
         },
         {
           "type": "group",
+          "id": "RESPONSE",
           "name": "RESPONSE",
           "optional": false,
           "repeating": true,

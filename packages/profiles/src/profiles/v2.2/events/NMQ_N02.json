@@ -10,6 +10,7 @@
     },
     {
       "type": "group",
+      "id": "QRY_WITH_DETAIL",
       "name": "QRY_WITH_DETAIL",
       "optional": true,
       "repeating": false,
@@ -30,6 +31,7 @@
     },
     {
       "type": "group",
+      "id": "CLOCK_AND_STATISTICS",
       "name": "CLOCK_AND_STATISTICS",
       "optional": false,
       "repeating": true,

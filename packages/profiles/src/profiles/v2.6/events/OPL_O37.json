@@ -34,6 +34,7 @@
     },
     {
       "type": "group",
+      "id": "GUARANTOR",
       "name": "GUARANTOR",
       "optional": true,
       "repeating": false,
@@ -54,6 +55,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER",
       "name": "ORDER",
       "optional": false,
       "repeating": true,
@@ -66,6 +68,7 @@
         },
         {
           "type": "group",
+          "id": "PATIENT",
           "name": "PATIENT",
           "optional": true,
           "repeating": false,
@@ -90,6 +93,7 @@
             },
             {
               "type": "group",
+              "id": "INSURANCE",
               "name": "INSURANCE",
               "optional": true,
               "repeating": true,
@@ -124,6 +128,7 @@
         },
         {
           "type": "group",
+          "id": "SPECIMEN",
           "name": "SPECIMEN",
           "optional": false,
           "repeating": true,
@@ -142,6 +147,7 @@
             },
             {
               "type": "group",
+              "id": "CONTAINER",
               "name": "CONTAINER",
               "optional": true,
               "repeating": true,
@@ -162,7 +168,8 @@
             },
             {
               "type": "group",
-              "name": "OBSERVATION_REQUEST",
+              "id": "OBSERVATION_REQUEST",
+              "name": "OBSERVATION REQUEST",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -186,6 +193,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "TIMING",
                   "name": "TIMING",
                   "optional": true,
                   "repeating": true,
@@ -228,6 +236,7 @@
         },
         {
           "type": "group",
+          "id": "PRIOR_RESULT",
           "name": "PRIOR_RESULT",
           "optional": true,
           "repeating": false,
@@ -240,7 +249,8 @@
             },
             {
               "type": "group",
-              "name": "PATIENT_PRIOR",
+              "id": "PATIENT_PRIOR",
+              "name": "PATIENT PRIOR",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -260,7 +270,8 @@
             },
             {
               "type": "group",
-              "name": "PATIENT_VISIT_PRIOR",
+              "id": "PATIENT_VISIT_PRIOR",
+              "name": "PATIENT VISIT PRIOR",
               "optional": true,
               "repeating": false,
               "elements": [
@@ -286,7 +297,8 @@
             },
             {
               "type": "group",
-              "name": "ORDER_PRIOR",
+              "id": "ORDER_PRIOR",
+              "name": "ORDER PRIOR",
               "optional": false,
               "repeating": true,
               "elements": [
@@ -310,6 +322,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "TIMING",
                   "name": "TIMING",
                   "optional": true,
                   "repeating": false,

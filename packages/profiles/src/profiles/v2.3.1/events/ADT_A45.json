@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "MERGE_INFO",
       "name": "MERGE_INFO",
       "optional": false,
       "repeating": true,

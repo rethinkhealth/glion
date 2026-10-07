@@ -22,6 +22,7 @@
     },
     {
       "type": "group",
+      "id": "SPECIMEN_CONTAINER",
       "name": "SPECIMEN_CONTAINER",
       "optional": false,
       "repeating": true,
@@ -40,6 +41,7 @@
         },
         {
           "type": "group",
+          "id": "SPECIMEN",
           "name": "SPECIMEN",
           "optional": true,
           "repeating": true,

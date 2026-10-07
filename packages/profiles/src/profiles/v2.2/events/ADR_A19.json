@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "QUERY_RESPONSE",
       "name": "QUERY_RESPONSE",
       "optional": false,
       "repeating": true,
@@ -94,6 +95,7 @@
         },
         {
           "type": "group",
+          "id": "INSURANCE",
           "name": "INSURANCE",
           "optional": true,
           "repeating": true,

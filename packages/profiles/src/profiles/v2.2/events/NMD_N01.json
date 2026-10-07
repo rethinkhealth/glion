@@ -10,12 +10,14 @@
     },
     {
       "type": "group",
+      "id": "CLOCK_AND_STATS_WITH_NOTES",
       "name": "CLOCK_AND_STATS_WITH_NOTES",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
+          "id": "CLOCK",
           "name": "CLOCK",
           "optional": true,
           "repeating": false,
@@ -36,6 +38,7 @@
         },
         {
           "type": "group",
+          "id": "APP_STATS",
           "name": "APP_STATS",
           "optional": true,
           "repeating": false,
@@ -56,6 +59,7 @@
         },
         {
           "type": "group",
+          "id": "APP_STATUS",
           "name": "APP_STATUS",
           "optional": true,
           "repeating": false,

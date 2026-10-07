@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "MF_SITE_DEFINED",
       "name": "MF_SITE_DEFINED",
       "optional": false,
       "repeating": true,

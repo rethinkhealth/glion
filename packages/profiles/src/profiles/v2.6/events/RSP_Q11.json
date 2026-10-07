@@ -46,6 +46,7 @@
     },
     {
       "type": "group",
+      "id": "QUERY_RESULT_CLUSTER",
       "name": "QUERY_RESULT_CLUSTER",
       "optional": true,
       "repeating": false,
@@ -76,6 +77,7 @@
         },
         {
           "type": "group",
+          "id": "MF_LOC_DEPT",
           "name": "MF_LOC_DEPT",
           "optional": false,
           "repeating": true,

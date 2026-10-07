@@ -34,6 +34,7 @@
     },
     {
       "type": "group",
+      "id": "DEFINITION",
       "name": "DEFINITION",
       "optional": false,
       "repeating": true,
@@ -52,6 +53,7 @@
         },
         {
           "type": "group",
+          "id": "PATIENT",
           "name": "PATIENT",
           "optional": true,
           "repeating": false,
@@ -72,6 +74,7 @@
         },
         {
           "type": "group",
+          "id": "ORDER",
           "name": "ORDER",
           "optional": false,
           "repeating": true,
@@ -84,6 +87,7 @@
             },
             {
               "type": "group",
+              "id": "ENCODING",
               "name": "ENCODING",
               "optional": true,
               "repeating": false,

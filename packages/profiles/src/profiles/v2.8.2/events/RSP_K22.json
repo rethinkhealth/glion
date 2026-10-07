@@ -46,6 +46,7 @@
     },
     {
       "type": "group",
+      "id": "QUERY_RESPONSE",
       "name": "QUERY_RESPONSE",
       "optional": true,
       "repeating": true,

@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": false,
@@ -42,6 +43,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER",
       "name": "ORDER",
       "optional": false,
       "repeating": true,
@@ -54,6 +56,7 @@
         },
         {
           "type": "group",
+          "id": "ORDER_DETAIL",
           "name": "ORDER_DETAIL",
           "optional": true,
           "repeating": false,

@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "MATERIAL_ITEM_RECORD",
       "name": "MATERIAL_ITEM_RECORD",
       "optional": false,
       "repeating": true,
@@ -52,6 +53,7 @@
         },
         {
           "type": "group",
+          "id": "STERILIZATION",
           "name": "STERILIZATION",
           "optional": true,
           "repeating": true,
@@ -72,6 +74,7 @@
         },
         {
           "type": "group",
+          "id": "PURCHASING_VENDOR",
           "name": "PURCHASING_VENDOR",
           "optional": true,
           "repeating": true,
@@ -84,6 +87,7 @@
             },
             {
               "type": "group",
+              "id": "PACKAGING",
               "name": "PACKAGING",
               "optional": true,
               "repeating": true,
@@ -106,6 +110,7 @@
         },
         {
           "type": "group",
+          "id": "MATERIAL_LOCATION",
           "name": "MATERIAL_LOCATION",
           "optional": true,
           "repeating": true,

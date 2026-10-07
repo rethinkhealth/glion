@@ -41,6 +41,7 @@
     },
     {
       "type": "group",
+      "id": "PAYMENT_REMITTANCE_DETAIL_INFO",
       "name": "PAYMENT_REMITTANCE_DETAIL_INFO",
       "optional": true,
       "repeating": true,
@@ -59,6 +60,7 @@
         },
         {
           "type": "group",
+          "id": "PRODUCT_SERVICE_SECTION",
           "name": "PRODUCT_SERVICE_SECTION",
           "optional": false,
           "repeating": true,
@@ -71,6 +73,7 @@
             },
             {
               "type": "group",
+              "id": "PRODUCT_SERVICE_GROUP",
               "name": "PRODUCT_SERVICE_GROUP",
               "optional": false,
               "repeating": true,
@@ -83,6 +86,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "PSL_ITEM_INFO",
                   "name": "PSL_ITEM_INFO",
                   "optional": false,
                   "repeating": true,
@@ -109,6 +113,7 @@
     },
     {
       "type": "group",
+      "id": "ADJUSTMENT_PAYEE",
       "name": "ADJUSTMENT_PAYEE",
       "optional": true,
       "repeating": true,

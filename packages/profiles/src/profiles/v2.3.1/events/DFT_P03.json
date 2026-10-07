@@ -52,6 +52,7 @@
     },
     {
       "type": "group",
+      "id": "FINANCIAL",
       "name": "FINANCIAL",
       "optional": false,
       "repeating": true,
@@ -64,6 +65,7 @@
         },
         {
           "type": "group",
+          "id": "FINANCIAL_PROCEDURE",
           "name": "FINANCIAL_PROCEDURE",
           "optional": true,
           "repeating": true,
@@ -104,6 +106,7 @@
     },
     {
       "type": "group",
+      "id": "INSURANCE",
       "name": "INSURANCE",
       "optional": true,
       "repeating": true,

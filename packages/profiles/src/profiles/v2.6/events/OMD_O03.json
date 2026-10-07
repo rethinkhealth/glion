@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": false,
@@ -52,6 +53,7 @@
         },
         {
           "type": "group",
+          "id": "PATIENT_VISIT",
           "name": "PATIENT_VISIT",
           "optional": true,
           "repeating": false,
@@ -72,6 +74,7 @@
         },
         {
           "type": "group",
+          "id": "INSURANCE",
           "name": "INSURANCE",
           "optional": true,
           "repeating": true,
@@ -112,6 +115,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER_DIET",
       "name": "ORDER_DIET",
       "optional": false,
       "repeating": true,
@@ -124,6 +128,7 @@
         },
         {
           "type": "group",
+          "id": "TIMING_DIET",
           "name": "TIMING_DIET",
           "optional": true,
           "repeating": true,
@@ -144,6 +149,7 @@
         },
         {
           "type": "group",
+          "id": "DIET",
           "name": "DIET",
           "optional": true,
           "repeating": false,
@@ -162,6 +168,7 @@
             },
             {
               "type": "group",
+              "id": "OBSERVATION",
               "name": "OBSERVATION",
               "optional": true,
               "repeating": true,
@@ -186,6 +193,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER_TRAY",
       "name": "ORDER_TRAY",
       "optional": true,
       "repeating": true,
@@ -198,6 +206,7 @@
         },
         {
           "type": "group",
+          "id": "TIMING_TRAY",
           "name": "TIMING_TRAY",
           "optional": true,
           "repeating": true,

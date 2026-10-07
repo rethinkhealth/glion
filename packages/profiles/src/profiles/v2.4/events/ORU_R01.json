@@ -10,12 +10,14 @@
     },
     {
       "type": "group",
+      "id": "PATIENT_RESULT",
       "name": "PATIENT_RESULT",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
+          "id": "PATIENT",
           "name": "PATIENT",
           "optional": true,
           "repeating": false,
@@ -46,6 +48,7 @@
             },
             {
               "type": "group",
+              "id": "VISIT",
               "name": "VISIT",
               "optional": true,
               "repeating": false,
@@ -68,6 +71,7 @@
         },
         {
           "type": "group",
+          "id": "ORDER_OBSERVATION",
           "name": "ORDER_OBSERVATION",
           "optional": false,
           "repeating": true,
@@ -98,6 +102,7 @@
             },
             {
               "type": "group",
+              "id": "OBSERVATION",
               "name": "OBSERVATION",
               "optional": false,
               "repeating": true,

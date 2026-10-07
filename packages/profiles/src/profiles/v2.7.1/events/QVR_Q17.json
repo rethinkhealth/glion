@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "QBP",
       "name": "QBP",
       "optional": true,
       "repeating": false,

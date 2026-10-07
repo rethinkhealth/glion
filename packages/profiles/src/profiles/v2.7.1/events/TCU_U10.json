@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "TEST_CONFIGURATION",
       "name": "TEST_CONFIGURATION",
       "optional": false,
       "repeating": true,

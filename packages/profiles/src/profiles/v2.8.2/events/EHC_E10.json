@@ -34,6 +34,7 @@
     },
     {
       "type": "group",
+      "id": "INVOICE_PROCESSING_RESULTS_INFO",
       "name": "INVOICE_PROCESSING_RESULTS_INFO",
       "optional": false,
       "repeating": true,
@@ -76,6 +77,7 @@
         },
         {
           "type": "group",
+          "id": "PRODUCT_SERVICE_SECTION",
           "name": "PRODUCT_SERVICE_SECTION",
           "optional": false,
           "repeating": true,
@@ -88,6 +90,7 @@
             },
             {
               "type": "group",
+              "id": "PRODUCT_SERVICE_GROUP",
               "name": "PRODUCT_SERVICE_GROUP",
               "optional": false,
               "repeating": true,
@@ -100,6 +103,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "PRODUCT_SERVICE_LINE_INFO",
                   "name": "PRODUCT_SERVICE_LINE_INFO",
                   "optional": false,
                   "repeating": true,

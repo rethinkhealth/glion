@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "AUTHORIZATION",
       "name": "AUTHORIZATION",
       "optional": true,
       "repeating": false,
@@ -48,6 +49,7 @@
     },
     {
       "type": "group",
+      "id": "PROVIDER",
       "name": "PROVIDER",
       "optional": false,
       "repeating": true,
@@ -80,6 +82,7 @@
     },
     {
       "type": "group",
+      "id": "GUARANTOR_INSURANCE",
       "name": "GUARANTOR_INSURANCE",
       "optional": true,
       "repeating": false,
@@ -92,6 +95,7 @@
         },
         {
           "type": "group",
+          "id": "INSURANCE",
           "name": "INSURANCE",
           "optional": false,
           "repeating": true,
@@ -144,6 +148,7 @@
     },
     {
       "type": "group",
+      "id": "PROCEDURE",
       "name": "PROCEDURE",
       "optional": true,
       "repeating": true,
@@ -156,6 +161,7 @@
         },
         {
           "type": "group",
+          "id": "AUTHORIZATION",
           "name": "AUTHORIZATION",
           "optional": true,
           "repeating": false,
@@ -178,6 +184,7 @@
     },
     {
       "type": "group",
+      "id": "OBSERVATION",
       "name": "OBSERVATION",
       "optional": true,
       "repeating": true,
@@ -196,6 +203,7 @@
         },
         {
           "type": "group",
+          "id": "RESULTS",
           "name": "RESULTS",
           "optional": true,
           "repeating": true,
@@ -224,6 +232,7 @@
     },
     {
       "type": "group",
+      "id": "VISIT",
       "name": "VISIT",
       "optional": true,
       "repeating": false,

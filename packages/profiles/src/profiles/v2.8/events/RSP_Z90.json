@@ -52,12 +52,14 @@
     },
     {
       "type": "group",
+      "id": "QUERY_RESPONSE",
       "name": "QUERY_RESPONSE",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
+          "id": "PATIENT",
           "name": "PATIENT",
           "optional": true,
           "repeating": false,
@@ -88,6 +90,7 @@
             },
             {
               "type": "group",
+              "id": "VISIT",
               "name": "VISIT",
               "optional": true,
               "repeating": false,
@@ -110,6 +113,7 @@
         },
         {
           "type": "group",
+          "id": "COMMON_ORDER",
           "name": "COMMON_ORDER",
           "optional": false,
           "repeating": true,
@@ -122,6 +126,7 @@
             },
             {
               "type": "group",
+              "id": "TIMING",
               "name": "TIMING",
               "optional": true,
               "repeating": true,
@@ -160,6 +165,7 @@
             },
             {
               "type": "group",
+              "id": "OBSERVATION",
               "name": "OBSERVATION",
               "optional": false,
               "repeating": true,
@@ -182,6 +188,7 @@
         },
         {
           "type": "group",
+          "id": "SPECIMEN",
           "name": "SPECIMEN",
           "optional": true,
           "repeating": true,

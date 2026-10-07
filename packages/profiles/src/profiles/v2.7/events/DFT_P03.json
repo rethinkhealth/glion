@@ -70,6 +70,7 @@
     },
     {
       "type": "group",
+      "id": "COMMON_ORDER",
       "name": "COMMON_ORDER",
       "optional": true,
       "repeating": true,
@@ -82,6 +83,7 @@
         },
         {
           "type": "group",
+          "id": "TIMING_QUANTITY",
           "name": "TIMING_QUANTITY",
           "optional": true,
           "repeating": true,
@@ -102,6 +104,7 @@
         },
         {
           "type": "group",
+          "id": "ORDER",
           "name": "ORDER",
           "optional": true,
           "repeating": false,
@@ -122,6 +125,7 @@
         },
         {
           "type": "group",
+          "id": "OBSERVATION",
           "name": "OBSERVATION",
           "optional": true,
           "repeating": true,
@@ -144,6 +148,7 @@
     },
     {
       "type": "group",
+      "id": "FINANCIAL",
       "name": "FINANCIAL",
       "optional": false,
       "repeating": true,
@@ -162,6 +167,7 @@
         },
         {
           "type": "group",
+          "id": "FINANCIAL_PROCEDURE",
           "name": "FINANCIAL_PROCEDURE",
           "optional": true,
           "repeating": true,
@@ -182,6 +188,7 @@
         },
         {
           "type": "group",
+          "id": "FINANCIAL_COMMON_ORDER",
           "name": "FINANCIAL_COMMON_ORDER",
           "optional": true,
           "repeating": true,
@@ -194,6 +201,7 @@
             },
             {
               "type": "group",
+              "id": "FINANCIAL_TIMING_QUANTITY",
               "name": "FINANCIAL_TIMING_QUANTITY",
               "optional": true,
               "repeating": true,
@@ -214,6 +222,7 @@
             },
             {
               "type": "group",
+              "id": "FINANCIAL_ORDER",
               "name": "FINANCIAL_ORDER",
               "optional": true,
               "repeating": false,
@@ -234,6 +243,7 @@
             },
             {
               "type": "group",
+              "id": "FINANCIAL_OBSERVATION",
               "name": "FINANCIAL_OBSERVATION",
               "optional": true,
               "repeating": true,
@@ -276,6 +286,7 @@
     },
     {
       "type": "group",
+      "id": "INSURANCE",
       "name": "INSURANCE",
       "optional": true,
       "repeating": true,

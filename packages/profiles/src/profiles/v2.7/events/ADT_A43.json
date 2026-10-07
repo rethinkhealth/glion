@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": false,
       "repeating": true,

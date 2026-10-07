@@ -34,12 +34,14 @@
     },
     {
       "type": "group",
+      "id": "PIDNTEORCOBRNTETQ1TQ2CTDOBXNTECTI_SUPPGRP",
       "name": "PIDNTEORCOBRNTETQ1TQ2CTDOBXNTECTI_SUPPGRP",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
+          "id": "PIDNTE_SUPPGRP",
           "name": "PIDNTE_SUPPGRP",
           "optional": true,
           "repeating": false,
@@ -60,6 +62,7 @@
         },
         {
           "type": "group",
+          "id": "ORCOBRNTETQ1TQ2CTDOBXNTECTI_SUPPGRP",
           "name": "ORCOBRNTETQ1TQ2CTDOBXNTECTI_SUPPGRP",
           "optional": false,
           "repeating": true,
@@ -84,6 +87,7 @@
             },
             {
               "type": "group",
+              "id": "TQ1TQ2_SUPPGRP",
               "name": "TQ1TQ2_SUPPGRP",
               "optional": true,
               "repeating": true,
@@ -110,6 +114,7 @@
             },
             {
               "type": "group",
+              "id": "OBXNTE_SUPPGRP",
               "name": "OBXNTE_SUPPGRP",
               "optional": false,
               "repeating": true,

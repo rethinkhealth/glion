@@ -40,6 +40,7 @@
     },
     {
       "type": "group",
+      "id": "PROVIDER_CONTACT",
       "name": "PROVIDER_CONTACT",
       "optional": true,
       "repeating": true,
@@ -60,6 +61,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": true,
@@ -86,6 +88,7 @@
     },
     {
       "type": "group",
+      "id": "INSURANCE",
       "name": "INSURANCE",
       "optional": true,
       "repeating": true,
@@ -112,6 +115,7 @@
     },
     {
       "type": "group",
+      "id": "APPOINTMENT_HISTORY",
       "name": "APPOINTMENT_HISTORY",
       "optional": true,
       "repeating": true,
@@ -124,6 +128,7 @@
         },
         {
           "type": "group",
+          "id": "RESOURCES",
           "name": "RESOURCES",
           "optional": true,
           "repeating": true,
@@ -136,6 +141,7 @@
             },
             {
               "type": "group",
+              "id": "RESOURCE_DETAIL",
               "name": "RESOURCE_DETAIL",
               "optional": true,
               "repeating": true,
@@ -173,6 +179,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "RESOURCE_OBSERVATION",
                   "name": "RESOURCE_OBSERVATION",
                   "optional": true,
                   "repeating": true,
@@ -199,6 +206,7 @@
     },
     {
       "type": "group",
+      "id": "CLINICAL_HISTORY",
       "name": "CLINICAL_HISTORY",
       "optional": true,
       "repeating": true,
@@ -211,6 +219,7 @@
         },
         {
           "type": "group",
+          "id": "CLINICAL_HISTORY_DETAIL",
           "name": "CLINICAL_HISTORY_DETAIL",
           "optional": true,
           "repeating": true,
@@ -296,6 +305,7 @@
             },
             {
               "type": "group",
+              "id": "CLINICAL_HISTORY_OBSERVATION",
               "name": "CLINICAL_HISTORY_OBSERVATION",
               "optional": true,
               "repeating": true,
@@ -318,6 +328,7 @@
         },
         {
           "type": "group",
+          "id": "ROLE_CLINICAL_HISTORY",
           "name": "ROLE_CLINICAL_HISTORY",
           "optional": true,
           "repeating": true,
@@ -359,6 +370,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT_VISITS",
       "name": "PATIENT_VISITS",
       "optional": false,
       "repeating": true,
@@ -379,6 +391,7 @@
     },
     {
       "type": "group",
+      "id": "MEDICATION_HISTORY",
       "name": "MEDICATION_HISTORY",
       "optional": true,
       "repeating": true,
@@ -391,6 +404,7 @@
         },
         {
           "type": "group",
+          "id": "MEDICATION_ORDER_DETAIL",
           "name": "MEDICATION_ORDER_DETAIL",
           "optional": true,
           "repeating": false,
@@ -415,6 +429,7 @@
             },
             {
               "type": "group",
+              "id": "MEDICATION_ORDER_OBSERVATION",
               "name": "MEDICATION_ORDER_OBSERVATION",
               "optional": true,
               "repeating": true,
@@ -437,6 +452,7 @@
         },
         {
           "type": "group",
+          "id": "MEDICATION_ENCODING_DETAIL",
           "name": "MEDICATION_ENCODING_DETAIL",
           "optional": true,
           "repeating": false,
@@ -461,6 +477,7 @@
             },
             {
               "type": "group",
+              "id": "MEDICATION_ENCODING_OBSERVATION",
               "name": "MEDICATION_ENCODING_OBSERVATION",
               "optional": true,
               "repeating": true,
@@ -483,6 +500,7 @@
         },
         {
           "type": "group",
+          "id": "MEDICATION_ADMINISTRATION_DETAIL",
           "name": "MEDICATION_ADMINISTRATION_DETAIL",
           "optional": true,
           "repeating": true,
@@ -501,6 +519,7 @@
             },
             {
               "type": "group",
+              "id": "MEDICATION_ADMINISTRATION_OBSERVATION",
               "name": "MEDICATION_ADMINISTRATION_OBSERVATION",
               "optional": true,
               "repeating": true,
@@ -531,6 +550,7 @@
     },
     {
       "type": "group",
+      "id": "PROBLEM",
       "name": "PROBLEM",
       "optional": true,
       "repeating": true,
@@ -549,6 +569,7 @@
         },
         {
           "type": "group",
+          "id": "ROLE_PROBLEM",
           "name": "ROLE_PROBLEM",
           "optional": true,
           "repeating": true,
@@ -582,6 +603,7 @@
         },
         {
           "type": "group",
+          "id": "PROBLEM_OBSERVATION",
           "name": "PROBLEM_OBSERVATION",
           "optional": true,
           "repeating": true,
@@ -604,6 +626,7 @@
     },
     {
       "type": "group",
+      "id": "GOAL",
       "name": "GOAL",
       "optional": true,
       "repeating": true,
@@ -622,6 +645,7 @@
         },
         {
           "type": "group",
+          "id": "ROLE_GOAL",
           "name": "ROLE_GOAL",
           "optional": true,
           "repeating": true,
@@ -655,6 +679,7 @@
         },
         {
           "type": "group",
+          "id": "GOAL_OBSERVATION",
           "name": "GOAL_OBSERVATION",
           "optional": true,
           "repeating": true,
@@ -677,6 +702,7 @@
     },
     {
       "type": "group",
+      "id": "PATHWAY",
       "name": "PATHWAY",
       "optional": true,
       "repeating": true,
@@ -695,6 +721,7 @@
         },
         {
           "type": "group",
+          "id": "ROLE_PATHWAY",
           "name": "ROLE_PATHWAY",
           "optional": true,
           "repeating": true,
@@ -728,6 +755,7 @@
         },
         {
           "type": "group",
+          "id": "PATHWAY_OBSERVATION",
           "name": "PATHWAY_OBSERVATION",
           "optional": true,
           "repeating": true,

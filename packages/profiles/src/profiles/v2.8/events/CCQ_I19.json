@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "PROVIDER_CONTACT",
       "name": "PROVIDER_CONTACT",
       "optional": true,
       "repeating": true,

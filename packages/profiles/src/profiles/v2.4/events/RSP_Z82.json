@@ -40,12 +40,14 @@
     },
     {
       "type": "group",
+      "id": "QUERY_RESPONSE",
       "name": "QUERY_RESPONSE",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
+          "id": "PATIENT",
           "name": "PATIENT",
           "optional": true,
           "repeating": false,
@@ -70,6 +72,7 @@
             },
             {
               "type": "group",
+              "id": "VISIT",
               "name": "VISIT",
               "optional": true,
               "repeating": false,
@@ -82,6 +85,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "PATIENT_VISIT",
                   "name": "PATIENT_VISIT",
                   "optional": true,
                   "repeating": false,
@@ -104,6 +108,7 @@
             },
             {
               "type": "group",
+              "id": "COMMON_ORDER",
               "name": "COMMON_ORDER",
               "optional": false,
               "repeating": true,
@@ -116,6 +121,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "ORDER_DETAIL",
                   "name": "ORDER_DETAIL",
                   "optional": true,
                   "repeating": false,
@@ -140,6 +146,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "TREATMENT",
                       "name": "TREATMENT",
                       "optional": true,
                       "repeating": false,
@@ -162,6 +169,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "ENCODED_ORDER",
                   "name": "ENCODED_ORDER",
                   "optional": true,
                   "repeating": false,
@@ -206,6 +214,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "OBSERVATION",
                   "name": "OBSERVATION",
                   "optional": false,
                   "repeating": true,

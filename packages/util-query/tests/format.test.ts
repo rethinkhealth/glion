@@ -148,6 +148,36 @@ describe(format, () => {
     });
   });
 
+  describe("with groups whose name differs from their ID", () => {
+    const visit = { id: "PATIENT_VISIT", name: "PATIENT VISIT" };
+    const message = m(
+      s("MSH", f("|")),
+      g(visit, s("PV1", f("1"))),
+      g(visit, s("PV1", f("2")))
+    );
+
+    it("names each group by its ID, counting groups with the same ID", () => {
+      const result = select(message, "PATIENT_VISIT[2]-PV1-1");
+      expect(format(result!.node, result!.ancestors)).toBe(
+        "PATIENT_VISIT[2]-PV1-1"
+      );
+    });
+  });
+
+  describe("with a segment and a group of the same name", () => {
+    const message = m(
+      s("MSH", f("|")),
+      s("ORDER", f("segment")),
+      g("ORDER", s("ORC", f("1"))),
+      g("ORDER", s("ORC", f("2")))
+    );
+
+    it("numbers a group among the groups only", () => {
+      const result = select(message, "ORDER[2]-ORC-1");
+      expect(format(result!.node, result!.ancestors)).toBe("ORDER[2]-ORC-1");
+    });
+  });
+
   describe("with group as target node", () => {
     const message = m(
       s("MSH", f("|")),

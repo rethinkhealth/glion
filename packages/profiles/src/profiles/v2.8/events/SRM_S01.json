@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": true,
@@ -52,6 +53,7 @@
         },
         {
           "type": "group",
+          "id": "OBSERVATION",
           "name": "OBSERVATION",
           "optional": true,
           "repeating": true,
@@ -80,6 +82,7 @@
     },
     {
       "type": "group",
+      "id": "RESOURCES",
       "name": "RESOURCES",
       "optional": false,
       "repeating": true,
@@ -92,6 +95,7 @@
         },
         {
           "type": "group",
+          "id": "SERVICE",
           "name": "SERVICE",
           "optional": true,
           "repeating": true,
@@ -118,6 +122,7 @@
         },
         {
           "type": "group",
+          "id": "GENERAL_RESOURCE",
           "name": "GENERAL_RESOURCE",
           "optional": true,
           "repeating": true,
@@ -144,6 +149,7 @@
         },
         {
           "type": "group",
+          "id": "LOCATION_RESOURCE",
           "name": "LOCATION_RESOURCE",
           "optional": true,
           "repeating": true,
@@ -170,6 +176,7 @@
         },
         {
           "type": "group",
+          "id": "PERSONNEL_RESOURCE",
           "name": "PERSONNEL_RESOURCE",
           "optional": true,
           "repeating": true,

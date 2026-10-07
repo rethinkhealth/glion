@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": true,
@@ -66,6 +67,7 @@
     },
     {
       "type": "group",
+      "id": "RESOURCES",
       "name": "RESOURCES",
       "optional": false,
       "repeating": true,
@@ -78,6 +80,7 @@
         },
         {
           "type": "group",
+          "id": "SERVICE",
           "name": "SERVICE",
           "optional": true,
           "repeating": true,
@@ -104,7 +107,8 @@
         },
         {
           "type": "group",
-          "name": "GENERAL_RESOURCE",
+          "id": "GENERAL_RESOURCE",
+          "name": "GENERAL RESOURCE",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -130,7 +134,8 @@
         },
         {
           "type": "group",
-          "name": "LOCATION_RESOURCE",
+          "id": "LOCATION_RESOURCE",
+          "name": "LOCATION RESOURCE",
           "optional": true,
           "repeating": true,
           "elements": [
@@ -156,7 +161,8 @@
         },
         {
           "type": "group",
-          "name": "PERSONNEL_RESOURCE",
+          "id": "PERSONNEL_RESOURCE",
+          "name": "PERSONNEL RESOURCE",
           "optional": true,
           "repeating": true,
           "elements": [

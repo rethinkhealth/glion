@@ -66,6 +66,7 @@ const schema: EventSchema = {
     { type: "segment", name: "PID", optional: false, repeating: false },
     {
       type: "group",
+      id: "VISIT",
       name: "VISIT",
       optional: true,
       repeating: false,
@@ -78,7 +79,7 @@ const schema: EventSchema = {
 };
 ```
 
-A schema of your own works wherever a bundled one does: `runner` and the `definition` option of `@glion/lint-profile-segment-order`. `runner` throws when the schema has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
+A schema of your own works wherever a bundled one does: `runner` and the `definition` option of `@glion/lint-profile-segment-order`. `runner` throws when the schema has no elements, a segment has no name, a group has no ID, no name, or no elements, a choice has no alternatives, or a choice alternative can match no segment.
 
 ### `runner(schema, segmentIds[, options])`
 
@@ -96,9 +97,10 @@ import { profiles, runner } from "@glion/profiles";
 const schema = await profiles.events.load("2.5", "ORU_R01");
 
 runner(schema, ["MSH", "PID", "OBR", "OBX"]);
-// { type: "matched", groups: [0, { name: "PATIENT_RESULT", children: [
-//   { name: "PATIENT", children: [1] },
-//   { name: "ORDER_OBSERVATION", children: [2, { name: "OBSERVATION", children: [3] }] },
+// { type: "matched", groups: [0, { id: "PATIENT_RESULT", name: "PATIENT_RESULT", children: [
+//   { id: "PATIENT", name: "PATIENT", children: [1] },
+//   { id: "ORDER_OBSERVATION", name: "ORDER_OBSERVATION", children: [2,
+//     { id: "OBSERVATION", name: "OBSERVATION", children: [3] }] },
 // ] }] }
 
 runner(schema, ["MSH", "PID", "OBR", "MSH"]);
@@ -117,9 +119,10 @@ A Z-segment (a segment ID that starts with `Z`) that the schema does not name fi
 
 ```ts
 runner(schema, ["MSH", "PID", "ZPI", "OBR", "OBX"]);
-// { type: "matched", groups: [0, { name: "PATIENT_RESULT", children: [
-//   { name: "PATIENT", children: [1, 2] },
-//   { name: "ORDER_OBSERVATION", children: [3, { name: "OBSERVATION", children: [4] }] },
+// { type: "matched", groups: [0, { id: "PATIENT_RESULT", name: "PATIENT_RESULT", children: [
+//   { id: "PATIENT", name: "PATIENT", children: [1, 2] },
+//   { id: "ORDER_OBSERVATION", name: "ORDER_OBSERVATION", children: [3,
+//     { id: "OBSERVATION", name: "OBSERVATION", children: [4] }] },
 // ] }] }
 
 runner(schema, ["MSH", "PID", "ZPI", "OBR", "OBX"], { allowZSegments: false });
@@ -230,6 +233,7 @@ type EventSchemaElement =
   | { type: "segment"; name: string; optional: boolean; repeating: boolean }
   | {
       type: "group";
+      id: string;
       name: string;
       optional: boolean;
       repeating: boolean;
@@ -243,7 +247,7 @@ type EventSchemaElement =
     };
 ```
 
-`optional` is the standard's `[ ]` and `repeating` its `{ }`. A `choice` is the standard's `< A | B >`: exactly one alternative per occurrence, and every alternative matches at least one segment.
+`optional` is the standard's `[ ]` and `repeating` its `{ }`. A group's `id`, such as `PATIENT_VISIT`, holds only uppercase letters, digits, and `_`; its `name` is the group name as the standard spells it, such as `PATIENT VISIT` in v2.6, and equals the `id` for most groups. A `choice` is the standard's `< A | B >`: exactly one alternative per occurrence, and every alternative matches at least one segment.
 
 ### Event schema JSON Schema
 

@@ -52,6 +52,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER_STATUS",
       "name": "ORDER_STATUS",
       "optional": false,
       "repeating": true,

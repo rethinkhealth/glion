@@ -52,6 +52,7 @@
     },
     {
       "type": "group",
+      "id": "VISIT",
       "name": "VISIT",
       "optional": false,
       "repeating": true,
@@ -112,6 +113,7 @@
         },
         {
           "type": "group",
+          "id": "PROCEDURE",
           "name": "PROCEDURE",
           "optional": true,
           "repeating": true,
@@ -150,6 +152,7 @@
         },
         {
           "type": "group",
+          "id": "INSURANCE",
           "name": "INSURANCE",
           "optional": true,
           "repeating": true,

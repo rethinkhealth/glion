@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "MF_CLIN_STUDY",
       "name": "MF_CLIN_STUDY",
       "optional": false,
       "repeating": true,
@@ -46,6 +47,7 @@
         },
         {
           "type": "group",
+          "id": "MF_PHASE_SCHED_DETAIL",
           "name": "MF_PHASE_SCHED_DETAIL",
           "optional": true,
           "repeating": true,

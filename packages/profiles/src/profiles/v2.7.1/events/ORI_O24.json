@@ -40,12 +40,14 @@
     },
     {
       "type": "group",
+      "id": "RESPONSE",
       "name": "RESPONSE",
       "optional": true,
       "repeating": false,
       "elements": [
         {
           "type": "group",
+          "id": "PATIENT",
           "name": "PATIENT",
           "optional": true,
           "repeating": false,
@@ -72,6 +74,7 @@
         },
         {
           "type": "group",
+          "id": "ORDER",
           "name": "ORDER",
           "optional": false,
           "repeating": true,
@@ -84,6 +87,7 @@
             },
             {
               "type": "group",
+              "id": "TIMING",
               "name": "TIMING",
               "optional": true,
               "repeating": true,

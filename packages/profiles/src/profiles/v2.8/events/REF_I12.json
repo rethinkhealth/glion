@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "AUTHORIZATION_CONTACT1",
       "name": "AUTHORIZATION_CONTACT1",
       "optional": true,
       "repeating": false,
@@ -48,6 +49,7 @@
     },
     {
       "type": "group",
+      "id": "PROVIDER_CONTACT",
       "name": "PROVIDER_CONTACT",
       "optional": false,
       "repeating": true,
@@ -86,6 +88,7 @@
     },
     {
       "type": "group",
+      "id": "INSURANCE",
       "name": "INSURANCE",
       "optional": true,
       "repeating": true,
@@ -136,6 +139,7 @@
     },
     {
       "type": "group",
+      "id": "PROCEDURE",
       "name": "PROCEDURE",
       "optional": true,
       "repeating": true,
@@ -148,6 +152,7 @@
         },
         {
           "type": "group",
+          "id": "AUTHORIZATION_CONTACT2",
           "name": "AUTHORIZATION_CONTACT2",
           "optional": true,
           "repeating": false,
@@ -170,6 +175,7 @@
     },
     {
       "type": "group",
+      "id": "OBSERVATION",
       "name": "OBSERVATION",
       "optional": true,
       "repeating": true,
@@ -188,6 +194,7 @@
         },
         {
           "type": "group",
+          "id": "RESULTS_NOTES",
           "name": "RESULTS_NOTES",
           "optional": true,
           "repeating": true,
@@ -216,6 +223,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT_VISIT",
       "name": "PATIENT_VISIT",
       "optional": true,
       "repeating": false,

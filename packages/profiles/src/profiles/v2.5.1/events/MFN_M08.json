@@ -22,6 +22,7 @@
     },
     {
       "type": "group",
+      "id": "MF_TEST_NUMERIC",
       "name": "MF_TEST_NUMERIC",
       "optional": false,
       "repeating": true,

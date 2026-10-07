@@ -34,6 +34,7 @@
     },
     {
       "type": "group",
+      "id": "COMMON_ORDER",
       "name": "COMMON_ORDER",
       "optional": true,
       "repeating": true,
@@ -46,6 +47,7 @@
         },
         {
           "type": "group",
+          "id": "TIMING",
           "name": "TIMING",
           "optional": true,
           "repeating": true,
@@ -86,6 +88,7 @@
     },
     {
       "type": "group",
+      "id": "OBSERVATION",
       "name": "OBSERVATION",
       "optional": false,
       "repeating": true,

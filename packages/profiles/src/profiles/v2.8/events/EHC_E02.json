@@ -51,6 +51,7 @@
         },
         {
           "type": "group",
+          "id": "PRODUCT_SERVICE_SECTION",
           "name": "PRODUCT_SERVICE_SECTION",
           "optional": false,
           "repeating": true,
@@ -63,6 +64,7 @@
             },
             {
               "type": "group",
+              "id": "PSG",
               "name": "PSG",
               "optional": true,
               "repeating": true,

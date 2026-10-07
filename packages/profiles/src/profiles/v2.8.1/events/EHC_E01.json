@@ -69,6 +69,7 @@
         },
         {
           "type": "group",
+          "id": "PRODUCT_SERVICE_SECTION",
           "name": "PRODUCT_SERVICE_SECTION",
           "optional": false,
           "repeating": true,
@@ -81,6 +82,7 @@
             },
             {
               "type": "group",
+              "id": "PRODUCT_SERVICE_GROUP",
               "name": "PRODUCT_SERVICE_GROUP",
               "optional": false,
               "repeating": true,
@@ -111,6 +113,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "PATIENT_INFO",
                   "name": "PATIENT_INFO",
                   "optional": true,
                   "repeating": true,
@@ -141,6 +144,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "INSURANCE",
                       "name": "INSURANCE",
                       "optional": false,
                       "repeating": true,
@@ -161,6 +165,7 @@
                     },
                     {
                       "type": "group",
+                      "id": "DIAGNOSIS",
                       "name": "DIAGNOSIS",
                       "optional": true,
                       "repeating": true,
@@ -189,6 +194,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "PRODUCT_SERVICE_LINE_ITEM",
                   "name": "PRODUCT_SERVICE_LINE_ITEM",
                   "optional": false,
                   "repeating": true,
@@ -239,6 +245,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "PROCEDURE",
                   "name": "PROCEDURE",
                   "optional": true,
                   "repeating": true,

@@ -40,6 +40,7 @@
     },
     {
       "type": "group",
+      "id": "RESPONSE",
       "name": "RESPONSE",
       "optional": true,
       "repeating": false,
@@ -58,6 +59,7 @@
         },
         {
           "type": "group",
+          "id": "ORDER",
           "name": "ORDER",
           "optional": true,
           "repeating": true,
@@ -76,6 +78,7 @@
             },
             {
               "type": "group",
+              "id": "TIMING",
               "name": "TIMING",
               "optional": true,
               "repeating": true,

@@ -22,6 +22,7 @@
     },
     {
       "type": "group",
+      "id": "MF_STAFF",
       "name": "MF_STAFF",
       "optional": false,
       "repeating": true,

@@ -40,6 +40,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": false,
@@ -66,6 +67,7 @@
     },
     {
       "type": "group",
+      "id": "INSURANCE",
       "name": "INSURANCE",
       "optional": true,
       "repeating": true,
@@ -92,6 +94,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER",
       "name": "ORDER",
       "optional": true,
       "repeating": true,
@@ -104,6 +107,7 @@
         },
         {
           "type": "group",
+          "id": "TIMING",
           "name": "TIMING",
           "optional": true,
           "repeating": true,
@@ -136,6 +140,7 @@
         },
         {
           "type": "group",
+          "id": "OBSERVATION",
           "name": "OBSERVATION",
           "optional": true,
           "repeating": true,

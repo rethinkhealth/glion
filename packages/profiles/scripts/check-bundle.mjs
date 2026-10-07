@@ -217,7 +217,14 @@ export function referenceMatch(schema, input, options = {}) {
     (options.allowZSegments ?? true) && isUnnamedZSegment(input[at], named);
 
   /** @typedef {(at: number) => boolean} Next */
-  /** @type {(number | { open: string } | { z: number } | "close")[]} */
+  /**
+   * @type {(
+   *   | number
+   *   | { open: { id: string; name: string } }
+   *   | { z: number }
+   *   | "close"
+   * )[]}
+   */
   const ops = [];
   /** @type {WeakMap<object, number>} */
   const ids = new WeakMap();
@@ -340,7 +347,7 @@ export function referenceMatch(schema, input, options = {}) {
         return segment(element, at, next);
       }
       case "group": {
-        ops.push({ open: element.name });
+        ops.push({ open: element });
         const close = continuation(next, `c${id(element)}`, () => (j) => {
           ops.push("close");
           return run(next, j);
@@ -381,7 +388,7 @@ export function referenceMatch(schema, input, options = {}) {
 
   /** @type {SegmentMatch[]} */
   const root = [];
-  /** @type {{ name: string; children: SegmentMatch[] }[]} */
+  /** @type {{ id: string; name: string; children: SegmentMatch[] }[]} */
   const open = [];
   let last = root;
   for (const op of ops) {
@@ -397,7 +404,7 @@ export function referenceMatch(schema, input, options = {}) {
         (open.at(-1)?.children ?? root).push(group);
       }
     } else {
-      open.push({ children: [], name: op.open });
+      open.push({ children: [], id: op.open.id, name: op.open.name });
     }
   }
   return root;

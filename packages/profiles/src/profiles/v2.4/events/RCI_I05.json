@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "PROVIDER",
       "name": "PROVIDER",
       "optional": false,
       "repeating": true,
@@ -72,6 +73,7 @@
     },
     {
       "type": "group",
+      "id": "OBSERVATION",
       "name": "OBSERVATION",
       "optional": true,
       "repeating": true,
@@ -90,6 +92,7 @@
         },
         {
           "type": "group",
+          "id": "RESULTS",
           "name": "RESULTS",
           "optional": true,
           "repeating": true,

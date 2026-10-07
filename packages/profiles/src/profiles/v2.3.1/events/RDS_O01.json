@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": false,
@@ -46,6 +47,7 @@
         },
         {
           "type": "group",
+          "id": "PATIENT_VISIT",
           "name": "PATIENT_VISIT",
           "optional": true,
           "repeating": false,
@@ -68,6 +70,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER",
       "name": "ORDER",
       "optional": false,
       "repeating": true,
@@ -80,6 +83,7 @@
         },
         {
           "type": "group",
+          "id": "ORDER_DETAIL",
           "name": "ORDER_DETAIL",
           "optional": true,
           "repeating": false,
@@ -92,6 +96,7 @@
             },
             {
               "type": "group",
+              "id": "ORDER_DETAIL_SUPPLEMENT",
               "name": "ORDER_DETAIL_SUPPLEMENT",
               "optional": true,
               "repeating": false,
@@ -110,6 +115,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "COMPONENT",
                   "name": "COMPONENT",
                   "optional": true,
                   "repeating": false,
@@ -134,6 +140,7 @@
         },
         {
           "type": "group",
+          "id": "ENCODING",
           "name": "ENCODING",
           "optional": true,
           "repeating": false,
@@ -178,6 +185,7 @@
         },
         {
           "type": "group",
+          "id": "OBSERVATION",
           "name": "OBSERVATION",
           "optional": true,
           "repeating": true,

@@ -33,6 +33,7 @@
         },
         {
           "type": "group",
+          "id": "PSL_ITEM_INFO",
           "name": "PSL_ITEM_INFO",
           "optional": false,
           "repeating": true,

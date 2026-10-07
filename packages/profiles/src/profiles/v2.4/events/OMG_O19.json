@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": false,
@@ -40,6 +41,7 @@
         },
         {
           "type": "group",
+          "id": "PATIENT_VISIT",
           "name": "PATIENT_VISIT",
           "optional": true,
           "repeating": false,
@@ -60,6 +62,7 @@
         },
         {
           "type": "group",
+          "id": "INSURANCE",
           "name": "INSURANCE",
           "optional": true,
           "repeating": true,
@@ -100,6 +103,7 @@
     },
     {
       "type": "group",
+      "id": "ORDER",
       "name": "ORDER",
       "optional": false,
       "repeating": true,
@@ -136,6 +140,7 @@
         },
         {
           "type": "group",
+          "id": "OBSERVATION",
           "name": "OBSERVATION",
           "optional": true,
           "repeating": true,
@@ -156,12 +161,14 @@
         },
         {
           "type": "group",
+          "id": "PRIOR_RESULT",
           "name": "PRIOR_RESULT",
           "optional": true,
           "repeating": true,
           "elements": [
             {
               "type": "group",
+              "id": "PATIENT_PRIOR",
               "name": "PATIENT_PRIOR",
               "optional": true,
               "repeating": false,
@@ -182,6 +189,7 @@
             },
             {
               "type": "group",
+              "id": "PATIENT_VISIT_PRIOR",
               "name": "PATIENT_VISIT_PRIOR",
               "optional": true,
               "repeating": false,
@@ -208,6 +216,7 @@
             },
             {
               "type": "group",
+              "id": "ORDER_PRIOR",
               "name": "ORDER_PRIOR",
               "optional": false,
               "repeating": true,
@@ -238,6 +247,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "OBSERVATION_PRIOR",
                   "name": "OBSERVATION_PRIOR",
                   "optional": false,
                   "repeating": true,

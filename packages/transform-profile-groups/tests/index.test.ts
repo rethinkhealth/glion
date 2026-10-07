@@ -17,7 +17,7 @@ type Outline = string | [string, ...Outline[]];
 const nodeOutline = (node: Group | Segment): Outline => {
   switch (node.type) {
     case "group": {
-      return [node.name, ...node.children.map(nodeOutline)];
+      return [node.id, ...node.children.map(nodeOutline)];
     }
     case "segment": {
       return node.name;
@@ -25,7 +25,7 @@ const nodeOutline = (node: Group | Segment): Outline => {
   }
 };
 
-// The tree as segment names nested in group names.
+// The tree as segment names nested in group IDs.
 const outline = (tree: Root): Outline[] =>
   (tree.children as (Group | Segment)[]).map(nodeOutline);
 
@@ -57,6 +57,7 @@ const SITE_SCHEMA: EventSchema = {
         { name: "PV1", optional: false, repeating: false, type: "segment" },
         { name: "ZPV", optional: true, repeating: false, type: "segment" },
       ],
+      id: "VISIT",
       name: "VISIT",
       optional: false,
       repeating: false,
@@ -89,6 +90,22 @@ describe("hl7v2TransformProfileGroups", () => {
             ["OBSERVATION", "OBX"],
           ],
         ],
+      ]);
+    });
+
+    it("gives each group its ID and its name as the standard spells it", async () => {
+      const tree = await grouped(
+        message(
+          "MSH|^~\\&|EMR|FAC|EMR|RFAC|20241201120000||REF^I12^REF_I12|MSG9|P|2.6",
+          "RF1|A",
+          "PRD|RP",
+          "PID|1||12345^^^MRN||Doe^John",
+          "PV1|1|O"
+        )
+      );
+
+      expect(selectAll(tree, "PATIENT_VISIT").map(({ node }) => node)).toEqual([
+        expect.objectContaining({ id: "PATIENT_VISIT", name: "PATIENT VISIT" }),
       ]);
     });
 
@@ -445,6 +462,7 @@ describe("hl7v2TransformProfileGroups", () => {
                 type: "segment",
               },
             ],
+            id: "VISIT",
             name: "VISIT",
             optional: false,
             repeating: false,
@@ -499,6 +517,7 @@ describe("hl7v2TransformProfileGroups", () => {
                 type: "segment",
               },
             ],
+            id: "PATIENT",
             name: "PATIENT",
             optional: false,
             repeating: false,
@@ -635,6 +654,7 @@ describe("hl7v2TransformProfileGroups", () => {
         .children as Segment[];
       const visit: Group = {
         children: [pv1 as Segment],
+        id: "VISIT",
         name: "VISIT",
         type: "group",
       };

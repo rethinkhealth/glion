@@ -22,6 +22,7 @@
     },
     {
       "type": "group",
+      "id": "MF_TEST_CALCULATED",
       "name": "MF_TEST_CALCULATED",
       "optional": false,
       "repeating": true,
@@ -40,6 +41,7 @@
         },
         {
           "type": "group",
+          "id": "MF_TEST_CALC_DETAIL",
           "name": "MF_TEST_CALC_DETAIL",
           "optional": true,
           "repeating": false,

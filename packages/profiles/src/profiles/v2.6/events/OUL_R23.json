@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT",
       "name": "PATIENT",
       "optional": true,
       "repeating": false,
@@ -58,6 +59,7 @@
         },
         {
           "type": "group",
+          "id": "VISIT",
           "name": "VISIT",
           "optional": true,
           "repeating": false,
@@ -86,6 +88,7 @@
     },
     {
       "type": "group",
+      "id": "SPECIMEN",
       "name": "SPECIMEN",
       "optional": false,
       "repeating": true,
@@ -104,6 +107,7 @@
         },
         {
           "type": "group",
+          "id": "CONTAINER",
           "name": "CONTAINER",
           "optional": false,
           "repeating": true,
@@ -122,6 +126,7 @@
             },
             {
               "type": "group",
+              "id": "ORDER",
               "name": "ORDER",
               "optional": false,
               "repeating": true,
@@ -152,6 +157,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "TIMING_QTY",
                   "name": "TIMING_QTY",
                   "optional": true,
                   "repeating": true,
@@ -172,6 +178,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "RESULT",
                   "name": "RESULT",
                   "optional": true,
                   "repeating": true,

@@ -22,6 +22,7 @@
     },
     {
       "type": "group",
+      "id": "COMMAND",
       "name": "COMMAND",
       "optional": false,
       "repeating": true,
@@ -40,6 +41,7 @@
         },
         {
           "type": "group",
+          "id": "SPECIMEN_CONTAINER",
           "name": "SPECIMEN_CONTAINER",
           "optional": true,
           "repeating": false,

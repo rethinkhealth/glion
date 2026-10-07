@@ -52,6 +52,7 @@
     },
     {
       "type": "group",
+      "id": "MF_QUERY",
       "name": "MF_QUERY",
       "optional": false,
       "repeating": true,
@@ -70,6 +71,7 @@
         },
         {
           "type": "group",
+          "id": "MF_PHASE_SCHED_DETAIL",
           "name": "MF_PHASE_SCHED_DETAIL",
           "optional": true,
           "repeating": true,

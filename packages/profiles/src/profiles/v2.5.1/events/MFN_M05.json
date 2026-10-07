@@ -22,6 +22,7 @@
     },
     {
       "type": "group",
+      "id": "MF_LOCATION",
       "name": "MF_LOCATION",
       "optional": false,
       "repeating": true,
@@ -52,6 +53,7 @@
         },
         {
           "type": "group",
+          "id": "MF_LOC_DEPT",
           "name": "MF_LOC_DEPT",
           "optional": false,
           "repeating": true,

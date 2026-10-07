@@ -10,6 +10,7 @@
     },
     {
       "type": "group",
+      "id": "PROVIDER",
       "name": "PROVIDER",
       "optional": false,
       "repeating": true,

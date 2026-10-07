@@ -22,6 +22,7 @@
     },
     {
       "type": "group",
+      "id": "DONOR",
       "name": "DONOR",
       "optional": true,
       "repeating": false,
@@ -64,6 +65,7 @@
         },
         {
           "type": "group",
+          "id": "DONOR_REGISTRATION",
           "name": "DONOR_REGISTRATION",
           "optional": true,
           "repeating": false,
@@ -86,6 +88,7 @@
     },
     {
       "type": "group",
+      "id": "DONOR_ORDER",
       "name": "DONOR_ORDER",
       "optional": false,
       "repeating": true,

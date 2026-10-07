@@ -51,6 +51,7 @@
         },
         {
           "type": "group",
+          "id": "INVOICE_PROCESSING_RESULTS_INFO",
           "name": "INVOICE_PROCESSING_RESULTS_INFO",
           "optional": false,
           "repeating": true,

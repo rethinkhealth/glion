@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "MF_PAYER",
       "name": "MF_PAYER",
       "optional": false,
       "repeating": true,
@@ -40,6 +41,7 @@
         },
         {
           "type": "group",
+          "id": "PAYER_MF_ENTRY",
           "name": "PAYER_MF_ENTRY",
           "optional": false,
           "repeating": true,
@@ -52,6 +54,7 @@
             },
             {
               "type": "group",
+              "id": "PAYER_MF_COVERAGE",
               "name": "PAYER_MF_COVERAGE",
               "optional": false,
               "repeating": true,

@@ -10,6 +10,7 @@
     },
     {
       "type": "group",
+      "id": "FACILITY",
       "name": "FACILITY",
       "optional": false,
       "repeating": true,
@@ -22,6 +23,7 @@
         },
         {
           "type": "group",
+          "id": "PRODUCT",
           "name": "PRODUCT",
           "optional": false,
           "repeating": true,
@@ -48,6 +50,7 @@
         },
         {
           "type": "group",
+          "id": "FACILITY_DETAIL",
           "name": "FACILITY_DETAIL",
           "optional": false,
           "repeating": true,

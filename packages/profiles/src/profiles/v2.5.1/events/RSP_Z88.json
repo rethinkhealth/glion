@@ -46,12 +46,14 @@
     },
     {
       "type": "group",
+      "id": "QUERY_RESPONSE",
       "name": "QUERY_RESPONSE",
       "optional": false,
       "repeating": true,
       "elements": [
         {
           "type": "group",
+          "id": "PATIENT",
           "name": "PATIENT",
           "optional": true,
           "repeating": false,
@@ -76,6 +78,7 @@
             },
             {
               "type": "group",
+              "id": "ALLERGY",
               "name": "ALLERGY",
               "optional": true,
               "repeating": false,
@@ -88,6 +91,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "VISIT",
                   "name": "VISIT",
                   "optional": true,
                   "repeating": false,
@@ -112,6 +116,7 @@
         },
         {
           "type": "group",
+          "id": "COMMON_ORDER",
           "name": "COMMON_ORDER",
           "optional": false,
           "repeating": true,
@@ -124,6 +129,7 @@
             },
             {
               "type": "group",
+              "id": "TIMING",
               "name": "TIMING",
               "optional": true,
               "repeating": true,
@@ -144,6 +150,7 @@
             },
             {
               "type": "group",
+              "id": "ORDER_DETAIL",
               "name": "ORDER_DETAIL",
               "optional": true,
               "repeating": false,
@@ -168,6 +175,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "COMPONENT",
                   "name": "COMPONENT",
                   "optional": true,
                   "repeating": false,
@@ -190,6 +198,7 @@
             },
             {
               "type": "group",
+              "id": "ORDER_ENCODED",
               "name": "ORDER_ENCODED",
               "optional": true,
               "repeating": false,
@@ -202,6 +211,7 @@
                 },
                 {
                   "type": "group",
+                  "id": "TIMING_ENCODED",
                   "name": "TIMING_ENCODED",
                   "optional": true,
                   "repeating": true,
@@ -254,6 +264,7 @@
             },
             {
               "type": "group",
+              "id": "OBSERVATION",
               "name": "OBSERVATION",
               "optional": false,
               "repeating": true,

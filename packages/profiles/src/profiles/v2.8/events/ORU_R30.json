@@ -46,6 +46,7 @@
     },
     {
       "type": "group",
+      "id": "PATIENT_OBSERVATION",
       "name": "PATIENT_OBSERVATION",
       "optional": true,
       "repeating": true,
@@ -66,6 +67,7 @@
     },
     {
       "type": "group",
+      "id": "VISIT",
       "name": "VISIT",
       "optional": true,
       "repeating": false,
@@ -122,6 +124,7 @@
     },
     {
       "type": "group",
+      "id": "TIMING_QTY",
       "name": "TIMING_QTY",
       "optional": true,
       "repeating": true,
@@ -142,6 +145,7 @@
     },
     {
       "type": "group",
+      "id": "OBSERVATION",
       "name": "OBSERVATION",
       "optional": false,
       "repeating": true,

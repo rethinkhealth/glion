@@ -211,8 +211,13 @@ export interface Group extends Parent {
    */
   type: "group";
   /**
-   * Name identifier for the group (e.g., "ORDER", "OBSERVATION").
-   * Used for querying specific groups in nested structures.
+   * Group ID (e.g., "ORDER_OBSERVATION", "PATIENT_VISIT"): uppercase letters,
+   * digits, and `_`. Query paths name a group by its ID.
+   */
+  id: string;
+  /**
+   * Group name as the standard spells it (e.g., "ORDER_OBSERVATION",
+   * "PATIENT VISIT").
    */
   name: string;
   /**

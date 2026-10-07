@@ -28,6 +28,7 @@
     },
     {
       "type": "group",
+      "id": "COMMAND_RESPONSE",
       "name": "COMMAND_RESPONSE",
       "optional": false,
       "repeating": true,
@@ -40,6 +41,7 @@
         },
         {
           "type": "group",
+          "id": "SPECIMEN_CONTAINER",
           "name": "SPECIMEN_CONTAINER",
           "optional": true,
           "repeating": false,

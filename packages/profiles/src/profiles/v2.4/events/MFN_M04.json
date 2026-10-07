@@ -16,6 +16,7 @@
     },
     {
       "type": "group",
+      "id": "MF_CDM",
       "name": "MF_CDM",
       "optional": false,
       "repeating": true,
