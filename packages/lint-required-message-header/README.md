@@ -4,7 +4,7 @@ Lint rule that requires the message header segment (`MSH`) to be the first segme
 
 ## What it does
 
-Walks the parsed tree and checks that the first `segment` node is named `MSH`. If a different segment appears first, the rule reports one fail message naming the offending segment and stops. HL7v2 messages must begin with `MSH` because it carries the metadata required for routing and interpretation.
+Walks the parsed tree and checks that the first `segment` node is named `MSH`. If a different segment appears first, the rule reports one message naming that segment; if the message has no segments, it reports the message as empty. HL7v2 messages must begin with `MSH` because it carries the metadata required for routing and interpretation.
 
 ## Install
 
@@ -37,7 +37,7 @@ console.error(reporter([file]));
 
 A `unified` lint rule plugin. Takes no options.
 
-The plugin visits the tree and finds the first `segment` node (descending through any nested groups). If it is not named `MSH`, the plugin calls `file.fail(...)` — this is a hard failure, not a warning.
+The plugin visits the tree and finds the first `segment` node (descending through any nested groups). If it is not named `MSH`, or the tree has no segments, the plugin reports a message. The message's severity is the one the rule is configured with; it does not throw.
 
 ```ts
 import type { Plugin } from "unified";
@@ -49,7 +49,7 @@ export default hl7v2LintRequiredMessageHeader;
 
 ## What it checks
 
-The first segment of the message must be `MSH`.
+The message must have at least one segment, and the first must be `MSH`.
 
 ### Valid
 
@@ -72,10 +72,28 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 Reported message:
 
 ```
-Message header (MSH) segment is required as the first segment — received 'PID' instead
+The first segment is `PID`; a message must start with the message header segment (`MSH`).
 ```
 
-The name of the first segment found is interpolated into the message. The rule reports at most one failure per tree.
+A segment with an empty Segment ID first, such as an input that starts with the field separator:
+
+```hl7
+|A|B
+```
+
+Reported message:
+
+```
+The first segment has an empty Segment ID; a message must start with the message header segment (`MSH`).
+```
+
+An empty input (`""`), which parses to a tree with no segments, is reported as:
+
+```
+The message has no segments; it must start with the message header segment (`MSH`).
+```
+
+The rule reports at most one message per tree. Each message sets `expected` to `['MSH']` and, when the message has a first segment, `actual` to its Segment ID.
 
 ## Part of Glion
 
