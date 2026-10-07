@@ -42,7 +42,10 @@ export type Occurrence = Readonly<{
 export type SegmentElement = Occurrence &
   Readonly<{
     type: "segment";
-    /** The segment ID, such as `PID`. `Hxx` stands for any segment. */
+    /**
+     * The segment ID, such as `PID`. `Hxx` stands for any segment, and
+     * `anyZSegment` for any segment ID that starts with `Z`.
+     */
     name: string;
   }>;
 
@@ -67,6 +70,21 @@ export type ChoiceElement = Occurrence &
      */
     alternatives: readonly EventSchemaElement[];
   }>;
+
+// ---------------------------------------------------------------------------
+// Runner options
+// ---------------------------------------------------------------------------
+
+/** Options for `runner()`. */
+export type RunnerOptions = Readonly<{
+  /**
+   * Whether a Z-segment (a segment ID that starts with `Z`) that the schema
+   * does not name fits at any position. HL7v2 allows local Z-segments in any
+   * message and segment group (v2.5.1 §2.11). When `false`, such a segment is
+   * a mismatch, like any segment the schema does not allow. Default: `true`.
+   */
+  allowZSegments?: boolean;
+}>;
 
 // ---------------------------------------------------------------------------
 // Runner result

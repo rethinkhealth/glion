@@ -69,6 +69,17 @@ const processor = unified().use(hl7v2LintSegmentOrder, {
 });
 ```
 
+Reporting every Z-segment the schema does not name:
+
+```ts
+import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
+import { unified } from "unified";
+
+const processor = unified().use(hl7v2LintSegmentOrder, {
+  allowZSegments: false,
+});
+```
+
 ## API
 
 ### `unified().use(hl7v2LintSegmentOrder[, options])`
@@ -92,13 +103,21 @@ export interface SegmentOrderOptions {
    * one to use for a message. Default: the schema MSH-9 names.
    *
    * When the function returns `undefined`, the rule uses the schema MSH-9
-   * names.
+   * names. Return the same object for every message that uses a schema: a
+   * new object is compiled on its first run.
    */
   definition?:
     | EventSchema
     | ((
         context: SegmentOrderContext
       ) => EventSchema | undefined | Promise<EventSchema | undefined>);
+  /**
+   * Whether a Z-segment (a segment ID that starts with `Z`) that the event
+   * schema does not name fits at any position. HL7v2 allows local Z-segments
+   * in any message and segment group (v2.5.1 §2.11). When `false`, the rule
+   * reports such a segment as unexpected. Default: `true`.
+   */
+  allowZSegments?: boolean;
 }
 
 declare const hl7v2LintSegmentOrder: Plugin<[SegmentOrderOptions?], Root>;
@@ -109,7 +128,7 @@ All messages use `ruleId: "segment-order"` and `source: "hl7v2-lint"`. The rule 
 
 ## What it checks
 
-Segments must appear in an order the event schema allows, and the message must include every segment the schema requires.
+Segments must appear in an order the event schema allows, and the message must include every segment the schema requires. A Z-segment the schema does not name may appear anywhere, unless `allowZSegments` is `false`; a Z-segment the schema names must appear where the schema allows it.
 
 ### Valid
 
@@ -119,6 +138,16 @@ An `ADT_A01` message whose segments follow the schema defined for v2.5:
 MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5
 EVN|A01|20250601120000
 PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
+PV1|1|I|WARD^101^1
+```
+
+The same message with a site's Z-segment, which the schema does not name:
+
+```hl7
+MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5
+EVN|A01|20250601120000
+PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
+ZPD|1|site patient data
 PV1|1|I|WARD^101^1
 ```
 

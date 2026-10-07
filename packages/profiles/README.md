@@ -46,7 +46,7 @@ The profile stores: `events`, `eventMaps`, `fields`, `datatypes`, `tables`, and 
 | `tables.load(version, tableNumber)`   | `TableDefinition`                                                            |
 | `codeSystems.load(codeSystemId)`      | `CodeSystemDefinition`                                                       |
 
-`load` resolves `undefined` for a profile the version does not bundle, and rejects only when a bundled profile fails to load. Each profile loads once per process; later loads of it resolve the same value, and a load that fails is retried by the next call.
+An event schema `events.load` resolves is frozen, at every depth. `load` resolves `undefined` for a profile the version does not bundle, and rejects only when a bundled profile fails to load. Each profile loads once per process; later loads of it resolve the same value, and a load that fails is retried by the next call.
 
 ### `loadSegments(version)`
 
@@ -80,7 +80,7 @@ const schema: EventSchema = {
 
 A schema of your own works wherever a bundled one does: `runner` and the `definition` option of `@glion/lint-profile-segment-order`. `runner` throws when the schema has no elements, a segment or group has no name, a group has no elements, a choice has no alternatives, or a choice alternative can match no segment.
 
-### `runner(schema, segmentIds)`
+### `runner(schema, segmentIds[, options])`
 
 Runs a message's segment IDs through an event schema: validates their order and groups them. Returns one of:
 
@@ -105,7 +105,26 @@ runner(schema, ["MSH", "PID", "OBR", "MSH"]);
 // { type: "mismatched", index: 3, expected: ["NTE", "OBX", …] }
 ```
 
-`expected` is sorted; `Hxx` in a schema matches any segment ID and is listed as `Hxx`. Where the schema admits more than one grouping, the runner enters an optional element rather than skip it, repeats an element rather than leave it, and takes the earlier alternative of a choice. A group occurrence that holds no segment is left out. Runs in time proportional to the number of segments times the size of the schema.
+`expected` is sorted; `Hxx` in a schema matches any segment ID and is listed as `Hxx`, and `anyZSegment` matches any segment ID that starts with `Z` and is listed as `anyZSegment`. Where the schema admits more than one grouping, the runner enters an optional element rather than skip it, repeats an element rather than leave it, and takes the earlier alternative of a choice. A group occurrence that holds no segment is left out. Runs in time proportional to the number of segments times the size of the schema. A schema is compiled on its first run and reused for later runs of the same object, so a schema must not change after its first run, and passing the same object for every message avoids compiling it again.
+
+#### Z-segments
+
+A Z-segment (a segment ID that starts with `Z`) that the schema does not name fits at any position, as HL7v2 allows local Z-segments in any message and segment group. It is grouped right after the segment before it, in that segment's group. A Z-segment the schema names is matched like any other segment. A reading that reaches an `Hxx` takes the Z-segment there rather than pass over it.
+
+| Option           | Type      | Default | Description                                                                                           |
+| ---------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `allowZSegments` | `boolean` | `true`  | When `false`, a Z-segment the schema does not name is a mismatch, like any segment it does not allow. |
+
+```ts
+runner(schema, ["MSH", "PID", "ZPI", "OBR", "OBX"]);
+// { type: "matched", groups: [0, { name: "PATIENT_RESULT", children: [
+//   { name: "PATIENT", children: [1, 2] },
+//   { name: "ORDER_OBSERVATION", children: [3, { name: "OBSERVATION", children: [4] }] },
+// ] }] }
+
+runner(schema, ["MSH", "PID", "ZPI", "OBR", "OBX"], { allowZSegments: false });
+// { type: "mismatched", index: 2, expected: ["NK1", "NTE", "OBR", …] }
+```
 
 ## Glossary
 
@@ -133,6 +152,8 @@ runner(schema, ["MSH", "PID", "OBR", "MSH"]);
 | Event map (`EventMap`)                          | For each version, the event schema ID each event and each schema ID maps to, such as `ADT_A04` → `ADT_A01`.                                                                                         |
 | Element (`EventSchemaElement`)                  | One node of an event schema: a segment (`SegmentElement`), a named group of elements (`GroupElement`), or a choice between alternatives (`ChoiceElement`).                                          |
 | Occurrence (`Occurrence`)                       | Every element's `optional` (the standard's `[ ]`) and `repeating` (its `{ }`). An element that is neither occurs exactly once.                                                                      |
+| Z-segment                                       | A locally defined segment: its ID starts with `Z`. HL7v2 allows one in any message and segment group.                                                                                               |
+| `anyZSegment`                                   | A segment element that matches any Z-segment. The HL7 v2 XML schemas use it for a site's Z-segment, as in MFN_M01.                                                                                  |
 | `Hxx`                                           | A segment element that matches any segment ID.                                                                                                                                                      |
 | Runner (`runner`)                               | Runs a message's segment IDs through an event schema once: validates their order and groups them. Its result (`RunnerResult`) is `matched`, `mismatched`, or `incomplete`.                          |
 | Groups (`SegmentMatch`, `GroupMatch`)           | What a `matched` result carries: each segment's index in the message, nested in the group occurrences (`GroupMatch`) it belongs to.                                                                 |

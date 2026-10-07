@@ -1,87 +1,76 @@
-// Compiles an event schema into a program: a Thompson NFA over segment
-// names, stored as plain arrays. `runner()` runs it.
+// Compiles an event schema into the program runner.ts runs: a Thompson NFA over
+// segment IDs, as instructions in the style of Cox's Pike VM
+// (https://swtch.com/~rsc/regexp/regexp2.html).
 //
-// The program
-// -----------
-// States are numbers. Each has an entry in `segments` and one in `edges`.
+//   segment  consume this segment ID, then go to `next`        (Char)
+//   any      consume any segment, then go to `next`; `Hxx`     (Any)
+//   z        consume any Z-segment, then go to `next`; the
+//            HL7 XML schemas' `anyZSegment`
+//   split    go to every target, most preferred first          (Split, Jmp)
+//   open     record that a group opens, then go to `next`      (Save)
+//   close    record that the innermost group closes, then go   (Save)
+//   match    the message is complete                           (Match)
 //
-// - A segment state has a name in `segments`. It consumes that segment and
-//   moves to the next state number. That move is implicit: the compiler always
-//   creates a segment's exit state right after it, so the engines compute
-//   `state + 1` and no edge is stored.
-// - Every other state has `null` in `segments`. It consumes nothing and moves
-//   along its `edges`, each `[target, boundary]`.
+// Target order decides the grouping when a message reads more than one way:
+// enter an optional element before skipping it, repeat an element before
+// leaving it, take the earlier alternative of a choice. It never changes which
+// messages fit.
 //
-// Edge order is priority. Where a message can be read more than one way,
-// `runner()` follows a state's edges first to last and keeps the first reading
-// that reaches the end. So the order in which edges are added below is what
-// decides the grouping: enter an optional element before skipping it, repeat
-// an element before leaving it, take the earlier alternative of a choice
-// before the later. The order never changes which messages fit, only how they
-// group.
-//
-// An edge's boundary marks where a group opens or closes: `g + 1` opens group
-// `g`, `-(g + 1)` closes it, and `0` does neither. `g` indexes `groups`. The
-// offset by one keeps group 0 apart from "no boundary".
-//
-// Construction
-// ------------
-// Every element compiles to a fragment `[start, end]`: states with one way in
-// and one way out. Fragments are joined by edges and never merged. That costs
-// a few extra states and keeps the three rules independent of each other:
+// Each element compiles to a fragment [start, end], one way in and one way out,
+// where `end` is a split the next fragment is joined to:
 //
 //   once(element)         the element, exactly one time
-//   occurrences(element)  once(), wrapped for `optional` and `repeating`
-//   sequence(elements)    occurrences() of each element, chained in order
+//   occurrences(element)  once(), wrapped for optional and repeating
+//   sequence(elements)    occurrences() of each element, in order
 //
-// Example: `MSH [{ NTE }]` compiles to these states. Numbers follow creation
-// order, not the order a message passes through them.
-//
-//   0       -> 1
-//   1  MSH  -> 2          (implicit: segment state, then its exit)
-//   2       -> 5
-//   5       -> 3, then 6  enter NTE first; skipping it is second
-//   3  NTE  -> 4          (implicit)
-//   4       -> 3, then 6  repeat NTE first; leaving it is second
-//   6                     final
-//
-// 0 is the sequence's entry. 5 and 6 are the wrapper occurrences() put around
-// NTE because it is optional and repeating; MSH is neither and gets none.
+// Joining fragments leaves splits with a single target, which only jump. A
+// last pass points every instruction past them; they stay in the program, and
+// no run reaches them.
 
+import { invariant } from "../invariant";
 import type { EventSchema, EventSchemaElement } from "./types";
 
-/**
- * An event schema compiled to a Thompson NFA over segment names, stored
- * as parallel arrays indexed by state number.
- *
- * States are numbered from `0`. A state with a non-null entry in `segments`
- * consumes that segment and moves to state `state + 1`, with no edge stored.
- * Every other state consumes nothing and moves along its `edges`.
- */
+/** An event schema compiled to instructions, indexed by program counter. */
 export type EventSchemaProgram = Readonly<{
-  /** The state a message starts in. */
+  /** The instructions. */
+  code: readonly Instruction[];
+  /** The program counter a message starts at. */
   start: number;
-  /** The state that ends a complete message. It has no edges. */
-  final: number;
-  /** Group names, such as `PATIENT_RESULT`, indexed by group number. */
-  groups: readonly string[];
-  /** By state, the segment the state consumes, or `null`. */
-  segments: readonly (string | null)[];
-  /** By state, the edges leaving it, highest priority first. */
-  edges: readonly (readonly EventSchemaEdge[])[];
+  /** The segment IDs the `segment` instructions consume. */
+  segmentIds: ReadonlySet<string>;
 }>;
 
 /**
- * A move to state `target` that consumes no segment.
- *
- * `boundary` is `0` when the edge crosses no group boundary, `g + 1` when it
- * opens group `g`, and `-(g + 1)` when it closes group `g`, where `g` indexes
- * {@link EventSchemaProgram.groups}.
+ * One instruction of a program, discriminated by `op`. `next` and `targets`
+ * are program counters.
  */
-export type EventSchemaEdge = readonly [target: number, boundary: number];
+export type Instruction =
+  | Readonly<{ op: "segment"; id: string; next: number }>
+  | Readonly<{ op: "any"; next: number }>
+  | Readonly<{ op: "z"; next: number }>
+  | Readonly<{ op: "split"; targets: readonly number[] }>
+  | Readonly<{ op: "open"; name: string; next: number }>
+  | Readonly<{ op: "close"; next: number }>
+  | Readonly<{ op: "match" }>;
 
-/** A compiled element: enter at `start`, leave from `end`. */
+/** The segment ID that matches any segment in a schema. */
+export const ANY_SEGMENT = "Hxx";
+
+/** The segment ID that matches any Z-segment in a schema. */
+export const ANY_Z_SEGMENT = "anyZSegment";
+
+/** A compiled element: enter at `start`, leave from the split `end`. */
 type Fragment = readonly [start: number, end: number];
+
+/** An instruction while it is built, before its successors are final. */
+type Draft =
+  | { op: "segment"; id: string; next: number }
+  | { op: "any"; next: number }
+  | { op: "z"; next: number }
+  | { op: "split"; targets: number[] }
+  | { op: "open"; name: string; next: number }
+  | { op: "close"; next: number }
+  | { op: "match" };
 
 /** Whether `element` can match zero segments. */
 const canMatchNothing = (element: EventSchemaElement): boolean => {
@@ -106,7 +95,8 @@ const canMatchNothing = (element: EventSchemaElement): boolean => {
  *
  * The program prefers, in order: entering an optional element over skipping
  * it, repeating an element over leaving it, and earlier choice alternatives
- * over later ones.
+ * over later ones. Neither `start` nor any instruction targets a split with a
+ * single target.
  *
  * @throws {Error} When `schema` has no elements, a segment or group has no
  *   name, a group has no elements, a choice has no alternatives, or a choice
@@ -116,29 +106,43 @@ export function compile(schema: EventSchema): EventSchemaProgram {
   const invalid = (reason: string): Error =>
     new Error(`Invalid event schema ${schema.id}: ${reason}`);
 
-  const groups: string[] = [];
-  const segments: (string | null)[] = [];
-  const edges: EventSchemaEdge[][] = [];
+  const code: Draft[] = [];
+  const segmentIds = new Set<string>();
 
-  // Adds a state and returns its number. With a name, it is a segment state.
-  const state = (segment: string | null = null): number => {
-    segments.push(segment);
-    edges.push([]);
-    return segments.length - 1;
+  // Adds an instruction and returns its program counter.
+  const emit = (instruction: Draft): number => code.push(instruction) - 1;
+
+  const split = (): number => emit({ op: "split", targets: [] });
+
+  // The instruction that consumes the segment a schema names `id`.
+  const consuming = (id: string, next: number): Draft => {
+    switch (id) {
+      case ANY_SEGMENT: {
+        return { next, op: "any" };
+      }
+      case ANY_Z_SEGMENT: {
+        return { next, op: "z" };
+      }
+      default: {
+        segmentIds.add(id);
+        return { id, next, op: "segment" };
+      }
+    }
   };
 
-  // Adds an edge out of `from`. Call order is priority order.
-  const edge = (from: number, target: number, boundary = 0): void => {
-    edges[from]?.push([target, boundary]);
+  // Adds a target to the split at `from`. Call order is priority order.
+  const jump = (from: number, target: number): void => {
+    const instruction = code[from];
+    invariant(instruction?.op === "split", "a jump leaves a non-split");
+    instruction.targets.push(target);
   };
 
-  // A fresh entry state, then each element's fragment chained end to start.
   const sequence = (elements: readonly EventSchemaElement[]): Fragment => {
-    const start = state();
+    const start = split();
     let end = start;
     for (const element of elements) {
       const [first, last] = occurrences(element);
-      edge(end, first);
+      jump(end, first);
       end = last;
     }
     return [start, end];
@@ -150,10 +154,8 @@ export function compile(schema: EventSchema): EventSchemaProgram {
         if (!element.name) {
           throw invalid("a segment has no name");
         }
-        // The exit must be the very next state: the engines reach it as
-        // `start + 1`, without an edge.
-        const start = state(element.name);
-        return [start, state()];
+        const end = split();
+        return [emit(consuming(element.name, end)), end];
       }
       case "group": {
         if (!element.name) {
@@ -162,37 +164,28 @@ export function compile(schema: EventSchema): EventSchemaProgram {
         if (element.elements.length === 0) {
           throw invalid(`group ${element.name} has no elements`);
         }
-        // `push` returns the new length, which is the group's number plus one:
-        // the boundary that opens it. Its negative closes it.
-        const boundary = groups.push(element.name);
         const [first, last] = sequence(element.elements);
-        const start = state();
-        const end = state();
-        // The body sits between two edges that carry the boundary, so a reading
-        // records the group as it enters and as it leaves.
-        edge(start, first, boundary);
-        edge(last, end, -boundary);
+        const end = split();
+        jump(last, emit({ next: end, op: "close" }));
+        const start = emit({ name: element.name, next: first, op: "open" });
         return [start, end];
       }
       case "choice": {
         if (element.alternatives.length === 0) {
           throw invalid("a choice has no alternatives");
         }
-        // A choice is exactly one of its alternatives. One that can match
-        // nothing makes the choice optional without saying so, and the engines
-        // and the reference parser read such a schema differently. Mark the
-        // choice `optional` instead.
+        // An alternative that can match nothing makes the choice optional
+        // without saying so, and a Pike VM and a backtracking parser read such
+        // a schema differently. Mark the choice `optional` instead.
         if (element.alternatives.some(canMatchNothing)) {
           throw invalid("a choice alternative can match no segment");
         }
-        const start = state();
-        const end = state();
-        // One edge out of `start` per alternative, in the order listed: the
-        // first alternative is the preferred one.
+        const start = split();
+        const end = split();
         for (const alternative of element.alternatives) {
           const [first, last] = occurrences(alternative);
-          edge(start, first);
-          edge(last, end);
+          jump(start, first);
+          jump(last, end);
         }
         return [start, end];
       }
@@ -201,39 +194,65 @@ export function compile(schema: EventSchema): EventSchemaProgram {
 
   const occurrences = (element: EventSchemaElement): Fragment => {
     const [first, last] = once(element);
-
-    // Required and single: the element itself, no wrapper.
     if (!(element.optional || element.repeating)) {
       return [first, last];
     }
-
-    // Both pairs below are ordered, and the order is the priority.
-    const start = state();
-    const end = state();
-
-    // Into the element: enter it, or, if optional, skip it. Entering is added
-    // first, so an optional segment that is present is read as that element.
-    edge(start, first);
+    const start = split();
+    const end = split();
+    // Enter before skipping.
+    jump(start, first);
     if (element.optional) {
-      edge(start, end);
+      jump(start, end);
     }
-
-    // Out of the element: if repeating, go round again, or leave. Repeating
-    // is added first, so a second NTE continues the NTE run it follows.
-    //
-    // A repeating element whose body can match nothing makes a cycle of edges
-    // that consume no segment. The engines visit a state once per segment, so
-    // the cycle ends there.
+    // Repeat before leaving. A body that can match nothing makes a cycle of
+    // splits, which the runner ends by visiting an instruction once per
+    // segment.
     if (element.repeating) {
-      edge(last, first);
+      jump(last, first);
     }
-    edge(last, end);
+    jump(last, end);
     return [start, end];
   };
 
   if (schema.elements.length === 0) {
     throw invalid("it has no elements");
   }
-  const [start, final] = sequence(schema.elements);
-  return { edges, final, groups, segments, start };
+  const [start, end] = sequence(schema.elements);
+  jump(end, emit({ op: "match" }));
+  for (const instruction of code) {
+    switch (instruction.op) {
+      case "split": {
+        const { targets } = instruction;
+        for (const [index, target] of targets.entries()) {
+          targets[index] = landing(code, target);
+        }
+        break;
+      }
+      case "segment":
+      case "any":
+      case "z":
+      case "open":
+      case "close": {
+        instruction.next = landing(code, instruction.next);
+        break;
+      }
+      case "match": {
+        break;
+      }
+    }
+  }
+  return { code, segmentIds, start: landing(code, start) };
+}
+
+// The program counter a chain of single-target splits from `pc` lands on.
+function landing(code: readonly Draft[], pc: number): number {
+  let at = pc;
+  for (let hops = 0; ; hops += 1) {
+    const instruction = code[at];
+    if (instruction?.op !== "split" || instruction.targets.length !== 1) {
+      return at;
+    }
+    invariant(hops < code.length, "a cycle of jumps");
+    at = instruction.targets[0] ?? at;
+  }
 }

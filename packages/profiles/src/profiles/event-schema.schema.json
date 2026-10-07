@@ -63,7 +63,7 @@
       },
       "required": ["type", "name", "optional", "repeating"],
       "additionalProperties": false,
-      "description": "A segment, such as `PID`. The name `Hxx` stands for any segment."
+      "description": "A segment, such as `PID`. The name `Hxx` stands for any segment, and `anyZSegment` for any Z-segment."
     },
     "GroupElement": {
       "type": "object",

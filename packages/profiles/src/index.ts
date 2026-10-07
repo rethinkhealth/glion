@@ -11,6 +11,7 @@ export type {
   RunnerIncomplete,
   RunnerMatched,
   RunnerMismatched,
+  RunnerOptions,
   RunnerResult,
   SegmentElement,
   EventSchemaElement,

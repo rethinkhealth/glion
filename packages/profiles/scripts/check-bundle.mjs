@@ -59,6 +59,27 @@ export function seeded(seed) {
 }
 
 /**
+ * The segment ID a generated message carries for a schema's segment `name`:
+ * a stand-in for `Hxx` (any segment) and `anyZSegment` (any Z-segment).
+ *
+ * @param {string} name - The schema's segment name.
+ * @returns {string} A segment ID.
+ */
+const generatedId = (name) => {
+  switch (name) {
+    case "Hxx": {
+      return "ZZ1";
+    }
+    case "anyZSegment": {
+      return "ZZ2";
+    }
+    default: {
+      return name;
+    }
+  }
+};
+
+/**
  * A segment-name sequence the schema accepts.
  *
  * @param {EventSchema} schema - The schema to expand.
@@ -90,7 +111,7 @@ export function validMessage(schema, random) {
     for (let n = count(element); n > 0; n -= 1) {
       switch (element.type) {
         case "segment": {
-          out.push(element.name === "Hxx" ? "ZZ1" : element.name);
+          out.push(generatedId(element.name));
           break;
         }
         case "group": {
@@ -144,6 +165,33 @@ export function nearMiss(message, names, random) {
 // ---------------------------------------------------------------------------
 
 /**
+ * The segment IDs `elements` name, at any depth.
+ *
+ * @param {readonly EventSchemaElement[]} elements - The elements to walk.
+ * @returns {Set<string>} The segment IDs.
+ */
+function segmentIds(elements, ids = new Set()) {
+  for (const element of elements) {
+    if (element.type === "segment") {
+      ids.add(element.name);
+    } else {
+      segmentIds(element.elements ?? element.alternatives, ids);
+    }
+  }
+  return ids;
+}
+
+/**
+ * Whether `name` is a Z-segment that is not in `named`.
+ *
+ * @param {string | undefined} name - A segment ID.
+ * @param {ReadonlySet<string>} named - The segment IDs a schema names.
+ * @returns {boolean} Whether `name` starts with `Z` and is not in `named`.
+ */
+const isUnnamedZSegment = (name, named) =>
+  name?.startsWith("Z") === true && !named.has(name);
+
+/**
  * The grouping of `input` under `schema`, or `undefined` when `input` does
  * not fit it.
  *
@@ -152,14 +200,24 @@ export function nearMiss(message, names, random) {
  * polynomial. Only failures are memoized, so the first success in priority
  * order is still the one returned.
  *
+ * A Z-segment the schema does not name fits anywhere unless
+ * `allowZSegments` is `false`: at each segment, matching it comes first, then
+ * passing over it. It is placed right after the segment before it, in that
+ * segment's group.
+ *
  * @param {EventSchema} schema - The schema to match against.
  * @param {readonly string[]} input - The message's segment names.
+ * @param {{ allowZSegments?: boolean }} [options] - As `runner`'s.
  * @returns {SegmentMatch[] | undefined} Segment indexes nested in groups.
  */
 // oxlint-disable-next-line complexity/complexity -- backtracking grammar parser: the branches are the schema's element kinds and the greedy occurrence order
-export function referenceMatch(schema, input) {
+export function referenceMatch(schema, input, options = {}) {
+  const named = segmentIds(schema.elements);
+  const passable = (at) =>
+    (options.allowZSegments ?? true) && isUnnamedZSegment(input[at], named);
+
   /** @typedef {(at: number) => boolean} Next */
-  /** @type {(number | { open: string } | "close")[]} */
+  /** @type {(number | { open: string } | { z: number } | "close")[]} */
   const ops = [];
   /** @type {WeakMap<object, number>} */
   const ids = new WeakMap();
@@ -245,18 +303,41 @@ export function referenceMatch(schema, input) {
     return count >= min && run(next, at);
   };
 
+  /**
+   * Whether a schema's segment `name` takes the segment ID `segmentId`.
+   */
+  const takes = (name, segmentId) =>
+    name === "Hxx" ||
+    name === segmentId ||
+    (name === "anyZSegment" && segmentId.startsWith("Z"));
+
+  /**
+   * Matches `element` at the first segment from `at` it names, passing over
+   * the Z-segments before it: at each position, matching comes first.
+   */
+  const segment = (element, at, next) => {
+    const mark = ops.length;
+    for (let j = at; input[j] !== undefined; j += 1) {
+      if (takes(element.name, input[j])) {
+        ops.length = mark;
+        ops.push(...Array.from({ length: j - at }, (_, k) => ({ z: at + k })));
+        ops.push(j);
+        if (run(next, j + 1)) {
+          return true;
+        }
+      }
+      if (!passable(j)) {
+        break;
+      }
+    }
+    ops.length = mark;
+    return false;
+  };
+
   const once = (element, at, next) => {
     switch (element.type) {
       case "segment": {
-        const name = input[at];
-        if (
-          name === undefined ||
-          (element.name !== "Hxx" && element.name !== name)
-        ) {
-          return false;
-        }
-        ops.push(at);
-        return run(next, at + 1);
+        return segment(element, at, next);
       }
       case "group": {
         ops.push({ open: element.name });
@@ -283,7 +364,17 @@ export function referenceMatch(schema, input) {
   };
 
   /** @type {Next} */
-  const end = (at) => at === input.length;
+  const end = (at) => {
+    for (let z = at; z < input.length; z += 1) {
+      if (!passable(z)) {
+        return false;
+      }
+    }
+    for (let z = at; z < input.length; z += 1) {
+      ops.push({ z });
+    }
+    return true;
+  };
   if (!sequence(schema.elements, 0, 0, end)) {
     return;
   }
@@ -292,10 +383,14 @@ export function referenceMatch(schema, input) {
   const root = [];
   /** @type {{ name: string; children: SegmentMatch[] }[]} */
   const open = [];
+  let last = root;
   for (const op of ops) {
     const siblings = open.at(-1)?.children ?? root;
     if (typeof op === "number") {
       siblings.push(op);
+      last = siblings;
+    } else if (typeof op === "object" && "z" in op) {
+      last.push(op.z);
     } else if (op === "close") {
       const group = open.pop();
       if (group && group.children.length > 0) {
@@ -383,27 +478,35 @@ async function problemsInBundle() {
     const schema = await profiles.events.load(version, id);
     const random = seeded(version.length * 31 + id.length);
     const names = [...new Set(validMessage(schema, random))];
+    const named = segmentIds(schema.elements);
 
     for (let n = 0; n < MESSAGES_PER_SCHEMA; n += 1) {
       const valid = validMessage(schema, random);
       const miss = nearMiss(valid, names, random);
-      const result = runner(schema, valid);
 
-      if (result.type !== "matched") {
-        problems.push(`v${version}/${id} rejects ${valid.join(" ")}`);
-      } else if (
-        JSON.stringify(result.groups) !==
-        JSON.stringify(referenceMatch(schema, valid))
-      ) {
-        problems.push(
-          `v${version}/${id} groups ${valid.join(" ")} differently`
-        );
-      }
-      if (
-        (runner(schema, miss).type === "matched") !==
-        (referenceMatch(schema, miss) !== undefined)
-      ) {
-        problems.push(`v${version}/${id} disagrees on ${miss.join(" ")}`);
+      // Strict matching differs only on a message with an unnamed Z-segment.
+      const strictDiffers = [...valid, ...miss].some((name) =>
+        isUnnamedZSegment(name, named)
+      );
+      for (const allowZSegments of strictDiffers ? [true, false] : [true]) {
+        const options = { allowZSegments };
+        const label = `v${version}/${id} (allowZSegments ${allowZSegments})`;
+        const result = runner(schema, valid, options);
+
+        if (result.type !== "matched") {
+          problems.push(`${label} rejects ${valid.join(" ")}`);
+        } else if (
+          JSON.stringify(result.groups) !==
+          JSON.stringify(referenceMatch(schema, valid, options))
+        ) {
+          problems.push(`${label} groups ${valid.join(" ")} differently`);
+        }
+        if (
+          (runner(schema, miss, options).type === "matched") !==
+          (referenceMatch(schema, miss, options) !== undefined)
+        ) {
+          problems.push(`${label} disagrees on ${miss.join(" ")}`);
+        }
       }
     }
   }

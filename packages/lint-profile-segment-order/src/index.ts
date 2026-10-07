@@ -21,13 +21,21 @@ export interface SegmentOrderOptions {
    * one to use for a message. Default: the schema MSH-9 names.
    *
    * When the function returns `undefined`, the rule uses the schema MSH-9
-   * names.
+   * names. Return the same object for every message that uses a schema: a
+   * new object is compiled on its first run.
    */
   definition?:
     | EventSchema
     | ((
         context: SegmentOrderContext
       ) => EventSchema | undefined | Promise<EventSchema | undefined>);
+  /**
+   * Whether a Z-segment (a segment ID that starts with `Z`) that the event
+   * schema does not name fits at any position. HL7v2 allows local Z-segments
+   * in any message and segment group (v2.5.1 §2.11). When `false`, the rule
+   * reports such a segment as unexpected. Default: `true`.
+   */
+  allowZSegments?: boolean;
 }
 
 /**
@@ -42,7 +50,8 @@ export interface SegmentOrderOptions {
  * reports nothing.
  *
  * **Behavior**: Reports at most one order error per message: the first segment
- * the schema does not allow.
+ * the schema does not allow. A Z-segment the schema does not name is allowed
+ * anywhere unless `allowZSegments` is `false`.
  *
  * @example
  *   ```typescript
@@ -106,7 +115,8 @@ const hl7v2LintSegmentOrder = lintRule<Root, SegmentOrderOptions>(
 
     const result = runner(
       schema,
-      segments.map(({ node }) => node.name)
+      segments.map(({ node }) => node.name),
+      { allowZSegments: options?.allowZSegments }
     );
 
     switch (result.type) {
