@@ -23,8 +23,8 @@
 //   occurrences(element)  once(), wrapped for optional and repeating
 //   sequence(elements)    occurrences() of each element, in order
 //
-// Joining fragments leaves splits with a single target, which only jump.
-// shrink() points every instruction past them, and compact() keeps only the
+// Joining fragments leaves splits with a single target, which only jump. A
+// last pass, compact(), points every instruction past them and keeps only the
 // instructions a run can reach, renumbered from 0 in the order a run meets
 // them.
 
@@ -72,25 +72,6 @@ type Draft =
   | { op: "open"; name: string; next: number }
   | { op: "close"; next: number }
   | { op: "match" };
-
-/** The program counters `instruction` goes to, most preferred first. */
-const successors = (instruction: Draft): readonly number[] => {
-  switch (instruction.op) {
-    case "split": {
-      return instruction.targets;
-    }
-    case "segment":
-    case "any":
-    case "z":
-    case "open":
-    case "close": {
-      return [instruction.next];
-    }
-    case "match": {
-      return [];
-    }
-  }
-};
 
 /** Whether `element` can match zero segments. */
 const canMatchNothing = (element: EventSchemaElement): boolean => {
@@ -247,35 +228,11 @@ export function compile(schema: EventSchema): EventSchemaProgram {
     }
   };
 
-  // Points every instruction past single-target splits. Such a split has one
-  // way out, so skipping it changes neither which instructions a thread
-  // reaches nor in what order.
-  const shrink = (): void => {
-    for (const instruction of code) {
-      switch (instruction.op) {
-        case "split": {
-          instruction.targets = instruction.targets.map(landing);
-          break;
-        }
-        case "segment":
-        case "any":
-        case "z":
-        case "open":
-        case "close": {
-          instruction.next = landing(instruction.next);
-          break;
-        }
-        case "match": {
-          break;
-        }
-      }
-    }
-  };
-
   // Keeps only the instructions a run can reach from `from`, numbered in the
-  // order a depth-first walk meets them, most preferred successor first.
-  // Renumbering changes neither which instructions a thread reaches nor in
-  // what order.
+  // order a depth-first walk meets them, most preferred successor first, and
+  // points every instruction past single-target splits. Such a split has one
+  // way out, and renumbering keeps the walk's order, so neither changes which
+  // instructions a thread reaches nor in what order.
   const compact = (from: number): Instruction[] => {
     // By old program counter, its new one (-1: not reached).
     const renumbered = new Int32Array(code.length).fill(-1);
@@ -284,14 +241,37 @@ export function compile(schema: EventSchema): EventSchemaProgram {
     for (let pc = pending.pop(); pc !== undefined; pc = pending.pop()) {
       const instruction = code[pc];
       invariant(instruction !== undefined, "a successor is out of range");
-      if (renumbered[pc] === -1) {
-        renumbered[pc] = order.length;
-        order.push(instruction);
-        pending.push(...successors(instruction).toReversed());
+      if (renumbered[pc] !== -1) {
+        continue;
+      }
+      renumbered[pc] = order.length;
+      order.push(instruction);
+      switch (instruction.op) {
+        case "split": {
+          for (
+            let index = instruction.targets.length - 1;
+            index >= 0;
+            index -= 1
+          ) {
+            pending.push(landing(instruction.targets[index] ?? pc));
+          }
+          break;
+        }
+        case "segment":
+        case "any":
+        case "z":
+        case "open":
+        case "close": {
+          pending.push(landing(instruction.next));
+          break;
+        }
+        case "match": {
+          break;
+        }
       }
     }
     const to = (pc: number): number => {
-      const renumberedPc = renumbered[pc] ?? -1;
+      const renumberedPc = renumbered[landing(pc)] ?? -1;
       invariant(renumberedPc !== -1, "a successor was not reached");
       return renumberedPc;
     };
@@ -302,12 +282,26 @@ export function compile(schema: EventSchema): EventSchemaProgram {
           program.push({ op: "split", targets: instruction.targets.map(to) });
           break;
         }
-        case "segment":
+        case "segment": {
+          program.push({
+            id: instruction.id,
+            next: to(instruction.next),
+            op: "segment",
+          });
+          break;
+        }
         case "any":
         case "z":
-        case "open":
         case "close": {
-          program.push({ ...instruction, next: to(instruction.next) });
+          program.push({ next: to(instruction.next), op: instruction.op });
+          break;
+        }
+        case "open": {
+          program.push({
+            name: instruction.name,
+            next: to(instruction.next),
+            op: "open",
+          });
           break;
         }
         case "match": {
@@ -324,6 +318,5 @@ export function compile(schema: EventSchema): EventSchemaProgram {
   }
   const [start, end] = sequence(schema.elements);
   jump(end, emit({ op: "match" }));
-  shrink();
   return { code: compact(landing(start)), segmentIds, start: 0 };
 }
