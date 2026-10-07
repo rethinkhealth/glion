@@ -138,6 +138,7 @@ function validateDigits(value: string, end: number): boolean {
  * `"20260307000000"`.
  *
  * Performance characteristics (optimized for high-throughput streaming):
+ *
  * - `toString()`: Direct string concatenation, no intermediate arrays
  * - `parse()`: Manual character extraction, no regex or match arrays
  * - Constant-time precision lookups via Map

@@ -52,6 +52,7 @@ declare module "@glion/ast" {
  *
  * Annotation flows down the AST and stops at the node where the primitive
  * value lives:
+ *
  * - Primitive field → stops at FieldRepetition
  * - Composite field with primitive components → stops at Component
  * - Composite field with composite components → stops at Subcomponent

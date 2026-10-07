@@ -102,6 +102,7 @@ const HL7v2SettingsSchema = z
      * Custom delimiters to use as defaults.
      *
      * These delimiters serve as fallbacks when:
+     *
      * - Processing non-MSH message fragments
      * - Working with systems that use non-standard delimiters
      * - CLI/batch processing where all messages use the same delimiters

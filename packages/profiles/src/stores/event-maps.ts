@@ -8,9 +8,8 @@ import { lazyImport } from "./utils";
  */
 export type EventMap = Readonly<Record<string, string>>;
 
-const index = memoize(
-  (raw: Record<string, string>): EventMap =>
-    Object.setPrototypeOf({ ...raw }, null)
+const index = memoize((raw: Record<string, string>): EventMap =>
+  Object.setPrototypeOf({ ...raw }, null)
 );
 
 /** The loader of event maps, one per HL7v2 version. */
