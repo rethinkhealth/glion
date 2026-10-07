@@ -4,7 +4,7 @@ Lint rule that requires the message header segment (`MSH`) to be the first segme
 
 ## What it does
 
-Walks the parsed tree and checks that the first `segment` node is named `MSH`. If a different segment appears first, the rule reports one fail message naming the offending segment and stops. HL7v2 messages must begin with `MSH` because it carries the metadata required for routing and interpretation.
+Walks the parsed tree and checks that the first `segment` node is named `MSH`. If a different segment appears first, the rule reports one message naming that segment; if the message has no segments, it reports the message as empty. HL7v2 messages must begin with `MSH` because it carries the metadata required for routing and interpretation.
 
 ## Install
 
@@ -37,7 +37,7 @@ console.error(reporter([file]));
 
 A `unified` lint rule plugin. Takes no options.
 
-The plugin visits the tree and finds the first `segment` node (descending through any nested groups). If it is not named `MSH`, the plugin calls `file.fail(...)` — this is a hard failure, not a warning.
+The plugin visits the tree and finds the first `segment` node (descending through any nested groups). If it is not named `MSH`, or the tree has no segments, the plugin reports a message. The message's severity is the one the rule is configured with; it does not throw.
 
 ```ts
 import type { Plugin } from "unified";
@@ -49,7 +49,7 @@ export default hl7v2LintRequiredMessageHeader;
 
 ## What it checks
 
-The first segment of the message must be `MSH`.
+The message must have at least one segment, and the first must be `MSH`.
 
 ### Valid
 
@@ -75,7 +75,13 @@ Reported message:
 Message header (MSH) segment is required as the first segment — received 'PID' instead
 ```
 
-The name of the first segment found is interpolated into the message. The rule reports at most one failure per tree.
+An empty input (`""`), which parses to a tree with no segments, is reported as:
+
+```
+Message header (MSH) segment is required as the first segment — received an empty message instead
+```
+
+The name of the first segment found is interpolated into the message. The rule reports at most one message per tree.
 
 ## Part of Glion
 

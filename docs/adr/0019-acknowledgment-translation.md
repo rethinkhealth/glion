@@ -79,6 +79,8 @@ When no route matches, `handle()` installs the notFound handler as the terminal 
 
 **Garbage payloads:** the lenient parser never throws, so a non-HL7 frame yields a tree with empty MSH-9/10/12. A payload with no readable MSH-9 (`ctx.messageType === ""`) is rejected `AR` + ERR-3 `207` via `new AckApplicationReject(msg, { errorCode: Hl7ErrorCode.ApplicationInternalError, severity: Severity.Error })` — empty MSA-2, modern layout per the blank-version row — rather than a misleading "Unsupported message type". Once #666 lands, decode/parse failures reach the same boundary via `ctx.error` and take over this branch.
 
+**Lint findings:** a lint rule never throws. `unified-lint-rule` catches `file.fail` inside a rule, records it as a message, and sets `fatal` from the rule's configured severity, so the only failure signal lint produces is a message with `fatal: true`. A message fails validation when `file.messages` holds at least one `fatal: true` message; the boundary answers it `AE`, one ERR per fatal message with ERR-4 `E`. Warnings (`fatal: false`) leave the success reply in place. There is no third level: a missing or unreadable header is answered `AR` by the garbage-payload branch above, from MSH-9 as `handle()` reads it, not from the `segment-required-message-header` report. Lint runs inside `ctx.tree()`, so the boundary sees findings only for a message whose tree was built.
+
 **Loop guard:** an inbound message whose MSH-9.1 is `ACK` and matches no route gets **no reply** — an ACK is never itself acknowledged, so two glion nodes cannot NAK each other's ACKs indefinitely.
 
 ### 5. Unknown errors: a generic NAK on the wire, the real error to the operator

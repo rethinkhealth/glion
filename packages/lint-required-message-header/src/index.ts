@@ -1,12 +1,13 @@
-import type { Nodes } from "@glion/ast";
+import type { Nodes, Segment } from "@glion/ast";
 import { lintRule } from "unified-lint-rule";
 import { EXIT, visitParents } from "unist-util-visit-parents";
 
 /**
- * Hl7v2-lint rule to warn when message header segment (MSH) is missing.
+ * Lint rule that reports a message whose first segment is not the message
+ * header (`MSH`), or that has no segments.
  *
- * This rule is useful for ensuring that all messages start with a message
- * header segment.
+ * The first segment is found through any nested groups. Reports at most one
+ * message per tree.
  */
 const hl7v2LintSegmentRequiredMessageHeader = lintRule<Nodes, undefined>(
   {
@@ -18,19 +19,26 @@ const hl7v2LintSegmentRequiredMessageHeader = lintRule<Nodes, undefined>(
       return;
     }
 
-    // Get the first segment in the message even if it's in a nested group(s).
-    // We must ensure that it is the first segment in the message.
-    visitParents(tree, (node) => {
-      if (node.type === "segment") {
-        if (node.name === "MSH") {
-          return EXIT;
-        }
-        file.fail(
-          `Message header (MSH) segment is required as the first segment — received '${node.name}' instead`,
-          { ancestors: [node], place: node.position }
-        );
-      }
+    let first: Segment | undefined;
+    visitParents(tree, "segment", (node) => {
+      first = node;
+      return EXIT;
     });
+
+    if (!first) {
+      file.message(
+        "Message header (MSH) segment is required as the first segment — received an empty message instead",
+        { ancestors: [tree], place: tree.position }
+      );
+      return;
+    }
+
+    if (first.name !== "MSH") {
+      file.message(
+        `Message header (MSH) segment is required as the first segment — received '${first.name}' instead`,
+        { ancestors: [first], place: first.position }
+      );
+    }
   }
 );
 export default hl7v2LintSegmentRequiredMessageHeader;
