@@ -1,65 +1,113 @@
 import { repair } from "../../src/engine/repair";
 import { runner } from "../../src/engine/runner";
 import type { EventSchema, EventSchemaElement } from "../../src/engine/types";
-import { ADT_A01_V2_5, ORU_R01_V2_5 } from "./fixtures";
+
+interface Occurrence {
+  optional?: boolean;
+  repeating?: boolean;
+}
+
+const segment = (
+  name: string,
+  { optional = false, repeating = false }: Occurrence = {}
+): EventSchemaElement => ({ name, optional, repeating, type: "segment" });
+
+const group = (
+  id: string,
+  elements: EventSchemaElement[],
+  { optional = false, repeating = false }: Occurrence = {}
+): EventSchemaElement => ({
+  elements,
+  id,
+  name: id,
+  optional,
+  repeating,
+  type: "group",
+});
 
 const schemaOf = (...elements: EventSchemaElement[]): EventSchema => ({
   elements,
   id: "TEST",
 });
 
-const segment = (
-  name: string,
-  { optional = false, repeating = false } = {}
-): EventSchemaElement => ({ name, optional, repeating, type: "segment" });
+/**
+ * MSH PATIENT { ORDER } [DSC], where
+ *
+ * - PATIENT is `PID [PD1]`,
+ * - ORDER is `[ORC] OBR [{ RESULT }]`,
+ * - RESULT is `OBX [{ NTE }]`.
+ */
+const LAB = schemaOf(
+  segment("MSH"),
+  group("PATIENT", [segment("PID"), segment("PD1", { optional: true })]),
+  group(
+    "ORDER",
+    [
+      segment("ORC", { optional: true }),
+      segment("OBR"),
+      group(
+        "RESULT",
+        [segment("OBX"), segment("NTE", { optional: true, repeating: true })],
+        { optional: true, repeating: true }
+      ),
+    ],
+    { repeating: true }
+  ),
+  segment("DSC", { optional: true })
+);
+
+/** MSH EVN PID PV1 [{ AL1 }], with no groups. */
+const ADMIT = schemaOf(
+  segment("MSH"),
+  segment("EVN"),
+  segment("PID"),
+  segment("PV1"),
+  segment("AL1", { optional: true, repeating: true })
+);
 
 const repairOf = (schema: EventSchema, message: string) =>
   repair(schema, message.split(" "));
 
 describe("repair: a message that fits", () => {
   it("has no edits for a message the runner matches", () => {
-    const input = "MSH PID OBR OBX OBX NTE OBR OBX".split(" ");
+    const input = "MSH PID OBR OBX OBX NTE ORC OBR OBX".split(" ");
 
-    expect(runner(ORU_R01_V2_5, input).type).toBe("matched");
-    expect(repair(ORU_R01_V2_5, input)).toEqual([]);
+    expect(runner(LAB, input).type).toBe("matched");
+    expect(repair(LAB, input)).toEqual([]);
   });
 
   it("has no edits for a Z-segment the schema does not name", () => {
-    expect(repairOf(ADT_A01_V2_5, "MSH EVN PID PV1 ZPI AL1")).toEqual([]);
+    expect(repairOf(ADMIT, "MSH EVN PID ZPI PV1")).toEqual([]);
   });
 });
 
 describe("repair: missing segments", () => {
-  it("reports a segment the schema requires as missing, before the segment it precedes, in the groups it belongs in", () => {
-    expect(repairOf(ORU_R01_V2_5, "MSH PID OBX OBX")).toEqual([
-      {
-        index: 2,
-        path: ["PATIENT_RESULT", "ORDER_OBSERVATION"],
-        segment: "OBR",
-        type: "missing",
-      },
+  it("reports a segment the schema requires as missing, at the index it would be inserted at, in the groups it belongs in", () => {
+    expect(repairOf(LAB, "MSH PID OBX OBX")).toEqual([
+      { index: 2, path: ["ORDER"], segment: "OBR", type: "missing" },
+    ]);
+  });
+
+  it("reports the first segment of a required group as missing in that group", () => {
+    expect(repairOf(LAB, "MSH OBR OBX")).toEqual([
+      { index: 1, path: ["PATIENT"], segment: "PID", type: "missing" },
     ]);
   });
 
   it("reports every missing segment, not only the first", () => {
-    expect(repairOf(ADT_A01_V2_5, "MSH PID AL1")).toEqual([
+    expect(repairOf(ADMIT, "MSH PID AL1")).toEqual([
       { index: 1, path: [], segment: "EVN", type: "missing" },
       { index: 2, path: [], segment: "PV1", type: "missing" },
     ]);
   });
 
   it("reports a segment missing at the end with the input length as its index", () => {
-    expect(repairOf(ORU_R01_V2_5, "MSH PID")).toEqual([
-      {
-        index: 2,
-        path: ["PATIENT_RESULT", "ORDER_OBSERVATION"],
-        segment: "OBR",
-        type: "missing",
-      },
+    expect(repairOf(LAB, "MSH PID")).toEqual([
+      { index: 2, path: ["ORDER"], segment: "OBR", type: "missing" },
     ]);
   });
 
-  it("reports every segment of an empty message's required elements as missing", () => {
+  it("reports every required segment of an empty message as missing", () => {
     expect(repair(schemaOf(segment("MSH"), segment("PID")), [])).toEqual([
       { index: 0, path: [], segment: "MSH", type: "missing" },
       { index: 0, path: [], segment: "PID", type: "missing" },
@@ -76,10 +124,10 @@ describe("repair: missing segments", () => {
 
 describe("repair: unexpected segments", () => {
   it("reports a segment the schema does not allow there as unexpected, in the groups of the segment before it", () => {
-    expect(repairOf(ORU_R01_V2_5, "MSH PID OBR OBX PV1 OBX")).toEqual([
+    expect(repairOf(LAB, "MSH PID OBR OBX PV1 OBX")).toEqual([
       {
         index: 4,
-        path: ["PATIENT_RESULT", "ORDER_OBSERVATION", "OBSERVATION"],
+        path: ["ORDER", "RESULT"],
         segment: "PV1",
         type: "unexpected",
       },
@@ -87,36 +135,30 @@ describe("repair: unexpected segments", () => {
   });
 
   it("reports a segment after the end of the message as unexpected", () => {
-    const schema = schemaOf(segment("MSH"), segment("PID"));
-    expect(repair(schema, ["MSH", "PID", "PID"])).toEqual([
-      { index: 2, path: [], segment: "PID", type: "unexpected" },
+    expect(repairOf(LAB, "MSH PID OBR DSC PID")).toEqual([
+      { index: 4, path: [], segment: "PID", type: "unexpected" },
     ]);
   });
 
   it("reports a Z-segment the schema does not name as unexpected when Z-segments are not allowed", () => {
     expect(
-      repair(ADT_A01_V2_5, "MSH EVN PID PV1 ZPI AL1".split(" "), {
+      repair(ADMIT, "MSH EVN PID ZPI PV1".split(" "), {
         allowZSegments: false,
       })
-    ).toEqual([{ index: 4, path: [], segment: "ZPI", type: "unexpected" }]);
+    ).toEqual([{ index: 3, path: [], segment: "ZPI", type: "unexpected" }]);
   });
 });
 
 describe("repair: the repair it chooses", () => {
   it("prefers a missing segment to an unexpected one when both cost one edit", () => {
     // Removing the ORC also makes the message fit.
-    expect(repairOf(ORU_R01_V2_5, "MSH PID OBR OBX ORC OBX")).toEqual([
-      {
-        index: 5,
-        path: ["PATIENT_RESULT", "ORDER_OBSERVATION"],
-        segment: "OBR",
-        type: "missing",
-      },
+    expect(repairOf(LAB, "MSH PID OBR OBX ORC OBX")).toEqual([
+      { index: 5, path: ["ORDER"], segment: "OBR", type: "missing" },
     ]);
   });
 
   it("reports a segment out of place next to the schema segment it displaces", () => {
-    expect(repairOf(ADT_A01_V2_5, "MSH PIDX PV")).toEqual([
+    expect(repairOf(ADMIT, "MSH PIDX PV")).toEqual([
       { index: 1, path: [], segment: "EVN", type: "missing" },
       { index: 1, path: [], segment: "PIDX", type: "unexpected" },
       { index: 2, path: [], segment: "PID", type: "missing" },
