@@ -29,6 +29,19 @@ describe("events", () => {
     expect(first).toBe(second);
   });
 
+  it("resolves a schema frozen at every depth, so a run can reuse its program", async () => {
+    const schema = await events.load("2.5", "ORU_R01");
+    const group = schema?.elements.find(({ type }) => type === "group");
+
+    expect(Object.isFrozen(schema)).toBe(true);
+    expect(Object.isFrozen(schema?.elements)).toBe(true);
+    expect(group).toBeDefined();
+    expect(Object.isFrozen(group)).toBe(true);
+    expect(group?.type === "group" && Object.isFrozen(group.elements[0])).toBe(
+      true
+    );
+  });
+
   it("resolves undefined for an event the version does not bundle", async () => {
     await expect(events.load("2.5", "ZZZ_Z99")).resolves.toBeUndefined();
   });

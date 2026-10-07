@@ -59,6 +59,27 @@ export function seeded(seed) {
 }
 
 /**
+ * The segment ID a generated message carries for a schema's segment `name`:
+ * a stand-in for `Hxx` (any segment) and `anyZSegment` (any Z-segment).
+ *
+ * @param {string} name - The schema's segment name.
+ * @returns {string} A segment ID.
+ */
+const generatedId = (name) => {
+  switch (name) {
+    case "Hxx": {
+      return "ZZ1";
+    }
+    case "anyZSegment": {
+      return "ZZ2";
+    }
+    default: {
+      return name;
+    }
+  }
+};
+
+/**
  * A segment-name sequence the schema accepts.
  *
  * @param {EventSchema} schema - The schema to expand.
@@ -90,7 +111,7 @@ export function validMessage(schema, random) {
     for (let n = count(element); n > 0; n -= 1) {
       switch (element.type) {
         case "segment": {
-          out.push(element.name === "Hxx" ? "ZZ1" : element.name);
+          out.push(generatedId(element.name));
           break;
         }
         case "group": {
@@ -283,13 +304,21 @@ export function referenceMatch(schema, input, options = {}) {
   };
 
   /**
+   * Whether a schema's segment `name` takes the segment ID `segmentId`.
+   */
+  const takes = (name, segmentId) =>
+    name === "Hxx" ||
+    name === segmentId ||
+    (name === "anyZSegment" && segmentId.startsWith("Z"));
+
+  /**
    * Matches `element` at the first segment from `at` it names, passing over
    * the Z-segments before it: at each position, matching comes first.
    */
   const segment = (element, at, next) => {
     const mark = ops.length;
     for (let j = at; input[j] !== undefined; j += 1) {
-      if (element.name === "Hxx" || element.name === input[j]) {
+      if (takes(element.name, input[j])) {
         ops.length = mark;
         ops.push(...Array.from({ length: j - at }, (_, k) => ({ z: at + k })));
         ops.push(j);

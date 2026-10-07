@@ -21,7 +21,8 @@ export interface SegmentOrderOptions {
    * one to use for a message. Default: the schema MSH-9 names.
    *
    * When the function returns `undefined`, the rule uses the schema MSH-9
-   * names.
+   * names. Return the same object for every message that uses a schema: a
+   * new object is compiled on its first run.
    */
   definition?:
     | EventSchema

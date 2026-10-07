@@ -127,6 +127,7 @@ describe("runner on random schemas", () => {
       NAMED_Z_SEGMENT,
       NAMED_Z_SEGMENT,
       "Hxx",
+      "anyZSegment",
     ];
     const disagreements: string[] = [];
     let compared = 0;

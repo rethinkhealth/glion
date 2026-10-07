@@ -1,47 +1,28 @@
-// Runs a message's segment IDs through its schema: it validates their
-// order and groups them.
+// Runs a message's segment IDs through its schema: validates their order and
+// groups them.
 //
-// The model
+// This is a Pike VM (Russ Cox, "Regular Expression Matching: the Virtual
+// Machine Approach", https://swtch.com/~rsc/regexp/regexp2.html). compile.ts
+// turns the schema into a program of instructions; the runner keeps one thread
+// per reading of the message still possible, at most one per instruction, and
+// steps them all over each segment. A thread records its history as a chain of
+// events: segments consumed and groups opened or closed.
 //
-// compile.ts turns a schema into a program (see EventSchemaProgram). A schema
-// often allows more than one reading: in `MSH [{NTE}] PID`, the segment after
-// MSH can be NTE or PID. The runner keeps the readings still possible, at most
-// one per state, and replaces them with each segment it consumes. A reading is
-// the state it reached and its last Step; each step links to the one before
-// it, so a reading's steps are the segments it consumed and the group
-// boundaries it crossed.
+// Unlike Cox's VM, a match must cover the whole message, and a thread keeps its
+// full history rather than capture slots, so every occurrence of a group is
+// kept. As in RE2 and Rust's regex-automata, a schema is compiled once and its
+// program reused with its own scratch space, and addThread() walks with an
+// explicit stack rather than recursion, so a schema of any size fits.
 //
-// follow() walks from a state across the edges that consume nothing, first to
-// last, and keeps a reading at every state that consumes a segment, plus final.
-// The first walk to reach a state keeps it, so the reading kept there is the
-// one with the highest priority. The three priorities are compile.ts's.
+// A Z-segment the schema does not name may be passed over: the thread stays at
+// its instruction, and nest() places the segment after the one before it.
 //
-// Z-segments
-//
-// A Z-segment the schema does not name fits anywhere when allowed: each
-// reading consumes it if its state can (an `Hxx`), then passes over it and
-// keeps its state. Consuming before passing over keeps the readings in the
-// order backtracking tries them. nest() places a segment passed over right
-// after the segment before it, in that segment's group, whichever reading
-// passed over it.
-//
-// Outcomes
-//
-//   matched     a reading reached final after the last segment: nest() replays
-//               its steps into the groups
-//   mismatched  no reading accepted the segment at `index`; `expected` is what
-//               the readings before it could consume
-//   incomplete  every segment was accepted but no reading reached final;
-//               `expected` is what could come next
-//
-// Cost
-//
-// `visited` and `generation` limit each segment to one visit per state and per
-// edge, so a message costs its segment count times the program size. The same
-// guard ends a cycle of edges that consume nothing. Readings share their earlier
-// steps, so a step costs one small object, not a copy.
+// Cost: each instruction is visited at most once per segment, so a run is
+// linear in the segment count times the program size.
 
-import { compile } from "./compile";
+import { invariant } from "../invariant";
+import { ANY_SEGMENT, ANY_Z_SEGMENT, compile } from "./compile";
+import type { EventSchemaProgram } from "./compile";
 import type {
   EventSchema,
   RunnerOptions,
@@ -53,14 +34,14 @@ import type {
 // Constants and types
 // ---------------------------------------------------------------------------
 
-// The segment ID that matches any segment in the schema.
-const ANY_SEGMENT = "Hxx";
-
 // HL7v2 reserves segment IDs that start with Z for locally defined segments.
 const Z_SEGMENT_PREFIX = "Z";
 
-// One step of a reading, linked to the step before it.
-type Step = Readonly<{ previous: Step | undefined }> &
+/** The largest generation a machine's `visited` marks can hold. */
+export const MAX_GENERATION = 2 ** 31 - 1;
+
+// One event in a thread's history, linked to the one before it.
+type Event = Readonly<{ previous: Event | undefined }> &
   (
     | Readonly<{ kind: "consumed" }>
     | Readonly<{ kind: "passed-over" }>
@@ -68,12 +49,74 @@ type Step = Readonly<{ previous: Step | undefined }> &
     | Readonly<{ kind: "close" }>
   );
 
-// A reading of the message so far: the state it reached, and its last step.
-type Reading = Readonly<{ state: number; last: Step | undefined }>;
+// A reading of the message so far: its program counter and its last event.
+type Thread = Readonly<{ pc: number; last: Event | undefined }>;
+
+// A schema's program and the scratch space its runs reuse. Every run of the
+// schema shares it, so a run MUST NOT call out or wait before it returns.
+interface Machine {
+  readonly program: EventSchemaProgram;
+  // The segment IDs the program names.
+  readonly named: ReadonlySet<string>;
+  // By instruction, the generation that last reached it (-1: never). Bumping
+  // the generation clears every mark at once.
+  readonly visited: Int32Array;
+  generation: number;
+  // Threads addThread() has yet to explore, most preferred on top, as two
+  // parallel stacks: a pending thread costs no object.
+  readonly pendingPcs: number[];
+  readonly pendingEvents: (Event | undefined)[];
+}
+
 interface OpenGroup {
   name: string;
   children: SegmentMatch[];
 }
+
+// ---------------------------------------------------------------------------
+// Machines: one per schema, compiled on its first run
+// ---------------------------------------------------------------------------
+
+const machines = new WeakMap<EventSchema, Machine>();
+
+/** The machine `schema` runs on: compiled on its first run, then reused. */
+export const machineOf = (schema: EventSchema): Machine => {
+  const known = machines.get(schema);
+  if (known) {
+    return known;
+  }
+  const program = compile(schema);
+  const named = new Set<string>();
+  for (const instruction of program.code) {
+    if (instruction.op === "segment") {
+      named.add(instruction.id);
+    }
+  }
+  const fresh: Machine = {
+    generation: 0,
+    named,
+    pendingEvents: [],
+    pendingPcs: [],
+    program,
+    visited: new Int32Array(program.code.length).fill(-1),
+  };
+  machines.set(schema, fresh);
+  return fresh;
+};
+
+/**
+ * Readies `machine` for a run of `segments` segments: empties the stacks a
+ * run that threw left behind, and clears the visited marks when the run's
+ * generations would pass {@link MAX_GENERATION}.
+ */
+export const beginRun = (machine: Machine, segments: number): void => {
+  machine.pendingPcs.length = 0;
+  machine.pendingEvents.length = 0;
+  if (machine.generation > MAX_GENERATION - segments - 1) {
+    machine.visited.fill(-1);
+    machine.generation = 0;
+  }
+};
 
 // ---------------------------------------------------------------------------
 // Runner
@@ -93,7 +136,8 @@ interface OpenGroup {
  * order: entering an optional element over skipping it, repeating an element
  * over leaving it, and the earlier alternative of a choice. A group occurrence
  * that holds no segment is left out of the groups. A segment named `Hxx` in the
- * schema matches any segment ID.
+ * schema matches any segment ID, and one named `anyZSegment` any segment ID
+ * that starts with `Z`.
  *
  * A Z-segment (a segment ID that starts with `Z`) that the schema does not
  * name fits at any position unless `options.allowZSegments` is `false`. It is
@@ -101,7 +145,9 @@ interface OpenGroup {
  * never makes a group occurrence that holds no other segment. A reading that
  * reaches an `Hxx` takes the Z-segment there rather than pass over it.
  *
- * Runs in time proportional to the input length times the schema size.
+ * Compiles `schema` on its first run and reuses the program for later runs
+ * of the same object. `schema` MUST NOT change after its first run. Runs in
+ * time proportional to the input length times the schema size.
  *
  * @throws {Error} When `schema` has no elements, a segment or group has no
  *   name, a group has no elements, a choice has no alternatives, or a choice
@@ -113,108 +159,192 @@ export function runner(
   options?: RunnerOptions
 ): RunnerResult {
   // ----------------------------------------------------------------
-  // Setup: the compiled program, and the state of this run.
+  // Setup
 
-  const { edges, final, groups, segments, start } = compile(schema);
+  const machine = machineOf(schema);
+  const { code, start } = machine.program;
   const allowZSegments = options?.allowZSegments ?? true;
-  const visited = new Int32Array(segments.length).fill(-1);
-  let generation = 0;
-  let readings: Reading[] = [];
+  let threads: Thread[] = [];
+
+  beginRun(machine, input.length);
 
   // ----------------------------------------------------------------
-  // Helpers: closures over that state.
+  // Helpers
 
-  const follow = (state: number, last?: Step): void => {
-    if (visited[state] === generation) {
-      return;
+  // Moves a thread from `pc` through the instructions that consume nothing,
+  // and adds it at every instruction that consumes a segment, and at match.
+  // Depth first, most preferred target first: the first thread to reach an
+  // instruction wins. Cox's addthread.
+  const addThread = (pc: number, last?: Event): void => {
+    machine.pendingPcs.push(pc);
+    machine.pendingEvents.push(last);
+    for (
+      let next = machine.pendingPcs.pop();
+      next !== undefined;
+      next = machine.pendingPcs.pop()
+    ) {
+      explore(next, machine.pendingEvents.pop());
     }
-    visited[state] = generation;
-    if (segments[state] !== null || state === final) {
-      readings.push({ last, state });
-    }
-    for (const [target, boundary] of edges[state] ?? []) {
-      if (boundary === 0) {
-        follow(target, last);
-      } else if (boundary > 0) {
-        const name = groups[boundary - 1] as string;
-        follow(target, { kind: "open", name, previous: last });
-      } else {
-        follow(target, { kind: "close", previous: last });
+  };
+
+  // Explores from one pending thread. It goes on along the most preferred
+  // target itself and pushes the others, least preferred first, so the next
+  // one popped is the next preferred.
+  const explore = (from: number, fromLast: Event | undefined): void => {
+    let pc = from;
+    let last = fromLast;
+    for (;;) {
+      // Already reached for this segment by a preferred thread; this also
+      // ends a cycle of splits.
+      if (machine.visited[pc] === machine.generation) {
+        return;
+      }
+      machine.visited[pc] = machine.generation;
+      const instruction = code[pc];
+      invariant(instruction !== undefined, "a program counter is out of range");
+      switch (instruction.op) {
+        case "segment":
+        case "any":
+        case "z":
+        case "match": {
+          threads.push({ last, pc });
+          return;
+        }
+        case "split": {
+          const { targets } = instruction;
+          for (let index = targets.length - 1; index > 0; index -= 1) {
+            const target = targets[index];
+            invariant(target !== undefined, "a split target is out of range");
+            machine.pendingPcs.push(target);
+            machine.pendingEvents.push(last);
+          }
+          const [first] = targets;
+          invariant(first !== undefined, "a split has no target");
+          pc = first;
+          break;
+        }
+        case "open": {
+          last = { kind: "open", name: instruction.name, previous: last };
+          pc = instruction.next;
+          break;
+        }
+        case "close": {
+          last = { kind: "close", previous: last };
+          pc = instruction.next;
+          break;
+        }
       }
     }
   };
 
-  // A reading sits at a segment state or at final, neither of which has edges,
-  // so follow() keeping its state adds it back and goes nowhere.
-  const advance = (
-    { last, state }: Reading,
-    name: string,
-    passable: boolean
-  ) => {
-    if (segments[state] === name || segments[state] === ANY_SEGMENT) {
-      follow(state + 1, { kind: "consumed", previous: last });
+  // Steps a thread over segment `name`: consumes it if its instruction can,
+  // then passes over it if `passable` (the thread stays where it is).
+  const step = ({ last, pc }: Thread, name: string, passable: boolean) => {
+    const instruction = code[pc];
+    invariant(instruction !== undefined, "a program counter is out of range");
+    switch (instruction.op) {
+      case "segment": {
+        if (instruction.id === name) {
+          addThread(instruction.next, { kind: "consumed", previous: last });
+        }
+        break;
+      }
+      case "any": {
+        addThread(instruction.next, { kind: "consumed", previous: last });
+        break;
+      }
+      case "z": {
+        if (name.startsWith(Z_SEGMENT_PREFIX)) {
+          addThread(instruction.next, { kind: "consumed", previous: last });
+        }
+        break;
+      }
+      case "match":
+      case "split":
+      case "open":
+      case "close": {
+        break;
+      }
     }
     if (passable) {
-      follow(state, { kind: "passed-over", previous: last });
+      addThread(pc, { kind: "passed-over", previous: last });
     }
   };
 
-  // The segment IDs the readings can consume next, deduplicated and sorted.
-  const expected = (from: readonly Reading[]): string[] => {
+  // The segment IDs the threads can consume next, deduplicated and sorted.
+  const expected = (from: readonly Thread[]): string[] => {
     const found = new Set<string>();
-    for (const { state } of from) {
-      const name = segments[state];
-      if (name) {
-        found.add(name);
+    for (const { pc } of from) {
+      const instruction = code[pc];
+      invariant(instruction !== undefined, "a program counter is out of range");
+      switch (instruction.op) {
+        case "segment": {
+          found.add(instruction.id);
+          break;
+        }
+        case "any": {
+          found.add(ANY_SEGMENT);
+          break;
+        }
+        case "z": {
+          found.add(ANY_Z_SEGMENT);
+          break;
+        }
+        case "match":
+        case "split":
+        case "open":
+        case "close": {
+          break;
+        }
       }
     }
     return [...found].toSorted();
   };
 
   // ----------------------------------------------------------------
-  // The run: one generation per segment, then the outcome.
+  // Run
 
-  follow(start);
+  machine.generation += 1;
+  addThread(start);
   for (const [index, name] of input.entries()) {
-    const current = readings;
-    readings = [];
-    generation += 1;
+    const current = threads;
+    threads = [];
+    machine.generation += 1;
     const passable =
       allowZSegments &&
       name.startsWith(Z_SEGMENT_PREFIX) &&
-      !segments.includes(name);
-    for (const reading of current) {
-      advance(reading, name, passable);
+      !machine.named.has(name);
+    for (const thread of current) {
+      step(thread, name, passable);
     }
-    if (readings.length === 0) {
+    if (threads.length === 0) {
       return { expected: expected(current), index, type: "mismatched" };
     }
   }
 
-  const accepted = readings.find((reading) => reading.state === final);
+  const accepted = threads.find(({ pc }) => code[pc]?.op === "match");
   return accepted
     ? { groups: nest(accepted.last), type: "matched" }
-    : { expected: expected(readings), type: "incomplete" };
+    : { expected: expected(threads), type: "incomplete" };
 }
 
 // ---------------------------------------------------------------------------
 // Nesting
 // ---------------------------------------------------------------------------
 
-// The accepted reading's segments, nested in the groups its steps open and
-// close.
-function nest(last: Step | undefined): SegmentMatch[] {
-  const steps: Step[] = [];
-  for (let step = last; step; step = step.previous) {
-    steps.push(step);
+// Replays the accepted thread's events into nested groups.
+function nest(last: Event | undefined): SegmentMatch[] {
+  const events: Event[] = [];
+  for (let event = last; event; event = event.previous) {
+    events.push(event);
   }
 
   const root: SegmentMatch[] = [];
   const open: OpenGroup[] = [];
   let previousSiblings = root;
   let index = 0;
-  for (const step of steps.toReversed()) {
-    switch (step.kind) {
+  for (const event of events.toReversed()) {
+    switch (event.kind) {
       case "consumed": {
         previousSiblings = open.at(-1)?.children ?? root;
         previousSiblings.push(index);
@@ -227,11 +357,12 @@ function nest(last: Step | undefined): SegmentMatch[] {
         break;
       }
       case "open": {
-        open.push({ children: [], name: step.name });
+        open.push({ children: [], name: event.name });
         break;
       }
       case "close": {
-        const group = open.pop() as OpenGroup;
+        const group = open.pop();
+        invariant(group !== undefined, "an event closes a group never opened");
         if (group.children.length > 0) {
           (open.at(-1)?.children ?? root).push(group);
         }

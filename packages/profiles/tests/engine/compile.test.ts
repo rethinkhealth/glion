@@ -195,26 +195,102 @@ describe("compile", () => {
     });
   });
 
-  it("numbers groups in the order the schema lists them", () => {
-    expect(compile(ORU_R01_V2_5).groups).toEqual([
-      "PATIENT_RESULT",
-      "PATIENT",
-      "VISIT",
-      "ORDER_OBSERVATION",
-      "TIMING_QTY",
+  it("opens and closes each group of the schema once", () => {
+    const { code } = compile(ORU_R01_V2_5);
+    const opened = code.flatMap((instruction) =>
+      instruction.op === "open" ? [instruction.name] : []
+    );
+
+    expect(opened.toSorted()).toEqual([
       "OBSERVATION",
+      "ORDER_OBSERVATION",
+      "PATIENT",
+      "PATIENT_RESULT",
       "SPECIMEN",
+      "TIMING_QTY",
+      "VISIT",
     ]);
+    expect(code.filter(({ op }) => op === "close")).toHaveLength(7);
   });
 
-  it("moves every segment state to the next state number", () => {
-    const program = compile(ORU_R01_V2_5);
-
-    for (const [state, segment] of program.segments.entries()) {
-      if (segment !== null) {
-        expect(program.edges[state]).toEqual([]);
-        expect(program.segments[state + 1]).toBeNull();
+  it("points no instruction, and not the start, at a split with one target", () => {
+    const { code, start } = compile(ORU_R01_V2_5);
+    const jumps = (pc: number) => {
+      const instruction = code[pc];
+      return instruction?.op === "split" && instruction.targets.length === 1;
+    };
+    const successors: number[] = [];
+    for (const instruction of code) {
+      switch (instruction.op) {
+        case "split": {
+          successors.push(...instruction.targets);
+          break;
+        }
+        case "segment":
+        case "any":
+        case "open":
+        case "close": {
+          successors.push(instruction.next);
+          break;
+        }
+        case "match": {
+          break;
+        }
       }
     }
+
+    expect(jumps(start)).toBe(false);
+    for (const pc of successors) {
+      expect(pc).toBeGreaterThanOrEqual(0);
+      expect(pc).toBeLessThan(code.length);
+      expect(jumps(pc)).toBe(false);
+    }
+  });
+
+  it("ends every program in one match instruction", () => {
+    expect(
+      compile(ORU_R01_V2_5).code.filter(({ op }) => op === "match")
+    ).toHaveLength(1);
+  });
+
+  it("compiles anyZSegment to an instruction that consumes any Z-segment", () => {
+    const { code } = compile({
+      elements: [
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        {
+          name: "anyZSegment",
+          optional: true,
+          repeating: false,
+          type: "segment",
+        },
+      ],
+      id: "ZZZ_Z21",
+    });
+
+    expect(code.filter(({ op }) => op === "z")).toHaveLength(1);
+    expect(
+      code.some(
+        (instruction) =>
+          instruction.op === "segment" && instruction.id === "anyZSegment"
+      )
+    ).toBe(false);
+  });
+
+  it("compiles Hxx to an instruction that consumes any segment", () => {
+    const { code } = compile({
+      elements: [
+        { name: "MSH", optional: false, repeating: false, type: "segment" },
+        { name: "Hxx", optional: false, repeating: false, type: "segment" },
+      ],
+      id: "ZZZ_Z20",
+    });
+
+    expect(code.filter(({ op }) => op === "any")).toHaveLength(1);
+    expect(
+      code.some(
+        (instruction) =>
+          instruction.op === "segment" && instruction.id === "Hxx"
+      )
+    ).toBe(false);
   });
 });

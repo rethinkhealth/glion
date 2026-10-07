@@ -42,7 +42,10 @@ export type Occurrence = Readonly<{
 export type SegmentElement = Occurrence &
   Readonly<{
     type: "segment";
-    /** The segment ID, such as `PID`. `Hxx` stands for any segment. */
+    /**
+     * The segment ID, such as `PID`. `Hxx` stands for any segment, and
+     * `anyZSegment` for any segment ID that starts with `Z`.
+     */
     name: string;
   }>;
 
