@@ -11,13 +11,13 @@ import type {
   SegmentMatch,
 } from "../../src/engine/types";
 import {
-  ADT_A01_V2_5,
-  CSU_C09_V2_5,
-  MFN_M01_V2_5,
-  ORM_O01_V2_5,
-  ORU_R01_V2_1,
-  ORU_R01_V2_5,
-  PPP_PCB_V2_3_1,
+  ADMISSION,
+  MASTER_FILE,
+  NOTES,
+  ORDERS,
+  PATHWAYS,
+  RESULTS,
+  STUDY,
 } from "./fixtures";
 
 // A group occurrence by its ID; its name is checked where a test names it.
@@ -177,56 +177,52 @@ describe("runner: segment order", () => {
   });
 
   it("expects no segment after the end of the message", () => {
-    expect(
-      runner(ORU_R01_V2_5, ["MSH", "PID", "OBR", "OBX", "DSC", "PID"])
-    ).toEqual({ expected: [], index: 5, type: "mismatched" });
+    expect(runner(RESULTS, ["MSH", "PID", "OBR", "OBX", "DSC", "PID"])).toEqual(
+      { expected: [], index: 5, type: "mismatched" }
+    );
   });
 });
 
 describe("runner: grouping", () => {
   it("gives each group occurrence its ID and its name", () => {
-    expect(match(ORU_R01_V2_5, "MSH PID OBR")).toEqual([
+    expect(match(RESULTS, "MSH PID OBR")).toEqual([
       0,
       {
         children: [
           { children: [1], id: "PATIENT", name: "Patient" },
-          { children: [2], id: "ORDER_OBSERVATION", name: "Order Observation" },
+          { children: [2], id: "ORDER", name: "Order" },
         ],
-        id: "PATIENT_RESULT",
-        name: "Patient Result",
+        id: "REPORT",
+        name: "Report",
       },
     ]);
   });
 
   it("nests each group inside the group that contains it", () => {
-    expect(match(ORU_R01_V2_5, "MSH PID PV1 ORC OBR OBX OBX")).toEqual([
+    expect(match(RESULTS, "MSH PID PV1 ORC OBR OBX OBX")).toEqual([
       0,
       g(
-        "PATIENT_RESULT",
+        "REPORT",
         g("PATIENT", 1, g("VISIT", 2)),
-        g("ORDER_OBSERVATION", 3, 4, g("OBSERVATION", 5), g("OBSERVATION", 6))
+        g("ORDER", 3, 4, g("OBSERVATION", 5), g("OBSERVATION", 6))
       ),
     ]);
   });
 
   it("names groups at every depth of a five-level schema", () => {
-    expect(match(PPP_PCB_V2_3_1, "MSH PID PTH PRB ORC OBR OBX")).toEqual([
+    expect(match(PATHWAYS, "MSH PID PTH PRB ORC OBR OBX")).toEqual([
       0,
       1,
       g(
         "PATHWAY",
         2,
-        g(
-          "PROBLEM",
-          3,
-          g("ORDER", 4, g("ORDER_DETAIL", 5, g("ORDER_OBSERVATION", 6)))
-        )
+        g("PROBLEM", 3, g("ORDER", 4, g("DETAIL", 5, g("RESULT", 6))))
       ),
     ]);
   });
 
   it("starts a new group occurrence when the group's first segment repeats", () => {
-    expect(match(ADT_A01_V2_5, "MSH EVN PID PV1 IN1 IN2 IN1 ACC")).toEqual([
+    expect(match(ADMISSION, "MSH EVN PID PV1 IN1 IN2 IN1 ACC")).toEqual([
       0,
       1,
       2,
@@ -238,122 +234,110 @@ describe("runner: grouping", () => {
   });
 
   it("places a segment by the segments that follow it", () => {
-    const schedule = (...children: SegmentMatch[]) => [
+    const study = (...children: SegmentMatch[]) => [
       0,
-      g("PATIENT", 1, 2, g("STUDY_PHASE", g("STUDY_SCHEDULE", ...children))),
+      1,
+      g("STUDY", ...children),
     ];
 
-    expect(match(CSU_C09_V2_5, "MSH PID CSR ORC OBR OBX ORC RXA RXR")).toEqual(
-      schedule(
-        g("STUDY_OBSERVATION", 3, 4, 5),
-        g("STUDY_PHARM", 6, g("RX_ADMIN", 7, 8))
-      )
+    expect(match(STUDY, "MSH PID ORC OBR OBX ORC RXA RXR")).toEqual(
+      study(g("TEST", 2, 3, 4), g("DOSE", 5, g("ADMIN", 6, 7)))
     );
-    expect(
-      match(CSU_C09_V2_5, "MSH PID CSR ORC OBR OBX ORC OBR OBX ORC RXA RXR")
-    ).toEqual(
-      schedule(
-        g("STUDY_OBSERVATION", 3, 4, 5),
-        g("STUDY_OBSERVATION", 6, 7, 8),
-        g("STUDY_PHARM", 9, g("RX_ADMIN", 10, 11))
+    expect(match(STUDY, "MSH PID ORC OBR OBX ORC OBR OBX ORC RXA RXR")).toEqual(
+      study(
+        g("TEST", 2, 3, 4),
+        g("TEST", 5, 6, 7),
+        g("DOSE", 8, g("ADMIN", 9, 10))
       )
     );
   });
 
   it("continues the current group where the schema also allows a new enclosing one", () => {
-    expect(match(ORU_R01_V2_5, "MSH PID OBR OBX ORC OBR")).toEqual([
+    expect(match(RESULTS, "MSH PID OBR OBX ORC OBR")).toEqual([
       0,
       g(
-        "PATIENT_RESULT",
+        "REPORT",
         g("PATIENT", 1),
-        g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3)),
-        g("ORDER_OBSERVATION", 4, 5)
+        g("ORDER", 2, g("OBSERVATION", 3)),
+        g("ORDER", 4, 5)
       ),
     ]);
   });
 
-  describe("a second order in an ORU_R01, which may start a new order or a new patient result", () => {
-    // PATIENT is optional in each PATIENT_RESULT, so both readings fit. A new
-    // PATIENT_RESULT starts only with a PID, as HAPI groups it.
+  describe("a second order, which may start a new order or a new report", () => {
+    // PATIENT is optional in each REPORT, so both readings fit. A new REPORT
+    // starts only with a PID, as HAPI groups an ORU_R01's PATIENT_RESULT.
 
-    it("puts a second order that starts with ORC in the same patient result", () => {
-      expect(match(ORU_R01_V2_5, "MSH PID OBR OBX ORC OBR OBX")).toEqual([
+    it("puts a second order that starts with ORC in the same report", () => {
+      expect(match(RESULTS, "MSH PID OBR OBX ORC OBR OBX")).toEqual([
         0,
         g(
-          "PATIENT_RESULT",
+          "REPORT",
           g("PATIENT", 1),
-          g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3)),
-          g("ORDER_OBSERVATION", 4, 5, g("OBSERVATION", 6))
+          g("ORDER", 2, g("OBSERVATION", 3)),
+          g("ORDER", 4, 5, g("OBSERVATION", 6))
         ),
       ]);
     });
 
-    it("puts a second order that starts with OBR in the same patient result", () => {
-      expect(match(ORU_R01_V2_5, "MSH PID OBR OBX OBR OBX")).toEqual([
+    it("puts a second order that starts with OBR in the same report", () => {
+      expect(match(RESULTS, "MSH PID OBR OBX OBR OBX")).toEqual([
         0,
         g(
-          "PATIENT_RESULT",
+          "REPORT",
           g("PATIENT", 1),
-          g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3)),
-          g("ORDER_OBSERVATION", 4, g("OBSERVATION", 5))
+          g("ORDER", 2, g("OBSERVATION", 3)),
+          g("ORDER", 4, g("OBSERVATION", 5))
         ),
       ]);
     });
 
-    it("keeps orders without any PID in one patient result", () => {
-      expect(match(ORU_R01_V2_5, "MSH OBR OBX OBR OBX")).toEqual([
+    it("keeps orders without any PID in one report", () => {
+      expect(match(RESULTS, "MSH OBR OBX OBR OBX")).toEqual([
         0,
         g(
-          "PATIENT_RESULT",
-          g("ORDER_OBSERVATION", 1, g("OBSERVATION", 2)),
-          g("ORDER_OBSERVATION", 3, g("OBSERVATION", 4))
+          "REPORT",
+          g("ORDER", 1, g("OBSERVATION", 2)),
+          g("ORDER", 3, g("OBSERVATION", 4))
         ),
       ]);
     });
 
-    it("starts a new patient result with a PID", () => {
-      expect(match(ORU_R01_V2_5, "MSH PID OBR OBX PID OBR OBX")).toEqual([
+    it("starts a new report with a PID", () => {
+      expect(match(RESULTS, "MSH PID OBR OBX PID OBR OBX")).toEqual([
         0,
-        g(
-          "PATIENT_RESULT",
-          g("PATIENT", 1),
-          g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3))
-        ),
-        g(
-          "PATIENT_RESULT",
-          g("PATIENT", 4),
-          g("ORDER_OBSERVATION", 5, g("OBSERVATION", 6))
-        ),
+        g("REPORT", g("PATIENT", 1), g("ORDER", 2, g("OBSERVATION", 3))),
+        g("REPORT", g("PATIENT", 4), g("ORDER", 5, g("OBSERVATION", 6))),
       ]);
     });
   });
 
   it("accepts any one alternative of a choice without adding a group", () => {
-    expect(match(ORM_O01_V2_5, "MSH PID ORC RXO")).toEqual([
+    expect(match(ORDERS, "MSH PID ORC RXO")).toEqual([
       0,
-      g("PATIENT", 1),
-      g("ORDER", 2, g("ORDER_DETAIL", 3)),
+      1,
+      g("ORDER", 2, g("DETAIL", 3)),
     ]);
-    expect(match(ORM_O01_V2_5, "MSH PID ORC OBR")).toEqual([
+    expect(match(ORDERS, "MSH PID ORC OBR")).toEqual([
       0,
-      g("PATIENT", 1),
-      g("ORDER", 2, g("ORDER_DETAIL", 3)),
+      1,
+      g("ORDER", 2, g("DETAIL", 3)),
     ]);
   });
 
   it("rejects two alternatives of a choice that occurs once", () => {
-    expect(match(ORM_O01_V2_5, "MSH PID ORC OBR RXO")).toBeUndefined();
+    expect(match(ORDERS, "MSH PID ORC OBR RXO")).toBeUndefined();
   });
 
   it("leaves out a group occurrence that holds no segment", () => {
-    expect(match(ORU_R01_V2_1, "MSH ORC OBR NTE")).toEqual([
+    expect(match(NOTES, "MSH ORC OBR NTE")).toEqual([
       0,
-      g("PATIENT_RESULT", g("ORDER_OBSERVATION", 1, 2, 3)),
+      g("REPORT", g("ORDER", 1, 2, 3)),
     ]);
   });
 
   it("matches any segment where the schema has Hxx", () => {
-    expect(match(MFN_M01_V2_5, "MSH MFI MFE ZL7")).toEqual([
+    expect(match(MASTER_FILE, "MSH MFI MFE ZL7")).toEqual([
       0,
       1,
       g("MF", 2, 3),
@@ -361,15 +345,15 @@ describe("runner: grouping", () => {
   });
 
   it("forms no groups when a required segment is missing", () => {
-    expect(runner(ORU_R01_V2_5, ["MSH", "PID"]).type).toBe("incomplete");
+    expect(runner(RESULTS, ["MSH", "PID"]).type).toBe("incomplete");
   });
 
   it("forms no groups for an empty message", () => {
-    expect(runner(ORU_R01_V2_5, []).type).toBe("incomplete");
+    expect(runner(RESULTS, []).type).toBe("incomplete");
   });
 
   it("forms no groups for a segment the schema does not allow there", () => {
-    expect(runner(ORU_R01_V2_5, ["MSH", "PID", "OBR", "MSH"])).toMatchObject({
+    expect(runner(RESULTS, ["MSH", "PID", "OBR", "MSH"])).toMatchObject({
       index: 3,
       type: "mismatched",
     });
@@ -378,21 +362,19 @@ describe("runner: grouping", () => {
 
 describe("runner: Z-segments", () => {
   it("groups a Z-segment the schema does not name right after the segment before it, in that segment's group", () => {
-    expect(
-      match(ORU_R01_V2_5, "MSH PID ZPI OBR ZDS OBX ZRS ORC OBR OBX")
-    ).toEqual([
+    expect(match(RESULTS, "MSH PID ZPI OBR ZDS OBX ZRS ORC OBR OBX")).toEqual([
       0,
       g(
-        "PATIENT_RESULT",
+        "REPORT",
         g("PATIENT", 1, 2),
-        g("ORDER_OBSERVATION", 3, 4, g("OBSERVATION", 5, 6)),
-        g("ORDER_OBSERVATION", 7, 8, g("OBSERVATION", 9))
+        g("ORDER", 3, 4, g("OBSERVATION", 5, 6)),
+        g("ORDER", 7, 8, g("OBSERVATION", 9))
       ),
     ]);
   });
 
   it("keeps consecutive Z-segments together, in order", () => {
-    expect(match(ADT_A01_V2_5, "MSH ZA1 ZA2 EVN PID PV1 IN1 ZI1 ZI2")).toEqual([
+    expect(match(ADMISSION, "MSH ZA1 ZA2 EVN PID PV1 IN1 ZI1 ZI2")).toEqual([
       0,
       1,
       2,
@@ -404,22 +386,22 @@ describe("runner: Z-segments", () => {
   });
 
   it("places a Z-segment before the first segment, or after the last, at the top level", () => {
-    expect(match(ADT_A01_V2_5, "ZA1 MSH EVN PID PV1 ZA2")).toEqual([
+    expect(match(ADMISSION, "ZA1 MSH EVN PID PV1 ZA2")).toEqual([
       0, 1, 2, 3, 4, 5,
     ]);
   });
 
   it("forms no group occurrence that holds only Z-segments", () => {
-    expect(match(ORU_R01_V2_5, "MSH ZA1 OBR OBX")).toEqual([
+    expect(match(RESULTS, "MSH ZA1 OBR OBX")).toEqual([
       0,
       1,
-      g("PATIENT_RESULT", g("ORDER_OBSERVATION", 2, g("OBSERVATION", 3))),
+      g("REPORT", g("ORDER", 2, g("OBSERVATION", 3))),
     ]);
   });
 
   it("reports a Z-segment the schema does not name as a mismatch when Z-segments are not allowed", () => {
     expect(
-      runner(ADT_A01_V2_5, ["MSH", "EVN", "ZA1", "PID", "PV1"], {
+      runner(ADMISSION, ["MSH", "EVN", "ZA1", "PID", "PV1"], {
         allowZSegments: false,
       })
     ).toEqual({ expected: ["PID"], index: 2, type: "mismatched" });
@@ -473,8 +455,8 @@ describe("runner: Z-segments", () => {
   });
 
   it("reports a later mismatch by its index in the input, Z-segments included", () => {
-    expect(runner(ORU_R01_V2_5, ["MSH", "PID", "ZPI", "OBX"])).toEqual({
-      expected: ["NK1", "NTE", "OBR", "ORC", "PD1", "PV1"],
+    expect(runner(RESULTS, ["MSH", "PID", "ZPI", "OBX"])).toEqual({
+      expected: ["OBR", "ORC", "PD1", "PV1"],
       index: 3,
       type: "mismatched",
     });
@@ -483,13 +465,11 @@ describe("runner: Z-segments", () => {
 
 describe("runner: a schema run more than once", () => {
   it("gives a run after a mismatch the same result as a run on a fresh copy", () => {
-    const schema = { ...ORU_R01_V2_5 };
+    const schema = { ...RESULTS };
     const message = ["MSH", "PID", "OBR", "OBX", "ORC", "OBR", "OBX"];
 
     expect(runner(schema, ["MSH", "PID", "OBX"]).type).toBe("mismatched");
-    expect(runner(schema, message)).toEqual(
-      runner({ ...ORU_R01_V2_5 }, message)
-    );
+    expect(runner(schema, message)).toEqual(runner({ ...RESULTS }, message));
   });
 });
 
@@ -510,13 +490,13 @@ describe("runner: schema size", () => {
 describe("runner agrees with the reference parser", () => {
   const MESSAGES_PER_STRUCTURE = 300;
   const schemas = [
-    ORU_R01_V2_5,
-    ADT_A01_V2_5,
-    ORM_O01_V2_5,
-    CSU_C09_V2_5,
-    MFN_M01_V2_5,
-    ORU_R01_V2_1,
-    PPP_PCB_V2_3_1,
+    RESULTS,
+    PATHWAYS,
+    ADMISSION,
+    STUDY,
+    ORDERS,
+    NOTES,
+    MASTER_FILE,
   ];
 
   for (const schema of schemas) {
