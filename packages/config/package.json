@@ -1,6 +1,6 @@
 {
   "name": "@glion/config",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "Configuration schema and loader for hl7v2",
   "keywords": [
     "config",
