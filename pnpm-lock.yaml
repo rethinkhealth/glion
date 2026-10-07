@@ -2560,21 +2560,45 @@ importers:
       '@glion/annotate-delimiters':
         specifier: workspace:*
         version: link:../packages/annotate-delimiters
+      '@glion/ast':
+        specifier: workspace:*
+        version: link:../packages/ast
+      '@glion/decode-escapes':
+        specifier: workspace:*
+        version: link:../packages/decode-escapes
       '@glion/hl7v2':
         specifier: workspace:*
         version: link:../packages/hl7v2
       '@glion/parser':
         specifier: workspace:*
         version: link:../packages/parser
+      '@glion/preset-annotate-profile-recommended':
+        specifier: workspace:*
+        version: link:../packages/preset-annotate-profile-recommended
+      '@glion/preset-lint-profile-recommended':
+        specifier: workspace:*
+        version: link:../packages/preset-lint-profile-recommended
+      '@glion/preset-lint-recommended':
+        specifier: workspace:*
+        version: link:../packages/preset-lint-recommended
+      '@glion/profiles':
+        specifier: workspace:*
+        version: link:../packages/profiles
       '@glion/testing':
         specifier: workspace:*
         version: link:../tools/testing
       '@glion/to-hl7v2':
         specifier: workspace:*
         version: link:../packages/to-hl7v2
+      '@glion/transform-profile-groups':
+        specifier: workspace:*
+        version: link:../packages/transform-profile-groups
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../tools/tsconfig
+      '@glion/util-visit':
+        specifier: workspace:*
+        version: link:../packages/util-visit
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0

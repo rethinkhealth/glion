@@ -50,6 +50,7 @@
  *   randomly corrupts it.
  * - **`fc.oneof(...arbs)`** — pick one of several arbitraries at random.
  */
+import type { EventSchema, EventSchemaElement } from "@glion/profiles";
 import fc from "fast-check";
 
 // ---------------------------------------------------------------------------
@@ -482,3 +483,61 @@ export const arbAdversarialInput: fc.Arbitrary<string> = fc.oneof(
   // Very long strings (stress test memory and performance)
   fc.string({ maxLength: 100_000, minLength: 10_000 })
 );
+
+// ---------------------------------------------------------------------------
+// Messages that fit an event schema
+// ---------------------------------------------------------------------------
+
+/** The segment IDs of one occurrence of `element`. */
+const arbOccurrenceSegmentIds = (
+  element: EventSchemaElement
+): fc.Arbitrary<string[]> => {
+  switch (element.type) {
+    case "segment": {
+      return fc.constant([element.name]);
+    }
+    case "group": {
+      return arbSequenceSegmentIds(element.elements);
+    }
+    case "choice": {
+      return fc.oneof(...element.alternatives.map(arbElementSegmentIds));
+    }
+  }
+};
+
+/**
+ * The segment IDs of `element`, in an order its event schema accepts: an
+ * optional element is present or not, a repeating one occurs once or twice,
+ * and a choice takes one alternative.
+ */
+const arbElementSegmentIds = (
+  element: EventSchemaElement
+): fc.Arbitrary<string[]> =>
+  fc
+    .array(arbOccurrenceSegmentIds(element), {
+      maxLength: element.repeating ? 2 : 1,
+      minLength: element.optional ? 0 : 1,
+    })
+    .map((occurrences) => occurrences.flat());
+
+const arbSequenceSegmentIds = (
+  elements: readonly EventSchemaElement[]
+): fc.Arbitrary<string[]> =>
+  fc.tuple(...elements.map(arbElementSegmentIds)).map((parts) => parts.flat());
+
+/**
+ * An HL7v2 message of `version` whose segments fit `schema`.
+ *
+ * MSH-9 names the schema and MSH-12 the version. Every other segment holds
+ * only its Set ID, `1`.
+ */
+export const arbEventSchemaMessage = (
+  schema: EventSchema,
+  version: string
+): fc.Arbitrary<string> => {
+  const [code = "", event = ""] = schema.id.split("_");
+  const header = `MSH|^~\\&|APP|FAC|APP|FAC|20240101120000||${code}^${event}^${schema.id}|1|P|${version}`;
+  return arbSequenceSegmentIds(schema.elements).map((ids) =>
+    ids.map((id) => (id === "MSH" ? header : `${id}|1`)).join("\r")
+  );
+};
