@@ -95,4 +95,16 @@ describe("hl7v2-lint:required-message-header", () => {
       "Message header (MSH) segment is required as the first segment — received 'PID' instead"
     );
   });
+
+  it("names an empty Segment ID in the report", async () => {
+    const tree = m(s("", f("A"), f("B")));
+    const file = new VFile();
+
+    await unified().use([hl7v2LintRequiredMessageHeader]).run(tree, file);
+
+    expect(file.messages).toHaveLength(1);
+    expect(file.messages[0]?.message).toBe(
+      "Message header (MSH) segment is required as the first segment — received a segment with an empty Segment ID instead"
+    );
+  });
 });

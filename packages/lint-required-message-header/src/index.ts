@@ -34,8 +34,12 @@ const hl7v2LintSegmentRequiredMessageHeader = lintRule<Nodes, undefined>(
     }
 
     if (first.name !== "MSH") {
+      const received =
+        first.name === ""
+          ? "a segment with an empty Segment ID"
+          : `'${first.name}'`;
       file.message(
-        `Message header (MSH) segment is required as the first segment — received '${first.name}' instead`,
+        `Message header (MSH) segment is required as the first segment — received ${received} instead`,
         { ancestors: [first], place: first.position }
       );
     }

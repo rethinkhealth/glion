@@ -75,13 +75,25 @@ Reported message:
 Message header (MSH) segment is required as the first segment — received 'PID' instead
 ```
 
+A segment with an empty Segment ID first, such as an input that starts with the field separator:
+
+```hl7
+|A|B
+```
+
+Reported message:
+
+```
+Message header (MSH) segment is required as the first segment — received a segment with an empty Segment ID instead
+```
+
 An empty input (`""`), which parses to a tree with no segments, is reported as:
 
 ```
 Message header (MSH) segment is required as the first segment — received an empty message instead
 ```
 
-The name of the first segment found is interpolated into the message. The rule reports at most one message per tree.
+The Segment ID of the first segment found is interpolated into the message. The rule reports at most one message per tree.
 
 ## Part of Glion
 
