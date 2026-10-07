@@ -39,7 +39,27 @@ describe("hl7v2PresetLintProfileRecommended", () => {
     expect(file.messages).toHaveLength(0);
   });
 
-  it("reports required field violations", async () => {
+  it("errors on a segment the event schema does not allow", async () => {
+    const tree = m(
+      msh("2.5"),
+      s("EVN", f("A01"), f("20241201")),
+      s("PID", f("1"), f(""), f("12345"), f(""), f("Doe^John")),
+      s("ORC", f("NW")),
+      s("PV1", f("1"), f("I"))
+    );
+    const file = new VFile();
+
+    await unified().use(hl7v2PresetLintProfileRecommended).run(tree, file);
+
+    expect(file.messages).toHaveLength(1);
+    expect(file.messages[0]).toMatchObject({
+      fatal: true,
+      message: "Unexpected segment 'ORC'. Expected: NK1, PD1, PV1, ROL",
+      ruleId: "segment-order",
+    });
+  });
+
+  it("errors on a missing required field", async () => {
     // PID-3 is required but empty
     const tree = m(msh("2.5"), s("PID", f("1"), f(""), f(""), f(""), f("Doe")));
     const file = new VFile();
@@ -50,6 +70,7 @@ describe("hl7v2PresetLintProfileRecommended", () => {
       (msg) => msg.ruleId === "required-fields"
     );
     expect(requiredErrors.length).toBeGreaterThanOrEqual(1);
+    expect(requiredErrors.every((msg) => msg.fatal === true)).toBe(true);
   });
 
   it("reports field max length violations", async () => {
@@ -65,7 +86,7 @@ describe("hl7v2PresetLintProfileRecommended", () => {
     expect(lengthErrors.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("reports field repetition violations", async () => {
+  it("errors on a repeated non-repeatable field", async () => {
     // PID-1 is not repeatable
     const tree = m(msh("2.5"), s("PID", f(r("1"), r("2"))));
     const file = new VFile();
@@ -76,6 +97,7 @@ describe("hl7v2PresetLintProfileRecommended", () => {
       (msg) => msg.ruleId === "field-repetition"
     );
     expect(repErrors.length).toBeGreaterThanOrEqual(1);
+    expect(repErrors.every((msg) => msg.fatal === true)).toBe(true);
   });
 
   it("reports table value violations", async () => {
@@ -91,7 +113,7 @@ describe("hl7v2PresetLintProfileRecommended", () => {
     expect(tableErrors.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("reports required component violations", async () => {
+  it("errors on a missing required component", async () => {
     // MSH-9 in v2.7.1 has 3 required components, only 2 provided
     const tree = m(
       s(
@@ -118,6 +140,7 @@ describe("hl7v2PresetLintProfileRecommended", () => {
       (msg) => msg.ruleId === "required-components"
     );
     expect(compErrors.length).toBeGreaterThanOrEqual(1);
+    expect(compErrors.every((msg) => msg.fatal === true)).toBe(true);
   });
 
   it("all five rules produce distinct ruleIds", async () => {
