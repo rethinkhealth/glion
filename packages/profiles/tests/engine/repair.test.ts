@@ -157,6 +157,13 @@ describe("repair: the repair it chooses", () => {
     ]);
   });
 
+  it("reports a required segment as missing, not as displaced, when the segment after it is valid there", () => {
+    // AL1 may follow PV1, so PV1 is missing; AL1 is not in place of it.
+    expect(repairOf(ADMIT, "MSH EVN PID AL1")).toEqual([
+      { index: 3, path: [], segment: "PV1", type: "missing" },
+    ]);
+  });
+
   it("reports a segment out of place next to the schema segment it displaces", () => {
     expect(repairOf(ADMIT, "MSH PIDX PV")).toEqual([
       { index: 1, path: [], segment: "EVN", type: "missing" },
