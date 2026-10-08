@@ -56,9 +56,10 @@ describe("hl7v2LintFieldMaxLength", () => {
       (msg) => msg.ruleId === "field-max-length"
     );
     expect(errors).toHaveLength(1);
-    expect(errors[0]?.message).toContain("PID-1");
-    expect(errors[0]?.message).toContain("4");
-    expect(errors[0]?.message).toContain("5");
+    expect(errors[0]?.message).toBe(
+      "Field `PID-1` (Set ID - PID) is 5 characters long; it allows at most 4 characters."
+    );
+    expect(errors[0]?.actual).toBe("5");
     expect(errors[0]?.source).toBe("hl7v2-lint");
   });
 
@@ -91,6 +92,9 @@ describe("hl7v2LintFieldMaxLength", () => {
       (msg) => msg.ruleId === "field-max-length"
     );
     expect(errors).toHaveLength(1);
+    expect(errors[0]?.message).toBe(
+      "Field `PID-1` (Set ID - PID) is 5 characters long; it allows at most 4 characters."
+    );
   });
 
   it("measures composite field length across all components", async () => {
@@ -112,11 +116,13 @@ describe("hl7v2LintFieldMaxLength", () => {
       .run(tree, file);
 
     const errors = file.messages.filter(
-      (msg) =>
-        msg.ruleId === "field-max-length" && msg.message.includes("PID-2")
+      (msg) => msg.ruleId === "field-max-length"
     );
     expect(errors).toHaveLength(1);
-    expect(errors[0]?.message).toContain("20");
+    expect(errors[0]?.message).toBe(
+      "Field `PID-2` (Patient ID) is 22 characters long; it allows at most 20 characters."
+    );
+    expect(errors[0]?.actual).toBe("22");
   });
 
   it("composite field within limits produces no warning", async () => {
@@ -133,8 +139,7 @@ describe("hl7v2LintFieldMaxLength", () => {
       .run(tree, file);
 
     const errors = file.messages.filter(
-      (msg) =>
-        msg.ruleId === "field-max-length" && msg.message.includes("PID-2")
+      (msg) => msg.ruleId === "field-max-length"
     );
     expect(errors).toHaveLength(0);
   });
@@ -216,6 +221,8 @@ describe("hl7v2LintFieldMaxLength", () => {
       (msg) => msg.ruleId === "field-max-length"
     );
     expect(errors).toHaveLength(1);
-    expect(errors[0]?.message).toContain("PID-1");
+    expect(errors[0]?.message).toBe(
+      "Field `PID-1` (Set ID - PID) is 5 characters long; it allows at most 4 characters."
+    );
   });
 });

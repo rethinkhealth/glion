@@ -1165,6 +1165,9 @@ importers:
       '@glion/utils':
         specifier: workspace:*
         version: link:../utils
+      pluralize:
+        specifier: 8.0.0
+        version: 8.0.0
       unified-lint-rule:
         specifier: 3.0.1
         version: 3.0.1
@@ -1187,6 +1190,9 @@ importers:
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
+      '@types/pluralize':
+        specifier: ^0.0.33
+        version: 0.0.33
       '@vitest/coverage-v8':
         specifier: 4.1.11
         version: 4.1.11(vitest@4.1.11)
@@ -1217,6 +1223,9 @@ importers:
       '@glion/util-visit':
         specifier: workspace:*
         version: link:../util-visit
+      pluralize:
+        specifier: 8.0.0
+        version: 8.0.0
       unified-lint-rule:
         specifier: 3.0.1
         version: 3.0.1
@@ -1239,6 +1248,9 @@ importers:
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
+      '@types/pluralize':
+        specifier: ^0.0.33
+        version: 0.0.33
       '@vitest/coverage-v8':
         specifier: 4.1.11
         version: 4.1.11(vitest@4.1.11)
@@ -1272,6 +1284,9 @@ importers:
       '@glion/utils':
         specifier: workspace:*
         version: link:../utils
+      pluralize:
+        specifier: 8.0.0
+        version: 8.0.0
       unified-lint-rule:
         specifier: 3.0.1
         version: 3.0.1
@@ -1294,6 +1309,9 @@ importers:
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
+      '@types/pluralize':
+        specifier: ^0.0.33
+        version: 0.0.33
       '@vitest/coverage-v8':
         specifier: 4.1.11
         version: 4.1.11(vitest@4.1.11)

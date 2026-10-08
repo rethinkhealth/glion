@@ -7,6 +7,13 @@ import { isEmptyNode } from "@glion/utils";
 import { lintRule } from "unified-lint-rule";
 import type { VFile } from "vfile";
 
+const messages = {
+  absentComponent: (component: string, name: string) =>
+    `Component \`${component}\` (${name}) is not present; it is required.`,
+  emptyComponent: (component: string, name: string) =>
+    `Component \`${component}\` (${name}) is empty; it is required.`,
+} as const;
+
 /**
  * Lint rule that validates required components in composite datatype fields.
  *
@@ -24,7 +31,10 @@ import type { VFile } from "vfile";
  *   ```;
  */
 const hl7v2LintRequiredComponents = lintRule<Root>(
-  { origin: "hl7v2-lint:required-components" },
+  {
+    origin: "hl7v2-lint:required-components",
+    url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-required-components#readme",
+  },
   (tree, file) => {
     const ctx = file.data.profile;
     if (!ctx) {
@@ -89,28 +99,33 @@ function checkRepetition(
   ancestors: Nodes[],
   fieldNode: Field
 ): void {
-  for (const compSeq of dtDef.requiredSequences) {
-    const component = repetition.children[compSeq - 1];
-    const compHasValue =
-      component?.children[0]?.value !== undefined &&
-      component.children[0].value.length > 0;
+  for (const profile of dtDef.componentsBySequence.values()) {
+    if (!profile.required) {
+      continue;
+    }
 
-    if (!compHasValue) {
-      const compProfile = dtDef.componentsBySequence.get(compSeq);
-      const compName = compProfile?.name ? ` (${compProfile.name})` : "";
-      file.message(
-        `Required component ${segment.name}-${sequence}.${compSeq}${compName} is missing or empty`,
+    const name = `${segment.name}-${sequence}.${profile.sequence}`;
+    const component = repetition.children[profile.sequence - 1];
+
+    if (!component) {
+      file.message(messages.absentComponent(name, profile.name), {
+        ancestors: [...ancestors, fieldNode, repetition],
+        place: repetition.position ?? fieldNode.position,
+      });
+      continue;
+    }
+
+    const value = component.children[0]?.value;
+    if (value === undefined || value.length === 0) {
+      const message = file.message(
+        messages.emptyComponent(name, profile.name),
         {
-          ancestors: [
-            ...ancestors,
-            fieldNode,
-            repetition,
-            ...(component ? [component] : []),
-          ],
+          ancestors: [...ancestors, fieldNode, repetition, component],
           place:
-            component?.position ?? repetition.position ?? fieldNode.position,
+            component.position ?? repetition.position ?? fieldNode.position,
         }
       );
+      message.actual = "";
     }
   }
 }

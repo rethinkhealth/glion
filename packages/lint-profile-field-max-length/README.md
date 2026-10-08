@@ -76,10 +76,10 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 Reported message:
 
 ```
-Field MSH-10 exceeds max length of 20 (actual: 28)
+Field `MSH-10` (Message Control ID) is 28 characters long; it allows at most 20 characters.
 ```
 
-One message is produced per offending repetition. Delimiters are not included in the measured length — a composite value like `DOE^JANE` counts as 7 characters, not 8.
+One message is produced per offending repetition, with `actual` set to the measured length. Delimiters are not included in the measured length — a composite value like `DOE^JANE` counts as 7 characters, not 8.
 
 ## Part of Glion
 

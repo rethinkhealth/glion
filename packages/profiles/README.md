@@ -193,7 +193,7 @@ interface FieldDefinition {
 interface FieldProfile {
   sequence: number; // 9
   id: string; // "MSH-9"
-  name?: string; // "Message Type"
+  name: string; // "Message Type"
   datatype: string; // "MSG"
   required: boolean;
   repeatable: boolean;

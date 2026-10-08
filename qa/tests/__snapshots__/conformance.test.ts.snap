@@ -92,12 +92,12 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
 "adt-a01-full.hl7
   segments: MSH(16) EVN(5) PID(22) PD1(4) NK1(5) PV1(44) PV2(3) DG1(6) IN1(12)
   diagnostics: 6
-    - [field-max-length] Field PV1-39 exceeds max length of 2 (actual: 6)
-    - [field-max-length] Field IN1-12 exceeds max length of 8 (actual: 28)
-    - [extra-components] Component IN1-12.2 is beyond the defined components for DT (max: 1 in v2.5.1)
-    - [extra-components] Component IN1-12.3 is beyond the defined components for DT (max: 1 in v2.5.1)
-    - [extra-components] Component IN1-12.4 is beyond the defined components for DT (max: 1 in v2.5.1)
-    - [extra-components] Component IN1-12.5 is beyond the defined components for DT (max: 1 in v2.5.1)"
+    - [field-max-length] Field \`PV1-39\` (Servicing Facility) is 6 characters long; it allows at most 2 characters.
+    - [field-max-length] Field \`IN1-12\` (Plan Effective Date) is 28 characters long; it allows at most 8 characters.
+    - [extra-components] Component \`IN1-12.2\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.
+    - [extra-components] Component \`IN1-12.3\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.
+    - [extra-components] Component \`IN1-12.4\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.
+    - [extra-components] Component \`IN1-12.5\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1."
 `;
 
 exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches snapshot 2`] = `
@@ -105,7 +105,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
   "diagnosticCount": 6,
   "diagnostics": [
     {
-      "message": "Field PV1-39 exceeds max length of 2 (actual: 6)",
+      "message": "Field \`PV1-39\` (Servicing Facility) is 6 characters long; it allows at most 2 characters.",
       "place": {
         "end": {
           "column": 191,
@@ -122,7 +122,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
       "source": "hl7v2-lint",
     },
     {
-      "message": "Field IN1-12 exceeds max length of 8 (actual: 28)",
+      "message": "Field \`IN1-12\` (Plan Effective Date) is 28 characters long; it allows at most 8 characters.",
       "place": {
         "end": {
           "column": 146,
@@ -139,7 +139,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component IN1-12.2 is beyond the defined components for DT (max: 1 in v2.5.1)",
+      "message": "Component \`IN1-12.2\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 146,
@@ -156,7 +156,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component IN1-12.3 is beyond the defined components for DT (max: 1 in v2.5.1)",
+      "message": "Component \`IN1-12.3\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 146,
@@ -173,7 +173,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component IN1-12.4 is beyond the defined components for DT (max: 1 in v2.5.1)",
+      "message": "Component \`IN1-12.4\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 146,
@@ -190,7 +190,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component IN1-12.5 is beyond the defined components for DT (max: 1 in v2.5.1)",
+      "message": "Component \`IN1-12.5\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 146,
@@ -540,9 +540,9 @@ exports[`QR1: message conformance > dft-p03-charge.hl7 — pipeline output match
 "dft-p03-charge.hl7
   segments: MSH(12) EVN(2) PID(8) PV1(18) FT1(27)
   diagnostics: 3
-    - [field-max-length] Field PV1-10 exceeds max length of 3 (actual: 4)
-    - [field-max-length] Field PV1-18 exceeds max length of 2 (actual: 8)
-    - [extra-components] Component FT1-27.7 is beyond the defined components for CE (max: 6 in v2.5.1)"
+    - [field-max-length] Field \`PV1-10\` (Hospital Service) is 4 characters long; it allows at most 3 characters.
+    - [field-max-length] Field \`PV1-18\` (Patient Type) is 8 characters long; it allows at most 2 characters.
+    - [extra-components] Component \`FT1-27.7\` has no definition; \`CE\` defines 6 components in HL7 v2.5.1."
 `;
 
 exports[`QR1: message conformance > dft-p03-charge.hl7 — pipeline output matches snapshot 2`] = `
@@ -550,7 +550,7 @@ exports[`QR1: message conformance > dft-p03-charge.hl7 — pipeline output match
   "diagnosticCount": 3,
   "diagnostics": [
     {
-      "message": "Field PV1-10 exceeds max length of 3 (actual: 4)",
+      "message": "Field \`PV1-10\` (Hospital Service) is 4 characters long; it allows at most 3 characters.",
       "place": {
         "end": {
           "column": 30,
@@ -567,7 +567,7 @@ exports[`QR1: message conformance > dft-p03-charge.hl7 — pipeline output match
       "source": "hl7v2-lint",
     },
     {
-      "message": "Field PV1-18 exceeds max length of 2 (actual: 8)",
+      "message": "Field \`PV1-18\` (Patient Type) is 8 characters long; it allows at most 2 characters.",
       "place": {
         "end": {
           "column": 48,
@@ -584,7 +584,7 @@ exports[`QR1: message conformance > dft-p03-charge.hl7 — pipeline output match
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component FT1-27.7 is beyond the defined components for CE (max: 6 in v2.5.1)",
+      "message": "Component \`FT1-27.7\` has no definition; \`CE\` defines 6 components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 110,
@@ -896,11 +896,11 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
   diagnostics: 8
     - [no-trailing-empty-field] Segment \`PID\` ends with 13 empty fields; a segment should end at its last field with a value.
     - [no-trailing-empty-field] Segment \`PV1\` ends with 38 empty fields; a segment should end at its last field with a value.
-    - [required-fields] Required field PID-3 (Patient Identifier List) is missing or empty
-    - [required-fields] Required field PID-5 (Patient Name) is missing or empty
-    - [required-fields] Required field PV1-2 (Patient Class) is missing or empty
-    - [required-fields] Required field OBX-3 (Observation Identifier) is missing or empty
-    - [required-fields] Required field OBX-11 (Observation Result Status) is missing or empty
+    - [required-fields] Field \`PID-3\` (Patient Identifier List) is empty; it is required.
+    - [required-fields] Field \`PID-5\` (Patient Name) is empty; it is required.
+    - [required-fields] Field \`PV1-2\` (Patient Class) is empty; it is required.
+    - [required-fields] Field \`OBX-3\` (Observation Identifier) is empty; it is required.
+    - [required-fields] Field \`OBX-11\` (Observation Result Status) is empty; it is required.
     - [segment-order] Unexpected segment 'PID'. Expected: EVN, SFT"
 `;
 
@@ -943,7 +943,7 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
       "source": "hl7v2-lint",
     },
     {
-      "message": "Required field PID-3 (Patient Identifier List) is missing or empty",
+      "message": "Field \`PID-3\` (Patient Identifier List) is empty; it is required.",
       "place": {
         "end": {
           "column": 8,
@@ -960,7 +960,7 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
       "source": "hl7v2-lint",
     },
     {
-      "message": "Required field PID-5 (Patient Name) is missing or empty",
+      "message": "Field \`PID-5\` (Patient Name) is empty; it is required.",
       "place": {
         "end": {
           "column": 10,
@@ -977,7 +977,7 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
       "source": "hl7v2-lint",
     },
     {
-      "message": "Required field PV1-2 (Patient Class) is missing or empty",
+      "message": "Field \`PV1-2\` (Patient Class) is empty; it is required.",
       "place": {
         "end": {
           "column": 6,
@@ -994,7 +994,7 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
       "source": "hl7v2-lint",
     },
     {
-      "message": "Required field OBX-3 (Observation Identifier) is missing or empty",
+      "message": "Field \`OBX-3\` (Observation Identifier) is empty; it is required.",
       "place": {
         "end": {
           "column": 10,
@@ -1011,7 +1011,7 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
       "source": "hl7v2-lint",
     },
     {
-      "message": "Required field OBX-11 (Observation Result Status) is missing or empty",
+      "message": "Field \`OBX-11\` (Observation Result Status) is empty; it is required.",
       "place": {
         "end": {
           "column": 18,
@@ -1539,12 +1539,12 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
 "mdm-t02-document.hl7
   segments: MSH(12) EVN(2) PID(8) PV1(3) TXA(17) OBX(11)
   diagnostics: 6
-    - [required-fields] Required field TXA-12 (Unique Document Number) is missing or empty
-    - [field-max-length] Field TXA-17 exceeds max length of 2 (actual: 22)
-    - [extra-components] Component TXA-2.2 is beyond the defined components for IS (max: 1 in v2.5.1)
-    - [extra-components] Component TXA-2.3 is beyond the defined components for IS (max: 1 in v2.5.1)
-    - [extra-components] Component TXA-17.2 is beyond the defined components for ID (max: 1 in v2.5.1)
-    - [extra-components] Component TXA-17.3 is beyond the defined components for ID (max: 1 in v2.5.1)"
+    - [required-fields] Field \`TXA-12\` (Unique Document Number) is empty; it is required.
+    - [field-max-length] Field \`TXA-17\` (Document Completion Status) is 22 characters long; it allows at most 2 characters.
+    - [extra-components] Component \`TXA-2.2\` has no definition; \`IS\` is a primitive datatype with no components in HL7 v2.5.1.
+    - [extra-components] Component \`TXA-2.3\` has no definition; \`IS\` is a primitive datatype with no components in HL7 v2.5.1.
+    - [extra-components] Component \`TXA-17.2\` has no definition; \`ID\` is a primitive datatype with no components in HL7 v2.5.1.
+    - [extra-components] Component \`TXA-17.3\` has no definition; \`ID\` is a primitive datatype with no components in HL7 v2.5.1."
 `;
 
 exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output matches snapshot 2`] = `
@@ -1552,7 +1552,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
   "diagnosticCount": 6,
   "diagnostics": [
     {
-      "message": "Required field TXA-12 (Unique Document Number) is missing or empty",
+      "message": "Field \`TXA-12\` (Unique Document Number) is empty; it is required.",
       "place": {
         "end": {
           "column": 100,
@@ -1569,7 +1569,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Field TXA-17 exceeds max length of 2 (actual: 22)",
+      "message": "Field \`TXA-17\` (Document Completion Status) is 22 characters long; it allows at most 2 characters.",
       "place": {
         "end": {
           "column": 129,
@@ -1586,7 +1586,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component TXA-2.2 is beyond the defined components for IS (max: 1 in v2.5.1)",
+      "message": "Component \`TXA-2.2\` has no definition; \`IS\` is a primitive datatype with no components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 38,
@@ -1603,7 +1603,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component TXA-2.3 is beyond the defined components for IS (max: 1 in v2.5.1)",
+      "message": "Component \`TXA-2.3\` has no definition; \`IS\` is a primitive datatype with no components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 38,
@@ -1620,7 +1620,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component TXA-17.2 is beyond the defined components for ID (max: 1 in v2.5.1)",
+      "message": "Component \`TXA-17.2\` has no definition; \`ID\` is a primitive datatype with no components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 129,
@@ -1637,7 +1637,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component TXA-17.3 is beyond the defined components for ID (max: 1 in v2.5.1)",
+      "message": "Component \`TXA-17.3\` has no definition; \`ID\` is a primitive datatype with no components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 129,
@@ -1919,7 +1919,7 @@ exports[`QR1: message conformance > oru-r01-lab.hl7 — pipeline output matches 
 "oru-r01-lab.hl7
   segments: MSH(12) PID(8) ORC(5) OBR(26) OBX(11) OBX(11) OBX(11) OBX(11) OBX(11)
   diagnostics: 2
-    - [field-max-length] Field OBR-25 exceeds max length of 1 (actual: 2)
+    - [field-max-length] Field \`OBR-25\` (Result Status) is 2 characters long; it allows at most 1 character.
     - [table-values] Field OBR-25 (Result Status) value 'HM' is not in table 0123 (Result Status)"
 `;
 
@@ -1928,7 +1928,7 @@ exports[`QR1: message conformance > oru-r01-lab.hl7 — pipeline output matches 
   "diagnosticCount": 2,
   "diagnostics": [
     {
-      "message": "Field OBR-25 exceeds max length of 1 (actual: 2)",
+      "message": "Field \`OBR-25\` (Result Status) is 2 characters long; it allows at most 1 character.",
       "place": {
         "end": {
           "column": 121,
@@ -2163,9 +2163,9 @@ exports[`QR1: message conformance > siu-s12-schedule.hl7 — pipeline output mat
 "siu-s12-schedule.hl7
   segments: MSH(12) SCH(12) PID(8) PV1(3) AIG(4)
   diagnostics: 4
-    - [required-fields] Required field SCH-16 (Filler Contact Person) is missing or empty
-    - [required-fields] Required field SCH-20 (Entered By Person) is missing or empty
-    - [extra-components] Component AIG-3.7 is beyond the defined components for CE (max: 6 in v2.5.1)
+    - [required-fields] Field \`SCH-16\` (Filler Contact Person) is not present; it is required.
+    - [required-fields] Field \`SCH-20\` (Entered By Person) is not present; it is required.
+    - [extra-components] Component \`AIG-3.7\` has no definition; \`CE\` defines 6 components in HL7 v2.5.1.
     - [segment-order] Unexpected segment 'AIG'. Expected: DG1, OBX, PID, PV2, RGS"
 `;
 
@@ -2174,7 +2174,7 @@ exports[`QR1: message conformance > siu-s12-schedule.hl7 — pipeline output mat
   "diagnosticCount": 4,
   "diagnostics": [
     {
-      "message": "Required field SCH-16 (Filler Contact Person) is missing or empty",
+      "message": "Field \`SCH-16\` (Filler Contact Person) is not present; it is required.",
       "place": {
         "end": {
           "column": 109,
@@ -2191,7 +2191,7 @@ exports[`QR1: message conformance > siu-s12-schedule.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Required field SCH-20 (Entered By Person) is missing or empty",
+      "message": "Field \`SCH-20\` (Entered By Person) is not present; it is required.",
       "place": {
         "end": {
           "column": 109,
@@ -2208,7 +2208,7 @@ exports[`QR1: message conformance > siu-s12-schedule.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component AIG-3.7 is beyond the defined components for CE (max: 6 in v2.5.1)",
+      "message": "Component \`AIG-3.7\` has no definition; \`CE\` defines 6 components in HL7 v2.5.1.",
       "place": {
         "end": {
           "column": 38,

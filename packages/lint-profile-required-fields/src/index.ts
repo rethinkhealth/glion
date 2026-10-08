@@ -5,6 +5,13 @@ import { SKIP, visit } from "@glion/util-visit";
 import { isEmptyNode } from "@glion/utils";
 import { lintRule } from "unified-lint-rule";
 
+const messages = {
+  absentField: (field: string, name: string) =>
+    `Field \`${field}\` (${name}) is not present; it is required.`,
+  emptyField: (field: string, name: string) =>
+    `Field \`${field}\` (${name}) is empty; it is required.`,
+} as const;
+
 /**
  * Lint rule that validates required fields per HL7v2 profile.
  *
@@ -22,7 +29,10 @@ import { lintRule } from "unified-lint-rule";
  *   ```;
  */
 const hl7v2LintRequiredFields = lintRule<Root>(
-  { origin: "hl7v2-lint:required-fields" },
+  {
+    origin: "hl7v2-lint:required-fields",
+    url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-required-fields#readme",
+  },
   (tree, file) => {
     const ctx = file.data.profile;
     if (!ctx) {
@@ -35,19 +45,31 @@ const hl7v2LintRequiredFields = lintRule<Root>(
         return SKIP;
       }
 
-      for (const sequence of fieldDef.requiredSequences) {
-        const fieldNode = node.children[sequence - 1];
+      for (const profile of fieldDef.bySequence.values()) {
+        if (!profile.required) {
+          continue;
+        }
 
-        if (!fieldNode || isEmptyNode(fieldNode)) {
-          const profile = fieldDef.bySequence.get(sequence);
-          const name = profile?.name ? ` (${profile.name})` : "";
-          file.message(
-            `Required field ${node.name}-${sequence}${name} is missing or empty`,
+        const field = `${node.name}-${profile.sequence}`;
+        const fieldNode = node.children[profile.sequence - 1];
+
+        if (!fieldNode) {
+          file.message(messages.absentField(field, profile.name), {
+            ancestors: [...parents, node],
+            place: node.position,
+          });
+          continue;
+        }
+
+        if (isEmptyNode(fieldNode)) {
+          const message = file.message(
+            messages.emptyField(field, profile.name),
             {
-              ancestors: [...parents, node, ...(fieldNode ? [fieldNode] : [])],
-              place: fieldNode?.position ?? node.position,
+              ancestors: [...parents, node, fieldNode],
+              place: fieldNode.position,
             }
           );
+          message.actual = "";
         }
       }
 

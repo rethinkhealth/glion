@@ -66,20 +66,26 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 
 ### Invalid
 
-`MSH-9.2` (Trigger Event) is empty, which violates the `MSG` datatype profile in v2.5:
+`MSH-9.3` (Message Structure) is not present, which violates the `MSG` datatype profile in v2.7.1:
 
 ```hl7
-MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^|MSG00001|P|2.5
+MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01|MSG00001|P|2.7.1
 PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 ```
 
 Reported message:
 
 ```
-Required component MSH-9.2 (Trigger Event) is missing or empty
+Component `MSH-9.3` (Message Structure) is not present; it is required.
 ```
 
-When the component name is available in the datatype profile it appears in parentheses. One message is reported per missing required component per repetition.
+A component that is present but empty (`ADT^A01^`) is reported as:
+
+```
+Component `MSH-9.3` (Message Structure) is empty; it is required.
+```
+
+One message is reported per missing required component per repetition.
 
 ## Part of Glion
 

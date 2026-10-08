@@ -4,6 +4,11 @@ import type { Root } from "@glion/ast";
 import { SKIP, visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
 
+const messages = {
+  notRepeatable: (field: string, name: string, repetitionCount: number) =>
+    `Field \`${field}\` (${name}) has ${repetitionCount} repetitions; it is not repeatable.`,
+} as const;
+
 /**
  * Lint rule that flags fields with multiple repetitions when the profile
  * declares `repeatable: false`.
@@ -20,7 +25,10 @@ import { lintRule } from "unified-lint-rule";
  *   ```;
  */
 const hl7v2LintFieldRepetition = lintRule<Root>(
-  { origin: "hl7v2-lint:field-repetition" },
+  {
+    origin: "hl7v2-lint:field-repetition",
+    url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-field-repetition#readme",
+  },
   (tree, file) => {
     const ctx = file.data.profile;
     if (!ctx) {
@@ -42,14 +50,18 @@ const hl7v2LintFieldRepetition = lintRule<Root>(
 
         const count = fieldNode.children.length;
         if (count > 1) {
-          const name = profile.name ? ` (${profile.name})` : "";
-          file.message(
-            `Field ${segment.name}-${info.sequence}${name} is not repeatable but has ${count} repetitions`,
+          const message = file.message(
+            messages.notRepeatable(
+              `${segment.name}-${info.sequence}`,
+              profile.name,
+              count
+            ),
             {
               ancestors: [...segmentAncestors, segment, fieldNode],
               place: fieldNode.position,
             }
           );
+          message.actual = String(count);
         }
 
         return SKIP;

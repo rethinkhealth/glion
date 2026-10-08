@@ -76,10 +76,14 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F^EXTRA
 Reported message:
 
 ```
-Component PID-8.2 is beyond the defined components for IS (max: 1 in v2.5)
+Component `PID-8.2` has no definition; `IS` is a primitive datatype with no components in HL7 v2.5.
 ```
 
-The datatype code (for example `IS`, `CX`, `XPN`) comes from the field's profile. For composite datatypes the same rule applies — a `CX` field in v2.5 defines up to 10 components, so a value carrying an 11th is reported against that datatype.
+The datatype code (for example `IS`, `CX`, `XPN`) comes from the field's profile. A composite datatype is reported with its component count; a `CX` field in v2.5 defines 10 components, so an 11th is reported as:
+
+```
+Component `PID-3.11` has no definition; `CX` defines 10 components in HL7 v2.5.
+```
 
 ## Part of Glion
 

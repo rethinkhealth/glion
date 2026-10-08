@@ -75,25 +75,11 @@ describe("hl7v2LintFieldRepetition", () => {
       (msg) => msg.ruleId === "field-repetition"
     );
     expect(errors).toHaveLength(1);
-    expect(errors[0]?.message).toEqual(
-      "Field PID-1 (Set ID - PID) is not repeatable but has 2 repetitions"
+    expect(errors[0]?.message).toBe(
+      "Field `PID-1` (Set ID - PID) has 2 repetitions; it is not repeatable."
     );
+    expect(errors[0]?.actual).toBe("2");
     expect(errors[0]?.source).toBe("hl7v2-lint");
-  });
-
-  it("includes field name in error message", async () => {
-    const tree = m(msh("2.5"), s("PID", f(r("1"), r("2"))));
-    const file = new VFile();
-
-    await unified()
-      .use(hl7v2AnnotateProfileContext)
-      .use(hl7v2LintFieldRepetition)
-      .run(tree, file);
-
-    const error = file.messages.find(
-      (msg) => msg.ruleId === "field-repetition"
-    );
-    expect(error?.message).toContain("Set ID");
   });
 
   it("reports multiple non-repeatable fields in the same segment", async () => {
@@ -113,8 +99,12 @@ describe("hl7v2LintFieldRepetition", () => {
       (msg) => msg.ruleId === "field-repetition"
     );
     expect(errors).toHaveLength(2);
-    expect(errors[0]?.message).toContain("PID-1");
-    expect(errors[1]?.message).toContain("PID-2");
+    expect(errors[0]?.message).toBe(
+      "Field `PID-1` (Set ID - PID) has 2 repetitions; it is not repeatable."
+    );
+    expect(errors[1]?.message).toBe(
+      "Field `PID-2` (Patient ID) has 2 repetitions; it is not repeatable."
+    );
   });
 
   it("reports violations across multiple segments", async () => {
@@ -135,8 +125,12 @@ describe("hl7v2LintFieldRepetition", () => {
       (msg) => msg.ruleId === "field-repetition"
     );
     expect(errors).toHaveLength(2);
-    expect(errors[0]?.message).toContain("PID-1");
-    expect(errors[1]?.message).toContain("OBX-1");
+    expect(errors[0]?.message).toBe(
+      "Field `PID-1` (Set ID - PID) has 2 repetitions; it is not repeatable."
+    );
+    expect(errors[1]?.message).toBe(
+      "Field `OBX-1` (Set ID - OBX) has 2 repetitions; it is not repeatable."
+    );
   });
 
   it("does not flag empty fields", async () => {
@@ -212,6 +206,8 @@ describe("hl7v2LintFieldRepetition", () => {
       (msg) => msg.ruleId === "field-repetition"
     );
     expect(errors).toHaveLength(1);
-    expect(errors[0]?.message).toContain("PID-1");
+    expect(errors[0]?.message).toBe(
+      "Field `PID-1` (Set ID - PID) has 2 repetitions; it is not repeatable."
+    );
   });
 });

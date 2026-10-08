@@ -2,7 +2,18 @@
 import type { ProfileContext } from "@glion/annotate-profile-context";
 import type { Root } from "@glion/ast";
 import { SKIP, visit } from "@glion/util-visit";
+import pluralize from "pluralize";
 import { lintRule } from "unified-lint-rule";
+
+const messages = {
+  extraField: (
+    field: string,
+    segmentId: string,
+    fieldCount: number,
+    version: string
+  ) =>
+    `Field \`${field}\` has no definition; \`${segmentId}\` defines ${pluralize("field", fieldCount, true)} in HL7 v${version}.`,
+} as const;
 
 /**
  * Lint rule that warns when a segment contains fields beyond the maximum
@@ -16,7 +27,10 @@ import { lintRule } from "unified-lint-rule";
  *   ```;
  */
 const hl7v2LintExtraFields = lintRule<Root>(
-  { origin: "hl7v2-lint:extra-fields" },
+  {
+    origin: "hl7v2-lint:extra-fields",
+    url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-extra-fields#readme",
+  },
   (tree, file) => {
     const ctx = file.data.profile;
     if (!ctx) {
@@ -37,7 +51,12 @@ const hl7v2LintExtraFields = lintRule<Root>(
       visit(segment, "field", (fieldNode, _fieldAncestors, info) => {
         if (info.sequence > maxSequence) {
           file.message(
-            `Field ${segment.name}-${info.sequence} is beyond the defined fields for ${segment.name} (max: ${maxSequence} in v${ctx.version})`,
+            messages.extraField(
+              `${segment.name}-${info.sequence}`,
+              segment.name,
+              maxSequence,
+              ctx.version
+            ),
             {
               ancestors: [...segmentAncestors, segment, fieldNode],
               place: fieldNode.position,

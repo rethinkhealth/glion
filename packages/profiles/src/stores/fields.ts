@@ -17,7 +17,7 @@ export type FieldProfile = Readonly<{
   datatype: string;
   maxLength?: number;
   table?: string;
-  name?: string;
+  name: string;
   item?: string;
 }>;
 
