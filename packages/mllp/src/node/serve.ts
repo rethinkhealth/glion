@@ -124,7 +124,7 @@ export interface ServeOptions {
    * instead of a plain TCP socket.
    */
   tls?: {
-    /** Optional CA certificate(s) for client certificate verification. */
+    /** CA certificate(s) that verify client certificates. */
     ca?: string | Buffer;
     /** The server certificate. */
     cert: string | Buffer;
@@ -132,6 +132,20 @@ export interface ServeOptions {
     key: string | Buffer;
     /** Optional passphrase for the private key. */
     passphrase?: string;
+    /**
+     * Ask every remote system for a client certificate, verified against
+     * `ca`.
+     *
+     * @default false
+     */
+    requestCert?: boolean;
+    /**
+     * Refuse a remote system whose client certificate is missing or does not
+     * verify. Applies only with `requestCert`.
+     *
+     * @default true
+     */
+    rejectUnauthorized?: boolean;
   };
 }
 

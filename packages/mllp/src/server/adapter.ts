@@ -15,6 +15,8 @@ export interface TlsOptions {
   key: string | Buffer;
   ca?: string | Buffer;
   passphrase?: string;
+  requestCert?: boolean;
+  rejectUnauthorized?: boolean;
 }
 
 /**
