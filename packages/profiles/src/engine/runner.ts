@@ -21,8 +21,12 @@
 // linear in the segment count times the program size.
 
 import { invariant } from "../invariant";
-import { memoize } from "../utils";
-import { ANY_SEGMENT, ANY_Z_SEGMENT, compile } from "./compile";
+import {
+  ANY_SEGMENT,
+  ANY_Z_SEGMENT,
+  Z_SEGMENT_PREFIX,
+  compileOnce,
+} from "./compile";
 import type { Instruction } from "./compile";
 import type {
   EventSchema,
@@ -34,9 +38,6 @@ import type {
 // ---------------------------------------------------------------------------
 // Constants and types
 // ---------------------------------------------------------------------------
-
-// HL7v2 reserves segment IDs that start with Z for locally defined segments.
-const Z_SEGMENT_PREFIX = "Z";
 
 // One event in a thread's history, linked to the one before it.
 type Event = Readonly<{ previous: Event | undefined }> &
@@ -66,9 +67,6 @@ interface Run {
   readonly pendingPcs: number[];
   readonly pendingEvents: (Event | undefined)[];
 }
-
-// A schema's program, compiled on its first run and reused for the object.
-const compileOnce = memoize(compile);
 
 interface OpenGroup {
   id: string;
@@ -103,9 +101,10 @@ interface OpenGroup {
  * never makes a group occurrence that holds no other segment. A reading that
  * reaches an `Hxx` takes the Z-segment there rather than pass over it.
  *
- * Compiles `schema` on its first run and reuses the program for later runs
- * of the same object. `schema` MUST NOT change after its first run. Runs in
- * time proportional to the input length times the schema size.
+ * Compiles `schema` on its first use by `runner()` or `repair()` and reuses
+ * the program for later runs of the same object. `schema` MUST NOT change
+ * after its first use. Runs in time proportional to the input length times
+ * the schema size.
  *
  * @throws {Error} When `schema` has no elements, a segment has no name, a
  *   group has no ID, no name, or no elements, a choice has no alternatives,

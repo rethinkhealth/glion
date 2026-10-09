@@ -1,6 +1,7 @@
 /** Biome-ignore-all lint/performance/noBarrelFile: public API surface */
 
 // Event schemas
+export { repair } from "./engine/repair";
 export { runner } from "./engine/runner";
 export type {
   ChoiceElement,
@@ -8,6 +9,9 @@ export type {
   GroupMatch,
   EventSchema,
   Occurrence,
+  RepairEdit,
+  RepairMissing,
+  RepairUnexpected,
   RunnerIncomplete,
   RunnerMatched,
   RunnerMismatched,
