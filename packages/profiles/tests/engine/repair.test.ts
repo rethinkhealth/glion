@@ -72,29 +72,52 @@ describe("repair: a message that fits", () => {
   it("has no edits for a message the runner matches", () => {
     const input = "MSH PID OBR OBX OBX NTE ORC OBR OBX".split(" ");
 
+    /**
+     * MSH PATIENT { ORDER } [DSC], where
+     *
+     * - PATIENT is `PID [PD1]`,
+     * - ORDER is `[ORC] OBR [{ RESULT }]`,
+     * - RESULT is `OBX [{ NTE }]`.
+     */
     expect(runner(LAB, input).type).toBe("matched");
     expect(repair(LAB, input)).toEqual([]);
   });
 
   it("has no edits for a Z-segment the schema does not name", () => {
+    /** MSH EVN PID PV1 [{ AL1 }], with no groups. */
     expect(repairOf(ADMIT, "MSH EVN PID ZPI PV1")).toEqual([]);
   });
 });
 
 describe("repair: missing segments", () => {
   it("reports a segment the schema requires as missing, at the index it would be inserted at, in the groups it belongs in", () => {
+    /**
+     * MSH PATIENT { ORDER } [DSC], where
+     *
+     * - PATIENT is `PID [PD1]`,
+     * - ORDER is `[ORC] OBR [{ RESULT }]`,
+     * - RESULT is `OBX [{ NTE }]`.
+     */
     expect(repairOf(LAB, "MSH PID OBX OBX")).toEqual([
       { index: 2, path: ["ORDER"], segment: "OBR", type: "missing" },
     ]);
   });
 
   it("reports the first segment of a required group as missing in that group", () => {
+    /**
+     * MSH PATIENT { ORDER } [DSC], where
+     *
+     * - PATIENT is `PID [PD1]`,
+     * - ORDER is `[ORC] OBR [{ RESULT }]`,
+     * - RESULT is `OBX [{ NTE }]`.
+     */
     expect(repairOf(LAB, "MSH OBR OBX")).toEqual([
       { index: 1, path: ["PATIENT"], segment: "PID", type: "missing" },
     ]);
   });
 
   it("reports every missing segment, not only the first", () => {
+    /** MSH EVN PID PV1 [{ AL1 }], with no groups. */
     expect(repairOf(ADMIT, "MSH PID AL1")).toEqual([
       { index: 1, path: [], segment: "EVN", type: "missing" },
       { index: 2, path: [], segment: "PV1", type: "missing" },
