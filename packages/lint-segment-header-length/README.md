@@ -37,7 +37,7 @@ console.error(reporter([file]));
 
 A `unified` lint rule plugin. Takes no options.
 
-Visits every `segment` node and reports one message per segment whose `name.length !== 3`. The reported text names how many characters to add or remove to reach the three-character target.
+Visits every `segment` node and reports one message per segment whose Segment ID is not three characters long, with `actual` set to the Segment ID.
 
 ```ts
 import type { Plugin } from "unified";
@@ -72,7 +72,7 @@ PID1|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 Reported message:
 
 ```
-Unexpected 4 header length, expected 3 characters, remove 1 character
+The Segment ID `PID1` is 4 characters long; a Segment ID must be exactly 3 characters.
 ```
 
 A two-character segment name:
@@ -84,10 +84,16 @@ MS|^~\&|...
 Reported message:
 
 ```
-Unexpected 2 header length, expected 3 characters, add 1 character
+The Segment ID `MS` is 2 characters long; a Segment ID must be exactly 3 characters.
 ```
 
-The delta between the actual length and three is interpolated with pluralization (`remove 1 character`, `add 2 characters`). One message is reported per offending segment.
+A segment with an empty Segment ID, such as a line that starts with the field separator, is reported as:
+
+```
+The segment has an empty Segment ID; a Segment ID must be exactly 3 characters.
+```
+
+One message is reported per offending segment.
 
 ## Part of Glion
 

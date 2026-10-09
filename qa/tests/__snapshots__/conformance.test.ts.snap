@@ -894,8 +894,8 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
 "edge-empty-segments.hl7
   segments: MSH(12) PID(14) PV1(38) OBX(13)
   diagnostics: 8
-    - [no-trailing-empty-field] Segment has 13 trailing empty fields
-    - [no-trailing-empty-field] Segment has 38 trailing empty fields
+    - [no-trailing-empty-field] Segment \`PID\` ends with 13 empty fields; a segment should end at its last field with a value.
+    - [no-trailing-empty-field] Segment \`PV1\` ends with 38 empty fields; a segment should end at its last field with a value.
     - [required-fields] Required field PID-3 (Patient Identifier List) is missing or empty
     - [required-fields] Required field PID-5 (Patient Name) is missing or empty
     - [required-fields] Required field PV1-2 (Patient Class) is missing or empty
@@ -909,7 +909,7 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
   "diagnosticCount": 8,
   "diagnostics": [
     {
-      "message": "Segment has 13 trailing empty fields",
+      "message": "Segment \`PID\` ends with 13 empty fields; a segment should end at its last field with a value.",
       "place": {
         "end": {
           "column": 20,
@@ -926,7 +926,7 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
       "source": "hl7v2-lint",
     },
     {
-      "message": "Segment has 38 trailing empty fields",
+      "message": "Segment \`PV1\` ends with 38 empty fields; a segment should end at its last field with a value.",
       "place": {
         "end": {
           "column": 43,

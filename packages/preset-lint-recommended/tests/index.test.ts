@@ -58,7 +58,7 @@ describe("hl7v2-preset-lint-recommended", () => {
 
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0].message).toBe(
-      "Unexpected 10 header length, expected 3 characters, remove 7 characters"
+      "The Segment ID `PIDTOOLONG` is 10 characters long; a Segment ID must be exactly 3 characters."
     );
     expect(file.messages[0].fatal).toBeTruthy();
   });
@@ -140,7 +140,7 @@ describe("hl7v2-preset-lint-recommended", () => {
 
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0].message).toBe(
-      "Required MSH-12 (version) field is missing or empty"
+      "The message has no `MSH-12` (Version ID); a message must declare its HL7v2 version."
     );
     expect(file.messages[0].fatal).toBeTruthy();
   });
@@ -167,13 +167,16 @@ describe("hl7v2-preset-lint-recommended", () => {
 
     await unified().use(hl7v2PresetLintRecommended).run(tree, file);
 
-    expect(file.messages.length).toBeGreaterThanOrEqual(1);
-    expect(
-      file.messages.some((msg) =>
-        msg.message.includes("does not satisfy expression")
-      )
-    ).toBeTruthy();
-    expect(file.messages.some((msg) => msg.fatal === true)).toBeTruthy();
+    const version = file.messages.find(
+      (msg) => msg.ruleId === "message-version"
+    );
+    expect(version).toMatchObject({
+      actual: "3.0",
+      expected: ["<3.0.0 >=2.3"],
+      fatal: true,
+      message:
+        "The version in `MSH-12` (Version ID) is `3.0`; it must satisfy `<3.0.0 >=2.3`.",
+    });
   });
 
   it("warns about trailing empty fields", async () => {
@@ -200,7 +203,9 @@ describe("hl7v2-preset-lint-recommended", () => {
     await unified().use(hl7v2PresetLintRecommended).run(tree, file);
 
     expect(file.messages).toHaveLength(1);
-    expect(file.messages[0].message).toContain("trailing empty field");
+    expect(file.messages[0].message).toBe(
+      "Segment `PID` ends with 2 empty fields; a segment should end at its last field with a value."
+    );
     expect(file.messages[0].fatal).toBeFalsy(); // This is a warning, not an error
   });
 

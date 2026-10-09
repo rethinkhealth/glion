@@ -70,16 +70,16 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 A message whose UTF-8 size exceeds `maxBytes`:
 
 ```
-Message size 2,000,000 bytes exceeds 1,000,000 bytes limit — trim payload or raise "maxBytes"
+The message is 2000000 bytes; the configured limit is 1000000 bytes. Shorten the message or raise `maxBytes`.
 ```
 
 A tree with more segments than `maxSegments`:
 
 ```
-Message contains 150 segments (limit 100 segments) — reduce segment count or raise "maxSegments"
+The message has 150 segments; the configured limit is 100 segments. Remove segments or raise `maxSegments`.
 ```
 
-Byte and segment counts are interpolated with pluralization. Both checks are independent — if the message violates both thresholds, two messages are reported.
+Each report sets `actual` to the byte or segment count. Both checks are independent — if the message violates both thresholds, two messages are reported.
 
 ## Part of Glion
 

@@ -57,12 +57,14 @@ describe("hl7v2-lint:message-version", () => {
       ancestors: [notRoot],
       fatal: false,
       file: "",
-      message: "Root node type must be 'root' — received 'segment' instead",
+      message:
+        "The input is a segment; the version can be read only from `MSH-12` (Version ID) of a whole message.",
       name: "1:1",
-      reason: "Root node type must be 'root' — received 'segment' instead",
+      reason:
+        "The input is a segment; the version can be read only from `MSH-12` (Version ID) of a whole message.",
       ruleId: "message-version",
       source: "hl7v2-lint",
-      url: "https://github.com/rethinkhealth/hl7v2/tree/main/packages/hl7v2-lint-message-version#readme",
+      url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme",
     });
   });
 
@@ -94,12 +96,14 @@ describe("hl7v2-lint:message-version", () => {
       ancestors: [hl7v2],
       fatal: false,
       file: "",
-      message: "Required MSH-12 (version) field is missing or empty",
+      message:
+        "The message has no `MSH-12` (Version ID); a message must declare its HL7v2 version.",
       name: "1:1",
-      reason: "Required MSH-12 (version) field is missing or empty",
+      reason:
+        "The message has no `MSH-12` (Version ID); a message must declare its HL7v2 version.",
       ruleId: "message-version",
       source: "hl7v2-lint",
-      url: "https://github.com/rethinkhealth/hl7v2/tree/main/packages/hl7v2-lint-message-version#readme",
+      url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme",
     });
   });
 
@@ -129,15 +133,18 @@ describe("hl7v2-lint:message-version", () => {
     // THEN
     expect(file.messages).toHaveLength(1);
     expect(messageToJson(file.messages[0])).toStrictEqual({
+      actual: "",
       ancestors: expect.any(Array),
       fatal: false,
       file: "",
-      message: "Required MSH-12 (version) field is missing or empty",
+      message:
+        "The version in `MSH-12` (Version ID) is empty; a message must declare its HL7v2 version.",
       name: "1:1",
-      reason: "Required MSH-12 (version) field is missing or empty",
+      reason:
+        "The version in `MSH-12` (Version ID) is empty; a message must declare its HL7v2 version.",
       ruleId: "message-version",
       source: "hl7v2-lint",
-      url: "https://github.com/rethinkhealth/hl7v2/tree/main/packages/hl7v2-lint-message-version#readme",
+      url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme",
     });
   });
 
@@ -167,6 +174,7 @@ describe("hl7v2-lint:message-version", () => {
     // THEN
     expect(file.messages).toHaveLength(1);
     expect(messageToJson(file.messages[0])).toStrictEqual({
+      actual: "foo",
       ancestors: expect.any(Array),
       cause: {
         input: "foo",
@@ -175,12 +183,14 @@ describe("hl7v2-lint:message-version", () => {
       },
       fatal: false,
       file: "",
-      message: "MSH-12 (version) field value 'foo' is not valid",
+      message:
+        "The version in `MSH-12` (Version ID) is `foo`; a version must be numbers separated by dots, such as `2.5` or `2.5.1`.",
       name: "1:1",
-      reason: "MSH-12 (version) field value 'foo' is not valid",
+      reason:
+        "The version in `MSH-12` (Version ID) is `foo`; a version must be numbers separated by dots, such as `2.5` or `2.5.1`.",
       ruleId: "message-version",
       source: "hl7v2-lint",
-      url: "https://github.com/rethinkhealth/hl7v2/tree/main/packages/hl7v2-lint-message-version#readme",
+      url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme",
     });
   });
 
@@ -210,17 +220,19 @@ describe("hl7v2-lint:message-version", () => {
     // THEN
     expect(file.messages).toHaveLength(1);
     expect(messageToJson(file.messages[0])).toStrictEqual({
+      actual: "2.2",
       ancestors: expect.any(Array),
+      expected: ["<3.0.0 >=2.3"],
       fatal: false,
       file: "",
       message:
-        "MSH-12 (version) field value '2.2' does not satisfy expression '<3.0.0 >=2.3'",
+        "The version in `MSH-12` (Version ID) is `2.2`; it must satisfy `<3.0.0 >=2.3`.",
       name: "1:1",
       reason:
-        "MSH-12 (version) field value '2.2' does not satisfy expression '<3.0.0 >=2.3'",
+        "The version in `MSH-12` (Version ID) is `2.2`; it must satisfy `<3.0.0 >=2.3`.",
       ruleId: "message-version",
       source: "hl7v2-lint",
-      url: "https://github.com/rethinkhealth/hl7v2/tree/main/packages/hl7v2-lint-message-version#readme",
+      url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme",
     });
   });
 
@@ -251,17 +263,19 @@ describe("hl7v2-lint:message-version", () => {
     // THEN
     expect(file.messages).toHaveLength(1);
     expect(messageToJson(file.messages[0])).toStrictEqual({
+      actual: "2.2",
       ancestors: expect.any(Array),
+      expected: ["<3.0.0 >=2.3"],
       fatal: false,
       file: "",
       message:
-        "MSH-12 (version) field value '2.2' does not satisfy expression '<3.0.0 >=2.3'",
+        "The version in `MSH-12` (Version ID) is `2.2`; it must satisfy `<3.0.0 >=2.3`.",
       name: "1:1",
       reason:
-        "MSH-12 (version) field value '2.2' does not satisfy expression '<3.0.0 >=2.3'",
+        "The version in `MSH-12` (Version ID) is `2.2`; it must satisfy `<3.0.0 >=2.3`.",
       ruleId: "message-version",
       source: "hl7v2-lint",
-      url: "https://github.com/rethinkhealth/hl7v2/tree/main/packages/hl7v2-lint-message-version#readme",
+      url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme",
     });
   });
 
@@ -276,12 +290,14 @@ describe("hl7v2-lint:message-version", () => {
 
     expect(file.messages).toHaveLength(1);
     expect(messageToJson(file.messages[0])).toStrictEqual({
+      actual: "",
       ancestors: expect.any(Array),
       column: 274,
       fatal: false,
       file: "",
       line: 1,
-      message: "Required MSH-12 (version) field is missing or empty",
+      message:
+        "The version in `MSH-12` (Version ID) is empty; a message must declare its HL7v2 version.",
       name: "1:274-1:274",
       place: {
         end: {
@@ -295,10 +311,11 @@ describe("hl7v2-lint:message-version", () => {
           offset: 273,
         },
       },
-      reason: "Required MSH-12 (version) field is missing or empty",
+      reason:
+        "The version in `MSH-12` (Version ID) is empty; a message must declare its HL7v2 version.",
       ruleId: "message-version",
       source: "hl7v2-lint",
-      url: "https://github.com/rethinkhealth/hl7v2/tree/main/packages/hl7v2-lint-message-version#readme",
+      url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme",
     });
   });
 
@@ -317,12 +334,14 @@ describe("hl7v2-lint:message-version", () => {
       ancestors: [ast],
       fatal: false,
       file: "",
-      message: "Required MSH-12 (version) field is missing or empty",
+      message:
+        "The message has no `MSH-12` (Version ID); a message must declare its HL7v2 version.",
       name: "1:1",
-      reason: "Required MSH-12 (version) field is missing or empty",
+      reason:
+        "The message has no `MSH-12` (Version ID); a message must declare its HL7v2 version.",
       ruleId: "message-version",
       source: "hl7v2-lint",
-      url: "https://github.com/rethinkhealth/hl7v2/tree/main/packages/hl7v2-lint-message-version#readme",
+      url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme",
     });
   });
 

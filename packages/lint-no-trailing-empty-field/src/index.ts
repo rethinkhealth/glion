@@ -4,10 +4,17 @@ import pluralize from "pluralize";
 import { lintRule } from "unified-lint-rule";
 import { SKIP, visitParents } from "unist-util-visit-parents";
 
+const messages = {
+  emptySegmentIdTrailingEmptyFields: (fieldCount: number) =>
+    `A segment with an empty Segment ID ends with ${pluralize("empty field", fieldCount, true)}; a segment should end at its last field with a value.`,
+  trailingEmptyFields: (segmentId: string, fieldCount: number) =>
+    `Segment \`${segmentId}\` ends with ${pluralize("empty field", fieldCount, true)}; a segment should end at its last field with a value.`,
+} as const;
+
 const hl7v2LintNoTrailingEmptyField = lintRule<Node, undefined>(
   {
     origin: "hl7v2-lint:no-trailing-empty-field",
-    url: "https://github.com/rethinkhealth/hl7v2/tree/main/packages/hl7v2-lint-no-trailing-empty-field#readme",
+    url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-no-trailing-empty-field#readme",
   },
   (tree, file) => {
     visitParents(tree, "segment", (segment: Segment, ancestors) => {
@@ -44,19 +51,22 @@ const hl7v2LintNoTrailingEmptyField = lintRule<Node, undefined>(
             }
           : undefined;
 
+      const options = {
+        ancestors: [...ancestors, segment, ...fields.slice(firstTrailingIndex)],
+        place: start && adjustedEnd ? { end: adjustedEnd, start } : undefined,
+      };
+
+      if (segment.name === "") {
+        file.message(
+          messages.emptySegmentIdTrailingEmptyFields(trailingCount),
+          options
+        );
+        return;
+      }
+
       file.message(
-        `Segment has ${trailingCount} trailing empty ${pluralize(
-          "field",
-          trailingCount
-        )}`,
-        {
-          ancestors: [
-            ...ancestors,
-            segment,
-            ...fields.slice(firstTrailingIndex),
-          ],
-          place: start && adjustedEnd ? { end: adjustedEnd, start } : undefined,
-        }
+        messages.trailingEmptyFields(segment.name, trailingCount),
+        options
       );
     });
   }
