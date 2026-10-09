@@ -39,36 +39,33 @@ const hl7v2LintRequiredFields = lintRule<Root>(
       return;
     }
 
-    visit(tree, "segment", (node, parents) => {
-      const fieldDef = ctx.fields.get(node.name);
-      if (!fieldDef) {
+    visit(tree, "segment", (segment, segmentAncestors) => {
+      const fields = ctx.fields.get(segment.name);
+      if (!fields) {
         return SKIP;
       }
 
-      for (const profile of fieldDef.bySequence.values()) {
-        if (!profile.required) {
+      for (const required of fields.bySequence.values()) {
+        if (!required.required) {
           continue;
         }
 
-        const field = `${node.name}-${profile.sequence}`;
-        const fieldNode = node.children[profile.sequence - 1];
+        const id = `${segment.name}-${required.sequence}`;
+        const field = segment.children[required.sequence - 1];
 
-        if (!fieldNode) {
-          file.message(messages.absentField(field, profile.name), {
-            ancestors: [...parents, node],
-            place: node.position,
+        if (!field) {
+          file.message(messages.absentField(id, required.name), {
+            ancestors: [...segmentAncestors, segment],
+            place: segment.position,
           });
           continue;
         }
 
-        if (isEmptyNode(fieldNode)) {
-          const message = file.message(
-            messages.emptyField(field, profile.name),
-            {
-              ancestors: [...parents, node, fieldNode],
-              place: fieldNode.position,
-            }
-          );
+        if (isEmptyNode(field)) {
+          const message = file.message(messages.emptyField(id, required.name), {
+            ancestors: [...segmentAncestors, segment, field],
+            place: field.position,
+          });
           message.actual = "";
         }
       }

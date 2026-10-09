@@ -2,17 +2,11 @@
 import type { ProfileContext } from "@glion/annotate-profile-context";
 import type { Root } from "@glion/ast";
 import { SKIP, visit } from "@glion/util-visit";
-import pluralize from "pluralize";
 import { lintRule } from "unified-lint-rule";
 
 const messages = {
-  extraField: (
-    field: string,
-    segmentId: string,
-    fieldCount: number,
-    version: string
-  ) =>
-    `Field \`${field}\` has no definition; \`${segmentId}\` defines ${pluralize("field", fieldCount, true)} in HL7 v${version}.`,
+  undefinedField: (field: string, segmentId: string, version: string) =>
+    `Field \`${field}\` is present; segment \`${segmentId}\` in HL7 v${version} does not define it.`,
 } as const;
 
 /**
@@ -38,28 +32,24 @@ const hl7v2LintExtraFields = lintRule<Root>(
     }
 
     visit(tree, "segment", (segment, segmentAncestors) => {
-      const fieldDef = ctx.fields.get(segment.name);
-      if (!fieldDef) {
+      const fields = ctx.fields.get(segment.name);
+      if (!fields) {
         return SKIP;
       }
 
-      const maxSequence = maxKey(fieldDef.bySequence);
-      if (maxSequence === 0) {
-        return SKIP;
-      }
+      const defined = Math.max(0, ...fields.bySequence.keys());
 
-      visit(segment, "field", (fieldNode, _fieldAncestors, info) => {
-        if (info.sequence > maxSequence) {
+      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
+        if (sequence > defined) {
           file.message(
-            messages.extraField(
-              `${segment.name}-${info.sequence}`,
+            messages.undefinedField(
+              `${segment.name}-${sequence}`,
               segment.name,
-              maxSequence,
               ctx.version
             ),
             {
-              ancestors: [...segmentAncestors, segment, fieldNode],
-              place: fieldNode.position,
+              ancestors: [...segmentAncestors, segment, field],
+              place: field.position,
             }
           );
         }
@@ -71,16 +61,5 @@ const hl7v2LintExtraFields = lintRule<Root>(
     });
   }
 );
-
-/** Return the highest numeric key in a Map, or 0 if empty. */
-function maxKey(map: ReadonlyMap<number, unknown>): number {
-  let max = 0;
-  for (const key of map.keys()) {
-    if (key > max) {
-      max = key;
-    }
-  }
-  return max;
-}
 
 export default hl7v2LintExtraFields;

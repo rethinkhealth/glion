@@ -37,44 +37,48 @@ const hl7v2LintExtraComponents = lintRule<Root>(
       return;
     }
 
-    visit(tree, "segment", (segment, ancestors) => {
+    visit(tree, "segment", (segment, segmentAncestors) => {
       const fields = ctx.fields.get(segment.name);
       if (!fields) {
         return SKIP;
       }
 
-      for (const [index, field] of segment.children.entries()) {
-        const sequence = index + 1;
+      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
         const profile = fields.bySequence.get(sequence);
         const datatype = profile && ctx.datatypes.get(profile.datatype);
         if (!datatype || isEmptyNode(field)) {
-          continue;
+          return SKIP;
         }
 
         // A primitive datatype has no component definitions; its value is
         // component 1.
         const defined = Math.max(1, ...datatype.componentsBySequence.keys());
 
-        for (const repetition of field.children) {
-          for (
-            let component = defined + 1;
-            component <= repetition.children.length;
-            component++
-          ) {
+        visit(field, "component", (component, componentAncestors, info) => {
+          if (info.sequence > defined) {
             file.message(
               messages.undefinedComponent(
-                `${segment.name}-${sequence}.${component}`,
+                `${segment.name}-${sequence}.${info.sequence}`,
                 profile.datatype,
                 ctx.version
               ),
               {
-                ancestors: [...ancestors, segment, field, repetition],
-                place: repetition.position ?? field.position,
+                ancestors: [
+                  ...segmentAncestors,
+                  segment,
+                  ...componentAncestors,
+                  component,
+                ],
+                place: component.position,
               }
             );
           }
-        }
-      }
+
+          return SKIP;
+        });
+
+        return SKIP;
+      });
 
       return SKIP;
     });

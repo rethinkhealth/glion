@@ -56,10 +56,10 @@ describe("hl7v2LintExtraFields", () => {
     const errors = file.messages.filter((msg) => msg.ruleId === "extra-fields");
     expect(errors).toHaveLength(2);
     expect(errors[0]?.message).toBe(
-      "Field `PID-40` has no definition; `PID` defines 39 fields in HL7 v2.5.1."
+      "Field `PID-40` is present; segment `PID` in HL7 v2.5.1 does not define it."
     );
     expect(errors[1]?.message).toBe(
-      "Field `PID-41` has no definition; `PID` defines 39 fields in HL7 v2.5.1."
+      "Field `PID-41` is present; segment `PID` in HL7 v2.5.1 does not define it."
     );
     expect(errors[0]?.source).toBe("hl7v2-lint");
   });
@@ -152,10 +152,10 @@ describe("hl7v2LintExtraFields", () => {
     const errors = file.messages.filter((msg) => msg.ruleId === "extra-fields");
     expect(errors).toHaveLength(2);
     expect(errors[0]?.message).toBe(
-      "Field `MSH-22` has no definition; `MSH` defines 21 fields in HL7 v2.5.1."
+      "Field `MSH-22` is present; segment `MSH` in HL7 v2.5.1 does not define it."
     );
     expect(errors[1]?.message).toBe(
-      "Field `MSH-23` has no definition; `MSH` defines 21 fields in HL7 v2.5.1."
+      "Field `MSH-23` is present; segment `MSH` in HL7 v2.5.1 does not define it."
     );
   });
 });

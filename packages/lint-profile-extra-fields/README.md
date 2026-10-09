@@ -76,10 +76,10 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 Reported message:
 
 ```
-Field `MSH-22` has no definition; `MSH` defines 21 fields in HL7 v2.5.
+Field `MSH-22` is present; segment `MSH` in HL7 v2.5 does not define it.
 ```
 
-The field count is the profile's highest sequence number, and the version is taken from the annotated profile context. One message is reported per extra field.
+A segment defines the fields up to its profile's highest sequence number. The version is taken from the annotated profile context. One message is reported per extra field.
 
 ## Part of Glion
 

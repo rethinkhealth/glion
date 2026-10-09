@@ -41,47 +41,33 @@ const hl7v2LintFieldMaxLength = lintRule<Root>(
     }
 
     visit(tree, "segment", (segment, segmentAncestors) => {
-      const fieldDef = ctx.fields.get(segment.name);
-      if (!fieldDef) {
+      const fields = ctx.fields.get(segment.name);
+      if (!fields) {
         return SKIP;
       }
 
-      visit(segment, "field", (fieldNode, _fieldAncestors, info) => {
-        if (isEmptyNode(fieldNode)) {
+      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
+        const profile = fields.bySequence.get(sequence);
+        if (!profile?.maxLength || isEmptyNode(field)) {
           return SKIP;
         }
 
-        const profile = fieldDef.bySequence.get(info.sequence);
-
-        if (!profile?.maxLength) {
-          return SKIP;
-        }
-
-        for (const repetition of fieldNode.children) {
-          const len = getLength(repetition);
-          if (len === 0) {
-            continue;
-          }
-
-          if (len > profile.maxLength) {
+        for (const repetition of field.children) {
+          const length = getLength(repetition);
+          if (length > profile.maxLength) {
             const message = file.message(
               messages.tooLong(
-                `${segment.name}-${info.sequence}`,
+                `${segment.name}-${sequence}`,
                 profile.name,
-                len,
+                length,
                 profile.maxLength
               ),
               {
-                ancestors: [
-                  ...segmentAncestors,
-                  segment,
-                  fieldNode,
-                  repetition,
-                ],
-                place: repetition.position ?? fieldNode.position,
+                ancestors: [...segmentAncestors, segment, field, repetition],
+                place: repetition.position,
               }
             );
-            message.actual = String(len);
+            message.actual = String(length);
           }
         }
 
