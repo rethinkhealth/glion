@@ -1,4 +1,22 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(pnpm build *)",
+      "Bash(pnpm check *)",
+      "Bash(pnpm check-types *)",
+      "Bash(pnpm test *)",
+      "Bash(pnpm mutate:changed *)",
+      "Bash(pnpm mutate:report *)",
+      "Bash(pnpm turbo run test *)",
+      "Bash(pnpm turbo run check-types *)",
+      "Bash(gh issue view *)",
+      "Bash(gh pr checks *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr view *)",
+      "Bash(gh run view *)"
+    ],
+    "deny": ["Bash(bun *)", "Bash(npm *)", "Bash(npx *)", "Bash(yarn *)"]
+  },
   "hooks": {
     "PostToolUse": [
       {
