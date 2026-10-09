@@ -94,10 +94,10 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
   diagnostics: 6
     - [field-max-length] Field \`PV1-39\` (Servicing Facility) is 6 characters long; it allows at most 2 characters.
     - [field-max-length] Field \`IN1-12\` (Plan Effective Date) is 28 characters long; it allows at most 8 characters.
-    - [extra-components] Component \`IN1-12.2\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.
-    - [extra-components] Component \`IN1-12.3\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.
-    - [extra-components] Component \`IN1-12.4\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.
-    - [extra-components] Component \`IN1-12.5\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1."
+    - [extra-components] Component \`IN1-12.2\` is present; datatype \`DT\` in HL7 v2.5.1 does not define it.
+    - [extra-components] Component \`IN1-12.3\` is present; datatype \`DT\` in HL7 v2.5.1 does not define it.
+    - [extra-components] Component \`IN1-12.4\` is present; datatype \`DT\` in HL7 v2.5.1 does not define it.
+    - [extra-components] Component \`IN1-12.5\` is present; datatype \`DT\` in HL7 v2.5.1 does not define it."
 `;
 
 exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches snapshot 2`] = `
@@ -139,7 +139,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`IN1-12.2\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.",
+      "message": "Component \`IN1-12.2\` is present; datatype \`DT\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 146,
@@ -156,7 +156,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`IN1-12.3\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.",
+      "message": "Component \`IN1-12.3\` is present; datatype \`DT\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 146,
@@ -173,7 +173,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`IN1-12.4\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.",
+      "message": "Component \`IN1-12.4\` is present; datatype \`DT\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 146,
@@ -190,7 +190,7 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`IN1-12.5\` has no definition; \`DT\` is a primitive datatype with no components in HL7 v2.5.1.",
+      "message": "Component \`IN1-12.5\` is present; datatype \`DT\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 146,
@@ -542,7 +542,7 @@ exports[`QR1: message conformance > dft-p03-charge.hl7 — pipeline output match
   diagnostics: 3
     - [field-max-length] Field \`PV1-10\` (Hospital Service) is 4 characters long; it allows at most 3 characters.
     - [field-max-length] Field \`PV1-18\` (Patient Type) is 8 characters long; it allows at most 2 characters.
-    - [extra-components] Component \`FT1-27.7\` has no definition; \`CE\` defines 6 components in HL7 v2.5.1."
+    - [extra-components] Component \`FT1-27.7\` is present; datatype \`CE\` in HL7 v2.5.1 does not define it."
 `;
 
 exports[`QR1: message conformance > dft-p03-charge.hl7 — pipeline output matches snapshot 2`] = `
@@ -584,7 +584,7 @@ exports[`QR1: message conformance > dft-p03-charge.hl7 — pipeline output match
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`FT1-27.7\` has no definition; \`CE\` defines 6 components in HL7 v2.5.1.",
+      "message": "Component \`FT1-27.7\` is present; datatype \`CE\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 110,
@@ -1541,10 +1541,10 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
   diagnostics: 6
     - [required-fields] Field \`TXA-12\` (Unique Document Number) is empty; it is required.
     - [field-max-length] Field \`TXA-17\` (Document Completion Status) is 22 characters long; it allows at most 2 characters.
-    - [extra-components] Component \`TXA-2.2\` has no definition; \`IS\` is a primitive datatype with no components in HL7 v2.5.1.
-    - [extra-components] Component \`TXA-2.3\` has no definition; \`IS\` is a primitive datatype with no components in HL7 v2.5.1.
-    - [extra-components] Component \`TXA-17.2\` has no definition; \`ID\` is a primitive datatype with no components in HL7 v2.5.1.
-    - [extra-components] Component \`TXA-17.3\` has no definition; \`ID\` is a primitive datatype with no components in HL7 v2.5.1."
+    - [extra-components] Component \`TXA-2.2\` is present; datatype \`IS\` in HL7 v2.5.1 does not define it.
+    - [extra-components] Component \`TXA-2.3\` is present; datatype \`IS\` in HL7 v2.5.1 does not define it.
+    - [extra-components] Component \`TXA-17.2\` is present; datatype \`ID\` in HL7 v2.5.1 does not define it.
+    - [extra-components] Component \`TXA-17.3\` is present; datatype \`ID\` in HL7 v2.5.1 does not define it."
 `;
 
 exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output matches snapshot 2`] = `
@@ -1586,7 +1586,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`TXA-2.2\` has no definition; \`IS\` is a primitive datatype with no components in HL7 v2.5.1.",
+      "message": "Component \`TXA-2.2\` is present; datatype \`IS\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 38,
@@ -1603,7 +1603,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`TXA-2.3\` has no definition; \`IS\` is a primitive datatype with no components in HL7 v2.5.1.",
+      "message": "Component \`TXA-2.3\` is present; datatype \`IS\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 38,
@@ -1620,7 +1620,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`TXA-17.2\` has no definition; \`ID\` is a primitive datatype with no components in HL7 v2.5.1.",
+      "message": "Component \`TXA-17.2\` is present; datatype \`ID\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 129,
@@ -1637,7 +1637,7 @@ exports[`QR1: message conformance > mdm-t02-document.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`TXA-17.3\` has no definition; \`ID\` is a primitive datatype with no components in HL7 v2.5.1.",
+      "message": "Component \`TXA-17.3\` is present; datatype \`ID\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 129,
@@ -2165,7 +2165,7 @@ exports[`QR1: message conformance > siu-s12-schedule.hl7 — pipeline output mat
   diagnostics: 4
     - [required-fields] Field \`SCH-16\` (Filler Contact Person) is not present; it is required.
     - [required-fields] Field \`SCH-20\` (Entered By Person) is not present; it is required.
-    - [extra-components] Component \`AIG-3.7\` has no definition; \`CE\` defines 6 components in HL7 v2.5.1.
+    - [extra-components] Component \`AIG-3.7\` is present; datatype \`CE\` in HL7 v2.5.1 does not define it.
     - [segment-order] Unexpected segment 'AIG'. Expected: DG1, OBX, PID, PV2, RGS"
 `;
 
@@ -2208,7 +2208,7 @@ exports[`QR1: message conformance > siu-s12-schedule.hl7 — pipeline output mat
       "source": "hl7v2-lint",
     },
     {
-      "message": "Component \`AIG-3.7\` has no definition; \`CE\` defines 6 components in HL7 v2.5.1.",
+      "message": "Component \`AIG-3.7\` is present; datatype \`CE\` in HL7 v2.5.1 does not define it.",
       "place": {
         "end": {
           "column": 38,

@@ -2,9 +2,8 @@
 "@glion/lint-profile-extra-components": patch
 ---
 
-Word every report as one sentence per cause, with a separate message for a primitive datatype:
+Word the report as one sentence:
 
-- `Component \`MSH-9.4\` has no definition; \`MSG\` defines 3 components in HL7 v2.7.1.`
-- `Component \`PID-8.2\` has no definition; \`IS\` is a primitive datatype with no components in HL7 v2.5.`
+- `Component \`MSH-9.4\` is present; datatype \`MSG\` in HL7 v2.7.1 does not define it.`
 
 The rule has a `url` to its README in this repository.

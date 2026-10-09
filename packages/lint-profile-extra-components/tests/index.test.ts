@@ -89,10 +89,10 @@ describe("hl7v2LintExtraComponents", () => {
     );
     expect(errors).toHaveLength(2);
     expect(errors[0].message).toBe(
-      "Component `MSH-9.4` has no definition; `MSG` defines 3 components in HL7 v2.7.1."
+      "Component `MSH-9.4` is present; datatype `MSG` in HL7 v2.7.1 does not define it."
     );
     expect(errors[1].message).toBe(
-      "Component `MSH-9.5` has no definition; `MSG` defines 3 components in HL7 v2.7.1."
+      "Component `MSH-9.5` is present; datatype `MSG` in HL7 v2.7.1 does not define it."
     );
     expect(errors[0].source).toBe("hl7v2-lint");
   });
@@ -113,7 +113,7 @@ describe("hl7v2LintExtraComponents", () => {
     );
     expect(errors).toHaveLength(1);
     expect(errors[0].message).toBe(
-      "Component `PID-1.2` has no definition; `SI` is a primitive datatype with no components in HL7 v2.7.1."
+      "Component `PID-1.2` is present; datatype `SI` in HL7 v2.7.1 does not define it."
     );
   });
 
@@ -228,7 +228,7 @@ describe("hl7v2LintExtraComponents", () => {
     );
     expect(errors).toHaveLength(1);
     expect(errors[0].message).toBe(
-      "Component `MSH-9.4` has no definition; `MSG` defines 3 components in HL7 v2.7.1."
+      "Component `MSH-9.4` is present; datatype `MSG` in HL7 v2.7.1 does not define it."
     );
   });
 });
