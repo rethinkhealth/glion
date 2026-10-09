@@ -19,30 +19,26 @@ export { EXIT, SKIP } from "unist-util-visit-parents";
 export type { Predicate, Test, VisitInfo, Visitor } from "./types";
 
 /**
- * Build index map for O(1) child index lookups.
- * Pre-computes the index of each node within its parent's children array.
+ * A lookup of a node's index among its parent's children.
  *
- * @param tree - Root of tree to index
- * @returns WeakMap mapping each node to its index in parent.children
+ * Indexes a parent's children the first time one of them is looked up, and
+ * at most once per lookup function.
  */
-function buildIndexMap(tree: Nodes): WeakMap<Nodes, number> {
-  const map = new WeakMap<Nodes, number>();
+function createIndexOf(): (parent: Nodes, node: Nodes) => number {
+  const indexes = new WeakMap<Nodes, Map<Nodes, number>>();
 
-  function traverse(node: Nodes): void {
-    if ("children" in node && Array.isArray(node.children)) {
-      // oxlint-disable-next-line no-plusplus
-      for (let i = 0; i < node.children.length; i++) {
-        const child = node.children[i];
-        if (child) {
-          map.set(child, i);
-          traverse(child);
-        }
-      }
+  return (parent, node) => {
+    let children = indexes.get(parent);
+    if (!children) {
+      children = new Map(
+        "children" in parent
+          ? parent.children.map((child: Nodes, index: number) => [child, index])
+          : []
+      );
+      indexes.set(parent, children);
     }
-  }
-
-  traverse(tree);
-  return map;
+    return children.get(node) ?? 0;
+  };
 }
 
 // Overload signatures
@@ -89,8 +85,7 @@ export function visit<T extends Nodes>(
 
   const predicate = createTest(test as Test<Nodes>);
 
-  // Pre-compute index map for O(1) lookups
-  const indexMap = buildIndexMap(tree);
+  const indexOf = createIndexOf();
 
   // Delegate traversal to unist-util-visit-parents
   visitParents(tree, (node, ancestors) => {
@@ -104,7 +99,7 @@ export function visit<T extends Nodes>(
 
     // For root node (no parent), use defaults
     // For children, look up their index in the parent's children array
-    const childIndex = parent ? (indexMap.get(node) ?? 0) : 0;
+    const childIndex = parent ? indexOf(parent, node) : 0;
 
     const info: VisitInfo = {
       depth: ancestors.length + 1,
