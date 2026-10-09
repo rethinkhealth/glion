@@ -140,7 +140,7 @@ Each lint rule reports one fact about a message, and only that fact:
 
 1. **Each fact has one owning rule.** A well-formed segment ID belongs to `lint-segment-header-length`; whether a segment is allowed at its position belongs to `lint-profile-segment-order`.
 2. **A rule checks only its own fact.** It does not re-check a fact another rule owns, even to avoid a second report. A segment `PIDX` gets two reports, and both are true: its ID is malformed, and the schema does not allow it there.
-3. **Report the first problem, not its consequences.** A rule that finds a problem does not go on to report what follows from it, as `lint-profile-segment-order` reports one order error and no premature end after it.
+3. **Report each problem, not its consequences.** A rule reports every problem it finds, and nothing that follows from one of them. `lint-profile-segment-order` reports each missing or unexpected segment of the smallest repair (ADR 0025): each is needed, so none follows from another.
 4. **Rules are independent.** No rule reads another rule's reports or shares state with it, so a rule behaves the same alone and in a preset.
 5. **Every report carries its rule ID**, so a user can turn one rule off.
 
