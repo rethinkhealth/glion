@@ -31,31 +31,24 @@ const hl7v2LintExtraFields = lintRule<Root>(
       return;
     }
 
-    visit(tree, "segment", (segment, segmentAncestors) => {
-      const fields = ctx.fields.get(segment.name);
-      if (!fields) {
+    visit(tree, "field", (field, ancestors, { segment, sequence }) => {
+      const fields = segment && ctx.fields.get(segment.name);
+      const defined =
+        !fields ||
+        fields.bySequence.has(sequence) ||
+        sequence <= Math.max(0, ...fields.bySequence.keys());
+      if (defined) {
         return SKIP;
       }
 
-      const defined = Math.max(0, ...fields.bySequence.keys());
-
-      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
-        if (sequence > defined) {
-          file.message(
-            messages.undefinedField(
-              `${segment.name}-${sequence}`,
-              segment.name,
-              ctx.version
-            ),
-            {
-              ancestors: [...segmentAncestors, segment, field],
-              place: field.position,
-            }
-          );
-        }
-
-        return SKIP;
-      });
+      file.message(
+        messages.undefinedField(
+          `${segment.name}-${sequence}`,
+          segment.name,
+          ctx.version
+        ),
+        { ancestors: [...ancestors, field], place: field.position }
+      );
 
       return SKIP;
     });

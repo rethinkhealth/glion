@@ -35,34 +35,23 @@ const hl7v2LintFieldRepetition = lintRule<Root>(
       return;
     }
 
-    visit(tree, "segment", (segment, segmentAncestors) => {
-      const fields = ctx.fields.get(segment.name);
-      if (!fields) {
+    visit(tree, "field", (field, ancestors, { segment, sequence }) => {
+      const profile =
+        segment && ctx.fields.get(segment.name)?.bySequence.get(sequence);
+      const count = field.children.length;
+      if (!profile || profile.repeatable || count < 2) {
         return SKIP;
       }
 
-      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
-        const profile = fields.bySequence.get(sequence);
-        const count = field.children.length;
-        if (!profile || profile.repeatable || count < 2) {
-          return SKIP;
-        }
-
-        const message = file.message(
-          messages.notRepeatable(
-            `${segment.name}-${sequence}`,
-            profile.name,
-            count
-          ),
-          {
-            ancestors: [...segmentAncestors, segment, field],
-            place: field.position,
-          }
-        );
-        message.actual = String(count);
-
-        return SKIP;
-      });
+      const message = file.message(
+        messages.notRepeatable(
+          `${segment.name}-${sequence}`,
+          profile.name,
+          count
+        ),
+        { ancestors: [...ancestors, field], place: field.position }
+      );
+      message.actual = String(count);
 
       return SKIP;
     });

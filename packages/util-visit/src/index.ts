@@ -17,6 +17,20 @@ export { EXIT, SKIP } from "unist-util-visit-parents";
 
 export type { Predicate, Test, VisitInfo, Visitor } from "./types";
 
+// How far below its segment each node type sits; root and group are not in a
+// segment. HL7v2 nests segment → field → repetition → component →
+// subcomponent, so a node's segment and the sequences of everything between
+// them sit at fixed depths above it.
+const LEVELS_BELOW_SEGMENT: Record<Nodes["type"], number | undefined> = {
+  component: 3,
+  field: 1,
+  "field-repetition": 2,
+  group: undefined,
+  root: undefined,
+  segment: 0,
+  subcomponent: 4,
+};
+
 // Overload signatures
 export function visit(tree: Nodes, visitor: Visitor): void;
 export function visit<Type extends Nodes["type"]>(
@@ -75,7 +89,29 @@ export function visit<T extends Nodes>(
     return true;
   };
 
+  // `sequences[depth]` is the 1-based sequence of the node open at that depth,
+  // kept current for every node so a matched node can read its ancestors'
+  // sequences. Depth 0 is the node `visit` starts from, whose sequence is
+  // unknown, so it is never read.
+  // Stryker disable next-line ArrayDeclaration: index 0 is written before any read.
+  const sequences: number[] = [];
+
+  // The sequence `levels` below the segment that sits at `segmentDepth`, or
+  // `undefined` when the node is not that deep (`level` is how far below its
+  // segment the node itself sits) or that position is the visit's start.
+  const sequenceAt = (
+    segmentDepth: number,
+    level: number,
+    levels: number
+  ): number | undefined => {
+    const depth = segmentDepth + levels;
+    return levels <= level && depth >= 1 ? sequences[depth] : undefined;
+  };
+
   visitParents(tree, captureIndex, (node, ancestors) => {
+    const depth = ancestors.length;
+    sequences[depth] = currentIndex + 1;
+
     // The caller's test runs here, not in `captureIndex`: it may read
     // `ancestors`, which visit-parents gives only to the visitor.
     if (!predicate(node, ancestors)) {
@@ -85,11 +121,25 @@ export function visit<T extends Nodes>(
       return;
     }
 
+    // A root or group has no segment: -1 puts its "segment" below it, where
+    // `ancestors` has nothing, and every `sequenceAt` level is out of range.
+    const level = LEVELS_BELOW_SEGMENT[node.type] ?? -1;
+    const segmentDepth = depth - level;
+    // `ancestors[depth]` is past the end, so a segment finds itself. A depth
+    // outside `ancestors` (the segment is above the visit's start) also falls
+    // back to the node, which the type check below then rejects.
+    const segment = ancestors[segmentDepth] ?? node;
+
     const info: VisitInfo = {
-      depth: ancestors.length + 1,
+      component: sequenceAt(segmentDepth, level, 3),
+      depth: depth + 1,
+      field: sequenceAt(segmentDepth, level, 1),
       index: currentIndex,
       metadata: "name" in node ? { name: node.name } : undefined,
+      repetition: sequenceAt(segmentDepth, level, 2),
+      segment: segment.type === "segment" ? segment : undefined,
       sequence: currentIndex + 1,
+      subcomponent: sequenceAt(segmentDepth, level, 4),
     };
 
     // visit-parents reads the visitor's return value to decide what to visit

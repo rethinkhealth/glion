@@ -40,53 +40,39 @@ const hl7v2LintRequiredComponents = lintRule<Root>(
       return;
     }
 
-    visit(tree, "segment", (segment, segmentAncestors) => {
-      const fields = ctx.fields.get(segment.name);
-      if (!fields) {
+    visit(tree, "field", (field, ancestors, { segment, sequence }) => {
+      const profile =
+        segment && ctx.fields.get(segment.name)?.bySequence.get(sequence);
+      const datatype = profile && ctx.datatypes.get(profile.datatype);
+      if (!datatype || isEmptyNode(field)) {
         return SKIP;
       }
 
-      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
-        const profile = fields.bySequence.get(sequence);
-        const datatype = profile && ctx.datatypes.get(profile.datatype);
-        if (!datatype || isEmptyNode(field)) {
-          return SKIP;
-        }
+      for (const repetition of field.children) {
+        for (const { component, required } of unmetComponents(
+          repetition,
+          datatype
+        )) {
+          const id = `${segment.name}-${sequence}.${required.sequence}`;
 
-        for (const repetition of field.children) {
-          for (const { component, required } of unmetComponents(
-            repetition,
-            datatype
-          )) {
-            const id = `${segment.name}-${sequence}.${required.sequence}`;
-
-            if (!component) {
-              file.message(messages.absentComponent(id, required.name), {
-                ancestors: [...segmentAncestors, segment, field, repetition],
-                place: repetition.position,
-              });
-              continue;
-            }
-
-            const message = file.message(
-              messages.emptyComponent(id, required.name),
-              {
-                ancestors: [
-                  ...segmentAncestors,
-                  segment,
-                  field,
-                  repetition,
-                  component,
-                ],
-                place: component.position,
-              }
-            );
-            message.actual = "";
+          if (!component) {
+            file.message(messages.absentComponent(id, required.name), {
+              ancestors: [...ancestors, field, repetition],
+              place: repetition.position,
+            });
+            continue;
           }
-        }
 
-        return SKIP;
-      });
+          const message = file.message(
+            messages.emptyComponent(id, required.name),
+            {
+              ancestors: [...ancestors, field, repetition, component],
+              place: component.position,
+            }
+          );
+          message.actual = "";
+        }
+      }
 
       return SKIP;
     });
