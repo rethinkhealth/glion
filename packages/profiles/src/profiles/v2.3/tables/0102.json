@@ -1,4 +1,5 @@
 {
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/Table",
   "id": "0102",
   "description": "Delayed Acknowledgement Type",
   "type": "hl7",

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/Table",
   "id": "0909",
   "description": "Patient Results Release Categorization Scheme",
   "type": "hl7",

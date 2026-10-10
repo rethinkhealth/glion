@@ -1,4 +1,5 @@
 {
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/Table",
   "id": "0027",
   "description": "PRIORITY (COMPONENT 6 QTY/TIMING[735])",
   "type": "hl7",

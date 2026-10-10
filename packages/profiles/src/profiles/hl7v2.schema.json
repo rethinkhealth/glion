@@ -1,0 +1,480 @@
+{
+  "$id": "https://glion.dev/schemas/hl7v2/v1.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Glion HL7v2 profiles",
+  "anyOf": [
+    {
+      "$ref": "#/definitions/EventSchema"
+    },
+    {
+      "$ref": "#/definitions/EventMap"
+    },
+    {
+      "$ref": "#/definitions/Segments"
+    },
+    {
+      "$ref": "#/definitions/Fields"
+    },
+    {
+      "$ref": "#/definitions/Datatype"
+    },
+    {
+      "$ref": "#/definitions/Table"
+    },
+    {
+      "$ref": "#/definitions/CodeSystem"
+    }
+  ],
+  "definitions": {
+    "EventSchema": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON Schema definition the file conforms to."
+        },
+        "id": {
+          "type": "string",
+          "description": "The message structure ID, as carried in MSH-9.3.",
+          "minLength": 1
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventSchemaElement"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["id", "elements"],
+      "additionalProperties": false,
+      "description": "The schema of an HL7v2 event: its message structure, such as `ORU_R01`, as the standard defines it."
+    },
+    "EventSchemaElement": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/SegmentElement"
+        },
+        {
+          "$ref": "#/definitions/GroupElement"
+        },
+        {
+          "$ref": "#/definitions/ChoiceElement"
+        }
+      ],
+      "description": "One element of an event schema, in the standard's order."
+    },
+    "SegmentElement": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "segment"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "The standard's `[ ]`."
+        },
+        "repeating": {
+          "type": "boolean",
+          "description": "The standard's `{ }`."
+        }
+      },
+      "required": ["type", "name", "optional", "repeating"],
+      "additionalProperties": false,
+      "description": "A segment, such as `PID`. The name `Hxx` stands for any segment, and `anyZSegment` for any Z-segment."
+    },
+    "GroupElement": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "group"
+        },
+        "id": {
+          "type": "string",
+          "description": "The group ID, such as `PATIENT_RESULT`.",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "name": {
+          "type": "string",
+          "description": "The group name in title case, such as `Patient Result`.",
+          "minLength": 1
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "The standard's `[ ]`."
+        },
+        "repeating": {
+          "type": "boolean",
+          "description": "The standard's `{ }`."
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventSchemaElement"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "id", "name", "optional", "repeating", "elements"],
+      "additionalProperties": false,
+      "description": "A segment group, such as `PATIENT_RESULT`."
+    },
+    "ChoiceElement": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "choice"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "The standard's `[ ]`."
+        },
+        "repeating": {
+          "type": "boolean",
+          "description": "The standard's `{ }`."
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventSchemaElement"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "optional", "repeating", "alternatives"],
+      "additionalProperties": false,
+      "description": "A choice, the standard's `< A | B >`: exactly one alternative per occurrence. Every alternative MUST match at least one segment."
+    },
+    "EventMap": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON Schema definition the file conforms to."
+        },
+        "events": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "The message structure of each message type and trigger event: `ADT_A04` uses `ADT_A01`."
+        }
+      },
+      "required": ["events"],
+      "additionalProperties": false,
+      "description": "The event map of a version, `v<version>/event-map.json`."
+    },
+    "Segments": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON Schema definition the file conforms to."
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Segment"
+          },
+          "description": "Every segment the version defines, by Segment ID."
+        }
+      },
+      "required": ["segments"],
+      "additionalProperties": false,
+      "description": "The segments of a version, `v<version>/segments.json`."
+    },
+    "Segment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The Segment ID, such as `PID`.",
+          "pattern": "^[A-Z][A-Z0-9]{2}$"
+        },
+        "title": {
+          "type": "string",
+          "description": "The segment's name, such as `Patient Identification`.",
+          "minLength": 1
+        }
+      },
+      "required": ["id", "title"],
+      "additionalProperties": false,
+      "description": "A segment the version defines."
+    },
+    "Fields": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON Schema definition the file conforms to."
+        },
+        "segmentId": {
+          "type": "string",
+          "description": "The Segment ID, such as `PID`.",
+          "pattern": "^[A-Z][A-Z0-9]{2}$"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Field"
+          },
+          "description": "The segment's fields in sequence order: one row of its segment attribute table each."
+        }
+      },
+      "required": ["segmentId", "fields"],
+      "additionalProperties": false,
+      "description": "The fields of one segment, `v<version>/fields/<segment>.json`."
+    },
+    "Field": {
+      "type": "object",
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "description": "SEQ: the field's position in the segment.",
+          "minimum": 1
+        },
+        "id": {
+          "type": "string",
+          "description": "The Segment ID and sequence, such as `PID-3`.",
+          "pattern": "^[A-Z][A-Z0-9]{2}-[1-9][0-9]*$"
+        },
+        "optionality": {
+          "$ref": "#/definitions/FieldOptionality",
+          "description": "OPT: required, optional, conditional, not used, backward compatible, or withdrawn. Absent when the standard records none."
+        },
+        "repetitions": {
+          "$ref": "#/definitions/FieldRepetitions",
+          "description": "RP/#: the most occurrences the field may have, or `unbounded`. `1` when the field does not repeat."
+        },
+        "datatype": {
+          "type": "string",
+          "description": "DT: the datatype ID, such as `CX`. Absent on a withdrawn field the standard gives no datatype."
+        },
+        "maxLength": {
+          "type": "integer",
+          "description": "LEN: the most characters the field may hold.",
+          "minimum": 1
+        },
+        "table": {
+          "type": "string",
+          "description": "TBL#: the table of the field's codes, such as `HL70001`.",
+          "pattern": "^HL7[0-9]{4}$"
+        },
+        "name": {
+          "type": "string",
+          "description": "ELEMENT NAME, such as `Patient Identifier List`."
+        },
+        "item": {
+          "type": "string",
+          "description": "ITEM#: the data element number, such as `106`."
+        }
+      },
+      "required": ["sequence", "id", "repetitions"],
+      "additionalProperties": false,
+      "description": "A field of a segment, one row of its segment attribute table."
+    },
+    "FieldOptionality": {
+      "type": "string",
+      "enum": ["R", "O", "C", "X", "B", "W"],
+      "description": "HL7v2 optionality of a field, the OPT column of a segment attribute table: required, optional, conditional, not used, backward compatible, or withdrawn."
+    },
+    "FieldRepetitions": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/RepetitionCount"
+        },
+        {
+          "type": "string",
+          "const": "unbounded"
+        }
+      ],
+      "description": "RP/#: a count, or `unbounded`."
+    },
+    "RepetitionCount": {
+      "type": "integer",
+      "description": "The most occurrences a field may have.",
+      "minimum": 1
+    },
+    "Datatype": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON Schema definition the file conforms to."
+        },
+        "id": {
+          "type": "string",
+          "description": "The datatype ID, such as `CWE`."
+        },
+        "version": {
+          "type": "string",
+          "description": "The HL7v2 version, such as `2.5.1`."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["composite", "primitive"],
+          "description": "Whether the datatype has components."
+        },
+        "title": {
+          "type": "string",
+          "description": "The datatype's name, such as `Coded with Exceptions`."
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Component"
+          },
+          "description": "The components of a composite datatype in sequence order; empty for a primitive."
+        }
+      },
+      "required": ["id", "version", "kind", "components"],
+      "additionalProperties": false,
+      "description": "A datatype, `v<version>/datatypes/<datatype>.json`."
+    },
+    "Component": {
+      "type": "object",
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "description": "The component's position in the datatype.",
+          "minimum": 1
+        },
+        "name": {
+          "type": "string",
+          "description": "The component's name, such as `Street Address`."
+        },
+        "datatypeId": {
+          "type": "string",
+          "description": "The component's datatype ID, such as `ST`."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether the component must be valued."
+        },
+        "maxLength": {
+          "type": "integer",
+          "description": "The most characters the component may hold.",
+          "minimum": 1
+        }
+      },
+      "required": ["sequence", "name", "datatypeId", "required"],
+      "additionalProperties": false,
+      "description": "A component of a composite datatype."
+    },
+    "Table": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON Schema definition the file conforms to."
+        },
+        "id": {
+          "type": "string",
+          "description": "The table number, such as `0001`.",
+          "pattern": "^[0-9]{4}$"
+        },
+        "description": {
+          "type": "string",
+          "description": "The table's name, such as `Administrative Sex`."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["user", "hl7"],
+          "description": "Whether HL7 defines the codes (`hl7`) or each site does (`user`)."
+        },
+        "codes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableCode"
+          },
+          "description": "The codes the table lists."
+        }
+      },
+      "required": ["id", "description", "type", "codes"],
+      "additionalProperties": false,
+      "description": "A table of codes, `v<version>/tables/<table>.json`."
+    },
+    "TableCode": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The code, such as `F`."
+        },
+        "description": {
+          "type": "string",
+          "description": "What the code means, such as `Female`."
+        }
+      },
+      "required": ["name", "description"],
+      "additionalProperties": false,
+      "description": "A code a table lists."
+    },
+    "CodeSystem": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON Schema definition the file conforms to."
+        },
+        "id": {
+          "type": "string",
+          "description": "The code system ID, such as `v2-0001`."
+        },
+        "url": {
+          "type": "string",
+          "description": "The code system's canonical URL."
+        },
+        "oid": {
+          "type": "string",
+          "description": "The code system's OID."
+        },
+        "name": {
+          "type": "string",
+          "description": "The code system's computable name."
+        },
+        "title": {
+          "type": "string",
+          "description": "The code system's title."
+        },
+        "codes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CodeSystemCode"
+          },
+          "description": "The codes the code system defines."
+        }
+      },
+      "required": ["id", "url", "name", "title", "codes"],
+      "additionalProperties": false,
+      "description": "An HL7 Terminology code system, `utg/<id>.json`."
+    },
+    "CodeSystemCode": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "The code."
+        },
+        "display": {
+          "type": "string",
+          "description": "What the code means."
+        },
+        "status": {
+          "type": "string",
+          "description": "The code's status, such as `active` or `deprecated`."
+        }
+      },
+      "required": ["code", "display", "status"],
+      "additionalProperties": false,
+      "description": "A code a code system defines."
+    }
+  }
+}

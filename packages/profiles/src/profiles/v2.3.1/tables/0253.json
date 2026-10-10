@@ -1,4 +1,5 @@
 {
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/Table",
   "id": "0253",
   "description": "Indirect exposure mechanism",
   "type": "hl7",

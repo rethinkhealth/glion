@@ -1,4 +1,5 @@
 {
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/Table",
   "id": "0552",
   "description": "Advanced Beneficiary Notice Override Reason",
   "type": "hl7",

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/Table",
   "id": "0454",
   "description": "Health care provider area of specialization",
   "type": "hl7",
