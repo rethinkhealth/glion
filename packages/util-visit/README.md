@@ -116,8 +116,31 @@ interface VisitInfo {
 
   /** Metadata (e.g., { name: "MSH" } or { name: "PATIENT" }) */
   metadata: Record<string, unknown> | undefined;
+
+  /** The segment the node is in, or the node itself when it is a segment */
+  segment: Segment | undefined;
+
+  /** 1-based sequences of the field, repetition, component and subcomponent the node is in */
+  field: number | undefined;
+  repetition: number | undefined;
+  component: number | undefined;
+  subcomponent: number | undefined;
 }
 ```
+
+`segment`, `field`, `repetition`, `component` and `subcomponent` give a node's HL7v2 location, so a visitor can look up its profile without walking back up `ancestors`. For `PID-3[2].4.2`:
+
+```typescript
+visit(ast, "subcomponent", (node, ancestors, info) => {
+  info.segment?.name; // "PID"
+  info.field; // 3
+  info.repetition; // 2
+  info.component; // 4
+  info.subcomponent; // 2
+});
+```
+
+Each is `undefined` above its level (a field has no `component`; a root or group has no `segment`) and when the visit started at or below that level: `visit(field, "component", …)` gives each component's `repetition` and `component`, but no `segment` or `field`.
 
 `index` and `sequence` represent the node's **position in the tree**, not its position among filtered results:
 

@@ -1,5 +1,5 @@
 import type { Group, Nodes, Segment } from "@glion/ast";
-import { c, f, g, m, s } from "@glion/builder";
+import { c, f, g, m, r, s } from "@glion/builder";
 
 import type { VisitInfo } from "../src";
 import { EXIT, SKIP, visit } from "../src";
@@ -579,6 +579,158 @@ describe("visit", () => {
       });
 
       expect(visitedNames).toStrictEqual(["MSH"]);
+    });
+  });
+
+  describe("HL7v2 location", () => {
+    const location = (info: VisitInfo) => ({
+      component: info.component,
+      field: info.field,
+      repetition: info.repetition,
+      segment: info.segment?.name,
+      subcomponent: info.subcomponent,
+    });
+
+    it("locates a subcomponent by segment, field, repetition, component and subcomponent", () => {
+      // PID-3[2].4.2 is "B"
+      const ast = m(
+        s("PID", f("1"), f(), f(r(c("X")), r(c(), c(), c(), c("A", "B"))))
+      );
+      const locations: ReturnType<typeof location>[] = [];
+      visit(ast, "subcomponent", (node, _ancestors, info) => {
+        if ("value" in node && node.value === "B") {
+          locations.push(location(info));
+        }
+      });
+      expect(locations).toStrictEqual([
+        {
+          component: 4,
+          field: 3,
+          repetition: 2,
+          segment: "PID",
+          subcomponent: 2,
+        },
+      ]);
+    });
+
+    it("locates each field of a segment by its sequence", () => {
+      const ast = m(s("PID", f("1"), f("2"), f("3")));
+      const locations: ReturnType<typeof location>[] = [];
+      visit(ast, "field", (_node, _ancestors, info) => {
+        locations.push(location(info));
+      });
+      const field = (sequence: number) => ({
+        component: undefined,
+        field: sequence,
+        repetition: undefined,
+        segment: "PID",
+        subcomponent: undefined,
+      });
+      expect(locations).toStrictEqual([field(1), field(2), field(3)]);
+    });
+
+    it("gives a segment itself as its segment, with no field", () => {
+      const pid = s("PID", f("1"));
+      const ast = m(pid);
+      const seen: [Segment | undefined, number | undefined][] = [];
+      visit(ast, "segment", (_node, _ancestors, info) => {
+        seen.push([info.segment, info.field]);
+      });
+      expect(seen).toStrictEqual([[pid, undefined]]);
+    });
+
+    it("gives no location for a root or a group", () => {
+      const ast = m(g("PATIENT", s("PID", f("1"))));
+      const locations: ReturnType<typeof location>[] = [];
+      visit(
+        ast,
+        (node) => node.type === "root" || node.type === "group",
+        (_node, _ancestors, info) => {
+          locations.push(location(info));
+        }
+      );
+      const none = {
+        component: undefined,
+        field: undefined,
+        repetition: undefined,
+        segment: undefined,
+        subcomponent: undefined,
+      };
+      expect(locations).toStrictEqual([none, none]);
+    });
+
+    it("locates a segment inside nested groups", () => {
+      const ast = m(
+        s("MSH", f("|")),
+        g("ORDER", g("OBSERVATION", s("OBX", f("1"), f("NM"))))
+      );
+      const locations: ReturnType<typeof location>[] = [];
+      visit(ast, "field", (_node, ancestors, info) => {
+        if (ancestors.some((ancestor) => ancestor.type === "group")) {
+          locations.push(location(info));
+        }
+      });
+      expect(locations.map((each) => [each.segment, each.field])).toStrictEqual(
+        [
+          ["OBX", 1],
+          ["OBX", 2],
+        ]
+      );
+    });
+
+    it("locates fields when the visit starts from their segment", () => {
+      const pid = s("PID", f("1"), f(c("a"), c("b")));
+      const locations: ReturnType<typeof location>[] = [];
+      visit(pid, "component", (_node, _ancestors, info) => {
+        locations.push(location(info));
+      });
+      expect(locations).toStrictEqual([
+        {
+          component: 1,
+          field: 1,
+          repetition: 1,
+          segment: "PID",
+          subcomponent: undefined,
+        },
+        {
+          component: 1,
+          field: 2,
+          repetition: 1,
+          segment: "PID",
+          subcomponent: undefined,
+        },
+        {
+          component: 2,
+          field: 2,
+          repetition: 1,
+          segment: "PID",
+          subcomponent: undefined,
+        },
+      ]);
+    });
+
+    it("gives no segment or field when the visit starts from a field", () => {
+      const field = f(c("a"), c("b"));
+      const locations: ReturnType<typeof location>[] = [];
+      visit(field, "component", (_node, _ancestors, info) => {
+        locations.push(location(info));
+      });
+      expect(locations).toStrictEqual([
+        {
+          component: 1,
+          field: undefined,
+          repetition: 1,
+          segment: undefined,
+          subcomponent: undefined,
+        },
+        {
+          component: 2,
+          field: undefined,
+          repetition: 1,
+          segment: undefined,
+          subcomponent: undefined,
+        },
+      ]);
     });
   });
 

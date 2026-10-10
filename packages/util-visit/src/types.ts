@@ -1,4 +1,4 @@
-import type { Nodes } from "@glion/ast";
+import type { Nodes, Segment } from "@glion/ast";
 import type { VisitorResult } from "unist-util-visit-parents";
 
 /**
@@ -21,6 +21,38 @@ export interface VisitInfo {
 
   /** Metadata extracted from node (e.g., { name: "MSH" } or { name: "PATIENT" }) */
   metadata: Record<string, unknown> | undefined;
+
+  /**
+   * The segment the node is in, or the node itself when it is a segment.
+   * `undefined` for a root or group, and for a node below a segment when the
+   * visit started below that segment.
+   */
+  segment: Segment | undefined;
+
+  /**
+   * The 1-based sequence of the field the node is in (`5` for any node in
+   * `PID-5`), or of the node itself when it is a field. `undefined` above a
+   * field, and when the visit started at or below that field.
+   */
+  field: number | undefined;
+
+  /**
+   * The 1-based repetition the node is in (`2` in `PID-5[2]`), on the same
+   * terms as `field`.
+   */
+  repetition: number | undefined;
+
+  /**
+   * The 1-based sequence of the component the node is in (`3` in `PID-5.3`),
+   * on the same terms as `field`.
+   */
+  component: number | undefined;
+
+  /**
+   * The 1-based sequence of the subcomponent (`1` in `PID-5.3.1`), on the same
+   * terms as `field`.
+   */
+  subcomponent: number | undefined;
 }
 
 /**

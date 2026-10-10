@@ -40,39 +40,31 @@ const hl7v2LintFieldMaxLength = lintRule<Root>(
       return;
     }
 
-    visit(tree, "segment", (segment, segmentAncestors) => {
-      const fields = ctx.fields.get(segment.name);
-      if (!fields) {
+    visit(tree, "field", (field, ancestors, { segment, sequence }) => {
+      const profile =
+        segment && ctx.fields.get(segment.name)?.bySequence.get(sequence);
+      if (!segment || !profile?.maxLength || isEmptyNode(field)) {
         return SKIP;
       }
 
-      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
-        const profile = fields.bySequence.get(sequence);
-        if (!profile?.maxLength || isEmptyNode(field)) {
-          return SKIP;
+      for (const repetition of field.children) {
+        const length = getLength(repetition);
+        if (length > profile.maxLength) {
+          const message = file.message(
+            messages.tooLong(
+              `${segment.name}-${sequence}`,
+              profile.name,
+              length,
+              profile.maxLength
+            ),
+            {
+              ancestors: [...ancestors, field, repetition],
+              place: repetition.position,
+            }
+          );
+          message.actual = String(length);
         }
-
-        for (const repetition of field.children) {
-          const length = getLength(repetition);
-          if (length > profile.maxLength) {
-            const message = file.message(
-              messages.tooLong(
-                `${segment.name}-${sequence}`,
-                profile.name,
-                length,
-                profile.maxLength
-              ),
-              {
-                ancestors: [...segmentAncestors, segment, field, repetition],
-                place: repetition.position,
-              }
-            );
-            message.actual = String(length);
-          }
-        }
-
-        return SKIP;
-      });
+      }
 
       return SKIP;
     });

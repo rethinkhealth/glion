@@ -37,48 +37,32 @@ const hl7v2LintExtraComponents = lintRule<Root>(
       return;
     }
 
-    visit(tree, "segment", (segment, segmentAncestors) => {
-      const fields = ctx.fields.get(segment.name);
-      if (!fields) {
+    visit(tree, "component", (component, ancestors, info) => {
+      const { segment, field, component: sequence } = info;
+      const profile =
+        segment && field && ctx.fields.get(segment.name)?.bySequence.get(field);
+      const datatype = profile && ctx.datatypes.get(profile.datatype);
+      // A primitive datatype has no component definitions; its value is
+      // component 1.
+      const defined =
+        !datatype ||
+        datatype.componentsBySequence.has(info.sequence) ||
+        info.sequence <= Math.max(1, ...datatype.componentsBySequence.keys());
+      // An empty field is left to the rules about empty fields; its
+      // component separators alone are not extra components. The field is
+      // the component's grandparent, after its repetition.
+      if (defined || isEmptyNode(ancestors.at(-2))) {
         return SKIP;
       }
 
-      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
-        const profile = fields.bySequence.get(sequence);
-        const datatype = profile && ctx.datatypes.get(profile.datatype);
-        if (!datatype || isEmptyNode(field)) {
-          return SKIP;
-        }
-
-        // A primitive datatype has no component definitions; its value is
-        // component 1.
-        const defined = Math.max(1, ...datatype.componentsBySequence.keys());
-
-        visit(field, "component", (component, componentAncestors, info) => {
-          if (info.sequence > defined) {
-            file.message(
-              messages.undefinedComponent(
-                `${segment.name}-${sequence}.${info.sequence}`,
-                profile.datatype,
-                ctx.version
-              ),
-              {
-                ancestors: [
-                  ...segmentAncestors,
-                  segment,
-                  ...componentAncestors,
-                  component,
-                ],
-                place: component.position,
-              }
-            );
-          }
-
-          return SKIP;
-        });
-
-        return SKIP;
-      });
+      file.message(
+        messages.undefinedComponent(
+          `${segment.name}-${field}.${sequence}`,
+          profile.datatype,
+          ctx.version
+        ),
+        { ancestors: [...ancestors, component], place: component.position }
+      );
 
       return SKIP;
     });
