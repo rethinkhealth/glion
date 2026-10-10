@@ -323,6 +323,58 @@ describe("visit", () => {
       expect(indices).toStrictEqual([0, 1, 2]);
       expect(sequences).toStrictEqual([1, 2, 3]);
     });
+
+    it("gives the position a node has when it is visited, after earlier siblings are removed", () => {
+      const segment = s("PID", f("a"), f("b"), f("c"), f("d"));
+      const last = segment.children.at(-1);
+      visit(segment, "field", (node, ancestors, info) => {
+        if (node === last) {
+          return;
+        }
+        (ancestors.at(-1) as Segment).children.splice(info.index, 1);
+        return info.index;
+      });
+      expect(segment.children).toStrictEqual([last]);
+    });
+
+    it("gives the position a node has when it is visited, after a sibling is inserted", () => {
+      const segment = s("PID", f("a"), f("b"));
+      const [first, second] = segment.children;
+      const inserted = f("inserted");
+      const sequences: [Nodes, number][] = [];
+      visit(segment, "field", (node, ancestors, info) => {
+        sequences.push([node, info.sequence]);
+        if (node === first) {
+          (ancestors.at(-1) as Segment).children.splice(1, 0, inserted);
+        }
+      });
+      expect(sequences).toStrictEqual([
+        [first, 1],
+        [inserted, 2],
+        [second, 3],
+      ]);
+    });
+
+    it("gives the position a node has when it is visited, after its parent's visitor prepends a sibling", () => {
+      const segment = s("PID", f("a"), f("b"));
+      const [first, second] = segment.children;
+      const prepended = f("prepended");
+      const sequences: [Nodes, number][] = [];
+      visit(segment, (node, _ancestors, info) => {
+        if (node === segment) {
+          segment.children.unshift(prepended);
+          return;
+        }
+        if (node.type === "field") {
+          sequences.push([node, info.sequence]);
+        }
+      });
+      expect(sequences).toStrictEqual([
+        [prepended, 1],
+        [first, 2],
+        [second, 3],
+      ]);
+    });
   });
 
   describe("edge cases", () => {
@@ -447,24 +499,40 @@ describe("visit", () => {
     });
   });
 
-  describe("security: Prototype pollution protection", () => {
-    it("should ignore __proto__ in test object", () => {
+  describe("test objects match own properties only", () => {
+    it("matches no node when a test key names an inherited property", () => {
       const ast = m(s("MSH", f(c()), f()));
       const visitedNodes: string[] = [];
 
       visit(
         ast,
-        { __proto__: "malicious", type: "segment" } as Partial<Segment>,
+        { toString: "x", type: "field" } as unknown as Partial<Segment>,
         (node) => {
           visitedNodes.push(node.type);
         }
       );
 
-      // Should match segments normally, ignoring __proto__
-      expect(visitedNodes).toStrictEqual(["segment"]);
+      expect(visitedNodes).toStrictEqual([]);
     });
 
-    it("should ignore constructor in test object", () => {
+    it("matches no node for an own __proto__ key, as JSON.parse creates", () => {
+      const ast = m(s("MSH", f(c()), f()));
+      const visitedNodes: string[] = [];
+
+      visit(
+        ast,
+        JSON.parse(
+          '{"__proto__":"malicious","type":"segment"}'
+        ) as Partial<Segment>,
+        (node) => {
+          visitedNodes.push(node.type);
+        }
+      );
+
+      expect(visitedNodes).toStrictEqual([]);
+    });
+
+    it("matches no node for a constructor key", () => {
       const ast = m(s("MSH", f(c()), f()));
       const visitedNodes: string[] = [];
 
@@ -479,11 +547,10 @@ describe("visit", () => {
         }
       );
 
-      // Should match fields normally, ignoring constructor
-      expect(visitedNodes).toStrictEqual(["field", "field"]);
+      expect(visitedNodes).toStrictEqual([]);
     });
 
-    it("should ignore prototype in test object", () => {
+    it("matches no node for a prototype key", () => {
       const ast = m(s("MSH", f(c()), f()));
       const visitedNodes: string[] = [];
 
@@ -498,8 +565,20 @@ describe("visit", () => {
         }
       );
 
-      // Should match components normally, ignoring prototype
-      expect(visitedNodes).toStrictEqual(["component"]);
+      expect(visitedNodes).toStrictEqual([]);
+    });
+
+    it("reads the test object when the test is created", () => {
+      const ast = m(s("MSH", f()), s("PID", f()));
+      const test: Partial<Segment> = { name: "MSH" };
+      const visitedNames: string[] = [];
+
+      visit(ast, test, (node) => {
+        visitedNames.push((node as Segment).name);
+        test.name = "PID";
+      });
+
+      expect(visitedNames).toStrictEqual(["MSH"]);
     });
   });
 

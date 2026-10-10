@@ -4,7 +4,7 @@ Visitor for traversing HL7v2 AST trees with ancestor context, depth, and HL7v2-a
 
 ## What it does
 
-Walks an HL7v2 AST from any starting node — Root, Segment, Field, Component, or Subcomponent — calling a visitor function for each matching node. Each call receives the node, its ancestors (root-to-parent), and a `VisitInfo` record with index, HL7v2 sequence number, depth, and extracted metadata. Supports filtering by type string, property object, or predicate, and exposes `SKIP`/`EXIT` control actions. Delegates core traversal to `unist-util-visit-parents` and pre-computes sibling indices for O(1) lookups.
+Walks an HL7v2 AST from any starting node — Root, Segment, Field, Component, or Subcomponent — calling a visitor function for each matching node. Each call receives the node, its ancestors (root-to-parent), and a `VisitInfo` record with index, HL7v2 sequence number, depth, and extracted metadata. Supports filtering by type string, property object, or predicate, and exposes `SKIP`/`EXIT` control actions. Delegates core traversal to `unist-util-visit-parents`.
 
 ## Install
 
@@ -52,7 +52,7 @@ Visit nodes in an HL7v2 AST tree.
 - `tree` (`Nodes`) — Tree to traverse. Can be any node type, not just `Root`.
 - `test` (`string | Partial<Nodes> | Test`, optional) — Filter:
   - `string` — Match nodes by type (e.g., `"segment"`).
-  - `Partial<Nodes>` — Match nodes with matching properties (e.g., `{ name: "PATIENT_GROUP" }`).
+  - `Partial<Nodes>` — Match nodes whose own properties equal (`===`) each value (e.g., `{ name: "PATIENT_GROUP" }`). A property the node does not own reads as `undefined`: an `undefined` value matches an absent property, and a key naming an inherited member (`constructor`, `toString`) matches no node.
   - `Test` — Custom function `(node, ancestors) => boolean`.
 - `visitor` (`Visitor`) — Function called for each matching node.
 
@@ -105,16 +105,16 @@ The visitor can return:
 
 ```typescript
 interface VisitInfo {
-  /** 0-based index among siblings */
+  /** 0-based index among the parent's children when the node is visited */
   index: number;
 
-  /** 1-based sequence (HL7v2 convention). For segment-header: 0 */
+  /** `index` + 1, the HL7v2 sequence number */
   sequence: number;
 
   /** 1-based depth in tree (root = 1) */
   depth: number;
 
-  /** Metadata (e.g., { header: "MSH" } or { name: "PATIENT" }) */
+  /** Metadata (e.g., { name: "MSH" } or { name: "PATIENT" }) */
   metadata: Record<string, unknown> | undefined;
 }
 ```
@@ -134,6 +134,17 @@ visit(
 ```
 
 This is correct because HL7v2 paths like `PID.3` refer to tree positions, not filtered positions.
+
+The position is read when the node is visited, so it reflects siblings a visitor inserted or removed earlier in the same visit. A visitor that removes the current node can return `info.index` to continue with the sibling that moved into its place:
+
+```typescript
+visit(segment, "field", (node, ancestors, info) => {
+  if (isEmptyNode(node)) {
+    ancestors.at(-1).children.splice(info.index, 1);
+    return info.index;
+  }
+});
+```
 
 ### Automatic metadata extraction
 
@@ -319,12 +330,14 @@ function extractPatientNames(ast: Root): PatientName[] {
     if (nameField?.children[0]?.children[0]) {
       const nameComponent = nameField.children[0].children[0];
       const name = (nameComponent.children[0] as Subcomponent)?.value || "";
-      const groupAncestor = ancestors.find((n) => n.type === "group");
+      const groupAncestor = ancestors.find(
+        (n): n is Group => n.type === "group"
+      );
 
       names.push({
         name,
         sequence: info.sequence,
-        inGroup: groupAncestor ? (groupAncestor as any).name : undefined,
+        inGroup: groupAncestor?.name,
       });
     }
   });

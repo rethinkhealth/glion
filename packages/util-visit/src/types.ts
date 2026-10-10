@@ -6,10 +6,14 @@ import type { VisitorResult } from "unist-util-visit-parents";
  * This is HL7v2-specific context not provided by unist-util-visit-parents.
  */
 export interface VisitInfo {
-  /** 0-based index among siblings */
+  /**
+   * 0-based index among the parent's children when the node is visited, or 0
+   * for the node the visit starts from. Reflects changes a visitor made to
+   * those children earlier in the same visit.
+   */
   index: number;
 
-  /** 1-based sequence (HL7v2 convention) */
+  /** `index` + 1, the HL7v2 sequence number. */
   sequence: number;
 
   /** 1-based depth in tree (root = 1) */

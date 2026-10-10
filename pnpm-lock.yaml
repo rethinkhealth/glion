@@ -2503,6 +2503,12 @@ importers:
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
+      '@stryker-mutator/core':
+        specifier: 10.0.0
+        version: 10.0.0(@types/node@25.6.0)
+      '@stryker-mutator/vitest-runner':
+        specifier: 10.0.0
+        version: 10.0.0(@stryker-mutator/core@10.0.0(@types/node@25.6.0))(vitest@4.1.11)
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
@@ -8238,7 +8244,7 @@ snapshots:
 
   mutation-server-protocol@0.4.1:
     dependencies:
-      zod: 4.4.2
+      zod: 4.4.3
 
   mutation-testing-elements@3.8.4: {}
 

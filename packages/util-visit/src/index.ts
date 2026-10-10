@@ -13,37 +13,9 @@ import { createTest } from "./utils";
 
 export type { VisitorResult } from "unist-util-visit-parents";
 
-// biome-ignore lint/performance/noBarrelFile: fine
 export { EXIT, SKIP } from "unist-util-visit-parents";
 
 export type { Predicate, Test, VisitInfo, Visitor } from "./types";
-
-/**
- * Build index map for O(1) child index lookups.
- * Pre-computes the index of each node within its parent's children array.
- *
- * @param tree - Root of tree to index
- * @returns WeakMap mapping each node to its index in parent.children
- */
-function buildIndexMap(tree: Nodes): WeakMap<Nodes, number> {
-  const map = new WeakMap<Nodes, number>();
-
-  function traverse(node: Nodes): void {
-    if ("children" in node && Array.isArray(node.children)) {
-      // oxlint-disable-next-line no-plusplus
-      for (let i = 0; i < node.children.length; i++) {
-        const child = node.children[i];
-        if (child) {
-          map.set(child, i);
-          traverse(child);
-        }
-      }
-    }
-  }
-
-  traverse(tree);
-  return map;
-}
 
 // Overload signatures
 export function visit(tree: Nodes, visitor: Visitor): void;
@@ -89,34 +61,47 @@ export function visit<T extends Nodes>(
 
   const predicate = createTest(test as Test<Nodes>);
 
-  // Pre-compute index map for O(1) lookups
-  const indexMap = buildIndexMap(tree);
+  // visit-parents passes a node's index among its parent's children only to
+  // its test, `test(node, index, parent)`, never to its visitor. It calls the
+  // test and, when the test passes, the visitor on that same node with nothing
+  // in between (unist-util-visit-parents 6.0.2, lib/index.js; the version is
+  // pinned). `captureIndex` is that test: it stores the index for the visitor
+  // to read and passes every node. The index is the node's position when it
+  // is visited, so it reflects siblings a visitor inserted or removed earlier.
+  let currentIndex = 0;
+  const captureIndex = (_node: unknown, index?: number): boolean => {
+    // The node `visit` starts from has no parent, so it has no index.
+    currentIndex = index ?? 0;
+    return true;
+  };
 
-  // Delegate traversal to unist-util-visit-parents
-  visitParents(tree, (node, ancestors) => {
-    // Only call visitor if node matches test
+  visitParents(tree, captureIndex, (node, ancestors) => {
+    // The caller's test runs here, not in `captureIndex`: it may read
+    // `ancestors`, which visit-parents gives only to the visitor.
     if (!predicate(node, ancestors)) {
-      return; // Continue traversal but skip visitor
+      // Returning nothing means "continue": visit-parents still walks into
+      // this node's children, so `visit(tree, "field", …)` reaches the fields
+      // of segments it does not match.
+      return;
     }
-
-    // Compute HL7v2-specific context
-    const parent = ancestors.at(-1);
-
-    // For root node (no parent), use defaults
-    // For children, look up their index in the parent's children array
-    const childIndex = parent ? (indexMap.get(node) ?? 0) : 0;
 
     const info: VisitInfo = {
       depth: ancestors.length + 1,
-      index: parent ? childIndex : 0,
-      metadata:
-        "name" in node && typeof node.name === "string"
-          ? { name: node.name }
-          : undefined,
-      sequence: parent ? childIndex + 1 : 1,
+      index: currentIndex,
+      metadata: "name" in node ? { name: node.name } : undefined,
+      sequence: currentIndex + 1,
     };
 
-    // Call user visitor with augmented signature
+    // visit-parents reads the visitor's return value to decide what to visit
+    // next, so the caller's result is passed through unchanged:
+    // - nothing or CONTINUE: walk into this node's children;
+    // - SKIP: skip this node's children;
+    // - EXIT: stop the walk;
+    // - a number: continue at that index among this node's siblings, as after
+    //   removing the current node with `splice(info.index, 1)`;
+    // - [action, index]: both.
+    // Calling the visitor without returning its result would turn every one
+    // of these into "continue".
     return visitor(node as T, ancestors, info);
   });
 }

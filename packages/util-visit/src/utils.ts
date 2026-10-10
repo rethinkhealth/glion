@@ -3,19 +3,40 @@ import type { Nodes } from "@glion/ast";
 import type { Predicate, Test } from "./types";
 
 /**
- * Create test predicate from various input types.
+ * The predicate a `visit` test describes.
  *
- * Assumptions:
+ * - `null` matches every node.
+ * - A string matches nodes whose `type` equals it.
+ * - A function is the predicate.
+ * - An object matches nodes whose own property equals (`===`) each of its values.
+ *   A property the node does not own reads as `undefined`, so an `undefined`
+ *   value matches an absent property, and a key that names an inherited member
+ *   (`constructor`, `toString`, an own `__proto__`) matches no node. The
+ *   object's entries are read once, when the predicate is created.
  *
- * - Null test matches all nodes
- * - String test matches by node.type property
- * - Object test uses strict equality (===) for property matching
- * - Explicit undefined values in test object check for property absence
- * - Dangerous keys (**proto**, constructor, prototype) are filtered for security
+ * @example
+ *   ```typescript
+ *   const msh = s("MSH", f("|"));
  *
- * @param test - Filter criteria: null (all), string (type), object
- *   (properties), or function
- * @returns Predicate function that returns true if node matches test criteria
+ *   createTest(null)(msh, []); // true
+ *   createTest("segment")(msh, []); // true
+ *   createTest("field")(msh, []); // false
+ *
+ *   createTest({ type: "segment", name: "MSH" })(msh, []); // true
+ *   createTest({ name: "PID" })(msh, []); // false
+ *
+ *   // `undefined` matches a property the node does not have
+ *   createTest({ name: undefined })(f("|"), []); // true
+ *
+ *   // An inherited member is never matched
+ *   createTest({ constructor: Object })(msh, []); // false
+ *
+ *   // A function receives the ancestors as well
+ *   const inGroup = createTest((_node, ancestors) => ancestors.length > 1);
+ *   ```;
+ *
+ * @param test - `null`, a node type, a property object, or a predicate.
+ * @returns The predicate.
  */
 export function createTest(test: Test<Nodes>): Predicate {
   if (test === null) {
@@ -25,31 +46,25 @@ export function createTest(test: Test<Nodes>): Predicate {
     return (node) => node.type === test;
   }
   if (typeof test === "function") {
+    // Used as is: `visit` calls it with `(node, ancestors)`, so it may match on
+    // a node's position in the tree as well as on the node itself.
     return test;
   }
-  // Object property matching
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Property matching requires checking multiple conditions
-  return (node) => {
-    for (const key of Object.keys(test)) {
-      // Guard against prototype pollution
-      if (key === "__proto__" || key === "constructor" || key === "prototype") {
-        continue;
-      }
 
-      const testValue = test[key as keyof typeof test];
-      // oxlint-disable-next-line typescript/no-explicit-any
-      const nodeValue = (node as any)[key];
+  // Read once here rather than per visited node: a visit calls the predicate
+  // for every node, and a test object changed during the visit does not change
+  // which nodes match.
+  const entries = Object.entries(test);
 
-      // If test has explicit undefined, check property doesn't exist or is undefined
-      if (testValue === undefined) {
-        if (Object.hasOwn(node, key) && nodeValue !== undefined) {
-          return false;
-        }
-      } else if (nodeValue !== testValue) {
-        // For non-undefined values, strict equality check
-        return false;
-      }
-    }
-    return true;
-  };
+  return (node) =>
+    entries.every(
+      ([key, value]) =>
+        // `Object.hasOwn` limits the match to the node's own properties. Without
+        // it, `node[key]` also finds inherited members, so `{ constructor: x }`
+        // or `{ toString: x }` would be compared against `Object.prototype`.
+        // `Reflect.get(node, key)` is `node[key]`; it compiles for an arbitrary
+        // string key, which `Nodes` (no index signature) does not allow.
+        (Object.hasOwn(node, key) ? Reflect.get(node, key) : undefined) ===
+        value
+    );
 }
