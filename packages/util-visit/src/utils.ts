@@ -25,13 +25,24 @@ export function createTest(test: Test<Nodes>): Predicate {
     return (node) => node.type === test;
   }
   if (typeof test === "function") {
+    // Used as is: `visit` calls it with `(node, ancestors)`, so it may match on
+    // a node's position in the tree as well as on the node itself.
     return test;
   }
 
+  // Read once here rather than per visited node: a visit calls the predicate
+  // for every node, and a test object changed during the visit does not change
+  // which nodes match.
   const entries = Object.entries(test);
+
   return (node) =>
     entries.every(
       ([key, value]) =>
+        // `Object.hasOwn` limits the match to the node's own properties. Without
+        // it, `node[key]` also finds inherited members, so `{ constructor: x }`
+        // or `{ toString: x }` would be compared against `Object.prototype`.
+        // `Reflect.get(node, key)` is `node[key]`; it compiles for an arbitrary
+        // string key, which `Nodes` (no index signature) does not allow.
         (Object.hasOwn(node, key) ? Reflect.get(node, key) : undefined) ===
         value
     );
