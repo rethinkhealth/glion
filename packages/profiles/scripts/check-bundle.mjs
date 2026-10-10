@@ -1,10 +1,10 @@
 /**
- * Checks the bundled event schemas, against the built package.
+ * Checks the bundled profiles, against the built package.
  *
  * Runs as the last step of `pnpm build`, so what is checked is what ships:
  *
- * 1. Every schema file matches `event-schema.schema.json` and names it in
- *    `$schema`.
+ * 1. Every profile file names the definition of `hl7v2.schema.json` for its kind
+ *    in `$schema`, and matches it.
  * 2. Every event map entry names a bundled schema, and every bundled schema maps
  *    to itself.
  * 3. Every schema loads, compiles, and accepts messages generated from it.
@@ -416,6 +416,51 @@ export function referenceMatch(schema, input, options = {}) {
 
 const readJson = (url) => JSON.parse(readFileSync(url, "utf8"));
 
+/** The definition of `hl7v2.schema.json` for each directory of profiles. */
+const KIND_OF_DIRECTORY = {
+  datatypes: "Datatype",
+  events: "EventSchema",
+  fields: "Fields",
+  tables: "Table",
+};
+
+/** The definition of `hl7v2.schema.json` for each file of a version. */
+const KIND_OF_FILE = {
+  "event-map.json": "EventMap",
+  "segments.json": "Segments",
+};
+
+const jsonFilesIn = (url) =>
+  readdirSync(url)
+    .filter((file) => file.endsWith(".json"))
+    .map((file) => new URL(file, url));
+
+/**
+ * Every bundled profile file and the definition it must conform to.
+ *
+ * @returns {{ url: URL; kind: string }[]} The files, with their definitions.
+ */
+const bundledProfileFiles = () => [
+  ...jsonFilesIn(new URL("utg/", PROFILES)).map((url) => ({
+    kind: "CodeSystem",
+    url,
+  })),
+  ...readdirSync(PROFILES)
+    .filter((entry) => entry.startsWith("v2"))
+    .flatMap((version) => [
+      ...Object.entries(KIND_OF_FILE).map(([file, kind]) => ({
+        kind,
+        url: new URL(`${version}/${file}`, PROFILES),
+      })),
+      ...Object.entries(KIND_OF_DIRECTORY).flatMap(([dir, kind]) =>
+        jsonFilesIn(new URL(`${version}/${dir}/`, PROFILES)).map((url) => ({
+          kind,
+          url,
+        }))
+      ),
+    ]),
+];
+
 const bundledEventSchemas = () =>
   readdirSync(PROFILES)
     .filter((entry) => entry.startsWith("v2"))
@@ -440,16 +485,18 @@ async function problemsInBundle() {
   /** @type {string[]} */
   const problems = [];
 
-  // 1. The event schema files match the JSON Schema they name.
-  const jsonSchema = readJson(new URL("event-schema.schema.json", PROFILES));
-  const validate = new Ajv({ allErrors: true }).compile(jsonSchema);
+  // 1. Every profile file names its definition and matches it.
+  const jsonSchema = readJson(new URL("hl7v2.schema.json", PROFILES));
+  const ajv = new Ajv({ allErrors: true, schemas: [jsonSchema] });
 
-  for (const { id, url, version } of bundled) {
-    const schema = readJson(url);
-    if (!validate(schema)) {
-      problems.push(`v${version}/${id} does not match the schema`);
-    } else if (schema.$schema !== jsonSchema.$id) {
-      problems.push(`v${version}/${id} names ${schema.$schema} in $schema`);
+  for (const { kind, url } of bundledProfileFiles()) {
+    const file = url.href.slice(PROFILES.href.length);
+    const definition = `${jsonSchema.$id}#/definitions/${kind}`;
+    const profile = readJson(url);
+    if (profile.$schema !== definition) {
+      problems.push(`${file} names ${profile.$schema} in $schema`);
+    } else if (!ajv.getSchema(definition)?.(profile)) {
+      problems.push(`${file} does not match ${kind}`);
     }
   }
 
@@ -530,7 +577,7 @@ if (executedDirectly) {
 
   if (problems.length > 0) {
     process.stderr.write(
-      `${problems.length} problem(s) in the bundled event schemas:\n${problems
+      `${problems.length} problem(s) in the bundled profiles:\n${problems
         .slice(0, REPORTED_PROBLEMS)
         .map((problem) => `  ${problem}\n`)
         .join("")}`
@@ -539,6 +586,6 @@ if (executedDirectly) {
   }
 
   process.stdout.write(
-    `${bundledEventSchemas().length} event schemas checked\n`
+    `${bundledProfileFiles().length} profile files and ${bundledEventSchemas().length} event schemas checked\n`
   );
 }

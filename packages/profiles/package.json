@@ -23,7 +23,7 @@
   },
   "files": [
     "dist",
-    "src/profiles/event-schema.schema.json"
+    "src/profiles/hl7v2.schema.json"
   ],
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -32,7 +32,7 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./event-schema.schema.json": "./src/profiles/event-schema.schema.json"
+    "./hl7v2.schema.json": "./src/profiles/hl7v2.schema.json"
   },
   "publishConfig": {
     "access": "public"

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/Table",
   "id": "0940",
   "description": "Limitation Type Codes",
   "type": "hl7",

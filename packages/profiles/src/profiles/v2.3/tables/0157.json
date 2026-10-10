@@ -1,4 +1,5 @@
 {
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/Table",
   "id": "0157",
   "description": "Which Date/Time Status Qualifier",
   "type": "hl7",

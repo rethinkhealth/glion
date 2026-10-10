@@ -1,4 +1,5 @@
 {
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/Table",
   "id": "0349",
   "description": "PSRO/UR Approval Indicator",
   "type": "user",

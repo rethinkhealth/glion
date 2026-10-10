@@ -8,8 +8,11 @@ import { lazyImport } from "./utils";
  */
 export type EventMap = Readonly<Record<string, string>>;
 
-const index = memoize((raw: Record<string, string>): EventMap =>
-  Object.setPrototypeOf({ ...raw }, null)
+/** Raw shape of a bundled event map file. */
+type EventMapModule = Readonly<{ events: Readonly<Record<string, string>> }>;
+
+const index = memoize((raw: EventMapModule): EventMap =>
+  Object.setPrototypeOf({ ...raw.events }, null)
 );
 
 /** The loader of event maps, one per HL7v2 version. */
@@ -29,7 +32,7 @@ export type EventMapStore = Readonly<{
 /** The loader of event maps. */
 export const eventMaps: EventMapStore = {
   load: async (version) => {
-    const raw = await lazyImport<Record<string, string>>(
+    const raw = await lazyImport<EventMapModule>(
       `../profiles/v${version}/event-map.json`
     );
     return raw === undefined ? undefined : index(raw);

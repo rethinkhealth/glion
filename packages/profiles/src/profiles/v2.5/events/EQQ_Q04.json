@@ -1,5 +1,5 @@
 {
-  "$schema": "https://glion.dev/schemas/event-schema/v2.json",
+  "$schema": "https://glion.dev/schemas/hl7v2/v1.json#/definitions/EventSchema",
   "id": "EQQ_Q04",
   "elements": [
     {
