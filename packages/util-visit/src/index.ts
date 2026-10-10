@@ -13,7 +13,6 @@ import { createTest } from "./utils";
 
 export type { VisitorResult } from "unist-util-visit-parents";
 
-// biome-ignore lint/performance/noBarrelFile: fine
 export { EXIT, SKIP } from "unist-util-visit-parents";
 
 export type { Predicate, Test, VisitInfo, Visitor } from "./types";

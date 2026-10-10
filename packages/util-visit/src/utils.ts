@@ -28,17 +28,14 @@ export function createTest(test: Test<Nodes>): Predicate {
     return test;
   }
   // Object property matching
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Property matching requires checking multiple conditions
   return (node) => {
-    for (const key of Object.keys(test)) {
+    for (const [key, testValue] of Object.entries(test)) {
       // Guard against prototype pollution
       if (key === "__proto__" || key === "constructor" || key === "prototype") {
         continue;
       }
 
-      const testValue = test[key as keyof typeof test];
-      // oxlint-disable-next-line typescript/no-explicit-any
-      const nodeValue = (node as any)[key];
+      const nodeValue: unknown = Reflect.get(node, key);
 
       // If test has explicit undefined, check property doesn't exist or is undefined
       if (testValue === undefined) {
