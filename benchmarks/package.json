@@ -31,6 +31,7 @@
     "@glion/transform-profile-groups": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "@glion/util-query": "workspace:*",
+    "@glion/util-visit": "workspace:*",
     "@types/node": "25.6.0",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",

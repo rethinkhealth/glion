@@ -14,6 +14,7 @@ import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetLintProfileRecommended from "@glion/preset-lint-profile-recommended";
 import { profiles, runner } from "@glion/profiles";
 import { hl7v2TransformProfileGroups } from "@glion/transform-profile-groups";
+import { SKIP, visit } from "@glion/util-visit";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -25,12 +26,31 @@ import {
   hl7File,
   ADT_A01_MINIMAL,
   ORU_R01_LARGE,
+  ORU_R01_HEADER,
   ORU_R01_MEDIUM,
   obxCodedLine,
+  oruObx,
+  repeat,
 } from "./fixtures/messages";
 import { source } from "./fixtures/streams";
 
 describe("canary — suites measure real work", () => {
+  it("visit: the ORU^R01 fixture has 205 segments and their fields", () => {
+    const tree = parseHL7v2(hl7(...ORU_R01_HEADER, ...repeat(oruObx, 200)));
+    let segments = 0;
+    let fields = 0;
+    visit(tree, "segment", (segment) => {
+      segments += 1;
+      visit(segment, "field", () => {
+        fields += 1;
+        return SKIP;
+      });
+      return SKIP;
+    });
+    expect(segments).toBe(205);
+    expect(fields).toBeGreaterThan(segments);
+  });
+
   it("parser: ADT_A01_SMALL parses to 3 segments", () => {
     const tree = parseHL7v2(ADT_A01_SMALL);
     expect(tree.children).toHaveLength(3);
