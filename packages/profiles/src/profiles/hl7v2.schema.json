@@ -2,6 +2,29 @@
   "$id": "https://glion.dev/schemas/hl7v2/v1.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Glion HL7v2 profiles",
+  "anyOf": [
+    {
+      "$ref": "#/definitions/EventSchema"
+    },
+    {
+      "$ref": "#/definitions/EventMap"
+    },
+    {
+      "$ref": "#/definitions/Segments"
+    },
+    {
+      "$ref": "#/definitions/Fields"
+    },
+    {
+      "$ref": "#/definitions/Datatype"
+    },
+    {
+      "$ref": "#/definitions/Table"
+    },
+    {
+      "$ref": "#/definitions/CodeSystem"
+    }
+  ],
   "definitions": {
     "EventSchema": {
       "type": "object",
@@ -334,6 +357,11 @@
         "required": {
           "type": "boolean",
           "description": "Whether the component must be valued."
+        },
+        "maxLength": {
+          "type": "integer",
+          "description": "The most characters the component may hold.",
+          "minimum": 1
         }
       },
       "required": ["sequence", "name", "datatypeId", "required"],

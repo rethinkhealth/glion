@@ -13,7 +13,7 @@
  * the standard defines it.
  */
 export type EventSchema = Readonly<{
-  /** The JSON Schema this event schema conforms to. */
+  /** The definition of `hl7v2.schema.json` this event schema conforms to. */
   $schema?: string;
   /** The message structure ID, as carried in MSH-9.3, such as `ORU_R01`. */
   id: string;

@@ -1,5 +1,14 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "packages/profiles/src/profiles/utg/*.json",
+        "packages/profiles/src/profiles/v2*/**/*.json"
+      ],
+      "url": "./packages/profiles/src/profiles/hl7v2.schema.json"
+    }
+  ],
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "emmet.showExpandedAbbreviation": "never",

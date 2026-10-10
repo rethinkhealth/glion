@@ -42,7 +42,7 @@ pnpm --filter @glion/benchmarks test        # Canaries proving suites measure re
 
 # Bundle size
 pnpm size                     # Check the size budgets in .size-limit.json (needs a build)
-pnpm --filter @glion/profiles check:bundle   # Check the bundled event schemas (runs in its build)
+pnpm --filter @glion/profiles check:bundle   # Check every bundled profile file against hl7v2.schema.json, and the event schemas against the engine (runs in its build)
 pnpm --filter @glion/profiles schema:compile <schema.json>   # Print the program an event schema compiles to
 
 # Dependencies

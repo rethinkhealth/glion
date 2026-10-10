@@ -263,10 +263,16 @@ type EventSchemaElement =
 | `Table`       | a table                            |
 | `CodeSystem`  | an HL7 Terminology code system     |
 
-Every bundled file names its definition in `$schema`, such as `https://glion.dev/schemas/hl7v2/v1.json#/definitions/Fields`, and conforms to it. The schema checks the shape; `runner` also requires that every choice alternative of an event schema matches at least one segment.
+Every bundled file names its definition in `$schema`, such as `https://glion.dev/schemas/hl7v2/v1.json#/definitions/Fields`, and conforms to it. The root accepts a file of any kind; select a definition to validate one kind. The schema checks the shape; `runner` also requires that every choice alternative of an event schema matches at least one segment.
 
 ```ts
+import { Ajv } from "ajv";
 import schema from "@glion/profiles/hl7v2.schema.json" with { type: "json" };
+
+const ajv = new Ajv({ schemas: [schema] });
+const validateEventSchema = ajv.getSchema(
+  `${schema.$id}#/definitions/EventSchema`
+);
 ```
 
 ### Tables and code systems

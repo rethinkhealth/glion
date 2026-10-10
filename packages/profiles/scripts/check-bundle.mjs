@@ -416,91 +416,125 @@ export function referenceMatch(schema, input, options = {}) {
 
 const readJson = (url) => JSON.parse(readFileSync(url, "utf8"));
 
-/** The definition of `hl7v2.schema.json` for each directory of profiles. */
-const KIND_OF_DIRECTORY = {
-  datatypes: "Datatype",
-  events: "EventSchema",
-  fields: "Fields",
-  tables: "Table",
-};
+/** The definition of `hl7v2.schema.json` for each directory of a version. */
+const KIND_OF_DIRECTORY = new Map([
+  ["datatypes", "Datatype"],
+  ["events", "EventSchema"],
+  ["fields", "Fields"],
+  ["tables", "Table"],
+]);
 
 /** The definition of `hl7v2.schema.json` for each file of a version. */
-const KIND_OF_FILE = {
-  "event-map.json": "EventMap",
-  "segments.json": "Segments",
-};
+const KIND_OF_FILE = new Map([
+  ["event-map.json", "EventMap"],
+  ["segments.json", "Segments"],
+]);
 
-const jsonFilesIn = (url) =>
-  readdirSync(url)
-    .filter((file) => file.endsWith(".json"))
-    .map((file) => new URL(file, url));
+const SCHEMA_FILE = "hl7v2.schema.json";
+const VERSION_DIRECTORY = /^v2(?:\.\d+)+$/;
 
 /**
- * Every bundled profile file and the definition it must conform to.
+ * The definition a profile file at `file` conforms to, or `undefined` when no
+ * kind of profile lives there.
  *
- * @returns {{ url: URL; kind: string }[]} The files, with their definitions.
+ * @param {string} file - The file's path under `src/profiles/`.
+ * @returns {string | undefined} The definition's name.
  */
-const bundledProfileFiles = () => [
-  ...jsonFilesIn(new URL("utg/", PROFILES)).map((url) => ({
-    kind: "CodeSystem",
-    url,
-  })),
-  ...readdirSync(PROFILES)
-    .filter((entry) => entry.startsWith("v2"))
-    .flatMap((version) => [
-      ...Object.entries(KIND_OF_FILE).map(([file, kind]) => ({
-        kind,
-        url: new URL(`${version}/${file}`, PROFILES),
-      })),
-      ...Object.entries(KIND_OF_DIRECTORY).flatMap(([dir, kind]) =>
-        jsonFilesIn(new URL(`${version}/${dir}/`, PROFILES)).map((url) => ({
-          kind,
-          url,
-        }))
-      ),
-    ]),
-];
+const kindOf = (file) => {
+  const [first, second, third, ...rest] = file.split("/");
+  if (rest.length > 0) {
+    return;
+  }
+  if (first === "utg" && third === undefined) {
+    return "CodeSystem";
+  }
+  if (!VERSION_DIRECTORY.test(first)) {
+    return;
+  }
+  if (third === undefined) {
+    return KIND_OF_FILE.get(second);
+  }
+  return KIND_OF_DIRECTORY.get(second);
+};
 
-const bundledEventSchemas = () =>
-  readdirSync(PROFILES)
-    .filter((entry) => entry.startsWith("v2"))
-    .flatMap((version) => {
-      const events = new URL(`${version}/events/`, PROFILES);
-      return readdirSync(events)
-        .filter((file) => file.endsWith(".json"))
-        .map((file) => ({
-          id: file.slice(0, -".json".length),
-          url: new URL(file, events),
-          version: version.slice(1),
-        }));
+/**
+ * Every JSON file under `src/profiles/` but the schema, with the definition
+ * its location gives it.
+ *
+ * @returns {{ file: string; url: URL; kind: string | undefined }[]} The files.
+ */
+const bundledProfileFiles = () =>
+  readdirSync(PROFILES, { recursive: true })
+    .filter((file) => file.endsWith(".json") && file !== SCHEMA_FILE)
+    .toSorted()
+    .map((file) => ({
+      file,
+      kind: kindOf(file),
+      url: new URL(file, PROFILES),
+    }));
+
+/**
+ * The bundled event schemas among `files`.
+ *
+ * @param {{ file: string; url: URL; kind: string | undefined }[]} files - The
+ *   bundled profile files.
+ * @returns {{ id: string; url: URL; version: string }[]} The event schemas.
+ */
+const eventSchemasIn = (files) =>
+  files
+    .filter(({ kind }) => kind === "EventSchema")
+    .map(({ file, url }) => {
+      const [version, , name] = file.split("/");
+      return {
+        id: name.slice(0, -".json".length),
+        url,
+        version: version.slice(1),
+      };
     });
 
-/** The problems found in the bundle; empty when there are none. */
-// oxlint-disable-next-line complexity/complexity -- four independent checks over the same file list, each a loop with its own failure branches
-async function problemsInBundle() {
-  const { Ajv } = await import("ajv");
-  const { profiles, runner } = await import("../dist/index.js");
-
-  const bundled = bundledEventSchemas();
-  /** @type {string[]} */
+/**
+ * The problems of check 1: a JSON file where no kind of profile lives, or a
+ * profile file that does not name its definition in `$schema` or match it.
+ *
+ * @param {{ file: string; url: URL; kind: string | undefined }[]} files - The
+ *   bundled profile files.
+ * @param {import("ajv").Ajv} ajv - Ajv with `hl7v2.schema.json` added.
+ * @param {string} schemaId - The `$id` of `hl7v2.schema.json`.
+ * @returns {string[]} The problems.
+ */
+function profileFileProblems(files, ajv, schemaId) {
   const problems = [];
-
-  // 1. Every profile file names its definition and matches it.
-  const jsonSchema = readJson(new URL("hl7v2.schema.json", PROFILES));
-  const ajv = new Ajv({ allErrors: true, schemas: [jsonSchema] });
-
-  for (const { kind, url } of bundledProfileFiles()) {
-    const file = url.href.slice(PROFILES.href.length);
-    const definition = `${jsonSchema.$id}#/definitions/${kind}`;
+  for (const { file, kind, url } of files) {
+    if (kind === undefined) {
+      problems.push(`${file} is where no kind of profile lives`);
+      continue;
+    }
+    const definition = `${schemaId}#/definitions/${kind}`;
     const profile = readJson(url);
+    const validate = ajv.getSchema(definition);
     if (profile.$schema !== definition) {
       problems.push(`${file} names ${profile.$schema} in $schema`);
-    } else if (!ajv.getSchema(definition)?.(profile)) {
-      problems.push(`${file} does not match ${kind}`);
+    } else if (!validate(profile)) {
+      problems.push(
+        `${file} does not match ${kind}: ${ajv.errorsText(validate.errors)}`
+      );
     }
   }
+  return problems;
+}
 
-  // 2. The event maps and the schema files agree.
+/**
+ * The problems of check 2: an event map entry that names no bundled event
+ * schema, or a bundled event schema its version's event map does not map to
+ * itself.
+ *
+ * @param {{ id: string; version: string }[]} bundled - The bundled event
+ *   schemas.
+ * @param {import("../src/index").Profiles} profiles - The built profiles.
+ * @returns {Promise<string[]>} The problems.
+ */
+async function eventMapProblems(bundled, profiles) {
+  const problems = [];
   const ids = new Set(bundled.map(({ id, version }) => `v${version}/${id}`));
   const versions = [...new Set(bundled.map(({ version }) => version))];
   const eventMaps = Object.fromEntries(
@@ -527,7 +561,56 @@ async function problemsInBundle() {
     }
   }
 
-  // 3 and 4. The engine runs every schema as the reference does.
+  return problems;
+}
+
+/**
+ * Where `runner` and `referenceMatch` part on a valid message and a near miss
+ * of one schema.
+ *
+ * @param {typeof import("../src/index").runner} runner - The built runner.
+ * @param {EventSchema} schema - The event schema.
+ * @param {{ valid: string[]; miss: string[] }} messages - A message the schema
+ *   accepts, and a near miss of it.
+ * @param {{ allowZSegments: boolean; label: string }} options - The runner
+ *   option, and the label of a problem.
+ * @returns {string[]} The problems.
+ */
+function messageProblems(runner, schema, { valid, miss }, options) {
+  const { allowZSegments, label } = options;
+  const runnerOptions = { allowZSegments };
+  const result = runner(schema, valid, runnerOptions);
+  const problems = [];
+
+  if (result.type !== "matched") {
+    problems.push(`${label} rejects ${valid.join(" ")}`);
+  } else if (
+    JSON.stringify(result.groups) !==
+    JSON.stringify(referenceMatch(schema, valid, runnerOptions))
+  ) {
+    problems.push(`${label} groups ${valid.join(" ")} differently`);
+  }
+  if (
+    (runner(schema, miss, runnerOptions).type === "matched") !==
+    (referenceMatch(schema, miss, runnerOptions) !== undefined)
+  ) {
+    problems.push(`${label} disagrees on ${miss.join(" ")}`);
+  }
+  return problems;
+}
+
+/**
+ * The problems of checks 3 and 4: an event schema that rejects a message
+ * generated from it, or that `runner` groups otherwise than `referenceMatch`.
+ *
+ * @param {{ id: string; version: string }[]} bundled - The bundled event
+ *   schemas.
+ * @param {import("../src/index").Profiles} profiles - The built profiles.
+ * @param {typeof import("../src/index").runner} runner - The built runner.
+ * @returns {Promise<string[]>} The problems.
+ */
+async function engineProblems(bundled, profiles, runner) {
+  const problems = [];
   for (const { id, version } of bundled) {
     const schema = await profiles.events.load(version, id);
     const random = seeded(version.length * 31 + id.length);
@@ -543,24 +626,17 @@ async function problemsInBundle() {
         isUnnamedZSegment(name, named)
       );
       for (const allowZSegments of strictDiffers ? [true, false] : [true]) {
-        const options = { allowZSegments };
-        const label = `v${version}/${id} (allowZSegments ${allowZSegments})`;
-        const result = runner(schema, valid, options);
-
-        if (result.type !== "matched") {
-          problems.push(`${label} rejects ${valid.join(" ")}`);
-        } else if (
-          JSON.stringify(result.groups) !==
-          JSON.stringify(referenceMatch(schema, valid, options))
-        ) {
-          problems.push(`${label} groups ${valid.join(" ")} differently`);
-        }
-        if (
-          (runner(schema, miss, options).type === "matched") !==
-          (referenceMatch(schema, miss, options) !== undefined)
-        ) {
-          problems.push(`${label} disagrees on ${miss.join(" ")}`);
-        }
+        problems.push(
+          ...messageProblems(
+            runner,
+            schema,
+            { miss, valid },
+            {
+              allowZSegments,
+              label: `v${version}/${id} (allowZSegments ${allowZSegments})`,
+            }
+          )
+        );
       }
     }
   }
@@ -568,12 +644,37 @@ async function problemsInBundle() {
   return problems;
 }
 
+/**
+ * The problems found in the bundle; empty when there are none.
+ *
+ * @param {{ file: string; url: URL; kind: string | undefined }[]} files - The
+ *   bundled profile files.
+ * @returns {Promise<string[]>} The problems.
+ */
+async function problemsInBundle(files) {
+  const { Ajv } = await import("ajv");
+  const { profiles, runner } = await import("../dist/index.js");
+  const bundled = eventSchemasIn(files);
+  const jsonSchema = readJson(new URL(SCHEMA_FILE, PROFILES));
+
+  return [
+    ...profileFileProblems(
+      files,
+      new Ajv({ allErrors: true, schemas: [jsonSchema] }),
+      jsonSchema.$id
+    ),
+    ...(await eventMapProblems(bundled, profiles)),
+    ...(await engineProblems(bundled, profiles, runner)),
+  ];
+}
+
 const executedDirectly =
   process.argv[1] !== undefined &&
   import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (executedDirectly) {
-  const problems = await problemsInBundle();
+  const files = bundledProfileFiles();
+  const problems = await problemsInBundle(files);
 
   if (problems.length > 0) {
     process.stderr.write(
@@ -586,6 +687,6 @@ if (executedDirectly) {
   }
 
   process.stdout.write(
-    `${bundledProfileFiles().length} profile files and ${bundledEventSchemas().length} event schemas checked\n`
+    `${files.length} profile files and ${eventSchemasIn(files).length} event schemas checked\n`
   );
 }
