@@ -1,5 +1,16 @@
 # @rethinkhealth/hl7v2-lint-segment-header-length
 
+## 0.23.0
+
+### Patch Changes
+
+- [#905](https://github.com/rethinkhealth/glion/pull/905) [`7cb9a7c`](https://github.com/rethinkhealth/glion/commit/7cb9a7c2e7713cbaeea9a6aaa12543b52a310f34) Thanks [@meleksomai](https://github.com/meleksomai)! - Name the Segment ID in the report, as one sentence, with the Segment ID in `actual`:
+
+  - `The Segment ID \`PID1\` is 4 characters long; a Segment ID must be exactly 3 characters.`
+  - `The segment has an empty Segment ID; a Segment ID must be exactly 3 characters.`
+
+  The rule's `url` points to its README in this repository.
+
 ## 0.22.0
 
 No changes in this release.

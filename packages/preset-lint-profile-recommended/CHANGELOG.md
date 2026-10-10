@@ -1,5 +1,24 @@
 # @rethinkhealth/hl7v2-preset-lint-profile-recommended
 
+## 0.23.0
+
+### Minor Changes
+
+- [#893](https://github.com/rethinkhealth/glion/pull/893) [`1281391`](https://github.com/rethinkhealth/glion/commit/128139121e07cf27b6c2d2641341bf891ef547ba) Thanks [@meleksomai](https://github.com/meleksomai)! - Report violations of the base standard as errors. `required-fields`, `required-components`, `field-repetition`, and `segment-order` now emit fatal messages; `field-max-length`, `table-values`, `extra-fields`, and `extra-components` stay warnings.
+
+### Patch Changes
+
+- Updated dependencies [[`0783f74`](https://github.com/rethinkhealth/glion/commit/0783f740cd35d4c74f8900ec616aafe7f3e229d3)]:
+  - @glion/lint-profile-segment-order@0.23.0
+  - @glion/annotate-profile-context@0.23.0
+  - @glion/lint-profile-extra-components@0.23.0
+  - @glion/lint-profile-extra-fields@0.23.0
+  - @glion/lint-profile-field-max-length@0.23.0
+  - @glion/lint-profile-field-repetition@0.23.0
+  - @glion/lint-profile-required-components@0.23.0
+  - @glion/lint-profile-required-fields@0.23.0
+  - @glion/lint-profile-table-values@0.23.0
+
 ## 0.22.0
 
 ### Patch Changes
