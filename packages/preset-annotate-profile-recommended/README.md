@@ -4,7 +4,7 @@ Preset bundling every profile-based annotation plugin so the AST carries full pr
 
 ## What it does
 
-This preset wires the five profile annotation plugins plus the `annotate-profile-context` loader into a single `unified` plugin. One `.use(...)` call enriches every segment, field, field-repetition, component, sub-component, and coded value in the AST with its HL7v2 profile metadata — names, datatypes, required flags, repeatability, max lengths, table references, and code-system displays. The annotated tree is self-describing and can be walked without loading any profiles yourself.
+This preset wires the five profile annotation plugins plus the `annotate-profile-context` loader into a single `unified` plugin. One `.use(...)` call enriches every segment, field, field-repetition, component, sub-component, and coded value in the AST with its HL7v2 profile metadata — names, datatypes, optionality, repetitions, max lengths, table references, and code-system displays. The annotated tree is self-describing and can be walked without loading any profiles yourself.
 
 ## Install
 
@@ -29,7 +29,7 @@ const file = await processor.process(
 );
 
 visit(file.result, "field", (node) => {
-  if (node.data?.required && node.data.name) {
+  if (node.data?.optionality === "R" && node.data.name) {
     console.log(`Required: ${node.data.id} (${node.data.name})`);
   }
 });
@@ -45,13 +45,13 @@ Default export is a `Preset` (unified's `{ plugins: [...] }` shape). No options 
 
 The preset applies these plugins in order. `annotate-profile-context` runs first so each subsequent plugin reads the pre-resolved profile from `file.data.profile`.
 
-| Plugin                                                                                   | Annotates                                                                                      |
-| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| [`@glion/annotate-profile-context`](../annotate-profile-context)                         | Loads the HL7v2 profile for the message version onto `file.data`.                              |
-| [`@glion/annotate-profile-segments`](../annotate-profile-segments)                       | Annotates Segment nodes with their human-readable title (e.g. `MSH` → `"Message Header"`).     |
-| [`@glion/annotate-profile-fields`](../annotate-profile-fields)                           | Annotates Field nodes with `name`, `required`, `repeatable`, `datatype`, `maxLength`, `table`. |
-| [`@glion/annotate-profile-datatypes`](../annotate-profile-datatypes)                     | Annotates FieldRepetition, Component, and Subcomponent nodes with datatype metadata.           |
-| [`@glion/annotate-profile-fields-code-systems`](../annotate-profile-fields-code-systems) | Annotates coded fields with UTG code-system identity and resolved display values.              |
+| Plugin                                                                                   | Annotates                                                                                          |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| [`@glion/annotate-profile-context`](../annotate-profile-context)                         | Loads the HL7v2 profile for the message version onto `file.data`.                                  |
+| [`@glion/annotate-profile-segments`](../annotate-profile-segments)                       | Annotates Segment nodes with their human-readable title (e.g. `MSH` → `"Message Header"`).         |
+| [`@glion/annotate-profile-fields`](../annotate-profile-fields)                           | Annotates Field nodes with `name`, `optionality`, `repetitions`, `datatype`, `maxLength`, `table`. |
+| [`@glion/annotate-profile-datatypes`](../annotate-profile-datatypes)                     | Annotates FieldRepetition, Component, and Subcomponent nodes with datatype metadata.               |
+| [`@glion/annotate-profile-fields-code-systems`](../annotate-profile-fields-code-systems) | Annotates coded fields with UTG code-system identity and resolved display values.                  |
 
 All five plugins read the HL7v2 version from `MSH-12` and load profiles via `@glion/profiles`. Unknown segments (Z-segments) are silently skipped so non-standard content passes through unchanged.
 

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "OM5-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 4,
       "name": "Sequence Number - Test/ Observation Master File",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "OM5-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CE",
       "maxLength": 200,
       "name": "Test/Observations Included w/an Ordered Test Battery",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "OM5-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 200,
       "name": "Observation ID Suffixes",

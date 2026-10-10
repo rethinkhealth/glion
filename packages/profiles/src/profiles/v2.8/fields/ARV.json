@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ARV-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "ARV-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70206",
       "name": "Access Restriction Action Code",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "ARV-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70717",
       "name": "Access Restriction Value",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "ARV-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70719",
       "name": "Access Restriction Reason",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "ARV-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "ST",
       "name": "Special Access Restriction Instructions",
       "item": "2147"
@@ -53,8 +53,8 @@
     {
       "sequence": 6,
       "id": "ARV-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DR",
       "name": "Access Restriction Date Range",
       "item": "2148"

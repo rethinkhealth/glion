@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "BLG-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CCD",
       "table": "HL70100",
       "name": "When to Charge",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "BLG-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70122",
@@ -25,8 +25,8 @@
     {
       "sequence": 3,
       "id": "BLG-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CX",
       "name": "Account ID",
       "item": "236"
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "BLG-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70475",
       "name": "Charge Type Reason",

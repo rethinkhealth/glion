@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PRD-1",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70286",
       "name": "Provider Role",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "PRD-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Provider Name",
       "item": "1156"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "PRD-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Provider Address",
       "item": "1157"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "PRD-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "PL",
       "name": "Provider Location",
       "item": "1158"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "PRD-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Provider Communication Information",
       "item": "1159"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "PRD-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70185",
       "name": "Preferred Method of Contact",
@@ -60,8 +60,8 @@
     {
       "sequence": 7,
       "id": "PRD-7",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "PLN",
       "table": "HL70338",
       "name": "Provider Identifiers",
@@ -70,8 +70,8 @@
     {
       "sequence": 8,
       "id": "PRD-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Effective Start Date of Provider Role",
       "item": "1163"
@@ -79,8 +79,8 @@
     {
       "sequence": 9,
       "id": "PRD-9",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "DTM",
       "name": "Effective End Date of Provider Role",
       "item": "1164"
@@ -88,8 +88,8 @@
     {
       "sequence": 10,
       "id": "PRD-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XON",
       "name": "Provider Organization Name and Identifier",
       "item": "2256"
@@ -97,8 +97,8 @@
     {
       "sequence": 11,
       "id": "PRD-11",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Provider Organization Address",
       "item": "2257"
@@ -106,8 +106,8 @@
     {
       "sequence": 12,
       "id": "PRD-12",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "PL",
       "name": "Provider Organization Location Information",
       "item": "2258"
@@ -115,8 +115,8 @@
     {
       "sequence": 13,
       "id": "PRD-13",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Provider Organization Communication Information",
       "item": "2259"
@@ -124,8 +124,8 @@
     {
       "sequence": 14,
       "id": "PRD-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70185",
       "name": "Provider Organization Method of Contact",

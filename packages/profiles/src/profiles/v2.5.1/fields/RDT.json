@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "RDT-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "var",
       "maxLength": 99999,
       "name": "Column Value",

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "OBX-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - OBX",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "OBX-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70125",
@@ -25,8 +25,8 @@
     {
       "sequence": 3,
       "id": "OBX-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Observation Identifier",
       "item": "571"
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "OBX-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "OG",
       "name": "Observation Sub-ID",
       "item": "572"
@@ -43,8 +43,8 @@
     {
       "sequence": 5,
       "id": "OBX-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "varies",
       "name": "Observation Value",
       "item": "573"
@@ -52,8 +52,8 @@
     {
       "sequence": 6,
       "id": "OBX-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Units",
       "item": "574"
@@ -61,8 +61,8 @@
     {
       "sequence": 7,
       "id": "OBX-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "References Range",
       "item": "575"
@@ -70,8 +70,8 @@
     {
       "sequence": 8,
       "id": "OBX-8",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70078",
       "name": "Interpretation Codes",
@@ -80,8 +80,8 @@
     {
       "sequence": 9,
       "id": "OBX-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Probability",
       "item": "577"
@@ -89,8 +89,8 @@
     {
       "sequence": 10,
       "id": "OBX-10",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70080",
@@ -100,8 +100,8 @@
     {
       "sequence": 11,
       "id": "OBX-11",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70085",
@@ -111,8 +111,8 @@
     {
       "sequence": 12,
       "id": "OBX-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Effective Date of Reference Range",
       "item": "580"
@@ -120,8 +120,8 @@
     {
       "sequence": 13,
       "id": "OBX-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "User Defined Access Checks",
       "item": "581"
@@ -129,8 +129,8 @@
     {
       "sequence": 14,
       "id": "OBX-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Date/Time of the Observation",
       "item": "582"
@@ -138,8 +138,8 @@
     {
       "sequence": 15,
       "id": "OBX-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "B",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Producer's ID",
       "item": "583"
@@ -147,8 +147,8 @@
     {
       "sequence": 16,
       "id": "OBX-16",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Responsible Observer",
       "item": "584"
@@ -156,8 +156,8 @@
     {
       "sequence": 17,
       "id": "OBX-17",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Observation Method",
       "item": "936"
@@ -165,8 +165,8 @@
     {
       "sequence": 18,
       "id": "OBX-18",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Equipment Instance Identifier",
       "item": "1479"
@@ -174,8 +174,8 @@
     {
       "sequence": 19,
       "id": "OBX-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Date/Time of the Analysis",
       "item": "1480"
@@ -183,8 +183,8 @@
     {
       "sequence": 20,
       "id": "OBX-20",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70163",
       "name": "Observation Site",
@@ -193,8 +193,8 @@
     {
       "sequence": 21,
       "id": "OBX-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Observation Instance Identifier",
       "item": "2180"
@@ -202,8 +202,8 @@
     {
       "sequence": 22,
       "id": "OBX-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70725",
       "name": "Mood Code",
@@ -212,8 +212,8 @@
     {
       "sequence": 23,
       "id": "OBX-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "B",
+      "repetitions": 1,
       "datatype": "XON",
       "name": "Performing Organization Name",
       "item": "2283"
@@ -221,8 +221,8 @@
     {
       "sequence": 24,
       "id": "OBX-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "B",
+      "repetitions": 1,
       "datatype": "XAD",
       "name": "Performing Organization Address",
       "item": "2284"
@@ -230,8 +230,8 @@
     {
       "sequence": 25,
       "id": "OBX-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "B",
+      "repetitions": 1,
       "datatype": "XCN",
       "name": "Performing Organization Medical Director",
       "item": "2285"
@@ -239,8 +239,8 @@
     {
       "sequence": 26,
       "id": "OBX-26",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 10,
       "table": "HL70909",
@@ -250,8 +250,8 @@
     {
       "sequence": 27,
       "id": "OBX-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70914",
       "name": "Root Cause",
@@ -260,8 +260,8 @@
     {
       "sequence": 28,
       "id": "OBX-28",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70915",
       "name": "Local Process Control",
@@ -270,8 +270,8 @@
     {
       "sequence": 29,
       "id": "OBX-29",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "table": "HL70936",
       "name": "Observation Type",
@@ -280,8 +280,8 @@
     {
       "sequence": 30,
       "id": "OBX-30",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "table": "HL70937",
       "name": "Observation Sub-Type",

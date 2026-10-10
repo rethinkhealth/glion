@@ -1,7 +1,11 @@
 // oxlint-disable-next-line no-unused-vars -- triggers VFile DataMap augmentation
 import type { ProfileContext } from "@glion/annotate-profile-context";
 import type { FieldData, Root, Segment } from "@glion/ast";
-import type { FieldProfile } from "@glion/profiles";
+import type {
+  FieldOptionality,
+  FieldProfile,
+  FieldRepetitions,
+} from "@glion/profiles";
 import { SKIP, visit } from "@glion/util-visit";
 import type { Plugin } from "unified";
 import type { VFile } from "vfile";
@@ -12,10 +16,10 @@ declare module "@glion/ast" {
     id?: string | undefined;
     /** Human-readable field name from the profile (e.g., "Patient Name"). */
     name?: string | undefined;
-    /** Whether this field is required in the segment. */
-    required?: boolean | undefined;
-    /** Whether this field supports repetition. */
-    repeatable?: boolean | undefined;
+    /** HL7v2 optionality of this field (OPT). */
+    optionality?: FieldOptionality | undefined;
+    /** Most occurrences this field may have (RP/#), or `"unbounded"`. */
+    repetitions?: FieldRepetitions | undefined;
     /** Datatype ID for this field (e.g., "XPN", "ST", "CWE"). */
     datatype?: string | undefined;
     /** Maximum allowed length for this field. */
@@ -71,8 +75,10 @@ export const hl7v2AnnotateProfileFields: Plugin<[], Root, Root> =
 function spreadFieldProfile(data: FieldData, profile: FieldProfile): void {
   data.id = profile.id;
   data.name = profile.name;
-  data.required = profile.required;
-  data.repeatable = profile.repeatable;
+  if (profile.optionality !== undefined) {
+    data.optionality = profile.optionality;
+  }
+  data.repetitions = profile.repetitions;
   if (profile.datatype !== undefined) {
     data.datatype = profile.datatype;
   }

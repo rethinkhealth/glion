@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ARQ-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Placer Appointment ID",
       "item": "860"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "ARQ-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Filler Appointment ID",
       "item": "861"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "ARQ-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Occurrence Number",
       "item": "862"
@@ -31,8 +31,8 @@
     {
       "sequence": 4,
       "id": "ARQ-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Placer Group Number",
       "item": "218"
@@ -40,8 +40,8 @@
     {
       "sequence": 5,
       "id": "ARQ-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Schedule ID",
       "item": "864"
@@ -49,8 +49,8 @@
     {
       "sequence": 6,
       "id": "ARQ-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Request Event Reason",
       "item": "865"
@@ -58,8 +58,8 @@
     {
       "sequence": 7,
       "id": "ARQ-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70276",
       "name": "Appointment Reason",
@@ -68,8 +68,8 @@
     {
       "sequence": 8,
       "id": "ARQ-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70277",
       "name": "Appointment Type",
@@ -78,8 +78,8 @@
     {
       "sequence": 9,
       "id": "ARQ-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Appointment Duration",
       "item": "868"
@@ -87,8 +87,8 @@
     {
       "sequence": 10,
       "id": "ARQ-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "name": "Appointment Duration Units",
       "item": "869"
@@ -96,8 +96,8 @@
     {
       "sequence": 11,
       "id": "ARQ-11",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "DR",
       "name": "Requested Start Date/Time Range",
       "item": "870"
@@ -105,8 +105,8 @@
     {
       "sequence": 12,
       "id": "ARQ-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Priority-ARQ",
       "item": "871"
@@ -114,8 +114,8 @@
     {
       "sequence": 13,
       "id": "ARQ-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "RI",
       "name": "Repeating Interval",
       "item": "872"
@@ -123,8 +123,8 @@
     {
       "sequence": 14,
       "id": "ARQ-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Repeating Interval Duration",
       "item": "873"
@@ -132,8 +132,8 @@
     {
       "sequence": 15,
       "id": "ARQ-15",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Placer Contact Person",
       "item": "874"
@@ -141,8 +141,8 @@
     {
       "sequence": 16,
       "id": "ARQ-16",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Placer Contact Phone Number",
       "item": "875"
@@ -150,8 +150,8 @@
     {
       "sequence": 17,
       "id": "ARQ-17",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Placer Contact Address",
       "item": "876"
@@ -159,8 +159,8 @@
     {
       "sequence": 18,
       "id": "ARQ-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "PL",
       "name": "Placer Contact Location",
       "item": "877"
@@ -168,8 +168,8 @@
     {
       "sequence": 19,
       "id": "ARQ-19",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Entered By Person",
       "item": "878"
@@ -177,8 +177,8 @@
     {
       "sequence": 20,
       "id": "ARQ-20",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Entered By Phone Number",
       "item": "879"
@@ -186,8 +186,8 @@
     {
       "sequence": 21,
       "id": "ARQ-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "PL",
       "name": "Entered By Location",
       "item": "880"
@@ -195,8 +195,8 @@
     {
       "sequence": 22,
       "id": "ARQ-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Parent Placer Appointment ID",
       "item": "881"
@@ -204,8 +204,8 @@
     {
       "sequence": 23,
       "id": "ARQ-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Parent Filler Appointment ID",
       "item": "882"
@@ -213,8 +213,8 @@
     {
       "sequence": 24,
       "id": "ARQ-24",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Placer Order Number",
       "item": "216"
@@ -222,8 +222,8 @@
     {
       "sequence": 25,
       "id": "ARQ-25",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Filler Order Number",
       "item": "217"

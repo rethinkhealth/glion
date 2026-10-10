@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ORO-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 200,
       "name": "ORDER ITEM ID",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "ORO-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "name": "SUBSTITUTE ALLOWED",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "ORO-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CN",
       "maxLength": 80,
       "name": "RESULTS COPIES TO",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "ORO-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70012",

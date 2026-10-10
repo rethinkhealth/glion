@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ERR-1",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "ID",
       "maxLength": 80,
       "table": "HL70060",

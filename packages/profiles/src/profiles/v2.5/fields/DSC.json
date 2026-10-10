@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "DSC-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 180,
       "name": "Continuation Pointer",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "DSC-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70398",

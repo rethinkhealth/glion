@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "GP2-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70456",
       "name": "Revenue Code",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "GP2-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Number of Service Units",
       "item": "1604"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "GP2-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Charge",
       "item": "1605"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "GP2-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70459",
       "name": "Reimbursement Action Code",
@@ -42,8 +42,8 @@
     {
       "sequence": 5,
       "id": "GP2-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70460",
       "name": "Denial or Rejection Code",
@@ -52,8 +52,8 @@
     {
       "sequence": 6,
       "id": "GP2-6",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70458",
       "name": "OCE Edit Code",
@@ -62,8 +62,8 @@
     {
       "sequence": 7,
       "id": "GP2-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70466",
       "name": "Ambulatory Payment Classification Code",
@@ -72,8 +72,8 @@
     {
       "sequence": 8,
       "id": "GP2-8",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70467",
       "name": "Modifier Edit Code",
@@ -82,8 +82,8 @@
     {
       "sequence": 9,
       "id": "GP2-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70468",
       "name": "Payment Adjustment Code",
@@ -92,8 +92,8 @@
     {
       "sequence": 10,
       "id": "GP2-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70469",
       "name": "Packaging Status Code",
@@ -102,8 +102,8 @@
     {
       "sequence": 11,
       "id": "GP2-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Expected CMS Payment Amount",
       "item": "1618"
@@ -111,8 +111,8 @@
     {
       "sequence": 12,
       "id": "GP2-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70470",
       "name": "Reimbursement Type Code",
@@ -121,8 +121,8 @@
     {
       "sequence": 13,
       "id": "GP2-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Co-Pay Amount",
       "item": "1620"
@@ -130,8 +130,8 @@
     {
       "sequence": 14,
       "id": "GP2-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Pay Rate per Service Unit",
       "item": "1621"

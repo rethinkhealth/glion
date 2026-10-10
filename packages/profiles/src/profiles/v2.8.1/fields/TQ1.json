@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "TQ1-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - TQ1",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "TQ1-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "name": "Quantity",
       "item": "1628"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "TQ1-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "RPT",
       "name": "Repeat Pattern",
       "item": "1629"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "TQ1-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "TM",
       "name": "Explicit Time",
       "item": "1630"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "TQ1-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CQ",
       "name": "Relative Time and Units",
       "item": "1631"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "TQ1-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "name": "Service Duration",
       "item": "1632"
@@ -59,8 +59,8 @@
     {
       "sequence": 7,
       "id": "TQ1-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Start date/time",
       "item": "1633"
@@ -68,8 +68,8 @@
     {
       "sequence": 8,
       "id": "TQ1-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "End date/time",
       "item": "1634"
@@ -77,8 +77,8 @@
     {
       "sequence": 9,
       "id": "TQ1-9",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70485",
       "name": "Priority",
@@ -87,8 +87,8 @@
     {
       "sequence": 10,
       "id": "TQ1-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "TX",
       "name": "Condition text",
       "item": "1636"
@@ -96,8 +96,8 @@
     {
       "sequence": 11,
       "id": "TQ1-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "TX",
       "name": "Text instruction",
       "item": "1637"
@@ -105,8 +105,8 @@
     {
       "sequence": 12,
       "id": "TQ1-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70472",
@@ -116,8 +116,8 @@
     {
       "sequence": 13,
       "id": "TQ1-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "name": "Occurrence duration",
       "item": "1639"
@@ -125,8 +125,8 @@
     {
       "sequence": 14,
       "id": "TQ1-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Total occurrences",
       "item": "1640"

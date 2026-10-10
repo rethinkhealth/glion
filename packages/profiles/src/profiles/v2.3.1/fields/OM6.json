@@ -4,8 +4,7 @@
     {
       "sequence": 1,
       "id": "OM6-1",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 4,
       "name": "Sequence Number - Test/Observation Master File",
@@ -14,8 +13,7 @@
     {
       "sequence": 2,
       "id": "OM6-2",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "TX",
       "maxLength": 10240,
       "name": "Derivation Rule",

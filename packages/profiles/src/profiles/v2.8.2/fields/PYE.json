@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PYE-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - PYE",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "PYE-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70557",
       "name": "Payee Type",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "PYE-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70558",
       "name": "Payee Relationship to Invoice (Patient)",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "PYE-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "XON",
       "name": "Payee Identification List",
       "item": "1942"
@@ -43,8 +43,8 @@
     {
       "sequence": 5,
       "id": "PYE-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "XPN",
       "name": "Payee Person Name",
       "item": "1943"
@@ -52,8 +52,8 @@
     {
       "sequence": 6,
       "id": "PYE-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "XAD",
       "name": "Payee Address",
       "item": "1944"
@@ -61,8 +61,8 @@
     {
       "sequence": 7,
       "id": "PYE-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70570",
       "name": "Payment Method",

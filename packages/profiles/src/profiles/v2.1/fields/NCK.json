@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "NCK-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "TS",
       "maxLength": 19,
       "name": "SYSTEM DATE/TIME",

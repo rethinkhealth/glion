@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PRT-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "maxLength": 4,
       "name": "Participation Instance ID",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "PRT-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70287",
@@ -25,8 +25,8 @@
     {
       "sequence": 3,
       "id": "PRT-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Action Reason",
       "item": "2380"
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "PRT-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70912",
       "name": "Participation",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "PRT-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Participation Person",
       "item": "2382"
@@ -53,8 +53,8 @@
     {
       "sequence": 6,
       "id": "PRT-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Participation Person Provider Type",
       "item": "2383"
@@ -62,8 +62,8 @@
     {
       "sequence": 7,
       "id": "PRT-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70406",
       "name": "Participant Organization Unit Type",
@@ -72,8 +72,8 @@
     {
       "sequence": 8,
       "id": "PRT-8",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "XON",
       "name": "Participation Organization",
       "item": "2385"
@@ -81,8 +81,8 @@
     {
       "sequence": 9,
       "id": "PRT-9",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "PL",
       "name": "Participant Location",
       "item": "2386"
@@ -90,8 +90,8 @@
     {
       "sequence": 10,
       "id": "PRT-10",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Participation Device",
       "item": "2348"
@@ -99,8 +99,8 @@
     {
       "sequence": 11,
       "id": "PRT-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Participation Begin Date/Time (arrival time)",
       "item": "2387"
@@ -108,8 +108,8 @@
     {
       "sequence": 12,
       "id": "PRT-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Participation End Date/Time (departure time)",
       "item": "2388"
@@ -117,8 +117,8 @@
     {
       "sequence": 13,
       "id": "PRT-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Participation Qualitative Duration",
       "item": "2389"
@@ -126,8 +126,8 @@
     {
       "sequence": 14,
       "id": "PRT-14",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Participation Address",
       "item": "2390"
@@ -135,8 +135,8 @@
     {
       "sequence": 15,
       "id": "PRT-15",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Participant Telecommunication Address",
       "item": "2391"

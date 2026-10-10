@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "MCP-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - MCP",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "MCP-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Producer's Service/Test/Observation ID",
       "item": "587"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "MCP-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Universal Service Price Range - Low Value",
       "item": "3469"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "MCP-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Universal Service Price Range - High Value",
       "item": "3470"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "MCP-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Reason for Universal Service Cost Range",
       "item": "3471"

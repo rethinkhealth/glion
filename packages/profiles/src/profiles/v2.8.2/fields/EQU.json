@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "EQU-1",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Equipment Instance Identifier",
       "item": "1479"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "EQU-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Event Date/Time",
       "item": "1322"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "EQU-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70365",
       "name": "Equipment State",
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "EQU-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70366",
       "name": "Local/Remote Control State",
@@ -42,8 +42,8 @@
     {
       "sequence": 5,
       "id": "EQU-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70367",
       "name": "Alert Level",

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PRA-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 20,
       "name": "PRA - primary key value",
@@ -14,8 +14,7 @@
     {
       "sequence": 2,
       "id": "PRA-2",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "CE",
       "maxLength": 60,
       "name": "Practitioner group",
@@ -24,8 +23,7 @@
     {
       "sequence": 3,
       "id": "PRA-3",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70186",
@@ -35,8 +33,7 @@
     {
       "sequence": 4,
       "id": "PRA-4",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70187",
@@ -46,8 +43,7 @@
     {
       "sequence": 5,
       "id": "PRA-5",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "CM",
       "maxLength": 100,
       "name": "Specialty",
@@ -56,8 +52,7 @@
     {
       "sequence": 6,
       "id": "PRA-6",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "CM",
       "maxLength": 100,
       "name": "Practitioner ID Numbers",
@@ -66,8 +61,7 @@
     {
       "sequence": 7,
       "id": "PRA-7",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "CM",
       "maxLength": 20,
       "name": "Privileges",

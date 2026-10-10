@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "RMI-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70427",
       "name": "Risk Management Incident Code",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "RMI-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Date/Time Incident",
       "item": "1531"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "RMI-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70428",
       "name": "Incident Type Code",

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "VAR-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Variance Instance ID",
       "item": "1212"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "VAR-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Documented Date/Time",
       "item": "1213"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "VAR-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Stated Variance Date/Time",
       "item": "1214"
@@ -31,8 +31,8 @@
     {
       "sequence": 4,
       "id": "VAR-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Variance Originator",
       "item": "1215"
@@ -40,8 +40,8 @@
     {
       "sequence": 5,
       "id": "VAR-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Variance Classification",
       "item": "1216"
@@ -49,8 +49,8 @@
     {
       "sequence": 6,
       "id": "VAR-6",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "ST",
       "name": "Variance Description",
       "item": "1217"

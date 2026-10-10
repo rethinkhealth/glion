@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ROL-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "maxLength": 60,
       "name": "Role Instance ID",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "ROL-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70287",
@@ -25,8 +25,8 @@
     {
       "sequence": 3,
       "id": "ROL-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CE",
       "name": "Role",
       "item": "1197"
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "ROL-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "XCN",
       "maxLength": 80,
       "name": "Role Person",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "ROL-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "TS",
       "maxLength": 26,
       "name": "Role Begin Date/Time",
@@ -54,8 +54,8 @@
     {
       "sequence": 6,
       "id": "ROL-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "TS",
       "maxLength": 26,
       "name": "Role End Date/Time",
@@ -64,8 +64,8 @@
     {
       "sequence": 7,
       "id": "ROL-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 80,
       "name": "Role Duration",
@@ -74,8 +74,8 @@
     {
       "sequence": 8,
       "id": "ROL-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 80,
       "name": "Role Action (Assumption) Reason",

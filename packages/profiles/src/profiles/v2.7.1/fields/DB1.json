@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "DB1-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - DB1",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "DB1-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70334",
       "name": "Disabled Person Code",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "DB1-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Disabled Person Identifier",
       "item": "1285"
@@ -33,8 +33,8 @@
     {
       "sequence": 4,
       "id": "DB1-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "DB1-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Disability Start Date",
       "item": "1287"
@@ -53,8 +53,8 @@
     {
       "sequence": 6,
       "id": "DB1-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Disability End Date",
       "item": "1288"
@@ -62,8 +62,8 @@
     {
       "sequence": 7,
       "id": "DB1-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Disability Return to Work Date",
       "item": "1289"
@@ -71,8 +71,8 @@
     {
       "sequence": 8,
       "id": "DB1-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Disability Unable to Work Date",
       "item": "1290"

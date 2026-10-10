@@ -4,8 +4,7 @@
     {
       "sequence": 1,
       "id": "UB1-1",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - UB82",
@@ -14,8 +13,7 @@
     {
       "sequence": 2,
       "id": "UB1-2",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 1,
       "table": "HL70136",
@@ -25,8 +23,7 @@
     {
       "sequence": 3,
       "id": "UB1-3",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 2,
       "name": "Blood furnished pints of (40)",
@@ -35,8 +32,7 @@
     {
       "sequence": 4,
       "id": "UB1-4",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 2,
       "name": "Blood replaced pints (41)",
@@ -45,8 +41,7 @@
     {
       "sequence": 5,
       "id": "UB1-5",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 2,
       "name": "Blood not replaced pints (42)",
@@ -55,8 +50,7 @@
     {
       "sequence": 6,
       "id": "UB1-6",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 2,
       "name": "Co-insurance days (25)",
@@ -65,8 +59,7 @@
     {
       "sequence": 7,
       "id": "UB1-7",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 5,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70043",
@@ -76,8 +69,7 @@
     {
       "sequence": 8,
       "id": "UB1-8",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 3,
       "name": "Covered days (23)",
@@ -86,8 +78,7 @@
     {
       "sequence": 9,
       "id": "UB1-9",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 3,
       "name": "Non-covered days (24)",
@@ -96,8 +87,7 @@
     {
       "sequence": 10,
       "id": "UB1-10",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 8,
       "datatype": "CM",
       "maxLength": 12,
       "table": "HL70153",
@@ -107,8 +97,7 @@
     {
       "sequence": 11,
       "id": "UB1-11",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 2,
       "name": "Number of grace days (90)",
@@ -117,8 +106,7 @@
     {
       "sequence": 12,
       "id": "UB1-12",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "name": "Special program indicator (44)",
@@ -127,8 +115,7 @@
     {
       "sequence": 13,
       "id": "UB1-13",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "name": "PSRO / UR approval indicator (87)",
@@ -137,8 +124,7 @@
     {
       "sequence": 14,
       "id": "UB1-14",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "DT",
       "maxLength": 8,
       "name": "PSRO / UR approved stay - from (88)",
@@ -147,8 +133,7 @@
     {
       "sequence": 15,
       "id": "UB1-15",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "DT",
       "maxLength": 8,
       "name": "PSRO / UR approved stay - to (89)",
@@ -157,8 +142,7 @@
     {
       "sequence": 16,
       "id": "UB1-16",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 5,
       "datatype": "CM",
       "maxLength": 20,
       "name": "Occurrence (28-32)",
@@ -167,8 +151,7 @@
     {
       "sequence": 17,
       "id": "UB1-17",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "name": "Occurrence span (33)",
@@ -177,8 +160,7 @@
     {
       "sequence": 18,
       "id": "UB1-18",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "DT",
       "maxLength": 8,
       "name": "Occurrence span start date (33)",
@@ -187,8 +169,7 @@
     {
       "sequence": 19,
       "id": "UB1-19",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "DT",
       "maxLength": 8,
       "name": "Occurrence span end date (33)",
@@ -197,8 +178,7 @@
     {
       "sequence": 20,
       "id": "UB1-20",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 30,
       "name": "UB-82 locator 2",
@@ -207,8 +187,7 @@
     {
       "sequence": 21,
       "id": "UB1-21",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 7,
       "name": "UB-82 locator 9",
@@ -217,8 +196,7 @@
     {
       "sequence": 22,
       "id": "UB1-22",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 8,
       "name": "UB-82 locator 27",
@@ -227,8 +205,7 @@
     {
       "sequence": 23,
       "id": "UB1-23",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 17,
       "name": "UB-82 locator 45",

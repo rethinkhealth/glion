@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PSS-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Provider Product/Service Section Number",
       "item": "1946"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "PSS-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Payer Product/Service Section Number",
       "item": "1947"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "PSS-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Product/Service Section Sequence Number",
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "PSS-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Billed Amount",
       "item": "1949"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "PSS-5",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Section Description or Heading",
       "item": "2043"

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "RQD-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Requisition Line Number",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "RQD-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Item Code - Internal",
       "item": "276"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "RQD-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Item Code - External",
       "item": "277"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "RQD-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Hospital Item Code",
       "item": "278"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "RQD-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Requisition Quantity",
       "item": "279"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "RQD-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Requisition Unit of Measure",
       "item": "280"
@@ -59,8 +59,8 @@
     {
       "sequence": 7,
       "id": "RQD-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CX",
       "table": "HL70319",
       "name": "Cost Center Account Number",
@@ -69,8 +69,8 @@
     {
       "sequence": 8,
       "id": "RQD-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70320",
       "name": "Item Natural Account Code",
@@ -79,8 +79,8 @@
     {
       "sequence": 9,
       "id": "RQD-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Deliver To ID",
       "item": "283"
@@ -88,8 +88,8 @@
     {
       "sequence": 10,
       "id": "RQD-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Date Needed",
       "item": "284"

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "RXR-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70162",
       "name": "Route",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "RXR-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70550",
       "name": "Administration Site",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "RXR-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70164",
       "name": "Administration Device",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "RXR-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70165",
       "name": "Administration Method",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "RXR-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Routing Instruction",
       "item": "1315"
@@ -53,8 +53,8 @@
     {
       "sequence": 6,
       "id": "RXR-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70495",
       "name": "Administration Site Modifier",

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PEO-1",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Event Identifiers Used",
       "item": "1073"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "PEO-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Event Symptom/Diagnosis Code",
       "item": "1074"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "PEO-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Event Onset Date/Time",
       "item": "1075"
@@ -31,8 +31,8 @@
     {
       "sequence": 4,
       "id": "PEO-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Event Exacerbation Date/Time",
       "item": "1076"
@@ -40,8 +40,8 @@
     {
       "sequence": 5,
       "id": "PEO-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Event Improved Date/Time",
       "item": "1077"
@@ -49,8 +49,8 @@
     {
       "sequence": 6,
       "id": "PEO-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Event Ended Data/Time",
       "item": "1078"
@@ -58,8 +58,8 @@
     {
       "sequence": 7,
       "id": "PEO-7",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Event Location Occurred Address",
       "item": "1079"
@@ -67,8 +67,8 @@
     {
       "sequence": 8,
       "id": "PEO-8",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70237",
@@ -78,8 +78,8 @@
     {
       "sequence": 9,
       "id": "PEO-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70238",
@@ -89,8 +89,8 @@
     {
       "sequence": 10,
       "id": "PEO-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70239",
@@ -100,8 +100,8 @@
     {
       "sequence": 11,
       "id": "PEO-11",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70240",
@@ -111,8 +111,8 @@
     {
       "sequence": 12,
       "id": "PEO-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70241",
@@ -122,8 +122,8 @@
     {
       "sequence": 13,
       "id": "PEO-13",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "FT",
       "name": "Event Description from Others",
       "item": "1085"
@@ -131,8 +131,8 @@
     {
       "sequence": 14,
       "id": "PEO-14",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "FT",
       "name": "Event Description from Original Reporter",
       "item": "1086"
@@ -140,8 +140,8 @@
     {
       "sequence": 15,
       "id": "PEO-15",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "FT",
       "name": "Event Description from Patient",
       "item": "1087"
@@ -149,8 +149,8 @@
     {
       "sequence": 16,
       "id": "PEO-16",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "FT",
       "name": "Event Description from Practitioner",
       "item": "1088"
@@ -158,8 +158,8 @@
     {
       "sequence": 17,
       "id": "PEO-17",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "FT",
       "name": "Event Description from Autopsy",
       "item": "1089"
@@ -167,8 +167,8 @@
     {
       "sequence": 18,
       "id": "PEO-18",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Cause Of Death",
       "item": "1090"
@@ -176,8 +176,8 @@
     {
       "sequence": 19,
       "id": "PEO-19",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Primary Observer Name",
       "item": "1091"
@@ -185,8 +185,8 @@
     {
       "sequence": 20,
       "id": "PEO-20",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Primary Observer Address",
       "item": "1092"
@@ -194,8 +194,8 @@
     {
       "sequence": 21,
       "id": "PEO-21",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Primary Observer Telephone",
       "item": "1093"
@@ -203,8 +203,8 @@
     {
       "sequence": 22,
       "id": "PEO-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70242",
@@ -214,8 +214,8 @@
     {
       "sequence": 23,
       "id": "PEO-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70242",
@@ -225,8 +225,8 @@
     {
       "sequence": 24,
       "id": "PEO-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Primary Observer Aware Date/Time",
       "item": "1096"
@@ -234,8 +234,8 @@
     {
       "sequence": 25,
       "id": "PEO-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70243",

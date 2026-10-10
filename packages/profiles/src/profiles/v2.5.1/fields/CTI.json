@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "CTI-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "maxLength": 60,
       "name": "Sponsor Study ID",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "CTI-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 250,
       "name": "Study Phase Identifier",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "CTI-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 250,
       "name": "Study Scheduled Time Point",

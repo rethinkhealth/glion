@@ -4,7 +4,7 @@ Unified plugin to annotate HL7v2 field nodes with profile metadata.
 
 ## What it does
 
-Enriches every `field` node in a parsed HL7v2 tree with metadata drawn from the HL7v2 specification profile — field name, datatype, required/repeatable flags, maximum length, and table reference — so the AST becomes self-describing. The plugin reads the message version from MSH-12, loads the matching field definitions from `@glion/profiles`, and spreads the profile properties onto `field.data`. Unknown segments (Z-segments) and unsupported versions are silently skipped.
+Enriches every `field` node in a parsed HL7v2 tree with metadata drawn from the HL7v2 specification profile — field name, datatype, optionality, repetitions, maximum length, and table reference — so the AST becomes self-describing. The plugin reads the message version from MSH-12, loads the matching field definitions from `@glion/profiles`, and spreads the profile properties onto `field.data`. Unknown segments (Z-segments) and unsupported versions are silently skipped.
 
 ## Install
 
@@ -28,7 +28,7 @@ const tree = processor.parse(message);
 await processor.run(tree);
 
 // Field nodes now carry profile metadata on field.data
-// e.g., PID-3: { id: "PID-3", name: "Patient Identifier List", required: true, repeatable: true, datatype: "CX", ... }
+// e.g., PID-3: { id: "PID-3", name: "Patient Identifier List", optionality: "R", repetitions: "unbounded", datatype: "CX", ... }
 ```
 
 ## API
@@ -51,18 +51,18 @@ Async transformer (`async function (Root) => Root`).
 
 Importing this package augments the `FieldData` interface from `@glion/ast`:
 
-| Property     | Type      | Description                                          |
-| ------------ | --------- | ---------------------------------------------------- |
-| `id`         | `string`  | Field identifier (e.g., `"MSH-9"`, `"PID-3"`)        |
-| `name`       | `string`  | Human-readable field name (e.g., `"Patient Name"`)   |
-| `required`   | `boolean` | Whether this field is required in the segment        |
-| `repeatable` | `boolean` | Whether this field supports repetition               |
-| `datatype`   | `string`  | Datatype ID (e.g., `"XPN"`, `"ST"`, `"CWE"`)         |
-| `maxLength`  | `number`  | Maximum allowed length (when defined in the profile) |
-| `table`      | `string`  | Table reference for coded fields (e.g., `"HL70001"`) |
-| `item`       | `string`  | HL7 specification item number                        |
+| Property      | Type                                     | Description                                                                                        |
+| ------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `id`          | `string`                                 | Field identifier (e.g., `"MSH-9"`, `"PID-3"`)                                                      |
+| `name`        | `string`                                 | Human-readable field name (e.g., `"Patient Name"`)                                                 |
+| `optionality` | `"R" \| "O" \| "C" \| "X" \| "B" \| "W"` | HL7v2 optionality (OPT): required, optional, conditional, not used, backward compatible, withdrawn |
+| `repetitions` | `number \| "unbounded"`                  | Most occurrences the field may have (RP/#); `1` when it does not repeat                            |
+| `datatype`    | `string`                                 | Datatype ID (e.g., `"XPN"`, `"ST"`, `"CWE"`)                                                       |
+| `maxLength`   | `number`                                 | Maximum allowed length (when defined in the profile)                                               |
+| `table`       | `string`                                 | Table reference for coded fields (e.g., `"HL70001"`)                                               |
+| `item`        | `string`                                 | HL7 specification item number                                                                      |
 
-All properties are optional (`undefined` when not available in the profile).
+All properties are optional: a property is absent when the profile has no value for it.
 
 ### Accessing field metadata
 
@@ -71,7 +71,7 @@ import { visit } from "@glion/util-visit";
 
 // After running the annotator...
 visit(tree, "field", (node) => {
-  if (node.data?.required && node.data?.name) {
+  if (node.data?.optionality === "R" && node.data?.name) {
     console.log(`Required field: ${node.data.id} (${node.data.name})`);
   }
 });

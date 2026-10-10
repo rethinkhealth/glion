@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "CSS-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "maxLength": 705,
       "name": "Study Scheduled Time Point",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "CSS-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "maxLength": 24,
       "name": "Study Scheduled Patient Time Point",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "CSS-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 3,
       "datatype": "CWE",
       "maxLength": 705,
       "name": "Study Quality Control Codes",

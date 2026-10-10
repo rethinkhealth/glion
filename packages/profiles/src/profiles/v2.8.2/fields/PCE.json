@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PCE-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - PCE",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "PCE-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CX",
       "table": "HL70319",
       "name": "Cost Center Account Number",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "PCE-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70132",
       "name": "Transaction Code",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "PCE-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Transaction amount - unit",
       "item": "366"

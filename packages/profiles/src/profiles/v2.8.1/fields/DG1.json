@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "DG1-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - DG1",
@@ -14,16 +14,16 @@
     {
       "sequence": 2,
       "id": "DG1-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Diagnosis Coding Method",
       "item": "376"
     },
     {
       "sequence": 3,
       "id": "DG1-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70051",
       "name": "Diagnosis Code - DG1",
@@ -32,16 +32,16 @@
     {
       "sequence": 4,
       "id": "DG1-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Diagnosis Description",
       "item": "378"
     },
     {
       "sequence": 5,
       "id": "DG1-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Diagnosis Date/Time",
       "item": "379"
@@ -49,8 +49,8 @@
     {
       "sequence": 6,
       "id": "DG1-6",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70052",
       "name": "Diagnosis Type",
@@ -59,8 +59,8 @@
     {
       "sequence": 7,
       "id": "DG1-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70118",
       "name": "Major Diagnostic Category",
@@ -69,8 +69,8 @@
     {
       "sequence": 8,
       "id": "DG1-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70055",
       "name": "Diagnostic Related Group",
@@ -79,8 +79,8 @@
     {
       "sequence": 9,
       "id": "DG1-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -90,8 +90,8 @@
     {
       "sequence": 10,
       "id": "DG1-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70056",
       "name": "DRG Grouper Review Code",
@@ -100,8 +100,8 @@
     {
       "sequence": 11,
       "id": "DG1-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70083",
       "name": "Outlier Type",
@@ -110,8 +110,8 @@
     {
       "sequence": 12,
       "id": "DG1-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Outlier Days",
       "item": "386"
@@ -119,8 +119,8 @@
     {
       "sequence": 13,
       "id": "DG1-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Outlier Cost",
       "item": "387"
@@ -128,16 +128,16 @@
     {
       "sequence": 14,
       "id": "DG1-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Grouper Version And Type",
       "item": "388"
     },
     {
       "sequence": 15,
       "id": "DG1-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "table": "HL70359",
       "name": "Diagnosis Priority",
@@ -146,8 +146,8 @@
     {
       "sequence": 16,
       "id": "DG1-16",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Diagnosing Clinician",
       "item": "390"
@@ -155,8 +155,8 @@
     {
       "sequence": 17,
       "id": "DG1-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70228",
       "name": "Diagnosis Classification",
@@ -165,8 +165,8 @@
     {
       "sequence": 18,
       "id": "DG1-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -176,8 +176,8 @@
     {
       "sequence": 19,
       "id": "DG1-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Attestation Date/Time",
       "item": "768"
@@ -185,8 +185,8 @@
     {
       "sequence": 20,
       "id": "DG1-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Diagnosis Identifier",
       "item": "1850"
@@ -194,8 +194,8 @@
     {
       "sequence": 21,
       "id": "DG1-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70206",
@@ -205,8 +205,8 @@
     {
       "sequence": 22,
       "id": "DG1-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Parent Diagnosis",
       "item": "2152"
@@ -214,8 +214,8 @@
     {
       "sequence": 23,
       "id": "DG1-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70728",
       "name": "DRG CCL Value Code",
@@ -224,8 +224,8 @@
     {
       "sequence": 24,
       "id": "DG1-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -235,8 +235,8 @@
     {
       "sequence": 25,
       "id": "DG1-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70731",
       "name": "DRG Diagnosis Determination Status",
@@ -245,8 +245,8 @@
     {
       "sequence": 26,
       "id": "DG1-26",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70895",
       "name": "Present On Admission (POA) Indicator",

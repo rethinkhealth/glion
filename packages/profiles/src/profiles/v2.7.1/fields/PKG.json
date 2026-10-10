@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PKG-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set Id - PKG",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "PKG-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70818",
       "name": "Packaging Units",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "PKG-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70532",
       "name": "Default Order Unit Of Measure Indicator",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "PKG-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Package Quantity",
       "item": "2224"
@@ -43,8 +43,8 @@
     {
       "sequence": 5,
       "id": "PKG-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Price",
       "item": "2225"
@@ -52,8 +52,8 @@
     {
       "sequence": 6,
       "id": "PKG-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Future Item Price",
       "item": "2226"
@@ -61,8 +61,8 @@
     {
       "sequence": 7,
       "id": "PKG-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Future Item Price Effective Date",
       "item": "2227"

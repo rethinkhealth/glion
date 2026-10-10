@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PES-1",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XON",
       "name": "Sender Organization Name",
       "item": "1059"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "PES-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Sender Individual Name",
       "item": "1060"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "PES-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Sender Address",
       "item": "1062"
@@ -31,8 +31,8 @@
     {
       "sequence": 4,
       "id": "PES-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Sender Telephone",
       "item": "1063"
@@ -40,8 +40,8 @@
     {
       "sequence": 5,
       "id": "PES-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Sender Event Identifier",
       "item": "1064"
@@ -49,8 +49,8 @@
     {
       "sequence": 6,
       "id": "PES-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Sender Sequence Number",
       "item": "1065"
@@ -58,8 +58,8 @@
     {
       "sequence": 7,
       "id": "PES-7",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "FT",
       "name": "Sender Event Description",
       "item": "1066"
@@ -67,8 +67,8 @@
     {
       "sequence": 8,
       "id": "PES-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "FT",
       "name": "Sender Comment",
       "item": "1067"
@@ -76,8 +76,8 @@
     {
       "sequence": 9,
       "id": "PES-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Sender Aware Date/Time",
       "item": "1068"
@@ -85,8 +85,8 @@
     {
       "sequence": 10,
       "id": "PES-10",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Event Report Date",
       "item": "1069"
@@ -94,8 +94,8 @@
     {
       "sequence": 11,
       "id": "PES-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 2,
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70234",
@@ -105,8 +105,8 @@
     {
       "sequence": 12,
       "id": "PES-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70235",
@@ -116,8 +116,8 @@
     {
       "sequence": 13,
       "id": "PES-13",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70236",

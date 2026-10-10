@@ -8,8 +8,9 @@ import { lintRule } from "unified-lint-rule";
 /**
  * Lint rule that validates required fields per HL7v2 profile.
  *
- * For each segment, checks that all fields marked `required: true`
- * in the field definition are present and non-empty.
+ * For each segment, checks that every field whose optionality is `R` is
+ * present and non-empty. Fields whose optionality is `C`, `B`, or `W` are not
+ * checked.
  *
  * Segments without a known profile (e.g., Z-segments) are silently skipped.
  *

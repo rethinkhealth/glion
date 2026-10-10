@@ -4,8 +4,7 @@
     {
       "sequence": 1,
       "id": "URD-1",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "TS",
       "maxLength": 26,
       "name": "R/U date / time",
@@ -14,8 +13,7 @@
     {
       "sequence": 2,
       "id": "URD-2",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70109",
@@ -25,8 +23,8 @@
     {
       "sequence": 3,
       "id": "URD-3",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "ST",
       "maxLength": 20,
       "name": "R/U Who Subject Definition",
@@ -35,8 +33,7 @@
     {
       "sequence": 4,
       "id": "URD-4",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70048",
@@ -46,8 +43,7 @@
     {
       "sequence": 5,
       "id": "URD-5",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "ST",
       "maxLength": 20,
       "name": "R/U What Department Code",
@@ -56,8 +52,7 @@
     {
       "sequence": 6,
       "id": "URD-6",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "ST",
       "maxLength": 20,
       "name": "R/U display / print locations",
@@ -66,8 +61,7 @@
     {
       "sequence": 7,
       "id": "URD-7",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70108",

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "TQ2-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - TQ2",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "TQ2-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70503",
@@ -25,8 +25,8 @@
     {
       "sequence": 3,
       "id": "TQ2-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Related Placer Number",
       "item": "1650"
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "TQ2-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Related Filler Number",
       "item": "1651"
@@ -43,8 +43,8 @@
     {
       "sequence": 5,
       "id": "TQ2-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Related Placer Group Number",
       "item": "1652"
@@ -52,8 +52,8 @@
     {
       "sequence": 6,
       "id": "TQ2-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "ID",
       "table": "HL70504",
       "name": "Sequence Condition Code",
@@ -62,8 +62,8 @@
     {
       "sequence": 7,
       "id": "TQ2-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70505",
@@ -73,8 +73,8 @@
     {
       "sequence": 8,
       "id": "TQ2-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "name": "Sequence Condition Time Interval",
       "item": "1655"
@@ -82,8 +82,8 @@
     {
       "sequence": 9,
       "id": "TQ2-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Cyclic Group Maximum Number of Repeats",
       "item": "1656"
@@ -91,8 +91,8 @@
     {
       "sequence": 10,
       "id": "TQ2-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70506",

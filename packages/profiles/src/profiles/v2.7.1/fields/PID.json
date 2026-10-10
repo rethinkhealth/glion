@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PID-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - PID",
@@ -14,16 +14,16 @@
     {
       "sequence": 2,
       "id": "PID-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Patient ID",
       "item": "105"
     },
     {
       "sequence": 3,
       "id": "PID-3",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Patient Identifier List",
       "item": "106"
@@ -31,16 +31,16 @@
     {
       "sequence": 4,
       "id": "PID-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Alternate Patient ID - PID",
       "item": "107"
     },
     {
       "sequence": 5,
       "id": "PID-5",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "table": "HL70200",
       "name": "Patient Name",
@@ -49,8 +49,8 @@
     {
       "sequence": 6,
       "id": "PID-6",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Mother's Maiden Name",
       "item": "109"
@@ -58,8 +58,8 @@
     {
       "sequence": 7,
       "id": "PID-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Date/Time of Birth",
       "item": "110"
@@ -67,8 +67,8 @@
     {
       "sequence": 8,
       "id": "PID-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70001",
       "name": "Administrative Sex",
@@ -77,16 +77,16 @@
     {
       "sequence": 9,
       "id": "PID-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Patient Alias",
       "item": "112"
     },
     {
       "sequence": 10,
       "id": "PID-10",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70005",
       "name": "Race",
@@ -95,8 +95,8 @@
     {
       "sequence": 11,
       "id": "PID-11",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Patient Address",
       "item": "114"
@@ -104,16 +104,16 @@
     {
       "sequence": 12,
       "id": "PID-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "County Code",
       "item": "115"
     },
     {
       "sequence": 13,
       "id": "PID-13",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Phone Number - Home",
       "item": "116"
@@ -121,8 +121,8 @@
     {
       "sequence": 14,
       "id": "PID-14",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Phone Number - Business",
       "item": "117"
@@ -130,8 +130,8 @@
     {
       "sequence": 15,
       "id": "PID-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70296",
       "name": "Primary Language",
@@ -140,8 +140,8 @@
     {
       "sequence": 16,
       "id": "PID-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70002",
       "name": "Marital Status",
@@ -150,8 +150,8 @@
     {
       "sequence": 17,
       "id": "PID-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70006",
       "name": "Religion",
@@ -160,8 +160,8 @@
     {
       "sequence": 18,
       "id": "PID-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CX",
       "name": "Patient Account Number",
       "item": "121"
@@ -169,24 +169,24 @@
     {
       "sequence": 19,
       "id": "PID-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "SSN Number - Patient",
       "item": "122"
     },
     {
       "sequence": 20,
       "id": "PID-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Driver's License Number - Patient",
       "item": "123"
     },
     {
       "sequence": 21,
       "id": "PID-21",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Mother's Identifier",
       "item": "124"
@@ -194,8 +194,8 @@
     {
       "sequence": 22,
       "id": "PID-22",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70189",
       "name": "Ethnic Group",
@@ -204,8 +204,8 @@
     {
       "sequence": 23,
       "id": "PID-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Birth Place",
       "item": "126"
@@ -213,8 +213,8 @@
     {
       "sequence": 24,
       "id": "PID-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -224,8 +224,8 @@
     {
       "sequence": 25,
       "id": "PID-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Birth Order",
       "item": "128"
@@ -233,8 +233,8 @@
     {
       "sequence": 26,
       "id": "PID-26",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70171",
       "name": "Citizenship",
@@ -243,8 +243,8 @@
     {
       "sequence": 27,
       "id": "PID-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70172",
       "name": "Veterans Military Status",
@@ -253,8 +253,8 @@
     {
       "sequence": 28,
       "id": "PID-28",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70212",
       "name": "Nationality",
@@ -263,8 +263,8 @@
     {
       "sequence": 29,
       "id": "PID-29",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Patient Death Date and Time",
       "item": "740"
@@ -272,8 +272,8 @@
     {
       "sequence": 30,
       "id": "PID-30",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -283,8 +283,8 @@
     {
       "sequence": 31,
       "id": "PID-31",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -294,8 +294,8 @@
     {
       "sequence": 32,
       "id": "PID-32",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70445",
       "name": "Identity Reliability Code",
@@ -304,8 +304,8 @@
     {
       "sequence": 33,
       "id": "PID-33",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Last Update Date/Time",
       "item": "1537"
@@ -313,8 +313,8 @@
     {
       "sequence": 34,
       "id": "PID-34",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "HD",
       "name": "Last Update Facility",
       "item": "1538"
@@ -322,8 +322,8 @@
     {
       "sequence": 35,
       "id": "PID-35",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70446",
       "name": "Species Code",
@@ -332,8 +332,8 @@
     {
       "sequence": 36,
       "id": "PID-36",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70447",
       "name": "Breed Code",
@@ -342,8 +342,8 @@
     {
       "sequence": 37,
       "id": "PID-37",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Strain",
       "item": "1541"
@@ -351,8 +351,8 @@
     {
       "sequence": 38,
       "id": "PID-38",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70429",
       "name": "Production Class Code",
@@ -361,8 +361,8 @@
     {
       "sequence": 39,
       "id": "PID-39",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70171",
       "name": "Tribal Citizenship",
@@ -371,8 +371,8 @@
     {
       "sequence": 40,
       "id": "PID-40",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Patient Telecommunication Information",
       "item": "2289"

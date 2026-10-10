@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "GT1-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - GT1",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "GT1-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Guarantor Number",
       "item": "406"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "GT1-3",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Guarantor Name",
       "item": "407"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "GT1-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Guarantor Spouse Name",
       "item": "408"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "GT1-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Guarantor Address",
       "item": "409"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "GT1-6",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Guarantor Ph Num - Home",
       "item": "410"
@@ -59,8 +59,8 @@
     {
       "sequence": 7,
       "id": "GT1-7",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Guarantor Ph Num - Business",
       "item": "411"
@@ -68,8 +68,8 @@
     {
       "sequence": 8,
       "id": "GT1-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Guarantor Date/Time Of Birth",
       "item": "412"
@@ -77,8 +77,8 @@
     {
       "sequence": 9,
       "id": "GT1-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70001",
       "name": "Guarantor Administrative Sex",
@@ -87,8 +87,8 @@
     {
       "sequence": 10,
       "id": "GT1-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70068",
       "name": "Guarantor Type",
@@ -97,8 +97,8 @@
     {
       "sequence": 11,
       "id": "GT1-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70063",
       "name": "Guarantor Relationship",
@@ -107,8 +107,8 @@
     {
       "sequence": 12,
       "id": "GT1-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Guarantor SSN",
       "item": "416"
@@ -116,8 +116,8 @@
     {
       "sequence": 13,
       "id": "GT1-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Guarantor Date - Begin",
       "item": "417"
@@ -125,8 +125,8 @@
     {
       "sequence": 14,
       "id": "GT1-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Guarantor Date - End",
       "item": "418"
@@ -134,8 +134,8 @@
     {
       "sequence": 15,
       "id": "GT1-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 2,
       "name": "Guarantor Priority",
@@ -144,8 +144,8 @@
     {
       "sequence": 16,
       "id": "GT1-16",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Guarantor Employer Name",
       "item": "420"
@@ -153,8 +153,8 @@
     {
       "sequence": 17,
       "id": "GT1-17",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Guarantor Employer Address",
       "item": "421"
@@ -162,8 +162,8 @@
     {
       "sequence": 18,
       "id": "GT1-18",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Guarantor Employer Phone Number",
       "item": "422"
@@ -171,8 +171,8 @@
     {
       "sequence": 19,
       "id": "GT1-19",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Guarantor Employee ID Number",
       "item": "423"
@@ -180,8 +180,8 @@
     {
       "sequence": 20,
       "id": "GT1-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70066",
       "name": "Guarantor Employment Status",
@@ -190,8 +190,8 @@
     {
       "sequence": 21,
       "id": "GT1-21",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XON",
       "name": "Guarantor Organization Name",
       "item": "425"
@@ -199,8 +199,8 @@
     {
       "sequence": 22,
       "id": "GT1-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -210,8 +210,8 @@
     {
       "sequence": 23,
       "id": "GT1-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70341",
       "name": "Guarantor Credit Rating Code",
@@ -220,8 +220,8 @@
     {
       "sequence": 24,
       "id": "GT1-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Guarantor Death Date And Time",
       "item": "775"
@@ -229,8 +229,8 @@
     {
       "sequence": 25,
       "id": "GT1-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -240,8 +240,8 @@
     {
       "sequence": 26,
       "id": "GT1-26",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70218",
       "name": "Guarantor Charge Adjustment Code",
@@ -250,8 +250,8 @@
     {
       "sequence": 27,
       "id": "GT1-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Guarantor Household Annual Income",
       "item": "778"
@@ -259,8 +259,8 @@
     {
       "sequence": 28,
       "id": "GT1-28",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Guarantor Household Size",
       "item": "779"
@@ -268,8 +268,8 @@
     {
       "sequence": 29,
       "id": "GT1-29",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Guarantor Employer ID Number",
       "item": "780"
@@ -277,8 +277,8 @@
     {
       "sequence": 30,
       "id": "GT1-30",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70002",
       "name": "Guarantor Marital Status Code",
@@ -287,8 +287,8 @@
     {
       "sequence": 31,
       "id": "GT1-31",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Guarantor Hire Effective Date",
       "item": "782"
@@ -296,8 +296,8 @@
     {
       "sequence": 32,
       "id": "GT1-32",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Employment Stop Date",
       "item": "783"
@@ -305,8 +305,8 @@
     {
       "sequence": 33,
       "id": "GT1-33",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70223",
       "name": "Living Dependency",
@@ -315,8 +315,8 @@
     {
       "sequence": 34,
       "id": "GT1-34",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70009",
       "name": "Ambulatory Status",
@@ -325,8 +325,8 @@
     {
       "sequence": 35,
       "id": "GT1-35",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70171",
       "name": "Citizenship",
@@ -335,8 +335,8 @@
     {
       "sequence": 36,
       "id": "GT1-36",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70296",
       "name": "Primary Language",
@@ -345,8 +345,8 @@
     {
       "sequence": 37,
       "id": "GT1-37",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70220",
       "name": "Living Arrangement",
@@ -355,8 +355,8 @@
     {
       "sequence": 38,
       "id": "GT1-38",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70215",
       "name": "Publicity Code",
@@ -365,8 +365,8 @@
     {
       "sequence": 39,
       "id": "GT1-39",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -376,8 +376,8 @@
     {
       "sequence": 40,
       "id": "GT1-40",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70231",
       "name": "Student Indicator",
@@ -386,8 +386,8 @@
     {
       "sequence": 41,
       "id": "GT1-41",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70006",
       "name": "Religion",
@@ -396,8 +396,8 @@
     {
       "sequence": 42,
       "id": "GT1-42",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Mother's Maiden Name",
       "item": "109"
@@ -405,8 +405,8 @@
     {
       "sequence": 43,
       "id": "GT1-43",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70212",
       "name": "Nationality",
@@ -415,8 +415,8 @@
     {
       "sequence": 44,
       "id": "GT1-44",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70189",
       "name": "Ethnic Group",
@@ -425,8 +425,8 @@
     {
       "sequence": 45,
       "id": "GT1-45",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Contact Person's Name",
       "item": "748"
@@ -434,8 +434,8 @@
     {
       "sequence": 46,
       "id": "GT1-46",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Contact Person's Telephone Number",
       "item": "749"
@@ -443,8 +443,8 @@
     {
       "sequence": 47,
       "id": "GT1-47",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70222",
       "name": "Contact Reason",
@@ -453,8 +453,8 @@
     {
       "sequence": 48,
       "id": "GT1-48",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70063",
       "name": "Contact Relationship",
@@ -463,8 +463,8 @@
     {
       "sequence": 49,
       "id": "GT1-49",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Job Title",
       "item": "785"
@@ -472,8 +472,8 @@
     {
       "sequence": 50,
       "id": "GT1-50",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "JCC",
       "name": "Job Code/Class",
       "item": "786"
@@ -481,8 +481,8 @@
     {
       "sequence": 51,
       "id": "GT1-51",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XON",
       "name": "Guarantor Employer's Organization Name",
       "item": "1299"
@@ -490,8 +490,8 @@
     {
       "sequence": 52,
       "id": "GT1-52",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70295",
       "name": "Handicap",
@@ -500,8 +500,8 @@
     {
       "sequence": 53,
       "id": "GT1-53",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70311",
       "name": "Job Status",
@@ -510,8 +510,8 @@
     {
       "sequence": 54,
       "id": "GT1-54",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "FC",
       "name": "Guarantor Financial Class",
       "item": "1231"
@@ -519,8 +519,8 @@
     {
       "sequence": 55,
       "id": "GT1-55",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70005",
       "name": "Guarantor Race",
@@ -529,8 +529,8 @@
     {
       "sequence": 56,
       "id": "GT1-56",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Guarantor Birth Place",
       "item": "1851"
@@ -538,8 +538,8 @@
     {
       "sequence": 57,
       "id": "GT1-57",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70099",
       "name": "VIP Indicator",

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "LAN-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - LAN",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "LAN-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70296",
       "name": "Language Code",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "LAN-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70403",
       "name": "Language Ability Code",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "LAN-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70404",
       "name": "Language Proficiency Code",

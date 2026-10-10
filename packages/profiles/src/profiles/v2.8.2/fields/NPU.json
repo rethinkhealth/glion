@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "NPU-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "PL",
       "name": "Bed Location",
       "item": "209"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "NPU-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70116",
       "name": "Bed Status",

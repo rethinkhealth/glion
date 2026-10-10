@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PRB-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "table": "HL70206",
       "name": "Action Code",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "PRB-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Action Date/Time",
       "item": "817"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "PRB-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Problem ID",
       "item": "838"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "PRB-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Problem Instance ID",
       "item": "839"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "PRB-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Episode of Care ID",
       "item": "820"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "PRB-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Problem List Priority",
       "item": "841"
@@ -59,8 +59,8 @@
     {
       "sequence": 7,
       "id": "PRB-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Problem Established Date/Time",
       "item": "842"
@@ -68,8 +68,8 @@
     {
       "sequence": 8,
       "id": "PRB-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Anticipated Problem Resolution Date/Time",
       "item": "843"
@@ -77,8 +77,8 @@
     {
       "sequence": 9,
       "id": "PRB-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Actual Problem Resolution Date/Time",
       "item": "844"
@@ -86,8 +86,8 @@
     {
       "sequence": 10,
       "id": "PRB-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Problem Classification",
       "item": "845"
@@ -95,8 +95,8 @@
     {
       "sequence": 11,
       "id": "PRB-11",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Problem Management Discipline",
       "item": "846"
@@ -104,8 +104,8 @@
     {
       "sequence": 12,
       "id": "PRB-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Problem Persistence",
       "item": "847"
@@ -113,8 +113,8 @@
     {
       "sequence": 13,
       "id": "PRB-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Problem Confirmation Status",
       "item": "848"
@@ -122,8 +122,8 @@
     {
       "sequence": 14,
       "id": "PRB-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Problem Life Cycle Status",
       "item": "849"
@@ -131,8 +131,8 @@
     {
       "sequence": 15,
       "id": "PRB-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Problem Life Cycle Status Date/Time",
       "item": "850"
@@ -140,8 +140,8 @@
     {
       "sequence": 16,
       "id": "PRB-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Problem Date of Onset",
       "item": "851"
@@ -149,8 +149,8 @@
     {
       "sequence": 17,
       "id": "PRB-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Problem Onset Text",
       "item": "852"
@@ -158,8 +158,8 @@
     {
       "sequence": 18,
       "id": "PRB-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Problem Ranking",
       "item": "853"
@@ -167,8 +167,8 @@
     {
       "sequence": 19,
       "id": "PRB-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Certainty of Problem",
       "item": "854"
@@ -176,8 +176,8 @@
     {
       "sequence": 20,
       "id": "PRB-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Probability of Problem (0-1)",
       "item": "855"
@@ -185,8 +185,8 @@
     {
       "sequence": 21,
       "id": "PRB-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Individual Awareness of Problem",
       "item": "856"
@@ -194,8 +194,8 @@
     {
       "sequence": 22,
       "id": "PRB-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Problem Prognosis",
       "item": "857"
@@ -203,8 +203,8 @@
     {
       "sequence": 23,
       "id": "PRB-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Individual Awareness of Prognosis",
       "item": "858"
@@ -212,8 +212,8 @@
     {
       "sequence": 24,
       "id": "PRB-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Family/Significant Other Awareness of Problem/Prognosis",
       "item": "859"
@@ -221,8 +221,8 @@
     {
       "sequence": 25,
       "id": "PRB-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Security/Sensitivity",
       "item": "823"
@@ -230,8 +230,8 @@
     {
       "sequence": 26,
       "id": "PRB-26",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70836",
       "name": "Problem Severity",
@@ -240,8 +240,8 @@
     {
       "sequence": 27,
       "id": "PRB-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70838",
       "name": "Problem Perspective",
@@ -250,8 +250,8 @@
     {
       "sequence": 28,
       "id": "PRB-28",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70725",
       "name": "Mood Code",
