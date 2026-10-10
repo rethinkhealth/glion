@@ -37,32 +37,37 @@ const hl7v2LintExtraComponents = lintRule<Root>(
       return;
     }
 
-    visit(tree, "component", (component, ancestors, info) => {
-      const { segment, field, component: sequence } = info;
+    visit(tree, "field", (field, ancestors, { segment, sequence }) => {
       const profile =
-        segment && field && ctx.fields.get(segment.name)?.bySequence.get(field);
+        segment && ctx.fields.get(segment.name)?.bySequence.get(sequence);
       const datatype = profile && ctx.datatypes.get(profile.datatype);
-      // A primitive datatype has no component definitions; its value is
-      // component 1.
-      const defined =
-        !datatype ||
-        datatype.componentsBySequence.has(info.sequence) ||
-        info.sequence <= Math.max(1, ...datatype.componentsBySequence.keys());
-      // An empty field is left to the rules about empty fields; its
-      // component separators alone are not extra components. The field is
-      // the component's grandparent, after its repetition.
-      if (defined || isEmptyNode(ancestors.at(-2))) {
+      if (!segment || !profile || !datatype || isEmptyNode(field)) {
         return SKIP;
       }
 
-      file.message(
-        messages.undefinedComponent(
-          `${segment.name}-${field}.${sequence}`,
-          profile.datatype,
-          ctx.version
-        ),
-        { ancestors: [...ancestors, component], place: component.position }
-      );
+      // A primitive datatype has no component definitions; its value is
+      // component 1.
+      const defined = Math.max(1, ...datatype.componentsBySequence.keys());
+
+      // Only the components past the defined ones are read: visiting every
+      // component to find the rare extra one costs ~10% on lint-profile.
+      for (const repetition of field.children) {
+        for (const [offset, component] of repetition.children
+          .slice(defined)
+          .entries()) {
+          file.message(
+            messages.undefinedComponent(
+              `${segment.name}-${sequence}.${defined + offset + 1}`,
+              profile.datatype,
+              ctx.version
+            ),
+            {
+              ancestors: [...ancestors, field, repetition, component],
+              place: component.position,
+            }
+          );
+        }
+      }
 
       return SKIP;
     });
