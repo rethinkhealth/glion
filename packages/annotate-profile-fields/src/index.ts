@@ -73,7 +73,9 @@ function spreadFieldProfile(data: FieldData, profile: FieldProfile): void {
   data.name = profile.name;
   data.required = profile.required;
   data.repeatable = profile.repeatable;
-  data.datatype = profile.datatype;
+  if (profile.datatype !== undefined) {
+    data.datatype = profile.datatype;
+  }
   if (profile.maxLength !== undefined) {
     data.maxLength = profile.maxLength;
   }

@@ -200,7 +200,7 @@
       "id": "OBX-20",
       "required": false,
       "repeatable": false,
-      "datatype": "VARIES",
+      "datatype": "var",
       "name": "Reserved for harmonization with V2.6",
       "item": "9999"
     },
@@ -209,7 +209,7 @@
       "id": "OBX-21",
       "required": false,
       "repeatable": false,
-      "datatype": "VARIES",
+      "datatype": "var",
       "name": "Reserved for harmonization with V2.6",
       "item": "9999"
     },
@@ -218,7 +218,7 @@
       "id": "OBX-22",
       "required": false,
       "repeatable": false,
-      "datatype": "VARIES",
+      "datatype": "var",
       "name": "Reserved for harmonization with V2.6",
       "item": "9999"
     },

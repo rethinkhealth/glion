@@ -67,7 +67,11 @@ describe("field definitions by sequence", () => {
       const misplaced: string[] = [];
       for (const segmentId of await segmentIdsOf(version)) {
         const definition = await fields.load(version, segmentId);
-        for (const [sequence, field] of definition?.bySequence ?? []) {
+        if (definition === undefined) {
+          misplaced.push(`${segmentId} has no field definition`);
+          continue;
+        }
+        for (const [sequence, field] of definition.bySequence) {
           if (field.id !== `${segmentId}-${sequence}`) {
             misplaced.push(`${field.id} at ${sequence}`);
           }
@@ -75,6 +79,25 @@ describe("field definitions by sequence", () => {
       }
 
       expect(misplaced).toEqual([]);
+    }
+  );
+
+  it.each(VERSIONS)(
+    "give a field at every v%s sequence from 1 to the last",
+    async (version) => {
+      const missing: string[] = [];
+      for (const segmentId of await segmentIdsOf(version)) {
+        const definition = await fields.load(version, segmentId);
+        const sequences = [...(definition?.bySequence.keys() ?? [])];
+        const last = Math.max(0, ...sequences);
+        for (let sequence = 1; sequence <= last; sequence++) {
+          if (!sequences.includes(sequence)) {
+            missing.push(`${segmentId}-${sequence}`);
+          }
+        }
+      }
+
+      expect(missing).toEqual([]);
     }
   );
 });
