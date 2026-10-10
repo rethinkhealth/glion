@@ -14,6 +14,27 @@ import type { Predicate, Test } from "./types";
  *   (`constructor`, `toString`, an own `__proto__`) matches no node. The
  *   object's entries are read once, when the predicate is created.
  *
+ * @example
+ *   ```typescript
+ *   const msh = s("MSH", f("|"));
+ *
+ *   createTest(null)(msh, []); // true
+ *   createTest("segment")(msh, []); // true
+ *   createTest("field")(msh, []); // false
+ *
+ *   createTest({ type: "segment", name: "MSH" })(msh, []); // true
+ *   createTest({ name: "PID" })(msh, []); // false
+ *
+ *   // `undefined` matches a property the node does not have
+ *   createTest({ name: undefined })(f("|"), []); // true
+ *
+ *   // An inherited member is never matched
+ *   createTest({ constructor: Object })(msh, []); // false
+ *
+ *   // A function receives the ancestors as well
+ *   const inGroup = createTest((_node, ancestors) => ancestors.length > 1);
+ *   ```;
+ *
  * @param test - `null`, a node type, a property object, or a predicate.
  * @returns The predicate.
  */
