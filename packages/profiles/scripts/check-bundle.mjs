@@ -30,6 +30,7 @@
  */
 
 import { readdirSync, readFileSync } from "node:fs";
+import { sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const MESSAGES_PER_SCHEMA = 12;
@@ -458,13 +459,14 @@ const kindOf = (file) => {
 };
 
 /**
- * Every JSON file under `src/profiles/` but the schema, with the definition
- * its location gives it.
+ * Every JSON file under `src/profiles/` but the schema, by its path with `/`
+ * separators, with the definition its location gives it.
  *
  * @returns {{ file: string; url: URL; kind: string | undefined }[]} The files.
  */
 const bundledProfileFiles = () =>
   readdirSync(PROFILES, { recursive: true })
+    .map((file) => file.split(sep).join("/"))
     .filter((file) => file.endsWith(".json") && file !== SCHEMA_FILE)
     .toSorted()
     .map((file) => ({
