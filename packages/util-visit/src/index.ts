@@ -85,10 +85,7 @@ export function visit<T extends Nodes>(
     const info: VisitInfo = {
       depth: ancestors.length + 1,
       index: currentIndex,
-      metadata:
-        "name" in node && typeof node.name === "string"
-          ? { name: node.name }
-          : undefined,
+      metadata: "name" in node ? { name: node.name } : undefined,
       sequence: currentIndex + 1,
     };
 
