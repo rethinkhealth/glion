@@ -138,6 +138,9 @@ importers:
       '@glion/util-query':
         specifier: workspace:*
         version: link:../packages/util-query
+      '@glion/util-visit':
+        specifier: workspace:*
+        version: link:../packages/util-visit
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
