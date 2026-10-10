@@ -13,6 +13,14 @@
     },
     {
       "sequence": 2,
+      "id": "PR1-2",
+      "required": false,
+      "repeatable": false,
+      "name": "Procedure Coding Method",
+      "item": "392"
+    },
+    {
+      "sequence": 3,
       "id": "PR1-3",
       "required": true,
       "repeatable": false,
@@ -23,7 +31,15 @@
       "item": "393"
     },
     {
-      "sequence": 3,
+      "sequence": 4,
+      "id": "PR1-4",
+      "required": false,
+      "repeatable": false,
+      "name": "Procedure Description",
+      "item": "394"
+    },
+    {
+      "sequence": 5,
       "id": "PR1-5",
       "required": true,
       "repeatable": false,
@@ -33,7 +49,7 @@
       "item": "395"
     },
     {
-      "sequence": 4,
+      "sequence": 6,
       "id": "PR1-6",
       "required": false,
       "repeatable": false,
@@ -44,7 +60,7 @@
       "item": "396"
     },
     {
-      "sequence": 5,
+      "sequence": 7,
       "id": "PR1-7",
       "required": false,
       "repeatable": false,
@@ -54,7 +70,15 @@
       "item": "397"
     },
     {
-      "sequence": 6,
+      "sequence": 8,
+      "id": "PR1-8",
+      "required": false,
+      "repeatable": false,
+      "name": "Anesthesiologist",
+      "item": "398"
+    },
+    {
+      "sequence": 9,
       "id": "PR1-9",
       "required": false,
       "repeatable": false,
@@ -65,7 +89,7 @@
       "item": "399"
     },
     {
-      "sequence": 7,
+      "sequence": 10,
       "id": "PR1-10",
       "required": false,
       "repeatable": false,
@@ -75,7 +99,23 @@
       "item": "400"
     },
     {
-      "sequence": 8,
+      "sequence": 11,
+      "id": "PR1-11",
+      "required": false,
+      "repeatable": false,
+      "name": "Surgeon",
+      "item": "401"
+    },
+    {
+      "sequence": 12,
+      "id": "PR1-12",
+      "required": false,
+      "repeatable": false,
+      "name": "Procedure Practitioner",
+      "item": "402"
+    },
+    {
+      "sequence": 13,
       "id": "PR1-13",
       "required": false,
       "repeatable": false,
@@ -86,7 +126,7 @@
       "item": "403"
     },
     {
-      "sequence": 9,
+      "sequence": 14,
       "id": "PR1-14",
       "required": false,
       "repeatable": false,
@@ -97,7 +137,7 @@
       "item": "404"
     },
     {
-      "sequence": 10,
+      "sequence": 15,
       "id": "PR1-15",
       "required": false,
       "repeatable": false,
@@ -108,7 +148,7 @@
       "item": "772"
     },
     {
-      "sequence": 11,
+      "sequence": 16,
       "id": "PR1-16",
       "required": false,
       "repeatable": true,
@@ -119,7 +159,7 @@
       "item": "1316"
     },
     {
-      "sequence": 12,
+      "sequence": 17,
       "id": "PR1-17",
       "required": false,
       "repeatable": false,
@@ -130,7 +170,7 @@
       "item": "1501"
     },
     {
-      "sequence": 13,
+      "sequence": 18,
       "id": "PR1-18",
       "required": false,
       "repeatable": true,
@@ -141,7 +181,7 @@
       "item": "1502"
     },
     {
-      "sequence": 14,
+      "sequence": 19,
       "id": "PR1-19",
       "required": false,
       "repeatable": false,
@@ -151,7 +191,7 @@
       "item": "1848"
     },
     {
-      "sequence": 15,
+      "sequence": 20,
       "id": "PR1-20",
       "required": false,
       "repeatable": false,
@@ -162,7 +202,7 @@
       "item": "1849"
     },
     {
-      "sequence": 16,
+      "sequence": 21,
       "id": "PR1-21",
       "required": false,
       "repeatable": false,
@@ -173,7 +213,7 @@
       "item": "2177"
     },
     {
-      "sequence": 17,
+      "sequence": 22,
       "id": "PR1-22",
       "required": false,
       "repeatable": false,

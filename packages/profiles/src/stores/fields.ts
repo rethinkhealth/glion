@@ -14,7 +14,8 @@ export type FieldProfile = Readonly<{
   id: string;
   required: boolean;
   repeatable: boolean;
-  datatype: string;
+  /** Absent on a withdrawn field the standard gives no datatype. */
+  datatype?: string;
   maxLength?: number;
   table?: string;
   name?: string;

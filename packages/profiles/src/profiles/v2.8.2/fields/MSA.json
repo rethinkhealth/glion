@@ -24,6 +24,14 @@
     },
     {
       "sequence": 3,
+      "id": "MSA-3",
+      "required": false,
+      "repeatable": false,
+      "name": "Text Message",
+      "item": "20"
+    },
+    {
+      "sequence": 4,
       "id": "MSA-4",
       "required": false,
       "repeatable": false,
@@ -32,7 +40,23 @@
       "item": "21"
     },
     {
-      "sequence": 4,
+      "sequence": 5,
+      "id": "MSA-5",
+      "required": false,
+      "repeatable": false,
+      "name": "Delayed Acknowledgment Type",
+      "item": "22"
+    },
+    {
+      "sequence": 6,
+      "id": "MSA-6",
+      "required": false,
+      "repeatable": false,
+      "name": "Error Condition",
+      "item": "23"
+    },
+    {
+      "sequence": 7,
       "id": "MSA-7",
       "required": false,
       "repeatable": false,
@@ -41,7 +65,7 @@
       "item": "1827"
     },
     {
-      "sequence": 5,
+      "sequence": 8,
       "id": "MSA-8",
       "required": false,
       "repeatable": false,

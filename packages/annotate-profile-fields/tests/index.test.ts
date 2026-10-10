@@ -35,6 +35,24 @@ function getField(tree: Root, segmentName: string, fieldIndex: number): Field {
 }
 
 describe("hl7v2AnnotateProfileFields", () => {
+  it("leaves out the datatype of a withdrawn field the standard gives none", async () => {
+    const tree = m(msh("2.6"), s("DG1", f("1"), f("I9")));
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2AnnotateProfileFields)
+      .run(tree);
+
+    // v2.6 DG1-2 (Diagnosis Coding Method) is withdrawn and has no datatype
+    expect(getField(tree, "DG1", 1).data).toStrictEqual({
+      id: "DG1-2",
+      item: "376",
+      name: "Diagnosis Coding Method",
+      repeatable: false,
+      required: false,
+    });
+  });
+
   it("annotates MSH fields with profile metadata", async () => {
     const tree = m(msh("2.5"));
 

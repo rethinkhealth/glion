@@ -48,6 +48,14 @@
       "datatype": "ST",
       "name": "Allergy Reaction Code",
       "item": "207"
+    },
+    {
+      "sequence": 6,
+      "id": "AL1-6",
+      "required": false,
+      "repeatable": false,
+      "name": "Identification Date",
+      "item": "208"
     }
   ]
 }

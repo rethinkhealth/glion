@@ -287,4 +287,86 @@ describe("hl7v2LintTableValues", () => {
     expect(errors).toHaveLength(1);
     expect(errors[0]?.message).toContain("ZZZ");
   });
+
+  it("checks a CWE field's first component, the identifier, against its table", async () => {
+    // ERR-3 (CWE) references HL70357; "ZZZ" is not a code in it
+    const tree = m(
+      msh("2.5"),
+      s("ERR", f(""), f(""), f(c("ZZZ"), c("Unknown")))
+    );
+    const file = new VFile();
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintTableValues)
+      .run(tree, file);
+
+    const errors = file.messages.filter((msg) => msg.ruleId === "table-values");
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.message).toContain("ERR-3");
+  });
+
+  it("does not check an XPN name against the table of its name type component", async () => {
+    // v2.6 PID-5 (XPN) references HL70200, which lists XPN.7 name type codes
+    const tree = m(
+      msh("2.6"),
+      s("PID", f(""), f(""), f(""), f(""), f(c("DOE"), c("JOHN")))
+    );
+    const file = new VFile();
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintTableValues)
+      .run(tree, file);
+
+    const errors = file.messages.filter((msg) => msg.ruleId === "table-values");
+    expect(errors).toHaveLength(0);
+  });
+
+  it("checks a v2.4 MSG message type, whose first component is the code, against its table", async () => {
+    // v2.4 MSH-9 (MSG) references HL70076; MSG.1 (ID) is the message code
+    const tree = m(
+      s(
+        "MSH",
+        f("|"),
+        f("^~\\&"),
+        f("SENDER"),
+        f("FAC"),
+        f("RECV"),
+        f("RFAC"),
+        f("20241201"),
+        f(""),
+        f(c("ZZZ"), c("A01")),
+        f("MSG001"),
+        f("P"),
+        f("2.4")
+      )
+    );
+    const file = new VFile();
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintTableValues)
+      .run(tree, file);
+
+    const errors = file.messages.filter((msg) => msg.ruleId === "table-values");
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.message).toContain("MSH-9");
+    expect(errors[0]?.message).toContain("ZZZ");
+  });
+
+  it("checks a v2.4 CCD charge timing, whose first component is the code, against its table", async () => {
+    // v2.4 BLG-1 (CCD) references HL70100; CCD.1 (ID) is the invocation event
+    const tree = m(msh("2.4"), s("BLG", f(c("Z"), c("200401011200"))));
+    const file = new VFile();
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintTableValues)
+      .run(tree, file);
+
+    const errors = file.messages.filter((msg) => msg.ruleId === "table-values");
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.message).toContain("BLG-1");
+  });
 });

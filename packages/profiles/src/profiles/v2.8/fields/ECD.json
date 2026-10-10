@@ -33,6 +33,14 @@
     },
     {
       "sequence": 4,
+      "id": "ECD-4",
+      "required": false,
+      "repeatable": false,
+      "name": "Requested Completion Time",
+      "item": "1393"
+    },
+    {
+      "sequence": 5,
       "id": "ECD-5",
       "required": false,
       "repeatable": true,
