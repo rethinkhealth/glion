@@ -149,8 +149,9 @@ export interface Server {
   readonly listening: Promise<void>;
 
   /**
-   * Gracefully close the server. No new connections will be accepted and the
-   * returned promise resolves once all underlying resources are released.
+   * Gracefully close the server. No new connections are accepted, and every
+   * open connection is ended once the message it is handling, if any, has
+   * been answered. Resolves once every connection has closed.
    */
   close(): Promise<void>;
 }
@@ -194,24 +195,38 @@ export function serve(app: Mllp, options: ServeOptions): Server {
     onError: options.onError,
   };
 
+  const connections = new Set<OpenConnection>();
+
   const handle = adapter.listen(
     {
       hostname: options.hostname,
       port: options.port,
       tls: options.tls,
     },
-    (socket) => handleConnection(app, socket, lifecycle)
+    (socket) => handleConnection(app, socket, lifecycle, connections)
   );
 
   return {
     async close() {
-      await handle.close();
+      const closed = handle.close();
+      await Promise.all([...connections].map((connection) => connection.end()));
+      await closed;
     },
     listening: handle.listening,
     get port() {
       return handle.port;
     },
   };
+}
+
+/** A connection the server has accepted and not yet closed. */
+interface OpenConnection {
+  /**
+   * Stop reading once the message in progress, if any, has been answered.
+   *
+   * Never rejects.
+   */
+  end(): Promise<void>;
 }
 
 /** Lifecycle callback options extracted from ServeOptions. */
@@ -278,14 +293,35 @@ async function reportError(
  * @param app - The MLLP application to dispatch messages to.
  * @param socket - The adapter socket wrapping the underlying TCP connection.
  * @param lifecycle - Optional lifecycle callbacks from ServeOptions.
+ * @param connections - The server's open connections; this one is listed
+ *   until it closes.
  */
 function handleConnection(
   app: Mllp,
   socket: AdapterSocket,
-  lifecycle: LifecycleOptions
+  lifecycle: LifecycleOptions,
+  connections: Set<OpenConnection>
 ): void {
   const reader = socket.readable.pipeThrough(unframe()).getReader();
   const writer = socket.writable.getWriter();
+
+  let handling = false;
+  let ending = false;
+  const open: OpenConnection = {
+    async end() {
+      ending = true;
+      if (handling) {
+        return;
+      }
+      try {
+        // Settles the pending read as done.
+        await reader.cancel();
+      } catch {
+        // The stream has already errored; the read loop reports that error.
+      }
+    },
+  };
+  connections.add(open);
 
   const connection: ConnectionInfo = {
     id: nextConnectionId++,
@@ -314,12 +350,13 @@ function handleConnection(
           if (done) {
             break;
           }
+          handling = true;
 
           // Inner try/catch separates per-message errors from stream errors.
           // Decode failures and handler errors both route to onError and the
           // connection survives; stream errors (connection reset) flow to the
           // outer catch for cleanup.
-          let response: Awaited<ReturnType<Mllp["handle"]>>;
+          let response: Awaited<ReturnType<Mllp["handle"]>> | undefined;
           try {
             // unframe() emits the de-framed payload bytes; decode them to
             // text (UTF-8) for the handler, which also receives the raw bytes.
@@ -335,13 +372,16 @@ function handleConnection(
               lifecycle,
               getMessageInfo(error)
             );
-            continue;
           }
 
           // Write is outside the handler error catch — write failures
           // are transport errors and flow to the outer catch.
           if (response) {
             await writer.write(frame(encodeBytes(response.raw)));
+          }
+          handling = false;
+          if (ending) {
+            break;
           }
         }
       } catch (streamError) {
@@ -368,16 +408,9 @@ function handleConnection(
     } finally {
       // ── Cleanup & onDisconnect ─────────────────────────────────────
       // Always runs, even if onConnect threw.
-      try {
-        reader.releaseLock();
-      } catch {
-        /* lock may already be released */
-      }
-      try {
-        writer.releaseLock();
-      } catch {
-        /* lock may already be released */
-      }
+      connections.delete(open);
+      reader.releaseLock();
+      writer.releaseLock();
 
       try {
         await lifecycle.onDisconnect?.(connection);
