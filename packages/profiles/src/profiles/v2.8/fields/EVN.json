@@ -4,16 +4,16 @@
     {
       "sequence": 1,
       "id": "EVN-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Event Type Code",
       "item": "99"
     },
     {
       "sequence": 2,
       "id": "EVN-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Recorded Date/Time",
       "item": "100"
@@ -21,8 +21,8 @@
     {
       "sequence": 3,
       "id": "EVN-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Date/Time Planned Event",
       "item": "101"
@@ -30,8 +30,8 @@
     {
       "sequence": 4,
       "id": "EVN-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70062",
       "name": "Event Reason Code",
@@ -40,8 +40,8 @@
     {
       "sequence": 5,
       "id": "EVN-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "table": "HL70188",
       "name": "Operator ID",
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "EVN-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Event Occurred",
       "item": "1278"
@@ -59,8 +59,8 @@
     {
       "sequence": 7,
       "id": "EVN-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "HD",
       "name": "Event Facility",
       "item": "1534"

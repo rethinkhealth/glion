@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "NTE-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "SET ID - NOTES AND COMMENTS",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "NTE-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 8,
       "table": "HL70105",
@@ -25,8 +25,8 @@
     {
       "sequence": 3,
       "id": "NTE-3",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "TX",
       "maxLength": 120,
       "name": "COMMENT",

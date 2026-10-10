@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "RF1-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70283",
       "name": "Referral Status",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "RF1-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70280",
       "name": "Referral Priority",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "RF1-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70281",
       "name": "Referral Type",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "RF1-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70282",
       "name": "Referral Disposition",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "RF1-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70284",
       "name": "Referral Category",
@@ -54,8 +54,8 @@
     {
       "sequence": 6,
       "id": "RF1-6",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Originating Referral Identifier",
       "item": "1142"
@@ -63,8 +63,8 @@
     {
       "sequence": 7,
       "id": "RF1-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Effective Date",
       "item": "1143"
@@ -72,8 +72,8 @@
     {
       "sequence": 8,
       "id": "RF1-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Expiration Date",
       "item": "1144"
@@ -81,8 +81,8 @@
     {
       "sequence": 9,
       "id": "RF1-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Process Date",
       "item": "1145"
@@ -90,8 +90,8 @@
     {
       "sequence": 10,
       "id": "RF1-10",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70336",
       "name": "Referral Reason",
@@ -100,8 +100,8 @@
     {
       "sequence": 11,
       "id": "RF1-11",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "External Referral Identifier",
       "item": "1300"
@@ -109,8 +109,8 @@
     {
       "sequence": 12,
       "id": "RF1-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70865",
       "name": "Referral Documentation Completion Status",
@@ -119,8 +119,8 @@
     {
       "sequence": 13,
       "id": "RF1-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "maxLength": 24,
       "name": "Planned Treatment Stop Date",
@@ -129,8 +129,8 @@
     {
       "sequence": 14,
       "id": "RF1-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 60,
       "name": "Referral Reason Text",
@@ -139,8 +139,8 @@
     {
       "sequence": 15,
       "id": "RF1-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "maxLength": 721,
       "name": "Number of Authorized Treatments/Units",
@@ -149,8 +149,8 @@
     {
       "sequence": 16,
       "id": "RF1-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "maxLength": 721,
       "name": "Number of Used Treatments/Units",
@@ -159,8 +159,8 @@
     {
       "sequence": 17,
       "id": "RF1-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "maxLength": 721,
       "name": "Number of Schedule Treatments/Units",
@@ -169,8 +169,8 @@
     {
       "sequence": 18,
       "id": "RF1-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "maxLength": 20,
       "name": "Remaining Benefit Amount",
@@ -179,8 +179,8 @@
     {
       "sequence": 19,
       "id": "RF1-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XON",
       "maxLength": 250,
       "name": "Authorized Provider",
@@ -189,8 +189,8 @@
     {
       "sequence": 20,
       "id": "RF1-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XCN",
       "maxLength": 250,
       "name": "Authorized Health Professional",
@@ -199,8 +199,8 @@
     {
       "sequence": 21,
       "id": "RF1-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 60,
       "name": "Source Text",
@@ -209,8 +209,8 @@
     {
       "sequence": 22,
       "id": "RF1-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "maxLength": 24,
       "name": "Source Date",
@@ -219,8 +219,8 @@
     {
       "sequence": 23,
       "id": "RF1-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XTN",
       "maxLength": 250,
       "name": "Source Phone",
@@ -229,8 +229,8 @@
     {
       "sequence": 24,
       "id": "RF1-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 250,
       "name": "Comment",
@@ -239,8 +239,8 @@
     {
       "sequence": 25,
       "id": "RF1-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70206",

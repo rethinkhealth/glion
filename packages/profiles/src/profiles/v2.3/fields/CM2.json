@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "CM2-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "CM2 - Set ID",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "CM2-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 60,
       "name": "Scheduled Time Point",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "CM2-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 300,
       "name": "Description of Time Point",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "CM2-4",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": 200,
       "datatype": "CE",
       "maxLength": 60,
       "name": "Events Scheduled This Time Point",

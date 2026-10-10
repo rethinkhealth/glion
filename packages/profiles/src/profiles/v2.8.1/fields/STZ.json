@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "STZ-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70806",
       "name": "Sterilization Type",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "STZ-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70702",
       "name": "Sterilization Cycle",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "STZ-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70809",
       "name": "Maintenance Cycle",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "STZ-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70811",
       "name": "Maintenance Type",

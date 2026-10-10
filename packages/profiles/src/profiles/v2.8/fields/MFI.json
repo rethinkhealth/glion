@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "MFI-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70175",
       "name": "Master File Identifier",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "MFI-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "HD",
       "table": "HL70361",
       "name": "Master File Application Identifier",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "MFI-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70178",
@@ -35,8 +35,8 @@
     {
       "sequence": 4,
       "id": "MFI-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Entered Date/Time",
       "item": "661"
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "MFI-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Effective Date/Time",
       "item": "662"
@@ -53,8 +53,8 @@
     {
       "sequence": 6,
       "id": "MFI-6",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70179",

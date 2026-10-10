@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PSL-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Provider Product/Service Line Item Number",
       "item": "1955"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "PSL-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Payer Product/Service Line Item Number",
       "item": "1956"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "PSL-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Product/Service Line Item Sequence Number",
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "PSL-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Provider Tracking ID",
       "item": "1958"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "PSL-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Payer Tracking ID",
       "item": "1959"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "PSL-6",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70559",
       "name": "Product/Service Line Item Status",
@@ -60,8 +60,8 @@
     {
       "sequence": 7,
       "id": "PSL-7",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70879",
       "name": "Product/Service Code",
@@ -70,8 +70,8 @@
     {
       "sequence": 8,
       "id": "PSL-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70880",
       "name": "Product/Service Code Modifier",
@@ -80,8 +80,8 @@
     {
       "sequence": 9,
       "id": "PSL-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Product/Service Code Description",
       "item": "1963"
@@ -89,8 +89,8 @@
     {
       "sequence": 10,
       "id": "PSL-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Product/Service Effective Date",
       "item": "1964"
@@ -98,8 +98,8 @@
     {
       "sequence": 11,
       "id": "PSL-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Product/Service Expiration Date",
       "item": "1965"
@@ -107,8 +107,8 @@
     {
       "sequence": 12,
       "id": "PSL-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CQ",
       "table": "HL70560",
       "name": "Product/Service Quantity",
@@ -117,8 +117,8 @@
     {
       "sequence": 13,
       "id": "PSL-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Product/Service Unit Cost",
       "item": "1967"
@@ -126,8 +126,8 @@
     {
       "sequence": 14,
       "id": "PSL-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Number of Items per Unit",
       "item": "1968"
@@ -135,8 +135,8 @@
     {
       "sequence": 15,
       "id": "PSL-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Product/Service Gross Amount",
       "item": "1969"
@@ -144,8 +144,8 @@
     {
       "sequence": 16,
       "id": "PSL-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Product/Service Billed Amount",
       "item": "1970"
@@ -153,8 +153,8 @@
     {
       "sequence": 17,
       "id": "PSL-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70561",
       "name": "Product/Service Clarification Code Type",
@@ -163,8 +163,8 @@
     {
       "sequence": 18,
       "id": "PSL-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Product/Service Clarification Code Value",
       "item": "1972"
@@ -172,8 +172,8 @@
     {
       "sequence": 19,
       "id": "PSL-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Health Document Reference Identifier",
       "item": "1973"
@@ -181,8 +181,8 @@
     {
       "sequence": 20,
       "id": "PSL-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70562",
       "name": "Processing Consideration Code",
@@ -191,8 +191,8 @@
     {
       "sequence": 21,
       "id": "PSL-21",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 4,
       "table": "HL70532",
@@ -202,8 +202,8 @@
     {
       "sequence": 22,
       "id": "PSL-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70879",
       "name": "Related Product/Service Code Indicator",
@@ -212,8 +212,8 @@
     {
       "sequence": 23,
       "id": "PSL-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Product/Service Amount for Physician",
       "item": "1977"
@@ -221,8 +221,8 @@
     {
       "sequence": 24,
       "id": "PSL-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Product/Service Cost Factor",
       "item": "1978"
@@ -230,8 +230,8 @@
     {
       "sequence": 25,
       "id": "PSL-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CX",
       "name": "Cost Center",
       "item": "1933"
@@ -239,8 +239,8 @@
     {
       "sequence": 26,
       "id": "PSL-26",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DR",
       "name": "Billing Period",
       "item": "1980"
@@ -248,8 +248,8 @@
     {
       "sequence": 27,
       "id": "PSL-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Days without Billing",
       "item": "1981"
@@ -257,8 +257,8 @@
     {
       "sequence": 28,
       "id": "PSL-28",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 4,
       "name": "Session-No",
@@ -267,8 +267,8 @@
     {
       "sequence": 29,
       "id": "PSL-29",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XCN",
       "name": "Executing Physician ID",
       "item": "1983"
@@ -276,8 +276,8 @@
     {
       "sequence": 30,
       "id": "PSL-30",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XCN",
       "name": "Responsible Physician ID",
       "item": "1984"
@@ -285,8 +285,8 @@
     {
       "sequence": 31,
       "id": "PSL-31",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70881",
       "name": "Role Executing Physician",
@@ -295,8 +295,8 @@
     {
       "sequence": 32,
       "id": "PSL-32",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70882",
       "name": "Medical Role Executing Physician",
@@ -305,8 +305,8 @@
     {
       "sequence": 33,
       "id": "PSL-33",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70894",
       "name": "Side of body",
@@ -315,8 +315,8 @@
     {
       "sequence": 34,
       "id": "PSL-34",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Number of TP's PP",
       "item": "1988"
@@ -324,8 +324,8 @@
     {
       "sequence": 35,
       "id": "PSL-35",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "TP-Value PP",
       "item": "1989"
@@ -333,8 +333,8 @@
     {
       "sequence": 36,
       "id": "PSL-36",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Internal Scaling Factor PP",
       "item": "1990"
@@ -342,8 +342,8 @@
     {
       "sequence": 37,
       "id": "PSL-37",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "External Scaling Factor PP",
       "item": "1991"
@@ -351,8 +351,8 @@
     {
       "sequence": 38,
       "id": "PSL-38",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Amount PP",
       "item": "1992"
@@ -360,8 +360,8 @@
     {
       "sequence": 39,
       "id": "PSL-39",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Number of TP's Technical Part",
       "item": "1993"
@@ -369,8 +369,8 @@
     {
       "sequence": 40,
       "id": "PSL-40",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "TP-Value Technical Part",
       "item": "1994"
@@ -378,8 +378,8 @@
     {
       "sequence": 41,
       "id": "PSL-41",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Internal Scaling Factor Technical Part",
       "item": "1995"
@@ -387,8 +387,8 @@
     {
       "sequence": 42,
       "id": "PSL-42",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "External Scaling Factor Technical Part",
       "item": "1996"
@@ -396,8 +396,8 @@
     {
       "sequence": 43,
       "id": "PSL-43",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Amount Technical Part",
       "item": "1997"
@@ -405,8 +405,8 @@
     {
       "sequence": 44,
       "id": "PSL-44",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Total Amount Professional Part + Technical Part",
       "item": "1998"
@@ -414,8 +414,8 @@
     {
       "sequence": 45,
       "id": "PSL-45",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "VAT-Rate",
       "item": "1999"
@@ -423,8 +423,8 @@
     {
       "sequence": 46,
       "id": "PSL-46",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 20,
       "name": "Main-Service",
@@ -433,8 +433,8 @@
     {
       "sequence": 47,
       "id": "PSL-47",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -444,8 +444,8 @@
     {
       "sequence": 48,
       "id": "PSL-48",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Comment",
       "item": "2002"

@@ -73,7 +73,7 @@ describe("hl7v2PresetAnnotateProfileRecommended", () => {
     // Fields annotator: PID-5 should have field profile data
     const pid5 = getField(tree, "PID", 4);
     expect(pid5.data?.datatype).toBe("XPN");
-    expect(pid5.data?.required).toBe(true);
+    expect(pid5.data?.optionality).toBe("R");
 
     // Datatypes annotator: PID-5 rep should be composite
     const rep = getFirstRepetition(pid5);

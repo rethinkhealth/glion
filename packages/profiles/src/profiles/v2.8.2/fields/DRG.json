@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "DRG-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70055",
       "name": "Diagnostic Related Group",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "DRG-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "DRG Assigned Date/Time",
       "item": "769"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "DRG-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "DRG-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70056",
       "name": "DRG Grouper Review Code",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "DRG-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70083",
       "name": "Outlier Type",
@@ -54,8 +54,8 @@
     {
       "sequence": 6,
       "id": "DRG-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Outlier Days",
       "item": "386"
@@ -63,8 +63,8 @@
     {
       "sequence": 7,
       "id": "DRG-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Outlier Cost",
       "item": "387"
@@ -72,8 +72,8 @@
     {
       "sequence": 8,
       "id": "DRG-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70229",
       "name": "DRG Payor",
@@ -82,8 +82,8 @@
     {
       "sequence": 9,
       "id": "DRG-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Outlier Reimbursement",
       "item": "771"
@@ -91,8 +91,8 @@
     {
       "sequence": 10,
       "id": "DRG-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -102,8 +102,8 @@
     {
       "sequence": 11,
       "id": "DRG-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70415",
       "name": "DRG Transfer Type",
@@ -112,8 +112,8 @@
     {
       "sequence": 12,
       "id": "DRG-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XPN",
       "name": "Name of Coder",
       "item": "2156"
@@ -121,8 +121,8 @@
     {
       "sequence": 13,
       "id": "DRG-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70734",
       "name": "Grouper Status",
@@ -131,8 +131,8 @@
     {
       "sequence": 14,
       "id": "DRG-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70728",
       "name": "PCCL Value Code",
@@ -141,8 +141,8 @@
     {
       "sequence": 15,
       "id": "DRG-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Effective Weight",
       "item": "2159"
@@ -150,8 +150,8 @@
     {
       "sequence": 16,
       "id": "DRG-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Monetary Amount",
       "item": "2160"
@@ -159,8 +159,8 @@
     {
       "sequence": 17,
       "id": "DRG-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70739",
       "name": "Status Patient",
@@ -169,8 +169,8 @@
     {
       "sequence": 18,
       "id": "DRG-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Grouper Software Name",
       "item": "2162"
@@ -178,8 +178,8 @@
     {
       "sequence": 19,
       "id": "DRG-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Grouper Software Version",
       "item": "2282"
@@ -187,8 +187,8 @@
     {
       "sequence": 20,
       "id": "DRG-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70742",
       "name": "Status Financial Calculation",
@@ -197,8 +197,8 @@
     {
       "sequence": 21,
       "id": "DRG-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Relative Discount/Surcharge",
       "item": "2164"
@@ -206,8 +206,8 @@
     {
       "sequence": 22,
       "id": "DRG-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Basic Charge",
       "item": "2165"
@@ -215,8 +215,8 @@
     {
       "sequence": 23,
       "id": "DRG-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Total Charge",
       "item": "2166"
@@ -224,8 +224,8 @@
     {
       "sequence": 24,
       "id": "DRG-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Discount/Surcharge",
       "item": "2167"
@@ -233,8 +233,8 @@
     {
       "sequence": 25,
       "id": "DRG-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Calculated Days",
       "item": "2168"
@@ -242,8 +242,8 @@
     {
       "sequence": 26,
       "id": "DRG-26",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70749",
       "name": "Status Gender",
@@ -252,8 +252,8 @@
     {
       "sequence": 27,
       "id": "DRG-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70749",
       "name": "Status Age",
@@ -262,8 +262,8 @@
     {
       "sequence": 28,
       "id": "DRG-28",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70749",
       "name": "Status Length of Stay",
@@ -272,8 +272,8 @@
     {
       "sequence": 29,
       "id": "DRG-29",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70749",
       "name": "Status Same Day Flag",
@@ -282,8 +282,8 @@
     {
       "sequence": 30,
       "id": "DRG-30",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70749",
       "name": "Status Separation Mode",
@@ -292,8 +292,8 @@
     {
       "sequence": 31,
       "id": "DRG-31",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70755",
       "name": "Status Weight at Birth",
@@ -302,8 +302,8 @@
     {
       "sequence": 32,
       "id": "DRG-32",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70757",
       "name": "Status Respiration Minutes",
@@ -312,8 +312,8 @@
     {
       "sequence": 33,
       "id": "DRG-33",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70759",
       "name": "Status Admission",

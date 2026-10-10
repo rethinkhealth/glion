@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "SHP-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Shipment ID",
       "item": "2317"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "SHP-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Internal Shipment ID",
       "item": "2318"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "SHP-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70905",
       "name": "Shipment Status",
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "SHP-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Shipment Status Date/Time",
       "item": "2320"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "SHP-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "TX",
       "name": "Shipment Status Reason",
       "item": "2321"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "SHP-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70906",
       "name": "Shipment Priority",
@@ -60,8 +60,8 @@
     {
       "sequence": 7,
       "id": "SHP-7",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70907",
       "name": "Shipment Confidentiality",
@@ -70,8 +70,8 @@
     {
       "sequence": 8,
       "id": "SHP-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Number of Packages in Shipment",
       "item": "2324"
@@ -79,8 +79,8 @@
     {
       "sequence": 9,
       "id": "SHP-9",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70544",
       "name": "Shipment Condition",
@@ -89,8 +89,8 @@
     {
       "sequence": 10,
       "id": "SHP-10",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70376",
       "name": "Shipment Handling Code",
@@ -99,8 +99,8 @@
     {
       "sequence": 11,
       "id": "SHP-11",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70489",
       "name": "Shipment Risk Code",

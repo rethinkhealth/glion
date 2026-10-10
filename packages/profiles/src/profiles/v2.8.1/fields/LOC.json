@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "LOC-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "PL",
       "name": "Primary Key Value - LOC",
       "item": "1307"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "LOC-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Location Description",
       "item": "944"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "LOC-3",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70260",
       "name": "Location Type - LOC",
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "LOC-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XON",
       "name": "Organization Name - LOC",
       "item": "947"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "LOC-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Location Address",
       "item": "948"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "LOC-6",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Location Phone",
       "item": "949"
@@ -59,8 +59,8 @@
     {
       "sequence": 7,
       "id": "LOC-7",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70461",
       "name": "License Number",
@@ -69,8 +69,8 @@
     {
       "sequence": 8,
       "id": "LOC-8",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70261",
       "name": "Location Equipment",
@@ -79,8 +79,8 @@
     {
       "sequence": 9,
       "id": "LOC-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70442",
       "name": "Location Service Code",

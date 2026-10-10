@@ -4,8 +4,7 @@
     {
       "sequence": 1,
       "id": "OM2-1",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 3,
       "name": "Segment Type ID",
@@ -14,8 +13,7 @@
     {
       "sequence": 2,
       "id": "OM2-2",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 4,
       "name": "Sequence Number - Test/ Observation Master File",
@@ -24,8 +22,7 @@
     {
       "sequence": 3,
       "id": "OM2-3",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 60,
       "name": "Units of Measure",
@@ -34,8 +31,7 @@
     {
       "sequence": 4,
       "id": "OM2-4",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 10,
       "name": "Range of Decimal Precision",
@@ -44,8 +40,7 @@
     {
       "sequence": 5,
       "id": "OM2-5",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 60,
       "name": "Corresponding SI Units of Measure",
@@ -54,8 +49,8 @@
     {
       "sequence": 6,
       "id": "OM2-6",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "TX",
       "maxLength": 20,
       "name": "SI Conversion Factor",
@@ -64,8 +59,7 @@
     {
       "sequence": 7,
       "id": "OM2-7",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "CM",
       "maxLength": 200,
       "name": "Reference (normal) range - ordinal &amp; continuous observations",
@@ -74,8 +68,7 @@
     {
       "sequence": 8,
       "id": "OM2-8",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CM",
       "maxLength": 200,
       "name": "Critical range for ordinal and continuous observations",
@@ -84,8 +77,7 @@
     {
       "sequence": 9,
       "id": "OM2-9",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CM",
       "maxLength": 200,
       "name": "Absolute range for ordinal and continuous observations",
@@ -94,8 +86,7 @@
     {
       "sequence": 10,
       "id": "OM2-10",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "CM",
       "maxLength": 200,
       "name": "Delta Check Criteria",
@@ -104,8 +95,7 @@
     {
       "sequence": 11,
       "id": "OM2-11",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 20,
       "name": "Minimum Meaningful Increments",

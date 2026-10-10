@@ -29,7 +29,7 @@ export type Profiles = Readonly<{
   events: ProfileStore<EventSchema>;
   /** Event maps: the event schema each event uses, by version. */
   eventMaps: EventMapStore;
-  /** Segment field metadata (required, repeatable, maxLength, datatype). */
+  /** Segment field metadata (optionality, repetitions, maxLength, datatype). */
   fields: ProfileStore<FieldDefinition>;
   /** Component schema and constraints for datatypes. */
   datatypes: ProfileStore<DatatypeDefinition>;

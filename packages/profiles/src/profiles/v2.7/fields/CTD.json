@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "CTD-1",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70131",
       "name": "Contact Role",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "CTD-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Contact Name",
       "item": "1165"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "CTD-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Contact Address",
       "item": "1166"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "CTD-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "PL",
       "name": "Contact Location",
       "item": "1167"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "CTD-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Contact Communication Information",
       "item": "1168"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "CTD-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70185",
       "name": "Preferred Method of Contact",
@@ -60,8 +60,8 @@
     {
       "sequence": 7,
       "id": "CTD-7",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "PLN",
       "table": "HL70338",
       "name": "Contact Identifiers",

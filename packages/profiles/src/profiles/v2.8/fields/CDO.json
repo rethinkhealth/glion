@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "CDO-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - CDO",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "CDO-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70206",
@@ -25,8 +25,8 @@
     {
       "sequence": 3,
       "id": "CDO-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "name": "Cumulative Dosage Limit",
       "item": "3397"
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "CDO-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "table": "HL70924",
       "name": "Cumulative Dosage Limit Time Interval",

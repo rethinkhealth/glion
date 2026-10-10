@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "LCC-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "PL",
       "maxLength": 200,
       "name": "Primary Key Value",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "LCC-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "IS",
       "maxLength": 10,
       "table": "HL70264",
@@ -25,8 +25,8 @@
     {
       "sequence": 3,
       "id": "LCC-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CE",
       "maxLength": 60,
       "name": "Accommodation Type",
@@ -35,8 +35,8 @@
     {
       "sequence": 4,
       "id": "LCC-4",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "CE",
       "maxLength": 60,
       "name": "Charge Code",

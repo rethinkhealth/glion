@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "NK1-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - Next of Kin",
@@ -14,8 +14,7 @@
     {
       "sequence": 2,
       "id": "NK1-2",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "PN",
       "maxLength": 48,
       "name": "Name",
@@ -24,8 +23,7 @@
     {
       "sequence": 3,
       "id": "NK1-3",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 60,
       "table": "HL70063",
@@ -35,8 +33,7 @@
     {
       "sequence": 4,
       "id": "NK1-4",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "AD",
       "maxLength": 106,
       "name": "Address",
@@ -45,8 +42,7 @@
     {
       "sequence": 5,
       "id": "NK1-5",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 3,
       "datatype": "TN",
       "maxLength": 40,
       "name": "Phone Number",
@@ -55,8 +51,7 @@
     {
       "sequence": 6,
       "id": "NK1-6",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "TN",
       "maxLength": 40,
       "name": "Business Phone Number",
@@ -65,8 +60,7 @@
     {
       "sequence": 7,
       "id": "NK1-7",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 60,
       "table": "HL70131",
@@ -76,8 +70,7 @@
     {
       "sequence": 8,
       "id": "NK1-8",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "DT",
       "maxLength": 8,
       "name": "Start Date",
@@ -86,8 +79,7 @@
     {
       "sequence": 9,
       "id": "NK1-9",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "DT",
       "maxLength": 8,
       "name": "End Date",
@@ -96,8 +88,7 @@
     {
       "sequence": 10,
       "id": "NK1-10",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 60,
       "name": "Next of Kin",
@@ -106,8 +97,7 @@
     {
       "sequence": 11,
       "id": "NK1-11",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CM",
       "maxLength": 60,
       "name": "Next of kin job code / class",
@@ -116,8 +106,7 @@
     {
       "sequence": 12,
       "id": "NK1-12",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 20,
       "name": "Next of Kin Employee Number",
@@ -126,8 +115,7 @@
     {
       "sequence": 13,
       "id": "NK1-13",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 60,
       "name": "Organization Name",

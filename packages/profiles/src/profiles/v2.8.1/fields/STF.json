@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "STF-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Primary Key Value - STF",
       "item": "671"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "STF-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "table": "HL70061",
       "name": "Staff Identifier List",
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "STF-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Staff Name",
       "item": "673"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "STF-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70182",
       "name": "Staff Type",
@@ -42,8 +42,8 @@
     {
       "sequence": 5,
       "id": "STF-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70001",
       "name": "Administrative Sex",
@@ -52,8 +52,8 @@
     {
       "sequence": 6,
       "id": "STF-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Date/Time of Birth",
       "item": "110"
@@ -61,8 +61,8 @@
     {
       "sequence": 7,
       "id": "STF-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70183",
@@ -72,8 +72,8 @@
     {
       "sequence": 8,
       "id": "STF-8",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70184",
       "name": "Department",
@@ -82,8 +82,8 @@
     {
       "sequence": 9,
       "id": "STF-9",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70069",
       "name": "Hospital Service - STF",
@@ -92,8 +92,8 @@
     {
       "sequence": 10,
       "id": "STF-10",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Phone",
       "item": "678"
@@ -101,8 +101,8 @@
     {
       "sequence": 11,
       "id": "STF-11",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XAD",
       "name": "Office/Home Address/Birthplace",
       "item": "679"
@@ -110,8 +110,8 @@
     {
       "sequence": 12,
       "id": "STF-12",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "DIN",
       "table": "HL70537",
       "name": "Institution Activation Date",
@@ -120,8 +120,8 @@
     {
       "sequence": 13,
       "id": "STF-13",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "DIN",
       "table": "HL70537",
       "name": "Institution Inactivation Date",
@@ -130,8 +130,8 @@
     {
       "sequence": 14,
       "id": "STF-14",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Backup Person ID",
       "item": "682"
@@ -139,8 +139,8 @@
     {
       "sequence": 15,
       "id": "STF-15",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "ST",
       "name": "E-Mail Address",
       "item": "683"
@@ -148,8 +148,8 @@
     {
       "sequence": 16,
       "id": "STF-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70185",
       "name": "Preferred Method of Contact",
@@ -158,8 +158,8 @@
     {
       "sequence": 17,
       "id": "STF-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70002",
       "name": "Marital Status",
@@ -168,8 +168,8 @@
     {
       "sequence": 18,
       "id": "STF-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Job Title",
       "item": "785"
@@ -177,8 +177,8 @@
     {
       "sequence": 19,
       "id": "STF-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "JCC",
       "name": "Job Code/Class",
       "item": "786"
@@ -186,8 +186,8 @@
     {
       "sequence": 20,
       "id": "STF-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70066",
       "name": "Employment Status Code",
@@ -196,8 +196,8 @@
     {
       "sequence": 21,
       "id": "STF-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -207,8 +207,8 @@
     {
       "sequence": 22,
       "id": "STF-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DLN",
       "name": "Driver's License Number - Staff",
       "item": "1302"
@@ -216,8 +216,8 @@
     {
       "sequence": 23,
       "id": "STF-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -227,8 +227,8 @@
     {
       "sequence": 24,
       "id": "STF-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Auto Ins Expires",
       "item": "1232"
@@ -236,8 +236,8 @@
     {
       "sequence": 25,
       "id": "STF-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Date Last DMV Review",
       "item": "1298"
@@ -245,8 +245,8 @@
     {
       "sequence": 26,
       "id": "STF-26",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Date Next DMV Review",
       "item": "1234"
@@ -254,8 +254,8 @@
     {
       "sequence": 27,
       "id": "STF-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70005",
       "name": "Race",
@@ -264,8 +264,8 @@
     {
       "sequence": 28,
       "id": "STF-28",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70189",
       "name": "Ethnic Group",
@@ -274,8 +274,8 @@
     {
       "sequence": 29,
       "id": "STF-29",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -285,8 +285,8 @@
     {
       "sequence": 30,
       "id": "STF-30",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70171",
       "name": "Citizenship",
@@ -295,8 +295,8 @@
     {
       "sequence": 31,
       "id": "STF-31",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Date/Time of Death",
       "item": "1886"
@@ -304,8 +304,8 @@
     {
       "sequence": 32,
       "id": "STF-32",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -315,8 +315,8 @@
     {
       "sequence": 33,
       "id": "STF-33",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70538",
       "name": "Institution Relationship Type Code",
@@ -325,8 +325,8 @@
     {
       "sequence": 34,
       "id": "STF-34",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DR",
       "name": "Institution Relationship Period",
       "item": "1889"
@@ -334,8 +334,8 @@
     {
       "sequence": 35,
       "id": "STF-35",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Expected Return Date",
       "item": "1890"
@@ -343,8 +343,8 @@
     {
       "sequence": 36,
       "id": "STF-36",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70539",
       "name": "Cost Center Code",
@@ -353,8 +353,8 @@
     {
       "sequence": 37,
       "id": "STF-37",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -364,8 +364,8 @@
     {
       "sequence": 38,
       "id": "STF-38",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70540",
       "name": "Inactive Reason Code",
@@ -374,8 +374,8 @@
     {
       "sequence": 39,
       "id": "STF-39",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70771",
       "name": "Generic resource type or category",
@@ -384,8 +384,8 @@
     {
       "sequence": 40,
       "id": "STF-40",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70006",
       "name": "Religion",
@@ -394,8 +394,8 @@
     {
       "sequence": 41,
       "id": "STF-41",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ED",
       "name": "Signature",
       "item": "1861"

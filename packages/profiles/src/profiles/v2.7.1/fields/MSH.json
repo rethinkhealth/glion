@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "MSH-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 1,
       "name": "Field Separator",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "MSH-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 5,
       "name": "Encoding Characters",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "MSH-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "HD",
       "table": "HL70361",
       "name": "Sending Application",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "MSH-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "HD",
       "table": "HL70362",
       "name": "Sending Facility",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "MSH-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "HD",
       "table": "HL70361",
       "name": "Receiving Application",
@@ -54,8 +54,8 @@
     {
       "sequence": 6,
       "id": "MSH-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "HD",
       "table": "HL70362",
       "name": "Receiving Facility",
@@ -64,8 +64,8 @@
     {
       "sequence": 7,
       "id": "MSH-7",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Date/Time of Message",
       "item": "7"
@@ -73,8 +73,8 @@
     {
       "sequence": 8,
       "id": "MSH-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Security",
       "item": "8"
@@ -82,8 +82,8 @@
     {
       "sequence": 9,
       "id": "MSH-9",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "MSG",
       "name": "Message Type",
       "item": "9"
@@ -91,8 +91,8 @@
     {
       "sequence": 10,
       "id": "MSH-10",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 199,
       "name": "Message Control ID",
@@ -101,8 +101,8 @@
     {
       "sequence": 11,
       "id": "MSH-11",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "PT",
       "name": "Processing ID",
       "item": "11"
@@ -110,8 +110,8 @@
     {
       "sequence": 12,
       "id": "MSH-12",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "VID",
       "name": "Version ID",
       "item": "12"
@@ -119,8 +119,8 @@
     {
       "sequence": 13,
       "id": "MSH-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Sequence Number",
       "item": "13"
@@ -128,8 +128,8 @@
     {
       "sequence": 14,
       "id": "MSH-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Continuation Pointer",
       "item": "14"
@@ -137,8 +137,8 @@
     {
       "sequence": 15,
       "id": "MSH-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70155",
@@ -148,8 +148,8 @@
     {
       "sequence": 16,
       "id": "MSH-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70155",
@@ -159,8 +159,8 @@
     {
       "sequence": 17,
       "id": "MSH-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70399",
@@ -170,8 +170,8 @@
     {
       "sequence": 18,
       "id": "MSH-18",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "ID",
       "maxLength": 15,
       "table": "HL70211",
@@ -181,8 +181,8 @@
     {
       "sequence": 19,
       "id": "MSH-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Principal Language Of Message",
       "item": "693"
@@ -190,8 +190,8 @@
     {
       "sequence": 20,
       "id": "MSH-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 13,
       "table": "HL70356",
@@ -201,8 +201,8 @@
     {
       "sequence": 21,
       "id": "MSH-21",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "EI",
       "name": "Message Profile Identifier",
       "item": "1598"
@@ -210,8 +210,8 @@
     {
       "sequence": 22,
       "id": "MSH-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XON",
       "name": "Sending Responsible Organization",
       "item": "1823"
@@ -219,8 +219,8 @@
     {
       "sequence": 23,
       "id": "MSH-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XON",
       "name": "Receiving Responsible Organization",
       "item": "1824"
@@ -228,8 +228,8 @@
     {
       "sequence": 24,
       "id": "MSH-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "HD",
       "name": "Sending Network Address",
       "item": "1825"
@@ -237,8 +237,8 @@
     {
       "sequence": 25,
       "id": "MSH-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "HD",
       "name": "Receiving Network Address",
       "item": "1826"

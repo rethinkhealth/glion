@@ -11,8 +11,8 @@ describe("fields", () => {
       item: "1",
       maxLength: 1,
       name: "Field Separator",
-      repeatable: false,
-      required: true,
+      optionality: "R",
+      repetitions: 1,
       sequence: 1,
     });
   });

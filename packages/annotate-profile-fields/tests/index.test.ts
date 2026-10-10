@@ -48,8 +48,27 @@ describe("hl7v2AnnotateProfileFields", () => {
       id: "DG1-2",
       item: "376",
       name: "Diagnosis Coding Method",
-      repeatable: false,
-      required: false,
+      optionality: "W",
+      repetitions: 1,
+    });
+  });
+
+  it("leaves out the optionality of a field the standard records none for", async () => {
+    const fields = Array.from({ length: 20 }, () => f(""));
+    const tree = m(msh("2.5.1"), s("OBX", ...fields.slice(0, 19), f("X")));
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2AnnotateProfileFields)
+      .run(tree);
+
+    // v2.5.1 OBX-20 is reserved for harmonization with v2.6, with no optionality
+    expect(getField(tree, "OBX", 19).data).toStrictEqual({
+      datatype: "var",
+      id: "OBX-20",
+      item: "9999",
+      name: "Reserved for harmonization with V2.6",
+      repetitions: 1,
     });
   });
 
@@ -69,8 +88,8 @@ describe("hl7v2AnnotateProfileFields", () => {
       item: "9",
       maxLength: 15,
       name: "Message Type",
-      repeatable: false,
-      required: true,
+      optionality: "R",
+      repetitions: 1,
     });
   });
 
@@ -93,8 +112,8 @@ describe("hl7v2AnnotateProfileFields", () => {
       item: "106",
       maxLength: 250,
       name: "Patient Identifier List",
-      repeatable: true,
-      required: true,
+      optionality: "R",
+      repetitions: "unbounded",
     });
   });
 
@@ -186,8 +205,8 @@ describe("hl7v2AnnotateProfileFields", () => {
       item: "104",
       maxLength: 4,
       name: "Set ID - PID",
-      repeatable: false,
-      required: false,
+      optionality: "O",
+      repetitions: 1,
     });
   });
 

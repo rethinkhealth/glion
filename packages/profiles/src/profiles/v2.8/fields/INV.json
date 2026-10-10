@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "INV-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70451",
       "name": "Substance Identifier",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "INV-2",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70383",
       "name": "Substance Status",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "INV-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70384",
       "name": "Substance Type",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "INV-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Inventory Container Identifier",
       "item": "1532"
@@ -43,8 +43,8 @@
     {
       "sequence": 5,
       "id": "INV-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Container Carrier Identifier",
       "item": "1376"
@@ -52,8 +52,8 @@
     {
       "sequence": 6,
       "id": "INV-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Position on Carrier",
       "item": "1377"
@@ -61,8 +61,8 @@
     {
       "sequence": 7,
       "id": "INV-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Initial Quantity",
       "item": "1378"
@@ -70,8 +70,8 @@
     {
       "sequence": 8,
       "id": "INV-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Current Quantity",
       "item": "1379"
@@ -79,8 +79,8 @@
     {
       "sequence": 9,
       "id": "INV-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Available Quantity",
       "item": "1380"
@@ -88,8 +88,8 @@
     {
       "sequence": 10,
       "id": "INV-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Consumption Quantity",
       "item": "1381"
@@ -97,8 +97,8 @@
     {
       "sequence": 11,
       "id": "INV-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Quantity Units",
       "item": "1382"
@@ -106,8 +106,8 @@
     {
       "sequence": 12,
       "id": "INV-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Expiration Date/Time",
       "item": "1383"
@@ -115,8 +115,8 @@
     {
       "sequence": 13,
       "id": "INV-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "First Used Date/Time",
       "item": "1384"
@@ -124,16 +124,16 @@
     {
       "sequence": 14,
       "id": "INV-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "On Board Stability Duration",
       "item": "1385"
     },
     {
       "sequence": 15,
       "id": "INV-15",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Test/Fluid Identifier(s)",
       "item": "1386"
@@ -141,8 +141,8 @@
     {
       "sequence": 16,
       "id": "INV-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Manufacturer Lot Number",
       "item": "1387"
@@ -150,8 +150,8 @@
     {
       "sequence": 17,
       "id": "INV-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70385",
       "name": "Manufacturer Identifier",
@@ -160,8 +160,8 @@
     {
       "sequence": 18,
       "id": "INV-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70386",
       "name": "Supplier Identifier",
@@ -170,8 +170,8 @@
     {
       "sequence": 19,
       "id": "INV-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "name": "On Board Stability Time",
       "item": "1626"
@@ -179,8 +179,8 @@
     {
       "sequence": 20,
       "id": "INV-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "name": "Target Value",
       "item": "1896"

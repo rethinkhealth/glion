@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "UAC-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "maxLength": 705,
       "table": "HL70615",
@@ -15,8 +15,8 @@
     {
       "sequence": 2,
       "id": "UAC-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ED",
       "maxLength": 65536,
       "name": "User Authentication Credential",

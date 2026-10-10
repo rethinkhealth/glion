@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "IN2-1",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Insured's Employee ID",
       "item": "472"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "IN2-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Insured's Social Security Number",
       "item": "473"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "IN2-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Insured's Employer's Name and ID",
       "item": "474"
@@ -31,8 +31,8 @@
     {
       "sequence": 4,
       "id": "IN2-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70139",
       "name": "Employer Information Data",
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "IN2-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70137",
       "name": "Mail Claim Party",
@@ -51,8 +51,8 @@
     {
       "sequence": 6,
       "id": "IN2-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Medicare Health Ins Card Number",
       "item": "477"
@@ -60,8 +60,8 @@
     {
       "sequence": 7,
       "id": "IN2-7",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Medicaid Case Name",
       "item": "478"
@@ -69,8 +69,8 @@
     {
       "sequence": 8,
       "id": "IN2-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Medicaid Case Number",
       "item": "479"
@@ -78,8 +78,8 @@
     {
       "sequence": 9,
       "id": "IN2-9",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Military Sponsor Name",
       "item": "480"
@@ -87,8 +87,8 @@
     {
       "sequence": 10,
       "id": "IN2-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Military ID Number",
       "item": "481"
@@ -96,8 +96,8 @@
     {
       "sequence": 11,
       "id": "IN2-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70342",
       "name": "Dependent Of Military Recipient",
@@ -106,8 +106,8 @@
     {
       "sequence": 12,
       "id": "IN2-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Military Organization",
       "item": "483"
@@ -115,8 +115,8 @@
     {
       "sequence": 13,
       "id": "IN2-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Military Station",
       "item": "484"
@@ -124,8 +124,8 @@
     {
       "sequence": 14,
       "id": "IN2-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70140",
       "name": "Military Service",
@@ -134,8 +134,8 @@
     {
       "sequence": 15,
       "id": "IN2-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70141",
       "name": "Military Rank/Grade",
@@ -144,8 +144,8 @@
     {
       "sequence": 16,
       "id": "IN2-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70142",
       "name": "Military Status",
@@ -154,8 +154,8 @@
     {
       "sequence": 17,
       "id": "IN2-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Military Retire Date",
       "item": "488"
@@ -163,8 +163,8 @@
     {
       "sequence": 18,
       "id": "IN2-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -174,8 +174,8 @@
     {
       "sequence": 19,
       "id": "IN2-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -185,8 +185,8 @@
     {
       "sequence": 20,
       "id": "IN2-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -196,8 +196,8 @@
     {
       "sequence": 21,
       "id": "IN2-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Blood Deductible",
       "item": "492"
@@ -205,8 +205,8 @@
     {
       "sequence": 22,
       "id": "IN2-22",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Special Coverage Approval Name",
       "item": "493"
@@ -214,8 +214,8 @@
     {
       "sequence": 23,
       "id": "IN2-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Special Coverage Approval Title",
       "item": "494"
@@ -223,8 +223,8 @@
     {
       "sequence": 24,
       "id": "IN2-24",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70143",
       "name": "Non-Covered Insurance Code",
@@ -233,8 +233,8 @@
     {
       "sequence": 25,
       "id": "IN2-25",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Payor ID",
       "item": "496"
@@ -242,8 +242,8 @@
     {
       "sequence": 26,
       "id": "IN2-26",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Payor Subscriber ID",
       "item": "497"
@@ -251,8 +251,8 @@
     {
       "sequence": 27,
       "id": "IN2-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70144",
       "name": "Eligibility Source",
@@ -261,8 +261,8 @@
     {
       "sequence": 28,
       "id": "IN2-28",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "RMC",
       "name": "Room Coverage Type/Amount",
       "item": "499"
@@ -270,8 +270,8 @@
     {
       "sequence": 29,
       "id": "IN2-29",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "PTA",
       "name": "Policy Type/Amount",
       "item": "500"
@@ -279,8 +279,8 @@
     {
       "sequence": 30,
       "id": "IN2-30",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DDI",
       "name": "Daily Deductible",
       "item": "501"
@@ -288,8 +288,8 @@
     {
       "sequence": 31,
       "id": "IN2-31",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70223",
       "name": "Living Dependency",
@@ -298,8 +298,8 @@
     {
       "sequence": 32,
       "id": "IN2-32",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70009",
       "name": "Ambulatory Status",
@@ -308,8 +308,8 @@
     {
       "sequence": 33,
       "id": "IN2-33",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70171",
       "name": "Citizenship",
@@ -318,8 +318,8 @@
     {
       "sequence": 34,
       "id": "IN2-34",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70296",
       "name": "Primary Language",
@@ -328,8 +328,8 @@
     {
       "sequence": 35,
       "id": "IN2-35",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70220",
       "name": "Living Arrangement",
@@ -338,8 +338,8 @@
     {
       "sequence": 36,
       "id": "IN2-36",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70215",
       "name": "Publicity Code",
@@ -348,8 +348,8 @@
     {
       "sequence": 37,
       "id": "IN2-37",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -359,8 +359,8 @@
     {
       "sequence": 38,
       "id": "IN2-38",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70231",
       "name": "Student Indicator",
@@ -369,8 +369,8 @@
     {
       "sequence": 39,
       "id": "IN2-39",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70006",
       "name": "Religion",
@@ -379,8 +379,8 @@
     {
       "sequence": 40,
       "id": "IN2-40",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Mother's Maiden Name",
       "item": "109"
@@ -388,8 +388,8 @@
     {
       "sequence": 41,
       "id": "IN2-41",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70212",
       "name": "Nationality",
@@ -398,8 +398,8 @@
     {
       "sequence": 42,
       "id": "IN2-42",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70189",
       "name": "Ethnic Group",
@@ -408,8 +408,8 @@
     {
       "sequence": 43,
       "id": "IN2-43",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70002",
       "name": "Marital Status",
@@ -418,8 +418,8 @@
     {
       "sequence": 44,
       "id": "IN2-44",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Insured's Employment Start Date",
       "item": "787"
@@ -427,8 +427,8 @@
     {
       "sequence": 45,
       "id": "IN2-45",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Employment Stop Date",
       "item": "783"
@@ -436,8 +436,8 @@
     {
       "sequence": 46,
       "id": "IN2-46",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Job Title",
       "item": "785"
@@ -445,8 +445,8 @@
     {
       "sequence": 47,
       "id": "IN2-47",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "JCC",
       "table": "HL70327",
       "name": "Job Code/Class",
@@ -455,8 +455,8 @@
     {
       "sequence": 48,
       "id": "IN2-48",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70311",
       "name": "Job Status",
@@ -465,8 +465,8 @@
     {
       "sequence": 49,
       "id": "IN2-49",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Employer Contact Person Name",
       "item": "789"
@@ -474,8 +474,8 @@
     {
       "sequence": 50,
       "id": "IN2-50",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Employer Contact Person Phone Number",
       "item": "790"
@@ -483,8 +483,8 @@
     {
       "sequence": 51,
       "id": "IN2-51",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70222",
       "name": "Employer Contact Reason",
@@ -493,8 +493,8 @@
     {
       "sequence": 52,
       "id": "IN2-52",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XPN",
       "name": "Insured's Contact Person's Name",
       "item": "792"
@@ -502,8 +502,8 @@
     {
       "sequence": 53,
       "id": "IN2-53",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Insured's Contact Person Phone Number",
       "item": "793"
@@ -511,8 +511,8 @@
     {
       "sequence": 54,
       "id": "IN2-54",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70222",
       "name": "Insured's Contact Person Reason",
@@ -521,8 +521,8 @@
     {
       "sequence": 55,
       "id": "IN2-55",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DT",
       "name": "Relationship to the Patient Start Date",
       "item": "795"
@@ -530,8 +530,8 @@
     {
       "sequence": 56,
       "id": "IN2-56",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "DT",
       "name": "Relationship to the Patient Stop Date",
       "item": "796"
@@ -539,8 +539,8 @@
     {
       "sequence": 57,
       "id": "IN2-57",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70232",
       "name": "Insurance Co Contact Reason",
@@ -549,8 +549,8 @@
     {
       "sequence": 58,
       "id": "IN2-58",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Insurance Co Contact Phone Number",
       "item": "798"
@@ -558,8 +558,8 @@
     {
       "sequence": 59,
       "id": "IN2-59",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70312",
       "name": "Policy Scope",
@@ -568,8 +568,8 @@
     {
       "sequence": 60,
       "id": "IN2-60",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70313",
       "name": "Policy Source",
@@ -578,8 +578,8 @@
     {
       "sequence": 61,
       "id": "IN2-61",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CX",
       "name": "Patient Member Number",
       "item": "801"
@@ -587,8 +587,8 @@
     {
       "sequence": 62,
       "id": "IN2-62",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70063",
       "name": "Guarantor's Relationship to Insured",
@@ -597,8 +597,8 @@
     {
       "sequence": 63,
       "id": "IN2-63",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Insured's Phone Number - Home",
       "item": "803"
@@ -606,8 +606,8 @@
     {
       "sequence": 64,
       "id": "IN2-64",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XTN",
       "name": "Insured's Employer Phone Number",
       "item": "804"
@@ -615,8 +615,8 @@
     {
       "sequence": 65,
       "id": "IN2-65",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70343",
       "name": "Military Handicapped Program",
@@ -625,8 +625,8 @@
     {
       "sequence": 66,
       "id": "IN2-66",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -636,8 +636,8 @@
     {
       "sequence": 67,
       "id": "IN2-67",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -647,8 +647,8 @@
     {
       "sequence": 68,
       "id": "IN2-68",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -658,8 +658,8 @@
     {
       "sequence": 69,
       "id": "IN2-69",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XON",
       "name": "Insured Organization Name and ID",
       "item": "809"
@@ -667,8 +667,8 @@
     {
       "sequence": 70,
       "id": "IN2-70",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XON",
       "name": "Insured Employer Organization Name and ID",
       "item": "810"
@@ -676,8 +676,8 @@
     {
       "sequence": 71,
       "id": "IN2-71",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70005",
       "name": "Race",
@@ -686,8 +686,8 @@
     {
       "sequence": 72,
       "id": "IN2-72",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70344",
       "name": "Patient's Relationship to Insured",

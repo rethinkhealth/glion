@@ -4,7 +4,7 @@ Lint rule that flags non-repeatable fields with multiple repetitions.
 
 ## What it does
 
-Flags fields that contain more than one repetition (delimited by `~`) when the HL7v2 profile for the message's version declares `repeatable: false` for that field. The rule reads profile context attached by `@glion/annotate-profile-context`. A single repetition is always valid regardless of the `repeatable` flag; only 2+ repetitions on a non-repeatable field are reported. Segments without a known profile are silently skipped.
+Flags fields that contain more than one repetition (delimited by `~`) when the HL7v2 profile for the message's version gives that field `repetitions: 1`. The rule reads profile context attached by `@glion/annotate-profile-context`. A single repetition is always valid; only 2+ repetitions on a non-repeatable field are reported. Segments without a known profile are silently skipped.
 
 ## Install
 
@@ -41,7 +41,7 @@ console.error(reporter([file]));
 
 A `unified` lint rule plugin. Takes no options.
 
-Reads `file.data.profile`. For each field under a segment with a known profile it looks up the field entry by sequence. If the field's profile sets `repeatable: false` and the AST has more than one repetition, the rule emits one message for that field.
+Reads `file.data.profile`. For each field under a segment with a known profile it looks up the field entry by sequence. If the field's profile sets `repetitions: 1` and the AST has more than one repetition, the rule emits one message for that field.
 
 ```ts
 import type { Plugin } from "unified";

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "UB2-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - UB2",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "UB2-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 3,
       "name": "Co-Insurance Days (9)",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "UB2-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 7,
       "datatype": "CWE",
       "table": "HL70043",
       "name": "Condition Code (24-30)",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "UB2-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 3,
       "name": "Covered Days (7)",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "UB2-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 4,
       "name": "Non-Covered Days (8)",
@@ -54,8 +54,8 @@
     {
       "sequence": 6,
       "id": "UB2-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 12,
       "datatype": "UVC",
       "name": "Value Amount &amp; Code",
       "item": "558"
@@ -63,8 +63,8 @@
     {
       "sequence": 7,
       "id": "UB2-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 8,
       "datatype": "OCD",
       "name": "Occurrence Code &amp; Date (32-35)",
       "item": "559"
@@ -72,8 +72,8 @@
     {
       "sequence": 8,
       "id": "UB2-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 2,
       "datatype": "OSP",
       "name": "Occurrence Span Code/Dates (36)",
       "item": "560"
@@ -81,8 +81,8 @@
     {
       "sequence": 9,
       "id": "UB2-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 2,
       "datatype": "ST",
       "maxLength": 29,
       "name": "Uniform Billing Locator 2 (State)",
@@ -91,8 +91,8 @@
     {
       "sequence": 10,
       "id": "UB2-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 2,
       "datatype": "ST",
       "maxLength": 12,
       "name": "Uniform Billing 11 (State)",
@@ -101,8 +101,8 @@
     {
       "sequence": 11,
       "id": "UB2-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 5,
       "name": "Uniform Billing 31 (National)",
@@ -111,8 +111,8 @@
     {
       "sequence": 12,
       "id": "UB2-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 3,
       "datatype": "ST",
       "maxLength": 23,
       "name": "Document Control Number",
@@ -121,8 +121,8 @@
     {
       "sequence": 13,
       "id": "UB2-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 23,
       "datatype": "ST",
       "maxLength": 4,
       "name": "Uniform Billing 49 (National)",
@@ -131,8 +131,8 @@
     {
       "sequence": 14,
       "id": "UB2-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 5,
       "datatype": "ST",
       "maxLength": 14,
       "name": "Uniform Billing 56 (State)",
@@ -141,8 +141,8 @@
     {
       "sequence": 15,
       "id": "UB2-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 27,
       "name": "Uniform Billing 57 (National)",
@@ -151,8 +151,8 @@
     {
       "sequence": 16,
       "id": "UB2-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 2,
       "datatype": "ST",
       "maxLength": 2,
       "name": "Uniform Billing 78 (State)",
@@ -161,8 +161,8 @@
     {
       "sequence": 17,
       "id": "UB2-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 3,
       "name": "Special Visit Count",

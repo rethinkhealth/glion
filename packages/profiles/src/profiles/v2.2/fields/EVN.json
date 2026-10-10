@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "EVN-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70003",
@@ -15,8 +15,8 @@
     {
       "sequence": 2,
       "id": "EVN-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "TS",
       "maxLength": 26,
       "name": "Date / time of event",
@@ -25,8 +25,7 @@
     {
       "sequence": 3,
       "id": "EVN-3",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "TS",
       "maxLength": 26,
       "name": "Date / time planned event",
@@ -35,8 +34,7 @@
     {
       "sequence": 4,
       "id": "EVN-4",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70062",
@@ -46,8 +44,7 @@
     {
       "sequence": 5,
       "id": "EVN-5",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 5,
       "table": "HL70188",

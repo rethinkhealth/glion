@@ -91,7 +91,8 @@ exports[`QR1: message conformance > adt-a01-basic.hl7 — pipeline output matche
 exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches snapshot 1`] = `
 "adt-a01-full.hl7
   segments: MSH(16) EVN(5) PID(22) PD1(4) NK1(5) PV1(44) PV2(3) DG1(6) IN1(12)
-  diagnostics: 6
+  diagnostics: 7
+    - [required-fields] Required field DG1-2 (Diagnosis Coding Method) is missing or empty
     - [field-max-length] Field PV1-39 exceeds max length of 2 (actual: 6)
     - [field-max-length] Field IN1-12 exceeds max length of 8 (actual: 28)
     - [extra-components] Component IN1-12.2 is beyond the defined components for DT (max: 1 in v2.5.1)
@@ -102,8 +103,25 @@ exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches
 
 exports[`QR1: message conformance > adt-a01-full.hl7 — pipeline output matches snapshot 2`] = `
 {
-  "diagnosticCount": 6,
+  "diagnosticCount": 7,
   "diagnostics": [
+    {
+      "message": "Required field DG1-2 (Diagnosis Coding Method) is missing or empty",
+      "place": {
+        "end": {
+          "column": 7,
+          "line": 8,
+          "offset": 827,
+        },
+        "start": {
+          "column": 7,
+          "line": 8,
+          "offset": 827,
+        },
+      },
+      "ruleId": "required-fields",
+      "source": "hl7v2-lint",
+    },
     {
       "message": "Field PV1-39 exceeds max length of 2 (actual: 6)",
       "place": {

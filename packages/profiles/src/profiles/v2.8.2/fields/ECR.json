@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ECR-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70387",
       "name": "Command Response",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "ECR-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Date/Time Completed",
       "item": "1396"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "ECR-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "TX",
       "name": "Command Response Parameters",
       "item": "1397"

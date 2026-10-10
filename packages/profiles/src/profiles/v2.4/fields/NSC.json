@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "NSC-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "IS",
       "maxLength": 4,
       "table": "HL70409",
@@ -15,8 +15,7 @@
     {
       "sequence": 2,
       "id": "NSC-2",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 30,
       "name": "Current CPU",
@@ -25,8 +24,7 @@
     {
       "sequence": 3,
       "id": "NSC-3",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 30,
       "name": "Current Fileserver",
@@ -35,8 +33,7 @@
     {
       "sequence": 4,
       "id": "NSC-4",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "HD",
       "maxLength": 30,
       "name": "Current Application",
@@ -45,8 +42,7 @@
     {
       "sequence": 5,
       "id": "NSC-5",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "HD",
       "maxLength": 30,
       "name": "Current Facility",
@@ -55,8 +51,7 @@
     {
       "sequence": 6,
       "id": "NSC-6",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 30,
       "name": "New CPU",
@@ -65,8 +60,7 @@
     {
       "sequence": 7,
       "id": "NSC-7",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 30,
       "name": "New Fileserver",
@@ -75,8 +69,7 @@
     {
       "sequence": 8,
       "id": "NSC-8",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "HD",
       "maxLength": 30,
       "name": "New Application",
@@ -85,8 +78,7 @@
     {
       "sequence": 9,
       "id": "NSC-9",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "HD",
       "maxLength": 30,
       "name": "New Facility",

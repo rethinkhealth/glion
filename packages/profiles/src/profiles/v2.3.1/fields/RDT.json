@@ -4,8 +4,7 @@
     {
       "sequence": 1,
       "id": "RDT-1",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "*",
       "name": "Column Value",
       "item": "703"

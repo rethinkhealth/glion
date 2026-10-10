@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "OBR-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - OBR",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "OBR-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Placer Order Number",
       "item": "216"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "OBR-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Filler Order Number",
       "item": "217"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "OBR-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Universal Service Identifier",
       "item": "238"
@@ -41,24 +41,24 @@
     {
       "sequence": 5,
       "id": "OBR-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Priority",
       "item": "239"
     },
     {
       "sequence": 6,
       "id": "OBR-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Requested Date/Time",
       "item": "240"
     },
     {
       "sequence": 7,
       "id": "OBR-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Observation Date/Time #",
       "item": "241"
@@ -66,8 +66,8 @@
     {
       "sequence": 8,
       "id": "OBR-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Observation End Date/Time #",
       "item": "242"
@@ -75,8 +75,8 @@
     {
       "sequence": 9,
       "id": "OBR-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "name": "Collection Volume *",
       "item": "243"
@@ -84,8 +84,8 @@
     {
       "sequence": 10,
       "id": "OBR-10",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Collector Identifier *",
       "item": "244"
@@ -93,8 +93,8 @@
     {
       "sequence": 11,
       "id": "OBR-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70065",
@@ -104,8 +104,8 @@
     {
       "sequence": 12,
       "id": "OBR-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Danger Code",
       "item": "246"
@@ -113,8 +113,8 @@
     {
       "sequence": 13,
       "id": "OBR-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Relevant Clinical Information",
       "item": "247"
@@ -122,8 +122,8 @@
     {
       "sequence": 14,
       "id": "OBR-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Specimen Received Date/Time",
       "item": "248"
@@ -131,16 +131,16 @@
     {
       "sequence": 15,
       "id": "OBR-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Specimen Source",
       "item": "249"
     },
     {
       "sequence": 16,
       "id": "OBR-16",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Ordering Provider",
       "item": "226"
@@ -148,8 +148,8 @@
     {
       "sequence": 17,
       "id": "OBR-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 2,
       "datatype": "XTN",
       "name": "Order Callback Phone Number",
       "item": "250"
@@ -157,8 +157,8 @@
     {
       "sequence": 18,
       "id": "OBR-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Placer Field 1",
       "item": "251"
@@ -166,8 +166,8 @@
     {
       "sequence": 19,
       "id": "OBR-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Placer Field 2",
       "item": "252"
@@ -175,8 +175,8 @@
     {
       "sequence": 20,
       "id": "OBR-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Filler Field 1 +",
       "item": "253"
@@ -184,8 +184,8 @@
     {
       "sequence": 21,
       "id": "OBR-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Filler Field 2 +",
       "item": "254"
@@ -193,8 +193,8 @@
     {
       "sequence": 22,
       "id": "OBR-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Results Rpt/Status Chng - Date/Time +",
       "item": "255"
@@ -202,8 +202,8 @@
     {
       "sequence": 23,
       "id": "OBR-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MOC",
       "name": "Charge to Practice +",
       "item": "256"
@@ -211,8 +211,8 @@
     {
       "sequence": 24,
       "id": "OBR-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70074",
@@ -222,8 +222,8 @@
     {
       "sequence": 25,
       "id": "OBR-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70123",
@@ -233,8 +233,8 @@
     {
       "sequence": 26,
       "id": "OBR-26",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "PRL",
       "name": "Parent Result +",
       "item": "259"
@@ -242,16 +242,16 @@
     {
       "sequence": 27,
       "id": "OBR-27",
-      "required": false,
-      "repeatable": true,
+      "optionality": "W",
+      "repetitions": "unbounded",
       "name": "Quantity/Timing",
       "item": "221"
     },
     {
       "sequence": 28,
       "id": "OBR-28",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Result Copies To",
       "item": "260"
@@ -259,8 +259,8 @@
     {
       "sequence": 29,
       "id": "OBR-29",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EIP",
       "name": "Parent",
       "item": "261"
@@ -268,8 +268,8 @@
     {
       "sequence": 30,
       "id": "OBR-30",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 4,
       "table": "HL70124",
@@ -279,8 +279,8 @@
     {
       "sequence": 31,
       "id": "OBR-31",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Reason for Study",
       "item": "263"
@@ -288,8 +288,8 @@
     {
       "sequence": 32,
       "id": "OBR-32",
-      "required": false,
-      "repeatable": false,
+      "optionality": "B",
+      "repetitions": 1,
       "datatype": "NDL",
       "name": "Principal Result Interpreter +",
       "item": "264"
@@ -297,8 +297,8 @@
     {
       "sequence": 33,
       "id": "OBR-33",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "NDL",
       "name": "Assistant Result Interpreter +",
       "item": "265"
@@ -306,8 +306,8 @@
     {
       "sequence": 34,
       "id": "OBR-34",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "NDL",
       "name": "Technician +",
       "item": "266"
@@ -315,8 +315,8 @@
     {
       "sequence": 35,
       "id": "OBR-35",
-      "required": false,
-      "repeatable": true,
+      "optionality": "B",
+      "repetitions": "unbounded",
       "datatype": "NDL",
       "name": "Transcriptionist +",
       "item": "267"
@@ -324,8 +324,8 @@
     {
       "sequence": 36,
       "id": "OBR-36",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Scheduled Date/Time +",
       "item": "268"
@@ -333,8 +333,8 @@
     {
       "sequence": 37,
       "id": "OBR-37",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Number of Sample Containers *",
       "item": "1028"
@@ -342,8 +342,8 @@
     {
       "sequence": 38,
       "id": "OBR-38",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Transport Logistics of Collected Sample *",
       "item": "1029"
@@ -351,8 +351,8 @@
     {
       "sequence": 39,
       "id": "OBR-39",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Collector's Comment *",
       "item": "1030"
@@ -360,8 +360,8 @@
     {
       "sequence": 40,
       "id": "OBR-40",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Transport Arrangement Responsibility",
       "item": "1031"
@@ -369,8 +369,8 @@
     {
       "sequence": 41,
       "id": "OBR-41",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70224",
@@ -380,8 +380,8 @@
     {
       "sequence": 42,
       "id": "OBR-42",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70225",
@@ -391,8 +391,8 @@
     {
       "sequence": 43,
       "id": "OBR-43",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Planned Patient Transport Comment",
       "item": "1034"
@@ -400,8 +400,8 @@
     {
       "sequence": 44,
       "id": "OBR-44",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70088",
       "name": "Procedure Code",
@@ -410,8 +410,8 @@
     {
       "sequence": 45,
       "id": "OBR-45",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CNE",
       "table": "HL70340",
       "name": "Procedure Code Modifier",
@@ -420,8 +420,8 @@
     {
       "sequence": 46,
       "id": "OBR-46",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70411",
       "name": "Placer Supplemental Service Information",
@@ -430,8 +430,8 @@
     {
       "sequence": 47,
       "id": "OBR-47",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70411",
       "name": "Filler Supplemental Service Information",
@@ -440,8 +440,8 @@
     {
       "sequence": 48,
       "id": "OBR-48",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70476",
       "name": "Medically Necessary Duplicate Procedure Reason",
@@ -450,8 +450,8 @@
     {
       "sequence": 49,
       "id": "OBR-49",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70507",
       "name": "Result Handling",
@@ -460,8 +460,8 @@
     {
       "sequence": 50,
       "id": "OBR-50",
-      "required": false,
-      "repeatable": false,
+      "optionality": "B",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Parent Universal Service Identifier",
       "item": "2286"
@@ -469,8 +469,8 @@
     {
       "sequence": 51,
       "id": "OBR-51",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Observation Group ID",
       "item": "2307"
@@ -478,8 +478,8 @@
     {
       "sequence": 52,
       "id": "OBR-52",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Parent Observation Group ID",
       "item": "2308"
@@ -487,8 +487,8 @@
     {
       "sequence": 53,
       "id": "OBR-53",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CX",
       "name": "Alternate Placer Order Number",
       "item": "3303"

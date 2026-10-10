@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "NDS-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 20,
       "name": "Notification Reference Number",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "NDS-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "maxLength": 24,
       "name": "Notification Date/Time",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "NDS-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "maxLength": 705,
       "table": "HL70367",
@@ -35,8 +35,8 @@
     {
       "sequence": 4,
       "id": "NDS-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "maxLength": 705,
       "name": "Notification Code",

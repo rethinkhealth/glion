@@ -6,11 +6,9 @@ import { lintRule } from "unified-lint-rule";
 
 /**
  * Lint rule that flags fields with multiple repetitions when the profile
- * declares `repeatable: false`.
+ * gives the field `repetitions: 1`.
  *
- * A field with a single repetition is always valid regardless of the
- * `repeatable` flag. Only fields with 2+ repetitions on a non-repeatable
- * field are reported.
+ * A field with a single repetition is always valid.
  *
  * Segments without a known profile (e.g., Z-segments) are silently skipped.
  *
@@ -36,7 +34,7 @@ const hl7v2LintFieldRepetition = lintRule<Root>(
       visit(segment, "field", (fieldNode, _fieldAncestors, info) => {
         const profile = fieldDef.bySequence.get(info.sequence);
 
-        if (!profile || profile.repeatable) {
+        if (!profile || profile.repetitions !== 1) {
           return SKIP;
         }
 

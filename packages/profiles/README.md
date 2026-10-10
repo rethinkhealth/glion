@@ -187,7 +187,7 @@ interface SegmentDefinition {
 interface FieldDefinition {
   segmentId: string; // "MSH"
   bySequence: ReadonlyMap<number, FieldProfile>; // 9 → MSH-9
-  requiredSequences: ReadonlySet<number>;
+  requiredSequences: ReadonlySet<number>; // the fields whose optionality is "R"
 }
 
 interface FieldProfile {
@@ -195,8 +195,8 @@ interface FieldProfile {
   id: string; // "MSH-9"
   name?: string; // "Message Type"
   datatype?: string; // "MSG"; absent on a withdrawn field with no datatype
-  required: boolean;
-  repeatable: boolean;
+  optionality?: "R" | "O" | "C" | "X" | "B" | "W"; // OPT; absent where the standard records none
+  repetitions: number | "unbounded"; // RP/#; 1 when the field does not repeat
   maxLength?: number;
   table?: string; // "HL70001" when the field is coded
   item?: string; // the HL7 data element number

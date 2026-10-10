@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ADJ-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Provider Adjustment Number",
       "item": "2003"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "ADJ-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Payer Adjustment Number",
       "item": "2004"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "ADJ-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Adjustment Sequence Number",
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "ADJ-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70564",
       "name": "Adjustment Category",
@@ -42,8 +42,8 @@
     {
       "sequence": 5,
       "id": "ADJ-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Adjustment Amount",
       "item": "2007"
@@ -51,8 +51,8 @@
     {
       "sequence": 6,
       "id": "ADJ-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "table": "HL70560",
       "name": "Adjustment Quantity",
@@ -61,8 +61,8 @@
     {
       "sequence": 7,
       "id": "ADJ-7",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70565",
       "name": "Adjustment Reason PA",
@@ -71,8 +71,8 @@
     {
       "sequence": 8,
       "id": "ADJ-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Adjustment Description",
       "item": "2010"
@@ -80,8 +80,8 @@
     {
       "sequence": 9,
       "id": "ADJ-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Original Value",
       "item": "2011"
@@ -89,8 +89,8 @@
     {
       "sequence": 10,
       "id": "ADJ-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Substitute Value",
       "item": "2012"
@@ -98,8 +98,8 @@
     {
       "sequence": 11,
       "id": "ADJ-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70569",
       "name": "Adjustment Action",
@@ -108,8 +108,8 @@
     {
       "sequence": 12,
       "id": "ADJ-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Provider Adjustment Number Cross Reference",
       "item": "2014"
@@ -117,8 +117,8 @@
     {
       "sequence": 13,
       "id": "ADJ-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Provider Product/Service Line Item Number Cross Reference",
       "item": "2015"
@@ -126,8 +126,8 @@
     {
       "sequence": 14,
       "id": "ADJ-14",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Adjustment Date",
       "item": "2016"
@@ -135,8 +135,8 @@
     {
       "sequence": 15,
       "id": "ADJ-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XON",
       "name": "Responsible Organization",
       "item": "2017"

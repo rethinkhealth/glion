@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ADD-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 65536,
       "name": "Addendum Continuation Pointer",

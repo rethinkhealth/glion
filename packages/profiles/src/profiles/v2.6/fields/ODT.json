@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ODT-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "maxLength": 250,
       "table": "HL70160",
@@ -15,8 +15,8 @@
     {
       "sequence": 2,
       "id": "ODT-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 10,
       "datatype": "CWE",
       "maxLength": 250,
       "name": "Service Period",
@@ -25,8 +25,8 @@
     {
       "sequence": 3,
       "id": "ODT-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 80,
       "name": "Text Instruction",

@@ -53,7 +53,7 @@ export default hl7v2LintRequiredFields;
 
 ## What it checks
 
-This rule flags fields declared `required: true` in the HL7v2 profile for the message's version when those fields are missing or empty on the corresponding segment.
+This rule flags fields whose optionality is `R` in the HL7v2 profile for the message's version when those fields are missing or empty on the corresponding segment.
 
 ### Valid
 

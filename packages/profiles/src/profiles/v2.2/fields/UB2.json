@@ -4,8 +4,7 @@
     {
       "sequence": 1,
       "id": "UB2-1",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - UB92",
@@ -14,8 +13,7 @@
     {
       "sequence": 2,
       "id": "UB2-2",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 3,
       "name": "Co-insurance days (9)",
@@ -24,8 +22,7 @@
     {
       "sequence": 3,
       "id": "UB2-3",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 7,
       "datatype": "ID",
       "maxLength": 2,
       "table": "HL70043",
@@ -35,8 +32,7 @@
     {
       "sequence": 4,
       "id": "UB2-4",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 3,
       "name": "Covered days (7)",
@@ -45,8 +41,7 @@
     {
       "sequence": 5,
       "id": "UB2-5",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 4,
       "name": "Non-covered days (8)",
@@ -55,8 +50,7 @@
     {
       "sequence": 6,
       "id": "UB2-6",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 12,
       "datatype": "CM",
       "maxLength": 11,
       "name": "Value amount and code (39-41)",
@@ -65,8 +59,7 @@
     {
       "sequence": 7,
       "id": "UB2-7",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 8,
       "datatype": "CM",
       "maxLength": 11,
       "name": "Occurrence code and date (32-35)",
@@ -75,8 +68,7 @@
     {
       "sequence": 8,
       "id": "UB2-8",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 2,
       "datatype": "CM",
       "maxLength": 28,
       "name": "Occurrence span code / dates (36)",
@@ -85,8 +77,7 @@
     {
       "sequence": 9,
       "id": "UB2-9",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 2,
       "datatype": "ST",
       "maxLength": 29,
       "name": "UB92 locator 2 (state)",
@@ -95,8 +86,7 @@
     {
       "sequence": 10,
       "id": "UB2-10",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 2,
       "datatype": "ST",
       "maxLength": 12,
       "name": "UB92 locator 11 (state)",
@@ -105,8 +95,7 @@
     {
       "sequence": 11,
       "id": "UB2-11",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 5,
       "name": "UB92 locator 31 (national)",
@@ -115,8 +104,7 @@
     {
       "sequence": 12,
       "id": "UB2-12",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 3,
       "datatype": "ST",
       "maxLength": 23,
       "name": "Document control number (37)",
@@ -125,8 +113,7 @@
     {
       "sequence": 13,
       "id": "UB2-13",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 23,
       "datatype": "ST",
       "maxLength": 4,
       "name": "UB92 locator 49 (national)",
@@ -135,8 +122,7 @@
     {
       "sequence": 14,
       "id": "UB2-14",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 5,
       "datatype": "ST",
       "maxLength": 14,
       "name": "UB92 locator 56 (state)",
@@ -145,8 +131,7 @@
     {
       "sequence": 15,
       "id": "UB2-15",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 27,
       "name": "UB92 locator 57 (national)",
@@ -155,8 +140,7 @@
     {
       "sequence": 16,
       "id": "UB2-16",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 2,
       "datatype": "ST",
       "maxLength": 2,
       "name": "UB92 Locator 78 (state)",

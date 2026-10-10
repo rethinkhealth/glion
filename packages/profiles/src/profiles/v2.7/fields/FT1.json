@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "FT1-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - FT1",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "FT1-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 12,
       "name": "Transaction ID",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "FT1-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 10,
       "name": "Transaction Batch ID",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "FT1-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DR",
       "name": "Transaction Date",
       "item": "358"
@@ -43,8 +43,8 @@
     {
       "sequence": 5,
       "id": "FT1-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Transaction Posting Date",
       "item": "359"
@@ -52,8 +52,8 @@
     {
       "sequence": 6,
       "id": "FT1-6",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70017",
       "name": "Transaction Type",
@@ -62,8 +62,8 @@
     {
       "sequence": 7,
       "id": "FT1-7",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70132",
       "name": "Transaction Code",
@@ -72,24 +72,24 @@
     {
       "sequence": 8,
       "id": "FT1-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Transaction Description",
       "item": "362"
     },
     {
       "sequence": 9,
       "id": "FT1-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "W",
+      "repetitions": 1,
       "name": "Transaction Description - Alt",
       "item": "363"
     },
     {
       "sequence": 10,
       "id": "FT1-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Transaction Quantity",
       "item": "364"
@@ -97,8 +97,8 @@
     {
       "sequence": 11,
       "id": "FT1-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Transaction Amount - Extended",
       "item": "365"
@@ -106,8 +106,8 @@
     {
       "sequence": 12,
       "id": "FT1-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Transaction amount - unit",
       "item": "366"
@@ -115,8 +115,8 @@
     {
       "sequence": 13,
       "id": "FT1-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70049",
       "name": "Department Code",
@@ -125,8 +125,8 @@
     {
       "sequence": 14,
       "id": "FT1-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70072",
       "name": "Health Plan ID",
@@ -135,8 +135,8 @@
     {
       "sequence": 15,
       "id": "FT1-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Insurance Amount",
       "item": "369"
@@ -144,8 +144,8 @@
     {
       "sequence": 16,
       "id": "FT1-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "PL",
       "name": "Assigned Patient Location",
       "item": "133"
@@ -153,8 +153,8 @@
     {
       "sequence": 17,
       "id": "FT1-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70024",
       "name": "Fee Schedule",
@@ -163,8 +163,8 @@
     {
       "sequence": 18,
       "id": "FT1-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70018",
       "name": "Patient Type",
@@ -173,8 +173,8 @@
     {
       "sequence": 19,
       "id": "FT1-19",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70051",
       "name": "Diagnosis Code - FT1",
@@ -183,8 +183,8 @@
     {
       "sequence": 20,
       "id": "FT1-20",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "table": "HL70084",
       "name": "Performed By Code",
@@ -193,8 +193,8 @@
     {
       "sequence": 21,
       "id": "FT1-21",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Ordered By Code",
       "item": "373"
@@ -202,8 +202,8 @@
     {
       "sequence": 22,
       "id": "FT1-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Unit Cost",
       "item": "374"
@@ -211,8 +211,8 @@
     {
       "sequence": 23,
       "id": "FT1-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Filler Order Number",
       "item": "217"
@@ -220,8 +220,8 @@
     {
       "sequence": 24,
       "id": "FT1-24",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XCN",
       "name": "Entered By Code",
       "item": "765"
@@ -229,8 +229,8 @@
     {
       "sequence": 25,
       "id": "FT1-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70088",
       "name": "Procedure Code",
@@ -239,8 +239,8 @@
     {
       "sequence": 26,
       "id": "FT1-26",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CNE",
       "table": "HL70340",
       "name": "Procedure Code Modifier",
@@ -249,8 +249,8 @@
     {
       "sequence": 27,
       "id": "FT1-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70339",
       "name": "Advanced Beneficiary Notice Code",
@@ -259,8 +259,8 @@
     {
       "sequence": 28,
       "id": "FT1-28",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70476",
       "name": "Medically Necessary Duplicate Procedure Reason",
@@ -269,8 +269,8 @@
     {
       "sequence": 29,
       "id": "FT1-29",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70549",
       "name": "NDC Code",
@@ -279,8 +279,8 @@
     {
       "sequence": 30,
       "id": "FT1-30",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CX",
       "name": "Payment Reference ID",
       "item": "1846"
@@ -288,8 +288,8 @@
     {
       "sequence": 31,
       "id": "FT1-31",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "SI",
       "maxLength": 4,
       "name": "Transaction Reference Key",
@@ -298,8 +298,8 @@
     {
       "sequence": 32,
       "id": "FT1-32",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XON",
       "name": "Performing Facility",
       "item": "2361"
@@ -307,8 +307,8 @@
     {
       "sequence": 33,
       "id": "FT1-33",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XON",
       "name": "Ordering Facility",
       "item": "2362"
@@ -316,8 +316,8 @@
     {
       "sequence": 34,
       "id": "FT1-34",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Item Number",
       "item": "2363"
@@ -325,8 +325,8 @@
     {
       "sequence": 35,
       "id": "FT1-35",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Model Number",
       "item": "2364"
@@ -334,8 +334,8 @@
     {
       "sequence": 36,
       "id": "FT1-36",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "name": "Special Processing Code",
       "item": "2365"
@@ -343,8 +343,8 @@
     {
       "sequence": 37,
       "id": "FT1-37",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Clinic Code",
       "item": "2366"
@@ -352,8 +352,8 @@
     {
       "sequence": 38,
       "id": "FT1-38",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CX",
       "name": "Referral Number",
       "item": "2367"
@@ -361,8 +361,8 @@
     {
       "sequence": 39,
       "id": "FT1-39",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CX",
       "name": "Authorization Number",
       "item": "2368"
@@ -370,8 +370,8 @@
     {
       "sequence": 40,
       "id": "FT1-40",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Service Provider Taxonomy Code",
       "item": "2369"
@@ -379,8 +379,8 @@
     {
       "sequence": 41,
       "id": "FT1-41",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70456",
       "name": "Revenue Code",
@@ -389,8 +389,8 @@
     {
       "sequence": 42,
       "id": "FT1-42",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Prescription Number",
       "item": "325"
@@ -398,8 +398,8 @@
     {
       "sequence": 43,
       "id": "FT1-43",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CQ",
       "name": "NDC Qty and UOM",
       "item": "2370"

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "PRC-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70132",
       "name": "Primary Key Value - PRC",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "PRC-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70464",
       "name": "Facility ID - PRC",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "PRC-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70184",
       "name": "Department",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "PRC-4",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70004",
       "name": "Valid Patient Classes",
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "PRC-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "C",
+      "repetitions": "unbounded",
       "datatype": "CP",
       "name": "Price",
       "item": "998"
@@ -53,8 +53,8 @@
     {
       "sequence": 6,
       "id": "PRC-6",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "ST",
       "name": "Formula",
       "item": "999"
@@ -62,8 +62,8 @@
     {
       "sequence": 7,
       "id": "PRC-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Minimum Quantity",
       "item": "1000"
@@ -71,8 +71,8 @@
     {
       "sequence": 8,
       "id": "PRC-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Maximum Quantity",
       "item": "1001"
@@ -80,8 +80,8 @@
     {
       "sequence": 9,
       "id": "PRC-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Minimum Price",
       "item": "1002"
@@ -89,8 +89,8 @@
     {
       "sequence": 10,
       "id": "PRC-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Maximum Price",
       "item": "1003"
@@ -98,8 +98,8 @@
     {
       "sequence": 11,
       "id": "PRC-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Effective Start Date",
       "item": "1004"
@@ -107,8 +107,8 @@
     {
       "sequence": 12,
       "id": "PRC-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Effective End Date",
       "item": "1005"
@@ -116,8 +116,8 @@
     {
       "sequence": 13,
       "id": "PRC-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70268",
       "name": "Price Override Flag",
@@ -126,8 +126,8 @@
     {
       "sequence": 14,
       "id": "PRC-14",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70293",
       "name": "Billing Category",
@@ -136,8 +136,8 @@
     {
       "sequence": 15,
       "id": "PRC-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70136",
@@ -147,8 +147,8 @@
     {
       "sequence": 16,
       "id": "PRC-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70183",
@@ -158,8 +158,8 @@
     {
       "sequence": 17,
       "id": "PRC-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Cost",
       "item": "989"
@@ -167,8 +167,8 @@
     {
       "sequence": 18,
       "id": "PRC-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70269",
       "name": "Charge on Indicator",

@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "APR-1",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "SCV",
       "table": "HL70294",
       "name": "Time Selection Criteria",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "APR-2",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "SCV",
       "table": "HL70294",
       "name": "Resource Selection Criteria",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "APR-3",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "SCV",
       "table": "HL70294",
       "name": "Location Selection Criteria",
@@ -34,8 +34,8 @@
     {
       "sequence": 4,
       "id": "APR-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Slot Spacing Criteria",
       "item": "911"
@@ -43,8 +43,8 @@
     {
       "sequence": 5,
       "id": "APR-5",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "SCV",
       "name": "Filler Override Criteria",
       "item": "912"

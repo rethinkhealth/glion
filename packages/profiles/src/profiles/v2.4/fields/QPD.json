@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "QPD-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CE",
       "maxLength": 250,
       "table": "HL70471",
@@ -15,8 +15,8 @@
     {
       "sequence": 2,
       "id": "QPD-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 32,
       "name": "Query Tag",
@@ -25,8 +25,7 @@
     {
       "sequence": 3,
       "id": "QPD-3",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "*",
       "maxLength": 256,
       "name": "User Parameters (in successive fields)",

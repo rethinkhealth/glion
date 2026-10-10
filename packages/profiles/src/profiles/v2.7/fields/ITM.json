@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ITM-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Item Identifier",
       "item": "2186"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "ITM-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Item Description",
       "item": "2274"
@@ -22,8 +22,8 @@
     {
       "sequence": 3,
       "id": "ITM-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70776",
       "name": "Item Status",
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "ITM-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70778",
       "name": "Item Type",
@@ -42,8 +42,8 @@
     {
       "sequence": 5,
       "id": "ITM-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Item Category",
       "item": "2189"
@@ -51,8 +51,8 @@
     {
       "sequence": 6,
       "id": "ITM-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70532",
       "name": "Subject to Expiration Indicator",
@@ -61,8 +61,8 @@
     {
       "sequence": 7,
       "id": "ITM-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Manufacturer Identifier",
       "item": "2191"
@@ -70,8 +70,8 @@
     {
       "sequence": 8,
       "id": "ITM-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Manufacturer Name",
       "item": "2275"
@@ -79,8 +79,8 @@
     {
       "sequence": 9,
       "id": "ITM-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Manufacturer Catalog Number",
       "item": "2192"
@@ -88,8 +88,8 @@
     {
       "sequence": 10,
       "id": "ITM-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "Manufacturer Labeler Identification Code",
       "item": "2193"
@@ -97,8 +97,8 @@
     {
       "sequence": 11,
       "id": "ITM-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70532",
       "name": "Patient Chargeable Indicator",
@@ -107,8 +107,8 @@
     {
       "sequence": 12,
       "id": "ITM-12",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70132",
       "name": "Transaction Code",
@@ -117,8 +117,8 @@
     {
       "sequence": 13,
       "id": "ITM-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CP",
       "name": "Transaction amount - unit",
       "item": "366"
@@ -126,8 +126,8 @@
     {
       "sequence": 14,
       "id": "ITM-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70532",
       "name": "Stocked Item Indicator",
@@ -136,8 +136,8 @@
     {
       "sequence": 15,
       "id": "ITM-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70871",
       "name": "Supply Risk Codes",
@@ -146,8 +146,8 @@
     {
       "sequence": 16,
       "id": "ITM-16",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "XON",
       "table": "HL70790",
       "name": "Approving Regulatory Agency",
@@ -156,8 +156,8 @@
     {
       "sequence": 17,
       "id": "ITM-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70532",
       "name": "Latex Indicator",
@@ -166,8 +166,8 @@
     {
       "sequence": 18,
       "id": "ITM-18",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70793",
       "name": "Ruling Act",
@@ -176,8 +176,8 @@
     {
       "sequence": 19,
       "id": "ITM-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70320",
       "name": "Item Natural Account Code",
@@ -186,8 +186,8 @@
     {
       "sequence": 20,
       "id": "ITM-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Approved To Buy Quantity",
       "item": "2203"
@@ -195,8 +195,8 @@
     {
       "sequence": 21,
       "id": "ITM-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Approved To Buy Price",
       "item": "2204"
@@ -204,8 +204,8 @@
     {
       "sequence": 22,
       "id": "ITM-22",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70532",
       "name": "Taxable Item Indicator",
@@ -214,8 +214,8 @@
     {
       "sequence": 23,
       "id": "ITM-23",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70532",
       "name": "Freight Charge Indicator",
@@ -224,8 +224,8 @@
     {
       "sequence": 24,
       "id": "ITM-24",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70532",
       "name": "Item Set Indicator",
@@ -234,8 +234,8 @@
     {
       "sequence": 25,
       "id": "ITM-25",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Item Set Identifier",
       "item": "2208"
@@ -243,8 +243,8 @@
     {
       "sequence": 26,
       "id": "ITM-26",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70532",
       "name": "Track Department Usage Indicator",
@@ -253,8 +253,8 @@
     {
       "sequence": 27,
       "id": "ITM-27",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "table": "HL70088",
       "name": "Procedure Code",
@@ -263,8 +263,8 @@
     {
       "sequence": 28,
       "id": "ITM-28",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CNE",
       "table": "HL70340",
       "name": "Procedure Code Modifier",
@@ -273,8 +273,8 @@
     {
       "sequence": 29,
       "id": "ITM-29",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70376",
       "name": "Special Handling Code",

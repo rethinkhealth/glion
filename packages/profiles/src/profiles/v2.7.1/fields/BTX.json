@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "BTX-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - BTX",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "BTX-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "BC Donation ID",
       "item": "1736"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "BTX-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CNE",
       "name": "BC Component",
       "item": "1737"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "BTX-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CNE",
       "name": "BC Blood Group",
       "item": "1738"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "BTX-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70512",
       "name": "CP Commercial Product",
@@ -51,8 +51,8 @@
     {
       "sequence": 6,
       "id": "BTX-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "XON",
       "name": "CP Manufacturer",
       "item": "1740"
@@ -60,8 +60,8 @@
     {
       "sequence": 7,
       "id": "BTX-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "CP Lot Number",
       "item": "1741"
@@ -69,8 +69,8 @@
     {
       "sequence": 8,
       "id": "BTX-8",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "BP Quantity",
       "item": "1742"
@@ -78,8 +78,8 @@
     {
       "sequence": 9,
       "id": "BTX-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "BP Amount",
       "item": "1743"
@@ -87,8 +87,8 @@
     {
       "sequence": 10,
       "id": "BTX-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "BP Units",
       "item": "1744"
@@ -96,8 +96,8 @@
     {
       "sequence": 11,
       "id": "BTX-11",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70513",
       "name": "BP Transfusion/Disposition Status",
@@ -106,8 +106,8 @@
     {
       "sequence": 12,
       "id": "BTX-12",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70511",
@@ -117,8 +117,8 @@
     {
       "sequence": 13,
       "id": "BTX-13",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "BP Date/Time of Status",
       "item": "1747"
@@ -126,8 +126,8 @@
     {
       "sequence": 14,
       "id": "BTX-14",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XCN",
       "name": "BP Transfusion Administrator",
       "item": "1748"
@@ -135,8 +135,8 @@
     {
       "sequence": 15,
       "id": "BTX-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XCN",
       "name": "BP Transfusion Verifier",
       "item": "1749"
@@ -144,8 +144,8 @@
     {
       "sequence": 16,
       "id": "BTX-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "BP Transfusion Start Date/Time of Status",
       "item": "1750"
@@ -153,8 +153,8 @@
     {
       "sequence": 17,
       "id": "BTX-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "BP Transfusion End Date/Time of Status",
       "item": "1751"
@@ -162,8 +162,8 @@
     {
       "sequence": 18,
       "id": "BTX-18",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CWE",
       "table": "HL70514",
       "name": "BP Adverse Reaction Type",
@@ -172,8 +172,8 @@
     {
       "sequence": 19,
       "id": "BTX-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70515",
       "name": "BP Transfusion Interrupted Reason",

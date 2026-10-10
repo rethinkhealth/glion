@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "BPX-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - BPX",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "BPX-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70510",
       "name": "BP Dispense Status",
@@ -24,8 +24,8 @@
     {
       "sequence": 3,
       "id": "BPX-3",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70511",
@@ -35,8 +35,8 @@
     {
       "sequence": 4,
       "id": "BPX-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "BP Date/Time of Status",
       "item": "1717"
@@ -44,8 +44,8 @@
     {
       "sequence": 5,
       "id": "BPX-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "BC Donation ID",
       "item": "1718"
@@ -53,8 +53,8 @@
     {
       "sequence": 6,
       "id": "BPX-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CNE",
       "name": "BC Component",
       "item": "1719"
@@ -62,8 +62,8 @@
     {
       "sequence": 7,
       "id": "BPX-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "name": "BC Donation Type / Intended Use",
       "item": "1720"
@@ -71,8 +71,8 @@
     {
       "sequence": 8,
       "id": "BPX-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70512",
       "name": "CP Commercial Product",
@@ -81,8 +81,8 @@
     {
       "sequence": 9,
       "id": "BPX-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "XON",
       "name": "CP Manufacturer",
       "item": "1722"
@@ -90,8 +90,8 @@
     {
       "sequence": 10,
       "id": "BPX-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "C",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "CP Lot Number",
       "item": "1723"
@@ -99,8 +99,8 @@
     {
       "sequence": 11,
       "id": "BPX-11",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CNE",
       "name": "BP Blood Group",
       "item": "1724"
@@ -108,8 +108,8 @@
     {
       "sequence": 12,
       "id": "BPX-12",
-      "required": false,
-      "repeatable": true,
+      "optionality": "O",
+      "repetitions": "unbounded",
       "datatype": "CNE",
       "name": "BC Special Testing",
       "item": "1725"
@@ -117,8 +117,8 @@
     {
       "sequence": 13,
       "id": "BPX-13",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "BP Expiration Date/Time",
       "item": "1726"
@@ -126,8 +126,8 @@
     {
       "sequence": 14,
       "id": "BPX-14",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "BP Quantity",
       "item": "1727"
@@ -135,8 +135,8 @@
     {
       "sequence": 15,
       "id": "BPX-15",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "BP Amount",
       "item": "1728"
@@ -144,8 +144,8 @@
     {
       "sequence": 16,
       "id": "BPX-16",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "name": "BP Units",
       "item": "1729"
@@ -153,8 +153,8 @@
     {
       "sequence": 17,
       "id": "BPX-17",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "BP Unique ID",
       "item": "1730"
@@ -162,8 +162,8 @@
     {
       "sequence": 18,
       "id": "BPX-18",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "PL",
       "name": "BP Actual Dispensed To Location",
       "item": "1731"
@@ -171,8 +171,8 @@
     {
       "sequence": 19,
       "id": "BPX-19",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XAD",
       "name": "BP Actual Dispensed To Address",
       "item": "1732"
@@ -180,8 +180,8 @@
     {
       "sequence": 20,
       "id": "BPX-20",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XCN",
       "name": "BP Dispensed to Receiver",
       "item": "1733"
@@ -189,8 +189,8 @@
     {
       "sequence": 21,
       "id": "BPX-21",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "XCN",
       "name": "BP Dispensing Individual",
       "item": "1734"

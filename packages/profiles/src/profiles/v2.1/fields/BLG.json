@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "BLG-1",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CM",
       "maxLength": 15,
       "table": "HL70100",
@@ -15,8 +15,8 @@
     {
       "sequence": 2,
       "id": "BLG-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 50,
       "table": "HL70122",
@@ -26,8 +26,8 @@
     {
       "sequence": 3,
       "id": "BLG-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CM",
       "maxLength": 100,
       "name": "ACCOUNT ID",

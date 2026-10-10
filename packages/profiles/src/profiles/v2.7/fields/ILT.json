@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "ILT-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set Id - ILT",
@@ -14,8 +14,8 @@
     {
       "sequence": 2,
       "id": "ILT-2",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "ST",
       "name": "Inventory Lot Number",
       "item": "1800"
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "ILT-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Inventory Expiration Date",
       "item": "1801"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "ILT-4",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Inventory Received Date",
       "item": "1804"
@@ -41,8 +41,8 @@
     {
       "sequence": 5,
       "id": "ILT-5",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Inventory Received Quantity",
       "item": "1805"
@@ -50,8 +50,8 @@
     {
       "sequence": 6,
       "id": "ILT-6",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70818",
       "name": "Inventory Received Quantity Unit",
@@ -60,8 +60,8 @@
     {
       "sequence": 7,
       "id": "ILT-7",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "MO",
       "name": "Inventory Received Item Cost",
       "item": "1807"
@@ -69,8 +69,8 @@
     {
       "sequence": 8,
       "id": "ILT-8",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "DTM",
       "name": "Inventory On Hand Date",
       "item": "1808"
@@ -78,8 +78,8 @@
     {
       "sequence": 9,
       "id": "ILT-9",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "NM",
       "name": "Inventory On Hand Quantity",
       "item": "1809"
@@ -87,8 +87,8 @@
     {
       "sequence": 10,
       "id": "ILT-10",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70818",
       "name": "Inventory On Hand Quantity Unit",

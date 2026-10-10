@@ -4,8 +4,7 @@
     {
       "sequence": 1,
       "id": "PID-1",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "SI",
       "maxLength": 4,
       "name": "Set ID - Patient ID",
@@ -14,8 +13,7 @@
     {
       "sequence": 2,
       "id": "PID-2",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CK",
       "maxLength": 16,
       "name": "Patient ID (External ID)",
@@ -24,8 +22,8 @@
     {
       "sequence": 3,
       "id": "PID-3",
-      "required": true,
-      "repeatable": true,
+      "optionality": "R",
+      "repetitions": "unbounded",
       "datatype": "CM",
       "maxLength": 20,
       "name": "Patient ID (Internal ID)",
@@ -34,8 +32,7 @@
     {
       "sequence": 4,
       "id": "PID-4",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 12,
       "name": "Alternate Patient ID",
@@ -44,8 +41,8 @@
     {
       "sequence": 5,
       "id": "PID-5",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "PN",
       "maxLength": 48,
       "name": "Patient Name",
@@ -54,8 +51,7 @@
     {
       "sequence": 6,
       "id": "PID-6",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 30,
       "name": "Mother&apos;s Maiden Name",
@@ -64,8 +60,7 @@
     {
       "sequence": 7,
       "id": "PID-7",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "TS",
       "maxLength": 26,
       "name": "Date of Birth",
@@ -74,8 +69,7 @@
     {
       "sequence": 8,
       "id": "PID-8",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70001",
@@ -85,8 +79,7 @@
     {
       "sequence": 9,
       "id": "PID-9",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "PN",
       "maxLength": 48,
       "name": "Patient Alias",
@@ -95,8 +88,7 @@
     {
       "sequence": 10,
       "id": "PID-10",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70005",
@@ -106,8 +98,7 @@
     {
       "sequence": 11,
       "id": "PID-11",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 3,
       "datatype": "AD",
       "maxLength": 106,
       "name": "Patient Address",
@@ -116,8 +107,7 @@
     {
       "sequence": 12,
       "id": "PID-12",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 4,
       "name": "County code",
@@ -126,8 +116,7 @@
     {
       "sequence": 13,
       "id": "PID-13",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 3,
       "datatype": "TN",
       "maxLength": 40,
       "name": "Phone Number - Home",
@@ -136,8 +125,7 @@
     {
       "sequence": 14,
       "id": "PID-14",
-      "required": false,
-      "repeatable": true,
+      "repetitions": 3,
       "datatype": "TN",
       "maxLength": 40,
       "name": "Phone Number - Business",
@@ -146,8 +134,7 @@
     {
       "sequence": 15,
       "id": "PID-15",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 25,
       "name": "Language - Patient",
@@ -156,8 +143,7 @@
     {
       "sequence": 16,
       "id": "PID-16",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70002",
@@ -167,8 +153,7 @@
     {
       "sequence": 17,
       "id": "PID-17",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70006",
@@ -178,8 +163,7 @@
     {
       "sequence": 18,
       "id": "PID-18",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CK",
       "maxLength": 20,
       "name": "Patient Account Number",
@@ -188,8 +172,7 @@
     {
       "sequence": 19,
       "id": "PID-19",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 16,
       "name": "Social security number - patient",
@@ -198,8 +181,7 @@
     {
       "sequence": 20,
       "id": "PID-20",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CM",
       "maxLength": 25,
       "name": "Driver&apos;s license number - patient",
@@ -208,8 +190,7 @@
     {
       "sequence": 21,
       "id": "PID-21",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "CK",
       "maxLength": 20,
       "name": "Mother&apos;s Identifier",
@@ -218,8 +199,7 @@
     {
       "sequence": 22,
       "id": "PID-22",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 1,
       "table": "HL70189",
@@ -229,8 +209,7 @@
     {
       "sequence": 23,
       "id": "PID-23",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 25,
       "name": "Birth Place",
@@ -239,8 +218,7 @@
     {
       "sequence": 24,
       "id": "PID-24",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ID",
       "maxLength": 2,
       "name": "Multiple Birth Indicator",
@@ -249,8 +227,7 @@
     {
       "sequence": 25,
       "id": "PID-25",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "NM",
       "maxLength": 2,
       "name": "Birth Order",
@@ -259,8 +236,7 @@
     {
       "sequence": 26,
       "id": "PID-26",
-      "required": false,
-      "repeatable": true,
+      "repetitions": "unbounded",
       "datatype": "ID",
       "maxLength": 3,
       "table": "HL70171",
@@ -270,8 +246,7 @@
     {
       "sequence": 27,
       "id": "PID-27",
-      "required": false,
-      "repeatable": false,
+      "repetitions": 1,
       "datatype": "ST",
       "maxLength": 60,
       "name": "Veterans Military Status",

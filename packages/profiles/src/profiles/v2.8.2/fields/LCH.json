@@ -4,8 +4,8 @@
     {
       "sequence": 1,
       "id": "LCH-1",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "PL",
       "name": "Primary Key Value - LCH",
       "item": "1305"
@@ -13,8 +13,8 @@
     {
       "sequence": 2,
       "id": "LCH-2",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "ID",
       "table": "HL70206",
       "name": "Segment Action Code",
@@ -23,8 +23,8 @@
     {
       "sequence": 3,
       "id": "LCH-3",
-      "required": false,
-      "repeatable": false,
+      "optionality": "O",
+      "repetitions": 1,
       "datatype": "EI",
       "name": "Segment Unique Key",
       "item": "764"
@@ -32,8 +32,8 @@
     {
       "sequence": 4,
       "id": "LCH-4",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70324",
       "name": "Location Characteristic ID",
@@ -42,8 +42,8 @@
     {
       "sequence": 5,
       "id": "LCH-5",
-      "required": true,
-      "repeatable": false,
+      "optionality": "R",
+      "repetitions": 1,
       "datatype": "CWE",
       "table": "HL70136",
       "name": "Location Characteristic Value - LCH",
