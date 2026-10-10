@@ -52,7 +52,7 @@ Visit nodes in an HL7v2 AST tree.
 - `tree` (`Nodes`) — Tree to traverse. Can be any node type, not just `Root`.
 - `test` (`string | Partial<Nodes> | Test`, optional) — Filter:
   - `string` — Match nodes by type (e.g., `"segment"`).
-  - `Partial<Nodes>` — Match nodes with matching properties (e.g., `{ name: "PATIENT_GROUP" }`).
+  - `Partial<Nodes>` — Match nodes whose own properties equal (`===`) each value (e.g., `{ name: "PATIENT_GROUP" }`). A property the node does not own reads as `undefined`: an `undefined` value matches an absent property, and a key naming an inherited member (`constructor`, `toString`) matches no node.
   - `Test` — Custom function `(node, ancestors) => boolean`.
 - `visitor` (`Visitor`) — Function called for each matching node.
 
@@ -330,12 +330,14 @@ function extractPatientNames(ast: Root): PatientName[] {
     if (nameField?.children[0]?.children[0]) {
       const nameComponent = nameField.children[0].children[0];
       const name = (nameComponent.children[0] as Subcomponent)?.value || "";
-      const groupAncestor = ancestors.find((n) => n.type === "group");
+      const groupAncestor = ancestors.find(
+        (n): n is Group => n.type === "group"
+      );
 
       names.push({
         name,
         sequence: info.sequence,
-        inGroup: groupAncestor ? (groupAncestor as any).name : undefined,
+        inGroup: groupAncestor?.name,
       });
     }
   });

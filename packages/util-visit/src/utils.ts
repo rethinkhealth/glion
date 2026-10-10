@@ -3,19 +3,19 @@ import type { Nodes } from "@glion/ast";
 import type { Predicate, Test } from "./types";
 
 /**
- * Create test predicate from various input types.
+ * The predicate a `visit` test describes.
  *
- * Assumptions:
+ * - `null` matches every node.
+ * - A string matches nodes whose `type` equals it.
+ * - A function is the predicate.
+ * - An object matches nodes whose own property equals (`===`) each of its values.
+ *   A property the node does not own reads as `undefined`, so an `undefined`
+ *   value matches an absent property, and a key that names an inherited member
+ *   (`constructor`, `toString`, an own `__proto__`) matches no node. The
+ *   object's entries are read once, when the predicate is created.
  *
- * - Null test matches all nodes
- * - String test matches by node.type property
- * - Object test uses strict equality (===) for property matching
- * - Explicit undefined values in test object check for property absence
- * - Dangerous keys (**proto**, constructor, prototype) are filtered for security
- *
- * @param test - Filter criteria: null (all), string (type), object
- *   (properties), or function
- * @returns Predicate function that returns true if node matches test criteria
+ * @param test - `null`, a node type, a property object, or a predicate.
+ * @returns The predicate.
  */
 export function createTest(test: Test<Nodes>): Predicate {
   if (test === null) {
@@ -27,26 +27,12 @@ export function createTest(test: Test<Nodes>): Predicate {
   if (typeof test === "function") {
     return test;
   }
-  // Object property matching
-  return (node) => {
-    for (const [key, testValue] of Object.entries(test)) {
-      // Guard against prototype pollution
-      if (key === "__proto__" || key === "constructor" || key === "prototype") {
-        continue;
-      }
 
-      const nodeValue: unknown = Reflect.get(node, key);
-
-      // If test has explicit undefined, check property doesn't exist or is undefined
-      if (testValue === undefined) {
-        if (Object.hasOwn(node, key) && nodeValue !== undefined) {
-          return false;
-        }
-      } else if (nodeValue !== testValue) {
-        // For non-undefined values, strict equality check
-        return false;
-      }
-    }
-    return true;
-  };
+  const entries = Object.entries(test);
+  return (node) =>
+    entries.every(
+      ([key, value]) =>
+        (Object.hasOwn(node, key) ? Reflect.get(node, key) : undefined) ===
+        value
+    );
 }
