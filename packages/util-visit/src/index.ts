@@ -79,6 +79,9 @@ export function visit<T extends Nodes>(
     // The caller's test runs here, not in `captureIndex`: it may read
     // `ancestors`, which visit-parents gives only to the visitor.
     if (!predicate(node, ancestors)) {
+      // Returning nothing means "continue": visit-parents still walks into
+      // this node's children, so `visit(tree, "field", …)` reaches the fields
+      // of segments it does not match.
       return;
     }
 
@@ -89,6 +92,16 @@ export function visit<T extends Nodes>(
       sequence: currentIndex + 1,
     };
 
+    // visit-parents reads the visitor's return value to decide what to visit
+    // next, so the caller's result is passed through unchanged:
+    // - nothing or CONTINUE: walk into this node's children;
+    // - SKIP: skip this node's children;
+    // - EXIT: stop the walk;
+    // - a number: continue at that index among this node's siblings, as after
+    //   removing the current node with `splice(info.index, 1)`;
+    // - [action, index]: both.
+    // Calling the visitor without returning its result would turn every one
+    // of these into "continue".
     return visitor(node as T, ancestors, info);
   });
 }
