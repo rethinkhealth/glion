@@ -61,27 +61,35 @@ export function visit<T extends Nodes>(
 
   const predicate = createTest(test as Test<Nodes>);
 
-  // visit-parents calls its test with the node's current index among its
-  // parent's children, immediately before it calls the visitor on that node.
-  let index = 0;
-  const recordIndex = (_node: unknown, nodeIndex?: number): boolean => {
-    index = nodeIndex ?? 0;
+  // visit-parents passes a node's index among its parent's children only to
+  // its test, `test(node, index, parent)`, never to its visitor. It calls the
+  // test and, when the test passes, the visitor on that same node with nothing
+  // in between (unist-util-visit-parents 6.0.2, lib/index.js; the version is
+  // pinned). `captureIndex` is that test: it stores the index for the visitor
+  // to read and passes every node. The index is the node's position when it
+  // is visited, so it reflects siblings a visitor inserted or removed earlier.
+  let currentIndex = 0;
+  const captureIndex = (_node: unknown, index?: number): boolean => {
+    // The node `visit` starts from has no parent, so it has no index.
+    currentIndex = index ?? 0;
     return true;
   };
 
-  visitParents(tree, recordIndex, (node, ancestors) => {
+  visitParents(tree, captureIndex, (node, ancestors) => {
+    // The caller's test runs here, not in `captureIndex`: it may read
+    // `ancestors`, which visit-parents gives only to the visitor.
     if (!predicate(node, ancestors)) {
       return;
     }
 
     const info: VisitInfo = {
       depth: ancestors.length + 1,
-      index,
+      index: currentIndex,
       metadata:
         "name" in node && typeof node.name === "string"
           ? { name: node.name }
           : undefined,
-      sequence: index + 1,
+      sequence: currentIndex + 1,
     };
 
     return visitor(node as T, ancestors, info);
