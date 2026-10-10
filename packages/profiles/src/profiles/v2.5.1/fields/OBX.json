@@ -200,14 +200,41 @@
       "id": "OBX-20",
       "required": false,
       "repeatable": false,
+      "datatype": "VARIES",
+      "name": "Reserved for harmonization with V2.6",
+      "item": "9999"
+    },
+    {
+      "sequence": 21,
+      "id": "OBX-21",
+      "required": false,
+      "repeatable": false,
+      "datatype": "VARIES",
+      "name": "Reserved for harmonization with V2.6",
+      "item": "9999"
+    },
+    {
+      "sequence": 22,
+      "id": "OBX-22",
+      "required": false,
+      "repeatable": false,
+      "datatype": "VARIES",
+      "name": "Reserved for harmonization with V2.6",
+      "item": "9999"
+    },
+    {
+      "sequence": 23,
+      "id": "OBX-23",
+      "required": false,
+      "repeatable": false,
       "datatype": "XON",
       "maxLength": 567,
       "name": "Performing Organization Name",
       "item": "2283"
     },
     {
-      "sequence": 21,
-      "id": "OBX-21",
+      "sequence": 24,
+      "id": "OBX-24",
       "required": false,
       "repeatable": false,
       "datatype": "XAD",
@@ -216,8 +243,8 @@
       "item": "2284"
     },
     {
-      "sequence": 22,
-      "id": "OBX-22",
+      "sequence": 25,
+      "id": "OBX-25",
       "required": false,
       "repeatable": false,
       "datatype": "XCN",

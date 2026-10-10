@@ -130,6 +130,14 @@
     },
     {
       "sequence": 15,
+      "id": "GOL-15",
+      "required": false,
+      "repeatable": false,
+      "name": "Goal Review Interval",
+      "item": "831"
+    },
+    {
+      "sequence": 16,
       "id": "GOL-16",
       "required": false,
       "repeatable": false,
@@ -138,7 +146,7 @@
       "item": "832"
     },
     {
-      "sequence": 16,
+      "sequence": 17,
       "id": "GOL-17",
       "required": false,
       "repeatable": true,
@@ -147,7 +155,7 @@
       "item": "833"
     },
     {
-      "sequence": 17,
+      "sequence": 18,
       "id": "GOL-18",
       "required": false,
       "repeatable": false,
@@ -156,7 +164,7 @@
       "item": "834"
     },
     {
-      "sequence": 18,
+      "sequence": 19,
       "id": "GOL-19",
       "required": false,
       "repeatable": false,
@@ -165,7 +173,7 @@
       "item": "835"
     },
     {
-      "sequence": 19,
+      "sequence": 20,
       "id": "GOL-20",
       "required": false,
       "repeatable": true,
@@ -174,7 +182,7 @@
       "item": "836"
     },
     {
-      "sequence": 20,
+      "sequence": 21,
       "id": "GOL-21",
       "required": false,
       "repeatable": true,
@@ -183,7 +191,7 @@
       "item": "837"
     },
     {
-      "sequence": 21,
+      "sequence": 22,
       "id": "GOL-22",
       "required": false,
       "repeatable": false,

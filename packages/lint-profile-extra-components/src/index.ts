@@ -45,7 +45,7 @@ const hl7v2LintExtraComponents = lintRule<Root>(
       }
 
       const fieldProfile = fieldDef.bySequence.get(info.sequence);
-      if (!fieldProfile) {
+      if (fieldProfile?.datatype === undefined) {
         return SKIP;
       }
 

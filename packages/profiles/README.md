@@ -194,7 +194,7 @@ interface FieldProfile {
   sequence: number; // 9
   id: string; // "MSH-9"
   name?: string; // "Message Type"
-  datatype: string; // "MSG"
+  datatype?: string; // "MSG"; absent on a withdrawn field with no datatype
   required: boolean;
   repeatable: boolean;
   maxLength?: number;
