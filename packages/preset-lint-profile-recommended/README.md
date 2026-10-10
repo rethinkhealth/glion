@@ -4,7 +4,7 @@ Preset bundling every profile-based HL7v2 lint rule for validating messages agai
 
 ## What it does
 
-This preset wires the eight profile lint rules plus the `annotate-profile-context` loader into a single `unified` plugin. One `.use(...)` call enables required-field, field-length, field-repetition, required-component, table-value, extra-field, extra-component, and segment-order validation — all driven by the HL7v2 profile loaded for the message's MSH-12 version.
+This preset wires the nine profile lint rules plus the `annotate-profile-context` loader into a single `unified` plugin. One `.use(...)` call enables required-field, field-length, field-repetition, required-component, table-value, extra-field, extra-component, segment-order, and withdrawn-field validation — all driven by the HL7v2 profile loaded for the message's MSH-12 version.
 
 ## Install
 
@@ -53,6 +53,7 @@ The preset applies these plugins in order. `annotate-profile-context` runs first
 | [`@glion/lint-profile-extra-fields`](../lint-profile-extra-fields)               | warning  | Warns when a segment contains more fields than the profile defines.      |
 | [`@glion/lint-profile-extra-components`](../lint-profile-extra-components)       | warning  | Warns when a composite field contains more components than its datatype. |
 | [`@glion/lint-profile-segment-order`](../lint-profile-segment-order)             | error    | Validates segment order against the event schema.                        |
+| [`@glion/lint-profile-withdrawn-fields`](../lint-profile-withdrawn-fields)       | error    | Flags a value in a withdrawn field.                                      |
 
 An error sets `fatal: true` on the message; a warning sets `fatal: false`. Neither throws.
 
