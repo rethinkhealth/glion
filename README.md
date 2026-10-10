@@ -124,6 +124,8 @@ Linting rules and presets for HL7v2 message quality and conformance.
 - **[@glion/lint-profile-segment-order][glion-lint-profile-segment-order]** — validate segment ordering per the event schema definition.
 - **[@glion/lint-profile-extra-fields][glion-lint-profile-extra-fields]** — flag segments that contain fields beyond the maximum sequence defined in the profile.
 - **[@glion/lint-profile-extra-components][glion-lint-profile-extra-components]** — flag composite fields that contain more components than the datatype profile defines.
+- **[@glion/lint-profile-withdrawn-fields][glion-lint-profile-withdrawn-fields]** — flag values in fields HL7v2 has withdrawn.
+- **[@glion/lint-profile-backward-compatible-fields][glion-lint-profile-backward-compatible-fields]** — flag values in fields HL7v2 keeps only for backward compatibility.
 
 #### Utilities
 
@@ -204,6 +206,8 @@ This program is licensed to you under the terms of the [MIT License](https://ope
 [glion-lint-profile-field-max-length]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-field-max-length#readme
 [glion-lint-profile-field-repetition]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-field-repetition#readme
 [glion-lint-profile-required-components]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-required-components#readme
+[glion-lint-profile-withdrawn-fields]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-withdrawn-fields#readme
+[glion-lint-profile-backward-compatible-fields]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-backward-compatible-fields#readme
 [glion-lint-profile-required-fields]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-required-fields#readme
 [glion-lint-profile-table-values]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-table-values#readme
 [glion-lint-required-message-header]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-required-message-header#readme

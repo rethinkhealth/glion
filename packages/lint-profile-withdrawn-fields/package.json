@@ -1,14 +1,13 @@
 {
-  "name": "@glion/preset-lint-profile-recommended",
+  "name": "@glion/lint-profile-withdrawn-fields",
   "version": "0.22.0",
-  "description": "hl7v2-lint preset with profile-based validation rules",
+  "description": "Lint rule that reports a value in a field HL7v2 has withdrawn",
   "keywords": [
+    "health",
+    "healthcare",
     "hl7",
     "hl7v2",
-    "hl7v2-lint",
-    "lint",
     "nodejs",
-    "profile",
     "typescript"
   ],
   "homepage": "https://glion.dev",
@@ -20,7 +19,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rethinkhealth/glion.git",
-    "directory": "packages/preset-lint-profile-recommended"
+    "directory": "packages/lint-profile-withdrawn-fields"
   },
   "files": [
     "dist"
@@ -43,23 +42,15 @@
     "publint": "publint --strict"
   },
   "dependencies": {
-    "@glion/annotate-profile-context": "workspace:*",
-    "@glion/lint-profile-extra-components": "workspace:*",
-    "@glion/lint-profile-extra-fields": "workspace:*",
-    "@glion/lint-profile-field-max-length": "workspace:*",
-    "@glion/lint-profile-field-repetition": "workspace:*",
-    "@glion/lint-profile-required-components": "workspace:*",
-    "@glion/lint-profile-required-fields": "workspace:*",
-    "@glion/lint-profile-segment-order": "workspace:*",
-    "@glion/lint-profile-table-values": "workspace:*",
-    "@glion/lint-profile-withdrawn-fields": "workspace:*",
-    "unified": "11.0.5"
+    "@glion/ast": "workspace:*",
+    "@glion/util-visit": "workspace:*",
+    "@glion/utils": "workspace:*",
+    "unified-lint-rule": "3.0.1"
   },
   "devDependencies": {
-    "@glion/ast": "workspace:*",
+    "@glion/annotate-profile-context": "workspace:*",
     "@glion/builder": "workspace:*",
     "@glion/check-readme": "workspace:*",
-    "@glion/profiles": "workspace:*",
     "@glion/testing": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "@types/node": "25.6.0",

@@ -7,6 +7,7 @@ import hl7v2LintRequiredComponents from "@glion/lint-profile-required-components
 import hl7v2LintRequiredFields from "@glion/lint-profile-required-fields";
 import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import hl7v2LintTableValues from "@glion/lint-profile-table-values";
+import hl7v2LintWithdrawnFields from "@glion/lint-profile-withdrawn-fields";
 import type { Preset } from "unified";
 
 /**
@@ -25,6 +26,7 @@ import type { Preset } from "unified";
  *   missing or empty
  * - **segment-order** — a segment is out of the event schema's order, or the
  *   message ends before a required segment
+ * - **withdrawn-fields** — a withdrawn field has a value
  *
  * Warnings:
  *
@@ -62,6 +64,7 @@ const hl7v2PresetLintProfileRecommended: Preset = {
     hl7v2LintExtraFields,
     hl7v2LintExtraComponents,
     [hl7v2LintSegmentOrder, ["error"]],
+    [hl7v2LintWithdrawnFields, ["error"]],
   ],
 };
 

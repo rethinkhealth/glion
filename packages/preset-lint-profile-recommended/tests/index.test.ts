@@ -113,6 +113,23 @@ describe("hl7v2PresetLintProfileRecommended", () => {
     expect(tableErrors.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("errors on a value in a withdrawn field", async () => {
+    // v2.7 AL1-6 (Identification Date) is withdrawn
+    const tree = m(
+      msh("2.7"),
+      s("AL1", f("1"), f(""), f("PENICILLIN"), f(""), f(""), f("20240101"))
+    );
+    const file = new VFile();
+
+    await unified().use(hl7v2PresetLintProfileRecommended).run(tree, file);
+
+    const withdrawn = file.messages.filter(
+      (msg) => msg.ruleId === "withdrawn-fields"
+    );
+    expect(withdrawn).toHaveLength(1);
+    expect(withdrawn[0]?.fatal).toBe(true);
+  });
+
   it("errors on a missing required component", async () => {
     // MSH-9 in v2.7.1 has 3 required components, only 2 provided
     const tree = m(
