@@ -18,29 +18,6 @@ export { EXIT, SKIP } from "unist-util-visit-parents";
 
 export type { Predicate, Test, VisitInfo, Visitor } from "./types";
 
-/**
- * A lookup of a node's index among its parent's children.
- *
- * Indexes a parent's children the first time one of them is looked up, and
- * at most once per lookup function.
- */
-function createIndexOf(): (parent: Nodes, node: Nodes) => number {
-  const indexes = new WeakMap<Nodes, Map<Nodes, number>>();
-
-  return (parent, node) => {
-    let children = indexes.get(parent);
-    if (!children) {
-      children = new Map(
-        "children" in parent
-          ? parent.children.map((child: Nodes, index: number) => [child, index])
-          : []
-      );
-      indexes.set(parent, children);
-    }
-    return children.get(node) ?? 0;
-  };
-}
-
 // Overload signatures
 export function visit(tree: Nodes, visitor: Visitor): void;
 export function visit<Type extends Nodes["type"]>(
@@ -85,33 +62,29 @@ export function visit<T extends Nodes>(
 
   const predicate = createTest(test as Test<Nodes>);
 
-  const indexOf = createIndexOf();
+  // visit-parents calls its test with the node's current index among its
+  // parent's children, immediately before it calls the visitor on that node.
+  let index = 0;
+  const recordIndex = (_node: unknown, nodeIndex?: number): boolean => {
+    index = nodeIndex ?? 0;
+    return true;
+  };
 
-  // Delegate traversal to unist-util-visit-parents
-  visitParents(tree, (node, ancestors) => {
-    // Only call visitor if node matches test
+  visitParents(tree, recordIndex, (node, ancestors) => {
     if (!predicate(node, ancestors)) {
-      return; // Continue traversal but skip visitor
+      return;
     }
-
-    // Compute HL7v2-specific context
-    const parent = ancestors.at(-1);
-
-    // For root node (no parent), use defaults
-    // For children, look up their index in the parent's children array
-    const childIndex = parent ? indexOf(parent, node) : 0;
 
     const info: VisitInfo = {
       depth: ancestors.length + 1,
-      index: parent ? childIndex : 0,
+      index,
       metadata:
         "name" in node && typeof node.name === "string"
           ? { name: node.name }
           : undefined,
-      sequence: parent ? childIndex + 1 : 1,
+      sequence: index + 1,
     };
 
-    // Call user visitor with augmented signature
     return visitor(node as T, ancestors, info);
   });
 }

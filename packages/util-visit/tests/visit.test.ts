@@ -323,6 +323,58 @@ describe("visit", () => {
       expect(indices).toStrictEqual([0, 1, 2]);
       expect(sequences).toStrictEqual([1, 2, 3]);
     });
+
+    it("gives the position a node has when it is visited, after earlier siblings are removed", () => {
+      const segment = s("PID", f("a"), f("b"), f("c"), f("d"));
+      const last = segment.children.at(-1);
+      visit(segment, "field", (node, ancestors, info) => {
+        if (node === last) {
+          return;
+        }
+        (ancestors.at(-1) as Segment).children.splice(info.index, 1);
+        return info.index;
+      });
+      expect(segment.children).toStrictEqual([last]);
+    });
+
+    it("gives the position a node has when it is visited, after a sibling is inserted", () => {
+      const segment = s("PID", f("a"), f("b"));
+      const [first, second] = segment.children;
+      const inserted = f("inserted");
+      const sequences: [Nodes, number][] = [];
+      visit(segment, "field", (node, ancestors, info) => {
+        sequences.push([node, info.sequence]);
+        if (node === first) {
+          (ancestors.at(-1) as Segment).children.splice(1, 0, inserted);
+        }
+      });
+      expect(sequences).toStrictEqual([
+        [first, 1],
+        [inserted, 2],
+        [second, 3],
+      ]);
+    });
+
+    it("gives the position a node has when it is visited, after its parent's visitor prepends a sibling", () => {
+      const segment = s("PID", f("a"), f("b"));
+      const [first, second] = segment.children;
+      const prepended = f("prepended");
+      const sequences: [Nodes, number][] = [];
+      visit(segment, (node, _ancestors, info) => {
+        if (node === segment) {
+          segment.children.unshift(prepended);
+          return;
+        }
+        if (node.type === "field") {
+          sequences.push([node, info.sequence]);
+        }
+      });
+      expect(sequences).toStrictEqual([
+        [prepended, 1],
+        [first, 2],
+        [second, 3],
+      ]);
+    });
   });
 
   describe("edge cases", () => {
