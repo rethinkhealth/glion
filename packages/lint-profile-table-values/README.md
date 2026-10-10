@@ -4,7 +4,7 @@ Lint rule to validate coded field values against HL7v2 tables.
 
 ## What it does
 
-Flags coded field values that are not present in the HL7-defined table referenced by the field's profile. The rule reads profile context attached by `@glion/annotate-profile-context`, resolves the table by id (stripping the `HL7` prefix, so `HL70001` looks up table `0001`), and checks the first component value of each repetition against the table's code set. Only `hl7`-type tables are validated; user-defined tables, empty fields, and Z-segments are skipped.
+Flags coded field values that are not present in the HL7-defined table referenced by the field's profile. The rule reads profile context attached by `@glion/annotate-profile-context`, resolves the table by id (stripping the `HL7` prefix, so `HL70001` looks up table `0001`), and checks the first component value of each repetition against the table's code set. Only fields whose datatype is primitive or a coded element (`CE`, `CF`, `CNE`, `CWE`) are checked; on any other composite the table lists the codes of a later component, such as the name type of an `XPN`. Only `hl7`-type tables are validated; user-defined tables, empty fields, and Z-segments are skipped.
 
 ## Install
 
@@ -41,7 +41,7 @@ console.error(reporter([file]));
 
 A `unified` lint rule plugin. Takes no options.
 
-Reads `file.data.profile`. For each non-empty field with a declared `table` reference in its profile, loads the table definition from `ctx.tables`. If the table is HL7-defined it checks each repetition's first subcomponent value against the table's code set.
+Reads `file.data.profile`. For each non-empty field with a declared `table` reference in its profile and a primitive or coded element datatype, loads the table definition from `ctx.tables`. If the table is HL7-defined it checks each repetition's first subcomponent value against the table's code set.
 
 ```ts
 import type { Plugin } from "unified";

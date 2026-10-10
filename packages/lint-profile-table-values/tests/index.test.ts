@@ -287,4 +287,39 @@ describe("hl7v2LintTableValues", () => {
     expect(errors).toHaveLength(1);
     expect(errors[0]?.message).toContain("ZZZ");
   });
+
+  it("checks a CWE field's first component, the identifier, against its table", async () => {
+    // ERR-3 (CWE) references HL70357; "ZZZ" is not a code in it
+    const tree = m(
+      msh("2.5"),
+      s("ERR", f(""), f(""), f(c("ZZZ"), c("Unknown")))
+    );
+    const file = new VFile();
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintTableValues)
+      .run(tree, file);
+
+    const errors = file.messages.filter((msg) => msg.ruleId === "table-values");
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.message).toContain("ERR-3");
+  });
+
+  it("does not check an XPN name against the table of its name type component", async () => {
+    // v2.6 PID-5 (XPN) references HL70200, which lists XPN.7 name type codes
+    const tree = m(
+      msh("2.6"),
+      s("PID", f(""), f(""), f(""), f(""), f(c("DOE"), c("JOHN")))
+    );
+    const file = new VFile();
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintTableValues)
+      .run(tree, file);
+
+    const errors = file.messages.filter((msg) => msg.ruleId === "table-values");
+    expect(errors).toHaveLength(0);
+  });
 });

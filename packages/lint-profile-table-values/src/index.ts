@@ -14,14 +14,26 @@ function normalizeTableId(tableRef: string): string {
 }
 
 /**
+ * Composite datatypes whose first component is the code from the field's
+ * table: the HL7v2 coded element family (§2.A).
+ */
+const CODED_COMPOSITES: ReadonlySet<string> = new Set([
+  "CE",
+  "CF",
+  "CNE",
+  "CWE",
+]);
+
+/**
  * Lint rule that validates coded field values against HL7-type tables.
  *
  * For each field that references a table in its profile, loads the table
  * definition and checks that the field's first component value is a valid
  * code in that table.
  *
- * Only `hl7`-type tables are validated. `user`-type tables are skipped
- * (they contain site-specific codes).
+ * Only fields whose datatype is primitive or a coded element (CE, CF, CNE, CWE)
+ * are checked. Only `hl7`-type tables are validated. `user`-type tables are
+ * skipped (they contain site-specific codes).
  *
  * Empty fields are skipped. Segments without a known profile are skipped.
  *
@@ -36,7 +48,14 @@ function resolveHl7Table(
   sequence: number
 ) {
   const fieldProfile = ctx.fields.get(segmentName)?.bySequence.get(sequence);
-  if (!fieldProfile?.table) {
+  const datatype = fieldProfile?.datatype;
+  if (!fieldProfile?.table || datatype === undefined) {
+    return;
+  }
+  const isCoded =
+    CODED_COMPOSITES.has(datatype) ||
+    ctx.datatypes.get(datatype)?.kind === "primitive";
+  if (!isCoded) {
     return;
   }
   const tableId = normalizeTableId(fieldProfile.table);
