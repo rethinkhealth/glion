@@ -1,5 +1,16 @@
 # @rethinkhealth/hl7v2-lint-max-message-size
 
+## 0.23.0
+
+### Patch Changes
+
+- [#905](https://github.com/rethinkhealth/glion/pull/905) [`7cb9a7c`](https://github.com/rethinkhealth/glion/commit/7cb9a7c2e7713cbaeea9a6aaa12543b52a310f34) Thanks [@meleksomai](https://github.com/meleksomai)! - Word every report as one sentence per cause, with the count in `actual`:
+
+  - `The message is 9 bytes; the configured limit is 1 byte. Shorten the message or raise \`maxBytes\`.`
+  - `The message has 3 segments; the configured limit is 1 segment. Remove segments or raise \`maxSegments\`.`
+
+  The rule's `url` points to its README in this repository.
+
 ## 0.22.0
 
 No changes in this release.

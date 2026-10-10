@@ -1,5 +1,17 @@
 # @rethinkhealth/hl7v2-lint-required-message-header
 
+## 0.23.0
+
+### Patch Changes
+
+- [#899](https://github.com/rethinkhealth/glion/pull/899) [`1361202`](https://github.com/rethinkhealth/glion/commit/13612023bd1c43e10efbcb8d185afdddd900dbfc) Thanks [@meleksomai](https://github.com/meleksomai)! - Report a message with no segments, and word every report as one sentence per cause:
+
+  - `The first segment is \`PID\`; a message must start with the message header segment (\`MSH\`).`
+  - `The first segment has an empty Segment ID; a message must start with the message header segment (\`MSH\`).`
+  - `The message has no segments; it must start with the message header segment (\`MSH\`).` (previously not reported)
+
+  Each report sets `expected` to `['MSH']` and, when there is a first segment, `actual` to its Segment ID. The rule's `url` points to its README in this repository. The rule reports through `file.message`; its severity is the one it is configured with, as before.
+
 ## 0.22.0
 
 No changes in this release.

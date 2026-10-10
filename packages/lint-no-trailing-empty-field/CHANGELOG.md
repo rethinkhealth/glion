@@ -1,5 +1,19 @@
 # @rethinkhealth/hl7v2-lint-no-trailing-empty-field
 
+## 0.23.0
+
+### Patch Changes
+
+- [#905](https://github.com/rethinkhealth/glion/pull/905) [`7cb9a7c`](https://github.com/rethinkhealth/glion/commit/7cb9a7c2e7713cbaeea9a6aaa12543b52a310f34) Thanks [@meleksomai](https://github.com/meleksomai)! - Name the segment in the report, as one sentence:
+
+  - `Segment \`PID\` ends with 2 empty fields; a segment should end at its last field with a value.`
+  - `A segment with an empty Segment ID ends with 2 empty fields; a segment should end at its last field with a value.`
+
+  The rule's `url` points to its README in this repository.
+
+- Updated dependencies []:
+  - @glion/utils@0.23.0
+
 ## 0.22.0
 
 ### Patch Changes

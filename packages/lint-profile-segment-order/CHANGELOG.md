@@ -1,5 +1,16 @@
 # @rethinkhealth/hl7v2-lint-profile-events-segments-order
 
+## 0.23.0
+
+### Patch Changes
+
+- [#889](https://github.com/rethinkhealth/glion/pull/889) [`0783f74`](https://github.com/rethinkhealth/glion/commit/0783f740cd35d4c74f8900ec616aafe7f3e229d3) Thanks [@meleksomai](https://github.com/meleksomai)! - A segment after the end of the message is reported as `Unexpected segment 'PID'`, without an empty `Expected:` list.
+- Updated dependencies [[`a8aec03`](https://github.com/rethinkhealth/glion/commit/a8aec03333d5b24570145043ff4d2c99a5dde28b)]:
+  - @glion/util-visit@0.23.0
+  - @glion/ast@0.23.0
+  - @glion/profiles@0.23.0
+  - @glion/util-query@0.23.0
+
 ## 0.22.0
 
 ### Patch Changes

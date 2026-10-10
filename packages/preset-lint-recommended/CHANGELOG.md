@@ -1,5 +1,15 @@
 # @rethinkhealth/hl7v2-preset-lint-recommended
 
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies [[`7cb9a7c`](https://github.com/rethinkhealth/glion/commit/7cb9a7c2e7713cbaeea9a6aaa12543b52a310f34), [`7cb9a7c`](https://github.com/rethinkhealth/glion/commit/7cb9a7c2e7713cbaeea9a6aaa12543b52a310f34), [`7cb9a7c`](https://github.com/rethinkhealth/glion/commit/7cb9a7c2e7713cbaeea9a6aaa12543b52a310f34), [`1361202`](https://github.com/rethinkhealth/glion/commit/13612023bd1c43e10efbcb8d185afdddd900dbfc)]:
+  - @glion/lint-message-version@0.23.0
+  - @glion/lint-no-trailing-empty-field@0.23.0
+  - @glion/lint-segment-header-length@0.23.0
+  - @glion/lint-required-message-header@0.23.0
+
 ## 0.22.0
 
 ### Patch Changes
