@@ -3,7 +3,13 @@ import type { ProfileContext } from "@glion/annotate-profile-context";
 import type { Root } from "@glion/ast";
 import { SKIP, visit } from "@glion/util-visit";
 import { getLength, isEmptyNode } from "@glion/utils";
+import pluralize from "pluralize";
 import { lintRule } from "unified-lint-rule";
+
+const messages = {
+  tooLong: (field: string, name: string, length: number, maxLength: number) =>
+    `Field \`${field}\` (${name}) is ${pluralize("character", length, true)} long; it allows at most ${pluralize("character", maxLength, true)}.`,
+} as const;
 
 /**
  * Lint rule that validates field value lengths against HL7v2 profile maxLength.
@@ -24,7 +30,10 @@ import { lintRule } from "unified-lint-rule";
  *   ```;
  */
 const hl7v2LintFieldMaxLength = lintRule<Root>(
-  { origin: "hl7v2-lint:field-max-length" },
+  {
+    origin: "hl7v2-lint:field-max-length",
+    url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-field-max-length#readme",
+  },
   (tree, file) => {
     const ctx = file.data.profile;
     if (!ctx) {
@@ -32,41 +41,33 @@ const hl7v2LintFieldMaxLength = lintRule<Root>(
     }
 
     visit(tree, "segment", (segment, segmentAncestors) => {
-      const fieldDef = ctx.fields.get(segment.name);
-      if (!fieldDef) {
+      const fields = ctx.fields.get(segment.name);
+      if (!fields) {
         return SKIP;
       }
 
-      visit(segment, "field", (fieldNode, _fieldAncestors, info) => {
-        if (isEmptyNode(fieldNode)) {
+      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
+        const profile = fields.bySequence.get(sequence);
+        if (!profile?.maxLength || isEmptyNode(field)) {
           return SKIP;
         }
 
-        const profile = fieldDef.bySequence.get(info.sequence);
-
-        if (!profile?.maxLength) {
-          return SKIP;
-        }
-
-        for (const repetition of fieldNode.children) {
-          const len = getLength(repetition);
-          if (len === 0) {
-            continue;
-          }
-
-          if (len > profile.maxLength) {
-            file.message(
-              `Field ${segment.name}-${info.sequence} exceeds max length of ${profile.maxLength} (actual: ${len})`,
+        for (const repetition of field.children) {
+          const length = getLength(repetition);
+          if (length > profile.maxLength) {
+            const message = file.message(
+              messages.tooLong(
+                `${segment.name}-${sequence}`,
+                profile.name,
+                length,
+                profile.maxLength
+              ),
               {
-                ancestors: [
-                  ...segmentAncestors,
-                  segment,
-                  fieldNode,
-                  repetition,
-                ],
-                place: repetition.position ?? fieldNode.position,
+                ancestors: [...segmentAncestors, segment, field, repetition],
+                place: repetition.position,
               }
             );
+            message.actual = String(length);
           }
         }
 

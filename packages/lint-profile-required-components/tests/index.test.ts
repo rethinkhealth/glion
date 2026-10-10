@@ -90,11 +90,45 @@ describe("hl7v2LintRequiredComponents", () => {
     const errors = file.messages.filter(
       (msg) => msg.ruleId === "required-components"
     );
-    expect(errors.length).toBeGreaterThanOrEqual(1);
-    const msh9Error = errors.find((msg) => msg.message.includes("MSH-9"));
-    expect(msh9Error).toBeDefined();
-    expect(msh9Error?.message).toContain("Message Structure");
-    expect(msh9Error?.source).toBe("hl7v2-lint");
+    expect(errors.map((msg) => msg.message)).toEqual([
+      "Component `MSH-9.3` (Message Structure) is not present; it is required.",
+    ]);
+    expect(errors[0]?.source).toBe("hl7v2-lint");
+  });
+
+  it("reports an empty required component", async () => {
+    // MSH-9 = MSG in v2.7.1, component 3 (Message Structure) present but empty
+    const tree = m(
+      s(
+        "MSH",
+        f("|"),
+        f("^~\\&"),
+        f("SENDER"),
+        f("FAC"),
+        f("RECV"),
+        f("RFAC"),
+        f("20241201"),
+        f(""),
+        f(c("ADT"), c("A01"), c("")),
+        f("MSG001"),
+        f("P"),
+        f("2.7.1")
+      )
+    );
+    const file = new VFile();
+
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintRequiredComponents)
+      .run(tree, file);
+
+    const errors = file.messages.filter(
+      (msg) => msg.ruleId === "required-components"
+    );
+    expect(errors.map((msg) => msg.message)).toEqual([
+      "Component `MSH-9.3` (Message Structure) is empty; it is required.",
+    ]);
+    expect(errors[0]?.actual).toBe("");
   });
 
   it("skips simple (non-composite) datatypes", async () => {
@@ -177,7 +211,9 @@ describe("hl7v2LintRequiredComponents", () => {
     const errors = file.messages.filter(
       (msg) => msg.ruleId === "required-components"
     );
-    expect(errors.length).toBeGreaterThanOrEqual(1);
+    expect(errors.map((msg) => msg.message)).toEqual([
+      "Component `MSH-9.3` (Message Structure) is not present; it is required.",
+    ]);
   });
 
   it("skips Z-segments silently", async () => {
@@ -236,7 +272,8 @@ describe("hl7v2LintRequiredComponents", () => {
     const errors = file.messages.filter(
       (msg) => msg.ruleId === "required-components"
     );
-    expect(errors.length).toBeGreaterThanOrEqual(1);
-    expect(errors.some((msg) => msg.message.includes("MSH-9"))).toBe(true);
+    expect(errors.map((msg) => msg.message)).toEqual([
+      "Component `MSH-9.3` (Message Structure) is not present; it is required.",
+    ]);
   });
 });

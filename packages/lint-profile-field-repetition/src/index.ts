@@ -4,6 +4,11 @@ import type { Root } from "@glion/ast";
 import { SKIP, visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
 
+const messages = {
+  notRepeatable: (field: string, name: string, repetitionCount: number) =>
+    `Field \`${field}\` (${name}) has ${repetitionCount} repetitions; it is not repeatable.`,
+} as const;
+
 /**
  * Lint rule that flags fields with multiple repetitions when the profile
  * declares `repeatable: false`.
@@ -20,7 +25,10 @@ import { lintRule } from "unified-lint-rule";
  *   ```;
  */
 const hl7v2LintFieldRepetition = lintRule<Root>(
-  { origin: "hl7v2-lint:field-repetition" },
+  {
+    origin: "hl7v2-lint:field-repetition",
+    url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-field-repetition#readme",
+  },
   (tree, file) => {
     const ctx = file.data.profile;
     if (!ctx) {
@@ -28,29 +36,30 @@ const hl7v2LintFieldRepetition = lintRule<Root>(
     }
 
     visit(tree, "segment", (segment, segmentAncestors) => {
-      const fieldDef = ctx.fields.get(segment.name);
-      if (!fieldDef) {
+      const fields = ctx.fields.get(segment.name);
+      if (!fields) {
         return SKIP;
       }
 
-      visit(segment, "field", (fieldNode, _fieldAncestors, info) => {
-        const profile = fieldDef.bySequence.get(info.sequence);
-
-        if (!profile || profile.repeatable) {
+      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
+        const profile = fields.bySequence.get(sequence);
+        const count = field.children.length;
+        if (!profile || profile.repeatable || count < 2) {
           return SKIP;
         }
 
-        const count = fieldNode.children.length;
-        if (count > 1) {
-          const name = profile.name ? ` (${profile.name})` : "";
-          file.message(
-            `Field ${segment.name}-${info.sequence}${name} is not repeatable but has ${count} repetitions`,
-            {
-              ancestors: [...segmentAncestors, segment, fieldNode],
-              place: fieldNode.position,
-            }
-          );
-        }
+        const message = file.message(
+          messages.notRepeatable(
+            `${segment.name}-${sequence}`,
+            profile.name,
+            count
+          ),
+          {
+            ancestors: [...segmentAncestors, segment, field],
+            place: field.position,
+          }
+        );
+        message.actual = String(count);
 
         return SKIP;
       });

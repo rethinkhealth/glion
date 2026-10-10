@@ -1,11 +1,17 @@
 // oxlint-disable-next-line no-unused-vars -- triggers VFile DataMap augmentation
 import type { ProfileContext } from "@glion/annotate-profile-context";
-import type { Field, FieldRepetition, Nodes, Root, Segment } from "@glion/ast";
-import type { DatatypeDefinition } from "@glion/profiles";
+import type { Component, FieldRepetition, Root } from "@glion/ast";
+import type { ComponentProfile, DatatypeDefinition } from "@glion/profiles";
 import { SKIP, visit } from "@glion/util-visit";
 import { isEmptyNode } from "@glion/utils";
 import { lintRule } from "unified-lint-rule";
-import type { VFile } from "vfile";
+
+const messages = {
+  absentComponent: (component: string, name: string) =>
+    `Component \`${component}\` (${name}) is not present; it is required.`,
+  emptyComponent: (component: string, name: string) =>
+    `Component \`${component}\` (${name}) is empty; it is required.`,
+} as const;
 
 /**
  * Lint rule that validates required components in composite datatype fields.
@@ -24,93 +30,87 @@ import type { VFile } from "vfile";
  *   ```;
  */
 const hl7v2LintRequiredComponents = lintRule<Root>(
-  { origin: "hl7v2-lint:required-components" },
+  {
+    origin: "hl7v2-lint:required-components",
+    url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-required-components#readme",
+  },
   (tree, file) => {
     const ctx = file.data.profile;
     if (!ctx) {
       return;
     }
 
-    visit(tree, "field", (fieldNode, ancestors, info) => {
-      // Check emptiness first — most fields in a message are empty,
-      // so this avoids segment/profile lookups for the majority of fields
-      if (isEmptyNode(fieldNode as Field)) {
+    visit(tree, "segment", (segment, segmentAncestors) => {
+      const fields = ctx.fields.get(segment.name);
+      if (!fields) {
         return SKIP;
       }
 
-      const segment = ancestors.at(-1) as Segment | undefined;
-      if (!segment || segment.type !== "segment") {
-        return SKIP;
-      }
+      visit(segment, "field", (field, _fieldAncestors, { sequence }) => {
+        const profile = fields.bySequence.get(sequence);
+        const datatype = profile && ctx.datatypes.get(profile.datatype);
+        if (!datatype || isEmptyNode(field)) {
+          return SKIP;
+        }
 
-      const fieldDef = ctx.fields.get(segment.name);
-      if (!fieldDef) {
-        return SKIP;
-      }
+        for (const repetition of field.children) {
+          for (const { component, required } of unmetComponents(
+            repetition,
+            datatype
+          )) {
+            const id = `${segment.name}-${sequence}.${required.sequence}`;
 
-      const fieldProfile = fieldDef.bySequence.get(info.sequence);
-      if (!fieldProfile) {
-        return SKIP;
-      }
+            if (!component) {
+              file.message(messages.absentComponent(id, required.name), {
+                ancestors: [...segmentAncestors, segment, field, repetition],
+                place: repetition.position,
+              });
+              continue;
+            }
 
-      const dtDef = ctx.datatypes.get(fieldProfile.datatype);
-      if (
-        !dtDef ||
-        dtDef.kind !== "composite" ||
-        dtDef.requiredSequences.size === 0
-      ) {
-        return SKIP;
-      }
+            const message = file.message(
+              messages.emptyComponent(id, required.name),
+              {
+                ancestors: [
+                  ...segmentAncestors,
+                  segment,
+                  field,
+                  repetition,
+                  component,
+                ],
+                place: component.position,
+              }
+            );
+            message.actual = "";
+          }
+        }
 
-      for (const repetition of (fieldNode as Field).children) {
-        checkRepetition(
-          file,
-          dtDef,
-          repetition,
-          segment,
-          info.sequence,
-          ancestors,
-          fieldNode as Field
-        );
-      }
+        return SKIP;
+      });
 
       return SKIP;
     });
   }
 );
 
-/** Check a single field repetition for missing required components. */
-function checkRepetition(
-  file: VFile,
-  dtDef: DatatypeDefinition,
+/**
+ * The required components of `datatype` that `repetition` leaves absent or
+ * empty, with the component when it is present.
+ *
+ * @yields The required component's profile, and the component when present.
+ */
+function* unmetComponents(
   repetition: FieldRepetition,
-  segment: Segment,
-  sequence: number,
-  ancestors: Nodes[],
-  fieldNode: Field
-): void {
-  for (const compSeq of dtDef.requiredSequences) {
-    const component = repetition.children[compSeq - 1];
-    const compHasValue =
-      component?.children[0]?.value !== undefined &&
-      component.children[0].value.length > 0;
+  datatype: DatatypeDefinition
+): Generator<{ component: Component | undefined; required: ComponentProfile }> {
+  for (const required of datatype.componentsBySequence.values()) {
+    if (!required.required) {
+      continue;
+    }
 
-    if (!compHasValue) {
-      const compProfile = dtDef.componentsBySequence.get(compSeq);
-      const compName = compProfile?.name ? ` (${compProfile.name})` : "";
-      file.message(
-        `Required component ${segment.name}-${sequence}.${compSeq}${compName} is missing or empty`,
-        {
-          ancestors: [
-            ...ancestors,
-            fieldNode,
-            repetition,
-            ...(component ? [component] : []),
-          ],
-          place:
-            component?.position ?? repetition.position ?? fieldNode.position,
-        }
-      );
+    const component = repetition.children[required.sequence - 1];
+    if (!component?.children[0]?.value) {
+      yield { component, required };
     }
   }
 }

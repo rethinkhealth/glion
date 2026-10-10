@@ -76,10 +76,10 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101~19800102|F
 Reported message:
 
 ```
-Field PID-7 (Date/Time of Birth) is not repeatable but has 2 repetitions
+Field `PID-7` (Date/Time of Birth) has 2 repetitions; it is not repeatable.
 ```
 
-When the field name is available in the profile it appears in parentheses after the position. The reported count equals the number of repetitions present in the field.
+The reported count equals the number of repetitions present in the field, and is also set as `actual`.
 
 ## Part of Glion
 

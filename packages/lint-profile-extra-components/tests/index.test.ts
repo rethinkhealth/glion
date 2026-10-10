@@ -88,10 +88,12 @@ describe("hl7v2LintExtraComponents", () => {
       (msg) => msg.ruleId === "extra-components"
     );
     expect(errors).toHaveLength(2);
-    expect(errors[0].message).toContain("MSH-9.4");
-    expect(errors[0].message).toContain("MSG");
-    expect(errors[0].message).toContain("max: 3");
-    expect(errors[1].message).toContain("MSH-9.5");
+    expect(errors[0].message).toBe(
+      "Component `MSH-9.4` is present; datatype `MSG` in HL7 v2.7.1 does not define it."
+    );
+    expect(errors[1].message).toBe(
+      "Component `MSH-9.5` is present; datatype `MSG` in HL7 v2.7.1 does not define it."
+    );
     expect(errors[0].source).toBe("hl7v2-lint");
   });
 
@@ -110,7 +112,9 @@ describe("hl7v2LintExtraComponents", () => {
       (msg) => msg.ruleId === "extra-components"
     );
     expect(errors).toHaveLength(1);
-    expect(errors[0].message).toContain("PID-1.2");
+    expect(errors[0].message).toBe(
+      "Component `PID-1.2` is present; datatype `SI` in HL7 v2.7.1 does not define it."
+    );
   });
 
   it("no warning when primitive field has single component", async () => {
@@ -223,6 +227,8 @@ describe("hl7v2LintExtraComponents", () => {
       (msg) => msg.ruleId === "extra-components"
     );
     expect(errors).toHaveLength(1);
-    expect(errors[0].message).toContain("MSH-9.4");
+    expect(errors[0].message).toBe(
+      "Component `MSH-9.4` is present; datatype `MSG` in HL7 v2.7.1 does not define it."
+    );
   });
 });

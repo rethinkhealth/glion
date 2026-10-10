@@ -58,10 +58,11 @@ describe("hl7v2LintRequiredFields", () => {
     const errors = file.messages.filter(
       (msg) => msg.ruleId === "required-fields"
     );
-    expect(errors.length).toBeGreaterThanOrEqual(1);
-    const pid3Error = errors.find((msg) => msg.message.includes("PID-3"));
-    expect(pid3Error).toBeDefined();
-    expect(pid3Error?.source).toBe("hl7v2-lint");
+    expect(errors.map((msg) => msg.message)).toEqual([
+      "Field `PID-3` (Patient Identifier List) is empty; it is required.",
+    ]);
+    expect(errors[0]?.actual).toBe("");
+    expect(errors[0]?.source).toBe("hl7v2-lint");
   });
 
   it("reports a missing required field in a segment nested in a group", async () => {
@@ -79,7 +80,9 @@ describe("hl7v2LintRequiredFields", () => {
     const errors = file.messages.filter(
       (msg) => msg.ruleId === "required-fields"
     );
-    expect(errors.some((msg) => msg.message.includes("PID-3"))).toBe(true);
+    expect(errors.map((msg) => msg.message)).toEqual([
+      "Field `PID-3` (Patient Identifier List) is empty; it is required.",
+    ]);
   });
 
   it("reports when segment is too short for required fields", async () => {
@@ -95,7 +98,11 @@ describe("hl7v2LintRequiredFields", () => {
     const errors = file.messages.filter(
       (msg) => msg.ruleId === "required-fields"
     );
-    expect(errors.length).toBeGreaterThanOrEqual(2);
+    expect(errors.map((msg) => msg.message)).toEqual([
+      "Field `PID-3` (Patient Identifier List) is not present; it is required.",
+      "Field `PID-5` (Patient Name) is not present; it is required.",
+    ]);
+    expect(errors[0]?.actual).toBeUndefined();
   });
 
   it("skips Z-segments silently", async () => {
@@ -120,21 +127,6 @@ describe("hl7v2LintRequiredFields", () => {
       .run(tree, file);
 
     expect(file.messages).toHaveLength(0);
-  });
-
-  it("includes field name in error message", async () => {
-    const tree = m(msh("2.5"), s("PID", f("1"), f(""), f(""), f(""), f("Doe")));
-    const file = new VFile();
-
-    await unified()
-      .use(hl7v2AnnotateProfileContext)
-      .use(hl7v2LintRequiredFields)
-      .run(tree, file);
-
-    const pid3Error = file.messages.find((msg) =>
-      msg.message.includes("PID-3")
-    );
-    expect(pid3Error?.message).toContain("Patient Identifier List");
   });
 
   // https://github.com/rethinkhealth/hl7v2/issues/489
@@ -174,7 +166,8 @@ describe("hl7v2LintRequiredFields", () => {
     const errors = file.messages.filter(
       (msg) => msg.ruleId === "required-fields"
     );
-    expect(errors.length).toBeGreaterThanOrEqual(1);
-    expect(errors.some((msg) => msg.message.includes("PID-3"))).toBe(true);
+    expect(errors.map((msg) => msg.message)).toEqual([
+      "Field `PID-3` (Patient Identifier List) is empty; it is required.",
+    ]);
   });
 });
