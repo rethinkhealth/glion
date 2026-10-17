@@ -14,7 +14,6 @@ describe("parseSendArgs", () => {
           host: undefined,
           json: false,
           port: undefined,
-          timeoutMs: undefined,
         },
         ok: true,
       });
@@ -83,22 +82,23 @@ describe("parseSendArgs", () => {
         expect(result.args.configPath).toBe("./glion.config.ts");
       }
     });
-  });
 
-  describe("--timeout", () => {
-    it("parses --timeout as an integer", () => {
-      const result = parseSendArgs(["--timeout", "5000"]);
+    it("falls back to the path given before the subcommand token", () => {
+      const result = parseSendArgs([], "./before.config.ts");
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.args.timeoutMs).toBe(5000);
+        expect(result.args.configPath).toBe("./before.config.ts");
       }
     });
 
-    it("leaves timeoutMs undefined when omitted", () => {
-      const result = parseSendArgs([]);
+    it("prefers its own path over the one before the token", () => {
+      const result = parseSendArgs(
+        ["--config", "./own.config.ts"],
+        "./before.config.ts"
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.args.timeoutMs).toBeUndefined();
+        expect(result.args.configPath).toBe("./own.config.ts");
       }
     });
   });
@@ -139,8 +139,6 @@ describe("parseSendArgs", () => {
         "192.168.1.10",
         "--port",
         "2575",
-        "--timeout",
-        "10000",
         "--json",
       ]);
       expect(result).toEqual({
@@ -151,7 +149,6 @@ describe("parseSendArgs", () => {
           host: "192.168.1.10",
           json: true,
           port: 2575,
-          timeoutMs: 10_000,
         },
         ok: true,
       });
@@ -198,7 +195,7 @@ describe("parseSendArgs", () => {
     it("rejects --config without a value", () => {
       const result = parseSendArgs(["--config"]);
       expect(result).toEqual({
-        error: "--config requires a path argument",
+        error: "--config requires a value",
         ok: false,
       });
     });
@@ -206,31 +203,7 @@ describe("parseSendArgs", () => {
     it("rejects --config followed by a flag", () => {
       const result = parseSendArgs(["--config", "--json"]);
       expect(result).toEqual({
-        error: "--config requires a path argument",
-        ok: false,
-      });
-    });
-
-    it("rejects --timeout without a value", () => {
-      const result = parseSendArgs(["--timeout"]);
-      expect(result).toEqual({
-        error: "--timeout requires a value",
-        ok: false,
-      });
-    });
-
-    it("rejects --timeout followed by a flag", () => {
-      const result = parseSendArgs(["--timeout", "--json"]);
-      expect(result).toEqual({
-        error: "--timeout requires a value",
-        ok: false,
-      });
-    });
-
-    it("rejects a non-integer --timeout", () => {
-      const result = parseSendArgs(["--timeout", "soon"]);
-      expect(result).toEqual({
-        error: "--timeout requires an integer value, got: soon",
+        error: "--config requires a value",
         ok: false,
       });
     });
@@ -238,17 +211,25 @@ describe("parseSendArgs", () => {
     it("rejects --port 0", () => {
       const result = parseSendArgs(["--port", "0"]);
       expect(result).toEqual({
-        error: "--port requires a positive integer, got: 0",
+        error: "--port requires a port between 1 and 65535, got: 0",
         ok: false,
       });
     });
 
-    it("rejects --timeout 0", () => {
-      const result = parseSendArgs(["--timeout", "0"]);
+    it("rejects a --port above the highest port number", () => {
+      const result = parseSendArgs(["--port", "65536"]);
       expect(result).toEqual({
-        error: "--timeout requires a positive integer, got: 0",
+        error: "--port requires a port between 1 and 65535, got: 65536",
         ok: false,
       });
+    });
+
+    it("accepts the highest port number", () => {
+      const result = parseSendArgs(["--port", "65535"]);
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.args.port).toBe(65_535);
+      }
     });
 
     it("rejects an unknown flag", () => {

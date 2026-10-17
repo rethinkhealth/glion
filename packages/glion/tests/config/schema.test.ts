@@ -1,3 +1,5 @@
+import { MllpClient, MllpInvalidOptionError } from "@glion/mllp-client";
+import type { MllpSocket } from "@glion/mllp-client";
 import { describe, expect, it } from "vitest";
 
 import { makeGlionConfigSchema } from "../../src/config/schema";
@@ -12,7 +14,103 @@ const ctx = {
 };
 const schema = makeGlionConfigSchema(ctx);
 
+/** `setTimeout`'s ceiling: the highest timeout the client accepts. */
+const MAX_TIMEOUT_MS = 2 ** 31 - 1;
+
+/** A socket the client never dials: the constructor is what we exercise. */
+const socket: MllpSocket = {
+  close: () => Promise.resolve(),
+  connect: () => Promise.reject(new Error("never dialed")),
+};
+
 describe("makeGlionConfigSchema", () => {
+  describe("client", () => {
+    it("accepts the client block and passes it through", () => {
+      const delay = (attempt: number) => attempt * 100;
+      const result = schema.safeParse({
+        client: {
+          connectTimeoutMs: 2000,
+          maxBufferedBytes: 1024,
+          reconnect: { attempts: 2, delay },
+          sendTimeoutMs: 5000,
+        },
+        entry: "./src/app.ts",
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.client).toEqual({
+          connectTimeoutMs: 2000,
+          maxBufferedBytes: 1024,
+          reconnect: { attempts: 2, delay },
+          sendTimeoutMs: 5000,
+        });
+      }
+    });
+
+    // The client asserts its own option ranges in its constructor and throws
+    // `MllpInvalidOptionError`. The schema has to agree with it: a value it
+    // lets through would otherwise reach the client as an uncaught throw
+    // instead of a config error naming the field.
+    it("accepts the extremes @glion/mllp-client accepts", () => {
+      const client = {
+        connectTimeoutMs: MAX_TIMEOUT_MS,
+        maxBufferedBytes: 1,
+        reconnect: { attempts: Number.POSITIVE_INFINITY },
+        sendTimeoutMs: 1,
+      };
+      expect(schema.safeParse({ client, entry: "./a.ts" }).success).toBe(true);
+      expect(() => new MllpClient({ ...client, socket })).not.toThrow();
+    });
+
+    it("rejects the values @glion/mllp-client rejects", () => {
+      const rejected = [
+        { reconnect: { attempts: 1.5 } },
+        { reconnect: { attempts: -1 } },
+        { connectTimeoutMs: MAX_TIMEOUT_MS + 1 },
+        { sendTimeoutMs: MAX_TIMEOUT_MS + 1 },
+        { maxBufferedBytes: 0 },
+      ];
+      for (const client of rejected) {
+        expect(schema.safeParse({ client, entry: "./a.ts" }).success).toBe(
+          false
+        );
+        expect(() => new MllpClient({ ...client, socket })).toThrow(
+          MllpInvalidOptionError
+        );
+      }
+    });
+
+    it("accepts reconnect: false and an unbounded attempts", () => {
+      expect(
+        schema.safeParse({ client: { reconnect: false }, entry: "./a.ts" })
+          .success
+      ).toBe(true);
+      expect(
+        schema.safeParse({
+          client: { reconnect: { attempts: Number.POSITIVE_INFINITY } },
+          entry: "./a.ts",
+        }).success
+      ).toBe(true);
+    });
+
+    it("rejects a zero timeout, a non-function delay, and an unknown key", () => {
+      expect(
+        schema.safeParse({ client: { sendTimeoutMs: 0 }, entry: "./a.ts" })
+          .success
+      ).toBe(false);
+      expect(
+        schema.safeParse({
+          client: { reconnect: { delay: 1000 } },
+          entry: "./a.ts",
+        }).success
+      ).toBe(false);
+      expect(
+        schema.safeParse({ client: { timeoutMs: 1000 }, entry: "./a.ts" })
+          .success
+      ).toBe(false);
+    });
+  });
+
   it("accepts a minimal config with only entry", () => {
     const result = schema.safeParse({ entry: "./src/app.ts" });
     expect(result.success).toBe(true);

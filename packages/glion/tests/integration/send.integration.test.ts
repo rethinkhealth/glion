@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
@@ -27,6 +27,29 @@ describe("runSend (integration, fake socket)", () => {
     }
   });
 
+  /** A project directory holding a `glion.config.ts` with `fields`. */
+  /**
+   * An empty project directory. Every send discovers and imports a config
+   * from its cwd, so a shared directory such as `/tmp` would run whatever
+   * `glion.config.ts` happens to sit there.
+   */
+  async function emptyProject(): Promise<string> {
+    const dir = await mkdtemp(join(tmpdir(), "glion-send-bare-"));
+    tempDirs.push(dir);
+    return dir;
+  }
+
+  async function project(fields: string): Promise<string> {
+    const dir = await mkdtemp(join(tmpdir(), "glion-send-project-"));
+    tempDirs.push(dir);
+    await writeFile(
+      join(dir, "glion.config.ts"),
+      `export default { entry: "./app.ts", ${fields} };`,
+      "utf8"
+    );
+    return dir;
+  }
+
   async function writeMessageFile(contents: string): Promise<string> {
     const dir = await mkdtemp(join(tmpdir(), "glion-send-int-"));
     tempDirs.push(dir);
@@ -39,7 +62,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
@@ -56,11 +79,30 @@ describe("runSend (integration, fake socket)", () => {
     expect(json.text).toBe("the peer says hi");
   });
 
+  it("sends to the MLLP standard port when only --host is given", async () => {
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "mllp.test"],
+      cwd: await emptyProject(),
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    expect(code).toBe(0);
+    expect(JSON.parse(state.out)).toMatchObject({
+      host: "mllp.test",
+      ok: true,
+      port: 2575,
+    });
+  });
+
   it("exits 1 and reports the NAK on AE", async () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AE", true)),
       stderr,
       stdin: Readable.from(ADT),
@@ -79,8 +121,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
-      reconnect: false,
+      cwd: await project("client: { reconnect: false }"),
       socket: refusingSocket,
       stderr,
       stdin: Readable.from(ADT),
@@ -97,8 +138,9 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
-      reconnect: { attempts: 1, delay: () => 0 },
+      cwd: await project(
+        "client: { reconnect: { attempts: 1, delay: () => 0 } }"
+      ),
       socket: flakySocket(1, ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
@@ -111,11 +153,121 @@ describe("runSend (integration, fake socket)", () => {
     expect(json.code).toBe("AA");
   });
 
+  it("gives up after the configured attempts", async () => {
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: await project(
+        "client: { reconnect: { attempts: 1, delay: () => 0 } }"
+      ),
+      socket: flakySocket(2, ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    expect(code).toBe(2);
+    expect(JSON.parse(state.out).code).toBe("CONNECTION_FAILED");
+  });
+
+  it("sends from a project with no config file, on the client's defaults", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "glion-send-empty-"));
+    tempDirs.push(dir);
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: dir,
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    expect(code).toBe(0);
+    expect(JSON.parse(state.out)).toMatchObject({ host: "h", ok: true });
+  });
+
+  it("writes no cache directory for a send from a project without a config", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "glion-send-nocache-"));
+    tempDirs.push(dir);
+    const { stderr, stdout } = capture();
+    await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: dir,
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    await expect(stat(join(dir, ".glion"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+  });
+
+  it("errors (exit 2) when the config is invalid", async () => {
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: await project("client: { sendTimeoutMs: 0 }"),
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    expect(code).toBe(2);
+    const json = JSON.parse(state.out);
+    expect(json.kind).toBe("invalid");
+    expect(json.message).toContain("client.sendTimeoutMs");
+  });
+
+  it("loads the config named before the send token, outside cwd", async () => {
+    const elsewhere = await mkdtemp(join(tmpdir(), "glion-send-nowhere-"));
+    tempDirs.push(elsewhere);
+    // A client setting proves which config was read: one dial, no retries.
+    const dir = await project("client: { reconnect: false }");
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      // What `glion --config <path> send` forwards.
+      configPath: join(dir, "glion.config.ts"),
+      cwd: elsewhere,
+      socket: refusingSocket,
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    expect(code).toBe(2);
+    expect(JSON.parse(state.out).code).toBe("CONNECTION_FAILED");
+  });
+
+  it("errors (exit 2) when the cache directory cannot be created", async () => {
+    const dir = await project("client: { reconnect: false }");
+    // A file where .glion/ belongs, so the compiled config has nowhere to go.
+    await writeFile(join(dir, ".glion"), "", "utf8");
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: dir,
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    expect(code).toBe(2);
+    const json = JSON.parse(state.out);
+    expect(json.kind).toBe("invalid");
+    expect(json.message).toContain("Failed to create the cache directory");
+  });
+
   it("errors (exit 2) when no target is given", async () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: [],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
@@ -130,7 +282,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stdout, stderr } = capture();
     const code = await runSend({
       argv: ["--help"],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
@@ -146,7 +298,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stdout, stderr } = capture();
     const code = await runSend({
       argv: ["--nope"],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
@@ -162,7 +314,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stdout, stderr } = capture();
     const code = await runSend({
       argv: [file, "--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdout,
@@ -176,7 +328,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stdout, stderr } = capture();
     const code = await runSend({
       argv: ["/no/such/file.hl7", "--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdout,
@@ -193,7 +345,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(noControlId),
@@ -214,7 +366,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(withVt),
@@ -231,7 +383,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stdout, stderr } = capture(true);
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await emptyProject(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT),
@@ -249,8 +401,7 @@ describe("runSend (integration, fake socket)", () => {
     const { state, stdout, stderr } = capture(true);
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
-      reconnect: false,
+      cwd: await project("client: { reconnect: false }"),
       socket: refusingSocket,
       stderr,
       stdin: Readable.from(ADT),

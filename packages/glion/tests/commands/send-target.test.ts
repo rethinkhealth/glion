@@ -13,20 +13,20 @@ describe("resolveTarget", () => {
     expect(result).toEqual({ host: "h.test", ok: true, port: 1234 });
   });
 
-  it("errors when --host is missing", () => {
-    const result = resolveTarget(args({ port: 1234 }));
-    expect(result).toEqual({
-      ok: false,
-      reason: "Specify a target with --host and --port.",
-    });
-  });
-
-  it("errors when --port is missing", () => {
+  it("defaults the port to the MLLP standard when only --host is given", () => {
     const result = resolveTarget(args({ host: "h.test" }));
-    expect(result.ok).toBe(false);
+    expect(result).toEqual({ host: "h.test", ok: true, port: 2575 });
   });
 
-  it("errors when neither is given", () => {
-    expect(resolveTarget(args()).ok).toBe(false);
+  it("errors when --host is missing, whether or not --port is given", () => {
+    for (const given of [args({ port: 1234 }), args()]) {
+      const result = resolveTarget(given);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.reason).toBe(
+          "No target host is defined. Pass `--host` with the system to send to."
+        );
+      }
+    }
   });
 });

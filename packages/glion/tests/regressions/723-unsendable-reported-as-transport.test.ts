@@ -12,9 +12,12 @@
  * client's `INVALID_MESSAGE` code and the reason.
  */
 
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Readable } from "node:stream";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { runSend } from "../../src/commands/send";
 import { ADT, ackFrame, capture, fakeSocket } from "../fixtures/send";
@@ -22,11 +25,26 @@ import { ADT, ackFrame, capture, fakeSocket } from "../fixtures/send";
 const VT = "";
 
 describe("glion send with a message the client cannot prepare", () => {
+  const dirs: string[] = [];
+
+  afterEach(async () => {
+    for (const dir of dirs.splice(0)) {
+      await rm(dir, { force: true, recursive: true });
+    }
+  });
+
+  /** An empty project: every send imports a config found in its cwd. */
+  async function cwd(): Promise<string> {
+    const dir = await mkdtemp(join(tmpdir(), "glion-send-723-"));
+    dirs.push(dir);
+    return dir;
+  }
+
   it("reports a message without MSH-10 as invalid, with the client's code", async () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await cwd(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT.replace("|MSG00001|", "||")),
@@ -44,7 +62,7 @@ describe("glion send with a message the client cannot prepare", () => {
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await cwd(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       // Since #1001 a control character in a value is encoded as \X0B\ and
@@ -66,7 +84,7 @@ describe("glion send with a message the client cannot prepare", () => {
     const { state, stderr, stdout } = capture(true);
     await runSend({
       argv: ["--host", "h", "--port", "1"],
-      cwd: "/tmp",
+      cwd: await cwd(),
       socket: fakeSocket(ackFrame("AA")),
       stderr,
       stdin: Readable.from(ADT.replace("|MSG00001|", "||")),

@@ -14,10 +14,23 @@ import type { ChildManifest } from "./types";
  * file, and `manifest.json`. The manifest currently includes any TLS
  * passphrase from the user config, so the directory must not be
  * world-readable on shared hosts.
+ *
+ * @throws {GlionError} The directory could not be created
+ * (`cache-dir-failed`).
  */
 export async function ensureCacheDir(cwd: string): Promise<string> {
   const dir = resolve(cwd, ".glion");
-  await mkdir(dir, { mode: 0o700, recursive: true });
+  try {
+    await mkdir(dir, { mode: 0o700, recursive: true });
+  } catch (error) {
+    throw new GlionError(
+      "cache-dir-failed",
+      `Failed to create the cache directory at ${dir}`,
+      { dir },
+      "Check that the project directory is writable and that .glion is not a file.",
+      error
+    );
+  }
   return dir;
 }
 

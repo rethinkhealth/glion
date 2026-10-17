@@ -61,7 +61,6 @@ export async function runDev(opts: RunDevOptions): Promise<number> {
     // Config is compiled (TS → JS via rolldown transform), imported
     // natively, then validated by Zod.
     const config = await loadConfig({
-      cacheDir,
       cwd: opts.cwd,
       explicitPath: opts.configPath,
     });
