@@ -1,0 +1,8 @@
+MSH|^~\&|LAB|CENTRAL_LAB|EHR|GENERAL_HOSPITAL|20261014093000||ORU^R01^ORU_R01|LAB20261014-7782|P|2.5.1
+PID|1||MRN445566^^^GENERAL_HOSPITAL^MR||RIVERA^MARIA^ELENA^^^^L||19781103|F
+NTE|1|P|Patient requests results be released by telephone.
+NTE|2|P|Interpreter required for the next visit.
+PV1|1|O|LAB^^^GENERAL_HOSPITAL|||||||||||||||V|VISIT99812^^^GENERAL_HOSPITAL|||||||||||||||||||||||||20261014080000
+ORC|RE|PLC-88301^EHR|FIL-55120^LAB
+OBR|1|PLC-88301^EHR|FIL-55120^LAB|57021-8^CBC with Differential panel^LN
+OBX|1|NM|6690-2^Leukocytes^LN||7.4|10*3/uL^thousand per microliter^UCUM
