@@ -1,11 +1,11 @@
 import { compile } from "../../src/engine/compile";
 import { runner } from "../../src/engine/runner";
 import type { EventSchema } from "../../src/engine/types";
-import { ORU_R01_V2_5 } from "./fixtures";
+import { RESULTS } from "./fixtures";
 
 describe("compile", () => {
   it("compiles equal schemas to equal programs", () => {
-    expect(compile({ ...ORU_R01_V2_5 })).toEqual(compile(ORU_R01_V2_5));
+    expect(compile({ ...RESULTS })).toEqual(compile(RESULTS));
   });
 
   it("rejects a schema with no elements", () => {
@@ -225,25 +225,23 @@ describe("compile", () => {
   });
 
   it("opens and closes each group of the schema once", () => {
-    const { code } = compile(ORU_R01_V2_5);
+    const { code } = compile(RESULTS);
     const opened = code.flatMap((instruction) =>
       instruction.op === "open" ? [instruction.id] : []
     );
 
     expect(opened.toSorted()).toEqual([
       "OBSERVATION",
-      "ORDER_OBSERVATION",
+      "ORDER",
       "PATIENT",
-      "PATIENT_RESULT",
-      "SPECIMEN",
-      "TIMING_QTY",
+      "REPORT",
       "VISIT",
     ]);
-    expect(code.filter(({ op }) => op === "close")).toHaveLength(7);
+    expect(code.filter(({ op }) => op === "close")).toHaveLength(5);
   });
 
   it("points no instruction, and not the start, at a split with one target", () => {
-    const { code, start } = compile(ORU_R01_V2_5);
+    const { code, start } = compile(RESULTS);
     const jumps = (pc: number) => {
       const instruction = code[pc];
       return instruction?.op === "split" && instruction.targets.length === 1;
@@ -279,7 +277,7 @@ describe("compile", () => {
 
   it("ends every program in one match instruction", () => {
     expect(
-      compile(ORU_R01_V2_5).code.filter(({ op }) => op === "match")
+      compile(RESULTS).code.filter(({ op }) => op === "match")
     ).toHaveLength(1);
   });
 
