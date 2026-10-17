@@ -112,6 +112,8 @@ glion send [<file>] [flags]
 
 The message is read from `<file>`, or from stdin when `<file>` is omitted or is `-`. It is parsed and re-serialized to its canonical, CR-delimited form before transmission, so editor line endings are normalized. Whether the message is valid is the receiver's call — it answers with a NAK — so `glion send` does not pre-validate.
 
+One source holds one message. `glion send` does not split a source: where one message ends and the next begins is a framing question that belongs to whatever reads a batch, not to this command. So a source is refused, rather than guessed at, unless it is one message — it must begin with a message header segment (`MSH`) and carry only one, and a source carrying any batch segment (`FHS`, `BHS`, `BTS`, `FTS`) is refused as the batch it is.
+
 | Flag              | Description                                                                   |
 | ----------------- | ----------------------------------------------------------------------------- |
 | `--host <host>`   | Target host.                                                                  |

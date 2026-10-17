@@ -9,6 +9,7 @@
 import { readFile } from "node:fs/promises";
 
 import { AckException } from "@glion/ack";
+import type { Root } from "@glion/ast";
 import {
   MllpClient,
   MllpClientError,
@@ -260,6 +261,53 @@ async function readStream(stream: NodeJS.ReadableStream): Promise<string> {
   return data;
 }
 
+/**
+ * The segments that frame an HL7v2 batch rather than a message: the file and
+ * batch headers and their trailers (HL7v2 §2.10).
+ */
+const BATCH_SEGMENTS = new Set(["FHS", "BHS", "BTS", "FTS"]);
+
+/** The Segment IDs of `tree`, in order. */
+function segmentIds(tree: Root): string[] {
+  return tree.children
+    .filter((child) => child.type === "segment")
+    .map((segment) => segment.name);
+}
+
+/**
+ * Why the source is not one message, or `undefined` when it is one.
+ *
+ * HL7v2 gives a message exactly one message header segment, as its first
+ * segment. A source that breaks either rule is a batch, several messages, or
+ * something else — and deciding where one message ends is a framing question
+ * this command does not answer.
+ */
+function notOneMessage(
+  tree: Root
+): { message: string; hint: string } | undefined {
+  const ids = segmentIds(tree);
+  if (ids.some((id) => BATCH_SEGMENTS.has(id))) {
+    return {
+      hint: "Send one message per invocation; the batch segments (`FHS`, `BHS`, `BTS`, `FTS`) are not read.",
+      message: "The source is an HL7v2 batch, not a single message.",
+    };
+  }
+  if (ids[0] !== "MSH") {
+    return {
+      hint: "A message begins with its message header segment; check what comes before it in the source.",
+      message:
+        "The source does not begin with a message header segment (`MSH`).",
+    };
+  }
+  if (ids.filter((id) => id === "MSH").length > 1) {
+    return {
+      hint: "Send one message per invocation; `glion send` does not split a source into messages.",
+      message: "The source holds more than one message.",
+    };
+  }
+  return undefined;
+}
+
 /** The message text a source holds, or why it could not be read. */
 type ReadResult =
   | { ok: true; text: string }
@@ -435,6 +483,15 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   // bytes (line endings in particular); whether the message is a *valid* HL7v2
   // message is the receiver's call, surfaced as a NAK. We do not pre-validate.
   const tree = parseHL7v2(read.text);
+  const refusal = notOneMessage(tree);
+  if (refusal !== undefined) {
+    return emit({
+      hint: refusal.hint,
+      kind: "invalid",
+      message: refusal.message,
+      target,
+    });
+  }
   const canonical = toHl7v2(tree);
   const request = {
     byteCount: ENCODER.encode(canonical).length,

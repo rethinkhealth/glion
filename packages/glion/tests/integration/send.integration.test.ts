@@ -345,6 +345,88 @@ describe("runSend (integration, fake socket)", () => {
     expect(json.cause).toContain("ENOENT");
   });
 
+  it("refuses an HL7v2 batch file rather than sending its envelope", async () => {
+    // The envelope parses as one MSH that is not the first segment, so the
+    // delimiters come from FHS and the message would go on the wire mangled.
+    const batch = [
+      "FHS|^~\\&|S|F",
+      "BHS|^~\\&|S|F",
+      ADT,
+      "BTS|1",
+      "FTS|1",
+    ].join("\r");
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: await emptyProject(),
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(batch),
+      stdout,
+    });
+
+    expect(code).toBe(2);
+    expect(JSON.parse(state.out)).toMatchObject({
+      hint: "Send one message per invocation; the batch segments (`FHS`, `BHS`, `BTS`, `FTS`) are not read.",
+      kind: "invalid",
+      message: "The source is an HL7v2 batch, not a single message.",
+    });
+  });
+
+  it("refuses a source whose first segment is not the message header", async () => {
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: await emptyProject(),
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(`NTE|1||exported by hand\r${ADT}`),
+      stdout,
+    });
+
+    expect(code).toBe(2);
+    expect(JSON.parse(state.out)).toMatchObject({
+      kind: "invalid",
+      message:
+        "The source does not begin with a message header segment (`MSH`).",
+    });
+  });
+
+  it("refuses a source that holds more than one message", async () => {
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(`${ADT}\r${ADT}`),
+      stdout,
+    });
+
+    expect(code).toBe(2);
+    const json = JSON.parse(state.out);
+    expect(json).toMatchObject({
+      hint: "Send one message per invocation; `glion send` does not split a source into messages.",
+      kind: "invalid",
+      message: "The source holds more than one message.",
+    });
+  });
+
+  it("sends a source whose single message repeats no header", async () => {
+    const { state, stderr, stdout } = capture();
+    const code = await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    expect(code).toBe(0);
+    expect(JSON.parse(state.out).code).toBe("AA");
+  });
+
   it("reports an invalid outcome (exit 2) when the message has no MSH-10", async () => {
     const noControlId = ADT.replace("|MSG00001|", "||");
     const { state, stderr, stdout } = capture();
