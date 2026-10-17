@@ -127,9 +127,10 @@ describe("runStart — process-listener lifecycle", () => {
     // we'd call `process.off(sig, undefined)` which would either
     // throw or silently break the listener table.
     //
-    // Force that path by pointing runStart at a directory with no
-    // glion config at all. `loadConfig` throws `config-not-found`
-    // before any signal handler is registered.
+    // Force that path by pointing runStart at an empty directory. A
+    // project with no config file runs on the defaults, so the failure
+    // comes from the entry build — still before any signal handler is
+    // registered.
     const emptyDir = await mkdtemp(join(tmpdir(), "glion-start-empty-"));
     try {
       const sigintBefore = process.listenerCount("SIGINT");

@@ -32,10 +32,9 @@ Usage:
 Flags may appear in any position, before or after the subcommand.
 
 Config:
-  By default glion looks for glion.config.ts / .mts / .mjs / .js,
-  .glionrc.ts / .js, or "glion" field in package.json. If neither is
-  found, it looks for a conventional entry file (glion.app.ts or
-  src/glion.app.ts) and runs with defaults.
+  A config file is optional. glion looks for glion.config.ts / .mts /
+  .mjs / .js in the current directory; without one it runs the app at
+  glion.app.ts or src/glion.app.ts on the defaults (port 2575).
 
 Network binding:
   glion dev   defaults to hostname "127.0.0.1" (loopback only).

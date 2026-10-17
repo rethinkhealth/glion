@@ -4,7 +4,12 @@ import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { CONFIG_FILENAMES, discoverConfig } from "../../src/config/discover";
+import {
+  CONFIG_FILENAMES,
+  discoverConfig,
+  discoverEntry,
+  ENTRY_FILENAMES,
+} from "../../src/config/discover";
 
 let dir: string;
 
@@ -97,8 +102,8 @@ describe("discoverConfig", () => {
   });
 
   it("exports CONFIG_FILENAMES in the order discover scans them", () => {
-    // The filename list is part of the public contract — the loader
-    // quotes it in "config-not-found" error context ("tried: ...").
+    // The filename list is part of the public contract — it is what the
+    // README and `glion --help` tell people to name their config.
     // Lock in the exact order + extensions so a reorder or removal
     // here is a visible break.
     expect(CONFIG_FILENAMES).toEqual([
@@ -107,5 +112,47 @@ describe("discoverConfig", () => {
       "glion.config.mjs",
       "glion.config.js",
     ]);
+  });
+});
+
+describe("discoverEntry", () => {
+  it("returns null when the directory has no conventional app file", async () => {
+    expect(await discoverEntry(dir)).toBeNull();
+  });
+
+  it("returns the absolute path of a root glion.app.ts", async () => {
+    const expected = join(dir, "glion.app.ts");
+    await writeFile(expected, "export default {};");
+
+    expect(await discoverEntry(dir)).toBe(expected);
+  });
+
+  it("returns src/glion.app.ts when the root has none", async () => {
+    await mkdir(join(dir, "src"));
+    const expected = join(dir, "src", "glion.app.ts");
+    await writeFile(expected, "export default {};");
+
+    expect(await discoverEntry(dir)).toBe(expected);
+  });
+
+  it("prefers the root app file over the one under src/", async () => {
+    const root = join(dir, "glion.app.ts");
+    await mkdir(join(dir, "src"));
+    await writeFile(root, "export default {};");
+    await writeFile(join(dir, "src", "glion.app.ts"), "export default {};");
+
+    expect(await discoverEntry(dir)).toBe(root);
+  });
+
+  it("does not walk above cwd", async () => {
+    const project = join(dir, "project");
+    await mkdir(project);
+    await writeFile(join(dir, "glion.app.ts"), "export default {};");
+
+    expect(await discoverEntry(project)).toBeNull();
+  });
+
+  it("exports ENTRY_FILENAMES in the order discover scans them", () => {
+    expect(ENTRY_FILENAMES).toEqual(["glion.app.ts", "src/glion.app.ts"]);
   });
 });

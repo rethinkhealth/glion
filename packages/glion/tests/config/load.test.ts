@@ -181,9 +181,43 @@ describe("loadConfig — discovery and loading", () => {
     }
   });
 
-  it("throws GlionError('config-not-found') when no config file exists", async () => {
-    await expect(loadConfig({ cacheDir, cwd: dir })).rejects.toMatchObject({
+  it("runs on the defaults when no config file exists", async () => {
+    await writeFile(join(dir, "glion.app.ts"), "export default {};");
+
+    const config = await loadConfig({ cacheDir, cwd: dir });
+
+    expect(config).toMatchObject({
+      entry: join(dir, "glion.app.ts"),
+      port: 2575,
+    });
+    // No bind address: `dev` and `start` each resolve their own.
+    expect(config.hostname).toBeUndefined();
+  });
+
+  it("names the conventional entry even when the project has none yet", async () => {
+    const config = await loadConfig({ cacheDir, cwd: dir });
+
+    expect(config).toMatchObject({
+      entry: join(dir, "glion.app.ts"),
+      port: 2575,
+    });
+  });
+
+  it("prefers src/glion.app.ts when the root has no app file", async () => {
+    await mkdir(join(dir, "src"));
+    await writeFile(join(dir, "src", "glion.app.ts"), "export default {};");
+
+    const config = await loadConfig({ cacheDir, cwd: dir });
+
+    expect(config.entry).toBe(join(dir, "src", "glion.app.ts"));
+  });
+
+  it("throws GlionError('config-not-found') when --config names a file that is not there", async () => {
+    await expect(
+      loadConfig({ cacheDir, cwd: dir, explicitPath: join(dir, "nope.ts") })
+    ).rejects.toMatchObject({
       kind: "config-not-found",
+      message: `No glion config file at \`${join(dir, "nope.ts")}\`.`,
     });
   });
 });
@@ -281,9 +315,12 @@ describe("loadConfig — path resolution", () => {
       `throw new Error("ancestor config was loaded");`
     );
 
-    await expect(loadConfig({ cacheDir, cwd: project })).rejects.toMatchObject({
-      kind: "config-not-found",
-    });
+    // The ancestor config throws when imported, so reaching the defaults
+    // instead proves it was never discovered.
+    const config = await loadConfig({ cacheDir, cwd: project });
+
+    expect(config.configPath).toBe(join(project, "glion.config.ts"));
+    expect(config.entry).toBe(join(project, "glion.app.ts"));
   });
 });
 

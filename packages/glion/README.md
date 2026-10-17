@@ -115,9 +115,9 @@ Output adapts to the destination: a terminal receives a human-readable exchange 
 
 TLS targets are not supported; `glion send` connects in plaintext.
 
-### Zero-config mode
+### Without a config file
 
-Both commands work without a `glion.config.ts` when the app file is at `./glion.app.ts` at the project root. The TUI shows a `zero-config` badge to indicate no config was loaded. Create a `glion.config.ts` when you need custom ports, TLS, or additional watch paths.
+A `glion.config.ts` is optional. With none, glion runs the app at `./glion.app.ts` or `./src/glion.app.ts` on the defaults: port `2575`, bound to `127.0.0.1` under `glion dev` and `0.0.0.0` under `glion start`. A config file is how you change them — custom ports, TLS, or additional watch paths.
 
 ### Cross-runtime invocation
 

@@ -22,7 +22,7 @@ const SHORTCUTS: readonly Shortcut[] = [
 /**
  * Topbar for the dev TUI. Two rows:
  *
- * Row 1: brand + mode + port + optional (tls, zero-config) | status · conns ·
+ * Row 1: brand + mode + port + optional tls | status · conns ·
  * uptime row 2: keyboard shortcuts
  *
  * The whole component is the TUI "chrome" — there is no separate
