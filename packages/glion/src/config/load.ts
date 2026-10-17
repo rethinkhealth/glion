@@ -14,12 +14,6 @@ export interface LoadConfigOptions {
   cacheDir: string;
   /** Skip discovery and load this specific file. */
   explicitPath?: string;
-  /**
-   * Drives the default hostname:
-   * dev   → 127.0.0.1 (localhost only, safe for development)
-   * start → 0.0.0.0   (all interfaces, for production behind a firewall)
-   */
-  mode?: "dev" | "start";
 }
 
 /**
@@ -33,8 +27,8 @@ export interface LoadConfigOptions {
  *    `.glion/<name>.mjs`
  * 3. **Import** — native `import()` on the compiled JS
  * 4. **Validate + transform** — schema factory parses the value AND applies all
- *    normalizations (path resolution, mode-dependent hostname, watch default)
- *    via Zod transforms in a single pass.
+ *    normalizations (path resolution, the watch default) via Zod transforms in
+ *    a single pass.
  *
  * Throws `config-not-found` if no config file exists.
  * Throws `config-invalid` if the config fails schema validation.
@@ -42,8 +36,6 @@ export interface LoadConfigOptions {
 export async function loadConfig(
   opts: LoadConfigOptions
 ): Promise<ResolvedConfig> {
-  const mode = opts.mode ?? "start";
-
   // Discovery: check each known filename in cwd, or use the explicit path.
   const configPath = opts.explicitPath ?? (await discoverConfig(opts.cwd));
 
@@ -110,13 +102,12 @@ export async function loadConfig(
   }
 
   // Validate + transform in one pass. The schema factory closes over
-  // the runtime context (configPath, cwd, mode) so its `.transform()`
+  // the runtime context (configPath, cwd) so its `.transform()`
   // calls produce the fully-normalized ResolvedConfig directly — the
   // loader contributes zero fields to the output.
   const schema = makeGlionConfigSchema({
     configPath: absConfigPath,
     cwd: opts.cwd,
-    mode,
   });
   const parsed = schema.safeParse(mod.default ?? mod);
   if (!parsed.success) {

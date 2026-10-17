@@ -34,7 +34,7 @@ describe("loadConfig — discovery and loading", () => {
     const resolved = await loadConfig({ cacheDir, cwd: dir });
     expect(resolved.entry).toBe(resolve(dir, "src", "app.ts"));
     expect(resolved.port).toBe(2600);
-    expect(resolved.hostname).toBe("0.0.0.0");
+    expect(resolved.hostname).toBeUndefined();
     expect(resolved.gracefulCloseMs).toBe(5000);
   });
 
@@ -223,19 +223,39 @@ describe("loadConfig — path resolution", () => {
     expect(resolved.watch).toEqual([resolve(dir, "src")]);
   });
 
-  it("defaults hostname to 127.0.0.1 in dev mode and 0.0.0.0 in start mode", async () => {
-    await mkdir(join(dir, "src"));
-    await writeFile(join(dir, "src", "app.ts"), "export default {};");
+  it("leaves hostname absent when the config does not name one", async () => {
     await writeFile(
       join(dir, "glion.config.ts"),
-      `export default { entry: "./src/app.ts" };`
+      `export default { entry: "./a.ts" };`
     );
 
-    const dev = await loadConfig({ cacheDir, cwd: dir, mode: "dev" });
-    expect(dev.hostname).toBe("127.0.0.1");
+    const config = await loadConfig({ cacheDir, cwd: dir });
 
-    const start = await loadConfig({ cacheDir, cwd: dir, mode: "start" });
-    expect(start.hostname).toBe("0.0.0.0");
+    // Which address to bind is the binding command's decision, not the
+    // schema's, so the config says nothing when the project says nothing.
+    expect(config.hostname).toBeUndefined();
+  });
+
+  it("keeps an empty hostname, which Node reads as every interface", async () => {
+    await writeFile(
+      join(dir, "glion.config.ts"),
+      `export default { entry: "./a.ts", hostname: "" };`
+    );
+
+    const config = await loadConfig({ cacheDir, cwd: dir });
+
+    expect(config.hostname).toBe("");
+  });
+
+  it("keeps the hostname the config names", async () => {
+    await writeFile(
+      join(dir, "glion.config.ts"),
+      `export default { entry: "./a.ts", hostname: "10.0.0.5" };`
+    );
+
+    const config = await loadConfig({ cacheDir, cwd: dir });
+
+    expect(config.hostname).toBe("10.0.0.5");
   });
 
   it("sanitizes zod issue context to exclude raw user input", async () => {

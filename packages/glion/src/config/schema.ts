@@ -17,8 +17,6 @@ import {
  *   watch, tls.*) resolve against `dirname(configPath)`.
  * - `cwd` — project root passed to loadConfig. Used by transforms whose defaults
  *   sit alongside .glion/.
- * - `mode` — "dev" or "start". Drives the hostname default (`127.0.0.1` vs
- *   `0.0.0.0`).
  *
  * These can't be Zod `.default()` values because they aren't constants
  * — they depend on which file we're loading and how. The schema is
@@ -28,7 +26,6 @@ import {
 export interface SchemaContext {
   configPath: string;
   cwd: string;
-  mode: "dev" | "start";
 }
 
 /**
@@ -37,13 +34,13 @@ export interface SchemaContext {
  * Returns a Zod schema whose **input type is what the user writes**
  * (`GlionConfig`) and whose **output type is the fully-normalized
  * config the rest of the runtime consumes** (`ResolvedConfig`).
- * Path resolution, mode-dependent hostname, the
+ * Path resolution, the
  * `watch → [dirname(entry)]` default, AND the top-level `configPath`
  * field all land via Zod `.transform()` calls — no post-Zod
  * normalization step in the loader.
  *
  * Why a factory and not a constant: the transforms close over
- * `ctx.configPath`, `ctx.cwd`, and `ctx.mode`. Zod transforms only
+ * `ctx.configPath` and `ctx.cwd`. Zod transforms only
  * receive the parsed value, not external state, so the only way to
  * give them runtime context is to bake it into the schema at the
  * moment of use.
@@ -60,17 +57,16 @@ export interface SchemaContext {
 export function makeGlionConfigSchema(ctx: SchemaContext) {
   const configDir = dirname(ctx.configPath);
   const rel = (p: string) => resolve(configDir, p);
-  const defaultHostname = ctx.mode === "dev" ? "127.0.0.1" : "0.0.0.0";
   const defaultLogDir = resolve(ctx.cwd, DEFAULT_LOG_DIR_SEGMENT);
 
   return z
     .object({
       entry: z.string().min(1).transform(rel),
       gracefulCloseMs: z.number().int().nonnegative().default(5000),
-      hostname: z
-        .string()
-        .optional()
-        .transform((h) => h ?? defaultHostname),
+      // Left as written. Which address to bind when the config names none is
+      // the decision of the command that binds — `dev` serves loopback,
+      // `start` serves every interface — so the schema does not make it.
+      hostname: z.string().optional(),
       keepAlive: z.boolean().optional(),
       keepAliveInitialDelay: z.number().int().nonnegative().optional(),
       // Polymorphic — accepts boolean, LogLevel string, or full object.
@@ -190,7 +186,6 @@ export function makeGlionConfigSchema(ctx: SchemaContext) {
 const referenceSchema = makeGlionConfigSchema({
   configPath: "",
   cwd: "",
-  mode: "start",
 });
 
 /**
@@ -204,7 +199,7 @@ export type GlionConfig = z.input<typeof referenceSchema>;
  * Fully-resolved config ready for the CLI to consume.
  *
  * Derived directly from the schema's output: `configPath`, path
- * resolution, mode-dependent hostname, and the `watch` default all
+ * resolution and the `watch` default all
  * come from the schema's `.transform()` pipeline. There's no
  * hand-written interface to keep in sync — adding a field to the
  * schema propagates here automatically.
