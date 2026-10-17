@@ -84,12 +84,13 @@ export default defineConfig({
 });
 ```
 
-| Field              | Type                                                            | Description                                                                                    |
-| ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `connectTimeoutMs` | `number`                                                        | Time to wait for the connection to open. Defaults to `10000`.                                  |
-| `sendTimeoutMs`    | `number`                                                        | Time to wait for an acknowledgment after sending. Defaults to `30000`.                         |
-| `maxBufferedBytes` | `number`                                                        | Maximum bytes buffered while receiving one acknowledgment. Defaults to 16 MiB.                 |
-| `reconnect`        | `{ attempts?: number; delay?: (attempt) => number }` or `false` | Attempts after a failed dial before giving up. Defaults to 5 with backoff; `false` dials once. |
+| Field              | Type                                                                                     | Description                                                                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `connectTimeoutMs` | `number`                                                                                 | Time to wait for the connection to open. Defaults to `10000`.                                                                                              |
+| `sendTimeoutMs`    | `number`                                                                                 | Time to wait for an acknowledgment after sending. Defaults to `30000`.                                                                                     |
+| `maxBufferedBytes` | `number`                                                                                 | Maximum bytes buffered while receiving one acknowledgment. Defaults to 16 MiB.                                                                             |
+| `reconnect`        | `{ attempts?: number; delay?: (attempt) => number }` or `false`                          | Attempts after a failed dial before giving up. Defaults to 5 with backoff; `false` dials once.                                                             |
+| `tls`              | `boolean` or `{ ca?, cert?, key?, passphrase?, pfx?, servername?, rejectUnauthorized? }` | TLS for the connection. `true` verifies against the runtime's trusted CAs. File fields are paths, resolved against the config file. Defaults to plain TCP. |
 
 ## Commands
 
@@ -135,7 +136,9 @@ Output adapts to the destination: a terminal receives a human-readable exchange 
 | `1`  | The peer rejected the message (a NAK: `AE`/`AR`/`CE`/`CR`).        |
 | `2`  | The message could not be delivered (transport, validation, usage). |
 
-TLS targets are not supported; `glion send` connects in plaintext.
+`glion send` dials over TLS when `client.tls` is set: `true` verifies the receiver against the runtime's trusted CAs, and an object gives Node's TLS settings, with `ca`, `cert`, `key` and `pfx` as paths resolved against the config file. Name the authority that signed the receiver's certificate with `ca` — or its own certificate, when it signed itself, as a development server does. Add `cert` and `key` when the receiver asks for a client certificate, and `servername` when the certificate names a host other than the address dialed.
+
+`rejectUnauthorized: false` turns certificate verification off: the connection is encrypted, but any certificate is accepted, including one a man in the middle presents. HL7v2 carries clinical data and has no authentication of its own, so prefer naming the right `ca`. When verification is off the terminal says so — the connection line reads `TLS unverified` rather than `TLS`.
 
 ### Without a config file
 
