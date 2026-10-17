@@ -379,6 +379,45 @@ describe("runSend (integration, fake socket)", () => {
     expect(json.code).toBe("INVALID_MESSAGE");
   });
 
+  it("reports the connection opening on a TTY, on stderr", async () => {
+    const { state, stderr, stdout } = capture(true);
+    await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
+      stderr,
+      stdin: Readable.from(ADT),
+      stdout,
+    });
+
+    expect(state.err).toMatch(/^== connected {2}h:1 {2}[\d.]+m?s\n$/);
+    expect(state.out).not.toContain("== connected");
+  });
+
+  it("reports nothing about the connection when it never opened, nor under --json", async () => {
+    const tty = capture(true);
+    await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: await project("client: { reconnect: false }"),
+      socket: refusingSocket,
+      stderr: tty.stderr,
+      stdin: Readable.from(ADT),
+      stdout: tty.stdout,
+    });
+    expect(tty.state.err).not.toContain("== ");
+
+    const json = capture();
+    await runSend({
+      argv: ["--host", "h", "--port", "1"],
+      cwd: "/tmp",
+      socket: fakeSocket(ackFrame("AA")),
+      stderr: json.stderr,
+      stdin: Readable.from(ADT),
+      stdout: json.stdout,
+    });
+    expect(json.state.err).toBe("");
+  });
+
   it("renders the human exchange view on a TTY (accept)", async () => {
     const { state, stdout, stderr } = capture(true);
     const code = await runSend({

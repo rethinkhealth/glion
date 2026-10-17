@@ -20,7 +20,12 @@ import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 
-import { renderHuman, renderJson } from "./send-render";
+import {
+  renderClosed,
+  renderConnected,
+  renderHuman,
+  renderJson,
+} from "./send-render";
 import type {
   SendOutcome,
   SendRequestSummary,
@@ -270,6 +275,29 @@ function readMessageText(
 }
 
 /**
+ * Writes the connection's facts to `sink` as the client reports them: the
+ * line for the connection opening, with the time since the dial began, and
+ * the line for a connection that was open closing on a failure.
+ */
+function reportConnection(
+  client: MllpClient,
+  target: SendTarget,
+  sink: NodeJS.WritableStream
+): void {
+  const dialedAt = performance.now();
+  let opened = false;
+  client.on("connect", () => {
+    opened = true;
+    sink.write(`${renderConnected(target, performance.now() - dialedAt)}\n`);
+  });
+  client.on("close", (error) => {
+    if (opened && error !== null) {
+      sink.write(`${renderClosed(target, error)}\n`);
+    }
+  });
+}
+
+/**
  * Maps a failed exchange to its outcome. A NAK, a message the client could
  * not prepare, and a transport failure are outcomes; anything else is a bug
  * and propagates.
@@ -383,6 +411,9 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     ...config?.client,
     socket: opts.socket ?? nodeSocket({ host: target.host, port: target.port }),
   });
+  if (!useJson) {
+    reportConnection(client, target, stderr);
+  }
 
   let startedAt = performance.now();
   try {
