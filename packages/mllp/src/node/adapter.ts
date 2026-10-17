@@ -210,6 +210,8 @@ export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
               cert: listenOpts.tls.cert,
               key: listenOpts.tls.key,
               passphrase: listenOpts.tls.passphrase,
+              rejectUnauthorized: listenOpts.tls.rejectUnauthorized,
+              requestCert: listenOpts.tls.requestCert,
             },
             onConnection
           )
