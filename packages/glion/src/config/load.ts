@@ -3,7 +3,13 @@ import { pathToFileURL } from "node:url";
 
 import { GlionError } from "../errors";
 import { compileConfig } from "./compile";
-import { CONFIG_FILENAMES, discoverConfig } from "./discover";
+import {
+  CONFIG_FILENAMES,
+  discoverConfig,
+  discoverEntry,
+  ENTRY_FILENAMES,
+  isReadable,
+} from "./discover";
 import type { ResolvedConfig } from "./schema";
 import { makeGlionConfigSchema } from "./schema";
 
@@ -14,6 +20,24 @@ export interface LoadConfigOptions {
   cacheDir: string;
   /** Skip discovery and load this specific file. */
   explicitPath?: string;
+}
+
+/**
+ * The config a project without a config file runs on: the conventional app
+ * entry when the project has one, and the schema's default for every other
+ * field — port 2575, and no bind address, which each command resolves for
+ * itself.
+ *
+ * `configPath` is the config file the project would have had. Paths resolve
+ * against its directory, which is `cwd`; nothing is read from or written to
+ * it, and no cache directory is needed because there is nothing to compile.
+ */
+export async function defaultConfig(cwd: string): Promise<ResolvedConfig> {
+  const entry = (await discoverEntry(cwd)) ?? resolve(cwd, ENTRY_FILENAMES[0]);
+  return makeGlionConfigSchema({
+    configPath: resolve(cwd, CONFIG_FILENAMES[0]),
+    cwd,
+  }).parse({ entry });
 }
 
 /**
@@ -30,8 +54,12 @@ export interface LoadConfigOptions {
  *    normalizations (path resolution, the watch default) via Zod transforms in
  *    a single pass.
  *
- * Throws `config-not-found` if no config file exists.
- * Throws `config-invalid` if the config fails schema validation.
+ * A project with no config file runs on {@link defaultConfig} — the
+ * conventional entry and the schema's defaults — so a config file is a way to
+ * change the defaults, not a requirement.
+ *
+ * Throws `config-not-found` if `explicitPath` names a file that is not there.
+ * Throws `config-invalid` if the config fails to compile, import, or validate.
  */
 export async function loadConfig(
   opts: LoadConfigOptions
@@ -40,12 +68,7 @@ export async function loadConfig(
   const configPath = opts.explicitPath ?? (await discoverConfig(opts.cwd));
 
   if (!configPath) {
-    throw new GlionError(
-      "config-not-found",
-      "No glion config file found.",
-      { cwd: opts.cwd, searched: CONFIG_FILENAMES },
-      `Create a config file:\n\n  import { defineConfig } from "@glion/cli/config";\n  export default defineConfig({ entry: "./src/app.ts" });`
-    );
+    return defaultConfig(opts.cwd);
   }
 
   // Normalize: explicit paths may be relative — resolve against cwd
@@ -60,6 +83,18 @@ export async function loadConfig(
   const absConfigPath = isAbsolute(configPath)
     ? configPath
     : resolve(opts.cwd, configPath);
+
+  // A discovered path was proven readable by the discovery; a path the
+  // operator named may simply not be there, and saying so beats a compile
+  // error about a file that does not exist.
+  if (opts.explicitPath !== undefined && !(await isReadable(absConfigPath))) {
+    throw new GlionError(
+      "config-not-found",
+      `No glion config file at \`${absConfigPath}\`.`,
+      { configPath: absConfigPath },
+      "Check the path passed to --config."
+    );
+  }
 
   // Compile: rolldown transform() strips TS types and writes .mjs to
   // the cache dir. Any failure here (syntax error in the user's TS,

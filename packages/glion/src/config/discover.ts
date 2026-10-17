@@ -29,14 +29,46 @@ export const CONFIG_FILENAMES = [
  * stable while still allowing projects without a TS toolchain to
  * use `.mjs` or `.js`.
  */
-export async function discoverConfig(cwd: string): Promise<string | null> {
-  for (const name of CONFIG_FILENAMES) {
+export function discoverConfig(cwd: string): Promise<string | null> {
+  return firstReadable(cwd, CONFIG_FILENAMES);
+}
+
+/**
+ * App entry filenames searched in `cwd` when the project has no config file,
+ * in priority order. A project that follows one of these conventions needs no
+ * `glion.config.ts` to run.
+ */
+export const ENTRY_FILENAMES = ["glion.app.ts", "src/glion.app.ts"] as const;
+
+/**
+ * Searches `cwd` for a conventional app entry and returns its absolute path,
+ * or `null` when neither name exists. Flat like {@link discoverConfig}: only
+ * `cwd` is inspected, never an ancestor.
+ */
+export function discoverEntry(cwd: string): Promise<string | null> {
+  return firstReadable(cwd, ENTRY_FILENAMES);
+}
+
+/** Whether `path` exists and this process may read it. */
+export async function isReadable(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.R_OK);
+    return true;
+  } catch {
+    // Not readable or not present — the only two outcomes callers act on.
+    return false;
+  }
+}
+
+/** The first of `names` under `cwd` that is readable, as an absolute path. */
+async function firstReadable(
+  cwd: string,
+  names: readonly string[]
+): Promise<string | null> {
+  for (const name of names) {
     const abs = resolve(cwd, name);
-    try {
-      await access(abs, constants.R_OK);
+    if (await isReadable(abs)) {
       return abs;
-    } catch {
-      // Not readable or not present; try the next filename.
     }
   }
   return null;
