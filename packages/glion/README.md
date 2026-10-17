@@ -130,6 +130,8 @@ cat adt.hl7 | glion send --host 127.0.0.1 --port 2575 --json
 
 Output adapts to the destination: a terminal receives a human-readable exchange view, with the connection's opening and any loss of it reported on stderr, while a pipe (or `--json`) receives a single JSON line. The exit code reports the result.
 
+A failure states what is wrong in one sentence. What to do about it follows as a `hint`, and the underlying error as a `cause` — on their own lines in the terminal, as their own fields in JSON — so the sentence stays readable and the detail stays available.
+
 | Code | Meaning                                                            |
 | ---- | ------------------------------------------------------------------ |
 | `0`  | The peer accepted the message (`AA`/`CA`).                         |

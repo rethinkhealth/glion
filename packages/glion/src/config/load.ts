@@ -114,9 +114,9 @@ export async function loadConfig(
   } catch (error) {
     throw new GlionError(
       "config-invalid",
-      `Failed to compile glion config at ${absConfigPath}: ${errorMessage(error)}`,
+      `The config file \`${absConfigPath}\` could not be compiled.`,
       { configPath: absConfigPath, phase: "compile" },
-      "Check the config file for syntax errors.",
+      "Check it for syntax errors.",
       error
     );
   }
@@ -134,9 +134,9 @@ export async function loadConfig(
   } catch (error) {
     throw new GlionError(
       "config-invalid",
-      `Failed to import glion config at ${absConfigPath}: ${errorMessage(error)}`,
+      `The config file \`${absConfigPath}\` threw while it was loading.`,
       { configPath: absConfigPath, phase: "import" },
-      "Check that the config module loads without throwing at import time (missing dependency? top-level throw?).",
+      "Check what it runs at import time: a missing dependency, or a throw outside defineConfig.",
       error
     );
   }
@@ -163,17 +163,16 @@ export async function loadConfig(
       message,
       path: path.map(String),
     }));
-    const body = issues
-      .map((i) => `  - ${i.path.join(".") || "(root)"}: ${i.message}`)
+    // One line per field to fix: the fields are what the user acts on, and a
+    // root-level issue (an unrecognized key) carries the key in its own
+    // wording. Presenters indent every line of a hint.
+    const hint = issues
+      .map((i) => `\`${i.path.join(".") || "config"}\`: ${i.message}`)
       .join("\n");
-    const hint =
-      issues.length === 1
-        ? `Check field: ${issues[0]?.path.join(".") || "(root)"}`
-        : `Fix the ${issues.length} fields listed above`;
 
     throw new GlionError(
       "config-invalid",
-      `Invalid glion config at ${absConfigPath}:\n${body}`,
+      `The config file \`${absConfigPath}\` has options that are not valid.`,
       { configPath: absConfigPath, issues },
       hint
       // No `cause`. The raw ZodError carries `issue.input` (in v4) and
@@ -185,9 +184,4 @@ export async function loadConfig(
   }
 
   return parsed.data;
-}
-
-/** Safely stringifies anything thrown for inclusion in a GlionError message. */
-function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }

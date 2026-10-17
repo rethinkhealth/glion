@@ -148,9 +148,9 @@ export async function createFileLogger(
   if (!dirStat.isDirectory()) {
     throw new GlionError(
       "log-dir-unsafe",
-      `Log dir ${opts.dir} is not a regular directory (likely a symbolic link); refusing to proceed.`,
+      `The log directory \`${opts.dir}\` is not a directory.`,
       { dir: opts.dir },
-      `Remove the symlink at ${opts.dir}, or set \`logging.dir\` in glion.config.ts to a real directory.`
+      "Remove what is at that path, or set `logging.dir` in glion.config.ts to a directory."
     );
   }
 

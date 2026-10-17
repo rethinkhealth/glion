@@ -1,4 +1,4 @@
-import { Static, Text } from "ink";
+import { Box, Static, Text } from "ink";
 import type { ReactElement, ReactNode } from "react";
 
 import type { LogLevel } from "../config/logging";
@@ -176,14 +176,32 @@ function LogLine({ event }: { event: Event }): ReactElement {
       );
     }
     case "fatal": {
+      // The message is the fact; the cause and what to do about it each get
+      // their own line rather than being folded into the sentence.
       return (
-        <Text>
-          <Text dimColor>{ts(event.ts)}</Text>
-          {"  "}
-          <Text color={theme.error} bold>
-            ✖ [{event.kind}] {event.message}
+        <Box flexDirection="column">
+          <Text>
+            <Text dimColor>{ts(event.ts)}</Text>
+            {"  "}
+            <Text color={theme.error} bold>
+              ✖ [{event.kind}] {event.message}
+            </Text>
           </Text>
-        </Text>
+          {event.cause === undefined ? null : (
+            <Text dimColor>{`              ${event.cause}`}</Text>
+          )}
+          {event.hint === undefined
+            ? null
+            : // A hint may carry one line per thing to fix; indent each.
+              event.hint
+                .split("\n")
+                .map((line) => (
+                  <Text
+                    color={theme.info}
+                    key={line}
+                  >{`              ${line}`}</Text>
+                ))}
+        </Box>
       );
     }
     case "log": {

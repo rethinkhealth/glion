@@ -295,7 +295,9 @@ describe("GlionSupervisor", () => {
     await stopPromise;
 
     expect(
-      events.some((e) => e.t === "warning" && e.message.includes("SIGKILL"))
+      events.some(
+        (e) => e.t === "warning" && e.message.includes("so it was killed")
+      )
     ).toBe(true);
   });
 

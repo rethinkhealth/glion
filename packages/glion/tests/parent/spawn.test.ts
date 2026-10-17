@@ -200,7 +200,7 @@ describe("spawnChild", () => {
     const warnings = events.filter((e) => e.t === "warning");
     expect(warnings).toHaveLength(1);
     expect(warnings[0]?.message).toMatch(
-      /child stdout dropped \d+ bytes \(line exceeded max length\)/
+      /^The app wrote a line longer than the \d+-byte limit; \d+ bytes were dropped\.$/
     );
     // Normal events still delivered in order.
     const normal = events.filter((e) => e.t !== "warning");
@@ -236,7 +236,7 @@ describe("spawnChild", () => {
     expect(stderrLines).toEqual([
       "short line",
       expect.stringMatching(
-        /^\[child stderr dropped \d+ bytes \(line exceeded max length\)\]$/
+        /^\[the app wrote a line longer than the \d+-byte limit; \d+ bytes were dropped\]$/
       ),
       "another short line",
     ]);

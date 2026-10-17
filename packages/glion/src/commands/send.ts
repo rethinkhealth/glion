@@ -70,7 +70,7 @@ function takeFlagValue(
 ): string | { error: string } {
   const next = argv[index + 1];
   if (next === undefined || next.startsWith("-")) {
-    return { error: `${flag} requires a value` };
+    return { error: `\`${flag}\` takes a value.` };
   }
   return next;
 }
@@ -93,13 +93,11 @@ function takePortValue(
     return raw;
   }
   if (!/^\d+$/.test(raw)) {
-    return { error: `--port requires an integer value, got: ${raw}` };
+    return { error: "`--port` takes a whole number." };
   }
   const parsed = Number.parseInt(raw, 10);
   if (parsed < 1 || parsed > MAX_PORT) {
-    return {
-      error: `--port requires a port between 1 and ${MAX_PORT}, got: ${raw}`,
-    };
+    return { error: `\`--port\` takes a port between 1 and ${MAX_PORT}.` };
   }
   return parsed;
 }
@@ -168,13 +166,13 @@ export function parseSendArgs(
     // The bare "-" sentinel is a positional meaning "read from stdin",
     // not an unknown flag — accept it before the flag-rejection branch.
     if (arg !== "-" && arg.startsWith("-")) {
-      return { error: `Unknown flag: ${arg}`, ok: false };
+      return { error: `\`${arg}\` is not a \`glion send\` flag.`, ok: false };
     }
     positional.push(arg);
   }
 
   if (positional.length > 1) {
-    return { error: `Unexpected argument: ${positional[1]}`, ok: false };
+    return { error: "`glion send` takes one message source.", ok: false };
   }
 
   // "-" and absence both mean stdin; collapse the sentinel to undefined
@@ -262,19 +260,34 @@ async function readStream(stream: NodeJS.ReadableStream): Promise<string> {
   return data;
 }
 
+/** The message text a source holds, or why it could not be read. */
+type ReadResult =
+  | { ok: true; text: string }
+  | { ok: false; reason: string; cause: string };
+
 /**
- * `glion send` handler. Resolves the target, reads and structurally gates the
- * message, sends it over MLLP, and renders the outcome — the human exchange
- * view on a TTY, otherwise a single JSON line. Returns the process exit code;
- * it never calls process.exit, mirroring runDev/runStart.
+ * Reads the message from the file `args` names, or from stdin when it names
+ * none. A source that cannot be read is a `reason` naming it, with the
+ * underlying error as the `cause`.
  */
-function readMessageText(
+async function readMessageText(
   args: SendArgs,
   opts: RunSendOptions
-): Promise<string> {
-  return args.file === undefined
-    ? readStream(opts.stdin ?? process.stdin)
-    : readFile(args.file, "utf8");
+): Promise<ReadResult> {
+  try {
+    const text =
+      args.file === undefined
+        ? await readStream(opts.stdin ?? process.stdin)
+        : await readFile(args.file, "utf8");
+    return { ok: true, text };
+  } catch (error) {
+    const cause = error instanceof Error ? error.message : String(error);
+    const reason =
+      args.file === undefined
+        ? "Standard input could not be read."
+        : `The message source \`${args.file}\` could not be read.`;
+    return { cause, ok: false, reason };
+  }
 }
 
 /**
@@ -398,6 +411,8 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   const project = await resolveProject(args, opts.cwd);
   if (!project.ok) {
     return emit({
+      cause: project.cause,
+      hint: project.hint,
       kind: "invalid",
       message: project.reason,
       target: project.target,
@@ -405,14 +420,12 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   }
   const { client: clientSettings, target, tls } = project;
 
-  let text: string;
-  try {
-    text = await readMessageText(args, opts);
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
+  const read = await readMessageText(args, opts);
+  if (!read.ok) {
     return emit({
+      cause: read.cause,
       kind: "invalid",
-      message: `Could not read the message: ${reason}`,
+      message: read.reason,
       target,
     });
   }
@@ -421,7 +434,7 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
   // parser is lenient — it never rejects — so this only normalizes the wire
   // bytes (line endings in particular); whether the message is a *valid* HL7v2
   // message is the receiver's call, surfaced as a NAK. We do not pre-validate.
-  const tree = parseHL7v2(text);
+  const tree = parseHL7v2(read.text);
   const canonical = toHl7v2(tree);
   const request = {
     byteCount: ENCODER.encode(canonical).length,

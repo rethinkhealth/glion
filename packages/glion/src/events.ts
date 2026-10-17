@@ -56,6 +56,10 @@ export type Event =
       t: "fatal";
       kind: GlionErrorKind;
       message: string;
+      /** What to do about it, when the failure knows. */
+      hint?: string;
+      /** The message of the underlying error, when there was one. */
+      cause?: string;
       stack?: string;
       context?: Record<string, unknown>;
       ts: string;
@@ -139,6 +143,14 @@ const KNOWN_EVENT_KINDS: Record<Event["t"], true> = {
   warning: true,
 };
 
+/** The message of an error's `cause`, when it had one. */
+function causeMessage(cause: unknown): string | undefined {
+  if (cause === undefined) {
+    return undefined;
+  }
+  return cause instanceof Error ? cause.message : String(cause);
+}
+
 /**
  * Converts any caught error into a structured fatal event.
  * GlionErrors preserve their kind and context; unknown errors
@@ -147,8 +159,12 @@ const KNOWN_EVENT_KINDS: Record<Event["t"], true> = {
 export function fatalEvent(error: unknown): Event {
   const ts = new Date().toISOString();
   if (error instanceof GlionError) {
+    // `message` is the fact alone, so the hint and the underlying error
+    // travel as their own fields rather than being folded into it.
     return {
+      cause: causeMessage(error.cause),
       context: error.context,
+      hint: error.hint,
       kind: error.kind,
       message: error.message,
       stack: error.stack,

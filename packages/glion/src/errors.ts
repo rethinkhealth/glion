@@ -20,9 +20,23 @@ export type GlionErrorKind =
   | "child-unresponsive";
 
 /**
- * The single error class used throughout the glion CLI. Carries a
- * discriminated `kind`, structured `context` for machine consumers, an
- * actionable `hint` for humans, and an optional underlying `cause`.
+ * The single error class used throughout the glion CLI.
+ *
+ * Four channels, each carrying one kind of thing. Keeping them apart is what
+ * makes a failure readable:
+ *
+ * - `message` — the fact, as one sentence, in the vocabulary the user works in:
+ *   their config file, their app file, their flags, the port they asked for.
+ *   Never glion's own control flow ("the target could not be derived"), never a
+ *   path under `.glion/` that glion wrote for itself, and never another
+ *   system's error text spliced in.
+ * - `hint` — what to do about it, as its own sentence. Every presenter shows it
+ *   under the message.
+ * - `context` — the values behind the fact, for structured logs.
+ * - `cause` — the underlying error, whole. Presenters show its message on its own
+ *   line; it is never concatenated into `message`.
+ *
+ * `kind` is the contract a consumer switches on; the sentence is not.
  */
 export class GlionError extends Error {
   readonly kind: GlionErrorKind;

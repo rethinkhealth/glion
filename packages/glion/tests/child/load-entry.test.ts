@@ -20,6 +20,12 @@ afterEach(async () => {
 });
 
 /**
+ * The app file the user wrote, as the manifest names it. Every failure is
+ * reported against this path, never the compiled copy beside it.
+ */
+const appFile = "/project/glion.app.ts";
+
+/**
  * Writes a `.mjs` entry file in the temp dir and returns its absolute
  * path. We use a unique filename per call so Node's ESM module cache
  * doesn't serve stale content between tests.
@@ -31,6 +37,18 @@ async function writeEntry(name: string, source: string): Promise<string> {
 }
 
 describe("loadEntry", () => {
+  it("names the app file, not the compiled copy, when loading fails", async () => {
+    const compiled = join(dir, "compiled.mjs");
+
+    await expect(
+      loadEntry({ compiled, source: appFile })
+    ).rejects.toMatchObject({
+      context: { compiled, entry: appFile },
+      kind: "entry-load-failed",
+      message: `The app file \`${appFile}\` could not be loaded.`,
+    });
+  });
+
   it("returns the default export when it is an Mllp instance", async () => {
     // Hand the Mllp instance to the imported module via globalThis —
     // Node's ESM loader shares globals with the test, and Mllp class
@@ -44,7 +62,7 @@ describe("loadEntry", () => {
       `export default globalThis.__glionTestEntry;`
     );
 
-    const result = await loadEntry(entry);
+    const result = await loadEntry({ compiled: entry, source: appFile });
 
     expect(result).toBeInstanceOf(Mllp);
     expect(result).toBe(mllp);
@@ -53,8 +71,11 @@ describe("loadEntry", () => {
   it("throws GlionError('entry-load-failed') when the file does not exist", async () => {
     const missing = join(dir, "does-not-exist.mjs");
 
-    await expect(loadEntry(missing)).rejects.toMatchObject({
+    await expect(
+      loadEntry({ compiled: missing, source: appFile })
+    ).rejects.toMatchObject({
       kind: "entry-load-failed",
+      message: `The app file \`${appFile}\` could not be loaded.`,
     });
   });
 
@@ -64,7 +85,9 @@ describe("loadEntry", () => {
       `this is not valid javascript {{{`
     );
 
-    await expect(loadEntry(entry)).rejects.toMatchObject({
+    await expect(
+      loadEntry({ compiled: entry, source: appFile })
+    ).rejects.toMatchObject({
       kind: "entry-load-failed",
     });
   });
@@ -75,8 +98,11 @@ describe("loadEntry", () => {
       `export default { handle: () => {} };`
     );
 
-    await expect(loadEntry(entry)).rejects.toMatchObject({
+    await expect(
+      loadEntry({ compiled: entry, source: appFile })
+    ).rejects.toMatchObject({
       kind: "entry-not-mllp-instance",
+      message: `The app file \`${appFile}\` does not export an Mllp instance as its default export.`,
     });
   });
 
@@ -86,8 +112,11 @@ describe("loadEntry", () => {
       `export const named = 42;`
     );
 
-    await expect(loadEntry(entry)).rejects.toMatchObject({
+    await expect(
+      loadEntry({ compiled: entry, source: appFile })
+    ).rejects.toMatchObject({
       kind: "entry-not-mllp-instance",
+      message: `The app file \`${appFile}\` does not export an Mllp instance as its default export.`,
     });
   });
 });

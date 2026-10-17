@@ -3,16 +3,14 @@ import { readFile } from "node:fs/promises";
 import { GlionError } from "../errors";
 
 /**
- * Reads a TLS certificate / key / ca file or throws a descriptive
- * GlionError. Used by runner.ts for each of `tls.cert`, `tls.key`, and
- * `tls.ca` — the `field` argument identifies which one is being loaded
- * so the error message can point at the exact config field that
- * failed.
+ * Reads one of the TLS files a config names, or throws. `field` is the config
+ * field that named it, written as the user wrote it — `tls.ca`,
+ * `client.tls.cert` — so the hint points at the line to change and a server's
+ * failure reads differently from a client's.
  *
- * The original fs error is preserved as the GlionError's `cause` so
- * callers can still inspect the OS-level code (ENOENT, EACCES, …) for
- * automated handling, while the human-facing message is descriptive
- * enough to act on without the OS error code.
+ * The fs error is preserved as `cause`, so the OS-level code (ENOENT, EACCES,
+ * …) stays available to whoever wants it without being spliced into the
+ * sentence.
  */
 export async function readTlsFile(
   path: string,
@@ -23,9 +21,9 @@ export async function readTlsFile(
   } catch (error) {
     throw new GlionError(
       "tls-read-failed",
-      `Failed to read ${field} at ${path}`,
+      `The TLS file \`${path}\` could not be read.`,
       { field, path },
-      "Check that the file exists and is readable (chmod 600 for key files).",
+      `Check that \`${field}\` names a file this process can read (chmod 600 for key files).`,
       error
     );
   }

@@ -31,8 +31,8 @@ export async function loadTls(
     return settings;
   }
   const { ca, cert, key, pfx, ...rest } = settings;
-  const read = (path: string | undefined, name: string) =>
-    path === undefined ? undefined : readTlsFile(path, `the TLS ${name} file`);
+  const read = (path: string | undefined, field: string) =>
+    path === undefined ? undefined : readTlsFile(path, `client.tls.${field}`);
   const [caBytes, certBytes, keyBytes, pfxBytes] = await Promise.all([
     read(ca, "ca"),
     read(cert, "cert"),

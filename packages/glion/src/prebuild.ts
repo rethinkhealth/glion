@@ -25,9 +25,9 @@ export async function ensureCacheDir(cwd: string): Promise<string> {
   } catch (error) {
     throw new GlionError(
       "cache-dir-failed",
-      `Failed to create the cache directory at ${dir}`,
+      `The cache directory \`${dir}\` could not be created.`,
       { dir },
-      "Check that the project directory is writable and that .glion is not a file.",
+      "Check that the project directory is writable, and that .glion is not a file.",
       error
     );
   }
@@ -84,14 +84,15 @@ export async function prepareChild(
   } catch (error) {
     throw new GlionError(
       "entry-load-failed",
-      `Failed to build entry file ${config.entry}: ${error instanceof Error ? error.message : String(error)}`,
+      `The app file \`${config.entry}\` could not be built.`,
       { entry: config.entry },
-      "Check the entry file path and that it compiles without errors.",
+      "Check that it exists, compiles, and that every import it makes resolves.",
       error
     );
   }
   const manifest: ChildManifest = {
     compiledEntry,
+    entry: config.entry,
     hostname,
     keepAlive: config.keepAlive,
     keepAliveInitialDelay: config.keepAliveInitialDelay,

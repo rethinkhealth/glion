@@ -23,9 +23,8 @@ describe("resolveTarget", () => {
       const result = resolveTarget(given);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.reason).toBe(
-          "No target host is defined. Pass `--host` with the system to send to."
-        );
+        expect(result.reason).toBe("No target host is defined.");
+        expect(result.hint).toBe("Pass `--host` with the system to send to.");
       }
     }
   });
