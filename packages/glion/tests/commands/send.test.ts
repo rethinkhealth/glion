@@ -158,28 +158,28 @@ describe("parseSendArgs", () => {
   describe("error cases", () => {
     it("rejects --host without a value (end of argv)", () => {
       const result = parseSendArgs(["--host"]);
-      expect(result).toEqual({ error: "--host requires a value", ok: false });
+      expect(result).toEqual({ error: "`--host` takes a value.", ok: false });
     });
 
     it("rejects --host followed by a flag", () => {
       const result = parseSendArgs(["--host", "--json"]);
-      expect(result).toEqual({ error: "--host requires a value", ok: false });
+      expect(result).toEqual({ error: "`--host` takes a value.", ok: false });
     });
 
     it("rejects --port without a value", () => {
       const result = parseSendArgs(["--port"]);
-      expect(result).toEqual({ error: "--port requires a value", ok: false });
+      expect(result).toEqual({ error: "`--port` takes a value.", ok: false });
     });
 
     it("rejects --port followed by a flag", () => {
       const result = parseSendArgs(["--port", "--json"]);
-      expect(result).toEqual({ error: "--port requires a value", ok: false });
+      expect(result).toEqual({ error: "`--port` takes a value.", ok: false });
     });
 
     it("rejects a non-integer --port", () => {
       const result = parseSendArgs(["--port", "abc"]);
       expect(result).toEqual({
-        error: "--port requires an integer value, got: abc",
+        error: "`--port` takes a whole number.",
         ok: false,
       });
     });
@@ -187,7 +187,7 @@ describe("parseSendArgs", () => {
     it("rejects a fractional --port", () => {
       const result = parseSendArgs(["--port", "25.7"]);
       expect(result).toEqual({
-        error: "--port requires an integer value, got: 25.7",
+        error: "`--port` takes a whole number.",
         ok: false,
       });
     });
@@ -195,7 +195,7 @@ describe("parseSendArgs", () => {
     it("rejects --config without a value", () => {
       const result = parseSendArgs(["--config"]);
       expect(result).toEqual({
-        error: "--config requires a value",
+        error: "`--config` takes a value.",
         ok: false,
       });
     });
@@ -203,7 +203,7 @@ describe("parseSendArgs", () => {
     it("rejects --config followed by a flag", () => {
       const result = parseSendArgs(["--config", "--json"]);
       expect(result).toEqual({
-        error: "--config requires a value",
+        error: "`--config` takes a value.",
         ok: false,
       });
     });
@@ -211,7 +211,7 @@ describe("parseSendArgs", () => {
     it("rejects --port 0", () => {
       const result = parseSendArgs(["--port", "0"]);
       expect(result).toEqual({
-        error: "--port requires a port between 1 and 65535, got: 0",
+        error: "`--port` takes a port between 1 and 65535.",
         ok: false,
       });
     });
@@ -219,7 +219,7 @@ describe("parseSendArgs", () => {
     it("rejects a --port above the highest port number", () => {
       const result = parseSendArgs(["--port", "65536"]);
       expect(result).toEqual({
-        error: "--port requires a port between 1 and 65535, got: 65536",
+        error: "`--port` takes a port between 1 and 65535.",
         ok: false,
       });
     });
@@ -234,26 +234,32 @@ describe("parseSendArgs", () => {
 
     it("rejects an unknown flag", () => {
       const result = parseSendArgs(["--raw"]);
-      expect(result).toEqual({ error: "Unknown flag: --raw", ok: false });
-    });
-
-    it("rejects an unknown short flag", () => {
-      const result = parseSendArgs(["-x"]);
-      expect(result).toEqual({ error: "Unknown flag: -x", ok: false });
-    });
-
-    it("rejects more than one positional", () => {
-      const result = parseSendArgs(["a.hl7", "b.hl7"]);
       expect(result).toEqual({
-        error: "Unexpected argument: b.hl7",
+        error: "`--raw` is not a `glion send` flag.",
         ok: false,
       });
     });
 
-    it("rejects a second positional even when the first is the stdin sentinel", () => {
+    it("rejects an unknown short flag", () => {
+      const result = parseSendArgs(["-x"]);
+      expect(result).toEqual({
+        error: "`-x` is not a `glion send` flag.",
+        ok: false,
+      });
+    });
+
+    it("rejects more than one message source", () => {
+      const result = parseSendArgs(["a.hl7", "b.hl7"]);
+      expect(result).toEqual({
+        error: "`glion send` takes one message source.",
+        ok: false,
+      });
+    });
+
+    it("rejects a second source even when the first is the stdin sentinel", () => {
       const result = parseSendArgs(["-", "b.hl7"]);
       expect(result).toEqual({
-        error: "Unexpected argument: b.hl7",
+        error: "`glion send` takes one message source.",
         ok: false,
       });
     });

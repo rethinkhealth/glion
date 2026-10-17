@@ -108,9 +108,10 @@ async function main(): Promise<void> {
   // the compiled entry path and all server configuration.
   const manifestPath = process.argv[2];
   if (!manifestPath) {
-    throw new GlionError(
-      "config-not-found",
-      "Child runner invoked without a manifest path argument."
+    // The parent always passes it; reaching here is a bug in the spawn path,
+    // not something an operator configured.
+    throw new Error(
+      "The child runner was started without a manifest path. This is a bug in @glion/cli; please report it."
     );
   }
 
@@ -122,7 +123,10 @@ async function main(): Promise<void> {
   // The parent compiled the user's glion.app.ts (and its local
   // imports) into a single .js file via rolldown build(). We load
   // it with native import() — no jiti, no runtime TS compilation.
-  const app = await loadEntry(manifest.compiledEntry);
+  const app = await loadEntry({
+    compiled: manifest.compiledEntry,
+    source: manifest.entry,
+  });
 
   // Step 3: Install the telemetry middleware.
   // This wraps every MLLP message handler to emit a "msg" event
@@ -196,19 +200,17 @@ async function main(): Promise<void> {
     if (code === "EADDRINUSE") {
       throw new GlionError(
         "port-in-use",
-        `Port ${manifest.port} on ${manifest.hostname} is already in use.`,
+        `Port \`${manifest.port}\` on \`${manifest.hostname}\` is already in use.`,
         { code, hostname: manifest.hostname, port: manifest.port },
-        "Stop the other process using this port, or set a different port in glion.config.ts.",
+        "Stop the process using it, or set `port` in glion.config.ts.",
         error
       );
     }
     throw new GlionError(
       "child-crashed",
-      `Failed to bind ${manifest.hostname}:${manifest.port}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
+      `The server could not bind \`${manifest.hostname}:${manifest.port}\`.`,
       { code, hostname: manifest.hostname, port: manifest.port },
-      undefined,
+      "Check that the hostname is an address this machine holds.",
       error
     );
   }

@@ -323,7 +323,7 @@ export class GlionSupervisor {
         this.fireEvent({
           context: { timeoutMs: STARTUP_TIMEOUT_MS },
           kind: "child-unresponsive",
-          message: `Child did not emit 'ready' within ${STARTUP_TIMEOUT_MS}ms.`,
+          message: `The app did not report ready within ${STARTUP_TIMEOUT_MS}ms.`,
           t: "fatal",
         });
         internal.intentionalShutdown = true;
@@ -370,7 +370,7 @@ export class GlionSupervisor {
     // appears in the TUI and JSON output alongside structured events.
     handle.onStderrLine((line) => {
       this.fireEvent({
-        message: `child stderr: ${line}`,
+        message: `The app wrote to stderr: ${line}`,
         t: "warning",
       });
     });
@@ -441,7 +441,7 @@ export class GlionSupervisor {
       // Dev mode, first crash after `ready`. Give it one more chance.
       case "runtime-crash-respawn": {
         this.fireEvent({
-          message: "Child crashed after ready; respawning once.",
+          message: "The app crashed after it started; starting it again once.",
           t: "warning",
         });
         void this.enqueue(() => {
@@ -464,7 +464,7 @@ export class GlionSupervisor {
           },
           kind: "child-crashed",
           message:
-            "Child crashed repeatedly after ready. Stopping auto-respawn.",
+            "The app crashed repeatedly after it started, so it will not be started again.",
           t: "fatal",
         });
         return;
@@ -534,7 +534,7 @@ export class GlionSupervisor {
     const forceKillTimer = nodeSetTimeout(() => {
       current.kill("SIGKILL");
       this.fireEvent({
-        message: `Child did not exit within ${this.gracefulCloseMs}ms; sent SIGKILL.`,
+        message: `The app did not exit within ${this.gracefulCloseMs}ms, so it was killed.`,
         t: "warning",
       });
     }, this.gracefulCloseMs);

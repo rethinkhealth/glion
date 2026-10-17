@@ -21,7 +21,7 @@ import { loadTls } from "./send-tls";
 
 export type TargetResult =
   | { ok: true; host: string; port: number }
-  | { ok: false; reason: string };
+  | { ok: false; reason: string; hint?: string };
 
 /** The `client` settings other than `tls`: `MllpClientOptions` as given. */
 export type ClientSettings = Omit<NonNullable<ResolvedConfig["client"]>, "tls">;
@@ -34,7 +34,13 @@ export type ProjectResult =
       target: SendTarget;
       tls: NodeSocketOptions["tls"];
     }
-  | { ok: false; reason: string; target?: SendTarget };
+  | {
+      ok: false;
+      reason: string;
+      hint?: string;
+      cause?: string;
+      target?: SendTarget;
+    };
 
 /**
  * Resolve the MLLP target. `--host` names the receiver; `--port` defaults to
@@ -45,9 +51,9 @@ export type ProjectResult =
 export function resolveTarget(args: SendArgs): TargetResult {
   if (args.host === undefined) {
     return {
+      hint: "Pass `--host` with the system to send to.",
       ok: false,
-      reason:
-        "No target host is defined. Pass `--host` with the system to send to.",
+      reason: "No target host is defined.",
     };
   }
   return { host: args.host, ok: true, port: args.port ?? DEFAULT_PORT };
@@ -56,8 +62,8 @@ export function resolveTarget(args: SendArgs): TargetResult {
 /**
  * Resolves the target from `args`, then loads the project's config and reads
  * the TLS files `client.tls` names. A target that cannot be resolved, a config
- * that fails to load, and a TLS file that cannot be read are `reason`s;
- * anything else propagates.
+ * that fails to load, and a TLS file that cannot be read are `reason`s, each
+ * with the failure's own hint and cause; anything else propagates.
  */
 export async function resolveProject(
   args: SendArgs,
@@ -77,8 +83,22 @@ export async function resolveProject(
     if (error instanceof GlionError) {
       // The target was resolved before the config was read, so a TLS file
       // that cannot be read still reports the endpoint it was aimed at.
-      return { ok: false, reason: error.message, target };
+      return {
+        cause: causeMessage(error.cause),
+        hint: error.hint,
+        ok: false,
+        reason: error.message,
+        target,
+      };
     }
     throw error;
   }
+}
+
+/** The message of an error's `cause`, when it had one. */
+function causeMessage(cause: unknown): string | undefined {
+  if (cause === undefined) {
+    return undefined;
+  }
+  return cause instanceof Error ? cause.message : String(cause);
 }

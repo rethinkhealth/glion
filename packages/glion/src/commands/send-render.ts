@@ -4,9 +4,10 @@
  * Two output modes, both driven by a single plain {@link SendOutcome} object:
  *
  * - {@link renderHuman} — the TTY "Exchange view" (the `-> sent` / `<- ACK|NAK`
- *   lines). Multi-line, human-readable; goes to stderr in the handler.
- * - {@link renderJson} — exactly one JSON line with a stable key set; goes to
- *   stdout in the handler.
+ *   lines). Multi-line, human-readable; the handler writes an acknowledgment to
+ *   stdout and a failure to stderr.
+ * - {@link renderJson} — exactly one JSON line with a stable key set; the handler
+ *   writes it to stdout, whatever the outcome.
  *
  * The renderers do no IO and never touch the MLLP client, the ack exceptions,
  * or the parser. The handler maps the wire types (`MllpClientResponse`,
@@ -28,10 +29,10 @@ export interface SendTarget {
 }
 
 /**
- * What we know about the request we put on the wire. Populated for the
- * accept/NAK/transport branches (the message was serialized and a connection
- * was attempted); omitted for the `invalid` branch, which fails before any of
- * this exists.
+ * What we know about the request we put on the wire. Populated once the
+ * message has been serialized — the accept, NAK and transport branches, and
+ * the `invalid` branch when the client refused a message we had summarized;
+ * omitted for a failure that comes before any message exists.
  */
 export interface SendRequestSummary {
   /** MSH-10 of the request — the control id the peer echoes in MSA-2. */
@@ -115,6 +116,8 @@ export interface SendInvalidOutcome {
    */
   request?: SendRequestSummary;
   message: string;
+  /** What to do about it, when the failure knows. */
+  hint?: string;
   /** The text of the error's `cause`, when it had one. */
   cause?: string;
 }
@@ -218,11 +221,15 @@ function renderTransport(outcome: SendTransportOutcome): string {
 }
 
 /**
- * The diagnostic line for a failure before the wire, and its cause. The
- * control id identifies the message when one is known and carries it.
+ * The diagnostic line for a failure before the wire, with its cause and hint
+ * under it. The endpoint and the control id appear when they are known, so
+ * the line says where the send was aimed and which message it was.
  */
 function renderInvalid(outcome: SendInvalidOutcome): string {
   const parts = ["x"];
+  if (outcome.target !== undefined) {
+    parts.push(`${outcome.target.host}:${outcome.target.port}`);
+  }
   const controlId = outcome.request?.controlId;
   if (controlId !== undefined && controlId.length > 0) {
     parts.push(`MSH-10 ${controlId}`);
@@ -231,8 +238,20 @@ function renderInvalid(outcome: SendInvalidOutcome): string {
     parts.push(outcome.code);
   }
   parts.push(outcome.message);
-  const head = parts.join("  ");
-  return outcome.cause === undefined ? head : `${head}\n   ${outcome.cause}`;
+  // The fact on the first line; the cause and what to do about it under it,
+  // each on its own line, never folded into the sentence.
+  const lines = [parts.join("  ")];
+  if (outcome.cause !== undefined) {
+    lines.push(`   ${outcome.cause}`);
+  }
+  if (outcome.hint !== undefined) {
+    // A hint may carry one line per thing to fix; each is indented under the
+    // fact rather than only the first.
+    for (const line of outcome.hint.split("\n")) {
+      lines.push(`   ${line}`);
+    }
+  }
+  return lines.join("\n");
 }
 
 /** The `<- ACK|NAK CODE MSA-2 <id> <duration>` reply line. */
@@ -399,6 +418,9 @@ function toJsonRecord(outcome: SendOutcome): Record<string, unknown> {
       }
       if (outcome.cause !== undefined) {
         record.cause = outcome.cause;
+      }
+      if (outcome.hint !== undefined) {
+        record.hint = outcome.hint;
       }
       return record;
     }

@@ -67,7 +67,7 @@ import type { Readable } from "node:stream";
  * that buffering one never puts meaningful memory pressure on the
  * parent. Callers can override for tests or for a stricter policy.
  */
-const DEFAULT_MAX_LINE_LENGTH = 1_048_576;
+export const DEFAULT_MAX_LINE_LENGTH = 1_048_576;
 
 export interface ReadLinesOptions {
   /**

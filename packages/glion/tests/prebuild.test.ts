@@ -87,7 +87,7 @@ describe("ensureCacheDir", () => {
       await writeFile(join(newDir, ".glion"), "");
       await expect(ensureCacheDir(newDir)).rejects.toMatchObject({
         kind: "cache-dir-failed",
-        message: `Failed to create the cache directory at ${join(newDir, ".glion")}`,
+        message: `The cache directory \`${join(newDir, ".glion")}\` could not be created.`,
       });
     } finally {
       await rm(newDir, { force: true, recursive: true });

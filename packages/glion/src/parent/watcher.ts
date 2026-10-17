@@ -218,7 +218,7 @@ async function importChokidar(): Promise<Chokidar> {
   } catch (error) {
     throw new GlionError(
       "peer-dep-missing",
-      "The 'glion dev' command requires 'chokidar' for file watching.",
+      "The `chokidar` package, which `glion dev` watches files with, is not installed.",
       { missing: "chokidar" },
       "Install it:\n  pnpm add -D chokidar",
       error

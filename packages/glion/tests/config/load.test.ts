@@ -48,7 +48,7 @@ describe("loadConfig — discovery and loading", () => {
     });
   });
 
-  it("surfaces every validation issue in the error message, not just the first", async () => {
+  it("names every invalid field in the hint, not just the first", async () => {
     // Three concurrent problems: missing required `entry`, wrong type
     // for `port`, and an unknown field. Zod returns all three in one
     // pass — the loader must format all three so users don't have to
@@ -63,10 +63,14 @@ describe("loadConfig — discovery and loading", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(GlionError);
       const err = error as GlionError;
-      // All three fields must be mentioned in the human-readable message.
-      expect(err.message).toContain("entry");
-      expect(err.message).toContain("port");
-      expect(err.message).toContain("unknownField");
+      // The message states the fact; the fields the user has to fix are the
+      // hint, so all three must be there.
+      expect(err.message).toBe(
+        `The config file \`${join(dir, "glion.config.ts")}\` has options that are not valid.`
+      );
+      expect(err.hint).toContain("entry");
+      expect(err.hint).toContain("port");
+      expect(err.hint).toContain("unknownField");
       // And the structured context must carry every issue, not just one.
       const ctxIssues = (err.context as { issues: unknown[] }).issues;
       expect(ctxIssues.length).toBeGreaterThanOrEqual(3);

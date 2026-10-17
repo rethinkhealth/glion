@@ -24,31 +24,36 @@ import { GlionError } from "../errors";
  *   error, transitive import threw, …).
  * - `entry-not-mllp-instance` — the import succeeded but the default export
  *   wasn't an Mllp.
+ *
+ * Both name `app.source` — the file the user wrote. `app.compiled` is the
+ * copy glion built for itself and is a path the user cannot act on, so it
+ * stays in the error's context.
  */
-export async function loadEntry(compiledEntryPath: string): Promise<Mllp> {
+export async function loadEntry(app: {
+  source: string;
+  compiled: string;
+}): Promise<Mllp> {
   let value: unknown;
   try {
-    const mod = (await import(pathToFileURL(compiledEntryPath).href)) as {
+    const mod = (await import(pathToFileURL(app.compiled).href)) as {
       default?: unknown;
     };
     value = mod.default ?? mod;
   } catch (error) {
     throw new GlionError(
       "entry-load-failed",
-      `Failed to load compiled entry ${compiledEntryPath}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-      { entry: compiledEntryPath },
-      "Check the entry file path and that it compiles without errors.",
+      `The app file \`${app.source}\` could not be loaded.`,
+      { compiled: app.compiled, entry: app.source },
+      "Check that every package it imports is installed, and that nothing it runs at import time throws.",
       error
     );
   }
   if (!(value instanceof Mllp)) {
     throw new GlionError(
       "entry-not-mllp-instance",
-      "The default export of the entry file must be an Mllp instance.",
-      { actualType: typeof value, entry: compiledEntryPath },
-      `Change your entry file to:
+      `The app file \`${app.source}\` does not export an Mllp instance as its default export.`,
+      { actualType: typeof value, compiled: app.compiled, entry: app.source },
+      `Export the app as the default export:
   import { Mllp } from "@glion/mllp";
   export default new Mllp().parser(...).on("ADT^A01", ...);`
     );

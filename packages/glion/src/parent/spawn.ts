@@ -3,7 +3,7 @@ import type { ChildProcess } from "node:child_process";
 
 import type { Event } from "../events";
 import { parseLine } from "../events";
-import { readLines } from "./line-reader";
+import { DEFAULT_MAX_LINE_LENGTH, readLines } from "./line-reader";
 
 // ─── Public types ──────────────────────────────────────────────────
 
@@ -144,6 +144,9 @@ export function spawnChild(
   deps: SpawnDeps = {}
 ): ChildHandle {
   const spawn = deps.spawn ?? defaultSpawn;
+  // The cap the readers below enforce, named so the overflow warnings can
+  // report it alongside the bytes they dropped.
+  const maxLineLength = opts.maxLineLength ?? DEFAULT_MAX_LINE_LENGTH;
 
   const child: ChildProcess = spawn(
     process.execPath,
@@ -184,10 +187,10 @@ export function spawnChild(
         }
       },
       {
-        maxLineLength: opts.maxLineLength,
+        maxLineLength,
         onOverflow: (bytes) => {
           const warning: Event = {
-            message: `child stdout dropped ${bytes} bytes (line exceeded max length)`,
+            message: `The app wrote a line longer than the ${maxLineLength}-byte limit; ${bytes} bytes were dropped.`,
             t: "warning",
             ts: new Date().toISOString(),
           };
@@ -217,11 +220,11 @@ export function spawnChild(
         }
       },
       {
-        maxLineLength: opts.maxLineLength,
+        maxLineLength,
         onOverflow: (bytes) => {
           for (const listener of stderrListeners) {
             listener(
-              `[child stderr dropped ${bytes} bytes (line exceeded max length)]`
+              `[the app wrote a line longer than the ${maxLineLength}-byte limit; ${bytes} bytes were dropped]`
             );
           }
         },

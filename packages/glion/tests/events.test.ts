@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { GlionError } from "../src/errors";
 import type { Event } from "../src/events";
-import { encode, eventLevel, parseLine } from "../src/events";
+import { encode, eventLevel, fatalEvent, parseLine } from "../src/events";
 
 describe("events codec", () => {
   it("round-trips a ready event", () => {
@@ -108,5 +109,35 @@ describe("eventLevel", () => {
     expect(
       eventLevel({ level: "error", message: "m", t: "log", ts: "t" })
     ).toBe("error");
+  });
+});
+
+describe("fatalEvent", () => {
+  it("carries the hint and the cause as their own fields", () => {
+    const error = new GlionError(
+      "config-invalid",
+      "The config file `/p/glion.config.ts` could not be compiled.",
+      { configPath: "/p/glion.config.ts" },
+      "Check it for syntax errors.",
+      new Error("Unexpected token")
+    );
+
+    const event = fatalEvent(error);
+
+    expect(event).toMatchObject({
+      cause: "Unexpected token",
+      hint: "Check it for syntax errors.",
+      kind: "config-invalid",
+      message: "The config file `/p/glion.config.ts` could not be compiled.",
+      t: "fatal",
+    });
+  });
+
+  it("leaves both out for an error that carries neither", () => {
+    const event = fatalEvent(new Error("boom"));
+
+    expect(event).toMatchObject({ kind: "child-crashed", message: "boom" });
+    expect(event).not.toHaveProperty("hint");
+    expect(event).not.toHaveProperty("cause");
   });
 });
