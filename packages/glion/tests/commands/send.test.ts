@@ -13,7 +13,6 @@ describe("parseSendArgs", () => {
           help: false,
           host: undefined,
           json: false,
-          local: false,
           port: undefined,
           timeoutMs: undefined,
         },
@@ -72,54 +71,6 @@ describe("parseSendArgs", () => {
       if (result.ok) {
         expect(result.args.port).toBe(2575);
         expect(typeof result.args.port).toBe("number");
-      }
-    });
-  });
-
-  describe("--local", () => {
-    it("sets local to true", () => {
-      const result = parseSendArgs(["--local"]);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.args.local).toBe(true);
-      }
-    });
-
-    it("allows --host to override an individual field alongside --local", () => {
-      const result = parseSendArgs(["--local", "--host", "10.0.0.5"]);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.args.local).toBe(true);
-        expect(result.args.host).toBe("10.0.0.5");
-        expect(result.args.port).toBeUndefined();
-      }
-    });
-
-    it("allows --port to override an individual field alongside --local", () => {
-      const result = parseSendArgs(["--local", "--port", "9999"]);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.args.local).toBe(true);
-        expect(result.args.port).toBe(9999);
-        expect(result.args.host).toBeUndefined();
-      }
-    });
-
-    it("allows both --host and --port overrides alongside --local", () => {
-      const result = parseSendArgs([
-        "--local",
-        "--host",
-        "10.0.0.5",
-        "--port",
-        "6000",
-      ]);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.args).toMatchObject({
-          host: "10.0.0.5",
-          local: true,
-          port: 6000,
-        });
       }
     });
   });
@@ -199,7 +150,6 @@ describe("parseSendArgs", () => {
           help: false,
           host: "192.168.1.10",
           json: true,
-          local: false,
           port: 2575,
           timeoutMs: 10_000,
         },
@@ -225,7 +175,7 @@ describe("parseSendArgs", () => {
     });
 
     it("rejects --port followed by a flag", () => {
-      const result = parseSendArgs(["--port", "--local"]);
+      const result = parseSendArgs(["--port", "--json"]);
       expect(result).toEqual({ error: "--port requires a value", ok: false });
     });
 

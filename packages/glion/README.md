@@ -90,21 +90,19 @@ glion send [<file>] [flags]
 
 The message is read from `<file>`, or from stdin when `<file>` is omitted or is `-`. It is parsed and re-serialized to its canonical, CR-delimited form before transmission, so editor line endings are normalized. Whether the message is valid is the receiver's call — it answers with a NAK — so `glion send` does not pre-validate.
 
-| Flag              | Description                                                              |
-| ----------------- | ------------------------------------------------------------------------ |
-| `--host <host>`   | Target host.                                                             |
-| `--port <port>`   | Target port.                                                             |
-| `--local`         | Reads host and port from `glion.config.ts`; `--host`/`--port` override.  |
-| `--config <path>` | Config file used to resolve `--local` (same discovery as `dev`/`start`). |
-| `--timeout <ms>`  | Deadline spanning connect and the ACK wait. Defaults to `30000`.         |
-| `--json`          | Prints one JSON line instead of the human exchange view.                 |
+| Flag              | Description                                                                   |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `--host <host>`   | Target host.                                                                  |
+| `--port <port>`   | Target port.                                                                  |
+| `--config <path>` | Config file to load instead of discovering one (same names as `dev`/`start`). |
+| `--timeout <ms>`  | Deadline spanning connect and the ACK wait. Defaults to `30000`.              |
+| `--json`          | Prints one JSON line instead of the human exchange view.                      |
 
-`--local` resolves the target from the server this project defines: it reads `hostname` and `port` from `glion.config.ts`, mapping a wildcard bind address such as `0.0.0.0` to loopback.
+The target is the one the invocation names. `glion send` is a client: it sends to the system you point it at, and takes no part in what address a server of this project binds — so sending to your own dev server is the same command as sending to any other receiver.
 
 ```bash
 glion send adt.hl7 --host 127.0.0.1 --port 2575
-cat adt.hl7 | glion send --port 2575 --json
-glion send adt.hl7 --local
+cat adt.hl7 | glion send --host 127.0.0.1 --port 2575 --json
 ```
 
 Output adapts to the destination: a terminal receives a human-readable exchange view, while a pipe (or `--json`) receives a single JSON line. The exit code reports the result.

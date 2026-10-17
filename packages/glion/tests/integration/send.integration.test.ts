@@ -139,7 +139,7 @@ describe("runSend (integration, fake socket)", () => {
 
     expect(code).toBe(0);
     expect(state.out).toContain("glion send");
-    expect(state.out).toContain("--local");
+    expect(state.out).toContain("--host");
   });
 
   it("prints the parse error and help to stderr and exits 2", async () => {
