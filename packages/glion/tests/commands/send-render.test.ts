@@ -140,6 +140,28 @@ describe("renderHuman", () => {
       expect(out).not.toContain("\n");
       expect(out).toContain("begin with an MSH segment");
     });
+
+    it("names the control id of the message that was refused", () => {
+      const out = renderHuman({
+        ...invalid,
+        code: "INVALID_MESSAGE",
+        request: REQUEST,
+      });
+      expect(out).toBe(
+        "x  MSH-10 MSG00001  INVALID_MESSAGE  Not an HL7v2 message: it must begin with an MSH segment."
+      );
+    });
+
+    it("leaves out the control id when the message has none", () => {
+      const out = renderHuman({
+        ...invalid,
+        code: "INVALID_MESSAGE",
+        request: { ...REQUEST, controlId: "" },
+      });
+      expect(out).toBe(
+        "x  INVALID_MESSAGE  Not an HL7v2 message: it must begin with an MSH segment."
+      );
+    });
   });
 });
 
@@ -239,6 +261,11 @@ describe("renderJson", () => {
       const json = JSON.parse(renderJson({ ...invalid, target: TARGET }));
       expect(json.host).toBe("127.0.0.1");
       expect(json.port).toBe(2575);
+    });
+
+    it("identifies the refused message by its request control id", () => {
+      const json = JSON.parse(renderJson({ ...invalid, request: REQUEST }));
+      expect(json.requestControlId).toBe("MSG00001");
     });
   });
 });

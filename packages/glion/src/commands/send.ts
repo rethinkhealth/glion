@@ -9,8 +9,11 @@
 import { readFile } from "node:fs/promises";
 
 import { AckException } from "@glion/ack";
-import type { Root } from "@glion/ast";
-import { MllpClient, MllpClientError } from "@glion/mllp-client";
+import {
+  MllpClient,
+  MllpClientError,
+  MllpInvalidMessageError,
+} from "@glion/mllp-client";
 import type { MllpClientOptions, MllpSocket } from "@glion/mllp-client";
 import { nodeSocket } from "@glion/mllp-client/node";
 import { parseHL7v2 } from "@glion/parser";
@@ -243,8 +246,9 @@ function exitCodeFor(outcome: SendOutcome): number {
     case "nak": {
       return 1;
     }
-    default: {
-      // transport and invalid both mean "not delivered".
+    case "transport":
+    case "invalid": {
+      // Both mean "not delivered".
       return 2;
     }
   }
@@ -258,18 +262,6 @@ async function readStream(stream: NodeJS.ReadableStream): Promise<string> {
     data += chunk;
   }
   return data;
-}
-
-/** The peer's MSA-3 free text, when present and non-empty. */
-function ackText(tree: Root | undefined): string | undefined {
-  if (!tree) {
-    return undefined;
-  }
-  const found = value(tree, "MSA.3.1")?.value;
-  if (!found) {
-    return undefined;
-  }
-  return found;
 }
 
 /**
@@ -288,8 +280,9 @@ function readMessageText(
 }
 
 /**
- * Maps a failed exchange to its outcome. A NAK and a transport failure are
- * outcomes; anything else is a bug and propagates.
+ * Maps a failed exchange to its outcome. A NAK, a message the client could
+ * not prepare, and a transport failure are outcomes; anything else is a bug
+ * and propagates.
  */
 function sendErrorOutcome(
   error: unknown,
@@ -311,6 +304,16 @@ function sendErrorOutcome(
       severity: error.severity,
       target,
       text: error.text,
+    };
+  }
+  if (error instanceof MllpInvalidMessageError) {
+    return {
+      cause: causeOf(error),
+      code: error.code,
+      kind: "invalid",
+      message: error.message,
+      request,
+      target,
     };
   }
   if (error instanceof MllpClientError) {
@@ -398,13 +401,13 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     startedAt = performance.now();
     const res = await client.send(tree, { timeoutMs });
     return emit({
-      ackControlId: request.controlId,
+      ackControlId: res.controlId,
       code: res.code,
       durationMs: performance.now() - startedAt,
       kind: "accept",
       request,
       target,
-      text: ackText(res.tree),
+      text: res.text,
     });
   } catch (error) {
     return emit(sendErrorOutcome(error, { request, startedAt, target }));
