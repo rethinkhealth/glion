@@ -55,10 +55,15 @@ export async function buildFile(
 /**
  * Builds the entry file, writes a manifest JSON with everything the
  * child process needs, and returns the manifest path.
+ *
+ * `hostname` is the address to bind. The config states it only when the
+ * project does; which address to serve otherwise is the calling command's
+ * decision, so it is passed rather than read.
  */
 export async function prepareChild(
   config: ResolvedConfig,
-  cacheDir: string
+  cacheDir: string,
+  hostname: string
 ): Promise<string> {
   let compiledEntry: string;
   try {
@@ -74,7 +79,7 @@ export async function prepareChild(
   }
   const manifest: ChildManifest = {
     compiledEntry,
-    hostname: config.hostname,
+    hostname,
     keepAlive: config.keepAlive,
     keepAliveInitialDelay: config.keepAliveInitialDelay,
     port: config.port,

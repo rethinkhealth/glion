@@ -1,4 +1,5 @@
 import { loadConfig } from "../config/load";
+import type { ResolvedConfig } from "../config/schema";
 import { GlionError } from "../errors";
 import type { Event } from "../events";
 import { encode, fatalEvent } from "../events";
@@ -6,6 +7,17 @@ import type { FileLogger } from "../file-logger";
 import { createFileLogger } from "../file-logger";
 import { GlionSupervisor } from "../parent/supervisor";
 import { ensureCacheDir, prepareChild } from "../prebuild";
+
+/**
+ * The address `glion start` binds when the project names none: every
+ * interface, for a server behind a firewall or a reverse proxy.
+ */
+const ALL_INTERFACES = "0.0.0.0";
+
+/** The address to bind: the one the project names, or every interface. */
+function bindAddress(config: ResolvedConfig): string {
+  return config.hostname ?? ALL_INTERFACES;
+}
 
 export interface RunStartOptions {
   cwd: string;
@@ -53,14 +65,14 @@ export async function runStart(opts: RunStartOptions): Promise<number> {
       cacheDir,
       cwd: opts.cwd,
       explicitPath: opts.configPath,
-      mode: "start",
     });
+    const hostname = bindAddress(config);
 
     // Step 3: Pre-build the user's entry file (the Mllp app) into
     // .glion/ using rolldown build() — bundles local TS imports while
     // leaving node_modules external. Writes a manifest JSON with the
     // compiled entry path + server options for the child process.
-    const manifestPath = await prepareChild(config, cacheDir);
+    const manifestPath = await prepareChild(config, cacheDir, hostname);
 
     // Step 3: Create the supervisor — it owns the child process
     // lifecycle (spawn, restart, graceful shutdown, crash policy).
@@ -105,9 +117,9 @@ export async function runStart(opts: RunStartOptions): Promise<number> {
     // Operators who intentionally want this configuration (behind a
     // firewall, tunneled via a reverse proxy that terminates TLS)
     // see the warning but can ignore it.
-    if (!isLoopback(config.hostname) && !config.tls) {
+    if (!isLoopback(hostname) && !config.tls) {
       const warning: Event = {
-        message: `glion start is binding to ${config.hostname} without TLS; HL7v2 has no built-in authentication. Bind to 127.0.0.1 or configure TLS before exposing to untrusted networks.`,
+        message: `glion start is binding to ${hostname} without TLS; HL7v2 has no built-in authentication. Bind to 127.0.0.1 or configure TLS before exposing to untrusted networks.`,
         t: "warning",
         ts: new Date().toISOString(),
       };
