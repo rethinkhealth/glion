@@ -5,20 +5,14 @@ import type { VFile } from "vfile";
 import type { AcknowledgeOptions } from "./acknowledge";
 
 /**
- * Connection metadata for an MLLP socket.
+ * The `env` argument of `handle()`: optional when `E` admits `undefined`,
+ * required otherwise.
  */
-export interface ConnectionInfo {
-  readonly id: number;
-  readonly remoteAddress: string;
-  readonly remotePort: number;
-  readonly localPort: number;
-  readonly secure: boolean;
-  readonly state: Map<string, unknown>;
-}
+export type EnvArgs<E> = undefined extends E ? [env?: E] : [env: E];
 
 /**
- * MLLP response — a raw HL7v2 string that the server encodes
- * with MLLP framing before sending back over TCP.
+ * The reply to a message: a raw HL7v2 string. A connection writes it back
+ * with MLLP framing.
  */
 export interface Response {
   readonly raw: string;
@@ -31,7 +25,7 @@ export interface Response {
  * produced, once, before routing. The compiled result is lazy: `result()`
  * runs the compiler on first call.
  */
-export interface Context {
+export interface Context<E = unknown> {
   /** Incoming message data */
   readonly req: {
     /** The payload decoded as UTF-8, without MLLP framing. */
@@ -46,8 +40,12 @@ export interface Context {
    */
   readonly error: Error | undefined;
 
-  /** TCP connection metadata */
-  readonly connection: ConnectionInfo;
+  /**
+   * What the runtime passed to `handle()` with this message, such as a
+   * Workers environment or the connection `serve()` accepted it on.
+   * `undefined` when it passed none.
+   */
+  readonly env: E;
 
   /**
    * The tree the processor parsed and ran its transformers on. The routing
@@ -101,14 +99,12 @@ export interface Context {
 }
 
 /**
- * Observes an error a message raised: a payload that is not UTF-8, a
- * processor throw, the processor's first fatal message, or the error of a
- * route filter, middleware or handler. Runs when the error is raised.
- * `connection` is the one `handle()` was given. MUST NOT throw.
+ * Observes an error raised by a payload no middleware runs on. `env` is what
+ * the runtime passed to `handle()`. MUST NOT throw.
  */
-export type ErrorHandler = (
+export type ErrorHandler<E = unknown> = (
   error: Error,
-  connection: ConnectionInfo
+  env: E
 ) => Promise<void> | undefined;
 
 /**
@@ -155,8 +151,8 @@ export type MiddlewareReturn =
   // oxlint-disable-next-line typescript/no-invalid-void-type
   | void;
 
-export type Middleware = (
-  ctx: Context,
+export type Middleware<E = unknown> = (
+  ctx: Context<E>,
   next: () => Promise<void>
 ) => MiddlewareReturn;
 
@@ -164,8 +160,8 @@ export type Middleware = (
  * Terminal route handler. A returned response is the reply; returning
  * nothing replies `AA`.
  */
-export type Handler = (
-  ctx: Context
+export type Handler<E = unknown> = (
+  ctx: Context<E>
   // oxlint-disable-next-line typescript/no-invalid-void-type
 ) => Promise<Response | undefined | void> | Response | undefined | void;
 
@@ -173,7 +169,7 @@ export type Handler = (
  * A filter function for route or middleware matching.
  * Receives the full context and returns true if the route/middleware applies.
  */
-export type RouteFilter = (ctx: Context) => boolean;
+export type RouteFilter<E = unknown> = (ctx: Context<E>) => boolean;
 
 /**
  * Parsed route pattern for matching against incoming messages.

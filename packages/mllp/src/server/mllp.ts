@@ -21,7 +21,7 @@ import { parseRequest, salvageHeader } from "./request";
 import type { MllpRequest } from "./request";
 import { Router } from "./router";
 import type {
-  ConnectionInfo,
+  EnvArgs,
   ErrorHandler,
   Handler,
   Hl7v2Processor,
@@ -32,10 +32,10 @@ import type {
 } from "./types";
 
 /**
- * MLLP application for HL7v2 messaging.
+ * MLLP application for HL7v2 messaging: routes and middleware over one
+ * message at a time, on any runtime.
  *
- * A pure routing and middleware engine with no TCP/server concerns.
- * Use `serve()` to bind this to a TCP server.
+ * `E` is the type of `ctx.env`, what the runtime passes to `handle()`.
  *
  * @example
  *   ```typescript
@@ -49,19 +49,9 @@ import type {
  *     .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
  *   ```;
  */
-/**
- * The processor of an app given none: `@glion/parser`, and
- * `@glion/lint-required-message-header` reporting a fatal message for a
- * message that does not start with an MSH.
- */
-const defaultProcessor: Hl7v2Processor = unified()
-  .use(hl7v2Parser)
-  .use(hl7v2LintRequiredMessageHeader, ["error"])
-  .freeze();
-
-export class Mllp {
-  readonly #router = new Router();
-  readonly #errorHandlers: ErrorHandler[] = [];
+export class Mllp<E = unknown> {
+  readonly #router = new Router<E>();
+  readonly #errorHandlers: ErrorHandler<E>[] = [];
   readonly #options: MllpOptions & Required<Pick<MllpOptions, "serializer">>;
   #processor: Hl7v2Processor = defaultProcessor;
 
@@ -105,18 +95,21 @@ export class Mllp {
    * - A scoped middleware: `app.use('ADT^*', middleware)` or `app.use(filter,
    *   middleware)`
    */
-  use(middleware: Middleware, options?: { prepend?: boolean }): this;
-  use(patternOrFilter: string | RouteFilter, middleware: Middleware): this;
+  use(middleware: Middleware<E>, options?: { prepend?: boolean }): this;
   use(
-    first: string | RouteFilter | Middleware,
-    second?: Middleware | { prepend?: boolean }
+    patternOrFilter: string | RouteFilter<E>,
+    middleware: Middleware<E>
+  ): this;
+  use(
+    first: string | RouteFilter<E> | Middleware<E>,
+    second?: Middleware<E> | { prepend?: boolean }
   ): this {
     // Scoped middleware: use('ADT^*', middleware) or use(filter, middleware)
     if (
       (typeof first === "string" || typeof first === "function") &&
       typeof second === "function"
     ) {
-      this.#router.addMiddleware(first as string | RouteFilter, second);
+      this.#router.addMiddleware(first as string | RouteFilter<E>, second);
       return this;
     }
 
@@ -124,7 +117,7 @@ export class Mllp {
     if (typeof first === "function") {
       const prepend =
         second && typeof second === "object" ? second.prepend : false;
-      this.#router.addMiddleware(first as Middleware, prepend);
+      this.#router.addMiddleware(first as Middleware<E>, prepend);
       return this;
     }
 
@@ -145,7 +138,7 @@ export class Mllp {
    *
    * - `(ctx) => ctx.messageType === "ADT" && ctx.version === "2.5.1"`
    */
-  on(patternOrFilter: string | RouteFilter, handler: Handler): this {
+  on(patternOrFilter: string | RouteFilter<E>, handler: Handler<E>): this {
     this.#router.add(patternOrFilter, handler);
     return this;
   }
@@ -158,15 +151,16 @@ export class Mllp {
    * handler registered runs, in the order registered, when the error is
    * raised, and `handle()` waits for it.
    */
-  onError(handler: ErrorHandler): this {
+  onError(handler: ErrorHandler<E>): this {
     this.#errorHandlers.push(handler);
     return this;
   }
 
   /**
-   * Process one MLLP frame payload through the middleware chain and router,
-   * and return the reply, or `undefined` for none. This is the integration
-   * point — analogous to Hono's `fetch()`.
+   * Process one message through the middleware chain and router, and return
+   * the reply, or `undefined` for none. `payload` is the message without MLLP
+   * framing; `env` becomes `ctx.env`. Bound to the app, so it can be passed
+   * on as a function.
    *
    * 1. Decode the payload as UTF-8, parse it, and run the processor's
    *    transformers, its lint rules among them.
@@ -201,10 +195,16 @@ export class Mllp {
    * `ctx.error` holds the latest error the message raised, and the reply
    * answers it. The handlers `onError()` registered observe every error.
    */
-  async handle(
+  readonly handle = async (
     payload: Uint8Array,
-    connection: ConnectionInfo
-  ): Promise<Response | undefined> {
+    ...[env]: EnvArgs<E>
+  ): Promise<Response | undefined> => {
+    if (!this.#processor) {
+      throw new MllpServerError(MllpServerErrorCode.NO_PARSER);
+    }
+
+    // Reading is sync — only decode() and parse() run here. Transform and
+    // compile are deferred to ctx.tree() / ctx.result().
     let request: MllpRequest;
     try {
       request = await parseRequest(payload, this.#processor);
@@ -212,7 +212,8 @@ export class Mllp {
       return this.#reject(
         payload,
         error instanceof Error ? error : new Error(String(error)),
-        connection
+        // EnvArgs<E> leaves `env` out only when E admits undefined.
+        env as E
       );
     }
     const fatal = request.file.messages.find((message) => message.fatal);
@@ -221,7 +222,8 @@ export class Mllp {
     }
     const ctx = createContext({
       app: this.#options,
-      connection,
+      // EnvArgs<E> leaves `env` out only when E admits undefined.
+      env: env as E,
       processor: this.#processor,
       request,
     });
@@ -242,8 +244,8 @@ export class Mllp {
           }
         : undefined;
 
-    let terminal: Middleware;
-    let middlewares: Middleware[];
+    let terminal: Middleware<E>;
+    let middlewares: Middleware<E>[];
     try {
       const matched = this.#router.match(ctx);
       middlewares = matched.middlewares;
@@ -263,7 +265,7 @@ export class Mllp {
 
     await compose([...middlewares, terminal], answer)(ctx);
     return ctx.res;
-  }
+  };
 
   /** Runs each handler `onError()` registered on `error`, in order. */
   async #observe(error: Error, connection: ConnectionInfo): Promise<void> {
@@ -279,9 +281,11 @@ export class Mllp {
   async #reject(
     payload: Uint8Array,
     error: Error,
-    connection: ConnectionInfo
+    env: E
   ): Promise<Response | undefined> {
-    await this.#observe(error, connection);
+    for (const handler of this.#errorHandlers) {
+      await handler(error, env);
+    }
     const header = salvageHeader(payload);
     if (!header || queryValue(header, "MSH.9.1")?.value === "ACK") {
       return undefined;
@@ -300,9 +304,9 @@ export class Mllp {
  * that returns no `Response` and leaves `ctx.res` as it was replies `AA`.
  * Neither default applies to a message that is not `answerable`.
  */
-async function route(
-  ctx: MessageContext,
-  handler: Handler | undefined,
+async function route<E>(
+  ctx: MessageContext<E>,
+  handler: Handler<E> | undefined,
   answerable: boolean
 ): Promise<Response | undefined> {
   if (!handler) {

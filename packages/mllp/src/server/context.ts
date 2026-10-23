@@ -4,7 +4,6 @@ import { acknowledge } from "./acknowledge";
 import type { MllpRequest } from "./request";
 import type {
   AckOptions,
-  ConnectionInfo,
   Context,
   Hl7v2Processor,
   MllpOptions,
@@ -12,18 +11,18 @@ import type {
 } from "./types";
 
 /** A {@link Context} whose `error` the server records. */
-export type MessageContext = Omit<Context, "error"> & {
+export type MessageContext<E = unknown> = Omit<Context<E>, "error"> & {
   error: Error | undefined;
 };
 
 /**
  * Options for creating a Context instance.
  */
-export interface CreateContextOptions {
+export interface CreateContextOptions<E> {
   /** The request, as `parseRequest()` parsed it with `processor`. */
   request: MllpRequest;
-  /** Connection metadata */
-  connection: ConnectionInfo;
+  /** What the runtime passed to `handle()`; becomes `ctx.env`. */
+  env: E;
   /** HL7v2 unified processor */
   processor: Hl7v2Processor;
   /** The app's options, which `ctx.ack()` writes the acknowledgment with. */
@@ -38,8 +37,10 @@ export interface CreateContextOptions {
  * when it is called. `ctx.result()` runs the processor's compiler on first
  * call.
  */
-export function createContext(options: CreateContextOptions): MessageContext {
-  const { app, request, connection, processor } = options;
+export function createContext<E>(
+  options: CreateContextOptions<E>
+): MessageContext<E> {
+  const { app, request, env, processor } = options;
   const { serializer, ...defaults } = app;
   const { file, raw, tree } = request;
   const variables = new Map<string, unknown>();
@@ -61,15 +62,15 @@ export function createContext(options: CreateContextOptions): MessageContext {
   }
 
   // ── Build context ──────────────────────────────────────────────────
-  const ctx: MessageContext = {
+  const ctx: MessageContext<E> = {
     ack(ackOptions?: AckOptions): Response {
       return {
         raw: serializer(acknowledge(tree, { ...ackOptions, ...defaults })),
       };
     },
-    ast: tree,
-    connection: Object.freeze(connection),
+    ast: parsed,
     controlId,
+    env,
     error: undefined,
     file,
     get<K extends string>(key: K): unknown {

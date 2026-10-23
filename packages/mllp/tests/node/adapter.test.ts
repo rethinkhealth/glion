@@ -5,7 +5,7 @@ import { createServer } from "node:net";
 import { Readable } from "node:stream";
 import { createServer as createTlsServer } from "node:tls";
 
-import { nodeAdapter } from "../../src/node/adapter";
+import { listen } from "../../src/node/adapter";
 
 // oxlint-disable-next-line prefer-await-to-callbacks
 type CloseCallback = (err?: Error) => void;
@@ -129,12 +129,11 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("nodeAdapter", () => {
+describe("listen", () => {
   it("listens on plain TCP with keep-alive after 60 s and Nagle's algorithm off, and sets no timeout", () => {
     vi.mocked(createTlsServer).mockClear();
     const accepted: boolean[] = [];
-    const adapter = nodeAdapter();
-    adapter.listen({ port: 2575 }, (socket) => accepted.push(socket.secure));
+    listen({ port: 2575 }, (socket) => accepted.push(socket.secure));
 
     const socket = createMockSocket();
     connectionHandler?.(socket);
@@ -151,8 +150,7 @@ describe("nodeAdapter", () => {
   it("passes tls to tls.createServer() with keep-alive and Nagle's algorithm off, and marks its sockets secure", () => {
     const tls = { ca: "ca", cert: "cert", key: "key", requestCert: true };
     const accepted: boolean[] = [];
-    const adapter = nodeAdapter({ tls });
-    adapter.listen({ port: 2575 }, (socket) => accepted.push(socket.secure));
+    listen({ port: 2575, tls }, (socket) => accepted.push(socket.secure));
 
     connectionHandler?.(createMockSocket());
 
@@ -164,8 +162,8 @@ describe("nodeAdapter", () => {
   });
 
   it("lets tls replace a socket option", () => {
-    nodeAdapter({ tls: { cert: "cert", key: "key", noDelay: false } }).listen(
-      { port: 2575 },
+    listen(
+      { port: 2575, tls: { cert: "cert", key: "key", noDelay: false } },
       noop
     );
 
@@ -182,8 +180,7 @@ describe("nodeAdapter", () => {
   });
 
   it("calls setTimeout when socketTimeout option is provided", () => {
-    const adapter = nodeAdapter({ socketTimeout: 30_000 });
-    adapter.listen({ port: 2575 }, noop);
+    listen({ port: 2575, socketTimeout: 30_000 }, noop);
 
     const socket = createMockSocket();
     connectionHandler?.(socket);
@@ -192,8 +189,7 @@ describe("nodeAdapter", () => {
   });
 
   it("destroys socket when timeout event fires", () => {
-    const adapter = nodeAdapter({ socketTimeout: 30_000 });
-    adapter.listen({ port: 2575 }, noop);
+    listen({ port: 2575, socketTimeout: 30_000 }, noop);
 
     const socket = createMockSocket();
     connectionHandler?.(socket);
@@ -206,8 +202,7 @@ describe("nodeAdapter", () => {
   it("handle.port returns correct port and handle.close() resolves", async () => {
     mockServer.address.mockReturnValue({ port: 4567 });
 
-    const adapter = nodeAdapter();
-    const handle = adapter.listen({ port: 2575 }, noop);
+    const handle = listen({ port: 2575 }, noop);
 
     expect(handle.port).toBe(4567);
     await expect(handle.close()).resolves.toBeUndefined();
@@ -218,8 +213,7 @@ describe("nodeAdapter", () => {
     // oxlint-disable-next-line typescript/no-explicit-any
     mockServer.address.mockReturnValue(null as any);
 
-    const adapter = nodeAdapter();
-    const handle = adapter.listen({ port: 2575 }, noop);
+    const handle = listen({ port: 2575 }, noop);
 
     expect(handle.port).toBe(2575);
   });
@@ -234,8 +228,7 @@ describe("nodeAdapter", () => {
     });
 
     let writable: WritableStream<Uint8Array> | undefined;
-    const adapter = nodeAdapter();
-    adapter.listen({ port: 2575 }, (s) => {
+    listen({ port: 2575 }, (s) => {
       writable = s.writable;
     });
     connectionHandler?.(socket);
@@ -251,8 +244,7 @@ describe("nodeAdapter", () => {
     const socket = createMockSocket();
 
     let writable: WritableStream<Uint8Array> | undefined;
-    const adapter = nodeAdapter();
-    adapter.listen({ port: 2575 }, (s) => {
+    listen({ port: 2575 }, (s) => {
       writable = s.writable;
     });
     connectionHandler?.(socket);
@@ -267,8 +259,7 @@ describe("nodeAdapter", () => {
     const socket = createMockSocket();
 
     let writable: WritableStream<Uint8Array> | undefined;
-    const adapter = nodeAdapter();
-    adapter.listen({ port: 2575 }, (s) => {
+    listen({ port: 2575 }, (s) => {
       writable = s.writable;
     });
     connectionHandler?.(socket);

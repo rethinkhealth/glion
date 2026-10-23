@@ -6,9 +6,10 @@ import {
 } from "@glion/ack";
 import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
+import type { NodeEnv } from "@glion/mllp/node";
 import { consola } from "consola";
 
-const app = new Mllp();
+const app = new Mllp<NodeEnv>();
 
 // Define the parser
 app.parser(parseHL7v2);
@@ -19,7 +20,7 @@ app.parser(parseHL7v2);
 app.use(async (ctx, next) => {
   const log = consola.withTag(ctx.controlId);
   log.info(
-    `← ${ctx.messageType}^${ctx.triggerEvent} from ${ctx.connection.remoteAddress}`
+    `← ${ctx.messageType}^${ctx.triggerEvent} from ${ctx.env.connection.remoteAddress}`
   );
 
   await next();

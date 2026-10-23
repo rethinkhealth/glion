@@ -10,7 +10,7 @@ import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
 
 import { serve } from "../../src/node/serve";
-import type { Server } from "../../src/node/serve";
+import type { NodeEnv, Server } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
 
 const SAMPLE_ADT = [
@@ -182,7 +182,7 @@ describe("serve() integration", () => {
 
   it("starts and listens on an OS-assigned port", async () => {
     const app = createApp();
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
 
     expect(server.port).toBeGreaterThan(0);
     // Verify we can connect
@@ -195,7 +195,7 @@ describe("serve() integration", () => {
       raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
     }));
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     const response = await sendMessage(server.port, SAMPLE_ADT);
@@ -209,7 +209,7 @@ describe("serve() integration", () => {
       raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
     }));
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     const client = createPersistentClient(server.port);
@@ -232,7 +232,7 @@ describe("serve() integration", () => {
       // processed, nothing to return
     });
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     const response = await sendMessage(server.port, SAMPLE_ADT);
@@ -244,7 +244,7 @@ describe("serve() integration", () => {
     // Only register handler for ORM^O01
     app.on("ORM^O01", async () => ({ raw: "should not reach" }));
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     // Send ADT^A01 which has no matching handler
@@ -265,7 +265,7 @@ describe("serve() integration", () => {
       };
     });
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     const client = createPersistentClient(server.port);
@@ -289,7 +289,8 @@ describe("serve() integration", () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
       const connections: number[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onConnect: (conn) => {
           connections.push(conn.id);
         },
@@ -309,7 +310,8 @@ describe("serve() integration", () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
       let disconnectedId: number | undefined;
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onDisconnect: (conn) => {
           disconnectedId = conn.id;
         },
@@ -335,7 +337,8 @@ describe("serve() integration", () => {
 
       const errors: string[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (err) => {
           errors.push(err.message);
         },
@@ -357,7 +360,8 @@ describe("serve() integration", () => {
 
       const errors: unknown[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (err) => {
           errors.push(err);
         },
@@ -376,7 +380,8 @@ describe("serve() integration", () => {
       }));
 
       const errors: { code?: string; causeName?: string }[] = [];
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (err) => {
           const e = err as Error & { code?: string; cause?: Error };
           errors.push({ causeName: e.cause?.name, code: e.code });
@@ -418,7 +423,8 @@ describe("serve() integration", () => {
       }));
 
       const errors: { code?: string }[] = [];
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (err) => {
           errors.push({ code: (err as Error & { code?: string }).code });
         },
@@ -435,7 +441,8 @@ describe("serve() integration", () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
       const ids: number[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onConnect: (conn) => {
           ids.push(conn.id);
         },
@@ -453,20 +460,20 @@ describe("serve() integration", () => {
     });
 
     it("connection state persists across messages on the same socket", async () => {
-      const app = createApp();
+      const app = new Mllp<NodeEnv>().parser(parseHL7v2);
       app.use((ctx, next) => {
-        const count = (ctx.connection.state.get("count") as number) ?? 0;
-        ctx.connection.state.set("count", count + 1);
+        const count = (ctx.env.connection.state.get("count") as number) ?? 0;
+        ctx.env.connection.state.set("count", count + 1);
         return next();
       });
       app.on("*", (ctx) => {
-        const count = ctx.connection.state.get("count") as number;
+        const count = ctx.env.connection.state.get("count") as number;
         return {
           raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`,
         };
       });
 
-      server = serve(app, { port: 0 });
+      server = serve({ handle: app.handle, port: 0 });
 
       const client = createPersistentClient(server.port);
       try {
@@ -481,20 +488,20 @@ describe("serve() integration", () => {
     });
 
     it("multiple connections get separate state Maps", async () => {
-      const app = createApp();
+      const app = new Mllp<NodeEnv>().parser(parseHL7v2);
       app.use((ctx, next) => {
-        const count = (ctx.connection.state.get("count") as number) ?? 0;
-        ctx.connection.state.set("count", count + 1);
+        const count = (ctx.env.connection.state.get("count") as number) ?? 0;
+        ctx.env.connection.state.set("count", count + 1);
         return next();
       });
       app.on("*", (ctx) => {
-        const count = ctx.connection.state.get("count") as number;
+        const count = ctx.env.connection.state.get("count") as number;
         return {
           raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`,
         };
       });
 
-      server = serve(app, { port: 0 });
+      server = serve({ handle: app.handle, port: 0 });
 
       // Two separate connections — each should have count=1
       const resp1 = await sendMessage(server.port, SAMPLE_ADT);
@@ -509,7 +516,8 @@ describe("serve() integration", () => {
       let disconnectCount = 0;
       const errors: string[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onConnect: () => {
           throw new Error("onConnect failed");
         },
@@ -538,7 +546,8 @@ describe("serve() integration", () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
       const errors: string[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onDisconnect: () => {
           throw new Error("onDisconnect failed");
         },
@@ -564,7 +573,8 @@ describe("serve() integration", () => {
         .spyOn(console, "error")
         .mockImplementation(() => {});
       try {
-        server = serve(app, {
+        server = serve({
+          handle: app.handle,
           onConnect: () => {
             throw new Error("unhandled boom");
           },
@@ -588,7 +598,7 @@ describe("serve() integration", () => {
       }));
 
       // No onConnect/onDisconnect/onError
-      server = serve(app, { port: 0 });
+      server = serve({ handle: app.handle, port: 0 });
 
       const resp = await sendMessage(server.port, SAMPLE_ADT);
       expect(resp).toContain("MSA|AA|MSG001");
@@ -676,7 +686,7 @@ describe("serve() integration", () => {
 
   it("graceful close — connecting after close fails", async () => {
     const app = createApp();
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     const port = server.port;
 
     await waitForReady(port);

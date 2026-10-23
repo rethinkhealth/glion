@@ -14,15 +14,17 @@ import type { PartialEvent } from "../../src/events";
  */
 function makeCtx(overrides: Partial<Context> = {}): Context {
   return {
-    connection: {
-      id: 1,
-      localPort: 2575,
-      remoteAddress: "127.0.0.1",
-      remotePort: 41_376,
-      secure: false,
-      state: new Map(),
-    },
     controlId: "MSG001",
+    env: {
+      connection: {
+        id: 1,
+        localPort: 2575,
+        remoteAddress: "127.0.0.1",
+        remotePort: 41_376,
+        secure: false,
+        state: new Map(),
+      },
+    },
     messageType: "ADT",
     res: undefined,
     triggerEvent: "A01",
@@ -248,7 +250,7 @@ describe("createErrorTelemetry", () => {
     const handler = createErrorTelemetry((e) => events.push(e));
     const raised = new Error("The inbound message is not valid UTF-8.");
 
-    handler(raised, makeCtx().connection);
+    handler(raised, makeCtx().env);
 
     expect(events).toEqual([
       {

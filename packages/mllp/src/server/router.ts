@@ -4,33 +4,33 @@ import type { Context, Handler, Middleware, RouteFilter } from "./types";
 /**
  * A route entry: matcher + handler.
  */
-interface Route {
-  filter: (ctx: Context) => boolean;
-  handler: Handler;
+interface Route<E> {
+  filter: (ctx: Context<E>) => boolean;
+  handler: Handler<E>;
 }
 
 /**
  * A scoped middleware entry: matcher + middleware.
  */
-interface ScopedMiddleware {
-  filter: (ctx: Context) => boolean;
-  middleware: Middleware;
+interface ScopedMiddleware<E> {
+  filter: (ctx: Context<E>) => boolean;
+  middleware: Middleware<E>;
 }
 
 /**
  * Result of matching a message against registered routes and middleware.
  */
-export interface MatchResult {
+export interface MatchResult<E> {
   /** The matched handler, or undefined if no route matches */
-  handler: Handler | undefined;
+  handler: Handler<E> | undefined;
   /** Middleware that applies to this message (global + scoped matches) */
-  middlewares: Middleware[];
+  middlewares: Middleware<E>[];
 }
 
 /**
  * Create a matcher function from a string pattern.
  */
-function patternMatcher(pattern: string): (ctx: Context) => boolean {
+function patternMatcher<E>(pattern: string): (ctx: Context<E>) => boolean {
   const parsed = parsePattern(pattern);
   return (ctx) => matchPattern(parsed, ctx.messageType, ctx.triggerEvent);
 }
@@ -51,15 +51,15 @@ function patternMatcher(pattern: string): (ctx: Context) => boolean {
  *
  * - `(ctx) => ctx.messageType === "ADT" && ctx.version === "2.5.1"`
  */
-export class Router {
-  readonly #routes: Route[] = [];
-  readonly #globalMiddleware: Middleware[] = [];
-  readonly #scopedMiddleware: ScopedMiddleware[] = [];
+export class Router<E = unknown> {
+  readonly #routes: Route<E>[] = [];
+  readonly #globalMiddleware: Middleware<E>[] = [];
+  readonly #scopedMiddleware: ScopedMiddleware<E>[] = [];
 
   /**
    * Register a route handler with a string pattern or filter function.
    */
-  add(patternOrFilter: string | RouteFilter, handler: Handler): void {
+  add(patternOrFilter: string | RouteFilter<E>, handler: Handler<E>): void {
     const filter =
       typeof patternOrFilter === "string"
         ? patternMatcher(patternOrFilter)
@@ -73,17 +73,17 @@ export class Router {
    * When `prepend` is true, the middleware is inserted at the front
    * of the chain so it executes outermost (first in, last out).
    */
-  addMiddleware(middleware: Middleware, prepend?: boolean): void;
+  addMiddleware(middleware: Middleware<E>, prepend?: boolean): void;
   /**
    * Register scoped middleware with a string pattern or filter function.
    */
   addMiddleware(
-    patternOrFilter: string | RouteFilter,
-    middleware: Middleware
+    patternOrFilter: string | RouteFilter<E>,
+    middleware: Middleware<E>
   ): void;
   addMiddleware(
-    patternOrFilterOrMiddleware: string | RouteFilter | Middleware,
-    middlewareOrPrepend?: Middleware | boolean
+    patternOrFilterOrMiddleware: string | RouteFilter<E> | Middleware<E>,
+    middlewareOrPrepend?: Middleware<E> | boolean
   ): void {
     // Global middleware: addMiddleware(fn) or addMiddleware(fn, true)
     if (
@@ -93,10 +93,12 @@ export class Router {
     ) {
       if (middlewareOrPrepend === true) {
         this.#globalMiddleware.unshift(
-          patternOrFilterOrMiddleware as Middleware
+          patternOrFilterOrMiddleware as Middleware<E>
         );
       } else {
-        this.#globalMiddleware.push(patternOrFilterOrMiddleware as Middleware);
+        this.#globalMiddleware.push(
+          patternOrFilterOrMiddleware as Middleware<E>
+        );
       }
       return;
     }
@@ -107,14 +109,14 @@ export class Router {
       const filter =
         typeof patternOrFilterOrMiddleware === "string"
           ? patternMatcher(patternOrFilterOrMiddleware)
-          : (patternOrFilterOrMiddleware as RouteFilter);
+          : (patternOrFilterOrMiddleware as RouteFilter<E>);
 
       this.#scopedMiddleware.push({ filter, middleware });
     }
   }
 
   /** The global middleware, in registration order. */
-  globalMiddleware(): Middleware[] {
+  globalMiddleware(): Middleware<E>[] {
     return [...this.#globalMiddleware];
   }
 
@@ -122,9 +124,9 @@ export class Router {
    * Match a context against registered routes and middleware.
    * Returns the first matching handler and all applicable middleware.
    */
-  match(ctx: Context): MatchResult {
+  match(ctx: Context<E>): MatchResult<E> {
     // Find first matching route (registration order)
-    let handler: Handler | undefined;
+    let handler: Handler<E> | undefined;
     for (const route of this.#routes) {
       if (route.filter(ctx)) {
         handler = route.handler;
@@ -133,7 +135,7 @@ export class Router {
     }
 
     // Collect applicable middleware: global + matching scoped
-    const middlewares: Middleware[] = [...this.#globalMiddleware];
+    const middlewares: Middleware<E>[] = [...this.#globalMiddleware];
     for (const scoped of this.#scopedMiddleware) {
       if (scoped.filter(ctx)) {
         middlewares.push(scoped.middleware);

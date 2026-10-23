@@ -8,7 +8,7 @@
  * can measure).
  */
 import { Mllp } from "@glion/mllp";
-import type { ConnectionInfo, Middleware } from "@glion/mllp";
+import type { Middleware } from "@glion/mllp";
 import { bench, describe } from "vitest";
 
 import { ORU_R01_LARGE, ADT_A01_MINIMAL } from "../fixtures/messages";
@@ -16,15 +16,6 @@ import { ORU_R01_LARGE, ADT_A01_MINIMAL } from "../fixtures/messages";
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
-
-const MOCK_CONNECTION: ConnectionInfo = {
-  id: 1,
-  localPort: 2575,
-  remoteAddress: "127.0.0.1",
-  remotePort: 12_345,
-  secure: false,
-  state: new Map(),
-};
 
 const RESPONSE_OK = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
 
@@ -54,11 +45,11 @@ describe("mllp", () => {
   app.on("ORU^R01", () => RESPONSE_OK);
 
   bench("mllp: handle small message (3 segments)", async () => {
-    await app.handle(smallBytes, MOCK_CONNECTION);
+    await app.handle(smallBytes);
   });
 
   bench("mllp: handle large message (100+ segments)", async () => {
-    await app.handle(largeBytes, MOCK_CONNECTION);
+    await app.handle(largeBytes);
   });
 
   const appMulti = new Mllp();
@@ -72,18 +63,18 @@ describe("mllp", () => {
   appMulti.on("*", () => RESPONSE_OK);
 
   bench("mllp: handle 8 routes (match 5th)", async () => {
-    await appMulti.handle(smallBytes, MOCK_CONNECTION);
+    await appMulti.handle(smallBytes);
   });
 
   const app5 = withMiddleware(5);
   const app10 = withMiddleware(10);
 
   bench("mllp: handle with 5 middleware", async () => {
-    await app5.handle(smallBytes, MOCK_CONNECTION);
+    await app5.handle(smallBytes);
   });
 
   bench("mllp: handle with 10 middleware", async () => {
-    await app10.handle(smallBytes, MOCK_CONNECTION);
+    await app10.handle(smallBytes);
   });
 
   const appTree = new Mllp();
@@ -93,14 +84,14 @@ describe("mllp", () => {
   });
 
   bench("mllp: handle with handler awaiting tree()", async () => {
-    await appTree.handle(smallBytes, MOCK_CONNECTION);
+    await appTree.handle(smallBytes);
   });
 
   const appNoMatch = new Mllp();
   appNoMatch.on("ORM^O01", () => RESPONSE_OK);
 
   bench("mllp: handle no matching route (AR reply)", async () => {
-    await appNoMatch.handle(smallBytes, MOCK_CONNECTION);
+    await appNoMatch.handle(smallBytes);
   });
 
   const appError = new Mllp();
@@ -109,6 +100,6 @@ describe("mllp", () => {
   });
 
   bench("mllp: handle handler throws (AE reply)", async () => {
-    await appError.handle(smallBytes, MOCK_CONNECTION);
+    await appError.handle(smallBytes);
   });
 });

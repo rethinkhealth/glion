@@ -1,10 +1,10 @@
 # @glion/mllp
 
-Transport-agnostic MLLP engine and middleware-driven MLLP server for HL7v2 messaging.
+Routes and middleware that reply to HL7v2 messages, on any runtime, with an MLLP server for Node.js and Bun.
 
 ## What it does
 
-`@glion/mllp` provides everything you need to send and receive HL7v2 messages over MLLP/TCP: frame encoding and decoding primitives, streaming TransformStreams for chunked TCP, and an `Mllp` class with pattern-based routing, composable middleware, and first-class `unified` processor integration. The server is transport-agnostic at its core and ships with a `serve()` helper for Node.js and Bun.
+An `Mllp` app routes each HL7v2 message to a handler by message type and trigger event, runs middleware around it, and replies with its acknowledgment. `app.handle(payload, env?)` replies to one message and depends on no runtime: a Cloudflare Worker or an AWS Lambda function calls it with each message it receives. `handleConnection()` runs the MLLP exchange over any socket that exposes Web Streams, and `serve()` from `@glion/mllp/node` listens on a TCP or TLS port and runs it on every connection.
 
 ## Install
 
@@ -14,10 +14,10 @@ npm install @glion/mllp
 
 ### Package exports
 
-| Subpath            | Description                       |
-| ------------------ | --------------------------------- |
-| `@glion/mllp`      | Core `Mllp` class and primitives  |
-| `@glion/mllp/node` | `serve()` helper for Node and Bun |
+| Subpath            | Description                                                  |
+| ------------------ | ------------------------------------------------------------ |
+| `@glion/mllp`      | `Mllp`, `handleConnection()`, `acknowledge()`; Web APIs only |
+| `@glion/mllp/node` | `serve()`, the TCP and TLS server for Node.js and Bun        |
 
 ## Use
 
@@ -39,7 +39,7 @@ const app = new Mllp()
   });
 // Any other message type is answered AR.
 
-const server = serve(app, { port: 2575 });
+const server = serve({ handle: app.handle, port: 2575 });
 ```
 
 To run the app with live reload during development and a production start command, use the `@glion/cli` package — it provides the `glion dev` / `glion start` binary and configuration loader. This README focuses on the server primitives themselves.
@@ -48,7 +48,7 @@ To run the app with live reload during development and a production start comman
 
 ### `Mllp`
 
-The server class. `new Mllp(options?)` takes the options every acknowledgment the app writes uses: the default `AA`, the NAK of a thrown error, and `ctx.ack()`.
+The app. `Mllp<E>` types `ctx.env` as `E`; it defaults to `unknown`. `new Mllp(options?)` takes the options every acknowledgment the app writes uses: the default `AA`, the NAK of a thrown error, and `ctx.ack()`.
 
 | Option       | Type                                             | Description                                                                                                                                                      |
 | ------------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -83,13 +83,32 @@ const app = new Mllp({
 
 The rest of the API chains:
 
-| Method                      | Description                                                                                                                                                                                                                                                                                             |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.parser(processor)`        | Replace the `unified` processor that reads each message; by default, `@glion/parser` and `@glion/lint-required-message-header` at `"error"`. It MUST report a fatal message for a message that does not start with an MSH.                                                                              |
-| `.use(middleware)`          | Register global middleware that runs for every message.                                                                                                                                                                                                                                                 |
-| `.use(pattern, middleware)` | Register scoped middleware that runs only for matching message types.                                                                                                                                                                                                                                   |
-| `.on(pattern, handler)`     | Register a terminal route handler for a message type or trigger event.                                                                                                                                                                                                                                  |
-| `.onError(handler)`         | Register a handler that observes every error a message raises, when it is raised: a payload that is not UTF-8, a processor throw, the processor's first fatal message, and the error of a route filter, middleware or handler. Each handler registered runs, in order; it does not change the response. |
+| Method                      | Description                                                                                                                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.parser(processor)`        | Attach a `unified` processor (or `@glion/parser` alone) as the parse stage.                                                                                                                                  |
+| `.use(middleware)`          | Register global middleware that runs for every message.                                                                                                                                                      |
+| `.use(pattern, middleware)` | Register scoped middleware that runs only for matching message types.                                                                                                                                        |
+| `.on(pattern, handler)`     | Register a terminal route handler for a message type or trigger event.                                                                                                                                       |
+| `.onError(handler)`         | Register a handler that observes the error of a payload no middleware runs on: one that is not UTF-8, or that the parser throws on. Each handler registered runs, in order; it does not change the response. |
+| `.handle(payload, env?)`    | Reply to one message, given as bytes without MLLP framing; resolves to the `Response`, or `undefined` for none. `env` becomes `ctx.env`, and is required when `E` excludes `undefined`. Bound to the app.    |
+
+### `handleConnection(handle, socket, options?)`
+
+Reply to every message on one connection. Reads MLLP frames from `socket.readable`, calls `handle` with each message, one at a time, and writes each reply to `socket.writable` with MLLP framing. Resolves once the remote system closes or resets the connection, or `options.signal` aborts; then the message in progress, if any, is answered first. Closes `socket` either way. Rejects with `MllpServerError` `PROTOCOL_VIOLATION` when the bytes break MLLP framing, and with what `handle` throws.
+
+| Argument         | Type                                                      | Description                                                                                 |
+| ---------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `handle`         | `(payload: Uint8Array) => Promise<Response \| undefined>` | Replies to one message; `app.handle`, or a function that calls it with an `env`.            |
+| `socket`         | `MllpSocket`                                              | `readable` and `writable` Web Streams, and a `close()` that never throws and is idempotent. |
+| `options.signal` | `AbortSignal`, optional                                   | Ends the connection.                                                                        |
+
+```ts
+import { handleConnection } from "@glion/mllp";
+
+await handleConnection((payload) => app.handle(payload, env), socket, {
+  signal,
+});
+```
 
 ### `acknowledge(origin, options?)`
 
@@ -114,20 +133,21 @@ toHl7v2(acknowledge(ctx.ast, { code: AckCode.ApplicationReject }));
 // MSA|AR|MSG001
 ```
 
-### `serve(app, options)` — from `@glion/mllp/node`
+### `serve(options)` — from `@glion/mllp/node`
 
-Start a Node.js or Bun TCP server that dispatches incoming MLLP frames through the `Mllp` instance.
+Start a Node.js or Bun TCP server that runs `handleConnection()` on every connection it accepts. Each message reaches `handle` with a `NodeEnv`, `{ connection }`, where `connection` is a `ConnectionInfo`: `id`, `remoteAddress`, `remotePort`, `localPort`, `secure`, and a `state` map kept across the messages of the connection.
 
-| Option           | Type                           | Description                                                                                                                                     |
-| ---------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `port`           | `number`                       | TCP port to listen on.                                                                                                                          |
-| `hostname`       | `string`, optional             | Interface to bind. Defaults to all interfaces.                                                                                                  |
-| `tls`            | `tls.TlsOptions`, optional     | Node's TLS server options, passed to `tls.createServer()` unchanged. Plain TCP without it. See [TLS](#tls).                                     |
-| `maxConnections` | `number`, optional             | Most connections open at once; one past it is closed before any message is read. Unlimited when unset. See [Connections](#connections).         |
-| `socketTimeout`  | `number`, optional             | Socket inactivity timeout in ms — an idle socket past it is destroyed. `0` (default) disables.                                                  |
-| `onConnect`      | `ConnectionCallback`, optional | Called when a new TCP connection is accepted.                                                                                                   |
-| `onDisconnect`   | `ConnectionCallback`, optional | Called when a connection closes — always fires, even if `onConnect` threw.                                                                      |
-| `onError`        | `ErrorCallback`, optional      | Called when a lifecycle callback throws, `app.handle()` rejects (a `serializer` that throws), or the byte stream breaks (`PROTOCOL_VIOLATION`). |
+| Option           | Type                                                        | Description                                                                                                                                                          |
+| ---------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `handle`         | `(payload, env: NodeEnv) => Promise<Response \| undefined>` | Replies to each message; `app.handle`.                                                                                                                               |
+| `port`           | `number`                                                    | TCP port to listen on.                                                                                                                                               |
+| `hostname`       | `string`, optional                                          | Interface to bind. Defaults to all interfaces.                                                                                                                       |
+| `tls`            | `tls.TlsOptions`, optional                                  | Node's TLS server options, passed to `tls.createServer()` unchanged. Plain TCP without it. See [TLS](#tls).                                                          |
+| `maxConnections` | `number`, optional                                          | Most connections open at once; one past it is closed before any message is read. Unlimited when unset. See [Connections](#connections).                              |
+| `socketTimeout`  | `number`, optional                                          | Socket inactivity timeout in ms — an idle socket past it is destroyed. `0` (default) disables.                                                                       |
+| `onConnect`      | `ConnectionCallback`, optional                              | Called when a new TCP connection is accepted.                                                                                                                        |
+| `onDisconnect`   | `ConnectionCallback`, optional                              | Called when a connection closes — always fires, even if `onConnect` threw.                                                                                           |
+| `onError`        | `ErrorCallback`, optional                                   | Called when a lifecycle callback throws, `handle` rejects (`NO_PARSER`), or the byte stream breaks (`PROTOCOL_VIOLATION`); the connection closes after the last two. |
 
 ### Wire framing
 
@@ -135,29 +155,34 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 
 ### Types
 
-| Type               | Description                                                                                                                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Context`          | Request context with message data and routing fields.                                                                                                                                       |
-| `MllpOptions`      | The options of `new Mllp()`: `timeZone` and `delimiters`, as `acknowledge()` takes them, and `serializer`.                                                                                  |
-| `ErrorHandler`     | The handler `app.onError()` takes: `(error, connection) => Promise<void> \| undefined`. MUST NOT throw.                                                                                     |
-| `AckOptions`       | The options of `ctx.ack()`: those of `acknowledge()` without `timeZone` and `delimiters`, which the app is given, and with an accept code (`AA` or `CA`) in `code`.                         |
-| `Response`         | Response object `{ raw: string }`.                                                                                                                                                          |
-| `Hl7v2Processor`   | Unified `Processor` type for HL7v2 (`Processor<Root, Root \| undefined, Root \| undefined>` — head/tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable). |
-| `Middleware`       | Middleware function `(ctx, next) => ...`.                                                                                                                                                   |
-| `Handler`          | Terminal route handler `(ctx) => Response \| void`; returning nothing replies `AA`.                                                                                                         |
-| `RouteFilter`      | Filter function `(ctx) => boolean` used for routing.                                                                                                                                        |
-| `MiddlewareReturn` | Return type of middleware functions.                                                                                                                                                        |
-| `ConnectionInfo`   | Connection metadata (ID, remote/local address, TLS flag, per-connection `state`).                                                                                                           |
-| `RoutePattern`     | Parsed route pattern.                                                                                                                                                                       |
+| Type                      | Description                                                                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Context`                 | Request context with message data and routing fields.                                                                                                                                       |
+| `MllpOptions`             | The options of `new Mllp()`: `timeZone` and `delimiters`, as `acknowledge()` takes them, and `serializer`.                                                                                  |
+| `ErrorHandler`            | The handler `app.onError()` takes: `(error, env) => Promise<void> \| undefined`, where `env` is what the runtime passed to `handle()`. MUST NOT throw.                                      |
+| `AckOptions`              | The options of `ctx.ack()`: those of `acknowledge()` without `timeZone` and `delimiters`, which the app is given, and with an accept code (`AA` or `CA`) in `code`.                         |
+| `Response`                | Response object `{ raw: string }`.                                                                                                                                                          |
+| `Hl7v2Processor`          | Unified `Processor` type for HL7v2 (`Processor<Root, Root \| undefined, Root \| undefined>` — head/tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable). |
+| `Middleware`              | Middleware function `(ctx, next) => ...`.                                                                                                                                                   |
+| `Handler`                 | Terminal route handler `(ctx) => Response \| void`; returning nothing replies `AA`.                                                                                                         |
+| `RouteFilter`             | Filter function `(ctx) => boolean` used for routing.                                                                                                                                        |
+| `MiddlewareReturn`        | Return type of middleware functions.                                                                                                                                                        |
+| `RoutePattern`            | Parsed route pattern.                                                                                                                                                                       |
+| `EnvArgs`                 | The `env` argument of `handle()`: optional when `E` admits `undefined`.                                                                                                                     |
+| `MllpSocket`              | The socket `handleConnection()` takes.                                                                                                                                                      |
+| `HandleConnectionOptions` | The options `handleConnection()` takes.                                                                                                                                                     |
+| `NodeEnv`                 | From `@glion/mllp/node`: `ctx.env` under `serve()`.                                                                                                                                         |
+| `ConnectionInfo`          | From `@glion/mllp/node`: a connection `serve()` accepted.                                                                                                                                   |
 
 ### Errors
 
 Server-side failures are raised (or passed to `onError`) as `MllpServerError` — branch on its stable `code`; the underlying codec or charset error rides on `cause`:
 
-| Code                 | Meaning                                                                                           |
-| -------------------- | ------------------------------------------------------------------------------------------------- |
-| `NEXT_CALLED_TWICE`  | A middleware called `next()` a second time; the message is answered as a middleware throw.        |
-| `PROTOCOL_VIOLATION` | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). |
+| Code                 | Meaning                                                                                                                           |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_CALLED_TWICE`  | A middleware called `next()` a second time; the message is answered as a middleware throw.                                        |
+| `NO_PARSER`          | `app.handle()` ran before a parser was registered via `app.parser()`.                                                             |
+| `PROTOCOL_VIOLATION` | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). Raised by `handleConnection()`. |
 
 ## Routing
 
@@ -216,7 +241,7 @@ app.use("ADT^*", async (ctx, next) => {
 
 // Short-circuit: throw without calling next().
 app.use(async (ctx, next) => {
-  if (!isAuthorized(ctx.connection.remoteAddress)) {
+  if (!isAuthorized(ctx.ast)) {
     throw new AckApplicationReject("Sender not allowed", {});
   }
   await next();
@@ -237,22 +262,22 @@ Available in every middleware and handler. Before routing, the processor has par
 
 ### Sync properties
 
-| Property               | Description                                                                                                                                                                               |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ctx.req.raw`          | The payload decoded as UTF-8.                                                                                                                                                             |
-| `ctx.connection`       | `{ id, remoteAddress, remotePort, localPort, secure, state }`.                                                                                                                            |
-| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                                                                                                                                                   |
-| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                                                                   |
-| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                                                                                               |
-| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                                                                                                  |
-| `ctx.controlId`        | MSH-10 message control ID.                                                                                                                                                                |
-| `ctx.ast`              | The tree the processor parsed and ran its transformers on.                                                                                                                                |
-| `ctx.file`             | VFile holding the processor's messages; none is fatal.                                                                                                                                    |
-| `ctx.set(key, value)`  | Store a variable.                                                                                                                                                                         |
-| `ctx.get(key)`         | Retrieve a variable.                                                                                                                                                                      |
-| `ctx.var`              | Read-only snapshot of all variables.                                                                                                                                                      |
-| `ctx.error`            | The latest error the message raised, or `undefined`. Read-only.                                                                                                                           |
-| `ctx.ack(options?)`    | The acknowledgment of this message as a reply: `acknowledge()` of its MSH as it is when `ack()` is called, with the app's `timeZone` and `delimiters`, serialized. MSA-1 is `AA` or `CA`. |
+| Property               | Description                                                                                                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctx.req.raw`          | The payload decoded as UTF-8.                                                                                                                                                         |
+| `ctx.env`              | What the runtime passed to `handle()`: a `NodeEnv` under `serve()`, a Workers environment, or `undefined`.                                                                            |
+| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                                                                                                                                               |
+| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                                                               |
+| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                                                                                           |
+| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                                                                                              |
+| `ctx.controlId`        | MSH-10 message control ID.                                                                                                                                                            |
+| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire.                                                                                                                               |
+| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).                                                                                                                                        |
+| `ctx.set(key, value)`  | Store a variable.                                                                                                                                                                     |
+| `ctx.get(key)`         | Retrieve a variable.                                                                                                                                                                  |
+| `ctx.var`              | Read-only snapshot of all variables.                                                                                                                                                  |
+| `ctx.error`            | The latest error the message raised, or `undefined`. Read-only.                                                                                                                       |
+| `ctx.ack(options?)`    | The acknowledgment of this message as a reply: `acknowledge()` of its MSH as the app's parser read it, with the app's `timeZone` and `delimiters`, serialized. MSA-1 is `AA` or `CA`. |
 
 ### Async methods
 
@@ -267,6 +292,36 @@ Available in every middleware and handler. Before routing, the processor has par
 app.on("ORU^R01", async (ctx) => {
   await saveToDatabase(await ctx.result());
 });
+```
+
+### Writing middleware — prefer `ctx.ast`
+
+Most middleware only needs routing fields or raw MSH data — both available synchronously from `ctx.ast`. Reach for `await ctx.tree()` only when you genuinely need the transformed tree.
+
+```ts
+import { AckApplicationError, AckApplicationReject } from "@glion/ack";
+import type { Middleware } from "@glion/mllp";
+
+// Good — sync, fast, no pipeline cost.
+function authMiddleware(): Middleware {
+  return (ctx, next) => {
+    if (!isAuthorized(ctx.ast)) {
+      throw new AckApplicationReject("Sender not allowed", {});
+    }
+    return next();
+  };
+}
+
+// Only when needed — triggers transform pipeline.
+function validationMiddleware(): Middleware {
+  return async (ctx, next) => {
+    const tree = await ctx.tree();
+    if (!isValid(tree)) {
+      throw new AckApplicationError("Message is not valid", {});
+    }
+    return next();
+  };
+}
 ```
 
 ## Error handling
@@ -317,7 +372,8 @@ import { serve } from "@glion/mllp/node";
 
 const app = new Mllp();
 
-const server = serve(app, {
+const server = serve({
+  handle: app.handle,
   port: 2575,
   tls: {
     cert: fs.readFileSync("cert.pem"),
@@ -329,7 +385,8 @@ const server = serve(app, {
 Mutual TLS is `requestCert` with the `ca` that issued the client certificates. A remote system that presents no certificate is refused during the handshake. One with a certificate `ca` does not verify is disconnected once the handshake completes, before any message is read:
 
 ```ts
-const server = serve(app, {
+const server = serve({
+  handle: app.handle,
   port: 2575,
   tls: {
     ca: fs.readFileSync("ca.pem"),
@@ -338,6 +395,37 @@ const server = serve(app, {
     requestCert: true,
   },
 });
+```
+
+## Runtimes
+
+`@glion/mllp` uses Web APIs only; `@glion/mllp/node` holds everything specific to Node.js.
+
+| Runtime                        | Entry point                                                        |
+| ------------------------------ | ------------------------------------------------------------------ |
+| Node.js, Bun                   | `serve({ handle: app.handle, port })`                              |
+| A Web Streams socket           | `handleConnection(app.handle, socket)`                             |
+| Cloudflare Workers, AWS Lambda | `app.handle(payload, env)`, once per message the function receives |
+
+A Worker passes its bindings as `env`, typed by `Mllp<Env>`:
+
+```ts
+import { parseHL7v2 } from "@glion/hl7v2";
+import { Mllp } from "@glion/mllp";
+
+const app = new Mllp<Env>().parser(parseHL7v2).on("ADT^A01", async (ctx) => {
+  await ctx.env.ADMISSIONS.send(await ctx.result());
+});
+
+export default {
+  async fetch(request: Request, env: Env) {
+    const reply = await app.handle(
+      new Uint8Array(await request.arrayBuffer()),
+      env
+    );
+    return new Response(reply?.raw ?? null);
+  },
+};
 ```
 
 ## Design notes

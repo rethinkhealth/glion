@@ -1,10 +1,9 @@
 /**
- * Node.js TCP/TLS adapter for the MLLP server.
+ * The Node.js TCP/TLS listener for the MLLP server.
  *
- * Implements the {@link TcpAdapter} interface over a Node.js `net.Server`, or a
- * `tls.Server` when TLS options are given. Accepted sockets are wrapped into
- * Web Streams-based {@link AdapterSocket} objects so that the rest of the MLLP
- * stack can work with a platform-agnostic streaming API.
+ * Listens with a Node.js `net.Server`, or a `tls.Server` when TLS options are
+ * given, and wraps each accepted socket into a {@link NodeSocket}: the core's
+ * Web Streams {@link MllpSocket} plus its TCP addresses.
  *
  * This module is internal to the `@glion/mllp` package and
  * is consumed by {@link serve} in `./serve.ts`.
@@ -20,20 +19,34 @@ import { createServer as createTlsServer } from "node:tls";
 import type { TlsOptions } from "node:tls";
 import { promisify } from "node:util";
 
-import type {
-  AdapterSocket,
-  ConnectionHandler,
-  ListenOptions,
-  TcpAdapter,
-  TcpHandle,
-} from "../server/adapter";
+import type { MllpSocket } from "../server/connection";
+
+/** An accepted Node.js socket, with its TCP addresses. */
+export interface NodeSocket extends MllpSocket {
+  readonly remoteAddress: string;
+  readonly remotePort: number;
+  readonly localPort: number;
+  readonly secure: boolean;
+}
+
+/** A Node.js server listening for MLLP connections. */
+export interface Listener {
+  /** The port the server is listening on. */
+  readonly port: number;
+  /** Resolves when the server has bound and started listening. */
+  readonly listening: Promise<void>;
+  /** Stops accepting connections. Resolves once the server has closed. */
+  close(): Promise<void>;
+}
 
 /**
- * Options specific to the Node.js adapter.
+ * Options for {@link listen}.
  *
  * @internal
  */
-export interface NodeAdapterOptions {
+export interface ListenOptions {
+  port: number;
+  hostname?: string;
   /** Set as the listener's `server.maxConnections`. */
   maxConnections?: number;
 
@@ -89,7 +102,7 @@ async function writeToSocket(socket: Socket, chunk: Uint8Array): Promise<void> {
 }
 
 /**
- * Wrap a Node.js `net.Socket` into a platform-agnostic {@link AdapterSocket}.
+ * Wrap a Node.js `net.Socket` into a {@link NodeSocket}.
  *
  * The readable side is created via `Readable.toWeb()` which converts the
  * Node.js stream into a WHATWG `ReadableStream<Uint8Array>`. The writable
@@ -99,10 +112,10 @@ async function writeToSocket(socket: Socket, chunk: Uint8Array): Promise<void> {
  *
  * @param socket - The raw Node.js socket to wrap.
  * @param secure - Whether this socket was accepted over TLS.
- * @returns An {@link AdapterSocket} exposing Web Streams and connection
- *   metadata.
+ * @returns A {@link NodeSocket} exposing Web Streams and connection
+ * metadata.
  */
-function wrapNodeSocket(socket: Socket, secure: boolean): AdapterSocket {
+function wrapNodeSocket(socket: Socket, secure: boolean): NodeSocket {
   const readable = Readable.toWeb(socket) as ReadableStream<Uint8Array>;
 
   const writable = new WritableStream<Uint8Array>({
@@ -149,29 +162,21 @@ function wrapNodeSocket(socket: Socket, secure: boolean): AdapterSocket {
 }
 
 /**
- * Create a Node.js {@link TcpAdapter} that listens with `tls.createServer()`
- * when `tls` is set, and with `net.createServer()` otherwise, both with
- * {@link SOCKET_OPTIONS}. A TLS socket is handed on once its TLS handshake
- * completes.
+ * Listen with `tls.createServer()` when `options.tls` is set, and with
+ * `net.createServer()` otherwise, both with {@link SOCKET_OPTIONS}, and pass
+ * every accepted socket to `onSocket` as a {@link NodeSocket}. A TLS socket is
+ * passed on once its TLS handshake completes.
  *
- * Each accepted socket gets the idle timeout via {@link configureSocket} and
- * is wrapped into an {@link AdapterSocket} before being handed to the
- * provided {@link ConnectionHandler}.
- *
- * @example
- *   ```typescript
- *   const adapter = nodeAdapter({ socketTimeout: 30_000 });
- *   const handle = adapter.listen({ port: 2575 }, (socket) => {
- *     // handle connection
- *   });
- *   ```;
- *
- * @param options - Optional listener and socket configuration.
- * @returns A {@link TcpAdapter} ready to bind to a port.
+ * @param options - Bind address, idle timeout, and TLS.
+ * @param onSocket - Called with each accepted socket.
+ * @returns The {@link Listener}.
  * @internal
  */
-export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
-  const { maxConnections, socketTimeout = 0, tls } = options ?? {};
+export function listen(
+  options: ListenOptions,
+  onSocket: (socket: NodeSocket) => void
+): Listener {
+  const { hostname, maxConnections, port, socketTimeout = 0, tls } = options;
 
   /**
    * Apply the idle timeout to an accepted connection: if `socketTimeout > 0`,
@@ -186,64 +191,60 @@ export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
     }
   }
 
+  const secure = tls !== undefined;
+  const onConnection = (socket: Socket) => {
+    configureSocket(socket);
+    onSocket(wrapNodeSocket(socket, secure));
+  };
+
+  const server: Server = secure
+    ? createTlsServer({ ...SOCKET_OPTIONS, ...tls }, onConnection)
+    : createServer(SOCKET_OPTIONS, onConnection);
+  if (maxConnections !== undefined) {
+    server.maxConnections = maxConnections;
+  }
+
+  let resolveListening!: (value: true) => void;
+  let rejectListening!: (reason: unknown) => void;
+  // oxlint-disable-next-line promise/avoid-new -- Node 18 compat (no Promise.withResolvers)
+  const listeningInternal = new Promise<true>((resolve, reject) => {
+    resolveListening = resolve;
+    rejectListening = reject;
+  });
+  // Public type is Promise<void>; the sentinel return value is an
+  // implementation detail never observed by consumers.
+  const listening = listeningInternal as Promise<unknown> as Promise<void>;
+
+  server.once("listening", () => {
+    resolveListening(true);
+  });
+  // Persistent error listener: server errors that fire before
+  // `listening` reject the startup promise; later errors (TLS,
+  // shutdown) propagate via the already-returned handle's lifecycle
+  // rather than crashing the process via an unhandled emitter error.
+  let listenFailed = false;
+  server.on("error", (err) => {
+    if (!listenFailed) {
+      listenFailed = true;
+      rejectListening(err);
+      // Close the server handle so the OS descriptor is released
+      // even if the caller never awaits `listening` again.
+      server.close();
+    }
+  });
+
+  server.listen(port, hostname);
+
+  const closeServer = promisify(server.close.bind(server));
+
   return {
-    listen(listenOpts: ListenOptions, handler: ConnectionHandler): TcpHandle {
-      const secure = tls !== undefined;
-      const onConnection = (socket: Socket) => {
-        configureSocket(socket);
-        handler(wrapNodeSocket(socket, secure));
-      };
-
-      const server: Server = secure
-        ? createTlsServer({ ...SOCKET_OPTIONS, ...tls }, onConnection)
-        : createServer(SOCKET_OPTIONS, onConnection);
-      if (maxConnections !== undefined) {
-        server.maxConnections = maxConnections;
-      }
-
-      let resolveListening!: (value: true) => void;
-      let rejectListening!: (reason: unknown) => void;
-      // oxlint-disable-next-line promise/avoid-new -- Node 18 compat (no Promise.withResolvers)
-      const listeningInternal = new Promise<true>((resolve, reject) => {
-        resolveListening = resolve;
-        rejectListening = reject;
-      });
-      // Public type is Promise<void>; the sentinel return value is an
-      // implementation detail never observed by consumers.
-      const listening = listeningInternal as Promise<unknown> as Promise<void>;
-
-      server.once("listening", () => {
-        resolveListening(true);
-      });
-      // Persistent error listener: server errors that fire before
-      // `listening` reject the startup promise; later errors (TLS,
-      // shutdown) propagate via the already-returned handle's lifecycle
-      // rather than crashing the process via an unhandled emitter error.
-      let listenFailed = false;
-      server.on("error", (err) => {
-        if (!listenFailed) {
-          listenFailed = true;
-          rejectListening(err);
-          // Close the server handle so the OS descriptor is released
-          // even if the caller never awaits `listening` again.
-          server.close();
-        }
-      });
-
-      server.listen(listenOpts.port, listenOpts.hostname, listenOpts.backlog);
-
-      const closeServer = promisify(server.close.bind(server));
-
-      return {
-        async close() {
-          await closeServer();
-        },
-        listening,
-        get port() {
-          const addr = server.address();
-          return addr && typeof addr === "object" ? addr.port : listenOpts.port;
-        },
-      };
+    async close() {
+      await closeServer();
+    },
+    listening,
+    get port() {
+      const addr = server.address();
+      return addr && typeof addr === "object" ? addr.port : port;
     },
   };
 }

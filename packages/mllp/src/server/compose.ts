@@ -19,13 +19,11 @@ import type { Context, Middleware, Response } from "./types";
  * `onError` MUST NOT throw. The second `next()` call also throws that error
  * to its caller.
  */
-export function compose(
-  middlewares: Middleware[],
-  onError: (
-    error: Error
-  ) => Response | undefined | Promise<Response | undefined>
-): (ctx: Context) => Promise<void> {
-  return async (ctx: Context): Promise<void> => {
+export function compose<E>(
+  middlewares: Middleware<E>[],
+  onError: (error: Error) => Response | undefined
+): (ctx: Context<E>) => Promise<void> {
+  return async (ctx: Context<E>): Promise<void> => {
     let index = -1;
 
     const fail = async (error: Error) => {

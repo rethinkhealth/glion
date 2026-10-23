@@ -94,8 +94,11 @@ describe("serve() with tls.requestCert", () => {
   });
 
   const listen = async () => {
-    const app = new Mllp().on("ADT^A01", () => ({ raw: ACK }));
-    server = serve(app, {
+    const app = new Mllp()
+      .parser(parseHL7v2)
+      .on("ADT^A01", () => ({ raw: ACK }));
+    server = serve({
+      handle: app.handle,
       onConnect: (connection) => {
         connections.push(connection.secure);
       },

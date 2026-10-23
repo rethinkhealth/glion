@@ -28,6 +28,7 @@ import { performance } from "node:perf_hooks";
 import { isAckCode } from "@glion/ack";
 import type { AckCode } from "@glion/ack";
 import type { Context, ErrorHandler, Middleware, Response } from "@glion/mllp";
+import type { NodeEnv } from "@glion/mllp/node";
 
 import type { PartialEvent } from "../events";
 
@@ -44,16 +45,27 @@ export function createMsgTelemetry(
     await next();
     const ms = performance.now() - start;
     const response: Response | undefined = ctx.res;
+    // The runner serves every app with serve(), which passes a NodeEnv.
+    const { connection } = ctx.env as NodeEnv;
     emit({
       ack: parseAckCode(response?.raw),
-      conn: ctx.connection.id,
+      conn: connection.id,
       control: ctx.controlId ?? "?",
       ms: Math.round(ms * 1000) / 1000,
       pattern: null,
-      remote: `${ctx.connection.remoteAddress}:${ctx.connection.remotePort}`,
+      remote: `${connection.remoteAddress}:${connection.remotePort}`,
       t: "msg",
       trigger: `${ctx.messageType ?? "?"}^${ctx.triggerEvent ?? "?"}`,
     });
+    if (ctx.error) {
+      emit({
+        conn: connection.id,
+        message: ctx.error.message,
+        stack: ctx.error.stack,
+        t: "error",
+        trigger: `${ctx.messageType}^${ctx.triggerEvent}`,
+      });
+    }
   };
 }
 
@@ -64,7 +76,9 @@ export function createMsgTelemetry(
 export function createErrorTelemetry(
   emit: (event: PartialEvent) => void
 ): ErrorHandler {
-  return (error, connection) => {
+  return (error, env) => {
+    // The runner serves every app with serve(), which passes a NodeEnv.
+    const { connection } = env as NodeEnv;
     emit({
       conn: connection.id,
       message: error.message,

@@ -10,25 +10,10 @@ import type { Context, Middleware } from "../../src/server/types";
 
 const RESPONSE_OK = { raw: "MSA|AA|OK" };
 
-const CONNECTION = {
-  id: 1,
-  localPort: 2575,
-  remoteAddress: "127.0.0.1",
-  remotePort: 12_345,
-  secure: false,
-  state: new Map(),
-};
-
-/** `raw` as the app reads it, parsed with `parseHL7v2`. */
-function request(raw: string): MllpRequest {
-  const file = new VFile(raw);
-  return { file, raw, tree: parseHL7v2.parse(file) };
-}
-
 function makeCtx(raw: string): Context {
   return createContext({
     app: { serializer: toHl7v2 },
-    connection: CONNECTION,
+    env: undefined,
     processor: parseHL7v2,
     request: request(raw),
   });
@@ -147,15 +132,18 @@ describe("Router", () => {
       expect(router.match(makeCtx(ORU_R01)).handler).toBeUndefined();
     });
 
-    it("filter can inspect connection metadata", async () => {
-      const router = new Router();
+    it("filter can inspect ctx.env", async () => {
+      const router = new Router<{ region: string }>();
       const handler = async () => RESPONSE_OK;
-      router.add(
-        (ctx) => ctx.connection.remoteAddress === "127.0.0.1",
-        handler
-      );
+      router.add((ctx) => ctx.env.region === "north", handler);
 
-      expect(router.match(makeCtx(ADT_A01)).handler).toBe(handler);
+      const ctx = createContext({
+        app: { serializer: toHl7v2 },
+        env: { region: "north" },
+        request: parseRequest(new TextEncoder().encode(ADT_A01), parseHL7v2),
+        processor: parseHL7v2,
+      });
+      expect(router.match(ctx).handler).toBe(handler);
     });
 
     it("filter can inspect the raw parsed AST", () => {

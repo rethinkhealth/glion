@@ -19,14 +19,7 @@ function request(raw: string): MllpRequest {
 function makeCtx(): Context {
   return createContext({
     app: { serializer: toHl7v2 },
-    connection: {
-      id: 1,
-      localPort: 2575,
-      remoteAddress: "127.0.0.1",
-      remotePort: 12_345,
-      secure: false,
-      state: new Map(),
-    },
+    env: undefined,
     processor: parseHL7v2,
     request: request(SAMPLE_MESSAGE),
   });

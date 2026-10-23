@@ -19,14 +19,7 @@ const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
 async function makeCtx(payload = SAMPLE_BYTES) {
   return createContext({
     app: { serializer: toHl7v2 },
-    connection: {
-      id: 1,
-      localPort: 2575,
-      remoteAddress: "192.168.1.100",
-      remotePort: 54_321,
-      secure: false,
-      state: new Map(),
-    },
+    env: undefined,
     processor: parseHL7v2,
     request: await parseRequest(payload, parseHL7v2),
   });
@@ -55,12 +48,15 @@ describe("createContext", () => {
     expect(ctx.ack().raw.split("\r")[1]).toBe("MSA|AA|CHANGED");
   });
 
-  it("exposes connection metadata", async () => {
-    const ctx = await makeCtx();
-    expect(ctx.connection.remoteAddress).toBe("192.168.1.100");
-    expect(ctx.connection.remotePort).toBe(54_321);
-    expect(ctx.connection.localPort).toBe(2575);
-    expect(ctx.connection.secure).toBe(false);
+  it("exposes what the runtime passed to handle() as ctx.env", () => {
+    const env = { region: "north" };
+    const ctx = createContext({
+      app: { serializer: toHl7v2 },
+      env,
+      request: parseRequest(SAMPLE_BYTES, parseHL7v2),
+      processor: parseHL7v2,
+    });
+    expect(ctx.env).toBe(env);
   });
 
   it("extracts messageType from MSH-9.1", async () => {
@@ -126,14 +122,7 @@ describe("createContext", () => {
 
       const ctx = createContext({
         app: { serializer: toHl7v2 },
-        connection: {
-          id: 1,
-          localPort: 2575,
-          remoteAddress: "192.168.1.100",
-          remotePort: 54_321,
-          secure: false,
-          state: new Map(),
-        },
+        env: undefined,
         processor: parseOnly,
         request: await parseRequest(SAMPLE_BYTES, parseOnly),
       });
@@ -159,14 +148,7 @@ describe("createContext", () => {
     it("works with full pipeline processor (parse + transform + compile)", async () => {
       const ctx = createContext({
         app: { serializer: toHl7v2 },
-        connection: {
-          id: 1,
-          localPort: 2575,
-          remoteAddress: "192.168.1.100",
-          remotePort: 54_321,
-          secure: false,
-          state: new Map(),
-        },
+        env: undefined,
         processor: parseHL7v2,
         request: await parseRequest(SAMPLE_BYTES, parseHL7v2),
       });
