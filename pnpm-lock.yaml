@@ -2136,9 +2136,15 @@ importers:
 
   packages/mllp:
     dependencies:
+      '@glion/ack':
+        specifier: workspace:*
+        version: link:../ack
       '@glion/ast':
         specifier: workspace:*
         version: link:../ast
+      '@glion/builder':
+        specifier: workspace:*
+        version: link:../builder
       '@glion/mllp-codec':
         specifier: workspace:*
         version: link:../mllp-codec
@@ -2151,6 +2157,12 @@ importers:
       '@glion/util-query':
         specifier: workspace:*
         version: link:../util-query
+      '@glion/util-timestamp':
+        specifier: workspace:*
+        version: link:../util-timestamp
+      '@glion/util-uid':
+        specifier: workspace:*
+        version: link:../util-uid
       unified:
         specifier: 11.0.5
         version: 11.0.5
@@ -2167,6 +2179,9 @@ importers:
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig

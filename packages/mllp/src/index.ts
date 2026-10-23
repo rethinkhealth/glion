@@ -8,6 +8,8 @@
 // Server
 // -------------
 export { MllpServerError, MllpServerErrorCode } from "./errors";
+export { acknowledge } from "./server/acknowledge";
+export type { AcknowledgeOptions } from "./server/acknowledge";
 export { getMessageInfo, Mllp } from "./server/mllp";
 export type { MessageInfo } from "./server/mllp";
 export type {
