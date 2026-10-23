@@ -1,6 +1,8 @@
 import type { Root } from "@glion/ast";
 import type { VFile } from "vfile";
 
+import type { AcknowledgeOptions } from "./acknowledge";
+
 /**
  * Connection metadata for an MLLP socket.
  */
@@ -16,9 +18,6 @@ export interface ConnectionInfo {
 /**
  * MLLP response — a raw HL7v2 string that the server encodes
  * with MLLP framing before sending back over TCP.
- *
- * Acknowledgment helpers (ack/nak) are not built in — register
- * an acknowledgment middleware via `.use()` to generate ACK/NAK responses.
  */
 export interface Response {
   readonly raw: string;
@@ -36,11 +35,20 @@ export interface Response {
 export interface Context {
   /** Incoming message data */
   readonly req: {
-    /** Original HL7 message string (without MLLP framing) */
+    /**
+     * The payload decoded as UTF-8, without MLLP framing. Empty when the
+     * payload is not UTF-8.
+     */
     readonly raw: string;
     /** Raw bytes from MLLP frame payload */
     readonly bytes: Uint8Array;
   };
+  /**
+   * The error this message raised: a payload that is not UTF-8
+   * (`MllpServerError` `INCOMPATIBLE_CHARSET`), a parser throw, or a
+   * middleware or handler throw. `undefined` while none has.
+   */
+  error: Error | undefined;
 
   /** TCP connection metadata */
   readonly connection: ConnectionInfo;
@@ -78,6 +86,11 @@ export interface Context {
    */
   result(): Promise<unknown | undefined>;
 
+  /**
+   * The acknowledgment of this message as a reply: `acknowledge(ctx.ast,
+   * options)` serialized. MSA-1 defaults to `AA`.
+   */
+  ack(options?: AcknowledgeOptions): Response;
   /** Response to send back. Set by middleware or handler. */
   res: Response | undefined;
 
@@ -122,18 +135,10 @@ export type Middleware = (
 ) => MiddlewareReturn;
 
 /**
- * Terminal route handler — may return a response or void (no response).
+ * Terminal route handler. A returned response is the reply; returning
+ * nothing replies `AA`.
  */
 export type Handler = (
-  ctx: Context
-  // oxlint-disable-next-line typescript/no-invalid-void-type
-) => Promise<Response | undefined | void> | Response | undefined | void;
-
-/**
- * Error handler — receives the error and context, returns a response.
- */
-export type ErrorHandler = (
-  err: Error,
   ctx: Context
   // oxlint-disable-next-line typescript/no-invalid-void-type
 ) => Promise<Response | undefined | void> | Response | undefined | void;

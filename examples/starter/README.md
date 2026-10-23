@@ -1,6 +1,6 @@
 # Starter Glion
 
-The minimal HL7v2 MLLP server: one route, ACK middleware, run via the [`glion`](https://github.com/rethinkhealth/glion/tree/main/packages/glion) CLI on Node.js. This is the default scaffold produced by `pnpm create glion`.
+The minimal HL7v2 MLLP server: one route, run via the [`glion`](https://github.com/rethinkhealth/glion/tree/main/packages/glion) CLI on Node.js. This is the default scaffold produced by `pnpm create glion`.
 
 ## How to use
 
@@ -29,9 +29,8 @@ The server listens on `127.0.0.1:2575` by default.
 
 The app:
 
-- Registers a single `ADT^A01` route that accepts and ACKs the message.
-- Uses `ackMiddleware()` from `@glion/mllp-ack` to turn handler return values into `AA` ACKs and throws into the matching NAK.
-- Adds a catch-all route that rejects unknown message types with an `AR` NAK.
+- Registers a single `ADT^A01` route. The handler returns nothing, so the reply is an `AA` ACK.
+- Rejects every other message type with an `AR` NAK, the server's default for a message no route matches.
 
 ## Send a test message
 
@@ -67,5 +66,3 @@ glion send samples/adt-a01.hl7 --local --json
 
 - Requires Node.js ≥ 22.
 - [`@glion/mllp`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp) — server API and routing reference.
-- [`@glion/mllp-ack`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-ack) — ACK middleware.
-- [`@glion/ack`](https://github.com/rethinkhealth/glion/tree/main/packages/ack) — `AckException` hierarchy.

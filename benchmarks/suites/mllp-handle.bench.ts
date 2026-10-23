@@ -55,11 +55,11 @@ describe("mllp", () => {
   app.on("ORU^R01", () => RESPONSE_OK);
 
   bench("mllp: handle small message (3 segments)", async () => {
-    await app.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
+    await app.handle(smallBytes, MOCK_CONNECTION);
   });
 
   bench("mllp: handle large message (100+ segments)", async () => {
-    await app.handle(ORU_R01_LARGE, largeBytes, MOCK_CONNECTION);
+    await app.handle(largeBytes, MOCK_CONNECTION);
   });
 
   const appMulti = new Mllp().parser(parseHL7v2);
@@ -73,18 +73,18 @@ describe("mllp", () => {
   appMulti.on("*", () => RESPONSE_OK);
 
   bench("mllp: handle 8 routes (match 5th)", async () => {
-    await appMulti.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
+    await appMulti.handle(smallBytes, MOCK_CONNECTION);
   });
 
   const app5 = withMiddleware(5);
   const app10 = withMiddleware(10);
 
   bench("mllp: handle with 5 middleware", async () => {
-    await app5.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
+    await app5.handle(smallBytes, MOCK_CONNECTION);
   });
 
   bench("mllp: handle with 10 middleware", async () => {
-    await app10.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
+    await app10.handle(smallBytes, MOCK_CONNECTION);
   });
 
   const appTree = new Mllp().parser(parseHL7v2);
@@ -94,23 +94,22 @@ describe("mllp", () => {
   });
 
   bench("mllp: handle with handler awaiting tree()", async () => {
-    await appTree.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
+    await appTree.handle(smallBytes, MOCK_CONNECTION);
   });
 
   const appNoMatch = new Mllp().parser(parseHL7v2);
   appNoMatch.on("ORM^O01", () => RESPONSE_OK);
 
-  bench("mllp: handle no matching route", async () => {
-    await appNoMatch.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
+  bench("mllp: handle no matching route (AR reply)", async () => {
+    await appNoMatch.handle(smallBytes, MOCK_CONNECTION);
   });
 
   const appError = new Mllp().parser(parseHL7v2);
   appError.on("ADT^A01", () => {
     throw new Error("handler error");
   });
-  appError.onError(() => RESPONSE_OK);
 
-  bench("mllp: handle handler throws, onError recovers", async () => {
-    await appError.handle(ADT_A01_MINIMAL, smallBytes, MOCK_CONNECTION);
+  bench("mllp: handle handler throws (AE reply)", async () => {
+    await appError.handle(smallBytes, MOCK_CONNECTION);
   });
 });

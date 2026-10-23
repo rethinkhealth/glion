@@ -44,7 +44,7 @@ describe("Mllp.use({ prepend })", () => {
       order.push("handler");
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(order).toEqual(["first", "second", "handler"]);
   });
 
@@ -67,7 +67,7 @@ describe("Mllp.use({ prepend })", () => {
       order.push("handler");
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(order).toEqual(["prepended", "first", "handler"]);
   });
 
@@ -94,7 +94,7 @@ describe("Mllp.use({ prepend })", () => {
       // handler does nothing
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(capturedRes).toContain("MSA|AA");
   });
 
@@ -105,7 +105,7 @@ describe("Mllp.use({ prepend })", () => {
     // Register outer middleware that sets ctx.res after next()
     app.use(async (ctx, next) => {
       await next();
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
+      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001|Outer" };
     });
 
     // Append inner middleware (default) that reads ctx.res after next()
@@ -119,9 +119,10 @@ describe("Mllp.use({ prepend })", () => {
       // handler does nothing
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    // Inner middleware finishes before outer sets ctx.res → undefined
-    expect(capturedRes).toBeUndefined();
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    // Inner middleware finishes before outer sets ctx.res → the handler's AA
+    expect(capturedRes).toContain("\rMSA|AA|MSG001");
+    expect(capturedRes).not.toContain("Outer");
   });
 
   it("scoped middleware still works alongside prepend", async () => {
@@ -147,7 +148,7 @@ describe("Mllp.use({ prepend })", () => {
       order.push("handler");
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(order).toEqual(["prepended", "global", "scoped", "handler"]);
   });
 

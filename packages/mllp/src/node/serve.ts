@@ -13,12 +13,11 @@
 import type { TlsOptions } from "node:tls";
 
 import { frame, MllpCodecError, unframe } from "@glion/mllp-codec";
-import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
+import { encodeBytes } from "@glion/util-charset";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import type { AdapterSocket } from "../server/adapter";
-import type { MessageInfo, Mllp } from "../server/mllp";
-import { getMessageInfo } from "../server/mllp";
+import type { Mllp } from "../server/mllp";
 import type { ConnectionInfo } from "../server/types";
 import { nodeAdapter } from "./adapter";
 
@@ -34,26 +33,16 @@ export type ConnectionCallback = (
 ) => void | Promise<void>;
 
 /**
- * Error callback invoked when a message handler error is unhandled.
- * Receives the error and the connection it occurred on.
- *
- * For handler errors, `messageInfo` contains the routing fields
- * (messageType, triggerEvent, controlId, version) of the message that
- * caused the error — useful for audit logging in healthcare contexts.
- * For lifecycle callback errors (onConnect/onDisconnect), `messageInfo`
- * is `undefined`.
- *
- * This fires for application-level errors (handler/middleware throws with no
- * app-level error handler, or the app-level error handler itself throws) and
- * for a server-level failure decoding an inbound message — surfaced as an
- * {@link MllpServerError} (`code` `INCOMPATIBLE_CHARSET`), never the codec's
- * own error. Stream-level errors (connection reset) do not trigger this
- * callback.
+ * Error callback invoked with an error on a connection: a throwing
+ * `onConnect` or `onDisconnect`, a message handled before a parser is
+ * registered ({@link MllpServerError} `NO_PARSER`), or a broken MLLP byte
+ * stream (`PROTOCOL_VIOLATION`). An error a message raises is answered by
+ * the app and never reaches this callback. Stream-level errors (connection
+ * reset) do not trigger it.
  */
 export type ErrorCallback = (
   error: Error,
-  connection: ConnectionInfo,
-  messageInfo: MessageInfo | undefined
+  connection: ConnectionInfo
 ) => void | Promise<void>;
 
 /**
@@ -93,10 +82,7 @@ export interface ServeOptions {
   onDisconnect?: ConnectionCallback;
 
   /**
-   * Called when a message handler error is unhandled — either no app-level
-   * error handler is registered, or the app-level error handler itself
-   * threw. Also called when lifecycle callbacks (`onConnect`,
-   * `onDisconnect`) throw.
+   * Called with an error on a connection; see {@link ErrorCallback}.
    *
    * Only logs `error.message` and connection ID to avoid leaking PHI
    * in the `console.error` fallback. Production deployments should
@@ -256,13 +242,12 @@ interface LifecycleOptions {
 async function reportError(
   error: unknown,
   connection: ConnectionInfo,
-  lifecycle: LifecycleOptions,
-  messageInfo?: MessageInfo
+  lifecycle: LifecycleOptions
 ): Promise<void> {
   const err = error instanceof Error ? error : new Error(String(error));
   try {
     if (lifecycle.onError) {
-      await lifecycle.onError(err, connection, messageInfo);
+      await lifecycle.onError(err, connection);
     } else {
       // Safe fallback: only message + connection ID, no PHI
       console.error(
@@ -300,7 +285,8 @@ async function reportError(
  *
  * - `onConnect` after the connection is established
  * - `onDisconnect` when the connection closes (always fires)
- * - `onError` when a handler error is unhandled (not for transport errors)
+ * - `onError` when a lifecycle callback throws, no parser is registered, or the
+ *   byte stream breaks
  *
  * @param app - The MLLP application to dispatch messages to.
  * @param socket - The adapter socket wrapping the underlying TCP connection.
@@ -354,26 +340,13 @@ function handleConnection(
           }
           handling = true;
 
-          // Inner try/catch separates per-message errors from stream errors.
-          // Decode failures and handler errors both route to onError and the
-          // connection survives; stream errors (connection reset) flow to the
-          // outer catch for cleanup.
+          // handle() throws only NO_PARSER; the connection survives it.
+          // Stream errors (connection reset) flow to the outer catch.
           let response: Awaited<ReturnType<Mllp["handle"]>>;
           try {
-            // unframe() emits the de-framed payload bytes; decode them to
-            // text (UTF-8) for the handler, which also receives the raw bytes.
-            // A non-UTF-8 feed throws here rather than being silently corrupted.
-            const text = decodeBytes(payload);
-            response = await app.handle(text, payload, connection);
-          } catch (messageError) {
-            // The connection survives a per-message error either way.
-            const error = toMessageError(messageError);
-            await reportError(
-              error,
-              connection,
-              lifecycle,
-              getMessageInfo(error)
-            );
+            response = await app.handle(payload, connection);
+          } catch (handleError) {
+            await reportError(handleError, connection, lifecycle);
           }
 
           // Write is outside the handler error catch — write failures
@@ -424,20 +397,4 @@ function handleConnection(
   };
 
   return { closed: processMessages(), end };
-}
-
-/**
- * A decode failure is the server's own error — translated into an
- * MllpServerError so the codec's CharsetError never reaches onError (it is
- * kept on `cause`). A handler or middleware throw is the consumer's own error
- * and passes through unchanged.
- */
-function toMessageError(error: unknown): unknown {
-  return error instanceof CharsetError
-    ? new MllpServerError(
-        MllpServerErrorCode.INCOMPATIBLE_CHARSET,
-        "The inbound message is not valid UTF-8; only UTF-8 is supported.",
-        { cause: error }
-      )
-    : error;
 }

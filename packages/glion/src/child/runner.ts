@@ -48,7 +48,7 @@
 
 import { readFile } from "node:fs/promises";
 
-import type { ConnectionInfo, MessageInfo } from "@glion/mllp";
+import type { ConnectionInfo } from "@glion/mllp";
 import { serve } from "@glion/mllp/node";
 import type { Server } from "@glion/mllp/node";
 
@@ -131,9 +131,7 @@ async function main(): Promise<void> {
   // Step 3: Install the telemetry middleware.
   // This wraps every MLLP message handler to emit a "msg" event
   // with timing, trigger, control ID, and ACK code. Prepended so it
-  // sits outermost — its `await next()` completes after all user
-  // middleware (including any acknowledgment middleware) have run, ensuring any
-  // other middleware is injected before.
+  // sits outermost and its timing covers all user middleware.
   app.use(createMsgTelemetry(emit), { prepend: true });
 
   // Step 4: Read TLS certificates (if configured).
@@ -168,17 +166,12 @@ async function main(): Promise<void> {
     onDisconnect: (conn: ConnectionInfo) => {
       emit({ id: conn.id, t: "conn.close" });
     },
-    onError: (
-      err: Error,
-      conn: ConnectionInfo,
-      info: MessageInfo | undefined
-    ) => {
+    onError: (err: Error, conn: ConnectionInfo) => {
       emit({
         conn: conn.id,
         message: err.message,
         stack: err.stack,
         t: "error",
-        trigger: info ? `${info.messageType}^${info.triggerEvent}` : undefined,
       });
     },
     port: manifest.port,

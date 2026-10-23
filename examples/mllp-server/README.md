@@ -29,10 +29,10 @@ The server listens on `127.0.0.1:2575` by default.
 
 The app:
 
-- Registers routes for `ADT^A01`, `ORM^O01`, and `ORU^R01`, plus a catch-all (`*`) that rejects unknown message types.
-- Uses `ackMiddleware()` from `@glion/mllp-ack` to turn handler return values into `AA` ACKs and handler throws into the matching NAK (`AE`/`AR`/`CE`/`CR`).
-- Adds a small logging middleware to show the onion model: log on entry, `await next()`, log the result.
-- Throws `AckApplicationError` from the `ORU^R01` route to demonstrate a typed NAK end-to-end.
+- Registers routes for `ADT^A01`, `ORM^O01`, and `ORU^R01`. Every other message type is rejected with an `AR` NAK, the server's default for a message no route matches.
+- Replies `AA` from `ADT^A01`, whose handler returns nothing, and `CA` from `ORM^O01` with `ctx.ack({ code: AckCode.CommitAccept })`.
+- Adds a small logging middleware to show the onion model: log on entry, `await next()`, then log `ctx.error` or whether a reply was sent.
+- Throws `AckApplicationError` from the `ORU^R01` route to demonstrate a typed NAK end-to-end: its code is MSA-1 and its `text` MSA-3.
 
 ## Send a test message
 
@@ -69,7 +69,6 @@ For the programmatic client API — streaming, commit-level acks, mutual TLS —
 
 - Requires Node.js ≥ 22.
 - [`@glion/mllp`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp) — server API and routing reference.
-- [`@glion/mllp-ack`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-ack) — ACK middleware.
 - [`@glion/ack`](https://github.com/rethinkhealth/glion/tree/main/packages/ack) — `AckException` hierarchy.
 - [`mllp-server-bun`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server-bun) — same app under Bun.
 - [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) — programmatic MLLP client (streaming, modes, TLS).

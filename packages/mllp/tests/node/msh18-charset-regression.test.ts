@@ -15,8 +15,8 @@ import { Mllp } from "../../src/server/mllp";
  *
  * The server decodes each inbound payload as UTF-8 via `decodeBytes(payload)`
  * (from `@glion/util-charset`), fatally. A non-UTF-8 feed (e.g. ISO 8859/1)
- * therefore fails LOUDLY — surfaced through `onError` as an `MllpServerError`
- * (`INCOMPATIBLE_CHARSET`), with no response — rather than being silently
+ * therefore fails LOUDLY — set on `ctx.error` as an `MllpServerError`
+ * (`INCOMPATIBLE_CHARSET`) and answered `AE` — rather than being silently
  * corrupted to U+FFFD and ACKed as if valid, which was the #659 bug. The
  * codec's `CharsetError` is not leaked; it rides on `cause`.
  *
@@ -97,11 +97,17 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     }
   });
 
-  it("surfaces MllpServerError via onError (not the codec's CharsetError) and never ACKs a corrupted body", async () => {
+  it("sets MllpServerError on ctx.error (not the codec's CharsetError) and answers AE, never AA", async () => {
     let handlerRan = false;
     const errors: Error[] = [];
 
     const app = new Mllp().parser(parseHL7v2);
+    app.use(async (ctx, next) => {
+      await next();
+      if (ctx.error) {
+        errors.push(ctx.error);
+      }
+    });
     app.on("*", (ctx) => {
       handlerRan = true;
       return {
@@ -109,12 +115,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
       };
     });
 
-    server = serve(app, {
-      onError: (error) => {
-        errors.push(error);
-      },
-      port: 0,
-    });
+    server = serve(app, { port: 0 });
     await waitForReady(server.port);
 
     // PID-5 family name "José" with "é" as the single Latin-1 byte 0xE9 (invalid
@@ -134,12 +135,14 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
 
     const response = await sendBytes(server.port, latin1, 1000);
 
-    // No silent corruption: the handler never sees a mangled body, no AA is
-    // returned, and the decode failure surfaces through onError as the server's
-    // own MllpServerError(INCOMPATIBLE_CHARSET) — not the codec's CharsetError,
-    // which is kept on `cause` for diagnostics.
+    // No silent corruption: the handler never sees a mangled body, the reply
+    // is AE echoing MSH-10 in MSA-2, and the decode failure is ctx.error as
+    // the server's own MllpServerError(INCOMPATIBLE_CHARSET) — not the
+    // codec's CharsetError, which is kept on `cause` for diagnostics.
     expect(handlerRan).toBe(false);
-    expect(response).toBeUndefined();
+    expect(response?.toString("utf8")).toContain(
+      "\rMSA|AE|MSG001|Application internal error"
+    );
     expect(errors.length).toBeGreaterThan(0);
     const [error] = errors;
     expect(error).toBeInstanceOf(MllpServerError);

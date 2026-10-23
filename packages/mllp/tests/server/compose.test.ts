@@ -9,7 +9,6 @@ const SAMPLE_MESSAGE = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|CTL1|P|2.5.1";
 
 function makeCtx(): Context {
   return createContext({
-    bytes: new TextEncoder().encode(SAMPLE_MESSAGE),
     connection: {
       id: 1,
       localPort: 2575,
@@ -18,9 +17,13 @@ function makeCtx(): Context {
       secure: false,
       state: new Map(),
     },
+    payload: new TextEncoder().encode(SAMPLE_MESSAGE),
     processor: parseHL7v2,
-    raw: SAMPLE_MESSAGE,
   });
+}
+
+function noAnswer(): undefined {
+  return undefined;
 }
 
 describe("compose", () => {
@@ -37,7 +40,7 @@ describe("compose", () => {
       order.push(3);
     };
 
-    await compose([mw1, mw2])(makeCtx());
+    await compose([mw1, mw2], noAnswer)(makeCtx());
     expect(order).toEqual([1, 2, 3, 4]);
   });
 
@@ -47,7 +50,7 @@ describe("compose", () => {
     });
 
     const ctx = makeCtx();
-    await compose([mw])(ctx);
+    await compose([mw], noAnswer)(ctx);
     expect(ctx.res).toBeDefined();
     expect(ctx.res?.raw).toContain("MSA|AA");
   });
@@ -64,33 +67,52 @@ describe("compose", () => {
     };
 
     const ctx = makeCtx();
-    await compose([mw1, mw2])(ctx);
+    await compose([mw1, mw2], noAnswer)(ctx);
     expect(order).toEqual([1]);
     expect(ctx.res?.raw).toContain("MSA|AR");
   });
 
-  it("propagates errors thrown by middleware", async () => {
-    const mw: Middleware = async () => {
-      throw new Error("boom");
+  it("writes the response onError gives a thrown error, and next() resolves for the outer middleware", async () => {
+    const thrown = new Error("boom");
+    const seen: Error[] = [];
+    let outerSaw: string | undefined;
+    const outer: Middleware = async (ctx, next) => {
+      await next();
+      outerSaw = ctx.res?.raw;
+    };
+    const inner: Middleware = async () => {
+      throw thrown;
     };
 
-    await expect(compose([mw])(makeCtx())).rejects.toThrow("boom");
+    const ctx = makeCtx();
+    await compose([outer, inner], (error) => {
+      seen.push(error);
+      return { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1" };
+    })(ctx);
+    expect(seen).toEqual([thrown]);
+    expect(outerSaw).toContain("MSA|AE");
+    expect(ctx.res?.raw).toContain("MSA|AE");
   });
 
-  it("throws if next() is called multiple times", async () => {
+  it("passes onError an error when next() is called multiple times", async () => {
     const mw: Middleware = async (_ctx, next) => {
       await next();
       await next();
     };
+    const seen: Error[] = [];
 
-    await expect(compose([mw])(makeCtx())).rejects.toThrow(
-      "next() called multiple times"
-    );
+    await compose([mw], (error) => {
+      seen.push(error);
+      return noAnswer();
+    })(makeCtx());
+    expect(seen.map(({ message }) => message)).toEqual([
+      "next() called multiple times",
+    ]);
   });
 
   it("works with empty middleware array", async () => {
     const ctx = makeCtx();
-    await compose([])(ctx);
+    await compose([], noAnswer)(ctx);
     expect(ctx.res).toBeUndefined();
   });
 
@@ -106,7 +128,7 @@ describe("compose", () => {
     };
 
     const ctx = makeCtx();
-    await compose([mw, handler])(ctx);
+    await compose([mw, handler], noAnswer)(ctx);
     expect(ctx.get("after")).toBe(true);
     expect(ctx.res?.raw).toContain("MSA|AA");
   });
@@ -118,7 +140,7 @@ describe("compose", () => {
     };
 
     const ctx = makeCtx();
-    await compose([mw])(ctx);
+    await compose([mw], noAnswer)(ctx);
     expect(ctx.res?.raw).toContain("Direct");
   });
 
@@ -132,7 +154,7 @@ describe("compose", () => {
     };
 
     const ctx = makeCtx();
-    await compose([outer, inner])(ctx);
+    await compose([outer, inner], noAnswer)(ctx);
     expect(ctx.res?.raw).toContain("Outer");
   });
 });
