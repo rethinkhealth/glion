@@ -24,7 +24,7 @@ describe("acknowledge", () => {
     const origin = parseHL7v2.parse(ADT_A01);
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" }))).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK001|P|2.5.1\rMSA|AA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
     );
   });
 
@@ -40,7 +40,7 @@ describe("acknowledge", () => {
         })
       )
     ).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK001|P|2.5.1\rMSA|AE|MSG001|Patient not on file"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AE|MSG001|Patient not on file"
     );
   });
 
@@ -50,7 +50,7 @@ describe("acknowledge", () => {
     expect(
       toHl7v2(acknowledge(origin, { code: AckCode.CommitAccept, id: "ACK001" }))
     ).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK001|P|2.5.1\rMSA|CA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|CA|MSG001"
     );
   });
 
@@ -77,13 +77,33 @@ describe("acknowledge", () => {
     );
   });
 
+  it("writes MSH-9 without MSH-9.3 before v2.3.1", () => {
+    const origin = parseHL7v2.parse(
+      "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01|MSG001|P|2.3"
+    );
+
+    expect(toHl7v2(acknowledge(origin, { id: "ACK001" })).split("\r")[0]).toBe(
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK001|P|2.3"
+    );
+  });
+
+  it("copies composite sender, receiver, and processing ID fields whole", () => {
+    const origin = parseHL7v2.parse(
+      "MSH|^~\\&|SendApp^1.2.3^ISO|^2.16.840^ISO|RecvApp|RecvFac|20240101120000||ADT^A01|MSG001|P^T|2.5.1"
+    );
+
+    expect(toHl7v2(acknowledge(origin, { id: "ACK001" })).split("\r")[0]).toBe(
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp^1.2.3^ISO|^2.16.840^ISO|20240115023000||ACK^A01^ACK|ACK001|P^T|2.5.1"
+    );
+  });
+
   it("echoes MSH-12.1 when MSH-12 carries the full version identifier", () => {
     const origin = parseHL7v2.parse(
       "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01|MSG001|P|2.5.1^USA^ISO"
     );
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" }))).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK001|P|2.5.1\rMSA|AA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
     );
   });
 
@@ -95,7 +115,7 @@ describe("acknowledge", () => {
     });
 
     expect(toHl7v2(ack).split("\r")[0]).toBe(
-      "MSH|^~\\&|Glion|Lab|SendApp|SendFac|20240115023000||ACK^A01|ACK001|P|2.5.1"
+      "MSH|^~\\&|Glion|Lab|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1"
     );
   });
 
@@ -104,7 +124,7 @@ describe("acknowledge", () => {
     const ack = acknowledge(origin, { id: "ACK001", processingId: "T" });
 
     expect(toHl7v2(ack).split("\r")[0]).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK001|T|2.5.1"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|T|2.5.1"
     );
   });
 
@@ -114,7 +134,7 @@ describe("acknowledge", () => {
     );
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" })).split("\r")[0]).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK001|P|2.5.1"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1"
     );
   });
 
@@ -137,8 +157,15 @@ describe("acknowledge", () => {
     const after = toHl7v2(acknowledge(origin, { id: "ACK001" }));
 
     expect(before).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|Smith\\T\\Jones|20240115023000||ACK^A01|ACK001|P|2.5.1\rMSA|AA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|Smith\\T\\Jones|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
     );
     expect(after).toBe(before);
+  });
+
+  it("passes the recommended lint rules for a v2.5.1 message", async () => {
+    const origin = parseHL7v2.parse(ADT_A01);
+    const file = await parseHL7v2.process(toHl7v2(acknowledge(origin)));
+
+    expect(file.messages.filter(({ fatal }) => fatal)).toEqual([]);
   });
 });

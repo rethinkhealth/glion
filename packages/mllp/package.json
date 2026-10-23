@@ -58,6 +58,7 @@
     "@glion/parser": "workspace:*",
     "@glion/util-charset": "workspace:*",
     "@glion/util-query": "workspace:*",
+    "@glion/util-semver": "workspace:*",
     "@glion/util-timestamp": "workspace:*",
     "@glion/util-uid": "workspace:*",
     "unified": "11.0.5",

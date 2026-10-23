@@ -2157,6 +2157,9 @@ importers:
       '@glion/util-query':
         specifier: workspace:*
         version: link:../util-query
+      '@glion/util-semver':
+        specifier: workspace:*
+        version: link:../util-semver
       '@glion/util-timestamp':
         specifier: workspace:*
         version: link:../util-timestamp

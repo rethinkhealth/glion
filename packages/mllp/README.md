@@ -55,15 +55,15 @@ The server class. Built with a fluent chainable API:
 
 ### `acknowledge(origin, options?)`
 
-Returns the acknowledgment of the parsed message `origin` as a `Root`: an MSH and an MSA segment, never an ERR segment. The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), sets MSH-7 to the current local time and MSH-9 to `ACK^<MSH-9.2>`, and echoes MSH-12.1. MSA-2 echoes the original MSH-10.
+Returns the acknowledgment of the parsed message `origin` as a `Root`: an MSH and an MSA segment, never an ERR segment. The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each field copied whole, sets MSH-7 to the current local time and MSH-9 to `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1), and echoes MSH-12.1. MSA-2 echoes the original MSH-10.
 
-| Option         | Type                                  | Description                                               |
-| -------------- | ------------------------------------- | --------------------------------------------------------- |
-| `code`         | `AckCode`, optional                   | MSA-1. Defaults to `AA`.                                  |
-| `text`         | `string`, optional                    | MSA-3, omitted when absent. Sent to the trading partner.  |
-| `id`           | `string`, optional                    | MSH-10. Defaults to a fresh `uid()`.                      |
-| `sending`      | `{ application, facility }`, optional | MSH-3 and MSH-4. Default to the original MSH-5 and MSH-6. |
-| `processingId` | `string`, optional                    | MSH-11. Defaults to the original MSH-11, else `P`.        |
+| Option         | Type                                  | Description                                                                 |
+| -------------- | ------------------------------------- | --------------------------------------------------------------------------- |
+| `code`         | `AckCode`, optional                   | MSA-1. Defaults to `AA`.                                                    |
+| `text`         | `string`, optional                    | MSA-3, omitted when absent. Sent to the trading partner.                    |
+| `id`           | `string`, optional                    | MSH-10. Defaults to a fresh `uid()`.                                        |
+| `sending`      | `{ application, facility }`, optional | MSH-3.1 and MSH-4.1. Default to the original MSH-5 and MSH-6, copied whole. |
+| `processingId` | `string`, optional                    | MSH-11. Defaults to the original MSH-11, copied whole, else `P`.            |
 
 ```ts
 import { AckCode } from "@glion/ack";
@@ -76,7 +76,7 @@ toHl7v2(
     text: "Message rejected",
   })
 );
-// MSH|^~\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|<uid>|P|2.5.1
+// MSH|^~\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|<uid>|P|2.5.1
 // MSA|AR|MSG001|Message rejected
 ```
 
