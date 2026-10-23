@@ -321,6 +321,8 @@ Run these in order after editing. Each is pass/fail; "looks done" is not done.
 
 Steps 1 and 2 correspond to the "Mutation testing" comment CI posts on the PR; the reviewer compares your report against it.
 
+A fast-check property follows the `glion-property-tests` skill: invoke it before writing, changing, or reviewing one. A property fails loudly on every run, never counts a caught error as a pass, and records a mutant it kills.
+
 - **Vitest**, base config in `tools/testing/src/vitest.config.ts` (`@glion/testing`).
 - Test files: `**/*.test.ts`, `**/*.test.tsx`.
 - Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier. The one exception is `tests/regressions/`, one file per bug, `<issue>-<symptom>.test.ts`, with the header CONTRIBUTING describes.
