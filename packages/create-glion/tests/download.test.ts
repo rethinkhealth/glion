@@ -24,6 +24,10 @@ vi.mock(import("giget"), () => ({ downloadTemplate: vi.fn() }));
 
 const STARTER: Template = exampleTemplate("starter");
 
+// giget names the cache entry after the template name, with each character
+// other than a letter, a digit, or a dash written as `-`.
+const GIGET_CACHE_REPLACED = /[^\da-z-]/gi;
+
 const extracts = (files: Record<string, string>) =>
   vi.mocked(downloadTemplate).mockImplementation(async (_input, options) => {
     for (const [name, content] of Object.entries(files)) {
@@ -134,12 +138,27 @@ describe("download", () => {
         Accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
       },
-      name: "rethinkhealth-glion",
+      name: "384cb11cbcc498f5c79801c8e3f06edd9f69cf922db7d23250f71a7f79461d3f",
       subdir: "examples/starter",
       tar: "https://api.github.com/repos/rethinkhealth/glion/tarball/main",
       url: "https://github.com/rethinkhealth/glion/tree/main/examples/starter",
       version: "main",
     });
+  });
+
+  it("gives each repository its own entry in giget's cache", async () => {
+    const cacheEntry = async (owner: string, repo: string) => {
+      vi.mocked(downloadTemplate).mockReset();
+      extracts({ "package.json": "{}" });
+      await download({ owner, path: "", ref: "main", repo }, dir);
+      const { name } = await providedInfo();
+      return name.replaceAll(GIGET_CACHE_REPLACED, "-");
+    };
+
+    expect(await cacheEntry("acme-tools", "template")).not.toBe(
+      await cacheEntry("acme", "tools-template")
+    );
+    expect(await cacheEntry("a", "b.c")).not.toBe(await cacheEntry("a", "b-c"));
   });
 
   it("asks giget for exactly the template, whatever its ref and folder hold", async () => {
