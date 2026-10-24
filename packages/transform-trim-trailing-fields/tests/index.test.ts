@@ -112,23 +112,23 @@ describe("hl7v2TransformTrimTrailingFields", () => {
       .use(hl7v2TransformTrimTrailingFields, { keepTrailingField: true })
       .use(hl7v2ToHl7v2);
 
-    it("keeps one empty field at the end of a segment", async () => {
+    it("keeps the field separator after the last field with a value", async () => {
       expect(String(await keepTrailingField.process("PID|1|DOE|||"))).toBe(
         "PID|1|DOE|"
       );
     });
 
-    it("keeps one empty field at the end of a segment with only empty fields", async () => {
+    it("keeps the field separator after the Segment ID of a segment with only empty fields", async () => {
       expect(String(await keepTrailingField.process("PID|||"))).toBe("PID|");
     });
 
-    it("leaves a segment without trailing empty fields as it is", async () => {
+    it("leaves a segment without a trailing field separator as it is", async () => {
       const source = "MSH|^~\\&|APP\rPID|1|DOE^JOHN";
 
       expect(String(await keepTrailingField.process(source))).toBe(source);
     });
 
-    it("leaves a segment that ends with one empty field as it is", async () => {
+    it("leaves a segment with one trailing field separator as it is", async () => {
       const tree = m(s("PID", f("1"), f()));
 
       await unified()

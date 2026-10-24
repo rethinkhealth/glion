@@ -6,10 +6,9 @@ import type { Plugin } from "unified";
 /** Options for {@link hl7v2TransformTrimTrailingFields}. */
 export interface TransformTrimTrailingFieldsOptions {
   /**
-   * Keep one empty field at the end of a segment that ends with empty fields,
-   * so `PID|1|DOE||` becomes `PID|1|DOE|` (`true`), or remove them all
-   * (`false`, the default). A segment that ends with a field with a value is
-   * left as it is either way.
+   * Keep the field separator after a segment's last field with a value, so
+   * `PID|1|DOE||` becomes `PID|1|DOE|` (`true`), or remove it (`false`, the
+   * default). A segment without one is left as it is.
    */
   keepTrailingField?: boolean;
 }

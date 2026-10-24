@@ -33,9 +33,9 @@ console.log(String(file));
 
 ## Options
 
-| Option              | Type      | Default | Description                                                                                                                            |
-| ------------------- | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `keepTrailingField` | `boolean` | `false` | Keep one empty field at the end of a segment that ends with empty fields, so the segment is written with one trailing field separator. |
+| Option              | Type      | Default | Description                                                                                                             |
+| ------------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `keepTrailingField` | `boolean` | `false` | Keep the field separator after a segment's last field with a value, so `PID\|1\|DOE\|\|` is written as `PID\|1\|DOE\|`. |
 
 ```ts
 unified()
@@ -52,7 +52,7 @@ unified()
 
 A `unified` transform plugin. Also the package's default export.
 
-Visits every segment, including segments inside groups, and removes the empty fields after its last field that is not empty, or all of them but one with `keepTrailingField`. The empty fields before that field stay in place, so field positions do not change. A segment that ends with a field with a value is left as it is.
+Visits every segment, including segments inside groups, and removes the empty fields after its last field that is not empty. With `keepTrailingField`, it keeps the field separator after that field. The empty fields before that field stay in place, so field positions do not change. A segment that ends with a field with a value is left as it is.
 
 ```ts
 import type { Plugin } from "unified";
