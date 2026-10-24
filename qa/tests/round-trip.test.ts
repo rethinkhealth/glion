@@ -37,52 +37,6 @@ const roundTripProcessor = unified()
   .use(hl7v2ToHl7v2)
   .freeze();
 
-/**
- * Same pipeline with `trailingDelimiter: true` — re-emits the terminal field
- * delimiter so the serializer output matches inputs that have trailing pipes.
- */
-const roundTripProcessorTrailing = unified()
-  .use(hl7v2Parser)
-  .use(hl7v2AnnotateDelimiters)
-  .use(hl7v2ToHl7v2, { trailingDelimiter: true })
-  .freeze();
-
-/**
- * Normalize then strip ALL trailing field delimiters per segment.
- *
- * Detects the field separator from MSH-1 (the character at position 3)
- * rather than hardcoding `|`, because custom-delimiter messages use
- * non-standard field separators. Malformed MSH segments can absorb the
- * field separator into their encoding characters, causing each round-trip
- * to grow by one trailing delimiter. Stripping all trailing delimiters is
- * the only semantically correct comparison per the HL7v2 spec (trailing
- * empty fields are meaningless).
- */
-function detectFieldSep(normalized: string): string {
-  // The HL7v2 parser reads the field separator from position 3
-  // of the first segment (MSH-1). Mutated messages may corrupt
-  // the segment name (e.g., " SH", "MSwH") but the parser still
-  // uses position 3 as the delimiter when the first segment has
-  // a 3-char prefix. Only fall back to "|" when position 3 is
-  // alphanumeric (likely data, not a delimiter) or missing.
-  const ch = normalized[3];
-  if (ch && !/[a-z0-9]/i.test(ch)) {
-    return ch;
-  }
-  return "|";
-}
-
-function normalizeTrailing(msg: string, fieldSep?: string): string {
-  const normalized = normalize(msg);
-  const sep = fieldSep ?? detectFieldSep(normalized);
-  const escaped = sep.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const trailingPattern = new RegExp(`${escaped}+$`);
-  return normalized
-    .split("\r")
-    .map((seg) => seg.replace(trailingPattern, ""))
-    .join("\r");
-}
-
 // ---------------------------------------------------------------------------
 // Fixed fixture round-trip tests
 // ---------------------------------------------------------------------------
@@ -132,11 +86,11 @@ describe("QR4: round-trip data fidelity", () => {
       expect(normalize(String(result))).toBe(normalize(source));
     });
 
-    it("empty segments preserve non-empty fields through round-trip", async () => {
+    it("trailing empty fields round-trip as written", async () => {
       const source = readFixture("edge-empty-segments.hl7");
-      const result = await roundTripProcessorTrailing.process(source);
+      const result = await roundTripProcessor.process(source);
 
-      expect(normalizeTrailing(String(result))).toBe(normalizeTrailing(source));
+      expect(normalize(String(result))).toBe(normalize(source));
     });
   });
 
@@ -145,43 +99,12 @@ describe("QR4: round-trip data fidelity", () => {
   // ---------------------------------------------------------------------------
 
   describe("fuzz: valid messages", () => {
-    it("round-trip is idempotent — second pass produces the same output", async () => {
+    it("round-trips exactly", async () => {
       await fc.assert(
         fc.asyncProperty(arbHL7v2Message, async (msg) => {
-          const firstPass = String(
-            await roundTripProcessorTrailing.process(msg)
-          );
-          const secondPass = String(
-            await roundTripProcessorTrailing.process(firstPass)
-          );
+          const serialized = String(await roundTripProcessor.process(msg));
 
-          expect(normalizeTrailing(secondPass)).toBe(
-            normalizeTrailing(firstPass)
-          );
-        }),
-        { numRuns: 300 }
-      );
-    });
-
-    it("messages without trailing empties round-trip exactly", async () => {
-      await fc.assert(
-        fc.asyncProperty(arbHL7v2Message, async (msg) => {
-          // Strip trailing pipes from each segment, then drop segments
-          // that became empty (just a name with no fields). The parser
-          // normalizes both trailing empty fields and all-empty segments.
-          const cleaned = normalize(msg)
-            .split("\r")
-            .map((seg) => seg.replace(/\|+$/, ""))
-            .filter((seg) => seg.includes("|"))
-            .join("\r");
-
-          if (cleaned.length === 0) {
-            return;
-          }
-
-          const serialized = String(await roundTripProcessor.process(cleaned));
-
-          expect(normalize(serialized)).toBe(cleaned);
+          expect(normalize(serialized)).toBe(normalize(msg));
         }),
         { numRuns: 300 }
       );
@@ -220,20 +143,12 @@ describe("QR4: round-trip data fidelity", () => {
   });
 
   describe("fuzz: custom delimiter messages", () => {
-    it("round-trip is idempotent — second pass produces the same output", async () => {
+    it("round-trips exactly", async () => {
       await fc.assert(
         fc.asyncProperty(arbHL7v2MessageCustomDelimiters, async (msg) => {
-          const firstPass = String(
-            await roundTripProcessorTrailing.process(msg)
-          );
-          const secondPass = String(
-            await roundTripProcessorTrailing.process(firstPass)
-          );
+          const serialized = String(await roundTripProcessor.process(msg));
 
-          const sep = detectFieldSep(normalize(firstPass));
-          expect(normalizeTrailing(secondPass, sep)).toBe(
-            normalizeTrailing(firstPass, sep)
-          );
+          expect(normalize(serialized)).toBe(normalize(msg));
         }),
         { numRuns: 300 }
       );
@@ -248,7 +163,7 @@ describe("QR4: round-trip data fidelity", () => {
         fc.asyncProperty(arbMutatedCustomDelimiterMessage, async (msg) => {
           let firstPass: string;
           try {
-            firstPass = String(await roundTripProcessorTrailing.process(msg));
+            firstPass = String(await roundTripProcessor.process(msg));
           } catch {
             skipCount++;
             return;
@@ -256,18 +171,13 @@ describe("QR4: round-trip data fidelity", () => {
 
           let secondPass: string;
           try {
-            secondPass = String(
-              await roundTripProcessorTrailing.process(firstPass)
-            );
+            secondPass = String(await roundTripProcessor.process(firstPass));
           } catch {
             skipCount++;
             return;
           }
 
-          const sep = detectFieldSep(normalize(firstPass));
-          expect(normalizeTrailing(secondPass, sep)).toBe(
-            normalizeTrailing(firstPass, sep)
-          );
+          expect(normalize(secondPass)).toBe(normalize(firstPass));
         }),
         { numRuns: 300 }
       );
@@ -284,18 +194,16 @@ describe("QR4: round-trip data fidelity", () => {
         fc.asyncProperty(arbMutatedMessage, async (msg) => {
           let firstPass: string;
           try {
-            firstPass = String(await roundTripProcessorTrailing.process(msg));
+            firstPass = String(await roundTripProcessor.process(msg));
           } catch {
             skipCount++;
             return;
           }
 
           const secondPass = String(
-            await roundTripProcessorTrailing.process(firstPass)
+            await roundTripProcessor.process(firstPass)
           );
-          expect(normalizeTrailing(secondPass)).toBe(
-            normalizeTrailing(firstPass)
-          );
+          expect(normalize(secondPass)).toBe(normalize(firstPass));
         }),
         { numRuns: 300 }
       );
@@ -308,13 +216,12 @@ describe("QR4: round-trip data fidelity", () => {
   describe("fuzz: adversarial inputs", () => {
     it("any parseable adversarial input stabilizes after one round-trip", async () => {
       let skipCount = 0;
-      let idempotentCount = 0;
 
       await fc.assert(
         fc.asyncProperty(arbAdversarialInput, async (msg) => {
           let firstPass: string;
           try {
-            firstPass = String(await roundTripProcessorTrailing.process(msg));
+            firstPass = String(await roundTripProcessor.process(msg));
           } catch {
             skipCount++;
             return;
@@ -322,25 +229,18 @@ describe("QR4: round-trip data fidelity", () => {
 
           let secondPass: string;
           try {
-            secondPass = String(
-              await roundTripProcessorTrailing.process(firstPass)
-            );
+            secondPass = String(await roundTripProcessor.process(firstPass));
           } catch {
             skipCount++;
             return;
           }
 
-          if (normalizeTrailing(secondPass) === normalizeTrailing(firstPass)) {
-            idempotentCount++;
-          }
+          expect(normalize(secondPass)).toBe(normalize(firstPass));
         }),
         { numRuns: 300 }
       );
 
       expect(skipCount).toBeLessThan(150);
-      // Most parseable adversarial inputs should be idempotent.
-      // Allow some non-idempotent edge cases (e.g., lone escape chars).
-      expect(idempotentCount).toBeGreaterThan(0);
     });
   });
 });

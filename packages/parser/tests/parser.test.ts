@@ -139,15 +139,40 @@ describe("parser", () => {
       });
     });
 
-    it("drops trailing empty field created by final delimiter", () => {
-      const input = "PID|1|";
-      const root = parseHL7v2(input);
+    it("reads a trailing field delimiter as an empty last field", () => {
+      const root = parseHL7v2("PID|1|");
       const seg = root.children[0] as Segment;
 
-      // Trailing delimiter should not create a field
-      expect(seg.children).toHaveLength(1); // 1 field
+      expect(seg.children).toHaveLength(2);
+      expect(getFieldValue(seg, 0)).toBe("1");
+      expect(seg.children[1]).toMatchObject({ children: [], type: "field" });
+    });
 
-      expect(root).toMatchSnapshot(); // for control
+    it("reads every trailing field delimiter as an empty field", () => {
+      const root = parseHL7v2("PID|1|||");
+      const seg = root.children[0] as Segment;
+
+      expect(seg.children).toHaveLength(4);
+      expect(seg.children.slice(1)).toMatchObject([
+        { children: [], type: "field" },
+        { children: [], type: "field" },
+        { children: [], type: "field" },
+      ]);
+    });
+
+    it("reads a field delimiter right after the Segment ID as one empty field", () => {
+      const root = parseHL7v2("PID|");
+      const seg = root.children[0] as Segment;
+
+      expect(seg.children).toHaveLength(1);
+      expect(seg.children[0]).toMatchObject({ children: [], type: "field" });
+    });
+
+    it("reads a Segment ID with no field delimiter as a segment with no fields", () => {
+      const root = parseHL7v2("PID");
+      const seg = root.children[0] as Segment;
+
+      expect(seg.children).toHaveLength(0);
     });
 
     it("preserves multiple consecutive empty fields except final", () => {
@@ -639,6 +664,39 @@ describe("parser", () => {
       expect(root.type).toBe("root");
       expect(root.children.length).toBeGreaterThanOrEqual(1);
       expect(root.children[0]).toMatchObject({ name: "" });
+    });
+
+    it("reads a line that starts with a field delimiter as an empty Segment ID and its fields", () => {
+      const seg = parseHL7v2("|A|B").children[0] as Segment;
+
+      expect(seg.name).toBe("");
+      expect(seg.children).toHaveLength(2);
+      expect(getFieldValue(seg, 0)).toBe("A");
+      expect(getFieldValue(seg, 1)).toBe("B");
+    });
+
+    it("starts a segment with an empty Segment ID where its line starts", () => {
+      const seg = parseHL7v2("PID|1\r|A").children[1] as Segment;
+
+      expect(seg.position?.start).toStrictEqual({
+        column: 1,
+        line: 2,
+        offset: 6,
+      });
+    });
+
+    it("reads the text before a line's first field delimiter as its Segment ID", () => {
+      const seg = parseHL7v2("^A~B&C|D").children[0] as Segment;
+
+      expect(seg.name).toBe("^A~B&C");
+      expect(seg.children).toHaveLength(1);
+      expect(getFieldValue(seg, 0)).toBe("D");
+    });
+
+    it("reads a line with no field delimiter as a Segment ID alone", () => {
+      const seg = parseHL7v2("PID|1\r^A").children[1] as Segment;
+
+      expect(seg).toMatchObject({ children: [], name: "^A" });
     });
 
     it("separates unnamed segment from subsequent named segment", () => {

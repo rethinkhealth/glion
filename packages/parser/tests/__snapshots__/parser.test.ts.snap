@@ -2241,9 +2241,9 @@ exports[`parser > component Delimiter Handling > handles leading component delim
               "offset": 10,
             },
             "start": {
-              "column": 6,
+              "column": 5,
               "line": 1,
-              "offset": 5,
+              "offset": 4,
             },
           },
           "type": "field",
@@ -2545,111 +2545,6 @@ exports[`parser > component Delimiter Handling > preserves intermediate empty co
       "column": 17,
       "line": 1,
       "offset": 16,
-    },
-    "start": {
-      "column": 1,
-      "line": 1,
-      "offset": 0,
-    },
-  },
-  "type": "root",
-}
-`;
-
-exports[`parser > field Delimiter Handling > drops trailing empty field created by final delimiter 1`] = `
-{
-  "children": [
-    {
-      "children": [
-        {
-          "children": [
-            {
-              "children": [
-                {
-                  "children": [
-                    {
-                      "position": {
-                        "end": {
-                          "column": 6,
-                          "line": 1,
-                          "offset": 5,
-                        },
-                        "start": {
-                          "column": 5,
-                          "line": 1,
-                          "offset": 4,
-                        },
-                      },
-                      "type": "subcomponent",
-                      "value": "1",
-                    },
-                  ],
-                  "position": {
-                    "end": {
-                      "column": 6,
-                      "line": 1,
-                      "offset": 5,
-                    },
-                    "start": {
-                      "column": 5,
-                      "line": 1,
-                      "offset": 4,
-                    },
-                  },
-                  "type": "component",
-                },
-              ],
-              "position": {
-                "end": {
-                  "column": 6,
-                  "line": 1,
-                  "offset": 5,
-                },
-                "start": {
-                  "column": 5,
-                  "line": 1,
-                  "offset": 4,
-                },
-              },
-              "type": "field-repetition",
-            },
-          ],
-          "position": {
-            "end": {
-              "column": 6,
-              "line": 1,
-              "offset": 5,
-            },
-            "start": {
-              "column": 5,
-              "line": 1,
-              "offset": 4,
-            },
-          },
-          "type": "field",
-        },
-      ],
-      "name": "PID",
-      "position": {
-        "end": {
-          "column": 7,
-          "line": 1,
-          "offset": 6,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "type": "segment",
-    },
-  ],
-  "position": {
-    "end": {
-      "column": 7,
-      "line": 1,
-      "offset": 6,
     },
     "start": {
       "column": 1,

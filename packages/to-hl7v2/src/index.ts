@@ -24,8 +24,6 @@ export interface Hl7v2ToHl7v2Options {
    * (`false`). MSH-1 and MSH-2 are written as they are either way.
    */
   encodeEscapes?: boolean;
-  /** Append a field delimiter after the last field in each segment. */
-  trailingDelimiter?: boolean;
 }
 
 /**
@@ -65,7 +63,6 @@ export function toHl7v2(
     ...(node.type === "root" ? queryDelimiters(node) : DEFAULT_DELIMITERS),
     ...delimiters,
   };
-  const trailing = options?.trailingDelimiter === true;
   const encode = options?.encodeEscapes ?? true;
 
   // -- leaf & field-level serializers ------------------------------------
@@ -86,17 +83,9 @@ export function toHl7v2(
 
   // -- segment-level serializers ----------------------------------------
 
-  const fields = (parts: string[]): string => {
-    const joined = parts.join(d.field);
-    return trailing && joined.length > 0 ? `${joined}${d.field}` : joined;
-  };
-
   const segment = (seg: Segment): string => {
-    const body = fields(seg.children.map(field));
-    if (!seg.name) {
-      return body;
-    }
-    return body ? `${seg.name}${d.field}${body}` : seg.name;
+    const body = seg.children.map(field).join(d.field);
+    return seg.children.length ? `${seg.name}${d.field}${body}` : seg.name;
   };
 
   // MSH-1 is the field separator itself — skip it and emit structurally.
@@ -109,8 +98,7 @@ export function toHl7v2(
         toHl7v2(encodingCharacters, d, { ...options, encodeEscapes: false })
       );
     }
-    const tail = fields(parts);
-    return tail.length ? `MSH${d.field}${tail}` : `MSH${d.field}`;
+    return `MSH${d.field}${parts.join(d.field)}`;
   };
 
   const line = (seg: Segment): string =>

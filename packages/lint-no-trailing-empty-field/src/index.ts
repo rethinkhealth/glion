@@ -5,8 +5,13 @@ import { lintRule } from "unified-lint-rule";
 import { SKIP, visitParents } from "unist-util-visit-parents";
 
 const messages = {
-  trailingEmptyFields: (fieldCount: number) =>
-    `The segment ends with ${pluralize("empty field", fieldCount, true)}; a segment should end at its last field with a value.`,
+  trailingFieldSeparators: (separatorCount: number) =>
+    `The segment has ${pluralize("trailing field separator", separatorCount, true)}.`,
+} as const;
+
+const notes = {
+  trailingFieldSeparators:
+    "HL7v2 does not require field separators after the last field with a value.",
 } as const;
 
 /** Options for `@glion/lint-no-trailing-empty-field`. */
@@ -49,10 +54,14 @@ const hl7v2LintNoTrailingEmptyField = lintRule<
 
       const start = first.position?.start;
       const end = segment.position?.end;
-      file.message(messages.trailingEmptyFields(trailing.length), {
-        ancestors: [...ancestors, segment],
-        place: start && end ? { end, start } : undefined,
-      });
+      const message = file.message(
+        messages.trailingFieldSeparators(trailing.length),
+        {
+          ancestors: [...ancestors, segment],
+          place: start && end ? { end, start } : undefined,
+        }
+      );
+      message.note = notes.trailingFieldSeparators;
     });
   }
 );

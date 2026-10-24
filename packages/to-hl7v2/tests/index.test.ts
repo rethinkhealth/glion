@@ -166,8 +166,8 @@ describe(toHl7v2, () => {
 });
 
 describe("toHl7v2 with individual node types", () => {
-  it("serializes a segment the parser could not name as its fields alone", () => {
-    expect(toHl7v2(s("", f("A"), f("B")))).toBe("A|B");
+  it("serializes a segment with an empty Segment ID as the field separator and its fields", () => {
+    expect(toHl7v2(s("", f("A"), f("B")))).toBe("|A|B");
   });
 
   it("serializes an MSH holding only its field separator as MSH and the separator", () => {
@@ -280,52 +280,25 @@ describe("hl7v2ToHl7v2 plugin", () => {
   });
 });
 
-describe("trailingDelimiter option", () => {
-  it("appends a trailing pipe to a simple non-MSH segment", () => {
-    const tree = m(s("PID", f("12345"), f("DOE", "JOHN")));
+describe("trailing empty fields", () => {
+  it("writes a field delimiter for each trailing empty field", () => {
+    const tree = m(s("PID", f("12345"), f("DOE", "JOHN"), f(), f()));
 
-    const result = toHl7v2(tree, undefined, { trailingDelimiter: true });
-    expect(result).toBe("PID|12345|DOE^JOHN|");
+    expect(toHl7v2(tree)).toBe("PID|12345|DOE^JOHN||");
   });
 
-  it("appends a trailing pipe to an MSH segment", () => {
-    const tree = m(s("MSH", f("|"), f("^~\\&"), f("SENDER")));
+  it("writes a field delimiter for a trailing empty field in MSH", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&"), f("SENDER"), f()));
 
-    const result = toHl7v2(tree, undefined, { trailingDelimiter: true });
-    expect(result).toBe("MSH|^~\\&|SENDER|");
+    expect(toHl7v2(tree)).toBe("MSH|^~\\&|SENDER|");
   });
 
-  it("does NOT produce a trailing pipe for a segment with zero fields", () => {
-    const seg1 = s("PID");
-    seg1.children = [];
-    const tree = m(seg1);
-
-    const result = toHl7v2(tree, undefined, { trailingDelimiter: true });
-    expect(result).toBe("PID");
+  it("writes a segment with one empty field as its Segment ID and a field delimiter", () => {
+    expect(toHl7v2(s("PID", f()))).toBe("PID|");
   });
 
-  it("appends trailing pipes to each segment in a root with multiple segments", () => {
-    const tree = m(
-      s("MSH", f("|"), f("^~\\&"), f("APP")),
-      s("PID", f("1"), f("DOE"))
-    );
-
-    const result = toHl7v2(tree, undefined, { trailingDelimiter: true });
-    expect(result).toBe("MSH|^~\\&|APP|\rPID|1|DOE|");
-  });
-
-  it("produces no trailing pipe when trailingDelimiter is false", () => {
-    const tree = m(s("PID", f("12345"), f("DOE", "JOHN")));
-
-    const result = toHl7v2(tree, undefined, { trailingDelimiter: false });
-    expect(result).toBe("PID|12345|DOE^JOHN");
-  });
-
-  it("produces no trailing pipe when trailingDelimiter is undefined", () => {
-    const tree = m(s("PID", f("12345"), f("DOE", "JOHN")));
-
-    const result = toHl7v2(tree);
-    expect(result).toBe("PID|12345|DOE^JOHN");
+  it("writes a segment with no fields as its Segment ID alone", () => {
+    expect(toHl7v2(s("PID"))).toBe("PID");
   });
 });
 
@@ -339,7 +312,7 @@ describe("getSegmentName graceful degradation", () => {
     expect(result).toBe("");
   });
 
-  it("handles first field with no field repetitions by returning empty segment name", () => {
+  it("writes an empty Segment ID and one field with no field repetitions as the field separator", () => {
     // Simulate a field without field repetitions
     const malformedSegment = s("", f(""));
     const field = malformedSegment.children[0];
@@ -348,11 +321,10 @@ describe("getSegmentName graceful degradation", () => {
     }
 
     const result = toHl7v2(malformedSegment);
-    // Should produce empty string as segment name
-    expect(result).toBe("");
+    expect(result).toBe("|");
   });
 
-  it("handles first field repetition with no components by returning empty segment name", () => {
+  it("writes an empty Segment ID and one field repetition with no components as the field separator", () => {
     // Simulate a field repetition without components
     const malformedSegment = s("", f(r("")));
     const rep = malformedSegment.children[0]?.children[0];
@@ -361,11 +333,10 @@ describe("getSegmentName graceful degradation", () => {
     }
 
     const result = toHl7v2(malformedSegment);
-    // Should produce empty string as segment name
-    expect(result).toBe("");
+    expect(result).toBe("|");
   });
 
-  it("handles first component with no subcomponents by returning empty segment name", () => {
+  it("writes an empty Segment ID and one component with no subcomponents as the field separator", () => {
     // Simulate a component without subcomponents
     const malformedSegment = s("", f(r(c(""))));
     const component = malformedSegment.children[0]?.children[0]?.children[0];
@@ -374,17 +345,14 @@ describe("getSegmentName graceful degradation", () => {
     }
 
     const result = toHl7v2(malformedSegment);
-    // Should produce empty string as segment name
-    expect(result).toBe("");
+    expect(result).toBe("|");
   });
 
-  it("handles empty segment name by returning empty string", () => {
-    // Simulate a segment where the first subcomponent has no value
+  it("writes an empty Segment ID and one empty field as the field separator", () => {
     const malformedSegment = s("", f(c("")));
 
     const result = toHl7v2(malformedSegment);
-    // Should produce empty string as segment name
-    expect(result).toBe("");
+    expect(result).toBe("|");
   });
 
   describe("real-world malformed HL7v2 scenarios", () => {
@@ -399,17 +367,13 @@ describe("getSegmentName graceful degradation", () => {
     });
 
     it("handles truncated segment parsing gracefully", () => {
-      // This could result from parsing a truncated message like "MSH"
-      // where the parser stopped before creating the full hierarchy
       const truncatedSegment = s("PID", f(""));
       const field = truncatedSegment.children[0];
       if (field) {
         field.children = [];
       }
 
-      const result = toHl7v2(truncatedSegment);
-      // Should produce empty string - no segment name, no additional fields
-      expect(result).toBe("PID");
+      expect(toHl7v2(truncatedSegment)).toBe("PID|");
     });
 
     it("handles empty message parsing gracefully", () => {
@@ -431,8 +395,7 @@ describe("getSegmentName graceful degradation", () => {
       field.children = [c("MSH")] as unknown as FieldRepetition[];
 
       const result = toHl7v2(badManualSegment);
-      // Should gracefully handle the malformed structure and return empty string
-      expect(result).toBe("");
+      expect(result).toBe("|");
     });
 
     it("handles missing component layer gracefully", () => {
@@ -444,8 +407,7 @@ describe("getSegmentName graceful degradation", () => {
       ] as unknown as Component[];
 
       const result = toHl7v2(badManualSegment);
-      // Should gracefully handle the malformed structure and return empty string
-      expect(result).toBe("");
+      expect(result).toBe("|");
     });
   });
 

@@ -121,6 +121,21 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
       this._advance(1);
       return this._tok("FIELD_DELIM", undefined, start);
     }
+    // A Segment ID runs to the first field delimiter and holds no other
+    // delimiters or escape sequences (HL7v2 §2.5.2, §2.7): a line `^A|B` opens
+    // with the Segment ID `^A`, and `Z\R\Z|B` with `Z\R\Z`.
+    if (this.i === 0 || s.charAt(this.i - 1) === this.delims.segment) {
+      // The first character is neither delimiter: both were checked above.
+      let j = this.i + 1;
+      let c = s.charAt(j);
+      while (c !== "" && c !== this.delims.segment && c !== this.delims.field) {
+        j += 1;
+        c = s.charAt(j);
+      }
+      const segmentId = s.slice(this.i, j);
+      this._fastAdvance(segmentId);
+      return this._tok("TEXT", segmentId, start);
+    }
     if (ch === this.delims.repetition) {
       this._advance(1);
       return this._tok("REPETITION_DELIM", undefined, start);
@@ -143,9 +158,6 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
       seg = this.delims.segment,
       sub = this.delims.subcomponent;
     let escaped = false;
-    // A Segment ID is not a field, so it holds no escape sequences (HL7v2
-    // §2.5.2, §2.7): `Z\R\Z` opening a segment stays `Z\R\Z`.
-    const opensSegment = j === 0 || s.charAt(j - 1) === seg;
 
     while (j < s.length) {
       const c = s.charAt(j);
@@ -163,9 +175,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     const raw = s.slice(this.i, j);
     this._fastAdvance(raw);
     const val =
-      escaped && this.decodeEscapes && !opensSegment
-        ? decodeEscapes(raw, this.delims)
-        : raw;
+      escaped && this.decodeEscapes ? decodeEscapes(raw, this.delims) : raw;
     return this._tok("TEXT", val, start);
   }
 
