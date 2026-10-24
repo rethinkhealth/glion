@@ -1,6 +1,6 @@
 import { AckCode } from "@glion/ack";
 import type { Field, Root } from "@glion/ast";
-import { c, f, m, s } from "@glion/builder";
+import { c, f, m, r, s } from "@glion/builder";
 import { select, value } from "@glion/util-query";
 import { gte, valid } from "@glion/util-semver";
 import { formatDTM, Precision } from "@glion/util-timestamp";
@@ -90,7 +90,19 @@ function field(origin: Root, path: string): string {
   return value(origin, path)?.value ?? "";
 }
 
+/** The field at `path`, rebuilt from its values: no `data`, no `position`. */
 function copy(origin: Root, path: string): Field {
   const node = select(origin, path)?.node as Field | undefined;
-  return node ? structuredClone(node) : f("");
+  if (!node) {
+    return f("");
+  }
+  return f(
+    ...node.children.map((repetition) =>
+      r(
+        ...repetition.children.map((component) =>
+          c(...component.children.map((subcomponent) => subcomponent.value))
+        )
+      )
+    )
+  );
 }

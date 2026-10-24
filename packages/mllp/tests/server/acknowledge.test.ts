@@ -1,6 +1,8 @@
 import { AckCode } from "@glion/ack";
+import type { Field } from "@glion/ast";
 import { parseHL7v2 } from "@glion/hl7v2";
 import { toHl7v2 } from "@glion/to-hl7v2";
+import { select } from "@glion/util-query";
 import { VFile } from "vfile";
 
 import { acknowledge } from "../../src/server/acknowledge";
@@ -95,6 +97,21 @@ describe("acknowledge", () => {
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" })).split("\r")[0]).toBe(
       "MSH|^~\\&|RecvApp|RecvFac|SendApp^1.2.3^ISO|^2.16.840^ISO|20240115023000||ACK^A01^ACK|ACK001|P^T|2.5.1"
     );
+  });
+
+  it("copies the original fields' values, not the data plugins attached to them", () => {
+    const origin = parseHL7v2.parse(ADT_A01);
+    const msh5 = select(origin, "MSH.5")?.node as Field;
+    msh5.data = { lookup: () => "RecvApp" };
+
+    const ack = acknowledge(origin, { id: "ACK001" });
+    const msh3 = select(ack, "MSH.3")?.node as Field;
+
+    expect(toHl7v2(ack).split("\r")[0]).toBe(
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1"
+    );
+    expect(msh3.data).toBeUndefined();
+    expect(msh3.position).toBeUndefined();
   });
 
   it("echoes MSH-12.1 when MSH-12 carries the full version identifier", () => {
