@@ -99,6 +99,11 @@ describe("QR4: round-trip data fidelity", () => {
   // ---------------------------------------------------------------------------
 
   describe("fuzz: valid messages", () => {
+    // A valid message is written back as it was read, every field separator
+    // included (ADR 0033).
+    //
+    // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
+    // `"MSH|^~\\&|||\rAAA|^"`.
     it("round-trips exactly", async () => {
       await fc.assert(
         fc.asyncProperty(arbHL7v2Message, async (msg) => {
@@ -106,12 +111,16 @@ describe("QR4: round-trip data fidelity", () => {
 
           expect(normalize(serialized)).toBe(normalize(msg));
         }),
-        { numRuns: 300 }
+        { examples: [["MSH|^~\\&|||\rAAA|^"]], numRuns: 300 }
       );
     });
   });
 
   describe("fuzz: Segment IDs", () => {
+    // A Segment ID is written as the sender wrote it, escape character
+    // included, and the field after it stays in place (#1054).
+    //
+    // Mutant: `to-hl7v2` writes each segment without its last field. Fails on `"\\"`.
     it("a Segment ID that holds the escape character round-trips as written", async () => {
       await fc.assert(
         fc.asyncProperty(
@@ -137,12 +146,17 @@ describe("QR4: round-trip data fidelity", () => {
             expect(normalize(serialized)).toBe(source);
           }
         ),
-        { numRuns: 300 }
+        { examples: [["\\"]], numRuns: 300 }
       );
     });
   });
 
   describe("fuzz: custom delimiter messages", () => {
+    // A valid message is written back as it was read, whatever delimiters MSH
+    // declares.
+    //
+    // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
+    // `"MSH;+'?-;;;\rAAA; "`.
     it("round-trips exactly", async () => {
       await fc.assert(
         fc.asyncProperty(arbHL7v2MessageCustomDelimiters, async (msg) => {
@@ -150,97 +164,74 @@ describe("QR4: round-trip data fidelity", () => {
 
           expect(normalize(serialized)).toBe(normalize(msg));
         }),
-        { numRuns: 300 }
+        { examples: [["MSH;+'?-;;;\rAAA; "]], numRuns: 300 }
       );
     });
   });
 
   describe("fuzz: mutated custom delimiter messages", () => {
-    it("any parseable mutated input stabilizes after one round-trip", async () => {
-      let skipCount = 0;
-
+    // A message corrupted in transit is read as some message, whatever
+    // delimiters MSH declares, and a second round trip of what was written
+    // changes nothing. The pipeline throws on no input.
+    //
+    // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
+    // `"MSH #.+$@@@\rAAA@ @$ "`.
+    it("any mutated input stabilizes after one round-trip", async () => {
       await fc.assert(
         fc.asyncProperty(arbMutatedCustomDelimiterMessage, async (msg) => {
-          let firstPass: string;
-          try {
-            firstPass = String(await roundTripProcessor.process(msg));
-          } catch {
-            skipCount++;
-            return;
-          }
-
-          let secondPass: string;
-          try {
-            secondPass = String(await roundTripProcessor.process(firstPass));
-          } catch {
-            skipCount++;
-            return;
-          }
+          const firstPass = String(await roundTripProcessor.process(msg));
+          const secondPass = String(
+            await roundTripProcessor.process(firstPass)
+          );
 
           expect(normalize(secondPass)).toBe(normalize(firstPass));
         }),
-        { numRuns: 300 }
+        { examples: [["MSH #.+$@@@\rAAA@ @$ "]], numRuns: 300 }
       );
-
-      expect(skipCount).toBeLessThan(150);
     });
   });
 
   describe("fuzz: mutated messages", () => {
-    it("any parseable mutated input stabilizes after one round-trip", async () => {
-      let skipCount = 0;
-
+    // A message corrupted in transit is read as some message, and a second
+    // round trip of what was written changes nothing. The pipeline throws on no
+    // input.
+    //
+    // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
+    // `" SH|^~\\&|||\rAAA| | "`.
+    it("any mutated input stabilizes after one round-trip", async () => {
       await fc.assert(
         fc.asyncProperty(arbMutatedMessage, async (msg) => {
-          let firstPass: string;
-          try {
-            firstPass = String(await roundTripProcessor.process(msg));
-          } catch {
-            skipCount++;
-            return;
-          }
-
+          const firstPass = String(await roundTripProcessor.process(msg));
           const secondPass = String(
             await roundTripProcessor.process(firstPass)
           );
+
           expect(normalize(secondPass)).toBe(normalize(firstPass));
         }),
-        { numRuns: 300 }
+        { examples: [[" SH|^~\\&|||\rAAA| | "]], numRuns: 300 }
       );
-
-      // Ensure we actually tested a meaningful number of inputs
-      expect(skipCount).toBeLessThan(150);
     });
   });
 
   describe("fuzz: adversarial inputs", () => {
-    it("any parseable adversarial input stabilizes after one round-trip", async () => {
-      let skipCount = 0;
-
+    // Any text is read as some message, and a second round trip of what was
+    // written changes nothing. It is not an exact round trip: an escape
+    // character that starts no escape sequence is written back as `\E\`.
+    //
+    // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
+    // `"| |"`.
+    it("any adversarial input stabilizes after one round-trip", async () => {
       await fc.assert(
         fc.asyncProperty(arbAdversarialInput, async (msg) => {
-          let firstPass: string;
-          try {
-            firstPass = String(await roundTripProcessor.process(msg));
-          } catch {
-            skipCount++;
-            return;
-          }
-
-          let secondPass: string;
-          try {
-            secondPass = String(await roundTripProcessor.process(firstPass));
-          } catch {
-            skipCount++;
-            return;
-          }
+          const firstPass = String(await roundTripProcessor.process(msg));
+          const secondPass = String(
+            await roundTripProcessor.process(firstPass)
+          );
 
           expect(normalize(secondPass)).toBe(normalize(firstPass));
         }),
-        { numRuns: 300 }
+        { examples: [["| |"]], numRuns: 300 }
       );
-
-      expect(skipCount).toBeLessThan(150);
     });
   });
 });
@@ -288,14 +279,18 @@ describe("QR4: content round-trips through serialize and parse", () => {
     expect(read(write(content))).toBe(content);
   });
 
+  // Mutant: `to-hl7v2` writes each value without escaping it. Fails on `"&"`.
   it("reads back any content a value was given", () => {
     fc.assert(
       fc.property(fc.string({ unit: "grapheme" }), (content) => {
         expect(read(write(content))).toBe(content);
-      })
+      }),
+      { examples: [["&"]] }
     );
   });
 
+  // Mutant: `to-hl7v2` writes each value without escaping it. Fails on the
+  // delimiters `S q $ K -` and the content `"S"`.
   it("reads back any content a value was given, with any delimiters", () => {
     fc.assert(
       fc.property(
@@ -359,7 +354,8 @@ describe("QR4: content round-trips through serialize and parse", () => {
 
           expect(value(tree, "MSH.3")?.value ?? "").toBe(content);
         }
-      )
+      ),
+      { examples: [[[["S", "q", "$", "K", "-"], "S"]]] }
     );
   });
 });
