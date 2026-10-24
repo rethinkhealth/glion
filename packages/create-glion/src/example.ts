@@ -13,6 +13,8 @@ const noExampleNamed = (name: string): string =>
 
 /** A directory in a GitHub repository to scaffold a project from. */
 export interface Template {
+  /** The example name `--example` gave; absent for a GitHub URL. */
+  name?: string;
   owner: string;
   repo: string;
   /** The branch, tag, or commit; `HEAD` for the default branch. */
@@ -61,6 +63,7 @@ export function exampleTemplate(name: string): Template {
     );
   }
   return {
+    name,
     owner: "rethinkhealth",
     path: `examples/${name}`,
     ref: "main",
@@ -115,12 +118,10 @@ function decodeSegments(pathname: string): string[] | undefined {
 function decodeSegment(segment: string): string | undefined {
   try {
     return decodeURIComponent(segment);
-  } catch (error: unknown) {
-    // `new URL` keeps a `%` that starts no UTF-8 escape, such as `100%`.
-    if (error instanceof URIError) {
-      return undefined;
-    }
-    throw error;
+  } catch {
+    // The only error decodeURIComponent throws is a URIError, for a `%` that
+    // starts no UTF-8 escape, such as `100%` or `%FF`, which `new URL` keeps.
+    return undefined;
   }
 }
 
@@ -161,22 +162,16 @@ export function githubUrl({ owner, path, ref, repo }: Template): string {
   return `${GITHUB}/${segments.join("/")}`;
 }
 
-/** The sentence that reports `example` has no `package.json` in `template`. */
-export function notFoundMessage(example: string, template: Template): string {
-  return URL.canParse(example)
+/** The sentence that reports `template` has no `package.json`. */
+export function notFoundMessage(template: Template): string {
+  return template.name === undefined
     ? `We could not find a template at ${githubUrl(template)}. A template is a folder with a package.json file.`
-    : noExampleNamed(example);
+    : noExampleNamed(template.name);
 }
 
-/**
- * The sentence that reports `template`, which `example` names, did not
- * download.
- */
-export function downloadFailedMessage(
-  example: string,
-  template: Template
-): string {
-  return URL.canParse(example)
+/** The sentence that reports `template` did not download. */
+export function downloadFailedMessage(template: Template): string {
+  return template.name === undefined
     ? `We could not download ${githubUrl(template)}. Check the link and your internet connection. If the branch name contains a slash, pass the folder with --example-path.`
-    : `We could not download the example "${example}". Check your internet connection and try again.`;
+    : `We could not download the example "${template.name}". Check your internet connection and try again.`;
 }

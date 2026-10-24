@@ -112,6 +112,7 @@ describe("templateFor", () => {
 describe("exampleTemplate", () => {
   it("points an example name at its directory in examples/ on main", () => {
     expect(exampleTemplate("mllp-server")).toEqual({
+      name: "mllp-server",
       owner: "rethinkhealth",
       path: "examples/mllp-server",
       ref: "main",
@@ -256,6 +257,14 @@ describe("urlTemplate", () => {
     );
   });
 
+  it("refuses an escape that is not UTF-8", () => {
+    expect(() =>
+      urlTemplate("https://github.com/acme/repo/tree/main/%FF")
+    ).toThrow(
+      "https://github.com/acme/repo/tree/main/%FF does not point to a GitHub repository or a folder in one."
+    );
+  });
+
   it("refuses a URL that is not on github.com", () => {
     expect(() => urlTemplate("https://gitlab.com/acme/hl7-template")).toThrow(
       "https://gitlab.com/acme/hl7-template is not a GitHub link. Templates can only come from GitHub."
@@ -354,16 +363,14 @@ describe("githubUrl", () => {
 
 describe("notFoundMessage", () => {
   it("names the example an example name names", () => {
-    expect(
-      notFoundMessage("no-such-example", exampleTemplate("no-such-example"))
-    ).toBe(
+    expect(notFoundMessage(exampleTemplate("no-such-example"))).toBe(
       'We could not find an example named "no-such-example". See the list of examples at https://github.com/rethinkhealth/glion/tree/main/examples.'
     );
   });
 
   it("links the folder a URL points to", () => {
     const url = "https://github.com/acme/templates/tree/main/docs";
-    expect(notFoundMessage(url, urlTemplate(url))).toBe(
+    expect(notFoundMessage(urlTemplate(url))).toBe(
       "We could not find a template at https://github.com/acme/templates/tree/main/docs. A template is a folder with a package.json file."
     );
   });
@@ -371,14 +378,14 @@ describe("notFoundMessage", () => {
 
 describe("downloadFailedMessage", () => {
   it("names the example an example name names", () => {
-    expect(downloadFailedMessage("starter", exampleTemplate("starter"))).toBe(
+    expect(downloadFailedMessage(exampleTemplate("starter"))).toBe(
       'We could not download the example "starter". Check your internet connection and try again.'
     );
   });
 
   it("links the folder a URL points to and mentions --example-path", () => {
     const url = "https://github.com/acme/templates/tree/feat/tls/mllp";
-    expect(downloadFailedMessage(url, urlTemplate(url))).toBe(
+    expect(downloadFailedMessage(urlTemplate(url))).toBe(
       "We could not download https://github.com/acme/templates/tree/feat/tls/mllp. Check the link and your internet connection. If the branch name contains a slash, pass the folder with --example-path."
     );
   });

@@ -4,12 +4,7 @@ import { resolve } from "node:path";
 import * as p from "@clack/prompts";
 
 import { download, isMissing } from "./download";
-import {
-  downloadFailedMessage,
-  EXAMPLES_URL,
-  notFoundMessage,
-  templateFor,
-} from "./example";
+import { EXAMPLES_URL, notFoundMessage, templateFor } from "./example";
 import type { Options } from "./options";
 import { parseOptions } from "./options";
 
@@ -59,8 +54,8 @@ async function scaffold(options: Options): Promise<void> {
 
   const example = options.example?.trim() ?? DEFAULT_EXAMPLE;
   const template = templateFor(example, options.examplePath);
-  if (!URL.canParse(example) && (await isMissing(template))) {
-    throw new Error(notFoundMessage(example, template));
+  if (template.name !== undefined && (await isMissing(template))) {
+    throw new Error(notFoundMessage(template));
   }
   const dir = options.dir || (await askDirectory());
   if (dir === undefined || !(await mayWriteTo(dir))) {
@@ -72,15 +67,13 @@ async function scaffold(options: Options): Promise<void> {
   spinner.start("Downloading the template");
   const found = await download(template, resolve(dir)).catch(
     (error: unknown) => {
-      spinner.stop("Nothing was created.", SPINNER_ERROR);
-      throw new Error(downloadFailedMessage(example, template), {
-        cause: error,
-      });
+      spinner.stop("Your project was not created.", SPINNER_ERROR);
+      throw error;
     }
   );
   if (!found) {
     spinner.stop("Nothing was created.", SPINNER_ERROR);
-    throw new Error(notFoundMessage(example, template));
+    throw new Error(notFoundMessage(template));
   }
   spinner.stop(`Your project is ready in ${dir}.`);
 

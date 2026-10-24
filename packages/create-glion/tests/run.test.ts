@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -233,7 +233,10 @@ describe("run", () => {
     );
 
     await expect(run([dir])).resolves.toBe(1);
-    expect(progress.stop).toHaveBeenCalledWith("Nothing was created.", 2);
+    expect(progress.stop).toHaveBeenCalledWith(
+      "Your project was not created.",
+      2
+    );
     expect(log.error).toHaveBeenCalledWith(
       "Failed to download https://api.github.com/: 404 Not Found"
     );
@@ -241,6 +244,21 @@ describe("run", () => {
       'We could not download the example "starter". Check your internet connection and try again.'
     );
     await expect(readdir(dir)).rejects.toThrow("ENOENT");
+  });
+
+  it("reports a failed copy as the file system reports it, and exits with 1", async () => {
+    await mkdir(join(parent, "package.json"));
+    vi.mocked(confirm).mockResolvedValue(true);
+
+    await expect(run([parent])).resolves.toBe(1);
+    expect(progress.stop).toHaveBeenCalledWith(
+      "Your project was not created.",
+      2
+    );
+    expect(log.error).not.toHaveBeenCalled();
+    expect(cancel).toHaveBeenCalledWith(
+      expect.stringContaining("Cannot overwrite directory")
+    );
   });
 
   it("exits with 1 on an unknown option", async () => {
