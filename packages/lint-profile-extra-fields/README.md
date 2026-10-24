@@ -35,11 +35,23 @@ const file = await unified()
 console.error(reporter([file]));
 ```
 
+## Options
+
+| Option   | Type      | Default | Description                                                                                       |
+| -------- | --------- | ------- | ------------------------------------------------------------------------------------------------- |
+| `strict` | `boolean` | `false` | Count every field the segment holds, the empty fields after its last field with a value included. |
+
+```ts
+unified()
+  .use(hl7v2AnnotateProfileContext)
+  .use(hl7v2LintExtraFields, { strict: true });
+```
+
 ## API
 
-### `unified().use(hl7v2LintExtraFields)`
+### `unified().use(hl7v2LintExtraFields[, options])`
 
-A `unified` lint rule plugin. Takes no options.
+A `unified` lint rule plugin.
 
 Reports one message for each segment with too many fields, with the number of fields in `actual`.
 
@@ -47,13 +59,17 @@ Reports one message for each segment with too many fields, with the number of fi
 import type { Plugin } from "unified";
 import type { Root } from "@glion/ast";
 
-declare const hl7v2LintExtraFields: Plugin<[], Root>;
+interface ExtraFieldsOptions {
+  strict?: boolean;
+}
+
+declare const hl7v2LintExtraFields: Plugin<[ExtraFieldsOptions?], Root>;
 export default hl7v2LintExtraFields;
 ```
 
 ## What it checks
 
-A segment has at most as many fields as its profile defines. `MSH` in v2.5 ends at `MSH-21`, so it allows 21 fields.
+A segment has at most as many fields as its profile defines. `MSH` in v2.5 ends at `MSH-21`, so it allows 21 fields. Fields are counted up to the segment's last field with a value; empty fields after it are not counted unless `strict` is set. HL7v2 treats a field with no value as not present, and a sender need not write the delimiters after the last field present.
 
 ### Valid
 
@@ -61,6 +77,13 @@ A segment has at most as many fields as its profile defines. `MSH` in v2.5 ends 
 
 ```hl7
 MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5
+PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
+```
+
+`MSH` ends with empty fields up to `MSH-22`, one past the v2.5 definition, and its last field with a value is `MSH-12`. With `strict: true`, it has 22 fields and is reported:
+
+```hl7
+MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5||||||||||
 PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F
 ```
 

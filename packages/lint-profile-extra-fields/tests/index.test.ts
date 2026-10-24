@@ -110,6 +110,74 @@ describe("hl7v2LintExtraFields", () => {
     expect(errors).toHaveLength(0);
   });
 
+  it("does not count empty fields after the last field with a value", async () => {
+    const fields = [];
+    for (let i = 1; i <= 39; i++) {
+      fields.push(f(`val${i}`));
+    }
+    const tree = m(msh("2.5.1"), s("PID", ...fields, f(), f()));
+    const file = new VFile();
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintExtraFields)
+      .run(tree, file);
+    const errors = file.messages.filter((msg) => msg.ruleId === "extra-fields");
+    expect(errors).toHaveLength(0);
+  });
+
+  it("counts every empty field after the last defined field when strict", async () => {
+    const fields = [];
+    for (let i = 1; i <= 39; i++) {
+      fields.push(f(`val${i}`));
+    }
+    const tree = m(msh("2.5.1"), s("PID", ...fields, f()));
+    const file = new VFile();
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintExtraFields, { strict: true })
+      .run(tree, file);
+    const errors = file.messages.filter((msg) => msg.ruleId === "extra-fields");
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.message).toBe(
+      "The segment has 40 fields; it allows at most 39 fields."
+    );
+    expect(errors[0]?.actual).toBe("40");
+  });
+
+  it("does not report a segment within its profile when strict", async () => {
+    const fields = [];
+    for (let i = 1; i <= 38; i++) {
+      fields.push(f(`val${i}`));
+    }
+    const tree = m(msh("2.5.1"), s("PID", ...fields, f()));
+    const file = new VFile();
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintExtraFields, { strict: true })
+      .run(tree, file);
+    const errors = file.messages.filter((msg) => msg.ruleId === "extra-fields");
+    expect(errors).toHaveLength(0);
+  });
+
+  it("counts empty fields before a field with a value past the last defined field", async () => {
+    const fields = [];
+    for (let i = 1; i <= 39; i++) {
+      fields.push(f(`val${i}`));
+    }
+    const tree = m(msh("2.5.1"), s("PID", ...fields, f(), f("val41"), f()));
+    const file = new VFile();
+    await unified()
+      .use(hl7v2AnnotateProfileContext)
+      .use(hl7v2LintExtraFields)
+      .run(tree, file);
+    const errors = file.messages.filter((msg) => msg.ruleId === "extra-fields");
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.message).toBe(
+      "The segment has 41 fields; it allows at most 39 fields."
+    );
+    expect(errors[0]?.actual).toBe("41");
+  });
+
   it("reports MSH once, however many fields it has beyond its last", async () => {
     // MSH with extra fields beyond the defined max
     const tree = m(
