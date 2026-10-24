@@ -15,6 +15,7 @@
 
 // oxlint-disable require-await, no-empty-function
 import type { Context } from "@glion/mllp";
+import type { NodeEnv } from "@glion/mllp/node";
 import { render } from "ink-testing-library";
 import { describe, expect, it, vi } from "vitest";
 
@@ -47,7 +48,7 @@ async function msgEvent(raw: string): Promise<PartialEvent> {
     messageType: "ADT",
     res: undefined,
     triggerEvent: "A01",
-  } as unknown as Context;
+  } as unknown as Context<NodeEnv>;
   await createMsgTelemetry((event) => events.push(event))(ctx, async () => {
     ctx.res = { raw };
   });

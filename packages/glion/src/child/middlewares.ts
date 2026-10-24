@@ -8,10 +8,11 @@
  *
  * ## Middleware positioning
  *
- * This middleware is PREPENDED via `app.use(mw, { prepend: true })` so it sits
- * at the outermost position in the middleware chain and `performance.now()`
- * measures the full middleware + handler time. After `await next()`,
- * `ctx.res` holds the reply, ACK or NAK.
+ * This middleware MUST be PREPENDED via `app.use(mw, { prepend: true })`, so
+ * it sits at the outermost position in the middleware chain: its `await
+ * next()` completes after every user middleware has run, so `ctx.res` is the
+ * reply that is sent and `ctx.error` the error the message raised, and
+ * `performance.now()` measures the full middleware + handler time.
  *
  * ## ACK parsing
  *
@@ -39,14 +40,13 @@ import type { PartialEvent } from "../events";
  */
 export function createMsgTelemetry(
   emit: (event: PartialEvent) => void
-): Middleware {
-  return async (ctx: Context, next: () => Promise<void>) => {
+): Middleware<NodeEnv> {
+  return async (ctx: Context<NodeEnv>, next: () => Promise<void>) => {
     const start = performance.now();
     await next();
     const ms = performance.now() - start;
     const response: Response | undefined = ctx.res;
-    // The runner serves every app with serve(), which passes a NodeEnv.
-    const { connection } = ctx.env as NodeEnv;
+    const { connection } = ctx.env;
     emit({
       ack: parseAckCode(response?.raw),
       conn: connection.id,

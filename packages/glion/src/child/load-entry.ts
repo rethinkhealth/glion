@@ -1,6 +1,7 @@
 import { pathToFileURL } from "node:url";
 
 import { Mllp } from "@glion/mllp";
+import type { NodeEnv } from "@glion/mllp/node";
 
 import { GlionError } from "../errors";
 
@@ -32,7 +33,7 @@ import { GlionError } from "../errors";
 export async function loadEntry(app: {
   source: string;
   compiled: string;
-}): Promise<Mllp> {
+}): Promise<Mllp<NodeEnv>> {
   let value: unknown;
   try {
     const mod = (await import(pathToFileURL(app.compiled).href)) as {
@@ -55,8 +56,10 @@ export async function loadEntry(app: {
       { actualType: typeof value, compiled: app.compiled, entry: app.source },
       `Export the app as the default export:
   import { Mllp } from "@glion/mllp";
+import type { NodeEnv } from "@glion/mllp/node";
   export default new Mllp().parser(...).on("ADT^A01", ...);`
     );
   }
-  return value;
+  // The runner serves the app with serve(), whose env is a NodeEnv.
+  return value as Mllp<NodeEnv>;
 }
