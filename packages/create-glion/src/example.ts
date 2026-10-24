@@ -76,9 +76,9 @@ export function exampleTemplate(name: string): Template {
  * `https://github.com/<owner>/<repo>/tree/<ref>/<path>`, or
  * `https://github.com/<owner>/<repo>` for the root of the default branch.
  *
- * When `<ref>` contains a slash, `examplePath` is `<path>`, and the URL ends
- * with `<ref>` or `<ref>/<path>`. Empty and `.` segments of `examplePath` are
- * dropped.
+ * With `examplePath`, the URL is `https://github.com/<owner>/<repo>/tree/<ref>`
+ * and `examplePath` is `<path>`, for a `<ref>` that contains a slash. Empty and
+ * `.` segments of `examplePath` are dropped.
  *
  * @throws {Error} When `url` is not on github.com, is not a repository or a
  *   directory in one, or `examplePath` contains `..`.
@@ -106,7 +106,7 @@ export function urlTemplate(url: string, examplePath?: string): Template {
     return { owner, path: rest.join("/"), ref, repo };
   }
   const path = examplePathSegments(examplePath).join("/");
-  return { owner, path, ref: refBefore([ref, ...rest].join("/"), path), repo };
+  return { owner, path, ref: [ref, ...rest].join("/"), repo };
 }
 
 // `%2F` decodes to a slash and `..%2F..` to two parent folders: each decoded
@@ -145,14 +145,6 @@ function examplePathSegments(examplePath: string): string[] {
     );
   }
   return segments;
-}
-
-// `feat/tls/mllp/tls` before `mllp/tls` is `feat/tls`; `feat/tls` alone is `feat/tls`.
-function refBefore(refAndPath: string, path: string): string {
-  const suffix = `/${path}`;
-  return refAndPath.endsWith(suffix)
-    ? refAndPath.slice(0, -suffix.length)
-    : refAndPath;
 }
 
 /** The page of `template` on github.com. */
