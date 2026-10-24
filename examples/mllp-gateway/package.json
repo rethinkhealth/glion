@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "start": "node src/main.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@glion/ack": "latest",
+    "@glion/mllp-client": "latest",
+    "@glion/parser": "latest"
+  },
+  "devDependencies": {
+    "@glion/hl7v2": "latest",
+    "@glion/mllp": "latest",
+    "@types/node": "25.6.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.12"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

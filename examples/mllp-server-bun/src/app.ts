@@ -1,66 +1,59 @@
 import {
   AckApplicationError,
-  AckCode,
   AckException,
   Hl7ErrorCode,
-  Severity,
   UnsupportedMessageTypeReject,
 } from "@glion/ack";
 import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
-import { ackMiddleware } from "@glion/mllp-ack";
-import { consola } from "consola";
+import { value } from "@glion/util-query";
 
-const app = new Mllp();
+import { acknowledge } from "./acknowledgment";
+import { validate } from "./validation";
 
-// Define the parser
-app.parser(parseHL7v2);
+// Patients by PID-3.1. In memory, so it empties whenever the server restarts,
+// and on every reload under `glion dev`.
+const admitted = new Set<string>();
 
-// ackMiddleware turns handler return values into AA ACKs and handler
-// throws into the matching NAK (AE/AR/CE/CR + ERR segment).
-app.use(ackMiddleware());
+const app = new Mllp().parser(parseHL7v2);
 
-// Per-message logging middleware — illustrates the onion model:
-// run before, await next(), run after.
+// A handler that returns without a reply of its own is answered `AA`.
 app.use(async (ctx, next) => {
-  const log = consola.withTag(ctx.controlId);
-  log.info(
-    `← ${ctx.messageType}^${ctx.triggerEvent} from ${ctx.connection.remoteAddress}`
-  );
+  await next();
+  ctx.res ??= acknowledge(ctx);
+});
 
-  try {
-    await next();
-    log.success(`→ ${AckCode.ApplicationAccept}`);
-  } catch (error) {
-    const code = error instanceof AckException ? error.code : "AE";
-    const reason = error instanceof Error ? error.message : String(error);
-    log.error(`→ ${code} ${reason}`);
-    throw error;
+app.on("ADT^A01", async (ctx) => {
+  const tree = await validate(ctx);
+  const patient = value(tree, "PID.3.1")?.value;
+  if (patient) {
+    admitted.add(patient);
   }
 });
 
-// Routes
-app.on("ADT^A01", (ctx) => {
-  consola.withTag(ctx.controlId).info("Patient admit processed");
+app.on("ORU^R01", async (ctx) => {
+  const tree = await validate(ctx);
+  const patient = value(tree, "PID.3.1")?.value;
+  if (!(patient && admitted.has(patient))) {
+    throw new AckApplicationError("The patient is not on file.", {
+      errorCode: Hl7ErrorCode.UnknownKeyIdentifier,
+    });
+  }
+  // Store the results here.
 });
 
-app.on("ORM^O01", (ctx) => {
-  consola.withTag(ctx.controlId).info("Order received");
-});
-
-// Throwing an AckException turns into the matching NAK on the wire.
-app.on("ORU^R01", () => {
-  throw new AckApplicationError("Patient not available", {
-    errorCode: Hl7ErrorCode.UnsupportedMessageType,
-    severity: Severity.Error,
-  });
-});
-
-// Catch-all — reject anything we didn't register a route for.
-app.on("*", (ctx) => {
+app.on("*", () => {
   throw new UnsupportedMessageTypeReject(
-    `Unsupported message type: ${ctx.messageType}^${ctx.triggerEvent}`
+    "The message type is not one this server receives."
   );
+});
+
+// Every throw, from any handler or middleware, is answered with a NAK here.
+app.onError((failure, ctx) => {
+  if (!(failure instanceof AckException)) {
+    console.error(`Message ${ctx.controlId} could not be processed.`, failure);
+  }
+  return acknowledge(ctx, failure);
 });
 
 export default app;

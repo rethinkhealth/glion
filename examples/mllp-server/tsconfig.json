@@ -4,10 +4,11 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "strict": true,
-    "esModuleInterop": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src", "glion.config.ts"]
+  "include": ["src", "tests", "glion.config.ts"]
 }

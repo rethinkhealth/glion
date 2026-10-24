@@ -1,62 +1,51 @@
 # MLLP server (Bun)
 
-A basic HL7v2 MLLP server with route handlers and ACK/NAK responses, run via the [`glion`](https://github.com/rethinkhealth/glion/tree/main/packages/glion) CLI under [Bun](https://bun.sh).
+The [`mllp-server`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server) app — routes, validation against the HL7v2 standard, and typed NAKs — run by the [`glion`](https://github.com/rethinkhealth/glion/tree/main/packages/glion) CLI under [Bun](https://bun.sh). The source is the same; only the runtime differs.
 
 ## How to use
-
-Scaffold this example into a new directory:
 
 ```bash
 pnpm create glion my-mllp-server --example mllp-server-bun
 cd my-mllp-server
-```
-
-Install dependencies and run:
-
-```bash
 pnpm install
-pnpm dev      # development: TUI, file-watching, hot reload
-pnpm start    # production: JSON-lines logs, no watcher
+pnpm dev      # development: terminal UI, reload on change, listens on 127.0.0.1:2575
+pnpm start    # production: JSON-line events, listens on 0.0.0.0:2575
 ```
 
-Both scripts use `bun --bun glion …` to force Bun's runtime through the script runner. Without `--bun`, the `glion` bin's `#!/usr/bin/env node` shebang would hand it to Node.
+Every script runs `bun --bun glion …`. Without `--bun`, the `glion` bin's `#!/usr/bin/env node` line hands it to Node.
 
 ## What's in it
 
-- `glion.config.ts` — entry path and port.
-- `src/app.ts` — the `Mllp` instance, exported as the default. The CLI picks it up via the config.
-- `samples/` — sample HL7v2 messages for `glion send` (`adt-a01` accepts, `oru-r01` is rejected).
+- `glion.config.ts` — the entry file and port.
+- `src/app.ts` — the routes, exported as the default `Mllp` app.
+- `src/validation.ts` — `validate(ctx)`, which annotates and lints the message against its HL7v2 version.
+- `src/acknowledgment.ts` — builds the acknowledgment for each message.
+- `samples/` — one message for each outcome.
 
-The app routes `ADT^A01`, `ORM^O01`, and `ORU^R01`, plus a catch-all, and uses `ackMiddleware()` to translate handler return values and throws into ACK/NAK responses. The code is identical to [`mllp-server`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server) — only the runtime differs.
+| Sample                        | Reply                                                             |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `adt-a01.hl7`                 | `AA`                                                              |
+| `oru-r01.hl7`                 | `AA` once `adt-a01.hl7` has admitted the patient, `AE` 204 before |
+| `oru-r01-unknown-patient.hl7` | `AE`, ERR-3 `204`: `The patient is not on file.`                  |
+| `adt-a01-invalid.hl7`         | `AE`, ERR-3 `101`: the lint finding for the missing PID-3         |
+| `siu-s12.hl7`                 | `AR`, ERR-3 `200`: no route takes `SIU^S12`                       |
+
+[`mllp-server`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server#how-a-message-is-answered) explains how each outcome is answered, and carries the tests.
 
 ## Send a test message
 
-With the server running, send the bundled sample from another terminal:
+With the server running, from another terminal:
 
 ```bash
-pnpm send     # → AA · MSG001
+pnpm send     # bun --bun glion send samples/adt-a01.hl7 --host 127.0.0.1
+bun --bun glion send samples/siu-s12.hl7 --host 127.0.0.1    # → AR, exit 1
 ```
 
-That runs `glion send samples/adt-a01.hl7 --local` — `--local` reads the host and port from `glion.config.ts`, so the message reaches this project's server (`127.0.0.1:2575`):
-
-```
-→ sent  127.0.0.1:2575  MSH-10 MSG001  3 segs, 121 B
-← ACK   AA  MSA-2 MSG001  3.1ms
-```
-
-Note the `send` script runs `glion send` on **Node** (no `bun --bun`), unlike `dev`/`start`: without `--bun`, the bin's `node` shebang wins. The Bun server still receives the message normally — only the sending process is Node.
-
-`glion send` exits `0` on accept (`AA`/`CA`), `1` on a NAK, and `2` when the message could not be delivered. The `ORU^R01` route throws a typed NAK, so sending the bundled `oru-r01` sample shows the rejection path end to end:
-
-```bash
-glion send samples/oru-r01.hl7 --local     # → AE · Patient not available · exit 1
-```
-
-For the programmatic client API — streaming, commit-level acks, mutual TLS — see the [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) package.
+`glion send` exits `0` on accept (`AA`/`CA`), `1` on a NAK, and `2` when the message could not be delivered.
 
 ## Notes
 
-- Requires [Bun](https://bun.sh) (latest).
-- [`mllp-server`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server) — same app under Node.
-- [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) — programmatic MLLP client (streaming, modes, TLS).
-- [`@glion/mllp`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp) — server API and CLI reference.
+- Requires [Bun](https://bun.sh) 1.4 or later.
+- `glion dev` listens on loopback only. `glion start` listens on every interface; MLLP has no authentication of its own, so put it behind TLS or a private network.
+- [`@glion/mllp`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp) — server API and routing.
+- [`@glion/mllp-client`](https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client) — the MLLP client, which runs on Bun through its `node:net` support.
