@@ -36,6 +36,12 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     | { kind: "TEXT"; value: string; advance: number }
     | { kind: "FIELD_DELIM"; advance: number }
   > = null; // queue to emit TEXT('MSH'), FIELD_DELIM, TEXT('^~\\&')
+  // MSH-2 holds the encoding characters, which are never escape sequences: in
+  // `MSH|^~\&\F\|a`, MSH-2 is `^~\&\F\`, read as it is written. The offset of
+  // the first field delimiter after MSH-2 starts, or 0 when the input does not
+  // start with MSH. Text up to it is MSH-2, or a Segment ID that is never
+  // decoded either.
+  private msh2End = 0;
 
   constructor(options: TokenizerOptions = {}) {
     this.decodeEscapes = options.decodeEscapes ?? true;
@@ -49,6 +55,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     this.col = 1;
     this.didMshBootstrap = false;
     this.pendingBootstrap = null;
+    this.msh2End = 0;
 
     // Prepare a one-time bootstrap if file starts with MSH
     if (this.input.startsWith("MSH")) {
@@ -70,6 +77,12 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
         { advance: msh2.length, kind: "TEXT", value: msh2 },
       ];
       // NOTE: we have not advanced indices yet; we will as we emit tokens
+      this.msh2End = Math.min(MSH_FIELD_DELIMITER_END, this.input.length);
+      let c = this.input.charAt(this.msh2End);
+      while (c !== "" && c !== this.delims.field) {
+        this.msh2End += 1;
+        c = this.input.charAt(this.msh2End);
+      }
     }
   }
 
@@ -175,7 +188,10 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     const raw = s.slice(this.i, j);
     this._fastAdvance(raw);
     const val =
-      escaped && this.decodeEscapes ? decodeEscapes(raw, this.delims) : raw;
+      // Stryker disable next-line EqualityOperator: no TEXT token starts at msh2End, which is a field delimiter or the end of the input
+      escaped && this.decodeEscapes && start.offset >= this.msh2End
+        ? decodeEscapes(raw, this.delims)
+        : raw;
     return this._tok("TEXT", val, start);
   }
 

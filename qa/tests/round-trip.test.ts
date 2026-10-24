@@ -104,6 +104,9 @@ describe("QR4: round-trip data fidelity", () => {
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `"MSH|^~\\&|||\rAAA|^"`.
+    //
+    // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
+    // `"MSH|^~\\&|||\rAAA|\\E\\ &"`.
     it("round-trips exactly", async () => {
       await fc.assert(
         fc.asyncProperty(arbHL7v2Message, async (msg) => {
@@ -111,7 +114,10 @@ describe("QR4: round-trip data fidelity", () => {
 
           expect(normalize(serialized)).toBe(normalize(msg));
         }),
-        { examples: [["MSH|^~\\&|||\rAAA|^"]], numRuns: 300 }
+        {
+          examples: [["MSH|^~\\&|||\rAAA|^"], ["MSH|^~\\&|||\rAAA|\\E\\ &"]],
+          numRuns: 300,
+        }
       );
     });
   });
@@ -157,6 +163,9 @@ describe("QR4: round-trip data fidelity", () => {
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `"MSH;+'?-;;;\rAAA; "`.
+    //
+    // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
+    // `"MSH{(]%#{{{\rAAA{%F%#("`.
     it("round-trips exactly", async () => {
       await fc.assert(
         fc.asyncProperty(arbHL7v2MessageCustomDelimiters, async (msg) => {
@@ -164,7 +173,10 @@ describe("QR4: round-trip data fidelity", () => {
 
           expect(normalize(serialized)).toBe(normalize(msg));
         }),
-        { examples: [["MSH;+'?-;;;\rAAA; "]], numRuns: 300 }
+        {
+          examples: [["MSH;+'?-;;;\rAAA; "], ["MSH{(]%#{{{\rAAA{%F%#("]],
+          numRuns: 300,
+        }
       );
     });
   });
@@ -176,6 +188,9 @@ describe("QR4: round-trip data fidelity", () => {
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `"MSH #.+$@@@\rAAA@ @$ "`.
+    //
+    // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
+    // `"MSH-`!>;---\rAAA->E>R>H>-"`.
     it("any mutated input stabilizes after one round-trip", async () => {
       await fc.assert(
         fc.asyncProperty(arbMutatedCustomDelimiterMessage, async (msg) => {
@@ -186,7 +201,10 @@ describe("QR4: round-trip data fidelity", () => {
 
           expect(normalize(secondPass)).toBe(normalize(firstPass));
         }),
-        { examples: [["MSH #.+$@@@\rAAA@ @$ "]], numRuns: 300 }
+        {
+          examples: [["MSH #.+$@@@\rAAA@ @$ "], ["MSH-`!>;---\rAAA->E>R>H>-"]],
+          numRuns: 300,
+        }
       );
     });
   });
@@ -198,6 +216,12 @@ describe("QR4: round-trip data fidelity", () => {
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `" SH|^~\\&|||\rAAA| | "`.
+    //
+    // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
+    // `"MSH|^~\\&|||\rAAA|\\.br\\\rA"`.
+    //
+    // Mutant: the parser decodes the escape sequences of MSH-2 after its fourth
+    // character (#1100). Fails on `"MSH|^~\\~\\F\\\\"`.
     it("any mutated input stabilizes after one round-trip", async () => {
       await fc.assert(
         fc.asyncProperty(arbMutatedMessage, async (msg) => {
@@ -208,7 +232,14 @@ describe("QR4: round-trip data fidelity", () => {
 
           expect(normalize(secondPass)).toBe(normalize(firstPass));
         }),
-        { examples: [[" SH|^~\\&|||\rAAA| | "]], numRuns: 300 }
+        {
+          examples: [
+            [" SH|^~\\&|||\rAAA| | "],
+            ["MSH|^~\\&|||\rAAA|\\.br\\\rA"],
+            ["MSH|^~\\~\\F\\\\"],
+          ],
+          numRuns: 300,
+        }
       );
     });
   });
