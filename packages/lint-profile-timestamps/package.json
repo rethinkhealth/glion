@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-profile-timestamps",
-  "version": "0.29.0",
+  "version": "0.30.0",
   "description": "Lint rule to warn when a DT, TM, or DTM value is not a valid date or time",
   "keywords": [
     "health",
