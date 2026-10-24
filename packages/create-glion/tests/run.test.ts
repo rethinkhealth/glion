@@ -45,12 +45,17 @@ beforeEach(async () => {
   parent = await mkdtemp(join(tmpdir(), "create-glion-"));
   dir = join(parent, "my-app");
   extracts({ "package.json": "{}" });
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => Promise.resolve(new Response(null)))
+  );
   vi.stubEnv("npm_config_user_agent", "pnpm/10.14.0 npm/? node/v22.0.0");
 });
 
 afterEach(async () => {
   vi.resetAllMocks();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   vi.unstubAllEnvs();
   await rm(parent, { force: true, recursive: true });
 });
@@ -114,6 +119,39 @@ describe("run", () => {
       '"../packages/mllp" is not the name of an example or a GitHub link. A GitHub link starts with https://github.com/.'
     );
     expect(text).not.toHaveBeenCalled();
+  });
+
+  it("refuses an example name GitHub does not have before asking anything", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve(new Response(null, { status: 404 })))
+    );
+
+    await expect(run(["--example", "mllp-sever"])).resolves.toBe(1);
+    expect(fetch).toHaveBeenCalledWith(
+      "https://raw.githubusercontent.com/rethinkhealth/glion/main/examples/mllp-sever/package.json",
+      expect.objectContaining({ method: "HEAD" })
+    );
+    expect(cancel).toHaveBeenCalledWith(
+      'We could not find an example named "mllp-sever". See the list of examples at https://github.com/rethinkhealth/glion/tree/main/examples.'
+    );
+    expect(text).not.toHaveBeenCalled();
+    expect(downloadTemplate).not.toHaveBeenCalled();
+  });
+
+  it("scaffolds when GitHub cannot be reached before the download", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.reject(new TypeError("fetch failed")))
+    );
+
+    await expect(run([dir])).resolves.toBe(0);
+    expect(await readdir(dir)).toEqual(["package.json"]);
+  });
+
+  it("does not look a GitHub link up before the download", async () => {
+    await run([dir, "--example", "https://github.com/acme/hl7-template"]);
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it("refuses an empty --example before asking anything", async () => {

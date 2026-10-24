@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import * as p from "@clack/prompts";
 
-import { download } from "./download";
+import { download, isMissing } from "./download";
 import {
   downloadFailedMessage,
   EXAMPLES_URL,
@@ -59,6 +59,9 @@ async function scaffold(options: Options): Promise<void> {
 
   const example = options.example?.trim() ?? DEFAULT_EXAMPLE;
   const template = templateFor(example, options.examplePath);
+  if (!URL.canParse(example) && (await isMissing(template))) {
+    throw new Error(notFoundMessage(example, template));
+  }
   const dir = options.dir || (await askDirectory());
   if (dir === undefined || !(await mayWriteTo(dir))) {
     p.cancel("Cancelled. Nothing was created.");

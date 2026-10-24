@@ -14,7 +14,7 @@ import type { DownloadTemplateOptions, TemplateInfo } from "giget";
 import { downloadTemplate } from "giget";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { download } from "../src/download";
+import { download, isMissing } from "../src/download";
 import type { Template } from "../src/example";
 
 // giget's download writes the files a test gives it into the folder it is
@@ -62,6 +62,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   vi.resetAllMocks();
+  vi.unstubAllGlobals();
   await rm(dir, { force: true, recursive: true });
 });
 
@@ -170,5 +171,51 @@ describe("download", () => {
       ),
       { numRuns: 50 }
     );
+  });
+});
+
+describe("isMissing", () => {
+  const answers = (response: Promise<Response>) => {
+    const fetch = vi.fn(() => response);
+    vi.stubGlobal("fetch", fetch);
+    return fetch;
+  };
+
+  it("looks for the package.json of the template on raw.githubusercontent.com", async () => {
+    const fetch = answers(Promise.resolve(new Response(null)));
+
+    await isMissing(STARTER);
+    expect(fetch).toHaveBeenCalledWith(
+      "https://raw.githubusercontent.com/rethinkhealth/glion/main/examples/starter/package.json",
+      expect.objectContaining({ method: "HEAD" })
+    );
+  });
+
+  it("is true when GitHub answers 404", async () => {
+    answers(Promise.resolve(new Response(null, { status: 404 })));
+
+    await expect(isMissing(STARTER)).resolves.toBe(true);
+  });
+
+  it("is false when GitHub finds the package.json", async () => {
+    answers(Promise.resolve(new Response(null)));
+
+    await expect(isMissing(STARTER)).resolves.toBe(false);
+  });
+
+  it("is false when GitHub answers with an error", async () => {
+    answers(Promise.resolve(new Response(null, { status: 503 })));
+
+    await expect(isMissing(STARTER)).resolves.toBe(false);
+  });
+
+  it("is false when GitHub cannot be reached or does not answer in time", async () => {
+    answers(
+      Promise.reject(
+        new DOMException("The operation timed out.", "TimeoutError")
+      )
+    );
+
+    await expect(isMissing(STARTER)).resolves.toBe(false);
   });
 });
