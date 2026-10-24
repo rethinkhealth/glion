@@ -107,19 +107,16 @@ function createParserCore() {
     segmentHasContent = true;
   };
 
-  const openRepetition = (start: Position["start"]) => {
-    if (!field) {
-      openField(start);
-      // Add an empty first repetition before the delimiter
-      const emptyRep = createFieldRepetition(start);
-      field!.children.push(emptyRep);
-    }
+  // A delimiter at `at` opens a sibling at `after`; an empty node before the
+  // delimiter is placed at `at`. In `PID|~`, the field is 4–5, its repetitions
+  // 4–4 and 5–5.
+  const openRepetition = (at: Position["start"], after: Position["start"]) => {
     // If field has no children yet, add empty first rep
     if (field!.children.length === 0) {
-      const emptyRep = createFieldRepetition(start);
+      const emptyRep = createFieldRepetition(at);
       field!.children.push(emptyRep);
     }
-    rep = createFieldRepetition(start);
+    rep = createFieldRepetition(after);
     field!.children.push(rep);
     comp = null;
     currentSub = null;
@@ -143,25 +140,16 @@ function createParserCore() {
     segmentHasContent = true;
   };
 
-  const openComponent = (start: Position["start"]) => {
-    if (!field) {
-      openField(start);
-      // Build out a rep + empty first component before the delimiter
-      rep = createFieldRepetition(start);
-      field!.children.push(rep);
-      const emptyComp = createComponent(start);
-      rep.children.push(emptyComp);
-    }
+  const openComponent = (at: Position["start"], after: Position["start"]) => {
     if (!rep) {
-      rep = createFieldRepetition(start);
+      rep = createFieldRepetition(at);
       field!.children.push(rep);
-      const emptyComp = createComponent(start);
-      rep.children.push(emptyComp);
-    } else if (rep.children.length === 0) {
-      const emptyComp = createComponent(start);
+    }
+    if (rep.children.length === 0) {
+      const emptyComp = createComponent(at);
       rep.children.push(emptyComp);
     }
-    comp = createComponent(start);
+    comp = createComponent(after);
     rep.children.push(comp);
     currentSub = null;
     segmentHasContent = true;
@@ -205,6 +193,12 @@ function createParserCore() {
   };
 
   const processToken = (tok: Token) => {
+    // The root starts at the first token of any kind: `|` holds no TEXT token,
+    // and its root is 0–1.
+    if (!rootStartSet) {
+      root.position = { end: tok.position.start, start: tok.position.start };
+      rootStartSet = true;
+    }
     switch (tok.type) {
       case "SEGMENT_END": {
         const endPos = lastContentEnd || tok.position.start;
@@ -223,16 +217,15 @@ function createParserCore() {
       case "REPETITION_DELIM": {
         lastContentEnd = tok.position.end;
         documentEnd = tok.position.end;
-        if (!field) {
-          openField(tok.position.start);
-        }
-        openRepetition(tok.position.end);
+        openRepetition(tok.position.start, tok.position.end);
+        updatePositionsToEnd(tok.position.end);
         return;
       }
       case "COMPONENT_DELIM": {
         lastContentEnd = tok.position.end;
         documentEnd = tok.position.end;
-        openComponent(tok.position.end);
+        openComponent(tok.position.start, tok.position.end);
+        updatePositionsToEnd(tok.position.end);
         return;
       }
       case "SUBCOMP_DELIM": {
@@ -247,19 +240,11 @@ function createParserCore() {
         currentSub = createSubcomponent(tok.position.end);
         comp?.children.push(currentSub);
         segmentHasContent = true;
+        updatePositionsToEnd(tok.position.end);
         return;
       }
       case "TEXT": {
         const val = tok.value ?? "";
-
-        // Set root start position on first token
-        if (!rootStartSet) {
-          root.position = {
-            end: tok.position.start,
-            start: tok.position.start,
-          };
-          rootStartSet = true;
-        }
 
         // If we're expecting a segment name, this TEXT is the segment name
         if (expectingSegmentName) {
