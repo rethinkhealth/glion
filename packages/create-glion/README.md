@@ -34,9 +34,9 @@ pnpm create glion my-app --example https://github.com/acme/templates/tree/feat/t
 | `--example-path <path>`            | The template's directory in the repository, for a URL whose branch name contains a slash.                                                                                                                      |
 | `-h, --help`                       | Print usage and exit.                                                                                                                                                                                          |
 
-A template is a directory with a `package.json`. A repository URL with no `/tree/` part means the root of its default branch. The template is checked for a `package.json` before anything is downloaded, then fetched with [`giget`](https://github.com/unjs/giget) and copied unchanged. The examples in this repository come from `main` and depend on the `latest` release of every `@glion/*` package.
+A template is a directory with a `package.json`. A repository URL with no `/tree/` part means the root of its default branch. The template is fetched with [`giget`](https://github.com/unjs/giget) into a temporary directory, and copied unchanged into the target directory only when it has a `package.json`. The examples in this repository come from `main` and depend on the `latest` release of every `@glion/*` package.
 
-Only public GitHub repositories are supported. A template's files, including its install scripts, run on your machine, so scaffold only from repositories you trust.
+To scaffold from a private repository, set `GIGET_AUTH` to a GitHub token that can read it. A template's files, including its install scripts, run on your machine, so scaffold only from repositories you trust.
 
 ## License
 

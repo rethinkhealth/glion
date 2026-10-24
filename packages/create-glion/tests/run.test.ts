@@ -1,27 +1,42 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
-import { cancel, confirm, note, text } from "@clack/prompts";
+import { cancel, confirm, log, note, text } from "@clack/prompts";
 import { downloadTemplate } from "giget";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { run } from "../src/run";
 
-const NOT_FOUND = 404;
-
-// The prompts answer from each test, and the download writes nothing.
+// The prompts answer from each test. giget's download extracts a
+// package.json, or what a test gives it, into the folder it is asked for.
+const progress = vi.hoisted(() => ({
+  message: vi.fn(),
+  start: vi.fn(),
+  stop: vi.fn(),
+}));
 vi.mock(import("@clack/prompts"), () => ({
   cancel: vi.fn(),
   confirm: vi.fn(),
   intro: vi.fn(),
   isCancel: (value: unknown): value is symbol => typeof value === "symbol",
+  log: { error: vi.fn() } as never,
   note: vi.fn(),
   outro: vi.fn(),
-  spinner: () => ({ message: vi.fn(), start: vi.fn(), stop: vi.fn() }),
+  spinner: () => progress,
   text: vi.fn(),
 }));
 vi.mock(import("giget"), () => ({ downloadTemplate: vi.fn() }));
+
+const extracts = (files: Record<string, string>) =>
+  vi.mocked(downloadTemplate).mockImplementation(async (_input, options) => {
+    for (const [name, content] of Object.entries(files)) {
+      await writeFile(join(options?.dir ?? "", name), content);
+    }
+    return { dir: options?.dir ?? "", name: "", source: "", tar: "" };
+  });
+
+const downloadedSource = () => vi.mocked(downloadTemplate).mock.calls[0]?.[0];
 
 let parent: string;
 let dir: string;
@@ -29,16 +44,13 @@ let dir: string;
 beforeEach(async () => {
   parent = await mkdtemp(join(tmpdir(), "create-glion-"));
   dir = join(parent, "my-app");
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(() => Promise.resolve(new Response(null)))
-  );
+  extracts({ "package.json": "{}" });
   vi.stubEnv("npm_config_user_agent", "pnpm/10.14.0 npm/? node/v22.0.0");
 });
 
 afterEach(async () => {
-  vi.clearAllMocks();
-  vi.unstubAllGlobals();
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
   vi.unstubAllEnvs();
   await rm(parent, { force: true, recursive: true });
 });
@@ -53,53 +65,39 @@ describe("run", () => {
     expect(write).toHaveBeenCalledWith(
       expect.stringMatching(/^Usage: create-glion \[dir\] \[options\]/)
     );
-    expect(fetch).not.toHaveBeenCalled();
     expect(downloadTemplate).not.toHaveBeenCalled();
-    write.mockRestore();
   });
 
-  it("downloads the starter into the directory given", async () => {
+  it("creates the starter in the directory given", async () => {
     await expect(run([dir])).resolves.toBe(0);
-    expect(downloadTemplate).toHaveBeenCalledWith(
-      "github:rethinkhealth/glion/examples/starter#main",
-      { dir, force: true }
+    expect(downloadedSource()).toBe("github:rethinkhealth/glion");
+    expect(await readdir(dir)).toEqual(["package.json"]);
+    expect(progress.stop).toHaveBeenCalledWith(
+      `Your project is ready in ${dir}.`
     );
   });
 
-  it("downloads the example --example names", async () => {
-    await run([dir, "--example", "mllp-server"]);
-    expect(downloadTemplate).toHaveBeenCalledWith(
-      "github:rethinkhealth/glion/examples/mllp-server#main",
-      { dir, force: true }
-    );
-  });
-
-  it("downloads the GitHub repository --example points to", async () => {
+  it("creates the GitHub repository --example points to", async () => {
     await run([dir, "--example", "https://github.com/acme/hl7-template"]);
-    expect(downloadTemplate).toHaveBeenCalledWith(
-      "github:acme/hl7-template#HEAD",
-      { dir, force: true }
-    );
+    expect(downloadedSource()).toBe("github:acme/hl7-template");
+    expect(await readdir(dir)).toEqual(["package.json"]);
   });
 
   it("asks for the directory when none is given", async () => {
     vi.mocked(text).mockResolvedValue(dir);
 
     await expect(run([])).resolves.toBe(0);
-    expect(downloadTemplate).toHaveBeenCalledWith(
-      "github:rethinkhealth/glion/examples/starter#main",
-      { dir, force: true }
-    );
+    expect(await readdir(dir)).toEqual(["package.json"]);
   });
 
   it("uses ./my-glion-app when the answer is blank", async () => {
     vi.mocked(text).mockResolvedValue("  ");
+    vi.spyOn(process, "cwd").mockReturnValue(parent);
 
     await run([]);
-    expect(downloadTemplate).toHaveBeenCalledWith(
-      "github:rethinkhealth/glion/examples/starter#main",
-      { dir: resolve("my-glion-app"), force: true }
-    );
+    expect(await readdir(resolve(parent, "my-glion-app"))).toEqual([
+      "package.json",
+    ]);
   });
 
   it("creates nothing when the directory question is cancelled", async () => {
@@ -110,7 +108,30 @@ describe("run", () => {
     expect(downloadTemplate).not.toHaveBeenCalled();
   });
 
-  it("replaces the files in an existing folder once the user agrees", async () => {
+  it("refuses an example name that cannot exist before asking anything", async () => {
+    await expect(run(["--example", "../packages/mllp"])).resolves.toBe(1);
+    expect(cancel).toHaveBeenCalledWith(
+      '"../packages/mllp" is not the name of an example or a GitHub link. A GitHub link starts with https://github.com/.'
+    );
+    expect(text).not.toHaveBeenCalled();
+  });
+
+  it("refuses an empty --example before asking anything", async () => {
+    await expect(run(["--example", " "])).resolves.toBe(1);
+    expect(cancel).toHaveBeenCalledWith(
+      "--example needs the name of an example or a GitHub link, and it is empty."
+    );
+    expect(text).not.toHaveBeenCalled();
+  });
+
+  it("writes into an empty folder without asking", async () => {
+    await run([parent]);
+    expect(confirm).not.toHaveBeenCalled();
+    expect(await readdir(parent)).toEqual(["package.json"]);
+  });
+
+  it("replaces the files in a folder that has some once the user agrees", async () => {
+    await writeFile(join(parent, "notes.txt"), "");
     vi.mocked(confirm).mockResolvedValue(true);
 
     await expect(run([parent])).resolves.toBe(0);
@@ -118,13 +139,12 @@ describe("run", () => {
       initialValue: false,
       message: `The folder ${parent} already exists. Replace the files in it?`,
     });
-    expect(downloadTemplate).toHaveBeenCalledWith(
-      "github:rethinkhealth/glion/examples/starter#main",
-      { dir: parent, force: true }
-    );
+    const files = await readdir(parent);
+    expect(files.toSorted()).toEqual(["notes.txt", "package.json"]);
   });
 
-  it("leaves an existing folder alone when the user declines", async () => {
+  it("leaves a folder that has files alone when the user declines", async () => {
+    await writeFile(join(parent, "notes.txt"), "");
     vi.mocked(confirm).mockResolvedValue(false);
 
     await expect(run([parent])).resolves.toBe(0);
@@ -132,7 +152,8 @@ describe("run", () => {
     expect(downloadTemplate).not.toHaveBeenCalled();
   });
 
-  it("leaves an existing folder alone when the question is cancelled", async () => {
+  it("leaves a folder that has files alone when the question is cancelled", async () => {
+    await writeFile(join(parent, "notes.txt"), "");
     vi.mocked(confirm).mockResolvedValue(Symbol("clack:cancel"));
 
     await run([parent]);
@@ -157,29 +178,31 @@ describe("run", () => {
     );
   });
 
-  it("reports an example that does not exist and exits with 1", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(() => Promise.resolve(new Response(null, { status: NOT_FOUND })))
-    );
+  it("reports an example that does not exist, stops the spinner, and exits with 1", async () => {
+    extracts({});
 
     await expect(run([dir, "--example", "no-such-example"])).resolves.toBe(1);
+    expect(progress.stop).toHaveBeenCalledWith("Nothing was created.", 2);
     expect(cancel).toHaveBeenCalledWith(
       'We could not find an example named "no-such-example". See the list of examples at https://github.com/rethinkhealth/glion/tree/main/examples.'
     );
-    expect(text).not.toHaveBeenCalled();
-    expect(downloadTemplate).not.toHaveBeenCalled();
+    await expect(readdir(dir)).rejects.toThrow("ENOENT");
   });
 
-  it("reports a failed download and exits with 1", async () => {
+  it("reports a failed download with its cause, stops the spinner, and exits with 1", async () => {
     vi.mocked(downloadTemplate).mockRejectedValue(
-      new Error("Failed to download https://codeload.github.com/...")
+      new Error("Failed to download https://api.github.com/: 404 Not Found")
     );
 
     await expect(run([dir])).resolves.toBe(1);
-    expect(cancel).toHaveBeenCalledWith(
-      "Failed to download https://codeload.github.com/..."
+    expect(progress.stop).toHaveBeenCalledWith("Nothing was created.", 2);
+    expect(log.error).toHaveBeenCalledWith(
+      "Failed to download https://api.github.com/: 404 Not Found"
     );
+    expect(cancel).toHaveBeenCalledWith(
+      'We could not download the example "starter". Check your internet connection and try again.'
+    );
+    await expect(readdir(dir)).rejects.toThrow("ENOENT");
   });
 
   it("exits with 1 on an unknown option", async () => {
