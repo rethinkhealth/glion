@@ -72,7 +72,7 @@ Public package families:
 
 1. **Runtime** — `@glion/mllp`, `@glion/mllp-client`, `@glion/mllp-codec`, `@glion/ack`, `@glion/cli` (in `packages/glion/`)
 2. **Core** — `@glion/hl7v2`, `@glion/parser`, `@glion/ast`, `@glion/builder`, `@glion/to-hl7v2`, `@glion/jsonify`
-3. **Plugins** — `@glion/annotate-delimiters`, `@glion/annotate-profile-*`, `@glion/transform-profile-groups`; `@glion/decode-escapes` and `@glion/encode-escapes` serve trees parsed or written with escape handling turned off
+3. **Plugins** — `@glion/annotate-delimiters`, `@glion/annotate-profile-*`, `@glion/transform-profile-groups`, `@glion/transform-omit-trailing-empty-fields`; `@glion/decode-escapes` and `@glion/encode-escapes` serve trees parsed or written with escape handling turned off
 4. **Linting** — `@glion/lint-*` plus `@glion/preset-lint-recommended`, `@glion/preset-lint-profile-recommended`, `@glion/preset-annotate-profile-recommended`
 5. **Utilities** — `@glion/utils`, `@glion/util-query`, `@glion/util-visit`, `@glion/util-semver`, `@glion/util-timestamp`
 6. **Data & config** — `@glion/profiles`, `@glion/config`
