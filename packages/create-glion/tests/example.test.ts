@@ -293,13 +293,23 @@ describe("urlTemplate", () => {
     );
   });
 
+  // The link to the branch and --example-path give back the template, even
+  // when the folder repeats the end of the branch name.
+  //
+  // Mutant: `urlTemplate` keeps only the first segment of the ref. Fails on
+  // `{ owner: "A", path: "", ref: " / ", repo: "a" }`.
   it("reads back the page of the ref githubUrl writes, with the folder as --example-path", () => {
     fc.assert(
       fc.property(arbTemplate(arbSegments(1)), (template) => {
         expect(
           urlTemplate(githubUrl({ ...template, path: "" }), template.path)
         ).toEqual(template);
-      })
+      }),
+      {
+        examples: [
+          [{ owner: "acme", path: "tls", ref: "feat/tls", repo: "templates" }],
+        ],
+      }
     );
   });
 

@@ -183,6 +183,8 @@ describe("download", () => {
     expect(capitalized.toLowerCase()).not.toBe(lowercase.toLowerCase());
   });
 
+  // Mutant: the provider leaves the tarball segments unencoded. Fails on
+  // `{ owner: "A", path: "", ref: " ", repo: "-" }`.
   it("asks giget for exactly the template, whatever its ref and folder hold", async () => {
     const arbSegment = fc
       .string({ minLength: 1, unit: "grapheme" })
