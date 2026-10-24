@@ -45,6 +45,7 @@
   "dependencies": {
     "@glion/ast": "workspace:*",
     "@glion/util-visit": "workspace:*",
+    "@glion/utils": "workspace:*",
     "pluralize": "8.0.0",
     "unified-lint-rule": "3.0.1"
   },

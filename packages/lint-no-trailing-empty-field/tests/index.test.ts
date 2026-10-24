@@ -44,8 +44,38 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
       expect(file.messages).toHaveLength(0);
     });
 
-    it("warns for trailing field with all-empty components", async () => {
-      // Per HL7v2 spec, |^^^^| is semantically empty — no non-whitespace values
+    it("does not warn for a trailing field that holds the HL7v2 null value", async () => {
+      const tree = m(s("PID", f("1"), f('""')));
+      const file = new VFile();
+
+      await unified()
+        .use(hl7v2LintNoTrailingEmptyField, { strict: true })
+        .run(tree, file);
+
+      expect(file.messages).toHaveLength(0);
+    });
+
+    it("does not warn for a segment that ends with one empty field", async () => {
+      const tree = m(s("PID", f("1"), f("DOE"), f()));
+      const file = new VFile();
+
+      await unified().use(hl7v2LintNoTrailingEmptyField).run(tree, file);
+
+      expect(file.messages).toHaveLength(0);
+    });
+
+    it("does not warn for a segment whose only field is empty", async () => {
+      const tree = m(s("PID", f()));
+      const file = new VFile();
+
+      await unified().use(hl7v2LintNoTrailingEmptyField).run(tree, file);
+
+      expect(file.messages).toHaveLength(0);
+    });
+  });
+
+  describe("nON-PASSING CASES", () => {
+    it("warns for a trailing field whose components hold no value", async () => {
       const tree = m(
         s(
           "OBR",
@@ -59,41 +89,79 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
       );
       const file = new VFile();
 
-      await unified().use([hl7v2LintNoTrailingEmptyField]).run(tree, file);
+      await unified().use(hl7v2LintNoTrailingEmptyField).run(tree, file);
 
-      expect(file.messages.length).toBeGreaterThanOrEqual(1);
+      expect(file.messages).toHaveLength(1);
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 3 empty fields; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
     });
 
-    it("warns for trailing field with all-empty components (short segment)", async () => {
-      const tree = m(s("OBR", f(""), f(""), f(c("", "", "", "", ""))));
+    it("warns for a trailing field whose repetitions hold no value", async () => {
+      const tree = m(s("OBR", f("1"), f(""), f(r(""), r(c("", "")))));
       const file = new VFile();
 
-      await unified().use([hl7v2LintNoTrailingEmptyField]).run(tree, file);
+      await unified().use(hl7v2LintNoTrailingEmptyField).run(tree, file);
 
-      expect(file.messages.length).toBeGreaterThanOrEqual(1);
+      expect(file.messages).toHaveLength(1);
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 2 empty fields; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
     });
 
-    it("warns for trailing field with empty repetitions", async () => {
-      const tree = m(s("OBR", f(""), f(""), f(r(""), r(c("", "")))));
+    it("warns for a segment that ends with one empty field when strict", async () => {
+      const tree = m(s("PID", f("1"), f("DOE"), f()));
       const file = new VFile();
 
-      await unified().use([hl7v2LintNoTrailingEmptyField]).run(tree, file);
+      await unified()
+        .use(hl7v2LintNoTrailingEmptyField, { strict: true })
+        .run(tree, file);
 
-      expect(file.messages.length).toBeGreaterThanOrEqual(1);
+      expect(file.messages).toHaveLength(1);
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
     });
-  });
 
-  describe("nON-PASSING CASES", () => {
+    it("warns for a segment that ends with two empty fields", async () => {
+      const tree = m(s("PID", f("1"), f("DOE"), f(), f()));
+      const file = new VFile();
+
+      await unified().use(hl7v2LintNoTrailingEmptyField).run(tree, file);
+
+      expect(file.messages).toHaveLength(1);
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 2 empty fields; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
+    });
+
     it("reports a segment with an empty Segment ID with the same message", async () => {
       const tree = m(s("", f("1"), f("")));
       const file = new VFile();
 
-      await unified().use([hl7v2LintNoTrailingEmptyField]).run(tree, file);
+      await unified()
+        .use(hl7v2LintNoTrailingEmptyField, { strict: true })
+        .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]?.message).toBe(
-        "The segment ends with 1 empty field; a segment should end at its last field with a value."
-      );
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
     });
 
     it("warns for a segment with trailing empty fields", async () => {
@@ -117,12 +185,17 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
       );
       const file = new VFile();
 
-      await unified().use([hl7v2LintNoTrailingEmptyField]).run(tree, file);
+      await unified()
+        .use(hl7v2LintNoTrailingEmptyField, { strict: true })
+        .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]?.message).toBe(
-        "The segment ends with 1 empty field; a segment should end at its last field with a value."
-      );
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
     });
 
     it("warns for a segment with multiple trailing empty fields", async () => {
@@ -141,9 +214,12 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
       await unified().use([hl7v2LintNoTrailingEmptyField]).run(tree, file);
 
       expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]?.message).toBe(
-        "The segment ends with 3 empty fields; a segment should end at its last field with a value."
-      );
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 3 empty fields; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
     });
 
     it("reports a range from the first trailing empty field to the end of the segment", async () => {
@@ -156,9 +232,12 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
       const pid = tree.children[1] as Segment;
 
       expect(file.messages).toHaveLength(1);
-      expect(file.messages[0]?.message).toBe(
-        "The segment ends with 2 empty fields; a segment should end at its last field with a value."
-      );
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 2 empty fields; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
       expect(file.messages[0]?.place).toStrictEqual({
         end: { column: 13, line: 2, offset: 23 },
         start: { column: 11, line: 2, offset: 21 },
@@ -175,9 +254,17 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
       const tree = m(s("PID", f("1"), trailing));
       const file = new VFile();
 
-      await unified().use([hl7v2LintNoTrailingEmptyField]).run(tree, file);
+      await unified()
+        .use(hl7v2LintNoTrailingEmptyField, { strict: true })
+        .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
       expect(file.messages[0]?.place).toBeUndefined();
     });
 
@@ -190,9 +277,17 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
       const tree = m(segment);
       const file = new VFile();
 
-      await unified().use([hl7v2LintNoTrailingEmptyField]).run(tree, file);
+      await unified()
+        .use(hl7v2LintNoTrailingEmptyField, { strict: true })
+        .run(tree, file);
 
       expect(file.messages).toHaveLength(1);
+      expect(file.messages[0]).toMatchObject({
+        message:
+          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        ruleId: "no-trailing-empty-field",
+        source: "hl7v2-lint",
+      });
       expect(file.messages[0]?.place).toStrictEqual(segment.position);
     });
   });
