@@ -16,17 +16,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { download, isMissing } from "../src/download";
 import type { Template } from "../src/example";
+import { exampleTemplate } from "../src/example";
 
 // giget's download writes the files a test gives it into the folder it is
 // asked to extract to.
 vi.mock(import("giget"), () => ({ downloadTemplate: vi.fn() }));
 
-const STARTER: Template = {
-  owner: "rethinkhealth",
-  path: "examples/starter",
-  ref: "main",
-  repo: "glion",
-};
+const STARTER: Template = exampleTemplate("starter");
 
 const extracts = (files: Record<string, string>) =>
   vi.mocked(downloadTemplate).mockImplementation(async (_input, options) => {
@@ -90,14 +86,34 @@ describe("download", () => {
   });
 
   it("writes nothing to the project folder when the download fails", async () => {
-    vi.mocked(downloadTemplate).mockRejectedValue(
-      new Error("Failed to download https://api.github.com/: 404 Not Found")
-    );
+    vi.mocked(downloadTemplate).mockRejectedValue(new Error("404 Not Found"));
 
-    await expect(download(STARTER, dir)).rejects.toThrow(
+    await expect(download(STARTER, dir)).rejects.toThrow();
+    expect(await readdir(dir)).toEqual([]);
+  });
+
+  it("reports a failed download with giget's error as its cause", async () => {
+    const failure = new Error(
       "Failed to download https://api.github.com/: 404 Not Found"
     );
-    expect(await readdir(dir)).toEqual([]);
+    vi.mocked(downloadTemplate).mockRejectedValue(failure);
+
+    await expect(download(STARTER, dir)).rejects.toThrow(
+      expect.objectContaining({
+        cause: failure,
+        message:
+          'We could not download the example "starter". Check your internet connection and try again.',
+      })
+    );
+  });
+
+  it("reports a failed copy with the file system's error, unchanged", async () => {
+    await mkdir(join(dir, "package.json"));
+    extracts({ "package.json": "{}" });
+
+    await expect(download(STARTER, dir)).rejects.toThrow(
+      expect.objectContaining({ code: "ERR_FS_CP_NON_DIR_TO_DIR" })
+    );
   });
 
   it("removes the folder giget extracts to", async () => {

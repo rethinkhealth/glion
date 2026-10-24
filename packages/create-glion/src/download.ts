@@ -7,7 +7,7 @@ import type { TemplateProvider } from "giget";
 import { downloadTemplate } from "giget";
 
 import type { Template } from "./example";
-import { githubUrl } from "./example";
+import { downloadFailedMessage, githubUrl } from "./example";
 
 const GITHUB_API = "https://api.github.com";
 const GITHUB_RAW = "https://raw.githubusercontent.com";
@@ -71,8 +71,12 @@ function githubProvider(template: Template): TemplateProvider {
  * `package.json`.
  *
  * Writes nothing to `dir` when the download fails or resolves to `false`.
+ * Copies links as they are, including a link that points outside the template.
  *
- * @throws {Error} When giget cannot download or extract the repository.
+ * @throws {Error} When giget cannot download or extract the repository, with
+ *   giget's error as `cause`.
+ * @throws {Error} The file system's error, unchanged, when copying into `dir`
+ *   fails.
  */
 export async function download(
   template: Template,
@@ -84,6 +88,8 @@ export async function download(
       dir: staging,
       force: true,
       providers: { github: githubProvider(template) },
+    }).catch((error: unknown) => {
+      throw new Error(downloadFailedMessage(template), { cause: error });
     });
     if (!existsSync(join(staging, "package.json"))) {
       return false;
