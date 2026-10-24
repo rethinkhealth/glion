@@ -33,13 +33,12 @@ export type ConnectionCallback = (
 ) => void | Promise<void>;
 
 /**
- * Error callback invoked with an error on a connection: a throwing
- * `onConnect` or `onDisconnect`, an error `app.handle()` rejects with (a
- * message handled before a parser is registered, {@link MllpServerError}
- * `NO_PARSER`; a second middleware error; a `next()` called twice), or a
+ * Error callback invoked with an error on a connection: a throwing `onConnect`
+ * or `onDisconnect`, an error `app.handle()` rejects with (a message handled
+ * before a parser is registered, {@link MllpServerError} `NO_PARSER`), or a
  * broken MLLP byte stream (`PROTOCOL_VIOLATION`). Any other error a message
- * raises is answered by the app and never reaches this callback.
- * Stream-level errors (connection reset) do not trigger it.
+ * raises is answered by the app and never reaches this callback. Stream-level
+ * errors (connection reset) do not trigger it.
  */
 export type ErrorCallback = (
   error: Error,

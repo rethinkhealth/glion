@@ -17,6 +17,8 @@ export const MllpServerErrorCode = {
    * package.
    */
   INCOMPATIBLE_CHARSET: "INCOMPATIBLE_CHARSET",
+  /** A middleware called `next()` a second time. */
+  NEXT_CALLED_TWICE: "NEXT_CALLED_TWICE",
   /**
    * `app.handle()` was called before a parser was registered via
    * `app.parser()`.

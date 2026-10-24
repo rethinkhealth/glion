@@ -45,8 +45,11 @@ export interface Context {
   };
   /**
    * The error this message raised: a payload that is not UTF-8
-   * (`MllpServerError` `INCOMPATIBLE_CHARSET`), a parser throw, or a
-   * middleware or handler throw. `undefined` while none has.
+   * (`MllpServerError` `INCOMPATIBLE_CHARSET`), a parser or route filter
+   * throw, a middleware or handler throw, a `next()` called twice
+   * (`NEXT_CALLED_TWICE`), or the `AckApplicationReject` of a message no
+   * route matches. A later error replaces it; a middleware that throws one
+   * passes this as its `cause` to keep it. `undefined` while none has.
    */
   readonly error: Error | undefined;
 
@@ -88,11 +91,14 @@ export interface Context {
 
   /**
    * The acknowledgment of this message as a reply: `acknowledge()` of its
-   * MSH as received, serialized. A change to the tree does not change it.
-   * MSA-1 defaults to `AA`.
+   * MSH as the processor parsed it, serialized. The transforms `tree()` runs
+   * do not change it. MSA-1 defaults to `AA`.
    */
   ack(options?: AcknowledgeOptions): Response;
-  /** Response to send back. Set by middleware or handler. */
+  /**
+   * Response to send back. A reply written here stands until an error
+   * replaces it; one a middleware or route handler returns stands.
+   */
   res: Response | undefined;
 
   /** MSH-9.1 message type (e.g., "ADT") — from pre-transform parse */

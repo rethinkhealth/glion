@@ -94,21 +94,54 @@ describe("compose", () => {
     expect(ctx.res?.raw).toContain("MSA|AE");
   });
 
-  it("rejects with the error of a next() called a second time, once the chain has run", async () => {
-    const ran: string[] = [];
-    const outer: Middleware = async (_ctx, next) => {
-      await next();
-      ran.push("outer");
-    };
+  it("passes NEXT_CALLED_TWICE to onError and throws it to the second next() call", async () => {
+    const seen: Error[] = [];
+    let caught: unknown;
     const twice: Middleware = async (_ctx, next) => {
       await next();
-      await next();
+      try {
+        await next();
+      } catch (error) {
+        caught = error;
+      }
+    };
+    const record = (error: Error): undefined => {
+      seen.push(error);
     };
 
-    await expect(compose([outer, twice], noAnswer)(makeCtx())).rejects.toThrow(
-      "next() called multiple times"
-    );
-    expect(ran).toEqual(["outer"]);
+    await compose([twice], record)(makeCtx());
+    expect(seen).toHaveLength(1);
+    expect(caught).toBe(seen[0]);
+    expect((caught as { code?: string }).code).toBe("NEXT_CALLED_TWICE");
+  });
+
+  it("keeps a returned reply when a middleware outside it throws", async () => {
+    const ok = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1" };
+    const outer: Middleware = async (_ctx, next) => {
+      await next();
+      throw new Error("audit write failed");
+    };
+    const ctx = makeCtx();
+
+    await compose([outer, () => ok], () => ({
+      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1",
+    }))(ctx);
+    expect(ctx.res).toBe(ok);
+  });
+
+  it("replaces a reply written to ctx.res when a middleware outside it throws", async () => {
+    const nak = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1" };
+    const outer: Middleware = async (_ctx, next) => {
+      await next();
+      throw new Error("audit write failed");
+    };
+    const inner: Middleware = (ctx) => {
+      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1" };
+    };
+    const ctx = makeCtx();
+
+    await compose([outer, inner], () => nak)(ctx);
+    expect(ctx.res).toBe(nak);
   });
 
   it("works with empty middleware array", async () => {

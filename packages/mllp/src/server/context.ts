@@ -15,11 +15,17 @@ import type {
   Response,
 } from "./types";
 
-const SEGMENT_SEPARATOR = /[\r\n]/;
+const CR = 0x0d;
+const LF = 0x0a;
+
+/** Decodes UTF-8, with U+FFFD for each byte that is not UTF-8. */
+const LENIENT_DECODER = new TextDecoder();
 
 /** A {@link Context} whose `error` the server records. */
 export type MessageContext = Omit<Context, "error"> & {
   error: Error | undefined;
+  /** Whether the message starts with a message header segment (MSH). */
+  readonly hasHeader: boolean;
 };
 
 /**
@@ -45,8 +51,8 @@ export interface CreateContextOptions {
  * ADR-0013). When the message raised an error, they are read from its MSH,
  * decoded with U+FFFD for each byte that is not UTF-8.
  *
- * `ctx.ack()` answers the MSH as received: a change to the tree does not
- * change the acknowledgment.
+ * `ctx.ack()` answers the MSH as the processor parsed it: the transforms
+ * `ctx.tree()` runs do not change the acknowledgment.
  *
  * The expensive pipeline stages are lazy:
  *
@@ -64,39 +70,19 @@ export function createContext(options: CreateContextOptions): MessageContext {
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
 
   // ── Eager: decode + parse (sync, fast) ─────────────────────────────
-  // VFile carries the input through the pipeline and collects diagnostics.
-  let raw = "";
-  let parsed: Root = { children: [], type: "root" };
-  let error: Error | undefined;
-  try {
-    raw = decodeBytes(payload);
-  } catch (decodeError) {
-    error = new MllpServerError(
-      MllpServerErrorCode.INCOMPATIBLE_CHARSET,
-      "The inbound message is not valid UTF-8; only UTF-8 is supported.",
-      { cause: decodeError }
-    );
-  }
-  const file = new VFile(raw);
-  if (!error) {
-    try {
-      parsed = processor.parse(file);
-    } catch (parseError) {
-      error =
-        parseError instanceof Error
-          ? parseError
-          : new Error(String(parseError));
-    }
-  }
+  const { error, file, parsed, raw } = read(payload, processor);
 
-  // The MSH as received, which ctx.ack() answers, parsed from the text on
-  // first use so it never changes with the tree. A payload that is not
-  // UTF-8 is decoded with U+FFFD:
+  // The MSH ctx.ack() answers: the parsed tree's own until ctx.tree() runs
+  // the transforms, a copy of it from then on. A payload that did not decode
+  // or parse has no tree; its first segment is parsed alone, with U+FFFD for
+  // each byte that is not UTF-8:
   //
   //   MSH|^~\&|A|B|C|D|…||ADT^A01|MSG001|P|2.5.1\rPID|…  →  MSH|^~\&|A|B|C|D|…
   let header = error
-    ? parseHL7v2(firstSegment(new TextDecoder().decode(payload)))
+    ? parseHL7v2(LENIENT_DECODER.decode(firstLine(payload)))
     : undefined;
+  const first = (header ?? parsed).children[0];
+  const hasHeader = first?.type === "segment" && first.name === "MSH";
 
   // Routing fields keep the values as parsed, even after transformers
   // enrich the tree in-place; from the header when the message raised an
@@ -120,6 +106,7 @@ export function createContext(options: CreateContextOptions): MessageContext {
     }
     if (!transformPromise) {
       transformPromise = (async () => {
+        header ??= copyHeader(parsed);
         // Hl7v2Processor's tail admits `undefined` (so the bare parser is
         // assignable), which makes unified type run()'s result as
         // `Root | Node`; an HL7v2 pipeline always yields the (possibly
@@ -151,8 +138,7 @@ export function createContext(options: CreateContextOptions): MessageContext {
   // ── Build context ──────────────────────────────────────────────────
   const ctx: MessageContext = {
     ack(ackOptions?: AcknowledgeOptions): Response {
-      header ??= parseHL7v2(firstSegment(raw));
-      return { raw: toHl7v2(acknowledge(header, ackOptions)) };
+      return { raw: toHl7v2(acknowledge(header ?? parsed, ackOptions)) };
     },
     ast: parsed,
     connection: Object.freeze(connection),
@@ -162,6 +148,7 @@ export function createContext(options: CreateContextOptions): MessageContext {
     get<K extends string>(key: K): unknown {
       return variables.get(key);
     },
+    hasHeader,
     messageStructure,
     messageType,
     req: Object.freeze({ bytes: payload, raw }),
@@ -185,8 +172,56 @@ export function createContext(options: CreateContextOptions): MessageContext {
   return ctx;
 }
 
-/** The text of the first segment of `text`. */
-function firstSegment(text: string): string {
-  const end = text.search(SEGMENT_SEPARATOR);
-  return end === -1 ? text : text.slice(0, end);
+/**
+ * `payload` decoded as UTF-8 and parsed by `processor`, in a VFile that
+ * carries it through the pipeline and collects diagnostics. Never throws: a
+ * payload that is not UTF-8 gives empty text, a parser throw an empty
+ * `Root`, and either one `error`.
+ */
+function read(
+  payload: Uint8Array,
+  processor: Hl7v2Processor
+): { error?: Error; file: VFile; parsed: Root; raw: string } {
+  const parsed: Root = { children: [], type: "root" };
+  let raw: string;
+  try {
+    raw = decodeBytes(payload);
+  } catch (error) {
+    return {
+      error: new MllpServerError(
+        MllpServerErrorCode.INCOMPATIBLE_CHARSET,
+        "The inbound message is not valid UTF-8; only UTF-8 is supported.",
+        { cause: error }
+      ),
+      file: new VFile(""),
+      parsed,
+      raw: "",
+    };
+  }
+  const file = new VFile(raw);
+  try {
+    return { file, parsed: processor.parse(file), raw };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error : new Error(String(error)),
+      file,
+      parsed,
+      raw,
+    };
+  }
+}
+
+/** The bytes of the first segment of `payload`. */
+function firstLine(payload: Uint8Array): Uint8Array {
+  const cr = payload.indexOf(CR);
+  const head = cr === -1 ? payload : payload.subarray(0, cr);
+  const lf = head.indexOf(LF);
+  return lf === -1 ? head : head.subarray(0, lf);
+}
+
+/** A tree holding a copy of the MSH `tree` starts with, if any. */
+function copyHeader(tree: Root): Root {
+  const [first] = tree.children;
+  const msh = first?.type === "segment" && first.name === "MSH";
+  return { children: msh ? [structuredClone(first)] : [], type: "root" };
 }
