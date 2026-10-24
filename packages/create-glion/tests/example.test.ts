@@ -212,12 +212,9 @@ describe("urlTemplate", () => {
     ).toEqual({ owner: "acme", path: "", ref: "v1.2.0", repo: "templates" });
   });
 
-  it("takes the ref as what precedes --example-path in a tree URL", () => {
+  it("takes the whole tree URL as the ref with --example-path", () => {
     expect(
-      urlTemplate(
-        "https://github.com/acme/templates/tree/feat/tls/mllp/tls",
-        "mllp/tls"
-      )
+      urlTemplate("https://github.com/acme/templates/tree/feat/tls", "mllp/tls")
     ).toEqual({
       owner: "acme",
       path: "mllp/tls",
@@ -226,12 +223,12 @@ describe("urlTemplate", () => {
     });
   });
 
-  it("takes the whole tree URL as the ref when it ends before --example-path", () => {
+  it("takes the whole tree URL as the ref when it ends with --example-path", () => {
     expect(
-      urlTemplate("https://github.com/acme/templates/tree/feat/tls", "mllp/tls")
+      urlTemplate("https://github.com/acme/templates/tree/feat/tls", "tls")
     ).toEqual({
       owner: "acme",
-      path: "mllp/tls",
+      path: "tls",
       ref: "feat/tls",
       repo: "templates",
     });
@@ -296,12 +293,12 @@ describe("urlTemplate", () => {
     );
   });
 
-  it("reads back the page githubUrl writes, with the folder as --example-path", () => {
+  it("reads back the page of the ref githubUrl writes, with the folder as --example-path", () => {
     fc.assert(
       fc.property(arbTemplate(arbSegments(1)), (template) => {
-        expect(urlTemplate(githubUrl(template), template.path)).toEqual(
-          template
-        );
+        expect(
+          urlTemplate(githubUrl({ ...template, path: "" }), template.path)
+        ).toEqual(template);
       })
     );
   });

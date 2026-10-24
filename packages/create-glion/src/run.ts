@@ -21,7 +21,8 @@ Options:
                                    or the URL of a GitHub repository or a
                                    directory in one. Defaults to ${DEFAULT_EXAMPLE}.
   --example-path <path>            The template's directory in the repository,
-                                   for a URL whose branch name contains a slash.
+                                   for a URL that ends with a branch name
+                                   containing a slash.
   -h, --help                       Show this message
 `;
 
