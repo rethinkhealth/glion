@@ -1,4 +1,5 @@
 import type { Root } from "@glion/ast";
+import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { decodeBytes } from "@glion/util-charset";
 import { value as queryValue } from "@glion/util-query";
@@ -13,6 +14,13 @@ import type {
   Hl7v2Processor,
   Response,
 } from "./types";
+
+const SEGMENT_SEPARATOR = /[\r\n]/;
+
+/** A {@link Context} whose `error` the server records. */
+export type MessageContext = Omit<Context, "error"> & {
+  error: Error | undefined;
+};
 
 /**
  * Options for creating a Context instance.
@@ -34,7 +42,11 @@ export interface CreateContextOptions {
  * empty `Root` and sets `ctx.error`. Routing fields are
  * extracted as strings from the parsed tree immediately — these cached
  * strings are the values as parsed, before any transformer runs (see
- * ADR-0013).
+ * ADR-0013). When the message raised an error, they are read from its MSH,
+ * decoded with U+FFFD for each byte that is not UTF-8.
+ *
+ * `ctx.ack()` answers the MSH as received: a change to the tree does not
+ * change the acknowledgment.
  *
  * The expensive pipeline stages are lazy:
  *
@@ -46,7 +58,7 @@ export interface CreateContextOptions {
  * If no handler matches or middleware short-circuits before accessing
  * the tree, the transform and compile steps never execute.
  */
-export function createContext(options: CreateContextOptions): Context {
+export function createContext(options: CreateContextOptions): MessageContext {
   const { payload, connection, processor } = options;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
@@ -56,9 +68,6 @@ export function createContext(options: CreateContextOptions): Context {
   let raw = "";
   let parsed: Root = { children: [], type: "root" };
   let error: Error | undefined;
-  // The tree ctx.ack() reads. For a payload that is not UTF-8 it is a lenient
-  // decode, so the NAK still echoes the sender's MSH and MSA-2 its MSH-10.
-  let replyOrigin: Root | undefined;
   try {
     raw = decodeBytes(payload);
   } catch (decodeError) {
@@ -67,7 +76,6 @@ export function createContext(options: CreateContextOptions): Context {
       "The inbound message is not valid UTF-8; only UTF-8 is supported.",
       { cause: decodeError }
     );
-    replyOrigin = leniently(processor, payload);
   }
   const file = new VFile(raw);
   if (!error) {
@@ -81,14 +89,24 @@ export function createContext(options: CreateContextOptions): Context {
     }
   }
 
-  // Extract routing fields as strings from the parsed tree.
-  // These are cached immediately and keep the values as parsed, even
-  // after transformers enrich the tree in-place.
-  const controlId = queryValue(parsed, "MSH.10")?.value ?? "";
-  const messageType = queryValue(parsed, "MSH.9.1")?.value ?? "";
-  const triggerEvent = queryValue(parsed, "MSH.9.2")?.value ?? "";
-  const messageStructure = queryValue(parsed, "MSH.9.3")?.value ?? "";
-  const version = queryValue(parsed, "MSH.12.1")?.value ?? "";
+  // The MSH as received, which ctx.ack() answers, parsed from the text on
+  // first use so it never changes with the tree. A payload that is not
+  // UTF-8 is decoded with U+FFFD:
+  //
+  //   MSH|^~\&|A|B|C|D|…||ADT^A01|MSG001|P|2.5.1\rPID|…  →  MSH|^~\&|A|B|C|D|…
+  let header = error
+    ? parseHL7v2(firstSegment(new TextDecoder().decode(payload)))
+    : undefined;
+
+  // Routing fields keep the values as parsed, even after transformers
+  // enrich the tree in-place; from the header when the message raised an
+  // error before it had a tree.
+  const fields = header ?? parsed;
+  const controlId = queryValue(fields, "MSH.10")?.value ?? "";
+  const messageType = queryValue(fields, "MSH.9.1")?.value ?? "";
+  const triggerEvent = queryValue(fields, "MSH.9.2")?.value ?? "";
+  const messageStructure = queryValue(fields, "MSH.9.3")?.value ?? "";
+  const version = queryValue(fields, "MSH.12.1")?.value ?? "";
 
   // ── Lazy: transform (async, cached) ────────────────────────────────
   // run() applies all transformers: annotations, lint.
@@ -131,11 +149,10 @@ export function createContext(options: CreateContextOptions): Context {
   }
 
   // ── Build context ──────────────────────────────────────────────────
-  const ctx: Context = {
+  const ctx: MessageContext = {
     ack(ackOptions?: AcknowledgeOptions): Response {
-      return {
-        raw: toHl7v2(acknowledge(replyOrigin ?? parsed, ackOptions)),
-      };
+      header ??= parseHL7v2(firstSegment(raw));
+      return { raw: toHl7v2(acknowledge(header, ackOptions)) };
     },
     ast: parsed,
     connection: Object.freeze(connection),
@@ -168,16 +185,8 @@ export function createContext(options: CreateContextOptions): Context {
   return ctx;
 }
 
-/**
- * `payload` decoded with U+FFFD for every byte that is not UTF-8, and parsed.
- * An empty tree when the parser throws.
- */
-function leniently(processor: Hl7v2Processor, payload: Uint8Array): Root {
-  try {
-    return processor.parse(new VFile(new TextDecoder().decode(payload)));
-  } catch {
-    // The decode failure is already this message's error; a header the
-    // parser cannot read leaves the NAK's MSA-2 empty.
-    return { children: [], type: "root" };
-  }
+/** The text of the first segment of `text`. */
+function firstSegment(text: string): string {
+  const end = text.search(SEGMENT_SEPARATOR);
+  return end === -1 ? text : text.slice(0, end);
 }

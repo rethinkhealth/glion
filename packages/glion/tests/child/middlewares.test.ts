@@ -113,6 +113,32 @@ describe("createMsgTelemetry", () => {
     expect(event.ack).toBeNull();
   });
 
+  it("emits an error event with the error the message raised, after its msg event", async () => {
+    const events: PartialEvent[] = [];
+    const mw = createMsgTelemetry((e) => events.push(e));
+    const error = new TypeError("Cannot read properties of undefined");
+
+    await mw(makeCtx({ error }), async () => {});
+
+    expect(events.map(({ t }) => t)).toEqual(["msg", "error"]);
+    expect(events[1]).toEqual({
+      conn: 1,
+      message: "Cannot read properties of undefined",
+      stack: error.stack,
+      t: "error",
+      trigger: "ADT^A01",
+    });
+  });
+
+  it("emits no error event for a message that raised none", async () => {
+    const events: PartialEvent[] = [];
+    const mw = createMsgTelemetry((e) => events.push(e));
+
+    await mw(makeCtx(), async () => {});
+
+    expect(events.map(({ t }) => t)).toEqual(["msg"]);
+  });
+
   it("uses ? for missing messageType/triggerEvent", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));

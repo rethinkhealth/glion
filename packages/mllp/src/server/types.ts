@@ -48,7 +48,7 @@ export interface Context {
    * (`MllpServerError` `INCOMPATIBLE_CHARSET`), a parser throw, or a
    * middleware or handler throw. `undefined` while none has.
    */
-  error: Error | undefined;
+  readonly error: Error | undefined;
 
   /** TCP connection metadata */
   readonly connection: ConnectionInfo;
@@ -87,23 +87,24 @@ export interface Context {
   result(): Promise<unknown | undefined>;
 
   /**
-   * The acknowledgment of this message as a reply: `acknowledge(ctx.ast,
-   * options)` serialized. MSA-1 defaults to `AA`.
+   * The acknowledgment of this message as a reply: `acknowledge()` of its
+   * MSH as received, serialized. A change to the tree does not change it.
+   * MSA-1 defaults to `AA`.
    */
   ack(options?: AcknowledgeOptions): Response;
   /** Response to send back. Set by middleware or handler. */
   res: Response | undefined;
 
   /** MSH-9.1 message type (e.g., "ADT") — from pre-transform parse */
-  messageType: string;
+  readonly messageType: string;
   /** MSH-9.2 trigger event (e.g., "A01") — from pre-transform parse */
-  triggerEvent: string;
+  readonly triggerEvent: string;
   /** MSH-9.3 message structure (e.g., "ADT_A01") — from pre-transform parse */
-  messageStructure: string;
+  readonly messageStructure: string;
   /** MSH-12 version (e.g., "2.5.1") — from pre-transform parse */
-  version: string;
+  readonly version: string;
   /** MSH-10 message control ID — from pre-transform parse */
-  controlId: string;
+  readonly controlId: string;
 
   /** Store a variable */
   set<K extends string>(key: K, value: unknown): void;

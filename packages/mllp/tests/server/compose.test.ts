@@ -94,20 +94,21 @@ describe("compose", () => {
     expect(ctx.res?.raw).toContain("MSA|AE");
   });
 
-  it("passes onError an error when next() is called multiple times", async () => {
-    const mw: Middleware = async (_ctx, next) => {
+  it("rejects with the error of a next() called a second time, once the chain has run", async () => {
+    const ran: string[] = [];
+    const outer: Middleware = async (_ctx, next) => {
+      await next();
+      ran.push("outer");
+    };
+    const twice: Middleware = async (_ctx, next) => {
       await next();
       await next();
     };
-    const seen: Error[] = [];
 
-    await compose([mw], (error) => {
-      seen.push(error);
-      return noAnswer();
-    })(makeCtx());
-    expect(seen.map(({ message }) => message)).toEqual([
-      "next() called multiple times",
-    ]);
+    await expect(compose([outer, twice], noAnswer)(makeCtx())).rejects.toThrow(
+      "next() called multiple times"
+    );
+    expect(ran).toEqual(["outer"]);
   });
 
   it("works with empty middleware array", async () => {

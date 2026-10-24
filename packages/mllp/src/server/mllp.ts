@@ -7,7 +7,7 @@ import {
 } from "@glion/ack";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
-import { compose } from "./compose";
+import { compose, isResponse } from "./compose";
 import { createContext } from "./context";
 import { Router } from "./router";
 import type {
@@ -134,23 +134,27 @@ export class Mllp {
    * The reply is the acknowledgment the route handler's outcome describes:
    *
    * - It returns a response, or sets `ctx.res`: that response.
-   * - It returns nothing: `AA`.
+   * - It returns nothing, or a value that is not a response: `AA`.
    * - It throws an `AckException`: its `code` in MSA-1 and its `text` in MSA-3.
    * - It throws anything else: `AE` with MSA-3 `Application internal error`.
    * - No route matches: `AR` with MSA-3 `Unsupported message type`.
    *
-   * A middleware throw is answered the same way, unless the route handler has
-   * already replied; then that reply stands. A payload that does not decode
-   * or parse, or a route filter that throws, runs only the global middleware
-   * and is answered as a throw. An error's `message` is never sent. An `ACK`
-   * gets no reply unless a handler or middleware gives one: an
+   * A middleware throw is answered the same way, unless a handler or
+   * middleware has already replied; then that reply stands. A route filter
+   * that throws runs only the global middleware and is answered as a throw.
+   * A payload that does not decode or parse runs only the global middleware,
+   * and its reply is `AE` whatever they return: a message whose content was
+   * never read is never accepted. An error's `message` is never sent. An
+   * `ACK` gets no reply unless a handler or middleware gives one: an
    * acknowledgment is never acknowledged.
    *
    * `ctx.error` holds the first error the message raised. `await next()`
-   * never throws.
+   * throws only when called a second time.
    *
    * @throws {MllpServerError} `NO_PARSER` when no processor has been
    *   registered via `app.parser()`.
+   * @throws A middleware's error when `ctx.error` already holds another, and
+   *   the error of a `next()` called a second time.
    */
   async handle(
     payload: Uint8Array,
@@ -171,58 +175,83 @@ export class Mllp {
       processor: this.#processor,
     });
 
+    // A payload that did not decode or parse: its content was never read.
+    const received = ctx.error;
     let handler: Handler | undefined;
     let middlewares: Middleware[] = [];
-    if (!ctx.error) {
+    if (!received) {
       try {
         ({ handler, middlewares } = this.#router.match(ctx));
       } catch (error) {
         ctx.error = toError(error);
       }
     }
-    if (ctx.error) {
+    const messageError = ctx.error;
+    if (messageError) {
       middlewares = this.#router.globalMiddleware();
     }
+    if (received) {
+      // Content never read is never accepted: the middleware observe the
+      // message, and the error's NAK is the reply.
+      ctx.res = acknowledgeError(ctx, received);
+      middlewares = middlewares.map(withoutReply);
+    }
 
-    // Set once the route handler's step has replied; a later middleware
-    // throw keeps that reply, since the sender would resend a message that
-    // was already processed.
-    let replied = false;
+    // A reply already given stands, since the sender would resend a message
+    // that was already processed. A second error has no place in ctx.error,
+    // so handle() rejects with it.
+    const unrecorded: Error[] = [];
     const answer = (error: Error): Response | undefined => {
-      ctx.error ??= error;
-      return replied ? ctx.res : acknowledgeError(ctx, error);
-    };
-    const terminal: Middleware = async (terminalCtx) => {
-      const before = terminalCtx.res;
-      let reply: Response | undefined;
-      try {
-        reply = await route(terminalCtx, handler);
-        reply ??=
-          terminalCtx.res === before ? accept(terminalCtx) : terminalCtx.res;
-      } catch (error) {
-        reply = answer(toError(error));
+      if (ctx.error && ctx.error !== error) {
+        unrecorded.push(error);
       }
-      replied = true;
-      return reply;
+      ctx.error ??= error;
+      return ctx.res ?? acknowledgeError(ctx, error);
+    };
+    const terminal: Middleware = async () => {
+      const before = ctx.res;
+      try {
+        const reply = await route(ctx, handler, messageError);
+        return reply ?? (ctx.res === before ? accept(ctx) : ctx.res);
+      } catch (error) {
+        const thrown = toError(error);
+        ctx.error ??= thrown;
+        return acknowledgeError(ctx, thrown);
+      }
     };
 
     await compose([...middlewares, terminal], answer)(ctx);
-    return ctx.res;
+    if (unrecorded.length > 0) {
+      throw unrecorded[0];
+    }
+    return received ? acknowledgeError(ctx, received) : ctx.res;
   }
+}
+
+/** `middleware`, with its return value dropped. */
+function withoutReply(middleware: Middleware): Middleware {
+  return async (ctx, next) => {
+    await middleware(ctx, next);
+  };
 }
 
 /**
  * Run the route handler, or raise the message's own error, or reject a
- * message no route matches.
+ * message no route matches. A handler result that is not a `Response` is no
+ * reply.
  */
 async function route(
   ctx: Context,
-  handler: Handler | undefined
+  handler: Handler | undefined,
+  error: Error | undefined
 ): Promise<Response | undefined> {
-  if (ctx.error) {
-    throw ctx.error;
+  if (error) {
+    throw error;
   }
   if (!handler) {
+    if (ctx.messageType === "ACK") {
+      return undefined;
+    }
     throw new AckApplicationReject(
       `No route matches ${ctx.messageType}^${ctx.triggerEvent}.`,
       {
@@ -232,7 +261,8 @@ async function route(
       }
     );
   }
-  return (await handler(ctx)) ?? undefined;
+  const result = await handler(ctx);
+  return isResponse(result) ? result : undefined;
 }
 
 /** `AA`, or no reply to an `ACK`. */
