@@ -62,42 +62,71 @@ const dtmText = fc
       `${`${dateText}${pairs.join("")}`.slice(0, length)}${length === 14 ? (fractionText ?? "") : ""}${offsetText ?? ""}`
   );
 
+// Each valid value parses, and formatting what it parsed to writes the value
+// back exactly, at the precision it was written with.
 describe("format of parse is the value", () => {
+  // Mutant: `writeDate` writes the year without padding it to four digits.
+  // Fails on `"0099"`.
   it("for every valid DT", () => {
     fc.assert(
       fc.property(dtText, (value) => {
         const result = parseDT(value);
         expect(result.success && formatDT(result.data)).toBe(value);
-      })
+      }),
+      { examples: [["0099"]] }
     );
   });
 
+  // Mutant: `formatOffset` writes an offset west of UTC with `+`. Fails on
+  // `"09-0545"`.
   it("for every valid TM", () => {
     fc.assert(
       fc.property(tmText, (value) => {
         const result = parseTM(value);
         expect(result.success && formatTM(result.data)).toBe(value);
-      })
+      }),
+      { examples: [["09-0545"]] }
     );
   });
 
+  // Mutant: `writeTime` drops the fraction of a second. Fails on
+  // `"20260307120000.25"`.
   it("for every valid DTM", () => {
     fc.assert(
       fc.property(dtmText, (value) => {
         const result = parseDTM(value);
         expect(result.success && formatDTM(result.data)).toBe(value);
-      })
+      }),
+      { examples: [["20260307120000.25"]] }
     );
   });
 });
 
+// A year drawn uniformly is rarely a century, and a day drawn uniformly is
+// rarely past the 28th, so half the draws come from the years whose leap rule
+// differs (multiples of 4, 100, and 400) and the days a month may not have.
+const arbYear = fc.oneof(
+  fc.integer({ max: 9999, min: 0 }),
+  fc.integer({ max: 2499, min: 0 }).map((value) => value * 4),
+  fc.integer({ max: 99, min: 0 }).map((value) => value * 100),
+  fc.integer({ max: 24, min: 0 }).map((value) => value * 400)
+);
+const arbDay = fc.oneof(
+  fc.integer({ max: 31, min: 1 }),
+  fc.integer({ max: 31, min: 28 })
+);
+
 describe("parseDT accepts exactly the days of the calendar", () => {
+  // A DT names a day exactly when the proleptic Gregorian calendar has it.
+  //
+  // Mutant: `isLeapYear` treats every year divisible by 4 as a leap year.
+  // Fails on February 29 of 1900.
   it("agrees with the proleptic Gregorian calendar for every year, month, and day 1 to 31", () => {
     fc.assert(
       fc.property(
-        fc.integer({ max: 9999, min: 0 }),
+        arbYear,
         fc.integer({ max: 12, min: 1 }),
-        fc.integer({ max: 31, min: 1 }),
+        arbDay,
         (year, month, day) => {
           const calendar = new Date(0);
           calendar.setUTCFullYear(year, month - 1, day);
@@ -105,7 +134,14 @@ describe("parseDT accepts exactly the days of the calendar", () => {
           const value = `${String(year).padStart(4, "0")}${String(month).padStart(2, "0")}${String(day).padStart(2, "0")}`;
           expect(parseDT(value).success).toBe(exists);
         }
-      )
+      ),
+      {
+        examples: [
+          [1900, 2, 29],
+          [2000, 2, 29],
+        ],
+        numRuns: 1000,
+      }
     );
   });
 });
