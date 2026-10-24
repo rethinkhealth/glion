@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -46,7 +47,9 @@ export async function isMissing(template: Template): Promise<boolean> {
 
 // giget's `github` provider re-parses a `owner/repo/path#ref` string, which
 // cannot hold every ref or folder name. This one hands giget the template as
-// it is, under the same name, so giget's cache and `GIGET_AUTH` still apply.
+// it is, so giget's cache and `GIGET_AUTH` still apply. The name is a hash:
+// giget writes `acme-tools/template` and `acme/tools-template` both as the
+// cache entry `acme-tools-template`, and falls back to it when a download fails.
 function githubProvider(template: Template): TemplateProvider {
   const { owner, path, ref, repo } = template;
   const segments = [owner, repo, "tarball", ...ref.split("/")].map(
@@ -57,7 +60,7 @@ function githubProvider(template: Template): TemplateProvider {
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
     },
-    name: `${owner}-${repo}`,
+    name: createHash("sha256").update(`${owner}/${repo}`).digest("hex"),
     subdir: path,
     tar: `${GITHUB_API}/repos/${segments.join("/")}`,
     url: githubUrl(template),
