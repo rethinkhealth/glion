@@ -1,5 +1,18 @@
 # @glion/lint-profile-backward-compatible
 
+## 0.30.0
+
+### Patch Changes
+
+- Updated dependencies [[`d769436`](https://github.com/rethinkhealth/glion/commit/d7694361597b574af2203052f80c029a55484cb1)]:
+  - @glion/to-hl7v2@0.30.0
+  - @glion/annotate-profile-fields@0.30.0
+  - @glion/util-query@0.30.0
+  - @glion/util-visit@0.30.0
+  - @glion/annotate-profile-datatypes@0.30.0
+  - @glion/ast@0.30.0
+  - @glion/utils@0.30.0
+
 ## 0.29.0
 
 ### Patch Changes

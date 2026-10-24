@@ -1,5 +1,9 @@
 # @rethinkhealth/hl7v2-lint-required-message-header
 
+## 0.30.0
+
+No changes in this release.
+
 ## 0.29.0
 
 No changes in this release.
