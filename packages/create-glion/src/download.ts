@@ -10,6 +10,39 @@ import type { Template } from "./example";
 import { githubUrl } from "./example";
 
 const GITHUB_API = "https://api.github.com";
+const GITHUB_RAW = "https://raw.githubusercontent.com";
+const NOT_FOUND = 404;
+const LOOKUP_TIMEOUT_MS = 5000;
+
+/**
+ * Resolves to `true` when GitHub answers that `template` has no
+ * `package.json`, and to `false` for any other outcome: found, an error, no
+ * answer within 5 s, or no network.
+ *
+ * Use it only for a template whose ref and folder hold no character a URL
+ * changes, such as an example name's; {@link download} decides for every
+ * template.
+ */
+export async function isMissing(template: Template): Promise<boolean> {
+  const { owner, path, ref, repo } = template;
+  const file = [
+    owner,
+    repo,
+    ...ref.split("/"),
+    ...path.split("/"),
+    "package.json",
+  ]
+    .filter(Boolean)
+    .map(encodeURIComponent)
+    .join("/");
+  const response = await fetch(`${GITHUB_RAW}/${file}`, {
+    method: "HEAD",
+    signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS),
+  })
+    // Without an answer, the download decides, from giget's cache if offline.
+    .catch(() => {});
+  return response?.status === NOT_FOUND;
+}
 
 // giget's `github` provider re-parses a `owner/repo/path#ref` string, which
 // cannot hold every ref or folder name. This one hands giget the template as
