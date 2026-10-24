@@ -1,177 +1,85 @@
 #!/usr/bin/env node
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { parseArgs } from "node:util";
 
 import * as p from "@clack/prompts";
 import { downloadTemplate } from "giget";
 
-const REPO = "github:rethinkhealth/glion";
+import { EXAMPLES_URL, gigetSource, resolveTemplate } from "./example";
+import { parseOptions } from "./options";
+
 const DEFAULT_DIR = "./my-glion-app";
 const DEFAULT_EXAMPLE = "starter";
 
-const EXAMPLES = [
-  {
-    hint: "Starter Glion — minimal HL7v2 MLLP server (default)",
-    label: "starter",
-    value: "starter",
-  },
-  {
-    hint: "HL7v2 MLLP server with route handlers (Node.js)",
-    label: "mllp-server",
-    value: "mllp-server",
-  },
-  {
-    hint: "HL7v2 MLLP server with route handlers (Bun)",
-    label: "mllp-server-bun",
-    value: "mllp-server-bun",
-  },
-] as const;
-
-type ExampleId = (typeof EXAMPLES)[number]["value"];
-
-const HELP = `Usage: create-glion [dir] [--example [name]]
+const HELP = `Usage: create-glion [dir] [options]
 
 Options:
-  -e, --example [name]  Example to clone from examples/. Pass a name to use it
-                        directly, or pass the flag with no value to open the
-                        interactive picker. Omit entirely to use the default
-                        (${DEFAULT_EXAMPLE}).
-  -h, --help            Show this message
-
-Examples:
-${EXAMPLES.map((e) => `  ${e.value.padEnd(18)} ${e.hint}`).join("\n")}
+  -e, --example <name|github-url>  The example to bootstrap the project with:
+                                   the name of a directory in
+                                   ${EXAMPLES_URL},
+                                   or the URL of a GitHub repository or a
+                                   directory in one. Defaults to ${DEFAULT_EXAMPLE}.
+  --example-path <path>            The template's directory in the repository,
+                                   for a URL whose branch name contains a slash.
+  -h, --help                       Show this message
 `;
 
-function isExampleId(value: string): value is ExampleId {
-  return EXAMPLES.some((e) => e.value === value);
-}
-
-function abort(message = "Aborted."): never {
-  p.cancel(message);
+function abort(): never {
+  p.cancel("Cancelled. Nothing was created.");
   process.exit(0);
 }
 
-// Detect bare `--example` / `-e` (no value) and `--example=` / `-e=` and strip
-// them from argv so that parseArgs (which requires a value for string options)
-// does not error. The bare form opts into the interactive picker.
-function extractPickerFlag(args: string[]): {
-  args: string[];
-  wantsPicker: boolean;
-} {
-  const out: string[] = [];
-  let wantsPicker = false;
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (arg === undefined) {
-      continue;
-    }
-    if (arg === "--example" || arg === "-e") {
-      const next = args[i + 1];
-      if (next === undefined || next.startsWith("-")) {
-        wantsPicker = true;
-        continue;
-      }
-      out.push(arg);
-      continue;
-    }
-    if (arg === "--example=" || arg === "-e=") {
-      wantsPicker = true;
-      continue;
-    }
-    out.push(arg);
-  }
-  return { args: out, wantsPicker };
-}
-
-async function chooseExample(
-  requested: string | undefined,
-  wantsPicker: boolean
-): Promise<ExampleId> {
-  if (requested !== undefined) {
-    if (!isExampleId(requested)) {
-      p.cancel(
-        `Unknown example: ${requested}. Available: ${EXAMPLES.map((e) => e.value).join(", ")}`
-      );
-      process.exit(1);
-    }
-    return requested;
-  }
-  if (!wantsPicker) {
-    return DEFAULT_EXAMPLE;
-  }
-  const choice = await p.select<ExampleId>({
-    initialValue: DEFAULT_EXAMPLE,
-    message: "Choose an example",
-    options: EXAMPLES.map((e) => ({
-      hint: e.hint,
-      label: e.label,
-      value: e.value,
-    })),
+async function askDirectory(): Promise<string> {
+  const answer = await p.text({
+    defaultValue: DEFAULT_DIR,
+    message: "Where should we create your project?",
+    placeholder: DEFAULT_DIR,
   });
-  if (p.isCancel(choice)) {
+  if (p.isCancel(answer)) {
     abort();
   }
-  return choice;
+  return answer.trim() || DEFAULT_DIR;
+}
+
+async function confirmOverwrite(dir: string): Promise<void> {
+  const proceed = await p.confirm({
+    initialValue: false,
+    message: `The folder ${dir} already exists. Replace the files in it?`,
+  });
+  if (p.isCancel(proceed) || !proceed) {
+    abort();
+  }
 }
 
 async function run(): Promise<void> {
-  const { args: cleanArgs, wantsPicker } = extractPickerFlag(
-    process.argv.slice(2)
-  );
-  const { values, positionals } = parseArgs({
-    allowPositionals: true,
-    args: cleanArgs,
-    options: {
-      example: { short: "e", type: "string" },
-      help: { short: "h", type: "boolean" },
-    },
-  });
-
-  if (values.help) {
+  const options = parseOptions(process.argv.slice(2));
+  if (options.help) {
     process.stdout.write(`${HELP}\n`);
     return;
   }
 
-  p.intro("create-glion");
+  p.intro("Create a Glion app");
 
-  let dir = positionals[0];
-  if (!dir) {
-    const answer = await p.text({
-      defaultValue: DEFAULT_DIR,
-      message: "Where should we scaffold your project?",
-      placeholder: DEFAULT_DIR,
-    });
-    if (p.isCancel(answer)) {
-      abort();
-    }
-    dir = answer.trim().length === 0 ? DEFAULT_DIR : answer;
-  }
-
-  const target = resolve(process.cwd(), dir);
-
+  const example = options.example?.trim() || DEFAULT_EXAMPLE;
+  const template = await resolveTemplate(example, options.examplePath);
+  const dir = options.dir || (await askDirectory());
+  const target = resolve(dir);
   if (existsSync(target)) {
-    const proceed = await p.confirm({
-      initialValue: false,
-      message: `${target} already exists. Continue and overwrite?`,
-    });
-    if (p.isCancel(proceed) || !proceed) {
-      abort();
-    }
+    await confirmOverwrite(dir);
   }
-
-  const example = await chooseExample(values.example, wantsPicker);
 
   const spinner = p.spinner();
-  spinner.start(`Downloading example: ${example}`);
-  await downloadTemplate(`${REPO}/examples/${example}`, {
-    dir: target,
-    force: true,
-  });
-  spinner.stop(`Scaffolded ${example} → ${target}`);
+  spinner.start("Downloading the template");
+  await downloadTemplate(gigetSource(template), { dir: target, force: true });
+  spinner.stop(`Your project is ready in ${dir}.`);
 
-  p.note(`cd ${dir}\npnpm install\npnpm dev`, "Next steps");
-  p.outro("Happy hacking!");
+  const packageManager =
+    process.env.npm_config_user_agent?.split("/")[0] || "npm";
+  p.note(
+    `cd ${dir}\n${packageManager} install\n\nThen open README.md to get started.`,
+    "Next steps"
+  );
+  p.outro("Happy healthcare interface programming!");
 }
 
 try {
