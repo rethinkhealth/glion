@@ -53,7 +53,9 @@ const arbPathname = fc.oneof(
           "%5C",
           "%",
           "%E0%A4%A",
-          "x.git"
+          "x.git",
+          "..git",
+          "...git"
         )
       ),
       { maxLength: 8 }
@@ -247,6 +249,15 @@ describe("urlTemplate", () => {
     expect(() => urlTemplate(url)).toThrow(
       `${url} does not point to a GitHub repository or a folder in one.`
     );
+  });
+
+  it("refuses a repository name that is . or .. once .git is removed", () => {
+    for (const repo of ["..git", "...git"]) {
+      const url = `https://github.com/acme/${repo}/tree/main`;
+      expect(() => urlTemplate(url)).toThrow(
+        `${url} does not point to a GitHub repository or a folder in one.`
+      );
+    }
   });
 
   it("refuses a % that starts no escape", () => {

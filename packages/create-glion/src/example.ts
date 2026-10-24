@@ -94,8 +94,9 @@ export function urlTemplate(url: string, examplePath?: string): Template {
   // `github.com/<owner>/<repo>` reads as `github.com/<owner>/<repo>/tree/HEAD`.
   const [owner, repoName = "", view = "tree", ref = "HEAD", ...rest] =
     decodeSegments(pathname) ?? [];
+  // `...git` loses `.git` to become `..`, so the repository is checked again.
   const repo = repoName.replace(GIT_SUFFIX, "");
-  if (!owner || !repo || view !== "tree") {
+  if (!(owner && repo && isName(repo)) || view !== "tree") {
     throw new Error(
       `${url} does not point to a GitHub repository or a folder in one.`
     );
