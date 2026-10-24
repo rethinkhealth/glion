@@ -1180,10 +1180,10 @@ exports[`QR1: message conformance > edge-custom-delimiters.hl7 — pipeline outp
 
 exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output matches snapshot 1`] = `
 "edge-empty-segments.hl7
-  segments: MSH(12) PID(14) PV1(38) OBX(13)
+  segments: MSH(12) PID(15) PV1(39) OBX(13)
   diagnostics: 8
-    - [no-trailing-empty-field] PID: The segment ends with 13 empty fields; a segment should end at its last field with a value.
-    - [no-trailing-empty-field] PV1: The segment ends with 38 empty fields; a segment should end at its last field with a value.
+    - [no-trailing-empty-field] PID: The segment has 14 trailing field separators.
+    - [no-trailing-empty-field] PV1: The segment has 39 trailing field separators.
     - [required-fields] PID.3: The field is empty; it is required.
     - [required-fields] PID.5: The field is empty; it is required.
     - [required-fields] PV1.2: The field is empty; it is required.
@@ -1197,7 +1197,7 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
   "diagnosticCount": 8,
   "diagnostics": [
     {
-      "message": "The segment ends with 13 empty fields; a segment should end at its last field with a value.",
+      "message": "The segment has 14 trailing field separators.",
       "place": {
         "end": {
           "column": 20,
@@ -1214,7 +1214,7 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
       "source": "hl7v2-lint",
     },
     {
-      "message": "The segment ends with 38 empty fields; a segment should end at its last field with a value.",
+      "message": "The segment has 39 trailing field separators.",
       "place": {
         "end": {
           "column": 43,
@@ -1364,11 +1364,13 @@ exports[`QR1: message conformance > edge-empty-segments.hl7 — pipeline output 
         "",
         "",
         "",
+        "",
       ],
       "segment": "PID",
     },
     {
       "fields": [
+        "",
         "",
         "",
         "",

@@ -96,10 +96,10 @@ PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F||
 Reported message:
 
 ```
-The segment ends with 2 empty fields; a segment should end at its last field with a value.
+The segment has 2 trailing field separators.
 ```
 
-One message is reported per offending segment, whatever its Segment ID.
+The message counts the field separators after the last field with a value. Its `note` is `HL7v2 does not require field separators after the last field with a value.` One message is reported per offending segment, whatever its Segment ID.
 
 ## Part of Glion
 

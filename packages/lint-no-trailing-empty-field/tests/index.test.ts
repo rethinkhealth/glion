@@ -93,8 +93,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 3 empty fields; a segment should end at its last field with a value.",
+        message: "The segment has 3 trailing field separators.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
@@ -108,8 +108,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 2 empty fields; a segment should end at its last field with a value.",
+        message: "The segment has 2 trailing field separators.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
@@ -125,8 +125,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        message: "The segment has 1 trailing field separator.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
@@ -140,8 +140,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 2 empty fields; a segment should end at its last field with a value.",
+        message: "The segment has 2 trailing field separators.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
@@ -157,8 +157,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        message: "The segment has 1 trailing field separator.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
@@ -191,8 +191,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        message: "The segment has 1 trailing field separator.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
@@ -215,8 +215,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 3 empty fields; a segment should end at its last field with a value.",
+        message: "The segment has 3 trailing field separators.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
@@ -233,8 +233,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 2 empty fields; a segment should end at its last field with a value.",
+        message: "The segment has 3 trailing field separators.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
@@ -260,8 +260,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        message: "The segment has 1 trailing field separator.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
@@ -283,8 +283,8 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
 
       expect(file.messages).toHaveLength(1);
       expect(file.messages[0]).toMatchObject({
-        message:
-          "The segment ends with 1 empty field; a segment should end at its last field with a value.",
+        message: "The segment has 1 trailing field separator.",
+        note: "HL7v2 does not require field separators after the last field with a value.",
         ruleId: "no-trailing-empty-field",
         source: "hl7v2-lint",
       });
