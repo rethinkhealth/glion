@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "certs": "sh scripts/certs.sh",
+    "check-types": "tsc --noEmit",
+    "send": "node src/send.ts samples/adt-a01.hl7",
+    "start": "node src/server.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@glion/ack": "latest",
+    "@glion/builder": "latest",
+    "@glion/hl7v2": "latest",
+    "@glion/mllp": "latest",
+    "@glion/mllp-client": "latest",
+    "@glion/parser": "latest",
+    "@glion/to-hl7v2": "latest",
+    "@glion/util-uid": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.12"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

@@ -4,7 +4,8 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "strict": true,
-    "esModuleInterop": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["bun"]

@@ -1,25 +1,20 @@
-import { UnsupportedMessageTypeReject } from "@glion/ack";
 import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
-import { ackMiddleware } from "@glion/mllp-ack";
 
-const app = new Mllp();
+import { accept } from "./accept";
 
-app.parser(parseHL7v2);
+const app = new Mllp().parser(parseHL7v2);
 
-// Turn handler return values into AA ACKs and throws into the matching NAK.
-app.use(ackMiddleware());
-
-// One route: accept ADT^A01 (patient admit).
-app.on("ADT^A01", () => {
-  // Returning normally produces an AA (Application Accept) ACK.
+app.on("ADT^A01", (ctx) => {
+  console.log(`Admission received (message ${ctx.controlId}).`);
+  return accept(ctx);
 });
 
-// Catch-all — reject anything else with an AR NAK.
 app.on("*", (ctx) => {
-  throw new UnsupportedMessageTypeReject(
-    `Unsupported message type: ${ctx.messageType}^${ctx.triggerEvent}`
+  console.log(
+    `Received ${ctx.messageType}^${ctx.triggerEvent} (message ${ctx.controlId}).`
   );
+  return accept(ctx);
 });
 
 export default app;

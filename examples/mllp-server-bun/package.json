@@ -2,19 +2,23 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "dev": "bun --bun glion dev",
-    "start": "bun --bun glion start",
-    "send": "glion send samples/adt-a01.hl7 --local"
+    "send": "bun --bun glion send samples/adt-a01.hl7 --host 127.0.0.1",
+    "start": "bun --bun glion start"
   },
   "dependencies": {
     "@glion/ack": "latest",
+    "@glion/builder": "latest",
     "@glion/cli": "latest",
     "@glion/hl7v2": "latest",
     "@glion/mllp": "latest",
-    "@glion/mllp-ack": "latest",
-    "consola": "3.4.2"
+    "@glion/to-hl7v2": "latest",
+    "@glion/util-query": "latest",
+    "@glion/util-uid": "latest"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "1.4.4",
+    "typescript": "6.0.3"
   }
 }
