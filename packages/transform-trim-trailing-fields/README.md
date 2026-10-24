@@ -1,4 +1,4 @@
-# @glion/transform-omit-trailing-empty-fields
+# @glion/transform-trim-trailing-fields
 
 Unified plugin that removes the empty fields at the end of each HL7v2 segment.
 
@@ -9,7 +9,7 @@ A segment can end with empty fields, such as the ones after `DOE` in `PID|1|DOE|
 ## Install
 
 ```bash
-npm install @glion/transform-omit-trailing-empty-fields
+npm install @glion/transform-trim-trailing-fields
 ```
 
 ## Use
@@ -17,12 +17,12 @@ npm install @glion/transform-omit-trailing-empty-fields
 ```ts
 import { hl7v2Parser } from "@glion/parser";
 import { hl7v2ToHl7v2 } from "@glion/to-hl7v2";
-import { hl7v2TransformOmitTrailingEmptyFields } from "@glion/transform-omit-trailing-empty-fields";
+import { hl7v2TransformTrimTrailingFields } from "@glion/transform-trim-trailing-fields";
 import { unified } from "unified";
 
 const file = await unified()
   .use(hl7v2Parser)
-  .use(hl7v2TransformOmitTrailingEmptyFields)
+  .use(hl7v2TransformTrimTrailingFields)
   .use(hl7v2ToHl7v2)
   .process("MSH|^~\\&|APP||\rPID|1|DOE|||");
 
@@ -33,7 +33,7 @@ console.log(String(file));
 
 ## API
 
-### `unified().use(hl7v2TransformOmitTrailingEmptyFields)`
+### `unified().use(hl7v2TransformTrimTrailingFields)`
 
 A `unified` transform plugin. Takes no options. Also the package's default export.
 
@@ -43,8 +43,8 @@ Visits every segment, including segments inside groups, and removes the empty fi
 import type { Plugin } from "unified";
 import type { Root } from "@glion/ast";
 
-declare const hl7v2TransformOmitTrailingEmptyFields: Plugin<[], Root>;
-export default hl7v2TransformOmitTrailingEmptyFields;
+declare const hl7v2TransformTrimTrailingFields: Plugin<[], Root>;
+export default hl7v2TransformTrimTrailingFields;
 ```
 
 ## Empty fields
@@ -61,7 +61,7 @@ A field is empty when none of its components, repetitions, or subcomponents hold
 
 ## Part of Glion
 
-`@glion/transform-omit-trailing-empty-fields` is part of **[Glion]**, the application framework for HL7v2. See the [Glion README] for the full package catalog and architecture.
+`@glion/transform-trim-trailing-fields` is part of **[Glion]**, the application framework for HL7v2. See the [Glion README] for the full package catalog and architecture.
 
 [Glion]: https://github.com/rethinkhealth/glion#readme
 [Glion README]: https://github.com/rethinkhealth/glion#readme

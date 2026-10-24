@@ -5,24 +5,24 @@ import { hl7v2ToHl7v2 } from "@glion/to-hl7v2";
 import { unified } from "unified";
 import { describe, expect, it } from "vitest";
 
-import { hl7v2TransformOmitTrailingEmptyFields } from "../src";
+import { hl7v2TransformTrimTrailingFields } from "../src";
 
 const processor = unified()
   .use(hl7v2Parser)
-  .use(hl7v2TransformOmitTrailingEmptyFields)
+  .use(hl7v2TransformTrimTrailingFields)
   .use(hl7v2ToHl7v2);
 
 const write = async (source: string): Promise<string> =>
   String(await processor.process(source));
 
-describe("hl7v2TransformOmitTrailingEmptyFields", () => {
-  it("omits the empty fields at the end of a segment", async () => {
+describe("hl7v2TransformTrimTrailingFields", () => {
+  it("removes the empty fields at the end of a segment", async () => {
     expect(await write("MSH|^~\\&|APP\rPID|1|DOE|||")).toBe(
       "MSH|^~\\&|APP\rPID|1|DOE"
     );
   });
 
-  it("omits the empty fields at the end of every segment", async () => {
+  it("removes the empty fields at the end of every segment", async () => {
     expect(await write("MSH|^~\\&|APP||\rPID|1||\rPV1|I|")).toBe(
       "MSH|^~\\&|APP\rPID|1\rPV1|I"
     );
@@ -46,15 +46,15 @@ describe("hl7v2TransformOmitTrailingEmptyFields", () => {
     expect(await write('PID|1|""|')).toBe('PID|1|""');
   });
 
-  it("omits a trailing field whose components hold no value", async () => {
+  it("removes a trailing field whose components hold no value", async () => {
     expect(await write("PID|1|^^|")).toBe("PID|1");
   });
 
-  it("omits a trailing field whose repetitions hold no value", async () => {
+  it("removes a trailing field whose repetitions hold no value", async () => {
     expect(await write("PID|1|~|")).toBe("PID|1");
   });
 
-  it("omits a trailing field whose subcomponents hold no value", async () => {
+  it("removes a trailing field whose subcomponents hold no value", async () => {
     expect(await write("PID|1|&|")).toBe("PID|1");
   });
 
@@ -66,15 +66,15 @@ describe("hl7v2TransformOmitTrailingEmptyFields", () => {
     expect(await write("PID|1|~DEF|")).toBe("PID|1|~DEF");
   });
 
-  it("omits a trailing field whose one subcomponent is empty", async () => {
+  it("removes a trailing field whose one subcomponent is empty", async () => {
     const tree = m(s("PID", f("1"), f(r(c(""))), f("")));
 
-    await unified().use(hl7v2TransformOmitTrailingEmptyFields).run(tree);
+    await unified().use(hl7v2TransformTrimTrailingFields).run(tree);
 
     expect(tree.children[0]).toMatchObject({ children: [f("1")] });
   });
 
-  it("omits a trailing field that holds one repetition or component with no children", async () => {
+  it("removes a trailing field that holds one repetition or component with no children", async () => {
     const tree = m(
       s(
         "PID",
@@ -87,12 +87,12 @@ describe("hl7v2TransformOmitTrailingEmptyFields", () => {
       )
     );
 
-    await unified().use(hl7v2TransformOmitTrailingEmptyFields).run(tree);
+    await unified().use(hl7v2TransformTrimTrailingFields).run(tree);
 
     expect(tree.children[0]).toMatchObject({ children: [f("1")] });
   });
 
-  it("omits the empty fields at the end of a segment inside a group", async () => {
+  it("removes the empty fields at the end of a segment inside a group", async () => {
     const group: Group = {
       children: [s("PID", f("1"), f(), f())],
       id: "PATIENT",
@@ -101,7 +101,7 @@ describe("hl7v2TransformOmitTrailingEmptyFields", () => {
     };
     const tree = m(group);
 
-    await unified().use(hl7v2TransformOmitTrailingEmptyFields).run(tree);
+    await unified().use(hl7v2TransformTrimTrailingFields).run(tree);
 
     expect(group.children[0]).toMatchObject({ children: [f("1")] });
   });

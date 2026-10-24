@@ -5,7 +5,7 @@ export default mergeConfig(
   baseConfig,
   defineConfig({
     test: {
-      name: "hl7v2-transform-omit-trailing-empty-fields",
+      name: "hl7v2-transform-trim-trailing-fields",
     },
   })
 );

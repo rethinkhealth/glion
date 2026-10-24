@@ -1,7 +1,7 @@
 {
-  "name": "@glion/transform-omit-trailing-empty-fields",
+  "name": "@glion/transform-trim-trailing-fields",
   "version": "0.29.0",
-  "description": "Unified plugin to omit the empty fields at the end of each HL7v2 segment",
+  "description": "Unified plugin to remove the empty fields at the end of each HL7v2 segment",
   "keywords": [
     "field",
     "health",
@@ -24,7 +24,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rethinkhealth/glion.git",
-    "directory": "packages/transform-omit-trailing-empty-fields"
+    "directory": "packages/transform-trim-trailing-fields"
   },
   "files": [
     "dist"

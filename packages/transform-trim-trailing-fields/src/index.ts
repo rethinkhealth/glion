@@ -13,7 +13,7 @@ import type { Plugin } from "unified";
  * is every empty field before the last field that is kept. Segments inside
  * groups are trimmed too.
  */
-export const hl7v2TransformOmitTrailingEmptyFields: Plugin<[], Root> =
+export const hl7v2TransformTrimTrailingFields: Plugin<[], Root> =
   () => (tree) => {
     visit(tree, "segment", (segment) => {
       const last = segment.children.findLastIndex(
@@ -23,4 +23,4 @@ export const hl7v2TransformOmitTrailingEmptyFields: Plugin<[], Root> =
     });
   };
 
-export default hl7v2TransformOmitTrailingEmptyFields;
+export default hl7v2TransformTrimTrailingFields;
