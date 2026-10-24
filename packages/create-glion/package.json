@@ -35,8 +35,8 @@
   },
   "scripts": {
     "build": "tsdown",
-    "check-types": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
+    "test": "vitest run",
     "test:watch": "vitest",
     "publint": "publint --strict"
   },

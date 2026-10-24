@@ -335,6 +335,10 @@ Steps 1 and 2 correspond to the "Mutation testing" comment CI posts on the PR; t
 
 All benchmarks live in the `benchmarks/` workspace — never add a `bench/` directory to a package. `benchmarks/README.md` is the contract: regression suites in `suites/` (CodSpeed-tracked; bench names and fixtures are API), deep sweeps in `lab/`, assertion-shaped checks go in the owning package's `tests/`, and every suite needs a canary in `canary.test.ts`.
 
+## Examples
+
+`examples/*` are not workspace members. Each depends on `@glion/*` at `latest`, so it runs against the published release, and `create-glion` copies it unchanged. An example stays self-contained: no `@glion/testing`, no `@glion/tsconfig`, nothing a scaffolded project could not install. A new directory in `examples/` is a new `pnpm create glion --example <name>`.
+
 ## Adding a new package
 
 1. Create `packages/<new-package-name>/`.
