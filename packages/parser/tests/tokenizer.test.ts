@@ -39,6 +39,29 @@ describe("mSH bootstrap only at file start", () => {
   });
 });
 
+describe("segment ids", () => {
+  it("emits the text before a line's first field delimiter as one TEXT token", () => {
+    const out = toks("PID|1\r^A~B&C|D");
+
+    expect(out.slice(4)).toMatchObject([
+      { type: "TEXT", value: "^A~B&C" },
+      { type: "FIELD_DELIM" },
+      { type: "TEXT", value: "D" },
+    ]);
+  });
+
+  it("emits a line with no field delimiter as one TEXT token", () => {
+    expect(toks("^A")).toMatchObject([{ type: "TEXT", value: "^A" }]);
+  });
+
+  it("does not decode escape sequences in a Segment ID", () => {
+    expect(toks("Z\\R\\Z|B")[0]).toMatchObject({
+      type: "TEXT",
+      value: "Z\\R\\Z",
+    });
+  });
+});
+
 describe("escape sequences", () => {
   it("decodes escape sequences in a TEXT token", () => {
     const out = toks("PID|a\\F\\b\\S\\c");

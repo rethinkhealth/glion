@@ -24,9 +24,9 @@ Most important:
 - `packages/ack` and the acknowledgment the server builds from a received message's MSH fields, which echoes attacker-controlled values back on the wire.
 - `packages/profiles`: profile loading keyed by the version and names a message declares; a message must not reach files, objects, or prototype members outside the bundled profiles. Also the event-schema engine (`src/engine`), which matches a message's segments against a compiled schema and repairs segment order.
 
-Less important but in scope: `packages/annotate-*`, `packages/lint-*`, `packages/transform-profile-groups`, `packages/jsonify`, `packages/util-*`, and `packages/glion` (the `@glion/cli`: `glion dev`, `glion start`, and `glion send`).
+Less important but in scope: `packages/annotate-*`, `packages/lint-*`, `packages/transform-profile-groups`, `packages/jsonify`, `packages/util-*`, `packages/glion` (the `@glion/cli`: `glion dev`, `glion start`, and `glion send`), and `packages/create-glion`, which reads a GitHub repository, ref, and directory from `--example` and downloads that template: it must download from exactly the repository and ref the link names, and write only to the target directory and giget's cache.
 
-Out of scope: `benchmarks/`, `qa/`, `tools/`, `examples/`, `.devcontainer/`, `.github/`, and `packages/create-glion` (which downloads an example the user names). Third-party dependencies are in scope only through a path reachable from glion code.
+Out of scope: `benchmarks/`, `qa/`, `tools/`, `examples/`, `.devcontainer/`, and `.github/`. Third-party dependencies are in scope only through a path reachable from glion code.
 
 ## Security goals
 

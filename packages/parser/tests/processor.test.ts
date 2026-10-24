@@ -152,7 +152,7 @@ describe("processor (semantics-agnostic)", () => {
     expect((root.children[1] as Segment).children).toHaveLength(0);
   });
 
-  it("drops only the final trailing empty field but preserves preceding empty fields", () => {
+  it("keeps every trailing empty field", () => {
     const tokens: Token[] = [
       text("PID"),
       tok("FIELD_DELIM"),
@@ -163,15 +163,15 @@ describe("processor (semantics-agnostic)", () => {
     ];
     const root = parseHL7v2FromIterator(tokens);
     const seg = root.children[0] as Segment;
-    expect(seg.children).toHaveLength(2); // 1, ''
+    expect(seg.children).toHaveLength(3);
     expect(seg.children[0].children?.[0].children.length).toBe(1);
-    expect(seg.children[1]).toMatchObject({
-      children: [],
-      type: "field",
-    });
+    expect(seg.children.slice(1)).toMatchObject([
+      { children: [], type: "field" },
+      { children: [], type: "field" },
+    ]);
   });
 
-  it("does not add a new field when segment ends with a single FIELD_DELIM", () => {
+  it("opens an empty field for a FIELD_DELIM that ends the segment", () => {
     const tokens: Token[] = [
       text("PID"),
       tok("FIELD_DELIM"),
@@ -181,7 +181,8 @@ describe("processor (semantics-agnostic)", () => {
     ];
     const root = parseHL7v2FromIterator(tokens);
     const seg = root.children[0] as Segment;
-    expect(seg.children).toHaveLength(1);
+    expect(seg.children).toHaveLength(2);
+    expect(seg.children[1]).toMatchObject({ children: [], type: "field" });
   });
 
   it("keeps trailing empty component when COMPONENT_DELIM is last before SEGMENT_END", () => {

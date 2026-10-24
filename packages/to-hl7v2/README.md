@@ -34,10 +34,9 @@ console.log(String(file));
 
 Register the plugin as the compiler of a `unified` processor. Serializes the AST back to HL7v2 text and sets it as the file contents. Reads `file.data.delimiters` when `@glion/annotate-delimiters` set it.
 
-| Option              | Type      | Description                                                                                                                                                                                                       |
-| ------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `encodeEscapes`     | `boolean` | Write each subcomponent value with its delimiters, escape character, and control characters as escape sequences (`true`, the default), or as it is (`false`). MSH-1 and MSH-2 are written as they are either way. |
-| `trailingDelimiter` | `boolean` | Append a field delimiter after the last field of each segment (default `false`).                                                                                                                                  |
+| Option          | Type      | Description                                                                                                                                                                                                       |
+| --------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `encodeEscapes` | `boolean` | Write each subcomponent value with its delimiters, escape character, and control characters as escape sequences (`true`, the default), or as it is (`false`). MSH-1 and MSH-2 are written as they are either way. |
 
 ### `toHl7v2(node, delimiters?, options?)`
 
@@ -68,7 +67,7 @@ Each subcomponent value is written as it must appear on the wire: the field, com
 - **Delimiter preservation** — the delimiters MSH-1 and MSH-2 declare, or `file.data.delimiters`, carry through to the output. Messages that do not use the defaults round-trip correctly.
 - **Escape sequences** — a value `@glion/parser` decoded is written with its escape sequences again, so a message with `\F\`, `\S\`, `\R\`, `\T\`, `\E\`, or `\.br\` in a value reads and writes back as the same text. When a delimiter is the escape code of one of these, that sequence is written back as `\Xdd\`, which reads back as the same value. A `\Xdd\` is written back as the character it decoded to, or as `\.br\` or `\Xdd\` when that character is a control character.
 - **MSH handling** — the special case where `MSH-1` is the field separator and `MSH-2` carries the encoding characters is encoded correctly on serialization.
-- **Empty fields and components** — preserved in position so field indexes remain stable.
+- **Empty fields and components** — preserved in position so field indexes remain stable. Every field is written with its field delimiter, the empty fields at the end of a segment included: a segment read as `PID|1||` is written as `PID|1||`.
 - **Every node type supported** — serializing a partial subtree produces the exact fragment you would expect to find embedded inside the full message.
 
 Pair with `@glion/parser` to read HL7v2 in and `@glion/to-hl7v2` to write it back out. A tree parsed with `decodeEscapes: false` is written with `encodeEscapes: false`.
