@@ -105,4 +105,37 @@ describe("hl7v2TransformTrimTrailingFields", () => {
 
     expect(group.children[0]).toMatchObject({ children: [f("1")] });
   });
+
+  describe("with keepTrailingField", () => {
+    const keepTrailingField = unified()
+      .use(hl7v2Parser)
+      .use(hl7v2TransformTrimTrailingFields, { keepTrailingField: true })
+      .use(hl7v2ToHl7v2);
+
+    it("keeps one empty field at the end of a segment", async () => {
+      expect(String(await keepTrailingField.process("PID|1|DOE|||"))).toBe(
+        "PID|1|DOE|"
+      );
+    });
+
+    it("keeps one empty field at the end of a segment with only empty fields", async () => {
+      expect(String(await keepTrailingField.process("PID|||"))).toBe("PID|");
+    });
+
+    it("leaves a segment without trailing empty fields as it is", async () => {
+      const source = "MSH|^~\\&|APP\rPID|1|DOE^JOHN";
+
+      expect(String(await keepTrailingField.process(source))).toBe(source);
+    });
+
+    it("leaves a segment that ends with one empty field as it is", async () => {
+      const tree = m(s("PID", f("1"), f()));
+
+      await unified()
+        .use(hl7v2TransformTrimTrailingFields, { keepTrailingField: true })
+        .run(tree);
+
+      expect(tree.children[0]).toMatchObject({ children: [f("1"), f()] });
+    });
+  });
 });

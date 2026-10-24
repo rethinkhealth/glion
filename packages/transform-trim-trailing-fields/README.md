@@ -31,19 +31,41 @@ console.log(String(file));
 // PID|1|DOE
 ```
 
+## Options
+
+| Option              | Type      | Default | Description                                                                                                                            |
+| ------------------- | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `keepTrailingField` | `boolean` | `false` | Keep one empty field at the end of a segment that ends with empty fields, so the segment is written with one trailing field separator. |
+
+```ts
+unified()
+  .use(hl7v2Parser)
+  .use(hl7v2TransformTrimTrailingFields, { keepTrailingField: true })
+  .use(hl7v2ToHl7v2)
+  .process("PID|1|DOE|||");
+// PID|1|DOE|
+```
+
 ## API
 
-### `unified().use(hl7v2TransformTrimTrailingFields)`
+### `unified().use(hl7v2TransformTrimTrailingFields[, options])`
 
-A `unified` transform plugin. Takes no options. Also the package's default export.
+A `unified` transform plugin. Also the package's default export.
 
-Visits every segment, including segments inside groups, and removes the empty fields after its last field that is not empty. The empty fields before that field stay in place, so field positions do not change.
+Visits every segment, including segments inside groups, and removes the empty fields after its last field that is not empty, or all of them but one with `keepTrailingField`. The empty fields before that field stay in place, so field positions do not change. A segment that ends with a field with a value is left as it is.
 
 ```ts
 import type { Plugin } from "unified";
 import type { Root } from "@glion/ast";
 
-declare const hl7v2TransformTrimTrailingFields: Plugin<[], Root>;
+interface TransformTrimTrailingFieldsOptions {
+  keepTrailingField?: boolean;
+}
+
+declare const hl7v2TransformTrimTrailingFields: Plugin<
+  [TransformTrimTrailingFieldsOptions?],
+  Root
+>;
 export default hl7v2TransformTrimTrailingFields;
 ```
 
