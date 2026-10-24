@@ -394,7 +394,7 @@ describe("downloadFailedMessage", () => {
   it("links the folder a URL points to and mentions --example-path", () => {
     const url = "https://github.com/acme/templates/tree/feat/tls/mllp";
     expect(downloadFailedMessage(urlTemplate(url))).toBe(
-      "We could not download https://github.com/acme/templates/tree/feat/tls/mllp. Check the link and your internet connection. If the branch name contains a slash, pass the folder with --example-path."
+      "We could not download https://github.com/acme/templates/tree/feat/tls/mllp. Check the link and your internet connection. If the branch name contains a slash, give the link to the branch and pass the folder with --example-path."
     );
   });
 });

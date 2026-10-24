@@ -165,6 +165,6 @@ export function notFoundMessage(template: Template): string {
 /** The sentence that reports `template` did not download. */
 export function downloadFailedMessage(template: Template): string {
   return template.name === undefined
-    ? `We could not download ${githubUrl(template)}. Check the link and your internet connection. If the branch name contains a slash, pass the folder with --example-path.`
+    ? `We could not download ${githubUrl(template)}. Check the link and your internet connection. If the branch name contains a slash, give the link to the branch and pass the folder with --example-path.`
     : `We could not download the example "${template.name}". Check your internet connection and try again.`;
 }
