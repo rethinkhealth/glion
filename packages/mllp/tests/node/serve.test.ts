@@ -641,9 +641,9 @@ describe("serve() integration", () => {
       expect(errors[0]).toBe("onDisconnect failed");
     });
 
-    it("console.error fallback when no onError is provided", async () => {
+    it("closes the connection and writes nothing to the console when an error has no onError", async () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
-
+      const disconnected = Promise.withResolvers<ConnectionInfo>();
       const consoleSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
@@ -653,15 +653,14 @@ describe("serve() integration", () => {
           onConnect: () => {
             throw new Error("unhandled boom");
           },
+          onDisconnect: disconnected.resolve,
           port: 0,
         });
 
         await sendMessage(server.port, SAMPLE_ADT, 500);
+        await disconnected.promise;
 
-        expect(consoleSpy).toHaveBeenCalledOnce();
-        const msg = consoleSpy.mock.calls[0]?.[0] as string;
-        expect(msg).toContain("unhandled boom");
-        expect(msg).toContain("[mllp]");
+        expect(consoleSpy).not.toHaveBeenCalled();
       } finally {
         consoleSpy.mockRestore();
       }

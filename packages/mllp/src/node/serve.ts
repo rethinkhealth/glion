@@ -100,17 +100,13 @@ export interface ServeOptions {
    * Called when a TCP connection is closed (including force-close).
    * Always fires, even if `onConnect` threw.
    *
-   * If this callback throws, the error is routed to `onError`
-   * (or `console.error` as last resort).
+   * If this callback throws, the error is passed to `onError`.
    */
   onDisconnect?: ConnectionCallback;
 
   /**
    * Called with an error on a connection; see {@link ErrorCallback}.
-   *
-   * Only logs `error.message` and connection ID to avoid leaking PHI
-   * in the `console.error` fallback. Production deployments should
-   * always provide this callback.
+   * Without it, those errors are not reported. MUST NOT throw.
    */
   onError?: ErrorCallback;
 
@@ -181,10 +177,12 @@ export function serve(options: ServeOptions): Server {
     handle,
     hostname,
     maxConnections,
+    onConnect,
+    onDisconnect,
+    onError,
     port,
     socketTimeout,
     tls,
-    ...lifecycle
   } = options;
   if (typeof handle !== "function") {
     throw new MllpServerError(
@@ -213,19 +211,19 @@ export function serve(options: ServeOptions): Server {
     });
     const env: NodeEnv = { connection };
     try {
-      await lifecycle.onConnect?.(connection);
+      await onConnect?.(connection);
       await handleConnection((payload) => handle(payload, env), socket, {
         signal: shutdown.signal,
       });
     } catch (error) {
-      await reportError(error, connection, lifecycle);
+      await onError?.(toError(error), connection);
     } finally {
       // Ends the socket when onConnect threw; idempotent otherwise.
       socket.close();
       try {
-        await lifecycle.onDisconnect?.(connection);
+        await onDisconnect?.(connection);
       } catch (disconnectError) {
-        await reportError(disconnectError, connection, lifecycle);
+        await onError?.(toError(disconnectError), connection);
       }
     }
   };
@@ -263,37 +261,6 @@ export function serve(options: ServeOptions): Server {
   };
 }
 
-/** Lifecycle callback options extracted from ServeOptions. */
-interface LifecycleOptions {
-  onConnect?: ConnectionCallback;
-  onDisconnect?: ConnectionCallback;
-  onError?: ErrorCallback;
-}
-
-/**
- * Route an error to the `onError` callback, falling back to a safe
- * `console.error` that logs only the error message and connection ID
- * to avoid leaking PHI from HL7v2 message content.
- */
-async function reportError(
-  error: unknown,
-  connection: ConnectionInfo,
-  lifecycle: LifecycleOptions
-): Promise<void> {
-  const err = error instanceof Error ? error : new Error(String(error));
-  try {
-    if (lifecycle.onError) {
-      await lifecycle.onError(err, connection);
-    } else {
-      // Safe fallback: only message + connection ID, no PHI
-      console.error(
-        `[mllp] Unhandled error on connection ${connection.id}: ${err.message}`
-      );
-    }
-  } catch {
-    // onError itself threw — last resort
-    console.error(
-      `[mllp] Unhandled error on connection ${connection.id}: ${err.message}`
-    );
-  }
+function toError(value: unknown): Error {
+  return value instanceof Error ? value : new Error(String(value));
 }
