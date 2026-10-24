@@ -7,6 +7,7 @@ export {
   AckCommitError,
   AckCommitReject,
   AckException,
+  isAckException,
 } from "./exception";
 export type { AckExceptionOptions } from "./exception";
 export {

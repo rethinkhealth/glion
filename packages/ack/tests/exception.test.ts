@@ -7,6 +7,7 @@ import {
   AckCommitError,
   AckCommitReject,
   AckException,
+  isAckException,
 } from "../src/exception";
 
 describe("AckException", () => {
@@ -247,5 +248,30 @@ describe("instanceof grouping", () => {
     for (const e of errors) {
       expect(e).toBeInstanceOf(AckException);
     }
+  });
+});
+
+describe("isAckException", () => {
+  it("detects an AckException", () => {
+    expect(
+      isAckException(new AckCommitReject("rejected", { text: "Full" }))
+    ).toBe(true);
+  });
+
+  it("detects an AckException made by another copy of @glion/ack", () => {
+    const brand = Symbol.for("@glion/ack/AckException");
+    const foreign = Object.assign(new Error("rejected"), {
+      [brand]: true,
+      code: AckCode.CommitReject,
+    });
+
+    expect(foreign).not.toBeInstanceOf(AckException);
+    expect(isAckException(foreign)).toBe(true);
+  });
+
+  it("rejects any other value", () => {
+    expect(isAckException(new Error("failed"))).toBe(false);
+    expect(isAckException(null)).toBe(false);
+    expect(isAckException("AR")).toBe(false);
   });
 });
