@@ -1,69 +1,63 @@
-import { parseHL7v2 } from "@glion/parser";
 import fc from "fast-check";
 
 import {
-  arbAdversarialInput,
   arbHL7v2Message,
   arbHL7v2MessageCustomDelimiters,
-  arbMutatedCustomDelimiterMessage,
-  arbMutatedMessage,
 } from "../src/arbitraries";
 import { normalize } from "../src/fixtures";
 
+// The round-trip and fuzz properties draw from these generators, and read a
+// message with the delimiters its MSH declares. A message written with other
+// delimiters still round-trips, as one long Segment ID per line, so those
+// properties would pass while checking nothing; these two check that each
+// generator writes what it declares.
+const SEGMENT_ID = /^[A-Z]{3}$/;
+
 describe("HL7v2 message arbitraries", () => {
-  it("generates valid messages starting with MSH", () => {
+  // A valid message declares `|^~\&` in its MSH, and every other line is a
+  // Segment ID of three letters other than MSH, then the field separator.
+  //
+  // Mutant: `arbSegment` joins the Segment ID to its fields with the component
+  // separator. Fails on `"MSH|^~\\&|||\rAAA^"`.
+  it("writes a valid message with the delimiters its MSH declares", () => {
     fc.assert(
       fc.property(arbHL7v2Message, (msg) => {
-        expect(msg).toMatch(/^MSH/);
-        expect(msg).toContain("|");
+        const [msh = "", ...segments] = msg.split("\r");
+
+        expect(msh.startsWith("MSH|^~\\&|")).toBe(true);
+        for (const segment of segments) {
+          const [id = ""] = segment.split("|", 1);
+          expect(id).toMatch(SEGMENT_ID);
+          expect(id).not.toBe("MSH");
+          expect(segment.charAt(3)).toBe("|");
+        }
       }),
-      { numRuns: 50 }
+      { numRuns: 300 }
     );
   });
 
-  it("generates messages with custom delimiters starting with MSH", () => {
+  // A custom delimiter message declares five distinct characters in MSH-1 and
+  // MSH-2, and every other line is a Segment ID of three letters, then the
+  // field separator MSH-1 declares.
+  //
+  // Mutant: `arbSegment` joins the Segment ID to its fields with `|` whatever
+  // the delimiters. Fails on `"MSH+&@*!+++\rAAA|"`.
+  it("writes a custom delimiter message with the delimiters its MSH declares", () => {
     fc.assert(
       fc.property(arbHL7v2MessageCustomDelimiters, (msg) => {
-        expect(msg).toMatch(/^MSH/);
-      }),
-      { numRuns: 50 }
-    );
-  });
+        const [msh = "", ...segments] = msg.split("\r");
+        const field = msh.charAt(3);
+        const encodingCharacters = msh.slice(4, 8);
 
-  it("generates mutated custom-delimiter messages as strings", () => {
-    fc.assert(
-      fc.property(arbMutatedCustomDelimiterMessage, (msg) => {
-        expectTypeOf(msg).toBeString();
+        expect(msh.slice(0, 3)).toBe("MSH");
+        expect(new Set([field, ...encodingCharacters]).size).toBe(5);
+        expect(msh.charAt(8)).toBe(field);
+        for (const segment of segments) {
+          expect(segment.slice(0, 3)).toMatch(SEGMENT_ID);
+          expect(segment.charAt(3)).toBe(field);
+        }
       }),
-      { numRuns: 50 }
-    );
-  });
-
-  it("generates mutated messages as strings", () => {
-    fc.assert(
-      fc.property(arbMutatedMessage, (msg) => {
-        expectTypeOf(msg).toBeString();
-      }),
-      { numRuns: 50 }
-    );
-  });
-
-  it("generates adversarial inputs as strings", () => {
-    fc.assert(
-      fc.property(arbAdversarialInput, (msg) => {
-        expectTypeOf(msg).toBeString();
-      }),
-      { numRuns: 50 }
-    );
-  });
-
-  it("generates valid messages that parse without throwing", () => {
-    fc.assert(
-      fc.property(arbHL7v2Message, (msg) => {
-        const root = parseHL7v2(msg);
-        expect(root.type).toBe("root");
-      }),
-      { numRuns: 100 }
+      { numRuns: 300 }
     );
   });
 });
