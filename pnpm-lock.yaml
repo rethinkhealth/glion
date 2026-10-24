@@ -716,6 +716,9 @@ importers:
       '@types/node':
         specifier: 25.6.0
         version: 25.6.0
+      fast-check:
+        specifier: ^3.23.2
+        version: 3.23.2
       publint:
         specifier: 0.3.18
         version: 0.3.18

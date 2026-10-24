@@ -1,15 +1,21 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 import * as p from "@clack/prompts";
-import { downloadTemplate } from "giget";
 
-import { EXAMPLES_URL, gigetSource, resolveTemplate } from "./example";
+import { download } from "./download";
+import {
+  downloadFailedMessage,
+  EXAMPLES_URL,
+  notFoundMessage,
+  templateFor,
+} from "./example";
 import type { Options } from "./options";
 import { parseOptions } from "./options";
 
 const DEFAULT_DIR = "./my-glion-app";
 const DEFAULT_EXAMPLE = "starter";
+const SPINNER_ERROR = 2;
 
 const HELP = `Usage: create-glion [dir] [options]
 
@@ -37,7 +43,8 @@ async function askDirectory(): Promise<string | undefined> {
 }
 
 async function mayWriteTo(dir: string): Promise<boolean> {
-  if (!existsSync(resolve(dir))) {
+  const target = resolve(dir);
+  if (!existsSync(target) || readdirSync(target).length === 0) {
     return true;
   }
   const replace = await p.confirm({
@@ -50,8 +57,8 @@ async function mayWriteTo(dir: string): Promise<boolean> {
 async function scaffold(options: Options): Promise<void> {
   p.intro("Create a Glion app");
 
-  const example = options.example?.trim() || DEFAULT_EXAMPLE;
-  const template = await resolveTemplate(example, options.examplePath);
+  const example = options.example?.trim() ?? DEFAULT_EXAMPLE;
+  const template = templateFor(example, options.examplePath);
   const dir = options.dir || (await askDirectory());
   if (dir === undefined || !(await mayWriteTo(dir))) {
     p.cancel("Cancelled. Nothing was created.");
@@ -60,10 +67,18 @@ async function scaffold(options: Options): Promise<void> {
 
   const spinner = p.spinner();
   spinner.start("Downloading the template");
-  await downloadTemplate(gigetSource(template), {
-    dir: resolve(dir),
-    force: true,
-  });
+  const found = await download(template, resolve(dir)).catch(
+    (error: unknown) => {
+      spinner.stop("Nothing was created.", SPINNER_ERROR);
+      throw new Error(downloadFailedMessage(example, template), {
+        cause: error,
+      });
+    }
+  );
+  if (!found) {
+    spinner.stop("Nothing was created.", SPINNER_ERROR);
+    throw new Error(notFoundMessage(example, template));
+  }
   spinner.stop(`Your project is ready in ${dir}.`);
 
   const packageManager =
@@ -91,6 +106,9 @@ export async function run(args: string[]): Promise<number> {
     await scaffold(options);
     return 0;
   } catch (error: unknown) {
+    if (error instanceof Error && error.cause instanceof Error) {
+      p.log.error(error.cause.message);
+    }
     p.cancel(error instanceof Error ? error.message : String(error));
     return 1;
   }
