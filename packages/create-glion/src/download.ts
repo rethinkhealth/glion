@@ -15,6 +15,9 @@ const GITHUB_RAW = "https://raw.githubusercontent.com";
 const NOT_FOUND = 404;
 const LOOKUP_TIMEOUT_MS = 5000;
 
+const sha256 = (text: string): string =>
+  createHash("sha256").update(text).digest("hex");
+
 /**
  * Resolves to `true` when GitHub answers that `template` has no
  * `package.json`, and to `false` for any other outcome: found, an error, no
@@ -47,9 +50,11 @@ export async function isMissing(template: Template): Promise<boolean> {
 
 // giget's `github` provider re-parses a `owner/repo/path#ref` string, which
 // cannot hold every ref or folder name. This one hands giget the template as
-// it is, so giget's cache and `GIGET_AUTH` still apply. The name is a hash:
-// giget writes `acme-tools/template` and `acme/tools-template` both as the
-// cache entry `acme-tools-template`, and falls back to it when a download fails.
+// it is, so giget's cache and `GIGET_AUTH` still apply. giget falls back to its
+// cache file `<name>/<version>.tar.gz` when a download fails, so both are
+// hashes: it writes `acme-tools/template` and `acme/tools-template` both as the
+// name `acme-tools-template`, and macOS and Windows read the versions `Main` and
+// `main` as one file.
 function githubProvider(template: Template): TemplateProvider {
   const { owner, path, ref, repo } = template;
   const segments = [owner, repo, "tarball", ...ref.split("/")].map(
@@ -60,11 +65,11 @@ function githubProvider(template: Template): TemplateProvider {
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
     },
-    name: createHash("sha256").update(`${owner}/${repo}`).digest("hex"),
+    name: sha256(`${owner}/${repo}`),
     subdir: path,
     tar: `${GITHUB_API}/repos/${segments.join("/")}`,
     url: githubUrl(template),
-    version: ref,
+    version: sha256(ref),
   });
 }
 

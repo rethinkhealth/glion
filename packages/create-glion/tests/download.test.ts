@@ -28,6 +28,10 @@ const STARTER: Template = exampleTemplate("starter");
 // other than a letter, a digit, or a dash written as `-`.
 const GIGET_CACHE_REPLACED = /[^\da-z-]/gi;
 
+// giget names the cache file after the version as it is, and macOS and Windows
+// compare file names without case.
+const FILE_NAME_ON_ANY_SYSTEM = /^[\da-z-]+$/i;
+
 const extracts = (files: Record<string, string>) =>
   vi.mocked(downloadTemplate).mockImplementation(async (_input, options) => {
     for (const [name, content] of Object.entries(files)) {
@@ -142,7 +146,8 @@ describe("download", () => {
       subdir: "examples/starter",
       tar: "https://api.github.com/repos/rethinkhealth/glion/tarball/main",
       url: "https://github.com/rethinkhealth/glion/tree/main/examples/starter",
-      version: "main",
+      version:
+        "0d6e4079e36703ebd37c00722f5891d28b0e2811dc114b129215123adcce3605",
     });
   });
 
@@ -159,6 +164,23 @@ describe("download", () => {
       await cacheEntry("acme", "tools-template")
     );
     expect(await cacheEntry("a", "b.c")).not.toBe(await cacheEntry("a", "b-c"));
+  });
+
+  it("gives each ref its own cache file, on any file system", async () => {
+    const cacheFile = async (ref: string) => {
+      vi.mocked(downloadTemplate).mockReset();
+      extracts({ "package.json": "{}" });
+      await download({ owner: "acme", path: "", ref, repo: "templates" }, dir);
+      const { version } = await providedInfo();
+      return version ?? "";
+    };
+
+    for (const ref of ["main", "Main", 'feat/"tls"|<x>']) {
+      expect(await cacheFile(ref)).toMatch(FILE_NAME_ON_ANY_SYSTEM);
+    }
+    const capitalized = await cacheFile("Main");
+    const lowercase = await cacheFile("main");
+    expect(capitalized.toLowerCase()).not.toBe(lowercase.toLowerCase());
   });
 
   it("asks giget for exactly the template, whatever its ref and folder hold", async () => {
@@ -186,12 +208,12 @@ describe("download", () => {
           extracts({ "package.json": "{}" });
 
           await download(template, dir);
-          const { subdir, tar, version } = await providedInfo();
+          const { subdir, tar } = await providedInfo();
           const tarball = new URL(String(tar)).pathname
             .split("/")
             .slice(1)
             .map(decodeURIComponent);
-          expect({ subdir, tarball, version }).toEqual({
+          expect({ subdir, tarball }).toEqual({
             subdir: template.path,
             tarball: [
               "repos",
@@ -200,7 +222,6 @@ describe("download", () => {
               "tarball",
               ...template.ref.split("/"),
             ],
-            version: template.ref,
           });
         }
       ),
