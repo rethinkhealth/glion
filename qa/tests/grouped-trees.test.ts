@@ -124,6 +124,14 @@ for (const id of schemaIds) {
   }
 }
 
+// The shortest generated message that opens a group: BAR_P02 holds PID in a
+// group.
+const BAR_P02 = schemas.find(
+  (schema) => schema.id === "BAR_P02"
+) as EventSchema;
+const BAR_P02_MESSAGE =
+  "MSH|^~\\&|APP|FAC|APP|FAC|20240101120000||BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1";
+
 const fixtures = discoverFixtures(() => true);
 const groupedFixtures: string[] = [];
 for (const filename of fixtures) {
@@ -266,6 +274,11 @@ describe("QR6: grouped trees", () => {
         )
       );
 
+    // A generated message fits its schema, and the transform groups it exactly
+    // when the schema's reading of it opens a group.
+    //
+    // Mutant: `@glion/transform-profile-groups` never replaces the root's children.
+    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1"`.
     it("fit the schema they were generated from, and are grouped by it", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ([schema, text]) => {
@@ -279,10 +292,15 @@ describe("QR6: grouped trees", () => {
             result.groups.some((match) => typeof match !== "number");
           expect(isGrouped(await group(parseHL7v2(text)))).toBe(opensGroup);
         }),
-        { numRuns: 500 }
+        { examples: [[[BAR_P02, BAR_P02_MESSAGE]]], numRuns: 500 }
       );
     });
 
+    // The lint rules report the same findings, at the same places, on the
+    // grouped tree as on the flat one.
+    //
+    // Mutant: `@glion/lint-profile-required-fields` reads no segment inside a group.
+    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1"`.
     it("report the same diagnostics grouped as flat", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ([, text]) => {
@@ -290,10 +308,15 @@ describe("QR6: grouped trees", () => {
             await diagnostics(parseHL7v2(text))
           );
         }),
-        { numRuns: 200 }
+        { examples: [[[BAR_P02, BAR_P02_MESSAGE]]], numRuns: 200 }
       );
     });
 
+    // The profile annotators set the same data on every segment of the grouped
+    // tree as on the flat one.
+    //
+    // Mutant: `@glion/annotate-profile-fields` reads no segment inside a group.
+    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1"`.
     it("set the same annotations grouped as flat", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ([, text]) => {
@@ -301,16 +324,20 @@ describe("QR6: grouped trees", () => {
             await annotatedSegments(await group(parseHL7v2(text)))
           ).toEqual(await annotatedSegments(parseHL7v2(text)));
         }),
-        { numRuns: 200 }
+        { examples: [[[BAR_P02, BAR_P02_MESSAGE]]], numRuns: 200 }
       );
     });
 
+    // The serializer writes the grouped tree as the message it was read from.
+    //
+    // Mutant: `@glion/to-hl7v2` writes no segment inside a group.
+    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1"`.
     it("serialize to the same text grouped as flat", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ([, text]) => {
           expect(toHl7v2(await group(parseHL7v2(text)))).toBe(text);
         }),
-        { numRuns: 200 }
+        { examples: [[[BAR_P02, BAR_P02_MESSAGE]]], numRuns: 200 }
       );
     });
   });
@@ -341,6 +368,11 @@ describe("QR6: grouped trees", () => {
         })
       );
 
+    // A Z-segment the schema does not name changes nothing about whether the
+    // message is grouped.
+    //
+    // Mutant: `@glion/transform-profile-groups` passes `allowZSegments: false` by default.
+    // Fails on BAR_P02 and the same message with `ZXX|3` after PID.
     it("are grouped when the message without them opens a group", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ({ base, schema, text }) => {
@@ -353,10 +385,25 @@ describe("QR6: grouped trees", () => {
             result.groups.some((match) => typeof match !== "number");
           expect(isGrouped(await group(parseHL7v2(text)))).toBe(opensGroup);
         }),
-        { numRuns: 200 }
+        {
+          examples: [
+            [
+              {
+                base: BAR_P02_MESSAGE,
+                schema: BAR_P02,
+                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+              },
+            ],
+          ],
+          numRuns: 200,
+        }
       );
     });
 
+    // A Z-segment goes in the group of the segment before it.
+    //
+    // Mutant: `runner` places a Z-segment it passes over at the top of the message.
+    // Fails on BAR_P02 and the same message with `ZXX|3` after PID.
     it("place each Z-segment beside the segment before it", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ({ text }) => {
@@ -371,10 +418,26 @@ describe("QR6: grouped trees", () => {
             }
           }
         }),
-        { numRuns: 200 }
+        {
+          examples: [
+            [
+              {
+                base: BAR_P02_MESSAGE,
+                schema: BAR_P02,
+                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+              },
+            ],
+          ],
+          numRuns: 200,
+        }
       );
     });
 
+    // Grouping keeps every segment, Z-segments included, in order, and the
+    // serializer writes the message as it was read.
+    //
+    // Mutant: `@glion/to-hl7v2` writes no segment inside a group.
+    // Fails on BAR_P02 and the same message with `ZXX|3` after PID.
     it("keep every segment, in order, and their text", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ({ text }) => {
@@ -388,10 +451,25 @@ describe("QR6: grouped trees", () => {
           );
           expect(toHl7v2(tree)).toBe(text);
         }),
-        { numRuns: 200 }
+        {
+          examples: [
+            [
+              {
+                base: BAR_P02_MESSAGE,
+                schema: BAR_P02,
+                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+              },
+            ],
+          ],
+          numRuns: 200,
+        }
       );
     });
 
+    // The lint rules report the same findings with Z-segments in the groups.
+    //
+    // Mutant: `@glion/lint-profile-required-fields` reads no segment inside a group.
+    // Fails on BAR_P02 and the same message with `ZXX|3` after PID.
     it("report the same diagnostics grouped as flat", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ({ text }) => {
@@ -399,10 +477,25 @@ describe("QR6: grouped trees", () => {
             await diagnostics(parseHL7v2(text))
           );
         }),
-        { numRuns: 200 }
+        {
+          examples: [
+            [
+              {
+                base: BAR_P02_MESSAGE,
+                schema: BAR_P02,
+                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+              },
+            ],
+          ],
+          numRuns: 200,
+        }
       );
     });
 
+    // The profile annotators set the same data with Z-segments in the groups.
+    //
+    // Mutant: `@glion/annotate-profile-fields` reads no segment inside a group.
+    // Fails on BAR_P02 and the same message with `ZXX|3` after PID.
     it("set the same annotations grouped as flat", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ({ text }) => {
@@ -410,7 +503,18 @@ describe("QR6: grouped trees", () => {
             await annotatedSegments(await group(parseHL7v2(text)))
           ).toEqual(await annotatedSegments(parseHL7v2(text)));
         }),
-        { numRuns: 200 }
+        {
+          examples: [
+            [
+              {
+                base: BAR_P02_MESSAGE,
+                schema: BAR_P02,
+                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+              },
+            ],
+          ],
+          numRuns: 200,
+        }
       );
     });
   });
