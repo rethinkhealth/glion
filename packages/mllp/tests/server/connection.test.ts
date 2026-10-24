@@ -120,6 +120,37 @@ describe("handleConnection", () => {
     expect(remote.socket.closes).toBeGreaterThan(0);
   });
 
+  it("rejects with an error the socket's readable raises", async () => {
+    const failure = new Error("bad record mac");
+    const socket: MllpSocket = {
+      close() {},
+      readable: new ReadableStream({
+        start(controller) {
+          controller.error(failure);
+        },
+      }),
+      writable: new WritableStream(),
+    };
+
+    await expect(handleConnection(echo, socket)).rejects.toBe(failure);
+  });
+
+  it("rejects with an error the socket's writable raises", async () => {
+    const remote = memorySocket();
+    remote.send(frame(encode(ADT)));
+    const failure = new Error("write failed");
+    const socket: MllpSocket = {
+      ...remote.socket,
+      writable: new WritableStream({
+        write() {
+          throw failure;
+        },
+      }),
+    };
+
+    await expect(handleConnection(echo, socket)).rejects.toBe(failure);
+  });
+
   it("ends an idle connection when the signal aborts", async () => {
     const remote = memorySocket();
     const shutdown = new AbortController();

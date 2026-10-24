@@ -3,7 +3,8 @@
  *
  * Listens with a Node.js `net.Server`, or a `tls.Server` when TLS options are
  * given, and wraps each accepted socket into a {@link NodeSocket}: the core's
- * Web Streams {@link MllpSocket} plus its TCP addresses.
+ * Web Streams {@link MllpSocket} plus its TCP addresses. A reset, a broken
+ * pipe or a timeout ends the streams as a close does.
  *
  * This module is internal to the `@glion/mllp` package and
  * is consumed by {@link serve} in `./serve.ts`.
@@ -14,7 +15,6 @@
 import { once } from "node:events";
 import type { Server, ServerOpts, Socket } from "node:net";
 import { createServer } from "node:net";
-import { Readable } from "node:stream";
 import { createServer as createTlsServer } from "node:tls";
 import type { TlsOptions } from "node:tls";
 import { promisify } from "node:util";
@@ -70,9 +70,11 @@ export interface ListenOptions {
 
 /**
  * Socket options every listener is created with: keep-alive probes after
- * 60 s idle, and Nagle's algorithm off.
+ * 60 s idle, Nagle's algorithm off, and the server's side left open after the
+ * remote system closes its own, until every message it sent is answered.
  */
 const SOCKET_OPTIONS = {
+  allowHalfOpen: true,
   keepAlive: true,
   keepAliveInitialDelay: 60_000,
   noDelay: true,
@@ -82,33 +84,82 @@ const SOCKET_OPTIONS = {
 const CLOSE_GRACE_MS = 1000;
 
 /**
- * Write a chunk to a Node.js socket, waiting for backpressure to clear.
- *
- * `socket.write()` returns `false` when the internal buffer is full,
- * indicating that the caller should wait for the `"drain"` event before
- * writing again. This helper wraps that pattern in a promise so it can
- * be used with `await`.
- *
- * @param socket - The Node.js TCP socket to write to.
- * @param chunk - The bytes to write.
- * @returns A promise that resolves once the chunk has been flushed or the
- *   socket's internal buffer has drained.
+ * Error codes of a socket the remote system or a timeout has already torn
+ * down. Each ends the connection as a close does.
+ */
+const TEARDOWN_CODES = new Set([
+  "ABORT_ERR",
+  "ECONNRESET",
+  "EPIPE",
+  "ERR_STREAM_DESTROYED",
+  "ERR_STREAM_WRITE_AFTER_END",
+]);
+
+function isTeardown(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    "code" in error &&
+    TEARDOWN_CODES.has(String(error.code))
+  );
+}
+
+/**
+ * Writes `chunk` to `socket`, and resolves once it has been handed to the
+ * operating system, or once the socket turns out to be torn down.
  */
 async function writeToSocket(socket: Socket, chunk: Uint8Array): Promise<void> {
-  const ok = socket.write(chunk);
-  if (!ok) {
-    await once(socket, "drain");
+  const written = Promise.withResolvers<Error | null | undefined>();
+  socket.write(chunk, written.resolve);
+  const error = await written.promise;
+  if (error && !isTeardown(error)) {
+    throw error;
   }
 }
 
 /**
+ * The bytes `socket` receives. Ends when the remote system closes its side,
+ * and when the socket is torn down.
+ */
+function readFromSocket(socket: Socket): ReadableStream<Uint8Array> {
+  let open = true;
+  return new ReadableStream<Uint8Array>({
+    cancel() {
+      open = false;
+      socket.destroy();
+    },
+    pull() {
+      socket.resume();
+    },
+    start(controller) {
+      const end = (error?: Error) => {
+        if (!open) {
+          return;
+        }
+        open = false;
+        if (error && !isTeardown(error)) {
+          controller.error(error);
+        } else {
+          controller.close();
+        }
+      };
+      socket.on("data", (chunk: Uint8Array) => {
+        if (!open) {
+          return;
+        }
+        controller.enqueue(chunk);
+        if ((controller.desiredSize ?? 0) <= 0) {
+          socket.pause();
+        }
+      });
+      socket.once("end", () => end());
+      socket.once("error", end);
+      socket.once("close", () => end());
+    },
+  });
+}
+
+/**
  * Wrap a Node.js `net.Socket` into a {@link NodeSocket}.
- *
- * The readable side is created via `Readable.toWeb()` which converts the
- * Node.js stream into a WHATWG `ReadableStream<Uint8Array>`. The writable
- * side is a custom `WritableStream` that delegates writes to
- * {@link writeToSocket} and handles `close` / `abort` by ending or
- * destroying the underlying socket.
  *
  * @param socket - The raw Node.js socket to wrap.
  * @param secure - Whether this socket was accepted over TLS.
@@ -116,8 +167,7 @@ async function writeToSocket(socket: Socket, chunk: Uint8Array): Promise<void> {
  * metadata.
  */
 function wrapNodeSocket(socket: Socket, secure: boolean): NodeSocket {
-  const readable = Readable.toWeb(socket) as ReadableStream<Uint8Array>;
-
+  const readable = readFromSocket(socket);
   const writable = new WritableStream<Uint8Array>({
     abort() {
       socket.destroy();
@@ -204,29 +254,15 @@ export function listen(
     server.maxConnections = maxConnections;
   }
 
-  let resolveListening!: (value: true) => void;
-  let rejectListening!: (reason: unknown) => void;
-  // oxlint-disable-next-line promise/avoid-new -- Node 18 compat (no Promise.withResolvers)
-  const listeningInternal = new Promise<true>((resolve, reject) => {
-    resolveListening = resolve;
-    rejectListening = reject;
-  });
-  // Public type is Promise<void>; the sentinel return value is an
-  // implementation detail never observed by consumers.
-  const listening = listeningInternal as Promise<unknown> as Promise<void>;
-
-  server.once("listening", () => {
-    resolveListening(true);
-  });
-  // Persistent error listener: server errors that fire before
-  // `listening` reject the startup promise; later errors (TLS,
-  // shutdown) propagate via the already-returned handle's lifecycle
-  // rather than crashing the process via an unhandled emitter error.
+  const listening = (async () => {
+    await once(server, "listening");
+  })();
+  // An error before `listening` rejects it; a later one is kept from crashing
+  // the process as an unhandled emitter error.
   let listenFailed = false;
-  server.on("error", (err) => {
+  server.on("error", () => {
     if (!listenFailed) {
       listenFailed = true;
-      rejectListening(err);
       // Close the server handle so the OS descriptor is released
       // even if the caller never awaits `listening` again.
       server.close();

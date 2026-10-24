@@ -10,10 +10,13 @@
 
 import type { TlsOptions } from "node:tls";
 
+import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { handleConnection } from "../server/connection";
 import type { Response } from "../server/types";
 import { listen } from "./adapter";
 import type { NodeSocket } from "./adapter";
+
+const MAX_PORT = 65_535;
 
 /** Monotonically-increasing connection ID counter. */
 // oxlint-disable-next-line prefer-const
@@ -49,11 +52,11 @@ export type ConnectionCallback = (
 /**
  * Error callback invoked with an error on a connection: a throwing
  * `onConnect` or `onDisconnect`, an error `handle` rejects with
- * ({@link MllpServerError} `NO_PARSER`), or a broken MLLP byte stream
- * (`PROTOCOL_VIOLATION`). The connection closes after either of the last
- * two. Any other error a message raises is answered by the app and never
- * reaches this callback. Stream-level errors (connection reset) do not
- * trigger it.
+ * ({@link MllpServerError} `NO_PARSER`), a broken MLLP byte stream
+ * (`PROTOCOL_VIOLATION`), or a socket error other than a reset, a broken pipe
+ * or a timeout. The connection closes after any of the last three. Any other
+ * error a message raises is answered by the app and never reaches this
+ * callback.
  */
 export type ErrorCallback = (
   error: Error,
@@ -170,6 +173,8 @@ export interface Server {
  * @param options - The handler, port, TLS, limits, timeouts, and callbacks.
  * @returns A {@link Server} handle that exposes the bound port and a `close()`
  *   method for graceful shutdown.
+ * @throws {MllpServerError} `INVALID_OPTION` when `handle` is not a function,
+ *   or `port` is not an integer from 0 to 65535.
  */
 export function serve(options: ServeOptions): Server {
   const {
@@ -181,6 +186,18 @@ export function serve(options: ServeOptions): Server {
     tls,
     ...lifecycle
   } = options;
+  if (typeof handle !== "function") {
+    throw new MllpServerError(
+      MllpServerErrorCode.INVALID_OPTION,
+      "The `handle` option is not a function; `serve()` replies to each message with the `handle` it is given, as in `serve({ handle: app.handle, port: 2575 })`."
+    );
+  }
+  if (!Number.isInteger(port) || port < 0 || port > MAX_PORT) {
+    throw new MllpServerError(
+      MllpServerErrorCode.INVALID_OPTION,
+      "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`."
+    );
+  }
   const shutdown = new AbortController();
   const connections = new Set<Promise<void>>();
 

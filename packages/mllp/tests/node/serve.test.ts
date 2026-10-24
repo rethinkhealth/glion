@@ -3,6 +3,7 @@
 // oxlint-disable promise/avoid-new
 import { once } from "node:events";
 import net from "node:net";
+import { setTimeout as delay } from "node:timers/promises";
 import tls from "node:tls";
 
 import { CR, frame, FS } from "@glion/mllp-codec";
@@ -10,7 +11,7 @@ import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
 
 import { serve } from "../../src/node/serve";
-import type { NodeEnv, Server } from "../../src/node/serve";
+import type { ConnectionInfo, NodeEnv, Server } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
 
 const SAMPLE_ADT = [
@@ -280,6 +281,80 @@ describe("serve() integration", () => {
     } finally {
       client.destroy();
     }
+  });
+
+  it("answers every message a remote system sent before closing its side", async () => {
+    const app = createApp().on("*", async () => {
+      await delay(20);
+    });
+    server = serve({ handle: app.handle, port: 0 });
+    await server.listening;
+
+    const client = net.connect({
+      allowHalfOpen: true,
+      host: "127.0.0.1",
+      port: server.port,
+    });
+    const chunks: Buffer[] = [];
+    client.on("data", (chunk: Buffer) => chunks.push(chunk));
+    client.write(frame(encodeBytes(SAMPLE_ADT)));
+    client.write(frame(encodeBytes(SAMPLE_ORU)));
+    client.end();
+    await once(client, "end");
+
+    const replies = Buffer.concat(chunks).toString("utf8");
+    expect(replies).toContain("\rMSA|AA|MSG001");
+    expect(replies).toContain("\rMSA|AA|MSG002");
+  });
+
+  it("closes a connection that dropped while its message was being handled", async () => {
+    // The idle timeout destroys the server's socket while the route handler
+    // runs, so the reply is written to a destroyed socket.
+    const app = createApp().on("*", async () => {
+      await delay(150);
+    });
+    const disconnected = Promise.withResolvers<ConnectionInfo>();
+    server = serve({
+      handle: app.handle,
+      onDisconnect: disconnected.resolve,
+      port: 0,
+      socketTimeout: 50,
+    });
+    await server.listening;
+
+    const client = net.connect({ host: "127.0.0.1", port: server.port });
+    client.on("error", () => {});
+    client.write(frame(encodeBytes(SAMPLE_ADT)));
+
+    await disconnected.promise;
+    client.destroy();
+  });
+
+  it("throws INVALID_OPTION when the port is not a TCP port", () => {
+    const app = createApp();
+    const options = { handle: app.handle, port: Number.NaN };
+
+    expect(() => serve(options)).toThrow(
+      expect.objectContaining({ code: MllpServerErrorCode.INVALID_OPTION })
+    );
+  });
+
+  it("throws INVALID_OPTION when called with the app and options", () => {
+    const app = createApp();
+    // The call shape before `handle` was an option, made from JavaScript.
+    const call = serve as unknown as (...args: unknown[]) => Server;
+
+    expect(() => call(app, { port: 2575 })).toThrow(
+      "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`."
+    );
+  });
+
+  it("throws INVALID_OPTION when handle is not a function", () => {
+    const call = serve as unknown as (...args: unknown[]) => Server;
+
+    expect(() => call({ port: 2575 })).toThrow(
+      "The `handle` option is not a function; `serve()` replies to each message with the `handle` it is given, as in `serve({ handle: app.handle, port: 2575 })`."
+    );
   });
 
   // ── Lifecycle callbacks ─────────────────────────────────────────────

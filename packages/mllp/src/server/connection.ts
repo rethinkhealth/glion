@@ -15,7 +15,14 @@ import { encodeBytes } from "@glion/util-charset";
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import type { Response } from "./types";
 
-/** An accepted connection, as Web Streams. */
+/**
+ * An accepted connection, as Web Streams.
+ *
+ * Once the connection is torn down (a reset, a broken pipe, a timeout),
+ * `readable` MUST end as when the remote system closes it, and a write to
+ * `writable` MUST resolve. Any other error the streams raise is a fault
+ * `handleConnection` rejects with.
+ */
 export interface MllpSocket {
   /** The bytes the remote system sends. */
   readonly readable: ReadableStream<Uint8Array>;
@@ -41,8 +48,8 @@ export interface HandleConnectionOptions {
  * Handles every message the remote system sends on `socket` with `handle`,
  * and writes each reply back with MLLP framing.
  *
- * Resolves once the connection has closed: the remote system closed or reset
- * it, or `signal` aborted. Closes `socket` either way.
+ * Resolves once the connection has closed: the remote system closed it, or
+ * `signal` aborted. Closes `socket` either way.
  *
  * @param handle - Replies to one message, given without MLLP framing. Called
  *   once per message, never concurrently.
@@ -50,7 +57,8 @@ export interface HandleConnectionOptions {
  * @param options - The signal that ends the connection.
  * @throws {MllpServerError} `PROTOCOL_VIOLATION` when the bytes break MLLP
  *   framing: the remote system's, or a reply that carries a VT or FS byte.
- * @throws What `handle` throws.
+ * @throws What `handle` throws, and any error of `socket` other than its
+ *   teardown.
  */
 export async function handleConnection(
   handle: (payload: Uint8Array) => Promise<Response | undefined>,
@@ -69,25 +77,22 @@ export async function handleConnection(
     }
   };
   signal?.addEventListener("abort", end, { once: true });
-  if (signal?.aborted) {
-    end();
-  }
 
   try {
     for (;;) {
+      if (signal?.aborted) {
+        break;
+      }
       const payload = await receive(reader);
       if (!payload || signal?.aborted) {
         break;
       }
       handling = true;
       const reply = await handle(payload);
-      if (reply && !(await send(writer, reply))) {
-        break;
+      if (reply) {
+        await writer.write(framed(encodeBytes(reply.raw)));
       }
       handling = false;
-      if (signal?.aborted) {
-        break;
-      }
     }
   } finally {
     signal?.removeEventListener("abort", end);
@@ -97,10 +102,7 @@ export async function handleConnection(
   }
 }
 
-/**
- * The next message, or `undefined` once the remote system has closed the
- * connection or the transport has failed.
- */
+/** The next message, or `undefined` once the remote system has closed. */
 async function receive(
   reader: ReadableStreamDefaultReader<Uint8Array>
 ): Promise<Uint8Array | undefined> {
@@ -113,27 +115,20 @@ async function receive(
         cause: error,
       });
     }
-    // A reset or a teardown ends the connection as a close does; the
-    // transport, not the message, failed.
-    return undefined;
+    throw error;
   }
 }
 
-/** Writes `reply` with MLLP framing; `false` when the transport has failed. */
-async function send(
-  writer: WritableStreamDefaultWriter<Uint8Array>,
-  reply: Response
-): Promise<boolean> {
+/** `reply` with MLLP framing. */
+function framed(reply: Uint8Array): Uint8Array {
   try {
-    await writer.write(frame(encodeBytes(reply.raw)));
-    return true;
+    return frame(reply);
   } catch (error) {
     if (error instanceof MllpCodecError) {
       throw new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION, {
         cause: error,
       });
     }
-    // As in receive(): the connection is gone.
-    return false;
+    throw error;
   }
 }

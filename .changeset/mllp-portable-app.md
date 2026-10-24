@@ -11,3 +11,7 @@ Breaking: make the app the part that runs on any runtime. `app.handle(payload, e
 - Move `ConnectionInfo` from `@glion/mllp` to `@glion/mllp/node`, and add `NodeEnv` there.
 - Close the connection when `handle()` rejects (`NO_PARSER`, a second middleware error, a `next()` called twice), after reporting it to `onError`. Before, the connection stayed open and every message on it went unanswered.
 - Make `Context`, `Middleware`, `Handler` and `RouteFilter` generic over `env`; each defaults to `unknown`.
+- Answer every message a remote system sent before closing its side of the connection. Before, Node ended the server's side too, and replies still being built were lost.
+- End the connection when the remote system resets it or it times out while a message is being handled. Before, writing the reply waited forever, and `server.close()` never resolved.
+- Report a socket error other than a reset, a broken pipe or a timeout, such as a failed TLS record, to `onError`. Before, it ended the connection as a close does.
+- Throw `MllpServerError` `INVALID_OPTION` when `serve()` is given no `handle` function or a `port` that is not an integer from 0 to 65535, as when it is still called as `serve(app, options)`.

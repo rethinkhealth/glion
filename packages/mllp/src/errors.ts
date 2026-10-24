@@ -10,6 +10,8 @@
  */
 
 export const MllpServerErrorCode = {
+  /** `serve()` was called with an option it cannot use. */
+  INVALID_OPTION: "INVALID_OPTION",
   /** A middleware called `next()` a second time. */
   NEXT_CALLED_TWICE: "NEXT_CALLED_TWICE",
   /**
