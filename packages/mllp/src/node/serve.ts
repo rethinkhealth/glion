@@ -12,7 +12,6 @@ import type { TlsOptions } from "node:tls";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { handleConnection } from "../server/connection";
-import type { Response } from "../server/types";
 import { listen } from "./adapter";
 import type { NodeSocket } from "./adapter";
 
@@ -51,12 +50,11 @@ export type ConnectionCallback = (
 
 /**
  * Error callback invoked with an error on a connection: a throwing
- * `onConnect` or `onDisconnect`, an error `handle` rejects with (the error
- * of a `serializer` that cannot write the reply, for example), a broken MLLP
- * byte stream (`PROTOCOL_VIOLATION`), or a socket error other than a reset,
- * a broken pipe or a timeout. The connection closes after any of the last
- * three. Any other error a message raises is answered by the app and never
- * reaches this callback.
+ * `onConnect` or `onDisconnect`, an error `handle` rejects with (such as
+ * {@link MllpServerError} `NO_PARSER`), a broken MLLP byte stream
+ * (`PROTOCOL_VIOLATION`), or a socket error other than a reset, a broken pipe
+ * or a timeout. The connection closes after any of the last three. An error a
+ * message raises is answered by the app and never reaches this callback.
  */
 export type ErrorCallback = (
   error: Error,
@@ -71,7 +69,10 @@ export interface ServeOptions {
    * Replies to each message: an app's `handle`. Called with the message
    * without MLLP framing, and the {@link NodeEnv} of its connection.
    */
-  handle: (payload: Uint8Array, env: NodeEnv) => Promise<Response | undefined>;
+  handle: (
+    payload: Uint8Array,
+    env: NodeEnv
+  ) => Promise<Uint8Array | undefined>;
 
   /**
    * The hostname or IP address to bind the server to.
@@ -158,8 +159,9 @@ export interface Server {
  *   import { Mllp } from "@glion/mllp";
  *   import { serve } from "@glion/mllp/node";
  *
- *   const app = new Mllp().on("ADT^A01", async (ctx) => {
- *     await save(ctx.ast); // replies AA
+ *   const app = new Mllp().parser(parseHL7v2).on("ADT^A01", async (ctx) => {
+ *     await save(await ctx.result());
+ *     return ctx.ack();
  *   });
  *
  *   const server = serve({ handle: app.handle, port: 2575 });

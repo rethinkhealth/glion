@@ -1,14 +1,14 @@
+import { AckCode, isAckNakCode } from "@glion/ack";
+import type { Root } from "@glion/ast";
 import { value as queryValue } from "@glion/util-query";
 
+import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { acknowledge } from "./acknowledge";
+import { isReply, toReply } from "./reply";
+import type { Reply } from "./reply";
+import { messageHeader } from "./request";
 import type { MllpRequest } from "./request";
-import type {
-  AckOptions,
-  Context,
-  Hl7v2Processor,
-  MllpOptions,
-  Response,
-} from "./types";
+import type { AckOptions, Context, Hl7v2Processor, MllpOptions } from "./types";
 
 /** A {@link Context} whose `error` the server records. */
 export type MessageContext<E = unknown> = Omit<Context<E>, "error"> & {
@@ -45,6 +45,7 @@ export function createContext<E>(
   const { file, raw, tree } = request;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
+  let res: Reply | undefined;
 
   const controlId = queryValue(tree, "MSH.10")?.value ?? "";
   const messageType = queryValue(tree, "MSH.9.1")?.value ?? "";
@@ -63,10 +64,15 @@ export function createContext<E>(
 
   // ── Build context ──────────────────────────────────────────────────
   const ctx: MessageContext<E> = {
-    ack(ackOptions?: AckOptions): Response {
-      return {
-        raw: serializer(acknowledge(tree, { ...ackOptions, ...defaults })),
-      };
+    ack(ackOptions?: AckOptions): Reply {
+      const code = ackOptions?.code ?? AckCode.ApplicationAccept;
+      if (isAckNakCode(code)) {
+        throw new MllpServerError(MllpServerErrorCode.REPLY_IS_NAK);
+      }
+      return toReply(
+        acknowledge(parsed, { ...ackOptions, ...defaults }),
+        serializer
+      );
     },
     ast: tree,
     controlId,
@@ -78,8 +84,26 @@ export function createContext<E>(
     },
     messageStructure,
     messageType,
+    reply(tree: Root): Reply {
+      if (!messageHeader(tree)) {
+        throw new MllpServerError(MllpServerErrorCode.REPLY_WITHOUT_MSH);
+      }
+      const reply = toReply(tree, serializer);
+      if (reply.code && isAckNakCode(reply.code)) {
+        throw new MllpServerError(MllpServerErrorCode.REPLY_IS_NAK);
+      }
+      return reply;
+    },
     req: Object.freeze({ raw }),
-    res: undefined as Response | undefined,
+    get res(): Reply | undefined {
+      return res;
+    },
+    set res(value: Reply | undefined) {
+      if (value !== undefined && !isReply(value)) {
+        throw new MllpServerError(MllpServerErrorCode.INVALID_REPLY);
+      }
+      res = value;
+    },
     result: getResult,
     set<K extends string>(key: K, value: unknown): void {
       variables.set(key, value);

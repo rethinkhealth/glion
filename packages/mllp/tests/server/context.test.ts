@@ -6,7 +6,9 @@ import { value } from "@glion/util-query";
 import { unified } from "unified";
 
 import { createContext } from "../../src/server/context";
+import type { Reply } from "../../src/server/reply";
 import { parseRequest } from "../../src/server/request";
+import type { AckOptions } from "../../src/server/types";
 
 const SAMPLE_MESSAGE = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -16,7 +18,9 @@ const SAMPLE_MESSAGE = [
 
 const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
 
-async function makeCtx(payload = SAMPLE_BYTES) {
+const decode = (reply: Reply) => new TextDecoder().decode(reply.bytes);
+
+function makeCtx(payload = SAMPLE_BYTES) {
   return createContext({
     app: { serializer: toHl7v2 },
     env: undefined,
@@ -45,7 +49,9 @@ describe("createContext", () => {
     controlId.value = "CHANGED";
 
     expect(ctx.controlId).toBe("MSG001");
-    expect(ctx.ack().raw.split("\r")[1]).toBe("MSA|AA|CHANGED");
+    expect(new TextDecoder().decode(ctx.ack().bytes).split("\r")[1]).toBe(
+      "MSA|AA|CHANGED"
+    );
   });
 
   it("exposes what the runtime passed to handle() as ctx.env", async () => {
@@ -211,6 +217,106 @@ describe("createContext", () => {
       expect(snapshot.key1).toBe("val1");
       expect(snapshot.key2).toBe(42);
       expect(Object.isFrozen(snapshot)).toBe(true);
+    });
+  });
+
+  describe("ctx.ack()", () => {
+    it("is the acknowledgment as a Reply, AA by default", () => {
+      const reply = makeCtx().ack();
+
+      expect(reply.code).toBe("AA");
+      expect(decode(reply).split("\r")[1]).toBe("MSA|AA|MSG001");
+    });
+
+    it("writes the accept code it is given", () => {
+      const reply = makeCtx().ack({ code: "CA" });
+
+      expect(reply.code).toBe("CA");
+      expect(decode(reply).split("\r")[1]).toBe("MSA|CA|MSG001");
+    });
+
+    it("throws REPLY_IS_NAK for a NAK code", () => {
+      const ctx = makeCtx();
+
+      expect(() => ctx.ack({ code: "AE" } as unknown as AckOptions)).toThrow(
+        expect.objectContaining({
+          code: "REPLY_IS_NAK",
+          message:
+            "The reply's acknowledgment code (MSA-1) is a NAK code; a reply accepts the message, and a NAK is the reply to a thrown error.",
+        })
+      );
+    });
+  });
+
+  describe("ctx.reply()", () => {
+    it("serializes the message when called, with its MSA-1 as the code", () => {
+      const tree = parseHL7v2.parse(
+        "MSH|^~\\&|RecvApp|RecvFac|||||RSP^K22^RSP_K21|R1|P|2.5.1\rMSA|AA|MSG001\rQAK|Q1|OK"
+      );
+      const reply = makeCtx().reply(tree);
+      tree.children.pop();
+
+      expect(reply.code).toBe("AA");
+      expect(decode(reply)).toBe(
+        "MSH|^~\\&|RecvApp|RecvFac|||||RSP^K22^RSP_K21|R1|P|2.5.1\rMSA|AA|MSG001\rQAK|Q1|OK"
+      );
+    });
+
+    it("gives a message with no acknowledgment code in MSA-1 no code", () => {
+      const reply = makeCtx().reply(
+        parseHL7v2.parse("MSH|^~\\&|||||||ADT^A08|R2|P|2.5.1\rPID|1||12345")
+      );
+
+      expect(reply.code).toBeUndefined();
+    });
+
+    it("throws REPLY_IS_NAK for a message whose MSA-1 is a NAK code", () => {
+      const ctx = makeCtx();
+      const nak = parseHL7v2.parse("MSH|^~\\&||||||||||2.5.1\rMSA|CR|MSG001");
+
+      expect(() => ctx.reply(nak)).toThrow(
+        expect.objectContaining({ code: "REPLY_IS_NAK" })
+      );
+    });
+
+    it("throws REPLY_WITHOUT_MSH for a message that does not start with an MSH", () => {
+      const ctx = makeCtx();
+
+      expect(() => ctx.reply(parseHL7v2.parse("MSA|AA|MSG001"))).toThrow(
+        expect.objectContaining({
+          code: "REPLY_WITHOUT_MSH",
+          message:
+            "The reply does not start with the message header segment (`MSH`); an HL7v2 message starts with one.",
+        })
+      );
+      expect(() => ctx.reply({ children: [], type: "root" })).toThrow(
+        expect.objectContaining({ code: "REPLY_WITHOUT_MSH" })
+      );
+    });
+  });
+
+  describe("ctx.res", () => {
+    it("starts as no reply, and holds the Reply written to it", () => {
+      const ctx = makeCtx();
+      expect(ctx.res).toBeUndefined();
+
+      const reply = ctx.ack();
+      ctx.res = reply;
+      expect(ctx.res).toBe(reply);
+
+      ctx.res = undefined;
+      expect(ctx.res).toBeUndefined();
+    });
+
+    it("throws INVALID_REPLY for a value that is not a Reply, and keeps the reply it held", () => {
+      const ctx = makeCtx();
+      const reply = ctx.ack();
+      ctx.res = reply;
+
+      expect(() => {
+        ctx.res = parseHL7v2.parse(SAMPLE_MESSAGE) as unknown as Reply;
+      }).toThrow(expect.objectContaining({ code: "INVALID_REPLY" }));
+      expect(ctx.res).toBe(reply);
     });
   });
 

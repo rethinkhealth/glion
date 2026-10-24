@@ -14,21 +14,17 @@
  * reply that is sent, and `performance.now()` measures the full middleware +
  * handler time.
  *
- * ## ACK parsing
+ * ## ACK code
  *
  * HL7v2 acknowledgments carry MSA-1, an HL7v2 Table 0008 code:
  * AA/AE/AR at the application level, CA/CE/CR at the commit level.
- * The code is extracted from the response's raw HL7v2 text via
- * regex — no full parse needed since MSA is always near the top of
- * the ACK message. Returns null for responses that don't follow the
- * standard ACK structure (custom responses, missing MSA).
+ * The code is the reply's `code`; it is `null` for no reply, or a reply
+ * with no Table 0008 code in MSA-1.
  */
 
 import { performance } from "node:perf_hooks";
 
-import { isAckCode } from "@glion/ack";
-import type { AckCode } from "@glion/ack";
-import type { Context, ErrorHandler, Middleware, Response } from "@glion/mllp";
+import type { Context, ErrorHandler, Middleware } from "@glion/mllp";
 import type { NodeEnv } from "@glion/mllp/node";
 
 import type { PartialEvent } from "../events";
@@ -45,10 +41,9 @@ export function createMsgTelemetry(
     const start = performance.now();
     await next();
     const ms = performance.now() - start;
-    const response: Response | undefined = ctx.res;
     const { connection } = ctx.env;
     emit({
-      ack: parseAckCode(response?.raw),
+      ack: ctx.res?.code ?? null,
       conn: connection.id,
       control: ctx.controlId ?? "?",
       ms: Math.round(ms * 1000) / 1000,
@@ -75,23 +70,4 @@ export function createErrorTelemetry(
       t: "error",
     });
   };
-}
-
-// ── ACK parsing ──────────────────────────────────────────────────
-
-// MSH-1, the character after `MSH`, is the field separator; the
-// backreference `\1` reuses it to find MSA-1 in the segment that starts
-// with `MSA` after a `\r`:
-//
-//   MSH|^~\&|...\rMSA|CA|MSG001  →  CA
-//   MSH#|~\&#...\rMSA#CA#MSG001  →  CA
-const MSA_PATTERN = /^MSH(.).*?\rMSA\1([A-Z]{2})\1/s;
-
-/** MSA-1 of the reply in `raw`, or `null` when it holds no Table 0008 code. */
-function parseAckCode(raw: string | undefined): AckCode | null {
-  if (!raw) {
-    return null;
-  }
-  const code = MSA_PATTERN.exec(raw)?.[2];
-  return code !== undefined && isAckCode(code) ? code : null;
 }

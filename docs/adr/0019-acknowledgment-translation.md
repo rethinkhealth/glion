@@ -28,7 +28,7 @@ The reply rules below therefore live in `handle()`, the runtime-independent core
 
 ### 2. A reply is a `Reply`, built by `ctx.ack()` or `ctx.reply()`
 
-A route handler returns its reply as a `Reply`, or `null` for no reply. `ctx.ack(options?)` builds the acknowledgment of the message with an accept code, `AA` or `CA`. `ctx.reply(message)` takes any other HL7v2 message as a tree, such as a query response. Both serialize the message with `@glion/to-hl7v2` when they are called, so a tree that cannot be serialized fails in the handler that built it, and `handle()` resolves to the reply's bytes. A `Reply` is immutable and branded: only those two methods make one, and TypeScript rejects a handler that returns a tree, a string or nothing. Its `code` is its MSA-1.
+A route handler returns its reply as a `Reply`, or `null` for no reply. `ctx.ack(options?)` builds the acknowledgment of the message with an accept code, `AA` or `CA`. `ctx.reply(message)` takes any other HL7v2 message as a tree, such as a query response. Both write the message with the app's `serializer` when they are called, so a tree that cannot be serialized fails in the handler that built it, and `handle()` resolves to the reply's bytes. A `Reply` is immutable and branded: only those two methods make one, and TypeScript rejects a handler that returns a tree, a string or nothing. Its `code` is its MSA-1.
 
 Any other value a route handler returns, `undefined` included, is answered `AE` with `MllpServerError` `INVALID_REPLY`, and so is a value that is not a `Reply` that a middleware returns or writes to `ctx.res`. A handler must say what it replies.
 

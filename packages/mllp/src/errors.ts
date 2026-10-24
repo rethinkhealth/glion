@@ -12,17 +12,30 @@
 export const MllpServerErrorCode = {
   /** `serve()` was called with an option it cannot use. */
   INVALID_OPTION: "INVALID_OPTION",
+  /**
+   * A route handler or middleware gave as the reply, or wrote to `ctx.res`,
+   * a value that is not a `Reply`: a route handler that returned
+   * `undefined`, for example.
+   */
+  INVALID_REPLY: "INVALID_REPLY",
   /** A middleware called `next()` a second time. */
   NEXT_CALLED_TWICE: "NEXT_CALLED_TWICE",
   /**
    * The MLLP byte stream itself was violated and the connection closed:
    * the remote system sent bytes outside a message, glued or unterminated
-   * messages, an over-cap message — or a handler's response contained a
-   * reserved VT/FS byte and could not be framed. The underlying
+   * messages, an over-cap message — or a reply given to the connection
+   * contained a reserved VT/FS byte and could not be framed. The underlying
    * `@glion/mllp-codec` `MllpCodecError` is kept on `cause`; branch on this
    * code without importing that package.
    */
   PROTOCOL_VIOLATION: "PROTOCOL_VIOLATION",
+  /**
+   * `ctx.ack()` was given a NAK code, or `ctx.reply()` a message whose MSA-1
+   * is one. A NAK is the reply to a thrown error.
+   */
+  REPLY_IS_NAK: "REPLY_IS_NAK",
+  /** `ctx.reply()` was given a message that does not start with an MSH. */
+  REPLY_WITHOUT_MSH: "REPLY_WITHOUT_MSH",
 } as const;
 export type MllpServerErrorCode =
   (typeof MllpServerErrorCode)[keyof typeof MllpServerErrorCode];
@@ -37,10 +50,16 @@ const messages = {
       "The `handle` option is not a function; `serve()` replies to each message with the `handle` it is given, as in `serve({ handle: app.handle, port: 2575 })`.",
     port: "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`.",
   },
+  INVALID_REPLY:
+    "The value given as the reply is not a `Reply`; a reply is built by `ctx.ack()` or `ctx.reply()`.",
   NEXT_CALLED_TWICE:
     "A middleware called `next()` a second time; a middleware calls `next()` at most once.",
   PROTOCOL_VIOLATION:
     "The MLLP byte stream is not framed as MLLP requires, and the connection is closing; the error's cause says how.",
+  REPLY_IS_NAK:
+    "The reply's acknowledgment code (MSA-1) is a NAK code; a reply accepts the message, and a NAK is the reply to a thrown error.",
+  REPLY_WITHOUT_MSH:
+    "The reply does not start with the message header segment (`MSH`); an HL7v2 message starts with one.",
 } as const satisfies Record<
   Exclude<MllpServerErrorCode, "INVALID_OPTION">,
   string

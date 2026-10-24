@@ -13,6 +13,7 @@ export type { AcknowledgeOptions } from "./server/acknowledge";
 export { handleConnection } from "./server/connection";
 export type { HandleConnectionOptions, MllpSocket } from "./server/connection";
 export { Mllp } from "./server/mllp";
+export type { Reply } from "./server/reply";
 export type {
   AckOptions,
   Context,
@@ -23,7 +24,6 @@ export type {
   Middleware,
   MiddlewareReturn,
   MllpOptions,
-  Response,
   RouteFilter,
   RoutePattern,
 } from "./server/types";

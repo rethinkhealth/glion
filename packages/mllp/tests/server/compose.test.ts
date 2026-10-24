@@ -5,7 +5,9 @@ import { VFile } from "vfile";
 
 import { compose } from "../../src/server/compose";
 import { createContext } from "../../src/server/context";
-import type { MllpRequest } from "../../src/server/request";
+import { toReply } from "../../src/server/reply";
+import type { Reply } from "../../src/server/reply";
+import { parseRequest } from "../../src/server/request";
 import type { Context, Middleware } from "../../src/server/types";
 
 const SAMPLE_MESSAGE = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|CTL1|P|2.5.1";
@@ -24,6 +26,11 @@ function makeCtx(): Context {
     request: request(SAMPLE_MESSAGE),
   });
 }
+
+const reply = (message: string): Reply =>
+  toReply(parseHL7v2.parse(message), toHl7v2);
+const text = (value: Reply | undefined) =>
+  value ? new TextDecoder().decode(value.bytes) : undefined;
 
 function noAnswer(): undefined {
   return undefined;
@@ -48,21 +55,20 @@ describe("compose", () => {
   });
 
   it("captures response from middleware return value on ctx.res", async () => {
-    const mw: Middleware = async () => ({
-      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1",
-    });
+    const mw: Middleware = async () =>
+      reply("MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1");
 
     const ctx = makeCtx();
     await compose([mw], noAnswer)(ctx);
     expect(ctx.res).toBeDefined();
-    expect(ctx.res?.raw).toContain("MSA|AA");
+    expect(text(ctx.res)).toContain("MSA|AA");
   });
 
   it("short-circuits when middleware returns without calling next", async () => {
     const order: number[] = [];
     const mw1: Middleware = async () => {
       order.push(1);
-      return { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|CTL1|Blocked" };
+      return reply("MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1|Answered");
     };
     const mw2: Middleware = async (_ctx, next) => {
       order.push(2);
@@ -72,7 +78,7 @@ describe("compose", () => {
     const ctx = makeCtx();
     await compose([mw1, mw2], noAnswer)(ctx);
     expect(order).toEqual([1]);
-    expect(ctx.res?.raw).toContain("MSA|AR");
+    expect(text(ctx.res)).toContain("Answered");
   });
 
   it("writes the response onError gives a thrown error, and next() resolves for the outer middleware", async () => {
@@ -81,7 +87,7 @@ describe("compose", () => {
     let outerSaw: string | undefined;
     const outer: Middleware = async (ctx, next) => {
       await next();
-      outerSaw = ctx.res?.raw;
+      outerSaw = text(ctx.res);
     };
     const inner: Middleware = async () => {
       throw thrown;
@@ -90,11 +96,11 @@ describe("compose", () => {
     const ctx = makeCtx();
     await compose([outer, inner], (error) => {
       seen.push(error);
-      return { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1" };
+      return reply("MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1");
     })(ctx);
     expect(seen).toEqual([thrown]);
     expect(outerSaw).toContain("MSA|AE");
-    expect(ctx.res?.raw).toContain("MSA|AE");
+    expect(text(ctx.res)).toContain("MSA|AE");
   });
 
   it("passes NEXT_CALLED_TWICE to onError and throws it to the second next() call", async () => {
@@ -108,6 +114,7 @@ describe("compose", () => {
         caught = error;
       }
     };
+
     const record = (error: Error): undefined => {
       seen.push(error);
     };
@@ -119,7 +126,7 @@ describe("compose", () => {
   });
 
   it("replaces a returned reply with the NAK of a middleware outside it that throws", async () => {
-    const nak = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1" };
+    const nak = reply("MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1");
     const outer: Middleware = async (_ctx, next) => {
       await next();
       throw new Error("audit write failed");
@@ -127,7 +134,7 @@ describe("compose", () => {
     const ctx = makeCtx();
 
     await compose(
-      [outer, () => ({ raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1" })],
+      [outer, () => reply("MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1")],
       () => nak
     )(ctx);
     expect(ctx.res).toBe(nak);
@@ -143,18 +150,34 @@ describe("compose", () => {
     };
     const ctx = makeCtx();
 
-    await compose([outer, inner], (error) => ({ raw: error.message }))(ctx);
-    expect(ctx.res).toEqual({ raw: "second" });
+    await compose([outer, inner], (error) =>
+      reply(`MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1|${error.message}`)
+    )(ctx);
+    expect(text(ctx.res)).toContain("MSA|AE|CTL1|second");
+  });
+
+  it("clears the reply when a middleware returns null", async () => {
+    const outer: Middleware = async (_ctx, next) => {
+      await next();
+      return null;
+    };
+    const ctx = makeCtx();
+
+    await compose(
+      [outer, () => reply("MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1")],
+      noAnswer
+    )(ctx);
+    expect(ctx.res).toBeUndefined();
   });
 
   it("replaces a reply written to ctx.res when a middleware outside it throws", async () => {
-    const nak = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1" };
+    const nak = reply("MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1");
     const outer: Middleware = async (_ctx, next) => {
       await next();
       throw new Error("audit write failed");
     };
     const inner: Middleware = (ctx) => {
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1" };
+      ctx.res = reply("MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1");
     };
     const ctx = makeCtx();
 
@@ -176,37 +199,37 @@ describe("compose", () => {
     };
     const handler: Middleware = async (ctx) => {
       expect(ctx.get("before")).toBe(true);
-      return { raw: `MSH|^~\\&||||||||||2.5.1\rMSA|AA|${ctx.controlId}` };
+      return reply(`MSH|^~\\&||||||||||2.5.1\rMSA|AA|${ctx.controlId}`);
     };
 
     const ctx = makeCtx();
     await compose([mw, handler], noAnswer)(ctx);
     expect(ctx.get("after")).toBe(true);
-    expect(ctx.res?.raw).toContain("MSA|AA");
+    expect(text(ctx.res)).toContain("MSA|AA");
   });
 
   it("allows middleware to set ctx.res directly", async () => {
     const mw: Middleware = async (ctx, next) => {
       await next();
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1|Direct" };
+      ctx.res = reply("MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1|Direct");
     };
 
     const ctx = makeCtx();
     await compose([mw], noAnswer)(ctx);
-    expect(ctx.res?.raw).toContain("Direct");
+    expect(text(ctx.res)).toContain("Direct");
   });
 
   it("last write to ctx.res wins", async () => {
     const inner: Middleware = async (ctx) => {
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1|Inner" };
+      ctx.res = reply("MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1|Inner");
     };
     const outer: Middleware = async (ctx, next) => {
       await next();
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1|Outer" };
+      ctx.res = reply("MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1|Outer");
     };
 
     const ctx = makeCtx();
     await compose([outer, inner], noAnswer)(ctx);
-    expect(ctx.res?.raw).toContain("Outer");
+    expect(text(ctx.res)).toContain("Outer");
   });
 });

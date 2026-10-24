@@ -4,7 +4,6 @@ import { frame } from "@glion/mllp-codec";
 import { MllpServerError } from "../../src/errors";
 import { handleConnection } from "../../src/server/connection";
 import type { MllpSocket } from "../../src/server/connection";
-import type { Response } from "../../src/server/types";
 
 const ADT = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|MSG001|P|2.5.1";
 const ORU = "MSH|^~\\&|S|F|R|RF|20240101||ORU^R01|MSG002|P|2.5.1";
@@ -52,8 +51,8 @@ function memorySocket() {
 }
 
 /** Replies `ACK:<the message>`. */
-async function echo(payload: Uint8Array): Promise<Response> {
-  return { raw: `ACK:${decode(payload)}` };
+async function echo(payload: Uint8Array): Promise<Uint8Array> {
+  return encode(`ACK:${decode(payload)}`);
 }
 
 describe("handleConnection", () => {
@@ -103,7 +102,7 @@ describe("handleConnection", () => {
     remote.end();
 
     await expect(
-      handleConnection(async () => ({ raw: "MSH|\u001C" }), remote.socket)
+      handleConnection(async () => encode("MSH|\u001C"), remote.socket)
     ).rejects.toMatchObject({ code: "PROTOCOL_VIOLATION" });
   });
 

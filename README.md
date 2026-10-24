@@ -42,8 +42,8 @@ import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
 
 export default new Mllp().parser(parseHL7v2).on("ADT^A01", (ctx) => {
-  // Handle admit. Reply by returning a Response ({ raw: string }).
-  // Built-in ACK/NAK generation is landing in @glion/mllp — see ADR 0019.
+  // Handle the admit, then reply AA.
+  return ctx.ack();
 });
 ```
 

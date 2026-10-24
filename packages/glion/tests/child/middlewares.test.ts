@@ -1,5 +1,6 @@
 // oxlint-disable require-await, no-empty-function
-import type { Context, Middleware } from "@glion/mllp";
+import type { AckCode } from "@glion/ack";
+import type { Context, Middleware, Reply } from "@glion/mllp";
 import type { NodeEnv } from "@glion/mllp/node";
 import { describe, expect, it } from "vitest";
 
@@ -8,6 +9,10 @@ import {
   createMsgTelemetry,
 } from "../../src/child/middlewares";
 import type { PartialEvent } from "../../src/events";
+
+/** A reply stub: the middleware reads only its `code`. */
+const reply = (code?: AckCode): Reply =>
+  ({ bytes: new Uint8Array(), code }) as unknown as Reply;
 
 /**
  * Minimal context stub for middleware tests.
@@ -61,58 +66,52 @@ describe("createMsgTelemetry", () => {
     expect(event.ack).toBeNull();
   });
 
-  it("extracts AA ack code from ctx.res.raw", async () => {
+  it("reports the AA code of the reply", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));
 
     const ctx = makeCtx();
     await mw(ctx, async () => {
-      ctx.res = {
-        raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001",
-      };
+      ctx.res = reply("AA");
     });
 
     const event = events[0] as Record<string, unknown>;
     expect(event.ack).toBe("AA");
   });
 
-  it("extracts AE ack code from ctx.res.raw", async () => {
+  it("reports the AE code of the reply", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));
 
     const ctx = makeCtx();
     await mw(ctx, async () => {
-      ctx.res = {
-        raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|MSG001|Error",
-      };
+      ctx.res = reply("AE");
     });
 
     const event = events[0] as Record<string, unknown>;
     expect(event.ack).toBe("AE");
   });
 
-  it("extracts AR ack code from ctx.res.raw", async () => {
+  it("reports the AR code of the reply", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));
 
     const ctx = makeCtx();
     await mw(ctx, async () => {
-      ctx.res = {
-        raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|MSG001|Rejected",
-      };
+      ctx.res = reply("AR");
     });
 
     const event = events[0] as Record<string, unknown>;
     expect(event.ack).toBe("AR");
   });
 
-  it("reports ack=null when res.raw has no MSA segment", async () => {
+  it("reports ack=null when the reply has no acknowledgment code", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));
 
     const ctx = makeCtx();
     await mw(ctx, async () => {
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rPID|1||12345" };
+      ctx.res = reply();
     });
 
     const event = events[0] as Record<string, unknown>;
@@ -164,9 +163,7 @@ describe("createMsgTelemetry", () => {
       // Simulate ack middleware: sets ctx.res AFTER next()
       const ackMw: Middleware = async (ctx, next) => {
         await next();
-        ctx.res = {
-          raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001",
-        };
+        ctx.res = reply("AA");
       };
 
       const ctx = makeCtx();
@@ -203,9 +200,7 @@ describe("createMsgTelemetry", () => {
       // Simulate ack middleware: sets ctx.res AFTER next()
       const ackMw: Middleware = async (ctx, next) => {
         await next();
-        ctx.res = {
-          raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001",
-        };
+        ctx.res = reply("AA");
       };
 
       const ctx = makeCtx();
@@ -229,9 +224,7 @@ describe("createMsgTelemetry", () => {
 
       const ackMw: Middleware = async (ctx, next) => {
         await next();
-        ctx.res = {
-          raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|MSG001|ApplicationError",
-        };
+        ctx.res = reply("AE");
       };
 
       const ctx = makeCtx();

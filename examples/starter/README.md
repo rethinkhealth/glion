@@ -29,7 +29,7 @@ The server listens on `127.0.0.1:2575` by default.
 
 The app:
 
-- Registers a single `ADT^A01` route. The handler returns nothing, so the reply is an `AA` ACK.
+- Registers a single `ADT^A01` route. The handler returns `ctx.ack()`, so the reply is an `AA` ACK.
 - Rejects every other message type with an `AR` NAK, the server's default for a message no route matches.
 
 ## Send a test message

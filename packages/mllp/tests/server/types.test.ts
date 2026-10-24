@@ -1,7 +1,13 @@
+import type { Root } from "@glion/ast";
 import { expectTypeOf } from "vitest";
 
-import type { AckOptions } from "../../src/server/types";
+import type { Reply } from "../../src/server/reply";
 import { matchPattern, parsePattern } from "../../src/server/types";
+import type {
+  AckOptions,
+  Handler,
+  MiddlewareReturn,
+} from "../../src/server/types";
 
 describe("parsePattern", () => {
   it("parses wildcard pattern", () => {
@@ -86,7 +92,42 @@ describe("matchPattern", () => {
   });
 });
 
+describe("Handler", () => {
+  it("returns a Reply or null for no reply", () => {
+    expectTypeOf<() => Reply>().toExtend<Handler>();
+    expectTypeOf<() => Promise<Reply | null>>().toExtend<Handler>();
+  });
+
+  it("does not return a tree, or nothing", () => {
+    expectTypeOf<() => Root>().not.toExtend<Handler>();
+    // oxlint-disable-next-line typescript/no-invalid-void-type
+    expectTypeOf<() => void>().not.toExtend<Handler>();
+  });
+});
+
+describe("MiddlewareReturn", () => {
+  it("is a Reply, null for no reply, or nothing", () => {
+    expectTypeOf<Reply>().toExtend<MiddlewareReturn>();
+    expectTypeOf<Promise<null>>().toExtend<MiddlewareReturn>();
+    expectTypeOf<Promise<void>>().toExtend<MiddlewareReturn>();
+  });
+
+  it("is not a tree, or any other value", () => {
+    expectTypeOf<Root>().not.toExtend<MiddlewareReturn>();
+    expectTypeOf<
+      Promise<Map<string, number>>
+    >().not.toExtend<MiddlewareReturn>();
+  });
+});
+
 describe("AckOptions", () => {
+  it("takes an accept code in code, and no NAK code", () => {
+    expectTypeOf<{ code: "AA" }>().toExtend<AckOptions>();
+    expectTypeOf<{ code: "CA" }>().toExtend<AckOptions>();
+    expectTypeOf<{ code: "AE" }>().not.toExtend<AckOptions>();
+    expectTypeOf<{ code: "AR" }>().not.toExtend<AckOptions>();
+  });
+
   it("takes neither the time zone nor the delimiters, which the app is given", () => {
     expectTypeOf<AckOptions>().not.toHaveProperty("timeZone");
     expectTypeOf<AckOptions>().not.toHaveProperty("delimiters");

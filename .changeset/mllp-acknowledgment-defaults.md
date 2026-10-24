@@ -4,11 +4,10 @@
 
 Breaking: the server replies with the acknowledgment of every message, the way an HTTP framework builds a response.
 
-- Reply `AA` when a route handler returns nothing, or a value that is not a response. Add `ctx.ack(options?)`, which returns the acknowledgment of the message as a reply, with the options of `acknowledge()` and an accept code (`AckOptions`): `ctx.ack({ code: AckCode.CommitAccept })`. A NAK is the reply to a throw.
 - Reply to a thrown `AckException` with its `code` in MSA-1. Any other error replies `AE`. No reply carries MSA-3, so neither an error's `message` nor an `AckException`'s `text` is sent.
 - Answer a message no route matches with `AR`. Before, it got no reply. An `ACK` gets no reply unless a handler or middleware gives one.
 - `await next()` no longer throws. After it, `ctx.error` is the error the message raised and `ctx.res` its reply; log the error or replace the reply there. Move a `try`/`catch` around `next()` to a check of `ctx.error`.
-- Code after `await next()` now runs when the route handler fails, and a reply it writes replaces the NAK. A middleware that answers every message, such as `await next(); ctx.res = ctx.ack();`, answers a failure with `AA`: write the reply only when `ctx.error` is unset, or let the route handler give it.
+- Code after `await next()` now runs when the route handler fails, and a reply it writes replaces the NAK. A middleware that answers every message, such as `await next(); ctx.res = ctx.ack();`, answers a failure with `AA`: write the reply only when `ctx.error` is unset, or let the route handler return it.
 - Reply to the latest error a message raised. An error a middleware throws after the route handler replied replaces the reply with its NAK, and a middleware changes the NAK's code by throwing an `AckException` with the error it answers as its `cause`. A reply a middleware returns or writes to `ctx.res`, before or after `next()`, replaces the one before it.
 - Answer a `next()` called a second time as a middleware throw, with `MllpServerError` `NEXT_CALLED_TWICE`, which the second call also throws.
 - `app.onError(handler)` observes every error a message raises, when it is raised; it no longer receives a context or gives the response, and each handler registered runs. `ErrorHandler` is `(error, env) => Promise<void> | undefined`.

@@ -34,9 +34,10 @@ app.use(async (ctx, next) => {
   }
 });
 
-// Returning nothing replies AA (Application Accept).
+// ctx.ack() replies AA (Application Accept).
 app.on("ADT^A01", (ctx) => {
   consola.withTag(ctx.controlId).info("Patient admit processed");
+  return ctx.ack();
 });
 
 // ctx.ack() builds the reply; here a CA (Commit Accept).

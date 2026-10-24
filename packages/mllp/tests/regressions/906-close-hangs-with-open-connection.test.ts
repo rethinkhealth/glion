@@ -79,7 +79,9 @@ describe("server.close()", () => {
   });
 
   it("resolves once a connection that has answered a message is idle again", async () => {
-    const app = new Mllp().on("ADT^A01", () => ({ raw: ACK }));
+    const app = new Mllp()
+      .parser(parseHL7v2)
+      .on("ADT^A01", (ctx) => ctx.reply(parseHL7v2.parse(ACK)));
     const server = serve({ handle: app.handle, port: 0 });
     await server.listening;
 
@@ -100,10 +102,10 @@ describe("server.close()", () => {
     // to release `answer`, so the test can call close() mid-message.
     const handling = Promise.withResolvers<true>();
     const answer = Promise.withResolvers<true>();
-    const app = new Mllp().on("ADT^A01", async () => {
+    const app = new Mllp().parser(parseHL7v2).on("ADT^A01", async (ctx) => {
       handling.resolve(true);
       await answer.promise;
-      return { raw: ACK };
+      return ctx.reply(parseHL7v2.parse(ACK));
     });
     const server = serve({ handle: app.handle, port: 0 });
     await server.listening;

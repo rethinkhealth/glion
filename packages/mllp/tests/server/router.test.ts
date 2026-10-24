@@ -4,11 +4,15 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { VFile } from "vfile";
 
 import { createContext } from "../../src/server/context";
-import type { MllpRequest } from "../../src/server/request";
+import { toReply } from "../../src/server/reply";
+import { parseRequest } from "../../src/server/request";
 import { Router } from "../../src/server/router";
 import type { Context, Middleware } from "../../src/server/types";
 
-const RESPONSE_OK = { raw: "MSA|AA|OK" };
+const RESPONSE_OK = toReply(
+  parseHL7v2.parse("MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001"),
+  toHl7v2
+);
 
 /** `raw` as the app reads it, parsed with `parseHL7v2`. */
 function request(raw: string): MllpRequest {
@@ -85,8 +89,8 @@ describe("Router", () => {
 
     it("uses first-match-wins ordering", async () => {
       const router = new Router();
-      const specific = async () => ({ raw: "specific" });
-      const catchAll = async () => ({ raw: "catchAll" });
+      const specific = async () => RESPONSE_OK;
+      const catchAll = async () => RESPONSE_OK;
       router.add("ADT^A01", specific);
       router.add("*", catchAll);
 
@@ -162,8 +166,8 @@ describe("Router", () => {
 
     it("filter respects first-match-wins with string patterns", async () => {
       const router = new Router();
-      const filterHandler = async () => ({ raw: "filter" });
-      const stringHandler = async () => ({ raw: "string" });
+      const filterHandler = async () => RESPONSE_OK;
+      const stringHandler = async () => RESPONSE_OK;
       router.add((ctx) => ctx.messageType === "ADT", filterHandler);
       router.add("ADT^A01", stringHandler);
 
@@ -173,8 +177,8 @@ describe("Router", () => {
 
     it("string pattern wins when registered before filter", async () => {
       const router = new Router();
-      const stringHandler = async () => ({ raw: "string" });
-      const filterHandler = async () => ({ raw: "filter" });
+      const stringHandler = async () => RESPONSE_OK;
+      const filterHandler = async () => RESPONSE_OK;
       router.add("ADT^A01", stringHandler);
       router.add((ctx) => ctx.messageType === "ADT", filterHandler);
 
