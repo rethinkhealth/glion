@@ -1,5 +1,11 @@
 # create-glion
 
+## 0.30.0
+
+### Minor Changes
+
+- [#1085](https://github.com/rethinkhealth/glion/pull/1085) [`7d33e02`](https://github.com/rethinkhealth/glion/commit/7d33e02a8f727635cce106b2ff5daab0cf1c9606) Thanks [@meleksomai](https://github.com/meleksomai)! - Breaking: `--example` without a value no longer opens a picker. It takes the name of a directory in `examples/`, or the URL of a GitHub repository or a directory in one, like `create-next-app`, and an empty value is refused. `--example-path` names the directory when a branch name contains a slash. The template is downloaded into a temporary directory, and nothing is written to the target directory unless the template has a `package.json`.
+
 ## 0.29.0
 
 No changes in this release.

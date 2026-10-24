@@ -1,5 +1,22 @@
 # @rethinkhealth/hl7v2-lint-profile-extra-fields
 
+## 0.30.0
+
+### Minor Changes
+
+- [#1096](https://github.com/rethinkhealth/glion/pull/1096) [`79da400`](https://github.com/rethinkhealth/glion/commit/79da400b2d6b0f35fb3e7a43a2546e8696b884e7) Thanks [@meleksomai](https://github.com/meleksomai)! - Breaking: `@glion/lint-no-trailing-empty-field` counts the empty fields the sender wrote, and reports one trailing empty field only with `strict: true` ([#1090](https://github.com/rethinkhealth/glion/issues/1090)).
+
+  - Add a `strict` option to `@glion/lint-no-trailing-empty-field`, defaulting to `false`: a segment that ends with one empty field, such as `PID|1|`, is reported only when it is set.
+  - Change `@glion/lint-profile-extra-fields` to count a segment's fields up to its last field with a value, so empty fields past the last defined field are not reported.
+  - Add a `strict` option to `@glion/lint-profile-extra-fields`, defaulting to `false`: when set, every field the segment holds is counted.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/util-visit@0.30.0
+  - @glion/ast@0.30.0
+  - @glion/utils@0.30.0
+
 ## 0.29.0
 
 ### Patch Changes

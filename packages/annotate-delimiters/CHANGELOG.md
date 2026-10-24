@@ -1,5 +1,12 @@
 # @rethinkhealth/hl7v2-annotate-delimiters
 
+## 0.30.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/util-query@0.30.0
+
 ## 0.29.0
 
 ### Patch Changes

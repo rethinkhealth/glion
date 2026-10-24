@@ -1,5 +1,31 @@
 # @rethinkhealth/hl7v2-mllp
 
+## 0.30.0
+
+### Minor Changes
+
+- [#909](https://github.com/rethinkhealth/glion/pull/909) [`c087d18`](https://github.com/rethinkhealth/glion/commit/c087d18208df74fb5b9cf174edba828ee8545e66) Thanks [@meleksomai](https://github.com/meleksomai)! - Breaking: `serve()` passes `tls` to `tls.createServer()` unchanged, as Node's `TlsOptions` ([#907](https://github.com/rethinkhealth/glion/issues/907)).
+
+  - Mutual TLS is `requestCert: true` with `ca`. A remote system that presents no client certificate is refused during the handshake, and one with a certificate `ca` does not verify is disconnected before any message is read. Before, `tls` took only `cert`, `key`, `ca`, and `passphrase`, so Node never asked for a client certificate and `ca` verified nothing.
+  - `keepAlive` and `keepAliveInitialDelay` are no longer options. Every connection has keep-alive, with the first probe after 60 s idle, and Nagle's algorithm off, as before. Over TLS, a socket option set in `tls` replaces the server's.
+
+  ```ts
+  // Before
+  serve(app, { port: 2575, tls: { cert, key, ca }, keepAlive: true });
+  // After
+  serve(app, { port: 2575, tls: { cert, key, ca, requestCert: true } });
+  ```
+
+### Patch Changes
+
+- [#908](https://github.com/rethinkhealth/glion/pull/908) [`fd4c862`](https://github.com/rethinkhealth/glion/commit/fd4c862de96c8faf8a45c89c879ac2e98fbe7d4c) Thanks [@meleksomai](https://github.com/meleksomai)! - `server.close()` resolves while a remote system holds its connection open ([#906](https://github.com/rethinkhealth/glion/issues/906)). It stops accepting connections and ends every open connection once the message it is handling, if any, has been answered. A connection whose remote system does not close its side within a second of the server's FIN is destroyed. A TLS connection whose handshake completes after `close()` started is ended without reaching the app. `close()` resolves once every connection has closed and its `onDisconnect` has settled. Before, it waited for remote systems to disconnect on their own, so a shutdown hung for as long as any trading partner stayed connected.
+- Updated dependencies [[`8b09ba9`](https://github.com/rethinkhealth/glion/commit/8b09ba9fe76167f23b99f28f22e2c6fd5d246da1), [`d769436`](https://github.com/rethinkhealth/glion/commit/d7694361597b574af2203052f80c029a55484cb1), [`28b61ea`](https://github.com/rethinkhealth/glion/commit/28b61ea1b40ebfb3ed5e025684f200736479852e)]:
+  - @glion/parser@0.30.0
+  - @glion/util-query@0.30.0
+  - @glion/ast@0.30.0
+  - @glion/mllp-codec@0.30.0
+  - @glion/util-charset@0.30.0
+
 ## 0.29.0
 
 ### Patch Changes
