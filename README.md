@@ -49,7 +49,7 @@ export default new Mllp().parser(parseHL7v2).on("ADT^A01", (ctx) => {
 
 Run `npm dev` to start the app with live reload during development. Run `npm start` to run it in production with graceful shutdown and structured logs.
 
-See [`examples/`](./examples) for zero-config, explicit-config, and low-level transport examples.
+See [`examples/`](./examples) for runnable apps. Scaffold any of them with `pnpm create glion my-app --example <name>`.
 
 ## Packages
 
@@ -145,7 +145,7 @@ Linting rules and presets for HL7v2 message quality and conformance.
 ## Documentation
 
 - Full documentation at [glion.dev](https://glion.dev).
-- Runnable examples in [`examples/`](./examples) covering the server (Node and Bun), the `glion` CLI workflow, and sending test messages with `glion send`.
+- Runnable examples in [`examples/`](./examples), each scaffolded with `pnpm create glion my-app --example <name>`.
 - API reference and detailed usage in each package's README, linked from the Packages section above.
 
 ## Status
