@@ -22,6 +22,7 @@ describe("makeGlionConfigSchema", () => {
       entry: "./src/app.ts",
       gracefulCloseMs: 5000,
       hostname: "0.0.0.0",
+      maxConnections: 10,
       port: 2575,
       socketTimeout: 0,
       tls: {
@@ -54,6 +55,18 @@ describe("makeGlionConfigSchema", () => {
       false
     );
     expect(schema.safeParse({ entry: "./a.ts", port: -1 }).success).toBe(false);
+  });
+
+  it("requires maxConnections to be a whole number of at least 1", () => {
+    expect(
+      schema.safeParse({ entry: "./a.ts", maxConnections: 1 }).success
+    ).toBe(true);
+    expect(
+      schema.safeParse({ entry: "./a.ts", maxConnections: 0 }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({ entry: "./a.ts", maxConnections: 1.5 }).success
+    ).toBe(false);
   });
 
   it("requires tls.cert and tls.key when tls is present", () => {

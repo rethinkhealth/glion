@@ -20,5 +20,6 @@ export interface ChildManifest {
     ca?: string;
     passphrase?: string;
   };
+  maxConnections?: number;
   socketTimeout?: number;
 }

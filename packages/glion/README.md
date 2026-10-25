@@ -61,14 +61,16 @@ export default defineConfig({
 
 Type exported from `@glion/cli/config`:
 
-| Field             | Type                            | Description                                                          |
-| ----------------- | ------------------------------- | -------------------------------------------------------------------- |
-| `entry`           | `string`                        | Path to the app file. Defaults to `./glion.app.ts` when unspecified. |
-| `port`            | `number`                        | Port to listen on. Defaults to `2575` (the MLLP standard).           |
-| `hostname`        | `string`                        | Interface to bind. Defaults to `0.0.0.0`.                            |
-| `tls`             | `{ cert: string; key: string }` | Enable MLLP over TLS.                                                |
-| `watch`           | `string[]`                      | Additional paths the dev watcher should reload on.                   |
-| `gracefulCloseMs` | `number`                        | Drain timeout for `glion start`. Defaults to `5000`.                 |
+| Field             | Type                            | Description                                                                                            |
+| ----------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `entry`           | `string`                        | Path to the app file. Defaults to `./glion.app.ts` when unspecified.                                   |
+| `port`            | `number`                        | Port to listen on. Defaults to `2575` (the MLLP standard).                                             |
+| `hostname`        | `string`                        | Interface to bind. Defaults to `0.0.0.0`.                                                              |
+| `tls`             | `{ cert: string; key: string }` | Enable MLLP over TLS.                                                                                  |
+| `maxConnections`  | `number`                        | Most connections open at once; one past it is closed before any message is read. Unlimited when unset. |
+| `socketTimeout`   | `number`                        | Idle time in ms after which a connection is closed. `0` or unset disables it.                          |
+| `watch`           | `string[]`                      | Additional paths the dev watcher should reload on.                                                     |
+| `gracefulCloseMs` | `number`                        | Drain timeout for `glion start`. Defaults to `5000`.                                                   |
 
 ## Commands
 
