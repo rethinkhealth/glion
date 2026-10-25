@@ -35,10 +35,14 @@ const arbSegments = (minLength: number) =>
 const arbTemplate = (ref: fc.Arbitrary<string>): fc.Arbitrary<Template> =>
   fc.record({ owner: arbOwner, path: arbSegments(0), ref, repo: arbRepo });
 
-// Text after `https://github.com/`: anything, or segments mixed with the
-// encodings that decode to a separator, a parent folder, or nothing valid.
+// Text after `https://github.com/`: anything, the page of a template, or
+// segments mixed with the encodings that decode to a separator, a parent
+// folder, or nothing valid.
 const arbPathname = fc.oneof(
   fc.string({ unit: "binary" }),
+  arbTemplate(arbSegments(1)).map((template) =>
+    githubUrl(template).slice("https://github.com/".length)
+  ),
   fc
     .array(
       fc.oneof(
@@ -86,27 +90,42 @@ describe("templateFor", () => {
     );
   });
 
+  // An example name is one folder in examples/ on main, or is refused with its
+  // own sentence. Names are drawn from any text, from short runs of letters,
+  // digits, dots, separators, and `%`, and from names of the form an example
+  // takes, so that both outcomes are common.
+  //
+  // Mutant: `EXAMPLE_NAME` accepts any character after the first. Fails on
+  // `"a/b"`.
   it("never leaves examples/ for an example name", () => {
     fc.assert(
-      fc.property(fc.string({ unit: "binary" }), (name) => {
-        fc.pre(name !== "" && !URL.canParse(name));
-        try {
-          const { owner, path, ref, repo } = templateFor(name);
-          const [folder, example = "", ...rest] = path.split("/");
-          expect({ folder, owner, ref, repo, rest }).toEqual({
-            folder: "examples",
-            owner: "rethinkhealth",
-            ref: "main",
-            repo: "glion",
-            rest: [],
-          });
-          expect(isOneName(example)).toBe(true);
-        } catch (error: unknown) {
-          expect((error as Error).message).toBe(
-            `"${name}" is not the name of an example or a GitHub link. A GitHub link starts with https://github.com/.`
-          );
+      fc.property(
+        fc.oneof(
+          fc.string({ unit: "binary" }),
+          fc.stringMatching(/^[\w./\\%-]{1,12}$/),
+          fc.stringMatching(/^[A-Za-z\d][\w.-]{0,11}$/)
+        ),
+        (name) => {
+          fc.pre(name !== "" && !URL.canParse(name));
+          try {
+            const { owner, path, ref, repo } = templateFor(name);
+            const [folder, example = "", ...rest] = path.split("/");
+            expect({ folder, owner, ref, repo, rest }).toEqual({
+              folder: "examples",
+              owner: "rethinkhealth",
+              ref: "main",
+              repo: "glion",
+              rest: [],
+            });
+            expect(isOneName(example)).toBe(true);
+          } catch (error: unknown) {
+            expect((error as Error).message).toBe(
+              `"${name}" is not the name of an example or a GitHub link. A GitHub link starts with https://github.com/.`
+            );
+          }
         }
-      })
+      ),
+      { examples: [["a/b"], ["mllp-basic"]] }
     );
   });
 });
@@ -313,14 +332,24 @@ describe("urlTemplate", () => {
     );
   });
 
+  // The page githubUrl writes for a template whose ref has no slash reads back
+  // as the template.
+  //
+  // Mutant: `githubUrl` writes each segment without percent-encoding it.
+  // Fails on a ref of `%`.
   it("reads back the page githubUrl writes for a ref without a slash", () => {
     fc.assert(
       fc.property(arbTemplate(arbSegment), (template) => {
         expect(urlTemplate(githubUrl(template))).toEqual(template);
-      })
+      }),
+      {
+        examples: [[{ owner: "acme", path: "", ref: "%", repo: "templates" }]],
+      }
     );
   });
 
+  // Mutant: `examplePathSegments` keeps `.` segments. Fails on the folder
+  // `a`, written `/./a/`.
   it("reads --example-path with empty and . segments as the folder without them", () => {
     fc.assert(
       fc.property(arbSegments(1), (path) => {
@@ -328,10 +357,16 @@ describe("urlTemplate", () => {
         expect(
           urlTemplate("https://github.com/acme/templates", examplePath).path
         ).toBe(path);
-      })
+      }),
+      { examples: [["a"]] }
     );
   });
 
+  // Any github.com URL names a folder in one repository, each segment one
+  // name, or is refused with its own sentence.
+  //
+  // Mutant: `isName` accepts a segment that holds a separator. Fails on
+  // `"acme/t/tree/main/..%2F.."`.
   it("reads any github.com URL as a folder in one repository, or refuses it with its own sentence", () => {
     fc.assert(
       fc.property(arbPathname, (pathname) => {
@@ -349,7 +384,8 @@ describe("urlTemplate", () => {
             `${url} does not point to a GitHub repository or a folder in one.`
           );
         }
-      })
+      }),
+      { examples: [["acme/t/tree/main/..%2F.."]] }
     );
   });
 });
