@@ -289,6 +289,11 @@ describe(encodeEscapes, () => {
     expect(decodeEscapes(wire, d)).toBe("\\H\\");
   });
 
+  // With delimiters that are not letters or digits, every value is written,
+  // holds no delimiter, and decodes to itself.
+  //
+  // Mutant: `namedEscapeCode` names the subcomponent delimiter `S` instead of
+  // `T`. Fails on `&` with `|^~\&`.
   it("writes any value with delimiters that are not letters or digits", () => {
     fc.assert(
       fc.property(
@@ -301,10 +306,18 @@ describe(encodeEscapes, () => {
           expect(heldDelimiters(wire, d)).toEqual([]);
           expect(decodeEscapes(wire, d)).toBe(value);
         }
-      )
+      ),
+      { examples: [[[DEFAULT_DELIMITERS, "&"]]] }
     );
   });
 
+  // With any delimiters, a value is written as above, or refused with
+  // EscapeSequenceError naming a character of the value that every escape code
+  // for it would write with a delimiter.
+  //
+  // Mutant: `hexEscapeCode` keeps a digit `A`–`F` in uppercase when it is a
+  // delimiter. Fails on the escape character `\` with `E` and `C` as
+  // delimiters, which only `\X5c\` writes.
   it("writes any value with any delimiters, or throws EscapeSequenceError for a character none can write", () => {
     fc.assert(
       fc.property(
@@ -332,7 +345,12 @@ describe(encodeEscapes, () => {
           expect(heldDelimiters(wire, d)).toEqual([]);
           expect(decodeEscapes(wire, d)).toBe(value);
         }
-      )
+      ),
+      {
+        examples: [
+          [[{ ...DEFAULT_DELIMITERS, component: "E", repetition: "C" }, "\\"]],
+        ],
+      }
     );
   });
 });
