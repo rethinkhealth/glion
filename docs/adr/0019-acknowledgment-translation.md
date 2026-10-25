@@ -32,7 +32,7 @@ A route handler returns its reply as a `Root`, or `null` for no reply. `ctx.ack(
 
 Any other value a route handler returns, `undefined` included, is answered `AE` with `MllpServerError` `INVALID_REPLY`, and so is a value that is not a message that a middleware returns or writes to `ctx.res`. A handler must say what it replies.
 
-`ctx.ack(input?)` takes nothing (`AA`), a text (`AA` with that text in MSA-3), `AcknowledgeOptions`, or an error: the NAK that error would get if it were thrown.
+`ctx.ack(input?)` takes nothing (`AA`), `AcknowledgeOptions`, or an error: the NAK that error would get if it were thrown.
 
 ### 3. Throwing is a failure, returning is a decision
 
@@ -44,15 +44,15 @@ A thrown error is recorded in `ctx.error`, so logging middleware see it. A retur
 | ------------------------------------------------------ | --------------------------------------------------------------------- |
 | The route handler returns a message                    | that message                                                          |
 | It returns `null`                                      | none                                                                  |
-| It returns anything else                               | `AE` · MSA-3 `Application internal error` · `INVALID_REPLY`           |
-| It throws an `AckException`                            | its `code` in MSA-1, its `text` in MSA-3                              |
-| It throws anything else                                | `AE` · MSA-3 `Application internal error`                             |
-| No route matches                                       | `AR` · MSA-3 `Unsupported message type`                               |
+| It returns anything else                               | `AE` · `INVALID_REPLY`                                                |
+| It throws an `AckException`                            | its `code` in MSA-1                                                   |
+| It throws anything else                                | `AE`                                                                  |
+| No route matches                                       | `AR`                                                                  |
 | A route filter throws                                  | as a throw, after the global middleware only                          |
 | The payload is not UTF-8, or the parser throws         | `AE`, after the global middleware only, whatever they return or write |
 | The message is an `ACK`, or does not start with an MSH | none, unless a handler or middleware gives one                        |
 
-An error's `message` is never sent; only an `AckException`'s `text` reaches MSA-3. `isAckException()` in `@glion/ack` recognizes an exception made by any installed copy of the package, so a second copy never turns an `AR` into an `AE`.
+No reply carries text: an error's `message` and an `AckException`'s `text` are never sent (§8). `isAckException()` in `@glion/ack` recognizes an exception made by any installed copy of the package, so a second copy never turns an `AR` into an `AE`.
 
 A payload that did not decode or parse was never read, so it is never accepted: the global middleware observe it, and the reply stays `AE`. An `ACK` is never acknowledged, so two receivers cannot answer each other's acknowledgments forever. A payload with no MSH, such as an empty keep-alive frame, has no MSH-10 to acknowledge.
 
@@ -74,9 +74,19 @@ Hono lets the latest error replace the response. That is wrong for MLLP. When a 
 
 `acknowledge(origin, options?)` builds an MSH and an MSA. It swaps MSH-3/4 with MSH-5/6, copying each field whole, writes MSH-9 as `ACK^<trigger>^ACK` (`ACK^<trigger>` before v2.3.1), echoes MSH-11 and MSH-12.1, and echoes MSH-10 in MSA-2. `ctx.ack()` passes it the processor's own tree, so an app with its own `preprocess` is acknowledged correctly. `ctx.tree()` copies the MSH before the transforms run, so they never change the acknowledgment. A payload with no tree has its first segment parsed alone.
 
-### 8. Version conformance is not the acknowledgment's job
+### 8. The acknowledgment is the same in every version, for now
 
-MSA-3 is withdrawn (`W`) from v2.7, where the standard refers the reader to the ERR segment: ERR-3 (HL7 Error Code, Table 0357), ERR-4 (Severity) and ERR-8 (User Message). `acknowledge()` does not branch on MSH-12. #1084 proposes that producers write the version-neutral union (MSA-3 and an ERR segment) and that one profile-driven transform conforms it to the message's version. That keeps what each version allows in one place, the profile data, instead of in every producer.
+`acknowledge()` writes only what every version from v2.1 to v2.8.2 accepts: MSH-1 to MSH-12, MSA-1 and MSA-2. A NAK states its reason in MSA-1 alone. The fields that carry a reason have no form every version accepts:
+
+| Field                           | v2.1 – v2.4 | v2.5 – v2.6 | v2.7 – v2.8.2 |
+| ------------------------------- | ----------- | ----------- | ------------- |
+| MSA-3 (Text Message)            | `O`         | `B`         | `W`           |
+| ERR-1 (Error Code and Location) | `R`         | `B`         | `W`           |
+| ERR-3, ERR-4                    | not defined | `R`         | `R`           |
+
+Leaving out MSA-3, which no version requires, is valid in all of them. Any ERR segment needs fields chosen by version. #1084 adds the reason back: producers write MSA-3 and an ERR segment, and one profile-driven transform conforms them to MSH-12, so what each version allows stays in the profile data instead of in every producer.
+
+MSH-9 is the one exception. No form is valid in every version: v2.1 has no components, MSH-9.3 exists from v2.3.1, and it is required from v2.5, so `acknowledge()` reads MSH-12 to choose. That check is temporary and tracked in #1112; the same transform replaces it.
 
 ### 9. The application's logger reports errors; the library never logs
 
@@ -84,11 +94,11 @@ A message's errors reach the application through `ctx.error`. `serve({ onError }
 
 ## Consequences
 
-- **Wire behaviour changes, and partners will see it.** An unrouted message is answered `AR` instead of nothing. A handler's throw is answered with a NAK instead of nothing. An error's `message` no longer reaches MSA-3. An empty frame still gets no reply.
+- **Wire behaviour changes, and partners will see it.** An unrouted message is answered `AR` instead of nothing. A handler's throw is answered with a NAK instead of nothing. No reply carries MSA-3, so an error's `message` no longer reaches the partner. An empty frame still gets no reply.
 - **Every route handler returns its reply.** `return ctx.ack()` replaces returning nothing; TypeScript rejects a handler that returns nothing, and an untyped one is answered `AE` with `INVALID_REPLY`.
 - **Code after `await next()` now runs when the route handler fails.** A middleware that writes a reply there replaces the NAK, so it checks `ctx.error` first. A `try`/`catch` around `next()` no longer sees errors.
 - **The examples and the CLI drop their hand-written ACKs** and their `app.on("*")` catch-alls. The CLI's telemetry middleware reads MSA-1 from `ctx.res` as a tree.
-- **Until #1084 lands,** a NAK to a v2.7 or later message carries MSA-3, which the receiver ignores, and no ERR segment, so it states no reason.
+- **Until #1084 lands,** a NAK states no reason beyond MSA-1, in every version, and MSH-9 is chosen by a version check (#1112).
 - **Deferred:** the ERR segment and its conformance (#1084); reading MSH-15/16 for enhanced-mode acknowledgment; the `201` (Unsupported event code) refinement of an unrouted reject; ERR-2 locations on `AckException`; `app.fetch()` for HL7v2 over HTTP.
 
 ## Alternatives considered
@@ -99,13 +109,15 @@ A message's errors reach the application through `ctx.error`. `serve({ onError }
 - **Returning nothing means `AA`.** Built in #1078, then reversed in #1091: a forgotten `return` would accept a message silently, and an explicit reply reads the same in every handler.
 - **The latest error decides the reply** (Hono). Rejected for the duplicate-processing reason in §6.
 - **`ctx.error` as an `AggregateError` of every error.** Rejected: `ctx.error instanceof DatabaseUnavailable` would stop matching whenever a second error happened, and chaining errors through `cause` is the thrower's choice.
-- **A version table inside `acknowledge()`.** Rejected: conformance spread across producers drifts; it belongs to one profile-driven step (§8).
+- **A version table inside `acknowledge()`.** Rejected: conformance spread across producers drifts; it belongs to one profile-driven step (§8). MSH-9's check is the one stopgap (#1112).
+- **Writing MSA-3 in every version.** Built, then removed: it is withdrawn from v2.7, and the starting point writes only what every version accepts (§8).
 - **Re-parsing the MSH from the payload text.** Built, then replaced: once the processor has parsed the message, the tree is the message, and a second parse ignored the app's own preprocessing.
 
 ## Related
 
 - [ADR 0011: MLLP Transport Server](./0011-mllp-transport-server.md): its middleware-first error handling is superseded; its default-NAK decision is kept, without sending the error's message.
 - [ADR 0013: MLLP Lazy Pipeline Execution](./0013-mllp-lazy-pipeline-execution.md)
-- [ADR 0018: Errors, Exceptions, and Acknowledgments in the HL7v2 Ecosystem](./0018-error-and-acknowledgment-model.md): `AckException` stays data-only and bidirectional; `text` is the field that reaches MSA-3.
+- [ADR 0018: Errors, Exceptions, and Acknowledgments in the HL7v2 Ecosystem](./0018-error-and-acknowledgment-model.md): `AckException` stays data-only and bidirectional; the server sends its `text` once #1084 lands.
 - [ADR 0031: Escape Sequences Are Decoded by the Parser and Encoded by the Serializer](./0031-escape-sequences-decoded-by-the-parser.md)
 - #1084: version conformance of outbound messages
+- #1112: the temporary MSH-9 version check in `acknowledge()`

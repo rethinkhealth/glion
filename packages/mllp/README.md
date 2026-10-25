@@ -55,12 +55,11 @@ The server class. Built with a fluent chainable API:
 
 ### `acknowledge(origin, options?)`
 
-Returns the acknowledgment of the parsed message `origin` as a `Root`: an MSH and an MSA segment, never an ERR segment. The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each field copied whole, sets MSH-7 to the current local time and MSH-9 to `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1), and echoes MSH-12.1. MSA-2 echoes the original MSH-10.
+Returns the acknowledgment of the parsed message `origin` as a `Root`: an MSH and an MSA segment. The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each field copied whole, sets MSH-7 to the current local time and MSH-9 to `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1), and echoes MSH-12.1. The MSA holds MSA-1 and MSA-2, which echoes the original MSH-10. It never contains MSA-3 or an ERR segment, so the acknowledgment has the same fields in every HL7v2 version.
 
 | Option         | Type                                  | Description                                                                 |
 | -------------- | ------------------------------------- | --------------------------------------------------------------------------- |
 | `code`         | `AckCode`, optional                   | MSA-1. Defaults to `AA`.                                                    |
-| `text`         | `string`, optional                    | MSA-3, omitted when absent. Sent to the trading partner.                    |
 | `id`           | `string`, optional                    | MSH-10. Defaults to a fresh `uid()`.                                        |
 | `sending`      | `{ application, facility }`, optional | MSH-3.1 and MSH-4.1. Default to the original MSH-5 and MSH-6, copied whole. |
 | `processingId` | `string`, optional                    | MSH-11. Defaults to the original MSH-11, copied whole, else `P`.            |
@@ -70,14 +69,9 @@ import { AckCode } from "@glion/ack";
 import { acknowledge } from "@glion/mllp";
 import { toHl7v2 } from "@glion/to-hl7v2";
 
-toHl7v2(
-  acknowledge(ctx.ast, {
-    code: AckCode.ApplicationReject,
-    text: "Message rejected",
-  })
-);
+toHl7v2(acknowledge(ctx.ast, { code: AckCode.ApplicationReject }));
 // MSH|^~\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|<uid>|P|2.5.1
-// MSA|AR|MSG001|Message rejected
+// MSA|AR|MSG001
 ```
 
 ### `serve(app, options)` — from `@glion/mllp/node`

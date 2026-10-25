@@ -30,19 +30,15 @@ describe("acknowledge", () => {
     );
   });
 
-  it("writes the given code to MSA-1 and the given text to MSA-3", () => {
+  it("writes the given code to MSA-1 and leaves MSA-3 out", () => {
     const origin = parseHL7v2.parse(ADT_A01);
 
     expect(
       toHl7v2(
-        acknowledge(origin, {
-          code: AckCode.ApplicationError,
-          id: "ACK001",
-          text: "Patient not on file",
-        })
+        acknowledge(origin, { code: AckCode.ApplicationError, id: "ACK001" })
       )
     ).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AE|MSG001|Patient not on file"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AE|MSG001"
     );
   });
 
@@ -53,19 +49,6 @@ describe("acknowledge", () => {
       toHl7v2(acknowledge(origin, { code: AckCode.CommitAccept, id: "ACK001" }))
     ).toBe(
       "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|CA|MSG001"
-    );
-  });
-
-  it("escapes delimiters in MSA-3 text", () => {
-    const origin = parseHL7v2.parse(ADT_A01);
-    const ack = acknowledge(origin, {
-      code: AckCode.ApplicationReject,
-      id: "ACK001",
-      text: "Field 3|4 is empty",
-    });
-
-    expect(toHl7v2(ack).split("\r")[1]).toBe(
-      "MSA|AR|MSG001|Field 3\\F\\4 is empty"
     );
   });
 
