@@ -8,7 +8,10 @@
  * @module
  */
 
-import type { NodeSocketOptions } from "@glion/mllp-client/node";
+import { connect as connectTcp, isIP } from "node:net";
+import type { Socket } from "node:net";
+import { connect as connectTls } from "node:tls";
+import type { ConnectionOptions } from "node:tls";
 
 import { DEFAULT_PORT } from "../constants";
 import { causeMessage, GlionError } from "../errors";
@@ -39,7 +42,7 @@ export function resolveTarget(args: SendArgs): TargetResult {
 
 /** Where a `glion send` is aimed, and how the connection is secured. */
 export type DestinationResult =
-  | { ok: true; target: SendTarget; tls: NodeSocketOptions["tls"] }
+  | { ok: true; target: SendTarget; tls: ConnectionOptions | undefined }
   | {
       ok: false;
       reason: string;
@@ -79,4 +82,23 @@ export async function resolveDestination(
     }
     throw error;
   }
+}
+
+/**
+ * Opens a connection to `target`, with Nagle's algorithm off: over TLS with
+ * `tls`, sending the host as the server name (SNI) unless it is an IP address
+ * or `tls` names one, and over plain TCP without it.
+ */
+export function dialTarget(
+  target: SendTarget,
+  tls?: ConnectionOptions
+): Socket {
+  const { host, port } = target;
+  if (tls === undefined) {
+    return connectTcp({ host, port }).setNoDelay(true);
+  }
+  // `tls.connect()` sends SNI only when `servername` is set. An IP address is
+  // never a server name (RFC 6066 §3).
+  const servername = isIP(host) ? undefined : host;
+  return connectTls({ servername, ...tls, host, port }).setNoDelay(true);
 }

@@ -49,7 +49,7 @@ export default new Mllp().parser(parseHL7v2).on("ADT^A01", (ctx) => {
 
 Run `npm dev` to start the app with live reload during development. Run `npm start` to run it in production with graceful shutdown and structured logs.
 
-See [`examples/`](./examples) for zero-config, explicit-config, and low-level transport examples.
+See [`examples/`](./examples) for runnable apps. Scaffold any of them with `pnpm create glion my-app --example <name>`.
 
 ## Packages
 
@@ -96,6 +96,7 @@ Composable plugins that annotate, enrich, and transform the AST.
 - **[@glion/annotate-profile-tables][glion-annotate-profile-tables]** — annotate primitive values with their entry in the table of the message's HL7v2 version.
 - **[@glion/decode-escapes][glion-decode-escapes]** — decode HL7v2 escape sequences (`\F\`, `\S\`, `\T\`, `\Xdd\`, `\.br\`) in a tree parsed with `decodeEscapes: false`.
 - **[@glion/encode-escapes][glion-encode-escapes]** — encode delimiter characters in subcomponent values as HL7v2 escape sequences before serialization.
+- **[@glion/transform-trim-trailing-fields][glion-transform-trim-trailing-fields]** — remove the empty fields at the end of each segment, so `PID|1|DOE||` is written as `PID|1|DOE`.
 - **[@glion/transform-profile-groups][glion-transform-profile-groups]** — nest segments in the segment groups their event schema defines, such as `PATIENT_RESULT` and `ORDER_OBSERVATION`.
 
 #### Linting
@@ -145,7 +146,7 @@ Linting rules and presets for HL7v2 message quality and conformance.
 ## Documentation
 
 - Full documentation at [glion.dev](https://glion.dev).
-- Runnable examples in [`examples/`](./examples) covering the server (Node and Bun), the `glion` CLI workflow, and sending test messages with `glion send`.
+- Runnable examples in [`examples/`](./examples), each scaffolded with `pnpm create glion my-app --example <name>`.
 - API reference and detailed usage in each package's README, linked from the Packages section above.
 
 ## Status
@@ -248,6 +249,7 @@ HL7® and Health Level Seven® are registered trademarks of Health Level Seven I
 [glion-preset-lint-recommended]: https://github.com/rethinkhealth/glion/tree/main/packages/preset-lint-recommended#readme
 [glion-profiles]: https://github.com/rethinkhealth/glion/tree/main/packages/profiles#readme
 [glion-to-hl7v2]: https://github.com/rethinkhealth/glion/tree/main/packages/to-hl7v2#readme
+[glion-transform-trim-trailing-fields]: https://github.com/rethinkhealth/glion/tree/main/packages/transform-trim-trailing-fields#readme
 [glion-transform-profile-groups]: https://github.com/rethinkhealth/glion/tree/main/packages/transform-profile-groups#readme
 [glion-util-charset]: https://github.com/rethinkhealth/glion/tree/main/packages/util-charset#readme
 [glion-util-query]: https://github.com/rethinkhealth/glion/tree/main/packages/util-query#readme

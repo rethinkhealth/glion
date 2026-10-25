@@ -5,23 +5,20 @@
  * @module
  */
 
-import type {
-  NodeSocketOptions,
-  NodeTlsOptions,
-} from "@glion/mllp-client/node";
+import type { ConnectionOptions } from "node:tls";
 
 import { readTlsFile } from "../tls";
 import type { SendTlsArgs } from "./send";
 
 /**
  * The TLS `tls` asks for, with each file it names read into memory, as
- * `nodeSocket` takes them. `undefined` dials in plaintext.
+ * `tls.connect()` takes them. `undefined` dials in plaintext.
  *
  * @throws {GlionError} A file could not be read (`tls-read-failed`).
  */
 export async function loadTls(
   tls?: SendTlsArgs
-): Promise<NodeSocketOptions["tls"]> {
+): Promise<ConnectionOptions | undefined> {
   if (tls === undefined) {
     return undefined;
   }
@@ -32,7 +29,7 @@ export async function loadTls(
     read(tls.cert, "--cert"),
     read(tls.key, "--key"),
   ]);
-  const options: NodeTlsOptions = {};
+  const options: ConnectionOptions = {};
   if (tls.insecure) {
     options.rejectUnauthorized = false;
   }

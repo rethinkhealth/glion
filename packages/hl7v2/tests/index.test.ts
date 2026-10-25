@@ -90,7 +90,7 @@ describe(parseHL7v2, () => {
     expect(fileCr.result).toStrictEqual(fileLf.result);
   });
 
-  it("parses correctly similar messages with or without trailing field separators", async () => {
+  it("reads a trailing field separator as an empty last field", async () => {
     const msgWithTrailingFieldSeparator = [
       // PID
       "PID|||PATID1234^5^M11^ADT1^MR^UNIVERSITY HOSPITAL~123_456_789^^^USSSA^SS||EVERYMAN^ADAM^A^III||19_610_615|M||C|1200 N ELM STREET^^GREENSBORO^NC^27_401-1020|GL|(919)379-1212|(919)271-3434||S||PATID12345001^2^M10^ADT1^AN^A|123_456_789|9-87_654^NC|",
@@ -105,31 +105,19 @@ describe(parseHL7v2, () => {
       "OBR|1|845439^GHH OE|1045813^GHH LAB|1554-5^GLUCOSE^LN|||200202150730|||||||||DOCT^KILDARE^JAMES^A|||||||200202150930||F|||^^^^^R",
     ].join("\r");
 
-    const fileCr = await parseHL7v2.process(msgWithTrailingFieldSeparator);
-    const fileLf = await parseHL7v2.process(msgWithoutTrailingFieldSeparator);
+    const withTrailing = await parseHL7v2.process(
+      msgWithTrailingFieldSeparator
+    );
+    const withoutTrailing = await parseHL7v2.process(
+      msgWithoutTrailingFieldSeparator
+    );
+    const segments = withoutTrailing.result as { fields: unknown[] }[];
 
-    expect(fileCr.result).toStrictEqual(fileLf.result);
-    expect(fileCr.value).not.toStrictEqual(fileLf.value);
-  });
-
-  it("parses correctly similar messages with or without trailing field separators and empty last field", async () => {
-    const msgWithTrailingFieldSeparator = [
-      // PID
-      "PID|||PATID1234^5^M11^ADT1^MR^UNIVERSITY HOSPITAL~123_456_789^^^USSSA^SS||EVERYMAN^ADAM^A^III||19_610_615|M||C|1200 N ELM STREET^^GREENSBORO^NC^27_401-1020|GL|(919)379-1212|(919)271-3434||S||PATID12345001^2^M10^ADT1^AN^A|123_456_789|9-87_654^NC|",
-      // OBX
-      "OBR|1|845439^GHH OE|1045813^GHH LAB|1554-5^GLUCOSE^LN|||200202150730|||||||||DOCT^KILDARE^JAMES^A|||||||200202150930||F|||^^^^^|",
-    ].join("\r");
-
-    const msgWithoutTrailingFieldSeparator = [
-      // PID
-      "PID|||PATID1234^5^M11^ADT1^MR^UNIVERSITY HOSPITAL~123_456_789^^^USSSA^SS||EVERYMAN^ADAM^A^III||19_610_615|M||C|1200 N ELM STREET^^GREENSBORO^NC^27_401-1020|GL|(919)379-1212|(919)271-3434||S||PATID12345001^2^M10^ADT1^AN^A|123_456_789|9-87_654^NC",
-      // OBX
-      "OBR|1|845439^GHH OE|1045813^GHH LAB|1554-5^GLUCOSE^LN|||200202150730|||||||||DOCT^KILDARE^JAMES^A|||||||200202150930||F|||^^^^^",
-    ].join("\r");
-
-    const fileCr = await parseHL7v2.process(msgWithTrailingFieldSeparator);
-    const fileLf = await parseHL7v2.process(msgWithoutTrailingFieldSeparator);
-
-    expect(fileCr.result).toStrictEqual(fileLf.result);
+    expect(withTrailing.result).toStrictEqual(
+      segments.map((segment) => ({
+        ...segment,
+        fields: [...segment.fields, ""],
+      }))
+    );
   });
 });

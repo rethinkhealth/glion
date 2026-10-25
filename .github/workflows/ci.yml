@@ -46,7 +46,8 @@ jobs:
       - name: Testing
         run: pnpm test:coverage
       - name: Integration testing
-        run: pnpm test:integration:node
+        # The runtime adapters are exercised over real sockets only here.
+        run: pnpm test:integration:node --coverage
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:

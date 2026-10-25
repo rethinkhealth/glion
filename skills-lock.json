@@ -22,6 +22,11 @@
       "sourceType": "local",
       "computedHash": "d2f2a331d3a5ad44b97108054c3b76a7a9028142123c5def8f3f1234863554de"
     },
+    "glion-property-tests": {
+      "source": "./.agents/skills",
+      "sourceType": "local",
+      "computedHash": "6a644b039ed1aa68ac9697b7e3ba16c167988750e1c10b28225aa647da4b3236"
+    },
     "glion-readme": {
       "source": "./.agents/skills",
       "sourceType": "local",

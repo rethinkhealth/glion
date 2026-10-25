@@ -1,7 +1,6 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  deps: { neverBundle: ["cloudflare:sockets"] },
   dts: false,
   entry: {
     index: "src/index.ts",

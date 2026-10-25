@@ -63,7 +63,7 @@ Options accept a partial `Delimiters` object, so only the characters you want to
 
 ### Escape sequences
 
-A value's escape sequences are decoded while the message is tokenized. `\F\`, `\S\`, `\R\`, `\T\`, and `\E\` become the field, component, repetition, subcomponent, and escape delimiters the message declares, `\.br\` becomes the segment delimiter, and `\Xdd\` becomes the characters its bytes, named by pairs of hexadecimal digits, encode in UTF-8. A formatting command such as `\H\`, `\N\`, or `\.sp 2\`, a locally defined sequence (`\Z…\`), a character set switch (`\Cxxyy\`, `\Mxxyyzz\`), and any other sequence stay as written. A Segment ID holds no escape sequences: `Z\R\Z` opening a segment is the Segment ID `Z\R\Z`.
+A value's escape sequences are decoded while the message is tokenized. `\F\`, `\S\`, `\R\`, `\T\`, and `\E\` become the field, component, repetition, subcomponent, and escape delimiters the message declares, `\.br\` becomes the segment delimiter, and `\Xdd\` becomes the characters its bytes, named by pairs of hexadecimal digits, encode in UTF-8. A formatting command such as `\H\`, `\N\`, or `\.sp 2\`, a locally defined sequence (`\Z…\`), a character set switch (`\Cxxyy\`, `\Mxxyyzz\`), and any other sequence stay as written. A Segment ID runs to the first field delimiter of its line and holds no escape sequences or other delimiters: `Z\R\Z|A` opens with the Segment ID `Z\R\Z`, and `^A|B` with `^A`.
 
 ```ts
 import { unified } from "unified";
@@ -97,6 +97,7 @@ const processor: Hl7v2Processor = unified().use(hl7v2Parser).freeze();
 - **Escape sequences decoded in the same pass.** A text run that holds the escape character is decoded as it is tokenized; a run without one is taken as it is.
 - **`unist`-compatible output.** Nodes follow the `@glion/ast` spec and integrate with `unist-util-visit`, `unist-builder`, and the wider Glion plugin ecosystem.
 - **Streaming-friendly.** The pull-based design is ready for streaming ingestion even though the current public API takes a complete string.
+- **Every field delimiter read as written.** Each field delimiter after the Segment ID opens a field, the last one included: `PID|1||` holds PID-1 and an empty PID-2 and PID-3, `PID|` holds an empty PID-1, and `PID` holds no fields. A line that starts with `|` has an empty Segment ID: `|A` holds one field, `A`.
 
 ### Empty-field representation
 
@@ -108,7 +109,7 @@ import { hl7v2Parser } from "@glion/parser";
 
 const tree = unified().use(hl7v2Parser).parse("PID|1||");
 
-// PID-2 (empty field): { type: "field", children: [] }
+// PID-2 and PID-3 (empty fields): { type: "field", children: [] }
 ```
 
 Rules:
@@ -117,7 +118,7 @@ Rules:
 - **Parent nodes** (`Field`, `FieldRepetition`, `Component`) with no content carry `children: []`.
 - **Presence vs value:** a node in the parent's `children` array means the position exists; empty `children` means the position has no value.
 
-| Wire format     | Representation                  |
+| Wire format     | PID-2                           |
 | --------------- | ------------------------------- |
 | `PID\|1\|\|`    | Field(children: [])             |
 | `PID\|1\|^\|`   | Field → Rep → [Comp[], Comp[]]  |

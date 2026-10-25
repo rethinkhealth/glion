@@ -146,7 +146,7 @@ describe("QR2: diagnostic precision", () => {
   });
 
   describe("no-trailing-empty-field — segments with trailing empty fields", () => {
-    it("flags EVN with 2 trailing empties and PID with 6", async () => {
+    it("flags EVN with 3 trailing empties and PID with 7", async () => {
       const source = readFixture("invalid-trailing-empty-fields.hl7");
       const file = await parseHL7v2.process(source);
 
@@ -156,15 +156,15 @@ describe("QR2: diagnostic precision", () => {
 
       expect(trailingDiags).toHaveLength(2);
 
-      // EVN — 2 trailing empty fields
+      // EVN — 3 trailing empty fields
       expect(trailingDiags[0]!.message).toBe(
-        "The segment ends with 2 empty fields; a segment should end at its last field with a value."
+        "The segment has 3 trailing field separators."
       );
       expectOffsetContains(source, trailingDiags[0]!, "||");
 
-      // PID — 6 trailing empty fields
+      // PID — 7 trailing empty fields
       expect(trailingDiags[1]!.message).toBe(
-        "The segment ends with 6 empty fields; a segment should end at its last field with a value."
+        "The segment has 7 trailing field separators."
       );
       expectOffsetContains(source, trailingDiags[1]!, "||||||");
     });

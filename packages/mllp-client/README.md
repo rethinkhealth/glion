@@ -3,7 +3,7 @@
 An HL7v2 MLLP client for Node.js, Bun, Deno, and Cloudflare Workers.
 
 - 📦 **MLLP built in.** Framing, message boundaries and acknowledgment matching are handled. You send a parsed message and get one back.
-- 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, connection attempts retried with backoff, TCP keepalive by default, and explicit states you can read.
+- 🔄 **Predictable connection lifecycle.** Timeouts on connecting and on waiting for a reply, connection attempts retried with backoff, and explicit states you can read.
 - ⚡ **Thin over TCP.** One socket, one message on the wire at a time. Further sends queue in call order. No worker threads, no polling.
 - 🧯 **Errors you can act on.** Every failure carries a stable code and says whether the connection is still usable.
 - 🧩 **Any transport.** TCP and TLS on Node.js, Bun, Deno, and Cloudflare Workers included. An in-memory or custom socket plugs in behind the same two-method interface.
@@ -22,12 +22,13 @@ Node.js 22 or later. ESM only.
 ### Send a message
 
 ```ts
+import { connect } from "node:net";
 import { parseHL7v2 } from "@glion/parser";
 import { MllpClient } from "@glion/mllp-client";
 import { nodeSocket } from "@glion/mllp-client/node";
 
 await using client = new MllpClient({
-  socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
+  socket: nodeSocket(() => connect({ host: "hl7.example.org", port: 2575 })),
 });
 
 const adt = parseHL7v2(
@@ -72,7 +73,7 @@ try {
 
 ```ts
 const client = new MllpClient({
-  socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
+  socket: nodeSocket(() => connect({ host: "hl7.example.org", port: 2575 })),
 });
 await client.connect();
 ```
@@ -87,7 +88,7 @@ A connection that is lost is not restored. The client closes with the failure, a
 
 ```ts
 const client = new MllpClient({
-  socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
+  socket: nodeSocket(() => connect({ host: "hl7.example.org", port: 2575 })),
   reconnect: {
     attempts: 20,
     delay: (attempt) => {
@@ -104,7 +105,7 @@ const client = new MllpClient({
 
 | Option             | Type                            | Default   | Description                                                                                            |
 | ------------------ | ------------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
-| `socket`           | `MllpSocket`                    | required  | Runtime adapter, such as `nodeSocket({ host, port })`.                                                 |
+| `socket`           | `MllpSocket`                    | required  | Runtime adapter, such as `nodeSocket(() => connect({ host, port }))`.                                  |
 | `connectTimeoutMs` | `number`                        | `10000`   | Time allowed to open the connection. Exceeded: `MllpConnectionTimeoutError`.                           |
 | `sendTimeoutMs`    | `number`                        | `30000`   | Time allowed from writing a message to receiving its acknowledgment. Exceeded: `MllpSendTimeoutError`. |
 | `maxBufferedBytes` | `number`                        | 16 MiB    | Largest reply the client buffers. Exceeded: `MllpInvalidResponseError`.                                |
@@ -135,7 +136,7 @@ Creates a client for one remote system. Nothing is opened until the first `conne
 
 ```ts
 const client = new MllpClient({
-  socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
+  socket: nodeSocket(() => connect({ host: "hl7.example.org", port: 2575 })),
   sendTimeoutMs: 10_000,
 });
 ```
@@ -297,12 +298,12 @@ client
 
 The client speaks MLLP over a pair of byte streams and knows nothing else about the transport. That whole dependency is [`MllpSocket`](#custom-socket) — two methods — so supporting a runtime means an adapter, not a fork of the client.
 
-| Runtime            | Adapter                                | Import                       | TLS                                         | Proven by                                                                                                                               |
-| ------------------ | -------------------------------------- | ---------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Node.js ≥ 22       | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Node 22 and 24                                                                                                 |
-| Bun                | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Bun 1.4                                                                                                        |
-| Deno               | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Trust store, CA, client certificate](#tls) | Conformance suite in CI, Deno 2.9                                                                                                       |
-| Cloudflare Workers | [`workersSocket`](#cloudflare-workers) | `@glion/mllp-client/workers` | Public trust store only                     | Integration suite in CI, inside `workerd`; TCP only, TLS handshake untested ([#626](https://github.com/rethinkhealth/glion/issues/626)) |
+| Runtime            | Adapter                                | Import                       | TLS                                        | Proven by                                                                                                                               |
+| ------------------ | -------------------------------------- | ---------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Node.js ≥ 22       | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Node's `tls.connect()` options](#tls)     | Conformance suite in CI, Node 22 and 24                                                                                                 |
+| Bun                | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Node's `tls.connect()` options](#tls)     | Conformance suite in CI, Bun 1.4                                                                                                        |
+| Deno               | [`nodeSocket`](#nodejs)                | `@glion/mllp-client/node`    | [Node's `tls.connect()` options](#tls)     | Conformance suite in CI, Deno 2.9                                                                                                       |
+| Cloudflare Workers | [`workersSocket`](#cloudflare-workers) | `@glion/mllp-client/workers` | `secureTransport`, public trust store only | Integration suite in CI, inside `workerd`; TCP only, TLS handshake untested ([#626](https://github.com/rethinkhealth/glion/issues/626)) |
 
 Every adapter runs the same conformance suite: the [`MllpSocket` contract](#custom-socket) case by case, and the client's behaviour over a real socket scenario by scenario. On Node.js, Bun, and Deno it runs twice, over TCP and over TLS. A custom socket can run it too; see `tests/integration/conformance/` in the package source.
 
@@ -311,96 +312,75 @@ Every adapter runs the same conformance suite: the [`MllpSocket` contract](#cust
 ```ts
 import { nodeSocket } from "@glion/mllp-client/node";
 
-nodeSocket(options: NodeSocketOptions): MllpSocket
+nodeSocket(dial: () => net.Socket, options?: NodeSocketOptions): MllpSocket
 ```
 
-TCP over `net.Socket`, or TLS over `tls.TLSSocket` when `tls` is set. The same adapter runs on Bun and Deno through their `node:net` and `node:tls` compatibility; no separate import is needed there.
+A socket over the `net.Socket` or `tls.TLSSocket` that `dial` returns: `net.connect()` or `tls.connect()`, with Node's options as given. Each `connect()` calls `dial` for a fresh socket, and resolves once the socket is connected, or once the TLS handshake completes for a `tls.TLSSocket`. `dial` must return the socket itself, still connecting, not a promise of it; setup that has to wait first, such as a proxy, belongs in a [custom socket](#custom-socket). `nodeSocket()` throws [`INVALID_OPTION`](#invalid_option) when `dial` is not a function. The same adapter runs on Bun and Deno through their `node:net` and `node:tls` compatibility; no separate import is needed there.
 
-| Option            | Type                        | Default  | Description                                                                                                                                                                              |
-| ----------------- | --------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `host`            | `string`                    | required | Host name or address of the receiver.                                                                                                                                                    |
-| `port`            | `number`                    | required | TCP port of the receiver.                                                                                                                                                                |
-| `tls`             | `boolean \| NodeTlsOptions` | `false`  | TLS for the connection. See [TLS](#tls).                                                                                                                                                 |
-| `gracefulCloseMs` | `number`                    | `1000`   | How long a socket gets to end cleanly before it is destroyed.                                                                                                                            |
-| `keepAliveIdleMs` | `number`                    | `30000`  | Idle time before the first keepalive probe. Once the probes fail, the OS ends the socket, and the next send fails at once with `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`. |
-
-`TCP_NODELAY` is set, so a message goes out immediately rather than waiting on Nagle's algorithm. On Bun and Deno the keepalive delay is passed through to the runtime; whether the runtime honours it is not verified.
+| Option            | Type     | Default | Description                                                   |
+| ----------------- | -------- | ------- | ------------------------------------------------------------- |
+| `gracefulCloseMs` | `number` | `1000`  | How long a socket gets to end cleanly before it is destroyed. |
 
 ```ts
+import { connect } from "node:net";
+
 const client = new MllpClient({
-  socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
+  socket: nodeSocket(() => connect({ host: "hl7.example.org", port: 2575 })),
 });
 ```
+
+The adapter configures nothing on the socket. `dial` sets what the connection needs, with the runtime's API. A receiver that goes away without closing the connection while it is idle ends the socket only when the socket's keepalive probes fail; without keepalive, the next `send()` waits out `sendTimeoutMs` and rejects with `SEND_TIMEOUT`.
 
 Deno needs `--allow-net` for the receiver's host and port.
 
 #### TLS
 
-`tls: true` verifies the receiver's certificate against the runtime's trusted CAs, for `host`, and needs no certificate files. `host` is sent as the server name (SNI) unless it is an IP address.
-
-```ts
-nodeSocket({ host: "hl7.example.org", port: 2575, tls: true });
-```
-
-An object passes Node's `tls.connect()` options:
-
-| Option               | Type                        | Default                      | Description                                                                                      |
-| -------------------- | --------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| `ca`                 | `string \| Buffer \| Array` | Runtime CAs                  | CA certificates that issued the receiver's certificate, PEM. Replaces the runtime's trusted CAs. |
-| `cert`               | `string \| Buffer \| Array` | none                         | Client certificate chain for mutual TLS, PEM.                                                    |
-| `key`                | `string \| Buffer \| Array` | none                         | Private key for `cert`, PEM.                                                                     |
-| `passphrase`         | `string`                    | none                         | Passphrase for an encrypted `key` or `pfx`.                                                      |
-| `pfx`                | `string \| Buffer \| Array` | none                         | Client certificate and key as PKCS#12.                                                           |
-| `servername`         | `string`                    | `host`, unless an IP address | Name the receiver's certificate is verified against, and the SNI name.                           |
-| `rejectUnauthorized` | `boolean`                   | `true`                       | `false` accepts any certificate, including one presented by an attacker.                         |
+`dial` returns `tls.connect()`, with Node's [TLS options](https://nodejs.org/api/tls.html#tlsconnectoptions-callback):
 
 ```ts
 import { readFileSync } from "node:fs";
+import { connect } from "node:tls";
 
-nodeSocket({
-  host: "10.20.0.15",
-  port: 2575,
-  tls: {
+nodeSocket(() =>
+  connect({
+    host: "10.20.0.15",
+    port: 2575,
     ca: readFileSync("hospital-ca.pem"),
     cert: readFileSync("client.pem"),
     key: readFileSync("client-key.pem"),
     servername: "hl7.hospital.internal",
-  },
-});
+  })
+);
 ```
-
-A receiver dialed by IP address must present a certificate that lists that address, or `servername` must name one the certificate lists.
 
 A handshake that fails rejects with [`CONNECTION_FAILED`](#connection_failed), with Node's TLS error on `cause`: for example `UNABLE_TO_VERIFY_LEAF_SIGNATURE` or `ERR_TLS_CERT_ALTNAME_INVALID`.
 
 A receiver that refuses the client certificate over TLS 1.2 fails the handshake: [`CONNECTION_FAILED`](#connection_failed), nothing sent. Over TLS 1.3 it refuses after the handshake, so the connection opens and the first `send()` rejects with `CONNECTION_LOST`, delivery `unknown`.
-
-On Deno, a wrong `passphrase` does not fail the handshake; the connection opens without the client certificate and fails as a refused client certificate.
 
 ### Cloudflare Workers
 
 ```ts
 import { workersSocket } from "@glion/mllp-client/workers";
 
-workersSocket(options: WorkersSocketOptions): MllpSocket
+workersSocket(dial: () => Socket): MllpSocket
 ```
 
-TCP or TLS over `cloudflare:sockets`. The module resolves only inside the Workers runtime; import it from the `./workers` subpath, never from `.`.
-
-| Option | Type      | Default  | Description                                                                                   |
-| ------ | --------- | -------- | --------------------------------------------------------------------------------------------- |
-| `host` | `string`  | required | Host name or address of the receiver.                                                         |
-| `port` | `number`  | required | TCP port of the receiver.                                                                     |
-| `tls`  | `boolean` | `false`  | `true` verifies the receiver's certificate against the public CAs Workers trusts, for `host`. |
+A socket over the one `dial` returns: `connect()` from `cloudflare:sockets`, or a binding's `connect()`, with the runtime's options as given. Each `connect()` calls `dial` for a fresh socket, and resolves once the socket is open. `dial` must return the socket itself, not a promise of it. `secureTransport: "starttls"` is not supported. `workersSocket()` throws [`INVALID_OPTION`](#invalid_option) when `dial` is not a function. Import it from the `./workers` subpath.
 
 ```ts
+import { connect } from "cloudflare:sockets";
 import { MllpClient } from "@glion/mllp-client";
 import { workersSocket } from "@glion/mllp-client/workers";
 
 export default {
   async fetch(request: Request): Promise<Response> {
     await using client = new MllpClient({
-      socket: workersSocket({ host: "hl7.example.org", port: 2575 }),
+      socket: workersSocket(() =>
+        connect(
+          { hostname: "hl7.example.org", port: 2575 },
+          { allowHalfOpen: false, secureTransport: "on" }
+        )
+      ),
     });
     const ack = await client.send(await messageFrom(request));
     return Response.json({ code: ack.code, controlId: ack.controlId });
@@ -410,12 +390,12 @@ export default {
 
 What differs from Node:
 
-- A Worker reaches only endpoints routable from Cloudflare's network. A receiver on a private network needs a publicly reachable endpoint in front of it.
+- `connect()` reaches only endpoints routable from Cloudflare's network. A binding's `connect()` reaches what the binding routes to.
 - `close()` resolves as soon as the runtime has ended the socket; there is no grace window.
 - Locally, under Miniflare (`wrangler dev` or the Vitest integration), connections go through a proxy, so `MllpConnectionFailedError.cause` carries the proxy's message rather than a socket error code. `code` is the same in both.
-- Locally, under Miniflare, a `tls: true` connection fails with the proxy's message, whatever certificate the receiver presents. TLS to a receiver works only when the Worker runs on Cloudflare.
+- Locally, under Miniflare, a `secureTransport: "on"` connection fails with the proxy's message, whatever certificate the receiver presents. TLS to a receiver works only when the Worker runs on Cloudflare.
 - Cloudflare blocks some destination ports.
-- `tls` takes no CA, client certificate, or server name. The receiver must present a publicly trusted certificate for `host`, so dial a host name rather than an address. Any value other than a boolean throws `MllpInvalidOptionError`.
+- `secureTransport: "on"` takes no CA, client certificate, or server name. The receiver must present a publicly trusted certificate for the host dialed, so dial a host name rather than an address.
 
 ### Custom Socket
 
@@ -481,7 +461,7 @@ The four failures of the wire — `CONNECTION_FAILED`, `CONNECTION_TIMEOUT`, `SE
 
 `MllpInvalidOptionError` · delivery `not-sent`
 
-A constructor option or a per-send `timeoutMs` is out of range — a timeout that is not a positive number of milliseconds, a `maxBufferedBytes` that is not a positive integer, or a `reconnect.attempts` that is not a non-negative integer or `Infinity`. `workersSocket()` also throws it for a `tls` that is not a boolean. The message names which one.
+A constructor option or a per-send `timeoutMs` is out of range — a timeout that is not a positive number of milliseconds, a `maxBufferedBytes` that is not a positive integer, or a `reconnect.attempts` that is not a non-negative integer or `Infinity`. Also thrown by `nodeSocket()` and `workersSocket()` when `dial` is not a function. The message names which one.
 
 Thrown before anything is opened or sent. A configuration bug, not a runtime condition.
 
@@ -515,7 +495,7 @@ Check host, port, whether a firewall allows the route, and, over TLS, the certif
 
 The receiver did not accept the connection within `connectTimeoutMs`.
 
-Typically a packet-dropping firewall rather than a refused connection — a refusal arrives fast and surfaces as `CONNECTION_FAILED`. With `tls` set, also a receiver that speaks plain TCP and never answers the TLS handshake.
+Typically a packet-dropping firewall rather than a refused connection — a refusal arrives fast and surfaces as `CONNECTION_FAILED`. Over TLS, also a receiver that speaks plain TCP and never answers the TLS handshake.
 
 ### `SEND_TIMEOUT`
 

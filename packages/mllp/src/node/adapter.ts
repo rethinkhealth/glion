@@ -13,7 +13,7 @@
  */
 
 import { once } from "node:events";
-import type { Server, Socket } from "node:net";
+import type { Server, ServerOpts, Socket } from "node:net";
 import { createServer } from "node:net";
 import { Readable } from "node:stream";
 import { createServer as createTlsServer } from "node:tls";
@@ -46,11 +46,21 @@ export interface NodeAdapterOptions {
   socketTimeout?: number;
 
   /**
-   * TLS for the listener, passed to `tls.createServer()` unchanged. Without
+   * Options for `tls.createServer()`, over {@link SOCKET_OPTIONS}. Without
    * it, the adapter listens with `net.createServer()`.
    */
   tls?: TlsOptions;
 }
+
+/**
+ * Socket options every listener is created with: keep-alive probes after
+ * 60 s idle, and Nagle's algorithm off.
+ */
+const SOCKET_OPTIONS = {
+  keepAlive: true,
+  keepAliveInitialDelay: 60_000,
+  noDelay: true,
+} as const satisfies ServerOpts;
 
 /** Time a socket gets to close after its FIN before it is destroyed. */
 const CLOSE_GRACE_MS = 1000;
@@ -137,12 +147,13 @@ function wrapNodeSocket(socket: Socket, secure: boolean): AdapterSocket {
 
 /**
  * Create a Node.js {@link TcpAdapter} that listens with `tls.createServer()`
- * when `tls` is set, and with `net.createServer()` otherwise. A TLS socket is
- * handed on once its TLS handshake completes.
+ * when `tls` is set, and with `net.createServer()` otherwise, both with
+ * {@link SOCKET_OPTIONS}. A TLS socket is handed on once its TLS handshake
+ * completes.
  *
  * Each accepted socket gets the idle timeout via {@link configureSocket} and
  * is wrapped into an {@link AdapterSocket} before being handed to the
- * provided {@link ConnectionHandler}. Nothing else is set on it.
+ * provided {@link ConnectionHandler}.
  *
  * @example
  *   ```typescript
@@ -181,8 +192,8 @@ export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
       };
 
       const server: Server = secure
-        ? createTlsServer(tls, onConnection)
-        : createServer(onConnection);
+        ? createTlsServer({ ...SOCKET_OPTIONS, ...tls }, onConnection)
+        : createServer(SOCKET_OPTIONS, onConnection);
 
       let resolveListening!: (value: true) => void;
       let rejectListening!: (reason: unknown) => void;

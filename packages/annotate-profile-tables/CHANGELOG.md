@@ -1,5 +1,15 @@
 # @glion/annotate-profile-tables
 
+## 0.30.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/util-visit@0.30.0
+  - @glion/annotate-profile-context@0.30.0
+  - @glion/annotate-profile-datatypes@0.30.0
+  - @glion/ast@0.30.0
+
 ## 0.29.0
 
 ### Patch Changes

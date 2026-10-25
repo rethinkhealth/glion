@@ -1,16 +1,13 @@
 /**
- * Node runtime adapter for `MllpClient`: one `net.Socket`, or `tls.TLSSocket`
- * when `tls` is set, ended gracefully first and forced after a grace period.
- * Closing resolves in bounded time.
+ * Node runtime adapter for `MllpClient`: the socket a dial function returns,
+ * ended gracefully first and forced after a grace period. Closing resolves in
+ * bounded time.
  *
  * @module
  */
 
-import { connect as connectTcp, isIP } from "node:net";
 import type { Socket } from "node:net";
 import { Duplex } from "node:stream";
-import { connect as connectTls } from "node:tls";
-import type { ConnectionOptions } from "node:tls";
 
 import { MllpInvalidOptionError } from "../errors/mllp-invalid-option-error";
 import type { MllpSocket, MllpStreams } from "../types";
@@ -18,40 +15,16 @@ import type { MllpSocket, MllpStreams } from "../types";
 /** Default time a socket gets to end gracefully before it is destroyed. */
 export const DEFAULT_GRACEFUL_CLOSE_MS = 1000;
 
-/** Default idle time before the first keepalive probe. */
-export const DEFAULT_KEEPALIVE_IDLE_MS = 30_000;
-
-/** TLS settings for {@link nodeSocket}, as Node's `tls.connect()` takes them. */
-export type NodeTlsOptions = Pick<
-  ConnectionOptions,
-  | "ca"
-  | "cert"
-  | "key"
-  | "passphrase"
-  | "pfx"
-  | "rejectUnauthorized"
-  | "servername"
->;
+/**
+ * Opens a connection to the remote system: `net.connect()` or
+ * `tls.connect()`, with Node's options. MUST return the socket itself, not a
+ * promise of it: Node can emit the socket's first error before a promise
+ * settles, with no listener yet attached. MUST return a socket that is still
+ * connecting, and a fresh one on every call.
+ */
+export type NodeDial = () => Socket;
 
 export interface NodeSocketOptions {
-  /** Host name or address of the remote system. */
-  readonly host: string;
-  /** TCP port of the remote system. */
-  readonly port: number;
-  /**
-   * TLS for the connection. `true`: verify the remote system's certificate
-   * against the runtime's trusted CAs, for `host`, sent as the server name
-   * (SNI) unless `host` is an IP address. An object: the same, with Node's
-   * `tls.connect()` options applied. `ca` replaces the runtime's trusted CAs.
-   * `cert` and `key` present a client certificate. `servername` replaces
-   * `host` as the server name. `false`: plain TCP.
-   *
-   * A remote system dialed by IP address MUST present a certificate for that
-   * address, or `servername` MUST name one the certificate lists.
-   *
-   * @default false
-   */
-  readonly tls?: boolean | NodeTlsOptions;
   /**
    * Time a socket gets to end gracefully before it is destroyed, in
    * milliseconds.
@@ -59,34 +32,33 @@ export interface NodeSocketOptions {
    * @default 1_000.
    */
   readonly gracefulCloseMs?: number;
-  /**
-   * Idle time before the first keepalive probe, in milliseconds. Once the
-   * probes fail, the OS ends the socket, and the next send fails at once with
-   * `CONNECTION_LOST` instead of waiting out `sendTimeoutMs`.
-   *
-   * @default 30_000.
-   */
-  readonly keepAliveIdleMs?: number;
 }
 
 /**
  * Dials one socket and resolves it once the connection is open: after the TLS
- * handshake when `tls` is set, plain TCP when it is `undefined`.
+ * handshake for a `tls.TLSSocket`, once connected for a `net.Socket`.
  *
  * Rejects with the socket's error, or with `signal.reason` when cancelled.
- * Destroys the socket before rejecting.
+ * Destroys the socket before rejecting. Rejects with a `TypeError` when `dial`
+ * returned a promise, once the socket it resolves with is destroyed.
  */
-function dial(
-  host: string,
-  port: number,
-  tls: NodeTlsOptions | undefined,
-  keepAliveIdleMs: number,
-  signal: AbortSignal
-): Promise<Socket> {
+async function open(dial: NodeDial, signal: AbortSignal): Promise<Socket> {
+  signal.throwIfAborted();
+  // The listeners below are attached in the same synchronous run as `dial()`,
+  // before Node can emit anything on the socket.
+  const socket: Socket | Promise<Socket> = dial();
+  if (socket instanceof Promise) {
+    const resolved = await socket;
+    resolved.destroy();
+    throw new TypeError(
+      "`dial` returned a promise; it must return the socket."
+    );
+  }
+
   // oxlint-disable-next-line promise/avoid-new -- wrapping a Node event emitter
   return new Promise<Socket>((resolve, reject) => {
-    signal.throwIfAborted();
-
+    // `encrypted` is how Node tells a `tls.TLSSocket` from a `net.Socket`.
+    const opened = "encrypted" in socket ? "secureConnect" : "connect";
     const done = () => {
       socket.removeListener("error", onError);
       signal.removeEventListener("abort", onAbort);
@@ -106,18 +78,9 @@ function dial(
       reject(signal.reason);
     };
 
-    // `tls.connect()` sends SNI only when `servername` is set. An IP address is
-    // never a server name (RFC 6066 §3).
-    const servername = isIP(host) ? undefined : host;
-    const socket = tls
-      ? connectTls({ servername, ...tls, host, port }, onOpened)
-      : connectTcp({ host, port }, onOpened);
+    socket.once(opened, onOpened);
     socket.once("error", onError);
     signal.addEventListener("abort", onAbort, { once: true });
-
-    // No Nagle — MLLP acknowledgments are tiny and latency-sensitive.
-    socket.setNoDelay(true);
-    socket.setKeepAlive(true, keepAliveIdleMs);
   });
 }
 
@@ -148,37 +111,24 @@ function end(socket: Socket, gracefulCloseMs: number): Promise<void> {
 }
 
 /**
- * The TLS settings `dial` applies, or `undefined` for plain TCP.
+ * A socket to one remote system, over the `net.Socket` or `tls.TLSSocket`
+ * that `dial` returns.
  *
- * @throws {MllpInvalidOptionError} `tls` is neither a boolean nor an object.
+ * Each `connect()` calls `dial` for a fresh socket: Node cannot reconnect one
+ * that has been destroyed.
+ *
+ * @throws {MllpInvalidOptionError} `dial` is not a function.
  */
-function tlsSettings(
-  tls: NodeSocketOptions["tls"]
-): NodeTlsOptions | undefined {
-  if (tls === undefined || typeof tls === "boolean") {
-    return tls === true ? {} : undefined;
-  }
-  if (typeof tls !== "object" || tls === null) {
+export function nodeSocket(
+  dial: NodeDial,
+  opts: NodeSocketOptions = {}
+): MllpSocket {
+  if (typeof dial !== "function") {
     throw new MllpInvalidOptionError(
-      "tls must be true, false, or an object of TLS settings."
+      "`dial` is not a function; it must open a connection to the remote system."
     );
   }
-  return tls;
-}
-
-/**
- * A TCP socket to one remote system, over Node's `net` module, or its `tls`
- * module when `tls` is set.
- *
- * Each `connect()` dials a fresh socket: Node cannot reconnect one that has
- * been destroyed.
- *
- * @throws {MllpInvalidOptionError} `tls` is neither a boolean nor an object.
- */
-export function nodeSocket(opts: NodeSocketOptions): MllpSocket {
   const gracefulCloseMs = opts.gracefulCloseMs ?? DEFAULT_GRACEFUL_CLOSE_MS;
-  const keepAliveIdleMs = opts.keepAliveIdleMs ?? DEFAULT_KEEPALIVE_IDLE_MS;
-  const tls = tlsSettings(opts.tls);
   /** Ends whatever `connect()` last opened. Nothing is open to begin with. */
   let closeOpen = (): Promise<void> => Promise.resolve();
 
@@ -186,13 +136,7 @@ export function nodeSocket(opts: NodeSocketOptions): MllpSocket {
     close: () => closeOpen(),
 
     async connect(signal: AbortSignal): Promise<MllpStreams> {
-      const socket = await dial(
-        opts.host,
-        opts.port,
-        tls,
-        keepAliveIdleMs,
-        signal
-      );
+      const socket = await open(dial, signal);
       closeOpen = () => end(socket, gracefulCloseMs);
 
       const web = Duplex.toWeb(socket);

@@ -246,9 +246,13 @@ app.onError(async (err, ctx) => {
 
 Without an error handler, errors are absorbed and no response is sent. The sending system will time out and retry per standard MLLP behaviour. See the [design notes](#design-notes) below for the rationale.
 
+## Socket options
+
+Every connection has TCP keep-alive, with the first probe after 60 s idle, and Nagle's algorithm off. Keep-alive ends a connection whose remote system is gone without closing it; `socketTimeout` also ends one whose remote system is there but quiet.
+
 ## TLS
 
-`tls` takes Node's [TLS server options](https://nodejs.org/api/tls.html#tlscreateserveroptions-secureconnectionlistener) and passes them to `tls.createServer()` unchanged. Each connection reaches the app once its TLS handshake completes. Without `tls`, the server listens with `net.createServer()` and Node's defaults. Nothing is set on an accepted socket except `socketTimeout`.
+`tls` takes Node's [TLS server options](https://nodejs.org/api/tls.html#tlscreateserveroptions-secureconnectionlistener) and passes them to `tls.createServer()` unchanged; a [socket option](#socket-options) set in `tls` replaces the server's. Each connection reaches the app once its TLS handshake completes. Without `tls`, the server listens with `net.createServer()`.
 
 ```ts
 import fs from "node:fs";

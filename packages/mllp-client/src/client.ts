@@ -46,11 +46,14 @@ import type {
  * is in flight waits its turn; sends go out in the order they were called.
  *
  * ```ts
+ * import { connect } from "node:net";
  * import { MllpClient } from "@glion/mllp-client";
  * import { nodeSocket } from "@glion/mllp-client/node";
  *
  * await using client = new MllpClient({
- *   socket: nodeSocket({ host: "hl7.example.org", port: 2575 }),
+ *   socket: nodeSocket(() =>
+ *     connect({ host: "hl7.example.org", port: 2575 })
+ *   ),
  * });
  *
  * const ack = await client.send(adtMessage);

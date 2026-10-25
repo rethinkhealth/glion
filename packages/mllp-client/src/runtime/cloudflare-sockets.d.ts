@@ -10,7 +10,9 @@
  * Drift is caught two ways: `tsconfig.cloudflare.json` type-checks the
  * adapter against `@cloudflare/workers-types` instead of this file, as part
  * of `check-types`, and `tests/integration/workers.test.ts` runs the adapter
- * inside `workerd`.
+ * inside `workerd`. The adapter uses `Socket` only; `SocketAddress` and
+ * `SocketOptions` are copied from that package as they stand and are checked
+ * by neither.
  */
 declare module "cloudflare:sockets" {
   export interface SocketAddress {
@@ -20,7 +22,7 @@ declare module "cloudflare:sockets" {
 
   export interface SocketOptions {
     readonly secureTransport?: "off" | "on" | "starttls";
-    readonly allowHalfOpen?: boolean;
+    readonly allowHalfOpen: boolean;
   }
 
   export interface Socket {

@@ -7,6 +7,7 @@
  */
 
 import { readFile } from "node:fs/promises";
+import type { ConnectionOptions } from "node:tls";
 
 import { AckException } from "@glion/ack";
 import type { Root } from "@glion/ast";
@@ -17,7 +18,6 @@ import {
 } from "@glion/mllp-client";
 import type { MllpClientOptions, MllpSocket } from "@glion/mllp-client";
 import { nodeSocket } from "@glion/mllp-client/node";
-import type { NodeSocketOptions } from "@glion/mllp-client/node";
 import { parseHL7v2 } from "@glion/parser";
 import { EscapeSequenceError, toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
@@ -31,7 +31,7 @@ import type {
   SendRequestSummary,
   SendTarget,
 } from "./send-render";
-import { resolveDestination } from "./send-target";
+import { dialTarget, resolveDestination } from "./send-target";
 
 /** Connect + ACK-wait deadline used when `--timeout` is omitted. */
 export const DEFAULT_SEND_TIMEOUT_MS = 30_000;
@@ -378,11 +378,11 @@ async function readMessageText(
  * How `tls` secures the connection: not at all, encrypted with the peer's
  * certificate verified, or encrypted with verification turned off.
  */
-function securityOf(tls: NodeSocketOptions["tls"]): ConnectionSecurity {
-  if (tls === undefined || tls === false) {
+function securityOf(tls: ConnectionOptions | undefined): ConnectionSecurity {
+  if (tls === undefined) {
     return "plain";
   }
-  if (tls !== true && tls.rejectUnauthorized === false) {
+  if (tls.rejectUnauthorized === false) {
     return "tls-unverified";
   }
   return "tls";
@@ -396,7 +396,7 @@ function securityOf(tls: NodeSocketOptions["tls"]): ConnectionSecurity {
 function reportConnection(
   client: MllpClient,
   target: SendTarget,
-  tls: NodeSocketOptions["tls"],
+  tls: ConnectionOptions | undefined,
   sink: NodeJS.WritableStream
 ): void {
   const security = securityOf(tls);
@@ -531,9 +531,7 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
       connectTimeoutMs: timeoutMs,
       reconnect: opts.reconnect,
       sendTimeoutMs: timeoutMs,
-      socket:
-        opts.socket ??
-        nodeSocket({ host: target.host, port: target.port, tls }),
+      socket: opts.socket ?? nodeSocket(() => dialTarget(target, tls)),
     });
     if (!useJson) {
       reportConnection(client, target, tls, stderr);

@@ -6,29 +6,9 @@ import type {
   Segment,
   Subcomponent,
 } from "@glion/ast";
-import { isEmptyNode } from "@glion/utils";
 import type { Position } from "unist";
 
 import type { Token } from "./types";
-
-/**
- * Check if a field has structural content beyond a single empty value.
- * A field with multiple repetitions, multiple components, or multiple
- * subcomponents has structural content even if all values are empty.
- * This is used to prevent dropping trailing fields like |^| or |&|
- * that have meaningful delimiter structure.
- */
-function hasStructuralContent(field: Field): boolean {
-  if (field.children.length > 1) {
-    return true;
-  }
-  const rep = field.children[0];
-  if (rep && rep.children.length > 1) {
-    return true;
-  }
-  const comp = rep?.children[0];
-  return comp !== undefined && comp.children.length > 1;
-}
 
 function createSubcomponent(start: Position["start"]): Subcomponent {
   return {
@@ -78,7 +58,6 @@ function createParserCore() {
   let lastContentEnd: Position["end"] | null = null;
   let documentEnd: Position["end"] | null = null; // Track document-level end position
   let expectingSegmentName = true; // Start expecting a segment name
-  let justSetSegmentName = false; // Track if we just set the segment name
   let rootStartSet = false; // Track if we've set the root start position
 
   const resetState = () => {
@@ -105,7 +84,6 @@ function createParserCore() {
     comp = null;
     currentSub = null;
     segmentHasContent = false;
-    justSetSegmentName = true;
     expectingSegmentName = false;
   };
 
@@ -116,9 +94,6 @@ function createParserCore() {
   const ensureSegment = (start: Position["start"]) => {
     if (!seg) {
       openSegment("", { end: start, start });
-      // Reset justSetSegmentName so the first FIELD_DELIM isn't skipped
-      // (there's no real segment name to separate from fields)
-      justSetSegmentName = false;
     }
   };
 
@@ -132,19 +107,16 @@ function createParserCore() {
     segmentHasContent = true;
   };
 
-  const openRepetition = (start: Position["start"]) => {
-    if (!field) {
-      openField(start);
-      // Add an empty first repetition before the delimiter
-      const emptyRep = createFieldRepetition(start);
-      field!.children.push(emptyRep);
-    }
+  // A delimiter at `at` opens a sibling at `after`; an empty node before the
+  // delimiter is placed at `at`. In `PID|~`, the field is 4–5, its repetitions
+  // 4–4 and 5–5.
+  const openRepetition = (at: Position["start"], after: Position["start"]) => {
     // If field has no children yet, add empty first rep
     if (field!.children.length === 0) {
-      const emptyRep = createFieldRepetition(start);
+      const emptyRep = createFieldRepetition(at);
       field!.children.push(emptyRep);
     }
-    rep = createFieldRepetition(start);
+    rep = createFieldRepetition(after);
     field!.children.push(rep);
     comp = null;
     currentSub = null;
@@ -168,25 +140,16 @@ function createParserCore() {
     segmentHasContent = true;
   };
 
-  const openComponent = (start: Position["start"]) => {
-    if (!field) {
-      openField(start);
-      // Build out a rep + empty first component before the delimiter
-      rep = createFieldRepetition(start);
-      field!.children.push(rep);
-      const emptyComp = createComponent(start);
-      rep.children.push(emptyComp);
-    }
+  const openComponent = (at: Position["start"], after: Position["start"]) => {
     if (!rep) {
-      rep = createFieldRepetition(start);
+      rep = createFieldRepetition(at);
       field!.children.push(rep);
-      const emptyComp = createComponent(start);
-      rep.children.push(emptyComp);
-    } else if (rep.children.length === 0) {
-      const emptyComp = createComponent(start);
+    }
+    if (rep.children.length === 0) {
+      const emptyComp = createComponent(at);
       rep.children.push(emptyComp);
     }
-    comp = createComponent(start);
+    comp = createComponent(after);
     rep.children.push(comp);
     currentSub = null;
     segmentHasContent = true;
@@ -230,42 +193,39 @@ function createParserCore() {
   };
 
   const processToken = (tok: Token) => {
+    // The root starts at the first token of any kind: `|` holds no TEXT token,
+    // and its root is 0–1.
+    if (!rootStartSet) {
+      root.position = { end: tok.position.start, start: tok.position.start };
+      rootStartSet = true;
+    }
     switch (tok.type) {
       case "SEGMENT_END": {
         const endPos = lastContentEnd || tok.position.start;
         updatePositionsToEnd(endPos);
-        dropTrailingEmptyFieldIfPresent();
         resetState();
         return;
       }
       case "FIELD_DELIM": {
         lastContentEnd = tok.position.end;
         documentEnd = tok.position.end;
-        // Skip the first field delimiter after setting segment name
-        if (justSetSegmentName) {
-          justSetSegmentName = false;
-          return;
-        }
-        // Leading field delimiter implies an empty first field
-        if (!field) {
-          openField(tok.position.start);
-        }
+        // A line that starts with a field delimiter has an empty Segment ID
+        ensureSegment(tok.position.start);
         openField(tok.position.end);
         return;
       }
       case "REPETITION_DELIM": {
         lastContentEnd = tok.position.end;
         documentEnd = tok.position.end;
-        if (!field) {
-          openField(tok.position.start);
-        }
-        openRepetition(tok.position.end);
+        openRepetition(tok.position.start, tok.position.end);
+        updatePositionsToEnd(tok.position.end);
         return;
       }
       case "COMPONENT_DELIM": {
         lastContentEnd = tok.position.end;
         documentEnd = tok.position.end;
-        openComponent(tok.position.end);
+        openComponent(tok.position.start, tok.position.end);
+        updatePositionsToEnd(tok.position.end);
         return;
       }
       case "SUBCOMP_DELIM": {
@@ -280,19 +240,11 @@ function createParserCore() {
         currentSub = createSubcomponent(tok.position.end);
         comp?.children.push(currentSub);
         segmentHasContent = true;
+        updatePositionsToEnd(tok.position.end);
         return;
       }
       case "TEXT": {
         const val = tok.value ?? "";
-
-        // Set root start position on first token
-        if (!rootStartSet) {
-          root.position = {
-            end: tok.position.start,
-            start: tok.position.start,
-          };
-          rootStartSet = true;
-        }
 
         // If we're expecting a segment name, this TEXT is the segment name
         if (expectingSegmentName) {
@@ -325,7 +277,6 @@ function createParserCore() {
     if (lastContentEnd && seg) {
       updatePositionsToEnd(lastContentEnd);
     }
-    dropTrailingEmptyFieldIfPresent();
     if (seg && !segmentHasContent && !seg.name) {
       // Drop trailing empty segment only when it was lazily opened by
       // `ensureSegment` (no name, no content). A segment that arrived
@@ -350,27 +301,6 @@ function createParserCore() {
 
     return root;
   };
-
-  /**
-   * Drop only the phantom trailing empty field created by a terminal field
-   * delimiter (e.g. the last `|` in `PID|foo|`). Without this, every segment
-   * ending with `|` would gain an extra empty field on each parse cycle.
-   */
-  function dropTrailingEmptyFieldIfPresent() {
-    if (!seg || seg.children.length === 0) {
-      return;
-    }
-    const lastChild = seg.children.at(-1);
-    if (lastChild?.type !== "field") {
-      return;
-    }
-    const lastField = lastChild as Field;
-    // A field like `|^|` is isEmpty (no leaf data) but has structural content
-    // (component separators) and must be preserved.
-    if (isEmptyNode(lastField) && !hasStructuralContent(lastField)) {
-      seg.children.pop();
-    }
-  }
 
   return { finalize, processToken, root };
 }

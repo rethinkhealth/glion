@@ -5,47 +5,59 @@
  * remote systems are the ones `setup.ts` starts in Node.
  */
 
+import { connect } from "cloudflare:sockets";
 import { describe, expect, inject, it } from "vitest";
 
 import { MllpClient } from "../../src/index";
-import type { WorkersSocketOptions } from "../../src/runtime/workers";
 import { workersSocket } from "../../src/runtime/workers";
 import { adtA01 } from "../fixtures";
 import { describeMllpClientScenarios } from "./conformance/client-scenarios";
 import { describeMllpSocketContract } from "./conformance/socket-contract";
+import type { Address } from "./remote-tcp";
 
 /** Workerd resolves `close()` at once; nothing waits for the remote system. */
 const CLOSE_BOUND_MS = 500;
 
 const { tcp } = inject("fixtures");
 
-describeMllpSocketContract("workersSocket", workersSocket, {
+/** `workersSocket` over TCP. */
+const overTcp = ({ host, port }: Address) =>
+  workersSocket(() => connect({ hostname: host, port }));
+
+describeMllpSocketContract("workersSocket", overTcp, {
   closeBoundMs: CLOSE_BOUND_MS,
   remotes: tcp,
 });
 
-describeMllpClientScenarios("workersSocket", workersSocket, tcp);
+describeMllpClientScenarios("workersSocket", overTcp, tcp);
 
-describe("workersSocket over TLS", () => {
-  it("throws INVALID_OPTION for TLS settings Workers cannot apply", () => {
-    const options = {
-      host: "hl7.example.org",
-      port: 2575,
-      tls: { ca: "-----BEGIN CERTIFICATE-----" },
-    } as unknown as WorkersSocketOptions;
+describe("workersSocket", () => {
+  it("rejects a dial that returns a promise", async () => {
+    const { host, port } = tcp.acknowledging;
+    const dial = async () => {
+      // Setup that waits first, as a certificate lookup would.
+      await Promise.resolve();
+      return connect({ hostname: host, port });
+    };
+    const socket = workersSocket(dial as never);
 
-    expect(() => workersSocket(options)).toThrow(
-      expect.objectContaining({ code: "INVALID_OPTION" })
+    await expect(socket.connect(new AbortController().signal)).rejects.toThrow(
+      "`dial` returned a promise; it must return the socket."
     );
   });
+});
 
-  it("does not dial plain TCP when tls is true", async () => {
+describe("workersSocket over TLS", () => {
+  it("rejects CONNECTION_FAILED when the remote system does not speak TLS", async () => {
+    const { host, port } = tcp.acknowledging;
     const client = new MllpClient({
       reconnect: false,
-      socket: workersSocket({
-        ...inject("fixtures").tcp.acknowledging,
-        tls: true,
-      }),
+      socket: workersSocket(() =>
+        connect(
+          { hostname: host, port },
+          { allowHalfOpen: false, secureTransport: "on" }
+        )
+      ),
     });
 
     await expect(client.send(adtA01().tree)).rejects.toMatchObject({

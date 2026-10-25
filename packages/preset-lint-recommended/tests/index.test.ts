@@ -204,7 +204,7 @@ describe("hl7v2-preset-lint-recommended", () => {
 
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0].message).toBe(
-      "The segment ends with 2 empty fields; a segment should end at its last field with a value."
+      "The segment has 2 trailing field separators."
     );
     expect(file.messages[0].fatal).toBeFalsy(); // This is a warning, not an error
   });

@@ -40,12 +40,12 @@ Default export is a `Preset` (unified's `{ plugins: [...] }` shape). No options 
 
 The preset applies these rules in order. Three are configured at `error` severity; `no-trailing-empty-field` uses its default severity.
 
-| Plugin                                                                   | Purpose                                                                      |
-| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| [`@glion/lint-segment-header-length`](../lint-segment-header-length)     | Flags segment headers that are not exactly three characters.                 |
-| [`@glion/lint-required-message-header`](../lint-required-message-header) | Flags messages whose first segment is not `MSH`.                             |
-| [`@glion/lint-message-version`](../lint-message-version)                 | Flags `MSH-12` values outside the configured semver range.                   |
-| [`@glion/lint-no-trailing-empty-field`](../lint-no-trailing-empty-field) | Flags segments that end with one or more empty fields (stray trailing `\|`). |
+| Plugin                                                                   | Purpose                                                      |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| [`@glion/lint-segment-header-length`](../lint-segment-header-length)     | Flags segment headers that are not exactly three characters. |
+| [`@glion/lint-required-message-header`](../lint-required-message-header) | Flags messages whose first segment is not `MSH`.             |
+| [`@glion/lint-message-version`](../lint-message-version)                 | Flags `MSH-12` values outside the configured semver range.   |
+| [`@glion/lint-no-trailing-empty-field`](../lint-no-trailing-empty-field) | Flags segments that end with two or more empty fields.       |
 
 The companion `@glion/preset-lint-profile-recommended` covers profile-driven, version-specific lint rules; use both together for comprehensive validation.
 

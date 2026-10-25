@@ -38,8 +38,6 @@ export interface ListenOptions {
   readonly allowHalfOpen?: boolean;
   /** Serve TLS with these options. Default: plain TCP. */
   readonly tls?: TlsOptions;
-  /** Host to bind. Default `127.0.0.1`. */
-  readonly host?: string;
 }
 
 export interface Remote extends Address, AsyncDisposable {
@@ -106,7 +104,7 @@ export async function listen(options: ListenOptions = {}): Promise<Remote> {
   const server = options.tls
     ? createTlsServer({ ...options.tls, allowHalfOpen }, accept)
     : createServer({ allowHalfOpen }, accept);
-  server.listen(0, options.host ?? "127.0.0.1");
+  server.listen(0, "127.0.0.1");
   await once(server, "listening");
   const { address: host, port } = server.address() as AddressInfo;
 

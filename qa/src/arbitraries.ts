@@ -23,7 +23,7 @@
  *     Field        = repetition [~ repetition ...]  (~ = repetition delimiter; may be empty or single)
  *     Repetition   = component [^ component ...]    (^ = component delimiter; may be single)
  *     Component    = subcomponent [& subcomponent ...] (& = subcomponent delimiter; may be single)
- *     Subcomponent = plain text (no delimiters)      (may be empty string)
+ *     Subcomponent = text, with each delimiter written as an escape sequence (may be empty string)
  *
  * At every level, values can be **empty** — an empty field, empty component,
  * or empty subcomponent are all valid in HL7v2 and represented as zero-length
@@ -111,23 +111,27 @@ export const arbEncodingChars = fc
 // ---------------------------------------------------------------------------
 
 /**
- * Generate a random printable ASCII string safe to use as an HL7v2 field value.
+ * Generate a value for one subcomponent, as a sender writes it.
  *
- * The generated string will never contain any of the delimiter characters,
- * because those would be interpreted as structural boundaries by the parser.
- * Think of this as the "plain text" content inside a subcomponent.
+ * Each unit is a printable ASCII character that is not a delimiter, or, one
+ * time in five, an escape sequence written with `delimiters.escape`:
  *
- * **How it works:** We generate characters in the printable ASCII range
- * (0x20–0x7E, i.e. space through tilde) and filter out any that match the
- * current delimiter set. The `unit` option tells `fc.string()` to use our
- * custom character generator instead of the default.
+ * - `\F\ \S\ \T\ \R\` for a delimiter in the value
+ * - `\E\` for the escape character, followed by a character that starts no
+ *   formatting command, locally defined sequence, or character set switch (`H N
+ *   Z C M .`): ADR 0031 writes `\E\H\E\` back as `\H\`
+ * - `\.br\` for a line break, unless `.` is a delimiter (#1051)
+ * - `\X0B\` for a control character
+ * - `\H\ \N\`, kept as they are
+ *
+ * A message built from these values round-trips exactly through the parser
+ * and `@glion/to-hl7v2`.
  *
  * @example
- *   // With default delimiters, might generate: "JOHN", "20250101", "", "Dr"
- *   // Will never generate strings containing | ^ ~ \ & \r
+ *   // With default delimiters, might generate: "JOHN", "SMITH\T\JONES", "", "a\F\b"
+ *   // Will never generate a delimiter outside an escape sequence
  *
- * @param delimiters - The delimiter set to avoid. This is a parameter (not
- *   hardcoded) because custom-delimiter tests use non-standard characters.
+ * @param delimiters - The delimiter set the value is written with.
  */
 function arbFieldValue(
   delimiters: typeof DEFAULT_ENCODING_CHARS
@@ -141,14 +145,30 @@ function arbFieldValue(
     delimiters.segment,
     "\n",
   ]);
+  const escape = (code: string) =>
+    `${delimiters.escape}${code}${delimiters.escape}`;
+  const codes = ["F", "S", "T", "R", "X0B", "H", "N"];
+  if (!forbidden.has(".")) {
+    codes.push(".br");
+  }
+  const arbChar = fc
+    .integer({ max: 0x7e, min: 0x20 })
+    .map((code) => String.fromCodePoint(code))
+    .filter((ch) => !forbidden.has(ch));
 
   return fc.string({
     maxLength: 20,
     minLength: 0,
-    unit: fc
-      .integer({ max: 0x7e, min: 0x20 })
-      .map((code) => String.fromCodePoint(code))
-      .filter((ch) => !forbidden.has(ch)),
+    unit: fc.oneof(
+      { arbitrary: arbChar, weight: 8 },
+      { arbitrary: fc.constantFrom(...codes).map(escape), weight: 1 },
+      {
+        arbitrary: arbChar
+          .filter((ch) => !"HNZCM.".includes(ch))
+          .map((ch) => `${escape("E")}${ch}`),
+        weight: 1,
+      }
+    ),
   });
 }
 
@@ -194,7 +214,7 @@ export const arbSegmentName: fc.Arbitrary<string> = fc
 /**
  * Generate a single subcomponent value.
  *
- * A subcomponent is the smallest unit of data in HL7v2 — just plain text.
+ * A subcomponent is the smallest unit of data in HL7v2.
  * This is a thin wrapper around {@link arbFieldValue} for clarity.
  *
  * @example

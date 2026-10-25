@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-profile-extra-fields",
-  "version": "0.29.0",
+  "version": "0.30.0",
   "description": "Lint rule that warns when a segment contains fields beyond the maximum sequence defined in its profile",
   "keywords": [
     "health",
@@ -45,6 +45,7 @@
   "dependencies": {
     "@glion/ast": "workspace:*",
     "@glion/util-visit": "workspace:*",
+    "@glion/utils": "workspace:*",
     "pluralize": "8.0.0",
     "unified-lint-rule": "3.0.1"
   },

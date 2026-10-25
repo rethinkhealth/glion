@@ -1205,14 +1205,14 @@ exports[`parser > complex Delimiter Combinations > handles empty nodes at all le
               "children": [],
               "position": {
                 "end": {
-                  "column": 7,
+                  "column": 6,
                   "line": 1,
-                  "offset": 6,
+                  "offset": 5,
                 },
                 "start": {
-                  "column": 7,
+                  "column": 6,
                   "line": 1,
-                  "offset": 6,
+                  "offset": 5,
                 },
               },
               "type": "field-repetition",
@@ -1236,9 +1236,9 @@ exports[`parser > complex Delimiter Combinations > handles empty nodes at all le
           ],
           "position": {
             "end": {
-              "column": 6,
+              "column": 7,
               "line": 1,
-              "offset": 5,
+              "offset": 6,
             },
             "start": {
               "column": 6,
@@ -1256,14 +1256,14 @@ exports[`parser > complex Delimiter Combinations > handles empty nodes at all le
                   "children": [],
                   "position": {
                     "end": {
-                      "column": 9,
+                      "column": 8,
                       "line": 1,
-                      "offset": 8,
+                      "offset": 7,
                     },
                     "start": {
-                      "column": 9,
+                      "column": 8,
                       "line": 1,
-                      "offset": 8,
+                      "offset": 7,
                     },
                   },
                   "type": "component",
@@ -1292,9 +1292,9 @@ exports[`parser > complex Delimiter Combinations > handles empty nodes at all le
                   "offset": 8,
                 },
                 "start": {
-                  "column": 9,
+                  "column": 8,
                   "line": 1,
-                  "offset": 8,
+                  "offset": 7,
                 },
               },
               "type": "field-repetition",
@@ -1302,9 +1302,9 @@ exports[`parser > complex Delimiter Combinations > handles empty nodes at all le
           ],
           "position": {
             "end": {
-              "column": 8,
+              "column": 9,
               "line": 1,
-              "offset": 7,
+              "offset": 8,
             },
             "start": {
               "column": 8,
@@ -2173,14 +2173,14 @@ exports[`parser > component Delimiter Handling > handles leading component delim
                   "children": [],
                   "position": {
                     "end": {
-                      "column": 6,
+                      "column": 5,
                       "line": 1,
-                      "offset": 5,
+                      "offset": 4,
                     },
                     "start": {
-                      "column": 6,
+                      "column": 5,
                       "line": 1,
-                      "offset": 5,
+                      "offset": 4,
                     },
                   },
                   "type": "component",
@@ -2226,9 +2226,9 @@ exports[`parser > component Delimiter Handling > handles leading component delim
                   "offset": 10,
                 },
                 "start": {
-                  "column": 6,
+                  "column": 5,
                   "line": 1,
-                  "offset": 5,
+                  "offset": 4,
                 },
               },
               "type": "field-repetition",
@@ -2241,9 +2241,9 @@ exports[`parser > component Delimiter Handling > handles leading component delim
               "offset": 10,
             },
             "start": {
-              "column": 6,
+              "column": 5,
               "line": 1,
-              "offset": 5,
+              "offset": 4,
             },
           },
           "type": "field",
@@ -2545,111 +2545,6 @@ exports[`parser > component Delimiter Handling > preserves intermediate empty co
       "column": 17,
       "line": 1,
       "offset": 16,
-    },
-    "start": {
-      "column": 1,
-      "line": 1,
-      "offset": 0,
-    },
-  },
-  "type": "root",
-}
-`;
-
-exports[`parser > field Delimiter Handling > drops trailing empty field created by final delimiter 1`] = `
-{
-  "children": [
-    {
-      "children": [
-        {
-          "children": [
-            {
-              "children": [
-                {
-                  "children": [
-                    {
-                      "position": {
-                        "end": {
-                          "column": 6,
-                          "line": 1,
-                          "offset": 5,
-                        },
-                        "start": {
-                          "column": 5,
-                          "line": 1,
-                          "offset": 4,
-                        },
-                      },
-                      "type": "subcomponent",
-                      "value": "1",
-                    },
-                  ],
-                  "position": {
-                    "end": {
-                      "column": 6,
-                      "line": 1,
-                      "offset": 5,
-                    },
-                    "start": {
-                      "column": 5,
-                      "line": 1,
-                      "offset": 4,
-                    },
-                  },
-                  "type": "component",
-                },
-              ],
-              "position": {
-                "end": {
-                  "column": 6,
-                  "line": 1,
-                  "offset": 5,
-                },
-                "start": {
-                  "column": 5,
-                  "line": 1,
-                  "offset": 4,
-                },
-              },
-              "type": "field-repetition",
-            },
-          ],
-          "position": {
-            "end": {
-              "column": 6,
-              "line": 1,
-              "offset": 5,
-            },
-            "start": {
-              "column": 5,
-              "line": 1,
-              "offset": 4,
-            },
-          },
-          "type": "field",
-        },
-      ],
-      "name": "PID",
-      "position": {
-        "end": {
-          "column": 7,
-          "line": 1,
-          "offset": 6,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "type": "segment",
-    },
-  ],
-  "position": {
-    "end": {
-      "column": 7,
-      "line": 1,
-      "offset": 6,
     },
     "start": {
       "column": 1,
@@ -3186,14 +3081,14 @@ exports[`parser > repetition Delimiter Handling > handles leading repetition del
               "children": [],
               "position": {
                 "end": {
-                  "column": 6,
+                  "column": 5,
                   "line": 1,
-                  "offset": 5,
+                  "offset": 4,
                 },
                 "start": {
-                  "column": 6,
+                  "column": 5,
                   "line": 1,
-                  "offset": 5,
+                  "offset": 4,
                 },
               },
               "type": "field-repetition",

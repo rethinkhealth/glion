@@ -74,10 +74,12 @@ const mockServer = {
     const actual = (await importOriginal()) as Record<string, unknown>;
     return {
       ...actual,
-      createServer: vi.fn((handler: (socket: MockSocket) => void) => {
-        connectionHandler = handler;
-        return mockServer as unknown as Server;
-      }),
+      createServer: vi.fn(
+        (_options: unknown, handler: (socket: MockSocket) => void) => {
+          connectionHandler = handler;
+          return mockServer as unknown as Server;
+        }
+      ),
     };
   }
 );
@@ -128,7 +130,7 @@ afterEach(() => {
 });
 
 describe("nodeAdapter", () => {
-  it("listens on plain TCP by default, and sets no timeout", () => {
+  it("listens on plain TCP with keep-alive after 60 s and Nagle's algorithm off, and sets no timeout", () => {
     vi.mocked(createTlsServer).mockClear();
     const accepted: boolean[] = [];
     const adapter = nodeAdapter();
@@ -137,13 +139,16 @@ describe("nodeAdapter", () => {
     const socket = createMockSocket();
     connectionHandler?.(socket);
 
-    expect(createServer).toHaveBeenLastCalledWith(expect.any(Function));
+    expect(createServer).toHaveBeenLastCalledWith(
+      { keepAlive: true, keepAliveInitialDelay: 60_000, noDelay: true },
+      expect.any(Function)
+    );
     expect(createTlsServer).not.toHaveBeenCalled();
     expect(accepted).toEqual([false]);
     expect(socket.setTimeout).not.toHaveBeenCalled();
   });
 
-  it("passes tls to tls.createServer() unchanged, and marks its sockets secure", () => {
+  it("passes tls to tls.createServer() with keep-alive and Nagle's algorithm off, and marks its sockets secure", () => {
     const tls = { ca: "ca", cert: "cert", key: "key", requestCert: true };
     const accepted: boolean[] = [];
     const adapter = nodeAdapter({ tls });
@@ -151,8 +156,29 @@ describe("nodeAdapter", () => {
 
     connectionHandler?.(createMockSocket());
 
-    expect(createTlsServer).toHaveBeenLastCalledWith(tls, expect.any(Function));
+    expect(createTlsServer).toHaveBeenLastCalledWith(
+      { keepAlive: true, keepAliveInitialDelay: 60_000, noDelay: true, ...tls },
+      expect.any(Function)
+    );
     expect(accepted).toEqual([true]);
+  });
+
+  it("lets tls replace a socket option", () => {
+    nodeAdapter({ tls: { cert: "cert", key: "key", noDelay: false } }).listen(
+      { port: 2575 },
+      noop
+    );
+
+    expect(createTlsServer).toHaveBeenLastCalledWith(
+      {
+        cert: "cert",
+        keepAlive: true,
+        keepAliveInitialDelay: 60_000,
+        key: "key",
+        noDelay: false,
+      },
+      expect.any(Function)
+    );
   });
 
   it("calls setTimeout when socketTimeout option is provided", () => {

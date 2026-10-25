@@ -72,7 +72,7 @@ Public package families:
 
 1. **Runtime** — `@glion/mllp`, `@glion/mllp-client`, `@glion/mllp-codec`, `@glion/ack`, `@glion/cli` (in `packages/glion/`)
 2. **Core** — `@glion/hl7v2`, `@glion/parser`, `@glion/ast`, `@glion/builder`, `@glion/to-hl7v2`, `@glion/jsonify`
-3. **Plugins** — `@glion/annotate-delimiters`, `@glion/annotate-profile-*`, `@glion/transform-profile-groups`; `@glion/decode-escapes` and `@glion/encode-escapes` serve trees parsed or written with escape handling turned off
+3. **Plugins** — `@glion/annotate-delimiters`, `@glion/annotate-profile-*`, `@glion/transform-profile-groups`, `@glion/transform-trim-trailing-fields`; `@glion/decode-escapes` and `@glion/encode-escapes` serve trees parsed or written with escape handling turned off
 4. **Linting** — `@glion/lint-*` plus `@glion/preset-lint-recommended`, `@glion/preset-lint-profile-recommended`, `@glion/preset-annotate-profile-recommended`
 5. **Utilities** — `@glion/utils`, `@glion/util-query`, `@glion/util-visit`, `@glion/util-semver`, `@glion/util-timestamp`
 6. **Data & config** — `@glion/profiles`, `@glion/config`
@@ -321,6 +321,8 @@ Run these in order after editing. Each is pass/fail; "looks done" is not done.
 
 Steps 1 and 2 correspond to the "Mutation testing" comment CI posts on the PR; the reviewer compares your report against it.
 
+A fast-check property follows the `glion-property-tests` skill: invoke it before writing, changing, or reviewing one. A property fails loudly on every run, never counts a caught error as a pass, and records a mutant it kills.
+
 - **Vitest**, base config in `tools/testing/src/vitest.config.ts` (`@glion/testing`).
 - Test files: `**/*.test.ts`, `**/*.test.tsx`.
 - Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier. The one exception is `tests/regressions/`, one file per bug, `<issue>-<symptom>.test.ts`, with the header CONTRIBUTING describes.
@@ -334,6 +336,10 @@ Steps 1 and 2 correspond to the "Mutation testing" comment CI posts on the PR; t
 ## Benchmarks
 
 All benchmarks live in the `benchmarks/` workspace — never add a `bench/` directory to a package. `benchmarks/README.md` is the contract: regression suites in `suites/` (CodSpeed-tracked; bench names and fixtures are API), deep sweeps in `lab/`, assertion-shaped checks go in the owning package's `tests/`, and every suite needs a canary in `canary.test.ts`.
+
+## Examples
+
+`examples/*` are not workspace members. Each depends on `@glion/*` at `latest`, so it runs against the published release, and `create-glion` copies it unchanged. An example stays self-contained: no `@glion/testing`, no `@glion/tsconfig`, nothing a scaffolded project could not install. A new directory in `examples/` is a new `pnpm create glion --example <name>`.
 
 ## Adding a new package
 
