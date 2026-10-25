@@ -1,0 +1,5 @@
+name = "hl7v2-spec"
+defaultTargets = ["Hl7v2"]
+
+[[lean_lib]]
+name = "Hl7v2"
