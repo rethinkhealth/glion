@@ -57,15 +57,16 @@ The server class. Built with a fluent chainable API:
 
 Start a Node.js or Bun TCP server that dispatches incoming MLLP frames through the `Mllp` instance.
 
-| Option          | Type                           | Description                                                                                                 |
-| --------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `port`          | `number`                       | TCP port to listen on.                                                                                      |
-| `hostname`      | `string`, optional             | Interface to bind. Defaults to all interfaces.                                                              |
-| `tls`           | `tls.TlsOptions`, optional     | Node's TLS server options, passed to `tls.createServer()` unchanged. Plain TCP without it. See [TLS](#tls). |
-| `socketTimeout` | `number`, optional             | Socket inactivity timeout in ms — an idle socket past it is destroyed. `0` (default) disables.              |
-| `onConnect`     | `ConnectionCallback`, optional | Called when a new TCP connection is accepted.                                                               |
-| `onDisconnect`  | `ConnectionCallback`, optional | Called when a connection closes — always fires, even if `onConnect` threw.                                  |
-| `onError`       | `ErrorCallback`, optional      | Called when a handler error goes unhandled or a lifecycle callback throws.                                  |
+| Option           | Type                           | Description                                                                                                                             |
+| ---------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `port`           | `number`                       | TCP port to listen on.                                                                                                                  |
+| `hostname`       | `string`, optional             | Interface to bind. Defaults to all interfaces.                                                                                          |
+| `tls`            | `tls.TlsOptions`, optional     | Node's TLS server options, passed to `tls.createServer()` unchanged. Plain TCP without it. See [TLS](#tls).                             |
+| `maxConnections` | `number`, optional             | Most connections open at once; one past it is closed before any message is read. Unlimited when unset. See [Connections](#connections). |
+| `socketTimeout`  | `number`, optional             | Socket inactivity timeout in ms — an idle socket past it is destroyed. `0` (default) disables.                                          |
+| `onConnect`      | `ConnectionCallback`, optional | Called when a new TCP connection is accepted.                                                                                           |
+| `onDisconnect`   | `ConnectionCallback`, optional | Called when a connection closes — always fires, even if `onConnect` threw.                                                              |
+| `onError`        | `ErrorCallback`, optional      | Called when a handler error goes unhandled or a lifecycle callback throws.                                                              |
 
 ### Wire framing
 
@@ -83,7 +84,7 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 | `ErrorHandler`     | Error handler `(err, ctx) => Response`.                                                                                                                                                     |
 | `RouteFilter`      | Filter function `(ctx) => boolean` used for routing.                                                                                                                                        |
 | `MiddlewareReturn` | Return type of middleware functions.                                                                                                                                                        |
-| `ConnectionInfo`   | Connection metadata (remote/local address, TLS flag).                                                                                                                                       |
+| `ConnectionInfo`   | Connection metadata (ID, remote/local address, TLS flag, per-connection `state`).                                                                                                           |
 | `RoutePattern`     | Parsed route pattern.                                                                                                                                                                       |
 
 ### Errors
@@ -142,21 +143,21 @@ Available in every middleware and handler. The pipeline is lazy: only the parse 
 
 ### Sync properties
 
-| Property               | Description                                             |
-| ---------------------- | ------------------------------------------------------- |
-| `ctx.req.raw`          | Original HL7v2 message string.                          |
-| `ctx.req.bytes`        | Raw bytes from the MLLP frame.                          |
-| `ctx.connection`       | `{ remoteAddress, remotePort, localPort, secure }`.     |
-| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                 |
-| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                 |
-| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                             |
-| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                |
-| `ctx.controlId`        | MSH-10 message control ID.                              |
-| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire. |
-| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).          |
-| `ctx.set(key, value)`  | Store a variable.                                       |
-| `ctx.get(key)`         | Retrieve a variable.                                    |
-| `ctx.var`              | Read-only snapshot of all variables.                    |
+| Property               | Description                                                    |
+| ---------------------- | -------------------------------------------------------------- |
+| `ctx.req.raw`          | Original HL7v2 message string.                                 |
+| `ctx.req.bytes`        | Raw bytes from the MLLP frame.                                 |
+| `ctx.connection`       | `{ id, remoteAddress, remotePort, localPort, secure, state }`. |
+| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                        |
+| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                        |
+| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                    |
+| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                       |
+| `ctx.controlId`        | MSH-10 message control ID.                                     |
+| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire.        |
+| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).                 |
+| `ctx.set(key, value)`  | Store a variable.                                              |
+| `ctx.get(key)`         | Retrieve a variable.                                           |
+| `ctx.var`              | Read-only snapshot of all variables.                           |
 
 ### Async methods
 
@@ -245,6 +246,14 @@ app.onError(async (err, ctx) => {
 ```
 
 Without an error handler, errors are absorbed and no response is sent. The sending system will time out and retry per standard MLLP behaviour. See the [design notes](#design-notes) below for the rationale.
+
+## Connections
+
+The server accepts any number of connections at once and handles them concurrently. On each connection, messages reach the app one at a time, in the order they arrived, and the server writes the reply before it reads the next message. Messages on different connections are not ordered: a sending system that needs its messages processed in order sends them over one connection.
+
+`connection.state` belongs to one connection and is discarded when it closes. `onConnect` and `onDisconnect` fire once per connection.
+
+`maxConnections` limits how many connections are open at once. A connection past the limit is closed as soon as it is accepted, before any message is read, and an open connection is never closed to make room. A connection whose remote system is gone holds its place until keep-alive ends it. With keep-alive turned off in `tls` and no `socketTimeout`, such connections can fill the limit and lock out a sending system that reconnects.
 
 ## Socket options
 
