@@ -72,7 +72,7 @@ Hono lets the latest error replace the response. That is wrong for MLLP. When a 
 
 ### 7. The acknowledgment answers the MSH as the app's parser read it
 
-`acknowledge(origin, options?)` builds an MSH and an MSA. It swaps MSH-3/4 with MSH-5/6, copying each field whole, writes MSH-9 as `ACK^<trigger>^ACK` (`ACK^<trigger>` before v2.3.1), echoes MSH-11 and MSH-12.1, and echoes MSH-10 in MSA-2. `ctx.ack()` passes it the processor's own tree, so an app with its own `preprocess` is acknowledged correctly. `ctx.tree()` copies the MSH before the transforms run, so they never change the acknowledgment. A payload with no tree has its first segment parsed alone.
+`acknowledge(origin, options?)` builds an MSH and an MSA. It swaps MSH-3/4 with MSH-5/6, copying each field whole, writes MSH-9 as `ACK^<trigger>^ACK` (`ACK^<trigger>` before v2.3.1), echoes MSH-11 and MSH-12.1, and echoes MSH-10 in MSA-2. `ctx.ack()` passes it a copy of the MSH the app's parser read, taken when the payload is read, values only. An app with its own `preprocess` is therefore acknowledged correctly, and neither the transforms nor a handler that changes the tree changes the acknowledgment. A payload that did not decode or parse is read by `@glion/parser` instead, from its text with U+FFFD for each byte that is not UTF-8, only to answer it.
 
 ### 8. The acknowledgment is the same in every version, for now
 
