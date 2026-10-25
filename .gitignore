@@ -57,3 +57,6 @@ temp
 # Stryker mutation testing
 reports
 .stryker-tmp
+
+# Research notes from agent research runs
+research_notes/
