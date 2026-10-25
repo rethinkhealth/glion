@@ -137,6 +137,34 @@ describe("glion start e2e", () => {
     }
   }, 10_000);
 
+  it("closes a connection past maxConnections and keeps the open one", async () => {
+    currentProc = execa(process.execPath, [binPath, "start"], {
+      cwd: resolve(fixturesDir, "max-connections"),
+      reject: false,
+    });
+    const ready = await readUntilEvent(currentProc, (e) => e.t === "ready");
+    if (ready.t !== "ready") {
+      throw new Error("expected ready event");
+    }
+
+    // The first connection takes the only slot; the second is opened once
+    // the server reports the first.
+    const opened = readUntilEvent(currentProc, (e) => e.t === "conn.open");
+    const open = net.connect(ready.port, "127.0.0.1");
+    try {
+      await opened;
+      const refused = net.connect(ready.port, "127.0.0.1");
+      const closed = Promise.withResolvers<boolean>();
+      refused.on("error", () => {});
+      refused.once("close", closed.resolve);
+      await closed.promise;
+
+      expect(open.destroyed).toBe(false);
+    } finally {
+      open.destroy();
+    }
+  });
+
   it("emits a fatal event with kind entry-load-failed when entry path is wrong", async () => {
     currentProc = execa(process.execPath, [binPath, "start"], {
       cwd: resolve(fixturesDir, "bad-entry"),

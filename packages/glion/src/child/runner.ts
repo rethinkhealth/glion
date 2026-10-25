@@ -157,6 +157,7 @@ async function main(): Promise<void> {
   // parent to display in the TUI or log as JSON lines.
   const server: Server = serve(app, {
     hostname: manifest.hostname,
+    maxConnections: manifest.maxConnections,
     onConnect: (conn: ConnectionInfo) => {
       emit({
         id: conn.id,

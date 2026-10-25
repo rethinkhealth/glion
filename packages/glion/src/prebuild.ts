@@ -91,6 +91,7 @@ export async function prepareChild(
     compiledEntry,
     entry: config.entry,
     hostname,
+    maxConnections: config.maxConnections,
     port: config.port,
     socketTimeout: config.socketTimeout,
     tls: config.tls,

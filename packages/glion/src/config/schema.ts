@@ -145,6 +145,7 @@ export function makeGlionConfigSchema(ctx: SchemaContext) {
             maxFiles: raw.maxFiles ?? DEFAULT_MAX_LOG_FILES,
           };
         }),
+      maxConnections: z.number().int().positive().optional(),
       // port 0 is explicitly allowed and means "OS-assigned ephemeral port".
       port: z.number().int().min(0).max(MAX_PORT).default(DEFAULT_PORT),
       socketTimeout: z.number().int().nonnegative().optional(),
