@@ -3,6 +3,7 @@ import { parseHL7v2 } from "@glion/hl7v2";
 
 import { compose } from "../../src/server/compose";
 import { createContext } from "../../src/server/context";
+import { readMessage } from "../../src/server/message";
 import type { Context, Middleware } from "../../src/server/types";
 
 const SAMPLE_MESSAGE = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|CTL1|P|2.5.1";
@@ -17,7 +18,7 @@ function makeCtx(): Context {
       secure: false,
       state: new Map(),
     },
-    payload: new TextEncoder().encode(SAMPLE_MESSAGE),
+    message: readMessage(new TextEncoder().encode(SAMPLE_MESSAGE), parseHL7v2),
     processor: parseHL7v2,
   });
 }

@@ -91,8 +91,8 @@ export interface Context {
 
   /**
    * The acknowledgment of this message as a reply: `acknowledge()` of its
-   * MSH as the processor parsed it, serialized. The transforms `tree()` runs
-   * do not change it. MSA-1 defaults to `AA`.
+   * MSH as the processor parsed it, serialized. Changes the transforms or a
+   * handler make to the tree do not change it. MSA-1 defaults to `AA`.
    */
   ack(options?: AcknowledgeOptions): Response;
   /**

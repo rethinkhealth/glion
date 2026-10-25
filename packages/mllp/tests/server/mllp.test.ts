@@ -887,6 +887,19 @@ describe("acknowledgment defaults", () => {
     }
   });
 
+  it("sends no default AA to a payload that does not start with an MSH, even when a route matches it", async () => {
+    const app = createApp();
+    app.on("*", () => {
+      // Returns nothing: the default reply.
+    });
+
+    for (const payload of ["", "PID|1||12345"]) {
+      expect(
+        await app.handle(toBytes(payload), MOCK_CONNECTION)
+      ).toBeUndefined();
+    }
+  });
+
   it("replies with the code of an AckException made by another copy of @glion/ack", async () => {
     const app = createApp();
     const foreign = Object.assign(new Error("Rejected"), {

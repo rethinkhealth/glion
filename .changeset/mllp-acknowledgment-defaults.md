@@ -14,6 +14,6 @@ Breaking: the server replies with the acknowledgment of every message, the way a
 - Answer a `next()` called a second time as a middleware throw, with `MllpServerError` `NEXT_CALLED_TWICE`, which the second call also throws.
 - Remove `app.onError()` and the `ErrorHandler` type; a middleware that reads `ctx.error` after `next()` replaces it.
 - Decode the payload as UTF-8 in `app.handle(payload, connection)`, which takes the MLLP frame payload and drops its leading text argument. A payload that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`) or that the parser throws on runs only the global middleware and is answered `AE`, echoing the sender's MSH-10, whatever they return or write; its routing fields are read from its MSH. A route filter that throws runs only the global middleware and is answered as a throw. Before, a payload that was not UTF-8 got no reply.
-- Build every acknowledgment from the MSH as the app's parser read it: the transforms `ctx.tree()` runs do not change it.
+- Build every acknowledgment from the MSH as the app's parser read it, copied when the message arrives: neither the transforms `ctx.tree()` runs nor a handler that changes the tree changes it.
 - Make `ctx.error` and the routing fields (`ctx.messageType`, `ctx.triggerEvent`, `ctx.messageStructure`, `ctx.version`, `ctx.controlId`) read-only.
 - `serve({ onError })` no longer fires for an error a message raised, and no longer receives `messageInfo`. Remove `getMessageInfo()` and the `MessageInfo` type.

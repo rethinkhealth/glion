@@ -1,21 +1,12 @@
-import type { Root } from "@glion/ast";
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 import { hl7v2Parser } from "@glion/parser";
+import { value } from "@glion/util-query";
 import { unified } from "unified";
-import type { Plugin } from "unified";
 
 import { MllpServerError } from "../../src/errors";
 import { createContext } from "../../src/server/context";
-
-/** A unified parser plugin whose parse step throws `error`. */
-function throwingParser(error: Error): Plugin<[], string, Root> {
-  return function parser() {
-    this.parser = () => {
-      throw error;
-    };
-  };
-}
+import { readMessage } from "../../src/server/message";
 
 const SAMPLE_MESSAGE = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -35,7 +26,7 @@ function makeCtx(payload = SAMPLE_BYTES) {
       secure: false,
       state: new Map(),
     },
-    payload,
+    message: readMessage(payload, parseHL7v2),
     processor: parseHL7v2,
   });
 }
@@ -51,32 +42,22 @@ describe("createContext", () => {
     expect(makeCtx().error).toBeUndefined();
   });
 
-  it("sets INCOMPATIBLE_CHARSET, an empty req.raw and an empty tree for a payload that is not UTF-8", () => {
+  it("starts ctx.error as the error the message was read with", () => {
     const ctx = makeCtx(new Uint8Array([0x4d, 0x53, 0x48, 0xff]));
     expect(ctx.error).toBeInstanceOf(MllpServerError);
     expect((ctx.error as MllpServerError).code).toBe("INCOMPATIBLE_CHARSET");
-    expect(ctx.req.raw).toBe("");
-    expect(ctx.ast).toEqual({ children: [], type: "root" });
-    expect(ctx.controlId).toBe("");
   });
 
-  it("sets the parser's error and an empty tree when the parser throws", () => {
-    const thrown = new Error("parser failed");
-    const ctx = createContext({
-      connection: {
-        id: 1,
-        localPort: 2575,
-        remoteAddress: "192.168.1.100",
-        remotePort: 54_321,
-        secure: false,
-        state: new Map(),
-      },
-      payload: SAMPLE_BYTES,
-      processor: unified().use(throwingParser(thrown)),
-    });
-    expect(ctx.error).toBe(thrown);
-    expect(ctx.req.raw).toBe(SAMPLE_MESSAGE);
-    expect(ctx.ast).toEqual({ children: [], type: "root" });
+  it("acknowledges MSH-10 as received when a handler changes ctx.ast", () => {
+    const ctx = makeCtx();
+    const controlId = value(ctx.ast, "MSH.10")?.node;
+    if (controlId?.type !== "subcomponent") {
+      throw new Error("The sample message has no MSH-10.");
+    }
+    controlId.value = "CHANGED";
+
+    expect(ctx.controlId).toBe("MSG001");
+    expect(ctx.ack().raw.split("\r")[1]).toBe("MSA|AA|MSG001");
   });
 
   it("exposes connection metadata", () => {
@@ -157,7 +138,7 @@ describe("createContext", () => {
           secure: false,
           state: new Map(),
         },
-        payload: SAMPLE_BYTES,
+        message: readMessage(SAMPLE_BYTES, parseOnly),
         processor: parseOnly,
       });
 
@@ -189,7 +170,7 @@ describe("createContext", () => {
           secure: false,
           state: new Map(),
         },
-        payload: SAMPLE_BYTES,
+        message: readMessage(SAMPLE_BYTES, parseHL7v2),
         processor: parseHL7v2,
       });
 

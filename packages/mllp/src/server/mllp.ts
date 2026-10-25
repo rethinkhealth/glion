@@ -5,15 +5,16 @@ import {
   isAckException,
   Severity,
 } from "@glion/ack";
+import type { AckNakCode } from "@glion/ack";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { compose, isResponse } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
+import { readMessage } from "./message";
 import { Router } from "./router";
 import type {
   ConnectionInfo,
-  Context,
   Handler,
   Hl7v2Processor,
   Middleware,
@@ -164,17 +165,26 @@ export class Mllp {
       );
     }
 
-    // Context creation is sync — only decode() and parse() run here.
-    // Transform and compile are deferred to ctx.tree() / ctx.result().
+    // Reading is sync — only decode() and parse() run here. Transform and
+    // compile are deferred to ctx.tree() / ctx.result().
+    const message = readMessage(payload, this.#processor);
     const ctx = createContext({
       connection,
-      payload,
+      message,
       processor: this.#processor,
     });
 
+    // The server answers neither an ACK, so two receivers never acknowledge
+    // each other's acknowledgments, nor a payload with no MSH, which has no
+    // MSH-10 to echo.
+    const answerable =
+      message.header.children.length > 0 && ctx.messageType !== "ACK";
+    const nakOf = (error: Error): Response | undefined =>
+      answerable ? ctx.ack({ code: nakCode(error) }) : undefined;
+
     // A payload that did not decode or parse: its content was never read.
-    const received = ctx.error;
-    let nak = received && acknowledgeError(ctx, received);
+    const received = message.error;
+    let nak = received && nakOf(received);
     let terminal: Middleware = noReply;
     let middlewares: Middleware[] = [];
     if (received) {
@@ -188,7 +198,7 @@ export class Mllp {
       try {
         const matched = this.#router.match(ctx);
         middlewares = matched.middlewares;
-        terminal = () => route(ctx, matched.handler);
+        terminal = () => route(ctx, matched.handler, answerable);
       } catch (error) {
         middlewares = this.#router.globalMiddleware();
         terminal = () => {
@@ -205,7 +215,7 @@ export class Mllp {
         return ctx.res ?? nak;
       }
       answered = true;
-      nak = acknowledgeError(ctx, error);
+      nak = nakOf(error);
       return nak;
     };
 
@@ -236,13 +246,15 @@ function keepingReply(
 /**
  * Run the route handler, or reject a message no route matches. A handler
  * that returns no `Response` and leaves `ctx.res` as it was replies `AA`.
+ * Neither default applies to a message that is not `answerable`.
  */
 async function route(
   ctx: MessageContext,
-  handler: Handler | undefined
+  handler: Handler | undefined,
+  answerable: boolean
 ): Promise<Response | undefined> {
   if (!handler) {
-    if (ctx.messageType === "ACK" || !ctx.hasHeader) {
+    if (!answerable) {
       return undefined;
     }
     throw new AckApplicationReject(
@@ -258,27 +270,13 @@ async function route(
   if (isResponse(result)) {
     return result;
   }
-  return ctx.res === before ? accept(ctx) : ctx.res;
+  if (ctx.res !== before) {
+    return ctx.res;
+  }
+  return answerable ? ctx.ack() : undefined;
 }
 
-/** `AA`, or no reply to an `ACK`. */
-function accept(ctx: Context): Response | undefined {
-  return ctx.messageType === "ACK" ? undefined : ctx.ack();
-}
-
-/**
- * The NAK `error` describes, or no reply to an `ACK` or to a payload that
- * does not start with an MSH.
- */
-function acknowledgeError(
-  ctx: MessageContext,
-  error: Error
-): Response | undefined {
-  if (ctx.messageType === "ACK" || !ctx.hasHeader) {
-    return undefined;
-  }
-  if (isAckException(error)) {
-    return ctx.ack({ code: error.code });
-  }
-  return ctx.ack({ code: AckCode.ApplicationError });
+/** MSA-1 of the NAK `error` gets: an `AckException`'s code, else `AE`. */
+function nakCode(error: Error): AckNakCode {
+  return isAckException(error) ? error.code : AckCode.ApplicationError;
 }

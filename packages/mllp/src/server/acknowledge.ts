@@ -1,6 +1,6 @@
 import { AckCode } from "@glion/ack";
 import type { Delimiters, Field, Root } from "@glion/ast";
-import { c, f, m, r, s } from "@glion/builder";
+import { c, f, m, s } from "@glion/builder";
 import { select, value } from "@glion/util-query";
 import { gte, valid } from "@glion/util-semver";
 import { formatDTM, nowDTM, Precision } from "@glion/util-timestamp";
@@ -105,19 +105,25 @@ function field(origin: Root, path: string): string {
   return value(origin, path)?.value ?? "";
 }
 
-/** The field at `path`, rebuilt from its values: no `data`, no `position`. */
+/** The field at `path`, copied with {@link copyField}, or an empty field. */
 function copy(origin: Root, path: string): Field {
   const node = select(origin, path)?.node as Field | undefined;
-  if (!node) {
-    return f("");
-  }
-  return f(
-    ...node.children.map((repetition) =>
-      r(
-        ...repetition.children.map((component) =>
-          c(...component.children.map((subcomponent) => subcomponent.value))
-        )
-      )
-    )
-  );
+  return node ? copyField(node) : f("");
+}
+
+/** `node` rebuilt from its values: no `data`, no `position`. */
+export function copyField(node: Field): Field {
+  return {
+    children: node.children.map((repetition) => ({
+      children: repetition.children.map((component) => ({
+        children: component.children.map((subcomponent) => ({
+          type: "subcomponent",
+          value: subcomponent.value,
+        })),
+        type: "component",
+      })),
+      type: "field-repetition",
+    })),
+    type: "field",
+  };
 }

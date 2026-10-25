@@ -2,6 +2,7 @@
 import { parseHL7v2 } from "@glion/hl7v2";
 
 import { createContext } from "../../src/server/context";
+import { readMessage } from "../../src/server/message";
 import { Router } from "../../src/server/router";
 import type { Context, Middleware } from "../../src/server/types";
 
@@ -19,7 +20,7 @@ const CONNECTION = {
 function makeCtx(raw: string): Context {
   return createContext({
     connection: CONNECTION,
-    payload: new TextEncoder().encode(raw),
+    message: readMessage(new TextEncoder().encode(raw), parseHL7v2),
     processor: parseHL7v2,
   });
 }
