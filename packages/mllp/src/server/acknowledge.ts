@@ -37,6 +37,8 @@ export function acknowledge(
   const { code = AckCode.ApplicationAccept, sending } = options;
   const triggerEvent = field(origin, "MSH.9.2");
   const version = field(origin, "MSH.12.1");
+  // TODO(#1113): read the time, with its offset, from nowDTM().
+  // https://github.com/rethinkhealth/glion/issues/1113
   const date = new Date();
   const timestamp = formatDTM({
     day: date.getDate(),
@@ -72,9 +74,11 @@ export function acknowledge(
 
 /**
  * MSH-9 of the acknowledgment. MSH-9.3 exists from v2.3.1; a blank or
- * unreadable version gets it too. A temporary version check, until a profile
- * transform conforms the acknowledgment to MSH-12 (#1112, #1084).
+ * unreadable version gets it too.
  */
+// TODO(#1112): remove this version check once a profile transform conforms
+// the acknowledgment to MSH-12 (#1084).
+// https://github.com/rethinkhealth/glion/issues/1112
 function messageType(triggerEvent: string, version: string): Field {
   if (!valid(version) || gte(version, "2.3.1")) {
     return f(c("ACK"), c(triggerEvent), c("ACK"));
