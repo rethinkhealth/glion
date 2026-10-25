@@ -1,11 +1,14 @@
 // oxlint-disable require-await
 // oxlint-disable no-empty-function
 // oxlint-disable promise/avoid-new
+import { once } from "node:events";
 import net from "node:net";
+import tls from "node:tls";
 
 import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
+import { generate } from "selfsigned";
 
 import { serve } from "../../src/node/serve";
 import type { Server } from "../../src/node/serve";
@@ -160,6 +163,9 @@ function waitForReady(port: number): Promise<void> {
     });
   });
 }
+
+/** X.509 GeneralName tag for a DNS name (RFC 5280 §4.2.1.6). */
+const DNS_NAME = 2;
 
 function createApp() {
   return new Mllp().parser(parseHL7v2);
@@ -693,6 +699,85 @@ describe("serve() integration", () => {
 
       const resp = await sendMessage(server.port, SAMPLE_ADT);
       expect(resp).toContain("MSA|AA|MSG001");
+    });
+  });
+
+  describe("maxConnections", () => {
+    const ACK = "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|MSG001";
+
+    it("closes a connection past the limit before reading from it, and keeps the open one", async () => {
+      const app = createApp().on("ADT^A01", () => ({ raw: ACK }));
+      const connected: number[] = [];
+      server = serve(app, {
+        maxConnections: 1,
+        onConnect: ({ id }) => {
+          connected.push(id);
+        },
+        port: 0,
+      });
+      await server.listening;
+
+      // The first connection takes the only slot.
+      const open = createPersistentClient(server.port);
+      expect(await open.send(SAMPLE_ADT)).toBe(ACK);
+
+      // The second is accepted by the OS, then closed by the server before
+      // any byte is read from it or written to it. Its message is still
+      // unread in the server's receive buffer, so the close arrives as a
+      // reset.
+      const refused = net.connect({ host: "127.0.0.1", port: server.port });
+      const received: Buffer[] = [];
+      refused.on("data", (chunk: Buffer) => received.push(chunk));
+      refused.on("error", () => {});
+      refused.write(frame(encodeBytes(SAMPLE_ADT)));
+      // `once()` would reject on the reset; the close follows it either way.
+      await new Promise((resolve) => {
+        refused.once("close", resolve);
+      });
+
+      expect(received).toEqual([]);
+      expect(connected).toHaveLength(1);
+      expect(await open.send(SAMPLE_ADT)).toBe(ACK);
+      open.destroy();
+    });
+
+    it("closes a TLS connection past the limit before its handshake", async () => {
+      const pem = await generate([{ name: "commonName", value: "localhost" }], {
+        algorithm: "sha256",
+        extensions: [
+          {
+            altNames: [{ type: DNS_NAME, value: "localhost" }],
+            name: "subjectAltName",
+          },
+        ],
+      });
+      const app = createApp().on("ADT^A01", () => ({ raw: ACK }));
+      server = serve(app, {
+        maxConnections: 1,
+        port: 0,
+        tls: { cert: pem.cert, key: pem.private },
+      });
+      await server.listening;
+      const dial = () =>
+        tls.connect({
+          ca: pem.cert,
+          host: "127.0.0.1",
+          port: server?.port,
+          servername: "localhost",
+        });
+
+      const open = dial();
+      await once(open, "secureConnect");
+      open.write(frame(encodeBytes(SAMPLE_ADT)));
+      await once(open, "data");
+
+      const refused = dial();
+      await expect(once(refused, "secureConnect")).rejects.toThrow();
+
+      open.write(frame(encodeBytes(SAMPLE_ADT)));
+      const [reply] = (await once(open, "data")) as [Buffer];
+      expect(reply).toEqual(Buffer.from(frame(encodeBytes(ACK))));
+      open.destroy();
     });
   });
 

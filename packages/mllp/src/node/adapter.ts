@@ -34,6 +34,9 @@ import type {
  * @internal
  */
 export interface NodeAdapterOptions {
+  /** Set as the listener's `server.maxConnections`. */
+  maxConnections?: number;
+
   /**
    * Socket inactivity timeout in milliseconds.
    *
@@ -168,7 +171,7 @@ function wrapNodeSocket(socket: Socket, secure: boolean): AdapterSocket {
  * @internal
  */
 export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
-  const { socketTimeout = 0, tls } = options ?? {};
+  const { maxConnections, socketTimeout = 0, tls } = options ?? {};
 
   /**
    * Apply the idle timeout to an accepted connection: if `socketTimeout > 0`,
@@ -194,6 +197,9 @@ export function nodeAdapter(options?: NodeAdapterOptions): TcpAdapter {
       const server: Server = secure
         ? createTlsServer({ ...SOCKET_OPTIONS, ...tls }, onConnection)
         : createServer(SOCKET_OPTIONS, onConnection);
+      if (maxConnections !== undefined) {
+        server.maxConnections = maxConnections;
+      }
 
       let resolveListening!: (value: true) => void;
       let rejectListening!: (reason: unknown) => void;

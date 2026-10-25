@@ -67,6 +67,14 @@ export interface ServeOptions {
   hostname?: string;
 
   /**
+   * The most connections the server holds open at once, set as Node's
+   * `server.maxConnections`. A connection past it is closed as soon as it
+   * is accepted, before any message is read; an open connection is never
+   * closed to make room. Unlimited when unset.
+   */
+  maxConnections?: number;
+
+  /**
    * Called when a new TCP connection is accepted. Receives the connection
    * metadata including the unique connection ID and mutable state map.
    *
@@ -158,12 +166,14 @@ export interface Server {
  *   ```
  *
  * @param app - The {@link Mllp} application that will handle each message.
- * @param options - Server configuration: port, TLS, timeouts, and callbacks.
+ * @param options - Server configuration: port, TLS, limits, timeouts, and
+ *   callbacks.
  * @returns A {@link Server} handle that exposes the bound port and a `close()`
  *   method for graceful shutdown.
  */
 export function serve(app: Mllp, options: ServeOptions): Server {
   const adapter = nodeAdapter({
+    maxConnections: options.maxConnections,
     socketTimeout: options.socketTimeout,
     tls: options.tls,
   });
