@@ -140,9 +140,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     // the server's own MllpServerError(INCOMPATIBLE_CHARSET) — not the
     // codec's CharsetError, which is kept on `cause` for diagnostics.
     expect(handlerRan).toBe(false);
-    expect(response?.toString("utf8")).toContain(
-      "\rMSA|AE|MSG001|Application internal error"
-    );
+    expect(response?.toString("utf8")).toContain("\rMSA|AE|MSG001");
     expect(errors.length).toBeGreaterThan(0);
     const [error] = errors;
     expect(error).toBeInstanceOf(MllpServerError);

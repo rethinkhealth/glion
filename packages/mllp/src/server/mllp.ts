@@ -21,12 +21,6 @@ import type {
   RouteFilter,
 } from "./types";
 
-/** MSA-3 of the reply to an error that is not an `AckException`: Table 0357 code 207. */
-const APPLICATION_INTERNAL_ERROR = "Application internal error";
-
-/** MSA-3 of the reply to a message no route matches: Table 0357 code 200. */
-const UNSUPPORTED_MESSAGE_TYPE = "Unsupported message type";
-
 /**
  * MLLP application for HL7v2 messaging.
  *
@@ -136,9 +130,12 @@ export class Mllp {
    *
    * - It returns a response, or sets `ctx.res`: that response.
    * - It returns nothing, or a value that is not a response: `AA`.
-   * - It throws an `AckException`: its `code` in MSA-1 and its `text` in MSA-3.
-   * - It throws anything else: `AE` with MSA-3 `Application internal error`.
-   * - No route matches: `AR` with MSA-3 `Unsupported message type`.
+   * - It throws an `AckException`: its `code` in MSA-1.
+   * - It throws anything else: `AE`.
+   * - No route matches: `AR`.
+   *
+   * No reply carries MSA-3: an error's `message` and an `AckException`'s
+   * `text` are never sent.
    *
    * A middleware throw is answered the same way, unless the route handler or
    * a middleware has returned a reply; then that reply stands. A reply a
@@ -253,7 +250,6 @@ async function route(
       {
         errorCode: Hl7ErrorCode.UnsupportedMessageType,
         severity: Severity.Error,
-        text: UNSUPPORTED_MESSAGE_TYPE,
       }
     );
   }
@@ -282,10 +278,7 @@ function acknowledgeError(
     return undefined;
   }
   if (isAckException(error)) {
-    return ctx.ack({ code: error.code, text: error.text });
+    return ctx.ack({ code: error.code });
   }
-  return ctx.ack({
-    code: AckCode.ApplicationError,
-    text: APPLICATION_INTERNAL_ERROR,
-  });
+  return ctx.ack({ code: AckCode.ApplicationError });
 }

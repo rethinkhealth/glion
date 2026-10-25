@@ -32,7 +32,7 @@ The app:
 - Registers routes for `ADT^A01`, `ORM^O01`, and `ORU^R01`. Every other message type is rejected with an `AR` NAK, the server's default for a message no route matches.
 - Replies `AA` from `ADT^A01`, whose handler returns nothing, and `CA` from `ORM^O01` with `ctx.ack({ code: AckCode.CommitAccept })`.
 - Adds a small logging middleware to show the onion model: log on entry, `await next()`, then log `ctx.error` or whether a reply was sent.
-- Throws `AckApplicationError` from the `ORU^R01` route to demonstrate a typed NAK end-to-end: its code is MSA-1 and its `text` MSA-3.
+- Throws `AckApplicationError` from the `ORU^R01` route to demonstrate a typed NAK end-to-end: its code is MSA-1.
 
 ## Send a test message
 

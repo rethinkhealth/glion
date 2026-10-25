@@ -93,7 +93,7 @@ HL7v2 distinguishes two levels of acknowledgment — **application** and **commi
 | `AckCommitError`       | CE    | Commit error (enhanced mode). Persistence or downstream failure.       |
 | `AckCommitReject`      | CR    | Commit reject (enhanced mode). Refused at the commit layer.            |
 
-When a server renders the response, the exception's `text` becomes MSA-3; its `message` is never sent. `errorCode` and `severity` stay data: the application renders them in whatever ERR shape its HL7v2 version requires.
+An exception's `message` is never sent to the trading partner. `text`, `errorCode` and `severity` stay data: the application renders them in whatever MSA-3 and ERR shape its HL7v2 version requires.
 
 ## Part of Glion
 

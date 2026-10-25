@@ -44,12 +44,11 @@ app.on("ORM^O01", (ctx) => {
   return ctx.ack({ code: AckCode.CommitAccept });
 });
 
-// Throwing an AckException replies with its code, and its text in MSA-3.
+// Throwing an AckException replies with its code in MSA-1.
 app.on("ORU^R01", () => {
   throw new AckApplicationError("Patient not available", {
     errorCode: Hl7ErrorCode.UnsupportedMessageType,
     severity: Severity.Error,
-    text: "Patient not available",
   });
 });
 

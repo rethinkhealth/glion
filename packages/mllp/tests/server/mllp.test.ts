@@ -480,7 +480,7 @@ describe("acknowledgment defaults", () => {
     expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
   });
 
-  it("replies with the code and text of a thrown AckException, never its message", async () => {
+  it("replies with the code of a thrown AckException, never its message or text", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
     const thrown = new AckApplicationError("Lookup of MRN 12345 failed", {
@@ -493,24 +493,13 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe(
-      "MSA|AE|MSG001|Patient not on file"
-    );
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(response?.raw).not.toContain("12345");
+    expect(response?.raw).not.toContain("Patient not on file");
     expect(seen.error).toBe(thrown);
   });
 
-  it("omits MSA-3 for a thrown AckException without text", async () => {
-    const app = createApp();
-    app.on("ADT^A01", () => {
-      throw new AckApplicationReject("Rejected", {});
-    });
-
-    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
-  });
-
-  it("replies AE with MSA-3 Application internal error to any other throw, never its message", async () => {
+  it("replies AE to any other throw, never its message", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
     const thrown = new Error("connect ECONNREFUSED 10.0.0.5:5432");
@@ -520,13 +509,11 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe(
-      "MSA|AE|MSG001|Application internal error"
-    );
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(response?.raw).not.toContain("ECONNREFUSED");
     expect(seen).toEqual({
       error: thrown,
-      msa: "MSA|AE|MSG001|Application internal error",
+      msa: "MSA|AE|MSG001",
     });
   });
 
@@ -541,9 +528,7 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe(
-      "MSA|AE|MSG001|Application internal error"
-    );
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(ran).toEqual([]);
   });
 
@@ -552,10 +537,7 @@ describe("acknowledgment defaults", () => {
     app.use(async (ctx, next) => {
       await next();
       if (ctx.error) {
-        ctx.res = ctx.ack({
-          code: AckCode.ApplicationError,
-          text: "Try again later",
-        });
+        ctx.res = ctx.ack({ code: AckCode.ApplicationReject });
       }
     });
     app.on("ADT^A01", () => {
@@ -563,7 +545,7 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001|Try again later");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
   });
 
   it("keeps the reply when a middleware throws after the route handler replied", async () => {
@@ -605,7 +587,7 @@ describe("acknowledgment defaults", () => {
   it("answers the first error and records the second in ctx.error when a middleware throws it", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
-    const first = new AckApplicationReject("Rejected", { text: "Bad order" });
+    const first = new AckApplicationReject("Rejected", {});
     const second = new Error("audit write failed");
     app.use(observe(seen));
     app.use(async (_ctx, next) => {
@@ -617,7 +599,7 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001|Bad order");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
     expect(seen.error).toBe(second);
   });
 
@@ -645,18 +627,18 @@ describe("acknowledgment defaults", () => {
     const app = createApp();
     const ran: string[] = [];
     app.use(async (ctx, next) => {
-      ctx.res = ctx.ack({ text: "Received" });
+      ctx.res = ctx.ack();
       await next();
     });
     app.use(() => {
-      throw new AckApplicationReject("Rejected", { text: "Unknown sender" });
+      throw new AckApplicationReject("Rejected", {});
     });
     app.on("ADT^A01", () => {
       ran.push("handler");
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001|Unknown sender");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
     expect(ran).toEqual([]);
   });
 
@@ -672,16 +654,14 @@ describe("acknowledgment defaults", () => {
     ).toBeUndefined();
   });
 
-  it("replies AR with MSA-3 Unsupported message type when no route matches", async () => {
+  it("replies AR when no route matches", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
     app.use(observe(seen));
     app.on("ORU^R01", () => RESPONSE_OK);
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe(
-      "MSA|AR|MSG001|Unsupported message type"
-    );
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
     expect(seen.error).toBeInstanceOf(AckApplicationReject);
     expect((seen.error as AckApplicationReject).errorCode).toBe(
       Hl7ErrorCode.UnsupportedMessageType
@@ -745,9 +725,7 @@ describe("acknowledgment defaults", () => {
     );
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe(
-      "MSA|AE|MSG001|Application internal error"
-    );
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(seen.error).toBe(thrown);
     expect(ran).toEqual([]);
   });
@@ -771,9 +749,7 @@ describe("acknowledgment defaults", () => {
     );
 
     const response = await app.handle(latin1, MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe(
-      "MSA|AE|MSG001|Application internal error"
-    );
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(seen.error).toBeInstanceOf(MllpServerError);
     expect((seen.error as MllpServerError).code).toBe("INCOMPATIBLE_CHARSET");
     expect(ran).toEqual([]);
@@ -786,27 +762,21 @@ describe("acknowledgment defaults", () => {
     app.use((ctx) => ctx.ack());
 
     const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe(
-      "MSA|AE|MSG001|Application internal error"
-    );
-    expect(seen.msa).toBe("MSA|AE|MSG001|Application internal error");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect(seen.msa).toBe("MSA|AE|MSG001");
   });
 
   it("replies AE to a payload that is not UTF-8 when a middleware throws for it", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
-    const thrown = new AckApplicationReject("Sender not allowed", {
-      text: "Sender not allowed",
-    });
+    const thrown = new AckApplicationReject("Sender not allowed", {});
     app.use(observe(seen));
     app.use(() => {
       throw thrown;
     });
 
     const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe(
-      "MSA|AE|MSG001|Application internal error"
-    );
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(seen.error).toBe(thrown);
   });
 
@@ -922,14 +892,13 @@ describe("acknowledgment defaults", () => {
     const foreign = Object.assign(new Error("Rejected"), {
       [Symbol.for("@glion/ack/AckException")]: true,
       code: AckCode.CommitReject,
-      text: "Queue full",
     });
     app.on("ADT^A01", () => {
       throw foreign;
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|CR|MSG001|Queue full");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|CR|MSG001");
   });
 
   it("keeps the reply and records NEXT_CALLED_TWICE when a middleware calls next() a second time", async () => {
@@ -987,9 +956,7 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe(
-      "MSA|AE|MSG001|Application internal error"
-    );
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(seen.error).toBe(thrown);
     expect(ran).toEqual([]);
   });

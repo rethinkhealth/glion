@@ -35,11 +35,9 @@ const app = new Mllp()
   })
   // ctx.ack() builds the reply.
   .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }))
-  // A thrown AckException replies with its code and text.
+  // A thrown AckException replies with its code.
   .on("ORU^R01", () => {
-    throw new AckApplicationError("No patient with this MRN", {
-      text: "Patient not on file",
-    });
+    throw new AckApplicationError("No patient with this MRN", {});
   });
 // Any other message type is answered AR.
 
@@ -146,16 +144,16 @@ Routes are matched first-match-wins — register specific routes before catch-al
 
 The reply is the acknowledgment the route handler's outcome describes:
 
-| The route handler                     | Reply                                                                         |
-| ------------------------------------- | ----------------------------------------------------------------------------- |
-| Returns nothing, or not a response    | `AA`.                                                                         |
-| Returns a response, or sets `ctx.res` | That response.                                                                |
-| Throws an `AckException`              | Its `code` in MSA-1 and its `text` in MSA-3; MSA-3 is omitted without `text`. |
-| Throws anything else                  | `AE` with MSA-3 `Application internal error`.                                 |
+| The route handler                     | Reply                |
+| ------------------------------------- | -------------------- |
+| Returns nothing, or not a response    | `AA`.                |
+| Returns a response, or sets `ctx.res` | That response.       |
+| Throws an `AckException`              | Its `code` in MSA-1. |
+| Throws anything else                  | `AE`.                |
 
-A message no route matches is answered as a thrown `AckApplicationReject` with `text` `Unsupported message type`: `AR`. A middleware throw is answered the same way as a handler throw, unless the route handler or a middleware has returned a reply; then that reply stands. A reply a middleware writes to `ctx.res`, before or after `next()`, stands until an error replaces it. A middleware that returns a response without calling `next()` replies with it; one that returns nothing sends no reply.
+A message no route matches is answered as a thrown `AckApplicationReject`: `AR`. A middleware throw is answered the same way as a handler throw, unless the route handler or a middleware has returned a reply; then that reply stands. A reply a middleware writes to `ctx.res`, before or after `next()`, stands until an error replaces it. A middleware that returns a response without calling `next()` replies with it; one that returns nothing sends no reply.
 
-A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`) or that the parser throws on runs only the global middleware, and is answered `AE` whatever they return or write: a message whose content was never read is never accepted. An `ACK`, and a payload that does not start with an MSH such as an empty frame, get no reply unless a handler or middleware gives one. An error's `message` is never sent.
+A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`) or that the parser throws on runs only the global middleware, and is answered `AE` whatever they return or write: a message whose content was never read is never accepted. An `ACK`, and a payload that does not start with an MSH such as an empty frame, get no reply unless a handler or middleware gives one. No reply carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
 
 `ctx.error` holds the latest error the message raised, and the reply answers the first. A middleware that throws once `ctx.error` holds an error replaces it; to keep it, pass it as the new error's `cause`. A `next()` called a second time throws `MllpServerError` `NEXT_CALLED_TWICE`, and is answered as a middleware throw.
 
@@ -184,7 +182,7 @@ app.use("ADT^*", async (ctx, next) => {
 // Short-circuit: return a response without calling next().
 app.use(async (ctx, next) => {
   if (!isAuthorized(ctx.connection.remoteAddress)) {
-    return ctx.ack({ code: AckCode.ApplicationReject, text: "Unauthorized" });
+    return ctx.ack({ code: AckCode.ApplicationReject });
   }
   await next();
 });
@@ -271,7 +269,7 @@ Most middleware only needs routing fields or raw MSH data — both available syn
 function authMiddleware(): Middleware {
   return (ctx, next) => {
     if (!isAuthorized(ctx.connection.remoteAddress)) {
-      return ctx.ack({ code: AckCode.ApplicationReject, text: "Unauthorized" });
+      return ctx.ack({ code: AckCode.ApplicationReject });
     }
     return next();
   };
@@ -282,7 +280,7 @@ function validationMiddleware(): Middleware {
   return async (ctx, next) => {
     const tree = await ctx.tree();
     if (!isValid(tree)) {
-      return ctx.ack({ code: AckCode.ApplicationError, text: "Invalid" });
+      return ctx.ack({ code: AckCode.ApplicationError });
     }
     return next();
   };
@@ -301,11 +299,8 @@ app.use(async (ctx, next) => {
   if (ctx.error) {
     logger.error(ctx.error);
   }
-  if (ctx.error instanceof DatabaseUnavailable) {
-    ctx.res = ctx.ack({
-      code: AckCode.ApplicationError,
-      text: "Try again later",
-    });
+  if (ctx.error instanceof UnknownPatient) {
+    ctx.res = ctx.ack({ code: AckCode.ApplicationReject });
   }
 });
 ```

@@ -252,7 +252,7 @@ describe("serve() integration", () => {
 
     // Send ADT^A01 which has no matching handler
     const response = await sendMessage(server.port, SAMPLE_ADT);
-    expect(response).toContain("\rMSA|AR|MSG001|Unsupported message type");
+    expect(response).toContain("\rMSA|AR|MSG001");
   });
 
   it("answers AE when a handler throws, connection stays alive", async () => {
@@ -274,7 +274,7 @@ describe("serve() integration", () => {
     const client = createPersistentClient(server.port);
     try {
       const resp1 = await client.send(SAMPLE_ADT);
-      expect(resp1).toContain("MSA|AE|MSG001|Application internal error");
+      expect(resp1).toContain("MSA|AE|MSG001");
 
       // Second message on SAME connection — still works
       const resp2 = await client.send(SAMPLE_ORU);
@@ -346,7 +346,7 @@ describe("serve() integration", () => {
       });
 
       const resp = await sendMessage(server.port, SAMPLE_ADT);
-      expect(resp).toContain("MSA|AE|MSG001|Application internal error");
+      expect(resp).toContain("MSA|AE|MSG001");
       expect(errors).toEqual([]);
     });
 
