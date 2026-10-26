@@ -20,13 +20,8 @@ const fraction = fc
   .chain((count) => digits(count))
   .map((value) => `.${value}`);
 
-// `-0000` is written back as `+0000`, so the generated offsets leave it out.
 const offset = fc
   .tuple(fc.constantFrom("+", "-"), pairInRange(14), pairInRange(59))
-  .filter(
-    ([sign, hours, minutes]) =>
-      sign === "+" || hours !== "00" || minutes !== "00"
-  )
   .map(([sign, hours, minutes]) => `${sign}${hours}${minutes}`);
 
 const date = fc
@@ -158,6 +153,19 @@ describe("formatDTM", () => {
         year: 2026,
       })
     ).toBe("2026030712+0000");
+  });
+
+  it("writes an offset of -0 as -0000", () => {
+    expect(
+      formatDTM({
+        day: 7,
+        hour: 12,
+        month: 3,
+        offset: -0,
+        precision: "hour",
+        year: 2026,
+      })
+    ).toBe("2026030712-0000");
   });
 
   it("pads a year below 1000 to four digits", () => {

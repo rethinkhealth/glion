@@ -31,7 +31,10 @@ export interface TM {
   fraction?: string;
   /**
    * The offset from UTC in minutes, positive east of UTC: `-0500` is `-300`.
-   * Absent when the value gives no offset. `+0000` and `-0000` are both `0`.
+   * Absent when the value gives no offset. `+0000` is `0`, and `-0000` is `-0`:
+   * from HL7v2 v2.9, `-0000` is UTC with no local time zone known, and
+   * `+0000` a local time zone at offset zero. `JSON.stringify` writes `-0` as
+   * `0`.
    */
   offset?: number;
   /**
@@ -66,7 +69,10 @@ export interface DTM {
   fraction?: string;
   /**
    * The offset from UTC in minutes, positive east of UTC: `-0500` is `-300`.
-   * Absent when the value gives no offset. `+0000` and `-0000` are both `0`.
+   * Absent when the value gives no offset. `+0000` is `0`, and `-0000` is `-0`:
+   * from HL7v2 v2.9, `-0000` is UTC with no local time zone known, and
+   * `+0000` a local time zone at offset zero. `JSON.stringify` writes `-0` as
+   * `0`.
    */
   offset?: number;
   /**

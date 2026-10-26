@@ -81,8 +81,8 @@ describe("nowDTM in the host's time zone", () => {
 
 // A `timeZone` reads the clock in that zone, whatever the host's zone is.
 describe("nowDTM in a named time zone", () => {
-  // The host is in New York (02:30 EST), but the value is read in UTC: 07:30,
-  // offset 0.
+  // The host is in New York (02:30 EST), but the value is read in UTC: 07:30.
+  // UTC has no local time zone, so the offset is -0, written `-0000`.
   it("reads the fields and the offset in that zone, not the host's", () => {
     at("2024-01-15T07:30:00.123Z");
     expect(nowDTM({ timeZone: "UTC" })).toStrictEqual({
@@ -91,12 +91,35 @@ describe("nowDTM in a named time zone", () => {
       hour: 7,
       minute: 30,
       month: 1,
-      offset: 0,
+      offset: -0,
       precision: "second",
       second: 0,
       year: 2024,
     });
   });
+
+  // Intl resolves these names to UTC, and an offset zone of zero to `+00:00`.
+  it.each(["UTC", "Etc/UTC", "Etc/GMT", "GMT", "Zulu", "+00:00"])(
+    "writes UTC as -0000 in %s",
+    (timeZone) => {
+      at("2024-01-15T07:30:00Z");
+      expect(formatDTM(nowDTM({ precision: Precision.Minute, timeZone }))).toBe(
+        "202401150730-0000"
+      );
+    }
+  );
+
+  // London in winter and Abidjan all year are local time zones at offset
+  // zero, so they keep `+0000`.
+  it.each(["Europe/London", "Africa/Abidjan"])(
+    "writes a local time zone at offset zero as +0000 in %s",
+    (timeZone) => {
+      at("2024-01-15T07:30:00Z");
+      expect(formatDTM(nowDTM({ precision: Precision.Minute, timeZone }))).toBe(
+        "202401150730+0000"
+      );
+    }
+  );
 
   // Kathmandu is UTC+5:45 all year: 07:30 UTC is 13:15 there.
   it("gives an offset east of UTC that is not whole hours", () => {

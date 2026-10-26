@@ -16,6 +16,10 @@ const FRACTION_DIGITS = 3;
 
 const PRECISIONS = Object.values(Precision);
 
+// The zones Intl resolves for UTC with no local time zone: `Etc/UTC`, `GMT`,
+// and `Zulu` resolve to `UTC`, and a host with `TZ=GMT` to `+00:00`.
+const UNIVERSAL_ZONES: ReadonlySet<string> = new Set(["UTC", "+00:00"]);
+
 const DATE_PRECISIONS: ReadonlySet<Precision> = new Set([
   Precision.Year,
   Precision.Month,
@@ -48,10 +52,10 @@ export interface NowDTMOptions {
 }
 
 // Formatters cost about 25 µs to build and 2 µs to use, so each `timeZone`
-// string gets one, built on first use.
-const formatters = new Map<string, Intl.DateTimeFormat>();
+// string, and the host's zone, gets one, built on first use.
+const formatters = new Map<string | undefined, Intl.DateTimeFormat>();
 
-function formatterFor(timeZone: string): Intl.DateTimeFormat {
+function formatterFor(timeZone: string | undefined): Intl.DateTimeFormat {
   const formatter =
     formatters.get(timeZone) ??
     new Intl.DateTimeFormat("en-US", {
@@ -105,6 +109,14 @@ function offsetAt(date: Date, timeZone: string | undefined): number {
   return (wallClock - date.getTime()) / MILLISECONDS_PER_MINUTE;
 }
 
+/**
+ * Whether `timeZone`, or the host's time zone when `timeZone` is `undefined`,
+ * is UTC with no local time zone.
+ */
+function isUniversal(timeZone: string | undefined): boolean {
+  return UNIVERSAL_ZONES.has(formatterFor(timeZone).resolvedOptions().timeZone);
+}
+
 /** The fields of `wallClock`, read in UTC, from the year down to `precision`. */
 function fieldsOf(wallClock: Date, precision: Precision): DTM {
   // How many fields after the year to keep: `year` is 0, `month` 1, ...
@@ -138,11 +150,14 @@ function fieldsOf(wallClock: Date, precision: Precision): DTM {
  * field down to the second, and the milliseconds as a 3-digit `fraction`; with
  * it, the value stops at that field and has no `fraction`. A value that stops
  * at the year, month, or day has no offset unless `options.offset` is `true`.
+ * In UTC, such as `UTC`, `Etc/UTC`, or `GMT`, the offset is `-0`, written
+ * `-0000`; a zone at offset zero with local time, such as `Europe/London` in
+ * winter, gives `0`, written `+0000`.
  *
  * @example
  *   ```ts
  *   formatDTM(nowDTM()); // "20240115023000.123-0500"
- *   formatDTM(nowDTM({ precision: Precision.Second, timeZone: "UTC" })); // "20240115073000+0000"
+ *   formatDTM(nowDTM({ precision: Precision.Second, timeZone: "UTC" })); // "20240115073000-0000"
  *   formatDTM(nowDTM({ offset: false, precision: Precision.Minute })); // "202401150230"
  *   formatDTM(nowDTM({ precision: Precision.Day })); // "20240115"
  *   ```;
@@ -173,7 +188,8 @@ export function nowDTM(options: NowDTMOptions = {}): DTM {
     );
   }
   if (withOffset) {
-    value.offset = offset;
+    // `-0000` is UTC with no local time zone known (HL7v2 v2.9).
+    value.offset = isUniversal(timeZone) ? -0 : offset;
   }
   return value;
 }

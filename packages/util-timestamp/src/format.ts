@@ -7,7 +7,7 @@ function pad(value: number, width: number): string {
 }
 
 function formatOffset(offset: number): string {
-  const sign = offset < 0 ? "-" : "+";
+  const sign = offset < 0 || Object.is(offset, -0) ? "-" : "+";
   const magnitude = Math.abs(offset);
   return `${sign}${pad(Math.floor(magnitude / MINUTES_PER_HOUR), 2)}${pad(magnitude % MINUTES_PER_HOUR, 2)}`;
 }
@@ -59,7 +59,8 @@ export function formatDT(date: DT): string {
 
 /**
  * Writes a TM as HL7v2 text, `HH[MM[SS[.S[S[S[S]]]]]][+/-ZZZZ]`, with the
- * fields `time` has. An `offset` of `0` is written `+0000`.
+ * fields `time` has. An `offset` of `0` is written `+0000`, and `-0` is
+ * written `-0000`.
  *
  * @example
  *   ```ts
@@ -72,7 +73,8 @@ export function formatTM(time: TM): string {
 
 /**
  * Writes a DTM as HL7v2 text, `YYYY[MM[DD[HH[MM[SS[.S[S[S[S]]]]]]]]][+/-ZZZZ]`,
- * with the fields `dateTime` has. An `offset` of `0` is written `+0000`.
+ * with the fields `dateTime` has. An `offset` of `0` is written `+0000`, and
+ * `-0` is written `-0000`.
  *
  * @example
  *   ```ts

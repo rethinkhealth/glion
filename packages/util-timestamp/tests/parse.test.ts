@@ -236,9 +236,11 @@ describe("parseTM", () => {
     });
   });
 
-  it("reads -0000 and +0000 as offset 0", () => {
+  // From v2.9, `-0000` is UTC with no local time zone known, and `+0000` a
+  // local time zone at offset zero; the sign of zero keeps them apart.
+  it("reads -0000 as offset -0 and +0000 as offset 0", () => {
     expect(parseTM("12-0000")).toStrictEqual({
-      data: { hour: 12, offset: 0, precision: "hour" },
+      data: { hour: 12, offset: -0, precision: "hour" },
       success: true,
     });
     expect(parseTM("12+0000")).toStrictEqual({

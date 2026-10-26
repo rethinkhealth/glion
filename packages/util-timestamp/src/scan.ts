@@ -22,7 +22,7 @@ export interface Offset {
   text: string;
   hours: number;
   minutes: number;
-  /** Minutes from UTC, positive east of UTC; `-0000` is `0`. */
+  /** Minutes from UTC, positive east of UTC; `-0000` is `-0`. */
   total: number;
 }
 
@@ -70,7 +70,7 @@ function readOffset(value: string, start: number): Offset | undefined {
   const hours = numberAt(value, start + 1, 2);
   const minutes = numberAt(value, start + 3, 2);
   const magnitude = hours * MINUTES_PER_HOUR + minutes;
-  const isWest = value.codePointAt(start) === MINUS && magnitude !== 0;
+  const isWest = value.codePointAt(start) === MINUS;
   return {
     hours,
     minutes,
