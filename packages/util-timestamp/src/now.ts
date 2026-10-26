@@ -1,16 +1,16 @@
+import { pad } from "./format";
 import { Precision } from "./precision";
 import type { DTM } from "./types";
 
-// `nowDTM` reads the clock in three steps, shown at 2024-01-15T07:30:00.123Z
-// in America/New_York:
+// `nowDTM` reads the clock once, shown at 2024-01-15T07:30:00.123Z in
+// America/New_York:
 //
 // 1. `offsetAt` gives the zone's offset from UTC at that moment: `-300`.
 // 2. The moment moved by the offset and read in UTC is the zone's wall clock:
 //    2024-01-15 02:30:00.123.
 // 3. `fieldsOf` keeps the wall clock's fields down to `precision`, and
-//    `nowDTM` adds `fraction` and `-300` as `offset: "-0500"`:
-//    `20240115023000.123-0500`. A year, month, or day is a date and has no
-//    offset by default: `20240115`.
+//    `nowDTM` adds `fraction` and, to a value with an hour, `offsetText`'s
+//    `-0500`: `20240115023000.123-0500`. In UTC, the offset is `-0000`.
 
 const MILLISECONDS_PER_MINUTE = 60_000;
 const MINUTES_PER_HOUR = 60;
@@ -18,16 +18,32 @@ const FRACTION_DIGITS = 3;
 
 const PRECISIONS = Object.values(Precision);
 
-// The zones Intl resolves for UTC with no local time zone, written `-0000`:
-// `Etc/UTC`, `GMT`, and `Zulu` resolve to `UTC`, and a host with `TZ=GMT` to
-// `+00:00`.
-const UNIVERSAL_ZONES: ReadonlySet<string> = new Set(["UTC", "+00:00"]);
-
-const DATE_PRECISIONS: ReadonlySet<Precision> = new Set([
-  Precision.Year,
-  Precision.Month,
-  Precision.Day,
+// The IANA names of UTC with no local time zone, whose offset is written
+// `-0000`: the zones that link to `Etc/UTC` and `Etc/GMT`, and `+00:00`, which
+// Node gives a host with `TZ=GMT`.
+// Stryker disable StringLiteral: V8 resolves every name here but `+00:00` to `UTC`, so Node reads no other; JavaScriptCore keeps the name given.
+const UTC_ZONES: ReadonlySet<string> = new Set([
+  "+00:00",
+  "Etc/GMT",
+  "Etc/GMT+0",
+  "Etc/GMT-0",
+  "Etc/GMT0",
+  "Etc/Greenwich",
+  "Etc/UCT",
+  "Etc/UTC",
+  "Etc/Universal",
+  "Etc/Zulu",
+  "GMT",
+  "GMT+0",
+  "GMT-0",
+  "GMT0",
+  "Greenwich",
+  "UCT",
+  "UTC",
+  "Universal",
+  "Zulu",
 ]);
+// Stryker restore StringLiteral
 
 /** Options for {@link nowDTM}. */
 export interface NowDTMOptions {
@@ -54,26 +70,38 @@ export interface NowDTMOptions {
   offset?: boolean;
 }
 
-// Formatters cost about 25 µs to build and 2 µs to use, so each `timeZone`
-// string, and the host's zone, gets one, built on first use.
-const formatters = new Map<string | undefined, Intl.DateTimeFormat>();
+/** A time zone's formatter, and whether the zone is UTC with no local time. */
+interface Zone {
+  formatter: Intl.DateTimeFormat;
+  utc: boolean;
+}
 
-function formatterFor(timeZone: string | undefined): Intl.DateTimeFormat {
-  const formatter =
-    formatters.get(timeZone) ??
-    new Intl.DateTimeFormat("en-US", {
-      day: "numeric",
-      hour: "numeric",
-      hourCycle: "h23",
-      minute: "numeric",
-      month: "numeric",
-      second: "numeric",
-      timeZone,
-      year: "numeric",
-    });
-  // Stryker disable next-line CallExpression: the cache saves time only; a formatter built on every call reads the same fields.
-  formatters.set(timeZone, formatter);
-  return formatter;
+// A zone costs about 25 µs to build and 2 µs to read, so each `timeZone`
+// string, and the host's zone under `undefined`, gets one on first use.
+const zones = new Map<string | undefined, Zone>();
+
+function newZone(timeZone: string | undefined): Zone {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    hour: "numeric",
+    hourCycle: "h23",
+    minute: "numeric",
+    month: "numeric",
+    second: "numeric",
+    timeZone,
+    year: "numeric",
+  });
+  return {
+    formatter,
+    utc: UTC_ZONES.has(formatter.resolvedOptions().timeZone),
+  };
+}
+
+function zoneOf(timeZone: string | undefined): Zone {
+  const zone = zones.get(timeZone) ?? newZone(timeZone);
+  // Stryker disable next-line CallExpression: the cache saves time only; while the process's time zone stays the same, a zone built on every call reads the same fields and the same `utc`.
+  zones.set(timeZone, zone);
+  return zone;
 }
 
 function numberOf(
@@ -85,53 +113,40 @@ function numberOf(
 }
 
 /**
- * The offset from UTC in minutes, positive east of UTC, of `timeZone` at
+ * The offset from UTC in whole minutes, positive east of UTC, of `timeZone` at
  * `date`, or of the host's time zone when `timeZone` is `undefined`.
  */
 function offsetAt(date: Date, timeZone: string | undefined): number {
-  // Stryker disable next-line ConditionalExpression,BlockStatement: with `TZ` fixed for the process, Intl with no `timeZone` reads the same zone as `Date`, so `if (false)` and the empty block give the same offset; `if (true)` is killed by the named-zone tests.
   if (timeZone === undefined) {
-    // The host's zone: `Date` already knows its offset.
     // `getTimezoneOffset()` is positive west of UTC.
     return -date.getTimezoneOffset();
   }
-  // A named zone: Intl reads the wall clock there (02:30:00 in New York), and
-  // that time, read as if it were UTC, minus the real moment (07:30:00 UTC) is
-  // the offset: -5 h, so -300. The milliseconds are copied over unchanged, as
-  // every zone's offset is a whole number of minutes.
-  const parts = formatterFor(timeZone).formatToParts(date);
+  // Intl reads the wall clock in the zone (02:30:00 in New York), and that
+  // time, read as if it were UTC, minus the real moment (07:30:00.123 UTC) is
+  // the offset: -5 h less 123 ms, rounded to -300.
+  const parts = zoneOf(timeZone).formatter.formatToParts(date);
   const wallClock = Date.UTC(
     numberOf(parts, "year"),
     numberOf(parts, "month") - 1,
     numberOf(parts, "day"),
     numberOf(parts, "hour"),
     numberOf(parts, "minute"),
-    numberOf(parts, "second"),
-    date.getUTCMilliseconds()
+    numberOf(parts, "second")
   );
-  return (wallClock - date.getTime()) / MILLISECONDS_PER_MINUTE;
+  return Math.round((wallClock - date.getTime()) / MILLISECONDS_PER_MINUTE);
 }
 
 /**
- * Whether `timeZone`, or the host's time zone when `timeZone` is `undefined`,
- * is UTC with no local time zone.
- */
-function isUniversal(timeZone: string | undefined): boolean {
-  return UNIVERSAL_ZONES.has(formatterFor(timeZone).resolvedOptions().timeZone);
-}
-
-/**
- * `minutes` from UTC as `+/-HHMM`, or `-0000` when `timeZone` is UTC with no
- * local time zone: `-300` is `"-0500"`.
+ * `minutes` as `+/-HHMM`, such as `-300` as `"-0500"`, or `"-0000"` when they
+ * are `0` and `timeZone` is UTC with no local time zone (HL7v2 v2.9).
  */
 function offsetText(minutes: number, timeZone: string | undefined): string {
-  if (isUniversal(timeZone)) {
+  if (minutes === 0 && zoneOf(timeZone).utc) {
     return "-0000";
   }
   const sign = minutes < 0 ? "-" : "+";
   const magnitude = Math.abs(minutes);
-  const hours = String(Math.floor(magnitude / MINUTES_PER_HOUR));
-  return `${sign}${hours.padStart(2, "0")}${String(magnitude % MINUTES_PER_HOUR).padStart(2, "0")}`;
+  return `${sign}${pad(Math.floor(magnitude / MINUTES_PER_HOUR), 2)}${pad(magnitude % MINUTES_PER_HOUR, 2)}`;
 }
 
 /** The fields of `wallClock`, read in UTC, from the year down to `precision`. */
@@ -183,29 +198,17 @@ function fieldsOf(wallClock: Date, precision: Precision): DTM {
  */
 export function nowDTM(options: NowDTMOptions = {}): DTM {
   const { precision, timeZone } = options;
-  const cut = precision ?? Precision.Second;
+  const now = new Date();
+  const minutes = offsetAt(now, timeZone);
+  const wallClock = new Date(now.getTime() + minutes * MILLISECONDS_PER_MINUTE);
+  const value = fieldsOf(wallClock, precision ?? Precision.Second);
+  if (precision === undefined) {
+    value.fraction = pad(wallClock.getUTCMilliseconds(), FRACTION_DIGITS);
+  }
   // A date, like `20240115`, is a calendar day, not a moment: by default it
   // has no offset, as HL7v2 writes a DT or a date of birth.
-  const withOffset = options.offset ?? !DATE_PRECISIONS.has(cut);
-  // Read the clock once; every field below comes from this one moment.
-  const now = new Date();
-
-  // Step 1: -300 in New York in January, -240 in July.
-  const offset = offsetAt(now, timeZone);
-
-  // Step 2: 07:30:00.123 UTC moved by -300 min reads 02:30:00.123 in UTC.
-  const wallClock = new Date(now.getTime() + offset * MILLISECONDS_PER_MINUTE);
-
-  // Step 3: `20240115023000.123-0500`.
-  const value = fieldsOf(wallClock, cut);
-  if (precision === undefined) {
-    value.fraction = String(wallClock.getUTCMilliseconds()).padStart(
-      FRACTION_DIGITS,
-      "0"
-    );
-  }
-  if (withOffset) {
-    value.offset = offsetText(offset, timeZone);
+  if (options.offset ?? value.hour !== undefined) {
+    value.offset = offsetText(minutes, timeZone);
   }
   return value;
 }

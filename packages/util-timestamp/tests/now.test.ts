@@ -3,12 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { formatDTM } from "../src/format";
 import { nowDTM } from "../src/now";
-import { parseDTM } from "../src/parse";
 import { Precision } from "../src/precision";
-import type { DTM } from "../src/types";
-
-const MILLISECONDS_PER_MINUTE = 60_000;
-const MINUTES_PER_HOUR = 60;
 
 /** Sets the clock `nowDTM` reads to `instant`, an ISO 8601 UTC time. */
 function at(instant: string): void {
@@ -22,6 +17,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 // `vitest.config.ts` sets the host's time zone to America/New_York, which is
@@ -80,6 +76,38 @@ describe("nowDTM in the host's time zone", () => {
   });
 });
 
+// A Cloudflare Worker or a container reads its clock in UTC. The host here is
+// New York, so `Date` is made to report offset 0 and Intl the zone `UTC`. Each
+// test imports `nowDTM` afresh, as the host's zone is read once and kept.
+describe("nowDTM on a host whose time zone is UTC", () => {
+  beforeEach(() => {
+    const resolved = new Intl.DateTimeFormat().resolvedOptions();
+    vi.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(0);
+    vi.spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions").mockReturnValue({
+      ...resolved,
+      timeZone: "UTC",
+    });
+    vi.resetModules();
+  });
+
+  it("writes the offset as -0000", async () => {
+    const { nowDTM: freshNowDTM } = await import("../src/now");
+    at("2024-01-15T07:30:00.123Z");
+    expect(formatDTM(freshNowDTM())).toBe("20240115073000.123-0000");
+  });
+
+  // The process's zone can change while it runs (`process.env.TZ`). The
+  // offset `Date` measures then still names the instant, even though the zone
+  // was first read as UTC.
+  it("writes the offset it measures after the zone changes", async () => {
+    const { nowDTM: freshNowDTM } = await import("../src/now");
+    at("2024-01-15T07:30:00.123Z");
+    expect(formatDTM(freshNowDTM())).toBe("20240115073000.123-0000");
+    vi.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(300);
+    expect(formatDTM(freshNowDTM())).toBe("20240115023000.123-0500");
+  });
+});
+
 // A `timeZone` reads the clock in that zone, whatever the host's zone is.
 describe("nowDTM in a named time zone", () => {
   // The host is in New York (02:30 EST), but the value is read in UTC: 07:30.
@@ -99,16 +127,33 @@ describe("nowDTM in a named time zone", () => {
     });
   });
 
-  // Intl resolves these names to UTC, and an offset zone of zero to `+00:00`.
-  it.each(["UTC", "Etc/UTC", "Etc/GMT", "GMT", "Zulu", "+00:00"])(
-    "writes UTC as -0000 in %s",
-    (timeZone) => {
-      at("2024-01-15T07:30:00Z");
-      expect(formatDTM(nowDTM({ precision: Precision.Minute, timeZone }))).toBe(
-        "202401150730-0000"
-      );
-    }
-  );
+  // Every IANA name of UTC, and the offset zone of zero.
+  it.each([
+    "+00:00",
+    "Etc/GMT",
+    "Etc/GMT+0",
+    "Etc/GMT-0",
+    "Etc/GMT0",
+    "Etc/Greenwich",
+    "Etc/UCT",
+    "Etc/UTC",
+    "Etc/Universal",
+    "Etc/Zulu",
+    "GMT",
+    "GMT+0",
+    "GMT-0",
+    "GMT0",
+    "Greenwich",
+    "UCT",
+    "UTC",
+    "Universal",
+    "Zulu",
+  ])("writes UTC as -0000 in %s", (timeZone) => {
+    at("2024-01-15T07:30:00Z");
+    expect(formatDTM(nowDTM({ precision: Precision.Minute, timeZone }))).toBe(
+      "202401150730-0000"
+    );
+  });
 
   // London in winter and Abidjan all year are local time zones at offset
   // zero, so they keep `+0000`.
@@ -294,41 +339,42 @@ const instants = fc.date({
   noInvalidDate: true,
 });
 
-/** The minutes from UTC `offset` gives: `"-0500"` is `-300`. */
-function minutesOf(offset = "+0000"): number {
-  const minutes =
-    Number(offset.slice(1, 3)) * MINUTES_PER_HOUR + Number(offset.slice(3));
-  return offset.startsWith("-") ? -minutes : minutes;
-}
+// `YYYYMMDDHHMMSS.SSS+/-ZZZZ`, the text `nowDTM()` gives with no precision.
+const FULL_DTM =
+  /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\.\d{3})([+-]\d{2})(\d{2})$/;
 
 /**
- * The instant `value` names: its fields read as if they were UTC, less its
- * offset. `20240115023000-0500` is 02:30 UTC less -5 h, so 07:30 UTC.
+ * The instant `text` names, read by `Date.parse` as ISO 8601, or `NaN` when it
+ * is not `YYYYMMDDHHMMSS.SSS+/-ZZZZ`. `20240115023000.123-0500` is
+ * `2024-01-15T02:30:00.123-05:00`.
  */
-function instantOf(value: DTM): number {
-  const wallClock = Date.UTC(
-    value.year,
-    (value.month ?? 1) - 1,
-    value.day,
-    value.hour,
-    value.minute,
-    value.second,
-    Number(value.fraction)
+function instantIn(text: string): number {
+  const match = FULL_DTM.exec(text);
+  if (match === null) {
+    return Number.NaN;
+  }
+  const [
+    ,
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    second,
+    fraction,
+    zoneHours,
+    zoneMinutes,
+  ] = match;
+  return Date.parse(
+    `${year}-${month}-${day}T${hour}:${minute}:${second}${fraction}${zoneHours}:${zoneMinutes}`
   );
-  return wallClock - minutesOf(value.offset) * MILLISECONDS_PER_MINUTE;
-}
-
-/** The instant `text` names, or `undefined` when it is not a valid DTM. */
-function instantIn(text: string): number | undefined {
-  const result = parseDTM(text);
-  return result.success ? instantOf(result.data) : undefined;
 }
 
 // The value, written as HL7v2 text and read back, names the moment it was
 // taken, in any zone and on either side of a daylight saving time change.
 describe("nowDTM names the current instant", () => {
-  // Mutant: `offsetAt` leaves the milliseconds out of the zone's wall clock.
-  // Fails on `2000-01-01T00:00:00.001Z` in `UTC`.
+  // Mutant: `offsetAt` does not round, so the offset keeps the milliseconds
+  // the wall clock leaves out. Fails on `2000-01-01T00:00:00.001Z` in `UTC`.
   it("in a named zone", () => {
     fc.assert(
       fc.property(instants, zones, (instant, timeZone) => {

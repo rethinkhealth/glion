@@ -91,7 +91,7 @@ describe("format of parse is the value", () => {
         const result = parseDTM(value);
         expect(result.success && formatDTM(result.data)).toBe(value);
       }),
-      { examples: [["20260307120000.25"]] }
+      { examples: [["20260307120000.25"], ["2026030712-0000"]] }
     );
   });
 });

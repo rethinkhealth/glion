@@ -1,6 +1,6 @@
 import type { DT, DTM, TM } from "./types";
 
-function pad(value: number, width: number): string {
+export function pad(value: number, width: number): string {
   return String(value).padStart(width, "0");
 }
 

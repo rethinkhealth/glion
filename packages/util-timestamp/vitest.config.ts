@@ -1,8 +1,8 @@
 import { baseConfig } from "@glion/testing";
 import { defineConfig, mergeConfig } from "vitest/config";
 
-// The time zone is the process's, so it is set before any test worker starts:
-// a worker thread does not see a later change to `TZ`.
+// Stryker runs the tests in worker threads, which do not see a later change to
+// `TZ`, so the time zone is set before any worker starts.
 process.env.TZ = "America/New_York";
 
 export default mergeConfig(
