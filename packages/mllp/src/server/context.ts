@@ -3,9 +3,9 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { value as queryValue } from "@glion/util-query";
 
 import { acknowledge } from "./acknowledge";
-import type { AcknowledgeOptions } from "./acknowledge";
 import type { ReceivedMessage } from "./message";
 import type {
+  AckOptions,
   ConnectionInfo,
   Context,
   Hl7v2Processor,
@@ -101,7 +101,7 @@ export function createContext(options: CreateContextOptions): MessageContext {
 
   // ── Build context ──────────────────────────────────────────────────
   const ctx: MessageContext = {
-    ack(ackOptions?: AcknowledgeOptions): Response {
+    ack(ackOptions?: AckOptions): Response {
       return { raw: toHl7v2(acknowledge(header, ackOptions)) };
     },
     ast: parsed,

@@ -9,15 +9,14 @@ import type { Context, Middleware, Response } from "./types";
  * next middleware. A middleware that returns without calling next()
  * short-circuits the chain.
  *
- * A middleware gives the reply by returning a Response, written to
- * `ctx.res`. A reply given this way stands. A middleware may also write
- * `ctx.res` directly; that reply stands only until an error replaces it.
+ * A middleware gives the reply by returning a Response or by writing
+ * `ctx.res`; a later one replaces it.
  *
  * A middleware that throws, or calls `next()` a second time
  * (`MllpServerError` `NEXT_CALLED_TWICE`), has that error passed to
- * `onError`. The response `onError` returns is written to `ctx.res` unless a
- * reply was given. `onError` MUST NOT throw. The second `next()` call also
- * throws that error to its caller.
+ * `onError`, and the response `onError` returns is written to `ctx.res`.
+ * `onError` MUST NOT throw. The second `next()` call also throws that error
+ * to its caller.
  */
 export function compose(
   middlewares: Middleware[],
@@ -25,13 +24,9 @@ export function compose(
 ): (ctx: Context) => Promise<void> {
   return async (ctx: Context): Promise<void> => {
     let index = -1;
-    let replied = false;
 
     const fail = (error: Error) => {
-      const reply = onError(error);
-      if (!replied) {
-        ctx.res = reply;
-      }
+      ctx.res = onError(error);
     };
 
     async function dispatch(i: number): Promise<void> {
@@ -53,7 +48,6 @@ export function compose(
         const result = await middleware(ctx, () => dispatch(i + 1));
         if (isResponse(result)) {
           ctx.res = result;
-          replied = true;
         }
       } catch (error) {
         fail(error instanceof Error ? error : new Error(String(error)));

@@ -1,3 +1,4 @@
+import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import type { VFile } from "vfile";
 
@@ -94,10 +95,10 @@ export interface Context {
    * MSH as the processor parsed it, serialized. Changes the transforms or a
    * handler make to the tree do not change it. MSA-1 defaults to `AA`.
    */
-  ack(options?: AcknowledgeOptions): Response;
+  ack(options?: AckOptions): Response;
   /**
-   * Response to send back. A reply written here stands until an error
-   * replaces it; one a middleware or route handler returns stands.
+   * Response to send back. A later reply replaces it, and an error replaces
+   * it with the error's NAK.
    */
   res: Response | undefined;
 
@@ -119,6 +120,12 @@ export interface Context {
   /** Read-only snapshot of all variables */
   readonly var: Readonly<Record<string, unknown>>;
 }
+
+/** The options of `ctx.ack()`: those of `acknowledge()`, with an accept code. */
+export type AckOptions = Omit<AcknowledgeOptions, "code"> & {
+  /** MSA-1: `AA` or `CA`. Defaults to `AA`. A NAK is the reply to a throw. */
+  code?: AckSuccessCode;
+};
 
 // Re-exported from @glion/parser — the ecosystem home of "a unified
 // processor over HL7v2 trees"; the client's `parser` option shares it.

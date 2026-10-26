@@ -106,6 +106,7 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 | Type               | Description                                                                                                                                                                                 |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Context`          | Request context with message data and routing fields.                                                                                                                                       |
+| `AckOptions`       | The options of `ctx.ack()`: those of `acknowledge()`, with an accept code (`AA` or `CA`) in `code`.                                                                                         |
 | `Response`         | Response object `{ raw: string }`.                                                                                                                                                          |
 | `Hl7v2Processor`   | Unified `Processor` type for HL7v2 (`Processor<Root, Root \| undefined, Root \| undefined>` — head/tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable). |
 | `Middleware`       | Middleware function `(ctx, next) => ...`.                                                                                                                                                   |
@@ -151,11 +152,11 @@ The reply is the acknowledgment the route handler's outcome describes:
 | Throws an `AckException`              | Its `code` in MSA-1. |
 | Throws anything else                  | `AE`.                |
 
-A message no route matches is answered as a thrown `AckApplicationReject`: `AR`. A middleware throw is answered the same way as a handler throw, unless the route handler or a middleware has returned a reply; then that reply stands. A reply a middleware writes to `ctx.res`, before or after `next()`, stands until an error replaces it. A middleware that returns a response without calling `next()` replies with it; one that returns nothing sends no reply.
+A message no route matches is answered as a thrown `AckApplicationReject`: `AR`. A middleware throw is answered the same way as a handler throw. A middleware replaces the reply by returning a response or writing `ctx.res`, before or after `next()`, and an error raised after that replaces it with the error's NAK. A middleware that returns a response without calling `next()` replies with it; one that returns nothing sends no reply. `ctx.ack()` gives only `AA` or `CA`: a NAK is the reply to a throw.
 
-A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`) or that the parser throws on runs only the global middleware, and is answered `AE` whatever they return or write: a message whose content was never read is never accepted. An `ACK`, and a payload that does not start with an MSH such as an empty frame, get no reply unless a handler or middleware gives one. No reply carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
+A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`) or that the parser throws on runs only the global middleware, and is answered with the NAK of the latest error whatever they return or write, `AE` unless a middleware throws another: a message whose content was never read is never accepted. An `ACK`, and a payload that does not start with an MSH such as an empty frame, get no reply unless a handler or middleware gives one. No reply carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
 
-`ctx.error` holds the latest error the message raised, and the reply answers the first. A middleware that throws once `ctx.error` holds an error replaces it; to keep it, pass it as the new error's `cause`. A `next()` called a second time throws `MllpServerError` `NEXT_CALLED_TWICE`, and is answered as a middleware throw.
+`ctx.error` holds the latest error the message raised, and the reply answers it. An error a middleware throws after the route handler replied replaces that reply too: the sender gets the NAK, and may send the message again. A middleware changes the NAK's code by throwing an `AckException` after `next()`, with the error it answers as its `cause`. A `next()` called a second time throws `MllpServerError` `NEXT_CALLED_TWICE`, and is answered as a middleware throw.
 
 The acknowledgment answers the MSH as the app's parser read it, copied when the message arrives: neither the transforms `ctx.tree()` runs nor a handler that changes the tree changes it. A payload that did not decode or parse is read by `@glion/parser`, with U+FFFD for each byte that is not UTF-8, only to answer it.
 
@@ -166,6 +167,8 @@ An acknowledgment is built by [`acknowledge()`](#acknowledgeorigin-options).
 Middleware functions receive the request context and a `next()` callback. Pre-work runs before `next()`; post-work runs after. Returning a response from any middleware short-circuits the handler. `await next()` throws only when called a second time: after it, `ctx.res` is the reply and `ctx.error` the error the message raised, if any. A reply written after `next()` replaces the NAK of an error, so check `ctx.error` first.
 
 ```ts
+import { AckApplicationReject } from "@glion/ack";
+
 // Global middleware — runs for every message.
 app.use(async (ctx, next) => {
   const start = Date.now();
@@ -179,10 +182,10 @@ app.use("ADT^*", async (ctx, next) => {
   await next();
 });
 
-// Short-circuit: return a response without calling next().
+// Short-circuit: throw without calling next().
 app.use(async (ctx, next) => {
   if (!isAuthorized(ctx.connection.remoteAddress)) {
-    return ctx.ack({ code: AckCode.ApplicationReject });
+    throw new AckApplicationReject("Sender not allowed", {});
   }
   await next();
 });
@@ -202,23 +205,23 @@ Available in every middleware and handler. The pipeline is lazy: only the decode
 
 ### Sync properties
 
-| Property               | Description                                                                                                        |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `ctx.req.raw`          | The payload decoded as UTF-8; empty when it is not UTF-8.                                                          |
-| `ctx.req.bytes`        | Raw bytes from the MLLP frame.                                                                                     |
-| `ctx.connection`       | `{ id, remoteAddress, remotePort, localPort, secure, state }`.                                                     |
-| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`). The routing fields are read from the MSH when the payload does not decode or parse.        |
-| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                            |
-| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                        |
-| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                           |
-| `ctx.controlId`        | MSH-10 message control ID.                                                                                         |
-| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire.                                                            |
-| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).                                                                     |
-| `ctx.set(key, value)`  | Store a variable.                                                                                                  |
-| `ctx.get(key)`         | Retrieve a variable.                                                                                               |
-| `ctx.var`              | Read-only snapshot of all variables.                                                                               |
-| `ctx.error`            | The latest error the message raised, or `undefined`. Read-only.                                                    |
-| `ctx.ack(options?)`    | The acknowledgment of this message as a reply: `acknowledge()` of its MSH as the app's parser read it, serialized. |
+| Property               | Description                                                                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctx.req.raw`          | The payload decoded as UTF-8; empty when it is not UTF-8.                                                                                 |
+| `ctx.req.bytes`        | Raw bytes from the MLLP frame.                                                                                                            |
+| `ctx.connection`       | `{ id, remoteAddress, remotePort, localPort, secure, state }`.                                                                            |
+| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`). The routing fields are read from the MSH when the payload does not decode or parse.                               |
+| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                   |
+| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                                               |
+| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                                                  |
+| `ctx.controlId`        | MSH-10 message control ID.                                                                                                                |
+| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire.                                                                                   |
+| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).                                                                                            |
+| `ctx.set(key, value)`  | Store a variable.                                                                                                                         |
+| `ctx.get(key)`         | Retrieve a variable.                                                                                                                      |
+| `ctx.var`              | Read-only snapshot of all variables.                                                                                                      |
+| `ctx.error`            | The latest error the message raised, or `undefined`. Read-only.                                                                           |
+| `ctx.ack(options?)`    | The acknowledgment of this message as a reply: `acknowledge()` of its MSH as the app's parser read it, serialized. MSA-1 is `AA` or `CA`. |
 
 ### Async methods
 
@@ -265,11 +268,14 @@ app.on("ORU^R01", async (ctx) => {
 Most middleware only needs routing fields or raw MSH data — both available synchronously from `ctx.ast`. Reach for `await ctx.tree()` only when you genuinely need the transformed tree.
 
 ```ts
+import { AckApplicationError, AckApplicationReject } from "@glion/ack";
+import type { Middleware } from "@glion/mllp";
+
 // Good — sync, fast, no pipeline cost.
 function authMiddleware(): Middleware {
   return (ctx, next) => {
     if (!isAuthorized(ctx.connection.remoteAddress)) {
-      return ctx.ack({ code: AckCode.ApplicationReject });
+      throw new AckApplicationReject("Sender not allowed", {});
     }
     return next();
   };
@@ -280,7 +286,7 @@ function validationMiddleware(): Middleware {
   return async (ctx, next) => {
     const tree = await ctx.tree();
     if (!isValid(tree)) {
-      return ctx.ack({ code: AckCode.ApplicationError });
+      throw new AckApplicationError("Message is not valid", {});
     }
     return next();
   };
@@ -289,10 +295,10 @@ function validationMiddleware(): Middleware {
 
 ## Error handling
 
-`await next()` throws only when called a second time. After it, `ctx.error` is the error the message raised and `ctx.res` its reply. A middleware logs the error there, and may replace the reply:
+`await next()` throws only when called a second time. After it, `ctx.error` is the error the message raised and `ctx.res` its reply. A middleware logs the error there, and may answer it with another NAK by throwing:
 
 ```ts
-import { AckCode } from "@glion/ack";
+import { AckApplicationReject } from "@glion/ack";
 
 app.use(async (ctx, next) => {
   await next();
@@ -300,12 +306,12 @@ app.use(async (ctx, next) => {
     logger.error(ctx.error);
   }
   if (ctx.error instanceof UnknownPatient) {
-    ctx.res = ctx.ack({ code: AckCode.ApplicationReject });
+    throw new AckApplicationReject("Unknown patient", { cause: ctx.error });
   }
 });
 ```
 
-Register it with `app.use()` before other middleware so it wraps them all. An error a middleware throws once `ctx.error` holds one replaces it, and the reply still answers the first; pass the first as the new error's `cause` to keep it. `onError` sees no error a message raised.
+Register it with `app.use()` before other middleware so it wraps them all. An error a middleware throws replaces `ctx.error` and the reply; the error it answers stays on its `cause`. `onError` sees no error a message raised.
 
 ## Connections
 

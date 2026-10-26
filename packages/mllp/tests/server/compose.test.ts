@@ -116,18 +116,33 @@ describe("compose", () => {
     expect((caught as { code?: string }).code).toBe("NEXT_CALLED_TWICE");
   });
 
-  it("keeps a returned reply when a middleware outside it throws", async () => {
-    const ok = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1" };
+  it("replaces a returned reply with the NAK of a middleware outside it that throws", async () => {
+    const nak = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1" };
     const outer: Middleware = async (_ctx, next) => {
       await next();
       throw new Error("audit write failed");
     };
     const ctx = makeCtx();
 
-    await compose([outer, () => ok], () => ({
-      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1",
-    }))(ctx);
-    expect(ctx.res).toBe(ok);
+    await compose(
+      [outer, () => ({ raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1" })],
+      () => nak
+    )(ctx);
+    expect(ctx.res).toBe(nak);
+  });
+
+  it("writes the NAK of the latest error when two middleware throw", async () => {
+    const outer: Middleware = async (_ctx, next) => {
+      await next();
+      throw new Error("second");
+    };
+    const inner: Middleware = () => {
+      throw new Error("first");
+    };
+    const ctx = makeCtx();
+
+    await compose([outer, inner], (error) => ({ raw: error.message }))(ctx);
+    expect(ctx.res).toEqual({ raw: "second" });
   });
 
   it("replaces a reply written to ctx.res when a middleware outside it throws", async () => {

@@ -6,8 +6,10 @@ import {
   Severity,
 } from "@glion/ack";
 import type { AckNakCode } from "@glion/ack";
+import { toHl7v2 } from "@glion/to-hl7v2";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
+import { acknowledge } from "./acknowledge";
 import { compose, isResponse } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
@@ -138,18 +140,18 @@ export class Mllp {
    * No reply carries MSA-3: an error's `message` and an `AckException`'s
    * `text` are never sent.
    *
-   * A middleware throw is answered the same way, unless the route handler or
-   * a middleware has returned a reply; then that reply stands. A reply a
-   * middleware writes to `ctx.res` stands until an error replaces it. A route
-   * filter that throws runs only the global middleware and is answered as a
-   * throw. A payload that does not decode or parse runs only the global
-   * middleware, and its reply is `AE` whatever they return or write: a
-   * message whose content was never read is never accepted. An error's
-   * `message` is never sent. An `ACK`, and a payload that does not start
-   * with an MSH, get no reply unless a handler or middleware gives one.
+   * A middleware throw is answered the same way. A middleware replaces the
+   * reply by returning a response or writing `ctx.res`, and an error raised
+   * after it replaces it with the error's NAK. A route filter that throws
+   * runs only the global middleware and is answered as a throw. A payload
+   * that does not decode or parse runs only the global middleware, and its
+   * reply is the NAK of the latest error whatever they return or write: a
+   * message whose content was never read is never accepted. An `ACK`, and a
+   * payload that does not start with an MSH, get no reply unless a handler
+   * or middleware gives one.
    *
-   * `ctx.error` holds the latest error the message raised; the reply answers
-   * the first.
+   * `ctx.error` holds the latest error the message raised, and the reply
+   * answers it.
    *
    * @throws {MllpServerError} `NO_PARSER` when no processor has been
    *   registered via `app.parser()`.
@@ -180,7 +182,11 @@ export class Mllp {
     const answerable =
       message.header.children.length > 0 && ctx.messageType !== "ACK";
     const nakOf = (error: Error): Response | undefined =>
-      answerable ? ctx.ack({ code: nakCode(error) }) : undefined;
+      answerable
+        ? {
+            raw: toHl7v2(acknowledge(message.header, { code: nakCode(error) })),
+          }
+        : undefined;
 
     // A payload that did not decode or parse: its content was never read.
     const received = message.error;
@@ -189,11 +195,11 @@ export class Mllp {
     let middlewares: Middleware[] = [];
     if (received) {
       // Content never read is never accepted: the middleware observe the
-      // message, and the error's NAK is the reply.
+      // message, and the latest error's NAK is the reply.
       ctx.res = nak;
       middlewares = this.#router
         .globalMiddleware()
-        .map((middleware) => keepingReply(middleware, nak));
+        .map((middleware) => keepingReply(middleware, () => nak));
     } else {
       try {
         const matched = this.#router.match(ctx);
@@ -207,14 +213,8 @@ export class Mllp {
       }
     }
 
-    // The first error decides the NAK; a later one only replaces ctx.error.
-    let answered = Boolean(received);
     const answer = (error: Error): Response | undefined => {
       ctx.error = error;
-      if (answered) {
-        return ctx.res ?? nak;
-      }
-      answered = true;
       nak = nakOf(error);
       return nak;
     };
@@ -229,16 +229,19 @@ function noReply(): undefined {
   return undefined;
 }
 
-/** `middleware`, its return value dropped and `nak` kept as the reply. */
+/**
+ * `middleware`, its return value dropped and the current `nak()` kept as the
+ * reply.
+ */
 function keepingReply(
   middleware: Middleware,
-  nak: Response | undefined
+  nak: () => Response | undefined
 ): Middleware {
   return async (ctx, next) => {
     try {
       await middleware(ctx, next);
     } finally {
-      ctx.res = nak;
+      ctx.res = nak();
     }
   };
 }

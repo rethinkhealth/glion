@@ -12,6 +12,7 @@ export { acknowledge } from "./server/acknowledge";
 export type { AcknowledgeOptions } from "./server/acknowledge";
 export { Mllp } from "./server/mllp";
 export type {
+  AckOptions,
   ConnectionInfo,
   Context,
   Handler,

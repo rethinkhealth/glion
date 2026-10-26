@@ -532,23 +532,23 @@ describe("acknowledgment defaults", () => {
     expect(ran).toEqual([]);
   });
 
-  it("lets a middleware replace the reply to an error after next()", async () => {
+  it("lets a middleware answer an error with an accept after next()", async () => {
     const app = createApp();
     app.use(async (ctx, next) => {
       await next();
       if (ctx.error) {
-        ctx.res = ctx.ack({ code: AckCode.ApplicationReject });
+        ctx.res = ctx.ack();
       }
     });
     app.on("ADT^A01", () => {
-      throw new Error("database unavailable");
+      throw new Error("duplicate key: the message is already saved");
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
   });
 
-  it("keeps the reply when a middleware throws after the route handler replied", async () => {
+  it("replies with the NAK of an error a middleware throws after the route handler replied", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
     const thrown = new Error("audit write failed");
@@ -562,11 +562,11 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
-    expect(seen).toEqual({ error: thrown, msa: "MSA|AA|MSG001" });
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect(seen).toEqual({ error: thrown, msa: "MSA|AE|MSG001" });
   });
 
-  it("keeps a middleware's rewrite of the reply when a middleware outside it throws", async () => {
+  it("replaces a middleware's rewrite of the reply with the NAK of a middleware outside it that throws", async () => {
     const app = createApp();
     app.use(async (_ctx, next) => {
       await next();
@@ -581,18 +581,22 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|CA|MSG001");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
   });
 
-  it("answers the first error and records the second in ctx.error when a middleware throws it", async () => {
+  it("answers the error a middleware throws for an earlier one, so a middleware changes the NAK's code", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
-    const first = new AckApplicationReject("Rejected", {});
-    const second = new Error("audit write failed");
+    const first = new Error("patient lookup returned no rows");
+    const second = new AckApplicationReject("Unknown patient", {
+      cause: first,
+    });
     app.use(observe(seen));
-    app.use(async (_ctx, next) => {
+    app.use(async (ctx, next) => {
       await next();
-      throw second;
+      if (ctx.error === first) {
+        throw second;
+      }
     });
     app.on("ADT^A01", () => {
       throw first;
@@ -601,14 +605,15 @@ describe("acknowledgment defaults", () => {
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
     expect(seen.error).toBe(second);
+    expect(second.cause).toBe(first);
   });
 
-  it("keeps the route handler's reply when two middleware throw after it", async () => {
+  it("answers the outermost of two errors middleware throw after the route handler", async () => {
     const app = createApp();
     const saved: string[] = [];
     app.use(async (_ctx, next) => {
       await next();
-      throw new Error("metrics backend unavailable");
+      throw new AckApplicationReject("Rejected", {});
     });
     app.use(async (_ctx, next) => {
       await next();
@@ -619,7 +624,7 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
     expect(saved).toEqual(["MSG001"]);
   });
 
@@ -766,7 +771,7 @@ describe("acknowledgment defaults", () => {
     expect(seen.msa).toBe("MSA|AE|MSG001");
   });
 
-  it("replies AE to a payload that is not UTF-8 when a middleware throws for it", async () => {
+  it("replies with the NAK of a middleware's throw to a payload that is not UTF-8", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
     const thrown = new AckApplicationReject("Sender not allowed", {});
@@ -776,7 +781,7 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
     expect(seen.error).toBe(thrown);
   });
 
@@ -790,11 +795,25 @@ describe("acknowledgment defaults", () => {
     });
     app.use(async (ctx, next) => {
       await next();
-      ctx.res = ctx.ack({ code: AckCode.ApplicationReject });
+      ctx.res = ctx.ack();
     });
 
     const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
     expect(seen).toEqual([response?.raw, response?.raw]);
+  });
+
+  it("keeps the NAK of the latest error to a payload that is not UTF-8 when a middleware outside it writes an accept", async () => {
+    const app = createApp();
+    app.use(async (ctx, next) => {
+      await next();
+      ctx.res = ctx.ack();
+    });
+    app.use(() => {
+      throw new AckApplicationReject("Sender not allowed", {});
+    });
+
+    const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
   });
 
   it("reads the routing fields of a payload that is not UTF-8 from its MSH", async () => {
@@ -828,7 +847,7 @@ describe("acknowledgment defaults", () => {
     expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
   });
 
-  it("keeps a middleware's reply given without next() when a middleware outside it throws", async () => {
+  it("replaces a middleware's reply given without next() with the NAK of a middleware outside it that throws", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
     app.use(observe(seen));
@@ -839,7 +858,7 @@ describe("acknowledgment defaults", () => {
     app.use((ctx) => ctx.ack());
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(seen.error?.message).toBe("metrics backend unavailable");
   });
 
@@ -914,7 +933,7 @@ describe("acknowledgment defaults", () => {
     expect(response?.raw.split("\r")[1]).toBe("MSA|CR|MSG001");
   });
 
-  it("keeps the reply and records NEXT_CALLED_TWICE when a middleware calls next() a second time", async () => {
+  it("replies AE and records NEXT_CALLED_TWICE when a middleware calls next() a second time", async () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
     const saved: string[] = [];
@@ -930,7 +949,7 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect((seen.error as MllpServerError).code).toBe("NEXT_CALLED_TWICE");
     expect(saved).toEqual(["MSG001"]);
   });
