@@ -69,7 +69,7 @@
     "@glion/mllp-codec": "workspace:*",
     "@glion/testing": "workspace:*",
     "@glion/tsconfig": "workspace:*",
-    "@types/node": "25.6.0",
+    "@types/node": "26.6.5",
     "@types/react": "^18.3.0",
     "@vitest/coverage-v8": "4.1.12",
     "execa": "^9.5.0",
