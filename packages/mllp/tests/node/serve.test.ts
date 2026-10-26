@@ -685,7 +685,8 @@ describe("serve() integration", () => {
     it("closes a connection past the limit before reading from it, and keeps the open one", async () => {
       const app = createApp().on("ADT^A01", () => ({ raw: ACK }));
       const connected: number[] = [];
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         maxConnections: 1,
         onConnect: ({ id }) => {
           connected.push(id);
@@ -729,7 +730,8 @@ describe("serve() integration", () => {
         ],
       });
       const app = createApp().on("ADT^A01", () => ({ raw: ACK }));
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         maxConnections: 1,
         port: 0,
         tls: { cert: pem.cert, key: pem.private },
