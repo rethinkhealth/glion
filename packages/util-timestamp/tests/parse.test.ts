@@ -150,7 +150,7 @@ describe("parseTM", () => {
 
   it("reads hours and minutes with an offset west of UTC", () => {
     expect(parseTM("1430-0500")).toStrictEqual({
-      data: { hour: 14, minute: 30, offset: -300, precision: "minute" },
+      data: { hour: 14, minute: 30, offset: "-0500", precision: "minute" },
       success: true,
     });
   });
@@ -161,7 +161,7 @@ describe("parseTM", () => {
         fraction: "1230",
         hour: 14,
         minute: 30,
-        offset: 345,
+        offset: "+0545",
         precision: "second",
         second: 45,
       },
@@ -237,14 +237,14 @@ describe("parseTM", () => {
   });
 
   // From v2.9, `-0000` is UTC with no local time zone known, and `+0000` a
-  // local time zone at offset zero; the sign of zero keeps them apart.
-  it("reads -0000 as offset -0 and +0000 as offset 0", () => {
+  // local time zone at offset zero.
+  it("keeps -0000 and +0000 as written", () => {
     expect(parseTM("12-0000")).toStrictEqual({
-      data: { hour: 12, offset: -0, precision: "hour" },
+      data: { hour: 12, offset: "-0000", precision: "hour" },
       success: true,
     });
     expect(parseTM("12+0000")).toStrictEqual({
-      data: { hour: 12, offset: 0, precision: "hour" },
+      data: { hour: 12, offset: "+0000", precision: "hour" },
       success: true,
     });
   });
@@ -294,7 +294,7 @@ describe("parseDTM", () => {
         hour: 14,
         minute: 30,
         month: 3,
-        offset: -300,
+        offset: "-0500",
         precision: "second",
         second: 45,
         year: 2026,
@@ -305,7 +305,7 @@ describe("parseDTM", () => {
 
   it("reads an offset on a value of any precision", () => {
     expect(parseDTM("20260307-0500")).toStrictEqual({
-      data: { day: 7, month: 3, offset: -300, precision: "day", year: 2026 },
+      data: { day: 7, month: 3, offset: "-0500", precision: "day", year: 2026 },
       success: true,
     });
   });

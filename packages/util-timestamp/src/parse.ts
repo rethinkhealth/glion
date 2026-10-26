@@ -114,7 +114,7 @@ export function parseDT(value: string): ParseResult<DT> {
  * @example
  *   ```ts
  *   parseTM("1430-0500");
- *   // { success: true, data: { hour: 14, minute: 30, offset: -300, precision: "minute" } }
+ *   // { success: true, data: { hour: 14, minute: 30, offset: "-0500", precision: "minute" } }
  *   ```;
  */
 export function parseTM(value: string): ParseResult<TM> {
@@ -143,7 +143,7 @@ export function parseTM(value: string): ParseResult<TM> {
     data.fraction = layout.fraction;
   }
   if (layout.offset !== undefined) {
-    data.offset = layout.offset.total;
+    data.offset = layout.offset.text;
   }
   return { data, success: true };
 }
@@ -161,7 +161,7 @@ export function parseTM(value: string): ParseResult<TM> {
  *   ```ts
  *   parseDTM("20260307143045-0500");
  *   // { success: true, data: { year: 2026, month: 3, day: 7, hour: 14,
- *   //   minute: 30, second: 45, offset: -300, precision: "second" } }
+ *   //   minute: 30, second: 45, offset: "-0500", precision: "second" } }
  *   ```;
  */
 export function parseDTM(value: string): ParseResult<DTM> {
@@ -188,7 +188,7 @@ export function parseDTM(value: string): ParseResult<DTM> {
     data.fraction = layout.fraction;
   }
   if (layout.offset !== undefined) {
-    data.offset = layout.offset.total;
+    data.offset = layout.offset.text;
   }
   return { data, success: true };
 }

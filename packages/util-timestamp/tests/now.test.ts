@@ -8,6 +8,7 @@ import { Precision } from "../src/precision";
 import type { DTM } from "../src/types";
 
 const MILLISECONDS_PER_MINUTE = 60_000;
+const MINUTES_PER_HOUR = 60;
 
 /** Sets the clock `nowDTM` reads to `instant`, an ISO 8601 UTC time. */
 function at(instant: string): void {
@@ -36,7 +37,7 @@ describe("nowDTM in the host's time zone", () => {
       hour: 2,
       minute: 30,
       month: 1,
-      offset: -300,
+      offset: "-0500",
       precision: "second",
       second: 17,
       year: 2024,
@@ -82,7 +83,7 @@ describe("nowDTM in the host's time zone", () => {
 // A `timeZone` reads the clock in that zone, whatever the host's zone is.
 describe("nowDTM in a named time zone", () => {
   // The host is in New York (02:30 EST), but the value is read in UTC: 07:30.
-  // UTC has no local time zone, so the offset is -0, written `-0000`.
+  // UTC has no local time zone, so the offset is `-0000`.
   it("reads the fields and the offset in that zone, not the host's", () => {
     at("2024-01-15T07:30:00.123Z");
     expect(nowDTM({ timeZone: "UTC" })).toStrictEqual({
@@ -91,7 +92,7 @@ describe("nowDTM in a named time zone", () => {
       hour: 7,
       minute: 30,
       month: 1,
-      offset: -0,
+      offset: "-0000",
       precision: "second",
       second: 0,
       year: 2024,
@@ -238,7 +239,7 @@ describe("nowDTM precision", () => {
       hour: 2,
       minute: 30,
       month: 1,
-      offset: -300,
+      offset: "-0500",
       precision: "second",
       second: 45,
       year: 2024,
@@ -293,6 +294,13 @@ const instants = fc.date({
   noInvalidDate: true,
 });
 
+/** The minutes from UTC `offset` gives: `"-0500"` is `-300`. */
+function minutesOf(offset = "+0000"): number {
+  const minutes =
+    Number(offset.slice(1, 3)) * MINUTES_PER_HOUR + Number(offset.slice(3));
+  return offset.startsWith("-") ? -minutes : minutes;
+}
+
 /**
  * The instant `value` names: its fields read as if they were UTC, less its
  * offset. `20240115023000-0500` is 02:30 UTC less -5 h, so 07:30 UTC.
@@ -307,7 +315,7 @@ function instantOf(value: DTM): number {
     value.second,
     Number(value.fraction)
   );
-  return wallClock - (value.offset ?? 0) * MILLISECONDS_PER_MINUTE;
+  return wallClock - minutesOf(value.offset) * MILLISECONDS_PER_MINUTE;
 }
 
 /** The instant `text` names, or `undefined` when it is not a valid DTM. */

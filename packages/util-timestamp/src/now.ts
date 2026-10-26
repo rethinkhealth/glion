@@ -8,16 +8,19 @@ import type { DTM } from "./types";
 // 2. The moment moved by the offset and read in UTC is the zone's wall clock:
 //    2024-01-15 02:30:00.123.
 // 3. `fieldsOf` keeps the wall clock's fields down to `precision`, and
-//    `nowDTM` adds `fraction` and `offset`: `20240115023000.123-0500`. A
-//    year, month, or day is a date and has no offset by default: `20240115`.
+//    `nowDTM` adds `fraction` and `-300` as `offset: "-0500"`:
+//    `20240115023000.123-0500`. A year, month, or day is a date and has no
+//    offset by default: `20240115`.
 
 const MILLISECONDS_PER_MINUTE = 60_000;
+const MINUTES_PER_HOUR = 60;
 const FRACTION_DIGITS = 3;
 
 const PRECISIONS = Object.values(Precision);
 
-// The zones Intl resolves for UTC with no local time zone: `Etc/UTC`, `GMT`,
-// and `Zulu` resolve to `UTC`, and a host with `TZ=GMT` to `+00:00`.
+// The zones Intl resolves for UTC with no local time zone, written `-0000`:
+// `Etc/UTC`, `GMT`, and `Zulu` resolve to `UTC`, and a host with `TZ=GMT` to
+// `+00:00`.
 const UNIVERSAL_ZONES: ReadonlySet<string> = new Set(["UTC", "+00:00"]);
 
 const DATE_PRECISIONS: ReadonlySet<Precision> = new Set([
@@ -89,8 +92,8 @@ function offsetAt(date: Date, timeZone: string | undefined): number {
   // Stryker disable next-line ConditionalExpression,BlockStatement: with `TZ` fixed for the process, Intl with no `timeZone` reads the same zone as `Date`, so `if (false)` and the empty block give the same offset; `if (true)` is killed by the named-zone tests.
   if (timeZone === undefined) {
     // The host's zone: `Date` already knows its offset.
-    // `getTimezoneOffset()` is positive west of UTC; `0 -` keeps UTC at `+0`.
-    return 0 - date.getTimezoneOffset();
+    // `getTimezoneOffset()` is positive west of UTC.
+    return -date.getTimezoneOffset();
   }
   // A named zone: Intl reads the wall clock there (02:30:00 in New York), and
   // that time, read as if it were UTC, minus the real moment (07:30:00 UTC) is
@@ -115,6 +118,20 @@ function offsetAt(date: Date, timeZone: string | undefined): number {
  */
 function isUniversal(timeZone: string | undefined): boolean {
   return UNIVERSAL_ZONES.has(formatterFor(timeZone).resolvedOptions().timeZone);
+}
+
+/**
+ * `minutes` from UTC as `+/-HHMM`, or `-0000` when `timeZone` is UTC with no
+ * local time zone: `-300` is `"-0500"`.
+ */
+function offsetText(minutes: number, timeZone: string | undefined): string {
+  if (isUniversal(timeZone)) {
+    return "-0000";
+  }
+  const sign = minutes < 0 ? "-" : "+";
+  const magnitude = Math.abs(minutes);
+  const hours = String(Math.floor(magnitude / MINUTES_PER_HOUR));
+  return `${sign}${hours.padStart(2, "0")}${String(magnitude % MINUTES_PER_HOUR).padStart(2, "0")}`;
 }
 
 /** The fields of `wallClock`, read in UTC, from the year down to `precision`. */
@@ -150,9 +167,9 @@ function fieldsOf(wallClock: Date, precision: Precision): DTM {
  * field down to the second, and the milliseconds as a 3-digit `fraction`; with
  * it, the value stops at that field and has no `fraction`. A value that stops
  * at the year, month, or day has no offset unless `options.offset` is `true`.
- * In UTC, such as `UTC`, `Etc/UTC`, or `GMT`, the offset is `-0`, written
- * `-0000`; a zone at offset zero with local time, such as `Europe/London` in
- * winter, gives `0`, written `+0000`.
+ * In UTC, such as `UTC`, `Etc/UTC`, or `GMT`, the offset is `-0000`; a zone
+ * at offset zero with local time, such as `Europe/London` in winter, gives
+ * `+0000`.
  *
  * @example
  *   ```ts
@@ -188,8 +205,7 @@ export function nowDTM(options: NowDTMOptions = {}): DTM {
     );
   }
   if (withOffset) {
-    // `-0000` is UTC with no local time zone known (HL7v2 v2.9).
-    value.offset = isUniversal(timeZone) ? -0 : offset;
+    value.offset = offsetText(offset, timeZone);
   }
   return value;
 }

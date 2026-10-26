@@ -72,8 +72,7 @@ describe("format of parse is the value", () => {
     );
   });
 
-  // Mutant: `formatOffset` writes an offset west of UTC with `+`. Fails on
-  // `"09-0545"`.
+  // Mutant: `writeTime` leaves the offset out. Fails on `"09-0545"`.
   it("for every valid TM", () => {
     fc.assert(
       fc.property(tmText, (value) => {
@@ -142,26 +141,13 @@ describe("parseDT accepts exactly the days of the calendar", () => {
 });
 
 describe("formatDTM", () => {
-  it("writes an offset of 0 as +0000", () => {
+  it("writes the offset as given", () => {
     expect(
       formatDTM({
         day: 7,
         hour: 12,
         month: 3,
-        offset: 0,
-        precision: "hour",
-        year: 2026,
-      })
-    ).toBe("2026030712+0000");
-  });
-
-  it("writes an offset of -0 as -0000", () => {
-    expect(
-      formatDTM({
-        day: 7,
-        hour: 12,
-        month: 3,
-        offset: -0,
+        offset: "-0000",
         precision: "hour",
         year: 2026,
       })
@@ -170,11 +156,5 @@ describe("formatDTM", () => {
 
   it("pads a year below 1000 to four digits", () => {
     expect(formatDTM({ precision: "year", year: 99 })).toBe("0099");
-  });
-
-  it("writes an offset east of UTC with +", () => {
-    expect(formatTM({ hour: 9, offset: 345, precision: "hour" })).toBe(
-      "09+0545"
-    );
   });
 });

@@ -1,15 +1,7 @@
 import type { DT, DTM, TM } from "./types";
 
-const MINUTES_PER_HOUR = 60;
-
 function pad(value: number, width: number): string {
   return String(value).padStart(width, "0");
-}
-
-function formatOffset(offset: number): string {
-  const sign = offset < 0 || Object.is(offset, -0) ? "-" : "+";
-  const magnitude = Math.abs(offset);
-  return `${sign}${pad(Math.floor(magnitude / MINUTES_PER_HOUR), 2)}${pad(magnitude % MINUTES_PER_HOUR, 2)}`;
 }
 
 function writeTime(
@@ -29,7 +21,7 @@ function writeTime(
     text += `.${time.fraction}`;
   }
   if (time.offset !== undefined) {
-    text += formatOffset(time.offset);
+    text += time.offset;
   }
   return text;
 }
@@ -59,12 +51,11 @@ export function formatDT(date: DT): string {
 
 /**
  * Writes a TM as HL7v2 text, `HH[MM[SS[.S[S[S[S]]]]]][+/-ZZZZ]`, with the
- * fields `time` has. An `offset` of `0` is written `+0000`, and `-0` is
- * written `-0000`.
+ * fields `time` has.
  *
  * @example
  *   ```ts
- *   formatTM({ hour: 14, minute: 30, offset: -300, precision: "minute" }); // "1430-0500"
+ *   formatTM({ hour: 14, minute: 30, offset: "-0500", precision: "minute" }); // "1430-0500"
  *   ```;
  */
 export function formatTM(time: TM): string {
@@ -73,8 +64,7 @@ export function formatTM(time: TM): string {
 
 /**
  * Writes a DTM as HL7v2 text, `YYYY[MM[DD[HH[MM[SS[.S[S[S[S]]]]]]]]][+/-ZZZZ]`,
- * with the fields `dateTime` has. An `offset` of `0` is written `+0000`, and
- * `-0` is written `-0000`.
+ * with the fields `dateTime` has.
  *
  * @example
  *   ```ts

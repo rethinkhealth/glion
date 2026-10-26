@@ -19,7 +19,7 @@ import { formatDTM, parseDTM } from "@glion/util-timestamp";
 
 const result = parseDTM("20260307143045-0500");
 // { success: true, data: { year: 2026, month: 3, day: 7, hour: 14,
-//   minute: 30, second: 45, offset: -300, precision: "second" } }
+//   minute: 30, second: 45, offset: "-0500", precision: "second" } }
 
 if (result.success) {
   formatDTM(result.data); // "20260307143045-0500"
@@ -46,7 +46,7 @@ parseDT("2026-03-07"); // { success: false, issue: { code: "invalid-format" } }
 Parses a TM value, `HH[MM[SS[.S[S[S[S]]]]]][+/-ZZZZ]`.
 
 ```ts
-parseTM("1430-0500"); // { success: true, data: { hour: 14, minute: 30, offset: -300, precision: "minute" } }
+parseTM("1430-0500"); // { success: true, data: { hour: 14, minute: 30, offset: "-0500", precision: "minute" } }
 parseTM("2400"); // { success: false, issue: { code: "hour-out-of-range", hour: 24 } }
 ```
 
@@ -65,13 +65,13 @@ Write a value as HL7v2 text, with the fields it has. For every valid value, `for
 
 ```ts
 formatDT({ year: 2026, month: 3, precision: "month" }); // "202603"
-formatTM({ hour: 9, offset: 345, precision: "hour" }); // "09+0545"
+formatTM({ hour: 9, offset: "+0545", precision: "hour" }); // "09+0545"
 formatDTM({ year: 99, precision: "year" }); // "0099"
 ```
 
 ### `nowDTM(options?: NowDTMOptions): DTM`
 
-Returns the current time as a DTM, read in the host's time zone or in `timeZone`, with that zone's offset from UTC at this moment, daylight saving time included. Without a `precision`, the value gives every field down to the second, and the milliseconds as a 3-digit `fraction`. A value that stops at the year, month, or day is a date and has no offset unless `offset` is `true`. In UTC, such as `UTC`, `Etc/UTC`, or `GMT`, the offset is `-0`, written `-0000`; a zone at offset zero with local time, such as `Europe/London` in winter, gives `+0000`. The fields are the date and time in that zone: a value for a facility in another zone needs that zone. Throws Intl's `RangeError` when `timeZone` is not a time zone Intl knows.
+Returns the current time as a DTM, read in the host's time zone or in `timeZone`, with that zone's offset from UTC at this moment, daylight saving time included. Without a `precision`, the value gives every field down to the second, and the milliseconds as a 3-digit `fraction`. A value that stops at the year, month, or day is a date and has no offset unless `offset` is `true`. In UTC, such as `UTC`, `Etc/UTC`, or `GMT`, the offset is `-0000`; a zone at offset zero with local time, such as `Europe/London` in winter, gives `+0000`. The fields are the date and time in that zone: a value for a facility in another zone needs that zone. Throws Intl's `RangeError` when `timeZone` is not a time zone Intl knows.
 
 In a TS, HL7v2 v2.1 accepts only the minute or the second, with no `fraction`; v2.2 adds the day and `fraction`; v2.3 and later accept every precision.
 
@@ -95,17 +95,17 @@ formatDTM(nowDTM({ precision: Precision.Day })); // "20240115"
 
 The parsed value. A field is present only when the value gives it.
 
-| Field       | Type     | In          | Description                                                                                                                          |
-| ----------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `year`      | `number` | DT, DTM     | The year as written, `0` to `9999`                                                                                                   |
-| `month`     | `number` | DT, DTM     | `1` to `12`                                                                                                                          |
-| `day`       | `number` | DT, DTM     | `1` to the number of days in the month                                                                                               |
-| `hour`      | `number` | TM, DTM     | `0` to `23`; always present in a TM                                                                                                  |
-| `minute`    | `number` | TM, DTM     | `0` to `59`                                                                                                                          |
-| `second`    | `number` | TM, DTM     | `0` to `59`                                                                                                                          |
-| `fraction`  | `string` | TM, DTM     | The 1 to 4 digits after the second, as written: `"1230"` for `.1230`                                                                 |
-| `offset`    | `number` | TM, DTM     | Minutes from UTC, positive east of UTC: `-0500` is `-300`. `-0000` is `-0`, UTC with no local time zone known (v2.9); `+0000` is `0` |
-| `precision` | `string` | DT, TM, DTM | The last field the value gives, one of the `Precision` values                                                                        |
+| Field       | Type     | In          | Description                                                                                                                                                     |
+| ----------- | -------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `year`      | `number` | DT, DTM     | The year as written, `0` to `9999`                                                                                                                              |
+| `month`     | `number` | DT, DTM     | `1` to `12`                                                                                                                                                     |
+| `day`       | `number` | DT, DTM     | `1` to the number of days in the month                                                                                                                          |
+| `hour`      | `number` | TM, DTM     | `0` to `23`; always present in a TM                                                                                                                             |
+| `minute`    | `number` | TM, DTM     | `0` to `59`                                                                                                                                                     |
+| `second`    | `number` | TM, DTM     | `0` to `59`                                                                                                                                                     |
+| `fraction`  | `string` | TM, DTM     | The 1 to 4 digits after the second, as written: `"1230"` for `.1230`                                                                                            |
+| `offset`    | `string` | TM, DTM     | The offset from UTC as written, `+/-HHMM`: `"-0500"`. From v2.9, `"-0000"` is UTC with no local time zone known, and `"+0000"` a local time zone at offset zero |
+| `precision` | `string` | DT, TM, DTM | The last field the value gives, one of the `Precision` values                                                                                                   |
 
 ### `Precision`
 

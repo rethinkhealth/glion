@@ -8,7 +8,6 @@ const MINUS = 45;
 
 const MAX_FRACTION_DIGITS = 4;
 const OFFSET_DIGITS = 4;
-const MINUTES_PER_HOUR = 60;
 
 const MAX_MONTH = 12;
 const MAX_HOUR = 23;
@@ -22,8 +21,6 @@ export interface Offset {
   text: string;
   hours: number;
   minutes: number;
-  /** Minutes from UTC, positive east of UTC; `-0000` is `-0`. */
-  total: number;
 }
 
 /**
@@ -67,15 +64,10 @@ function readOffset(value: string, start: number): Offset | undefined {
   if (!hasFourDigits) {
     return undefined;
   }
-  const hours = numberAt(value, start + 1, 2);
-  const minutes = numberAt(value, start + 3, 2);
-  const magnitude = hours * MINUTES_PER_HOUR + minutes;
-  const isWest = value.codePointAt(start) === MINUS;
   return {
-    hours,
-    minutes,
+    hours: numberAt(value, start + 1, 2),
+    minutes: numberAt(value, start + 3, 2),
     text: value.slice(start),
-    total: isWest ? -magnitude : magnitude,
   };
 }
 

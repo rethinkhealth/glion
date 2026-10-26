@@ -30,13 +30,11 @@ export interface TM {
   /** The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`. */
   fraction?: string;
   /**
-   * The offset from UTC in minutes, positive east of UTC: `-0500` is `-300`.
-   * Absent when the value gives no offset. `+0000` is `0`, and `-0000` is `-0`:
-   * from HL7v2 v2.9, `-0000` is UTC with no local time zone known, and
-   * `+0000` a local time zone at offset zero. `JSON.stringify` writes `-0` as
-   * `0`.
+   * The offset from UTC as written, `+/-HHMM`: `"-0500"`. Absent when the
+   * value gives no offset. From HL7v2 v2.9, `"-0000"` is UTC with no local
+   * time zone known, and `"+0000"` a local time zone at offset zero.
    */
-  offset?: number;
+  offset?: string;
   /**
    * The last field the value gives: `1430` is `minute`. Digits after the
    * second are in `fraction`, and the precision stays `second`; the offset
@@ -68,13 +66,11 @@ export interface DTM {
   /** The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`. */
   fraction?: string;
   /**
-   * The offset from UTC in minutes, positive east of UTC: `-0500` is `-300`.
-   * Absent when the value gives no offset. `+0000` is `0`, and `-0000` is `-0`:
-   * from HL7v2 v2.9, `-0000` is UTC with no local time zone known, and
-   * `+0000` a local time zone at offset zero. `JSON.stringify` writes `-0` as
-   * `0`.
+   * The offset from UTC as written, `+/-HHMM`: `"-0500"`. Absent when the
+   * value gives no offset. From HL7v2 v2.9, `"-0000"` is UTC with no local
+   * time zone known, and `"+0000"` a local time zone at offset zero.
    */
-  offset?: number;
+  offset?: string;
   /**
    * The last field the value gives, from `year` to `second`: `202603-0500` is
    * `month`. Digits after the second are in `fraction`, and the precision
