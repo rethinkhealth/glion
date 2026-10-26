@@ -4,7 +4,7 @@ HL7v2 DT, TM, and DTM parser and formatter with precision and calendar checks.
 
 ## What it does
 
-Reads an HL7v2 DT (Date), TM (Time), or DTM (Date/Time) value into a plain object holding the fields the value gives, and writes such an object back as HL7v2 text. A value keeps its precision: `202603` is March 2026, with no day. A parse checks the format and the calendar, so `20250229` fails because 2025 is not a leap year. Parsing never throws: it returns the value or the reason it is not valid. The fields are the sender's local time, with the offset when the value gives one. Pure computation, zero runtime dependencies.
+Reads an HL7v2 DT (Date), TM (Time), or DTM (Date/Time) value into a plain object holding the fields the value gives, and writes such an object back as HL7v2 text. A value keeps its precision: `202603` is March 2026, with no day. A parse checks the format and the calendar, so `20250229` fails because 2025 is not a leap year. Parsing never throws: it returns the value or the reason it is not valid. The fields are the sender's local time, with the offset when the value gives one. `nowDTM()` reads the current time, in the host's time zone or a named one, with that zone's offset. Zero runtime dependencies.
 
 ## Install
 
@@ -68,6 +68,28 @@ formatDT({ year: 2026, month: 3, precision: "month" }); // "202603"
 formatTM({ hour: 9, offset: 345, precision: "hour" }); // "09+0545"
 formatDTM({ year: 99, precision: "year" }); // "0099"
 ```
+
+### `nowDTM(options?: NowDTMOptions): DTM`
+
+Returns the current time as a DTM, read in the host's time zone or in `timeZone`, with that zone's offset from UTC at this moment, daylight saving time included. Without a `precision`, the value gives every field down to the second, and the milliseconds as a 3-digit `fraction`. A value that stops at the year, month, or day is a date and has no offset unless `offset` is `true`. The fields are the date and time in that zone: a value for a facility in another zone needs that zone. Throws Intl's `RangeError` when `timeZone` is not a time zone Intl knows.
+
+In a TS, HL7v2 v2.1 accepts only the minute or the second, with no `fraction`; v2.2 adds the day and `fraction`; v2.3 and later accept every precision.
+
+```ts
+import { formatDTM, nowDTM, Precision } from "@glion/util-timestamp";
+
+formatDTM(nowDTM()); // "20240115023000.123-0500"
+formatDTM(nowDTM({ precision: Precision.Second })); // "20240115023000-0500"
+formatDTM(nowDTM({ timeZone: "UTC" })); // "20240115073000.123+0000"
+formatDTM(nowDTM({ offset: false, precision: Precision.Minute })); // "202401150230"
+formatDTM(nowDTM({ precision: Precision.Day })); // "20240115"
+```
+
+| Option      | Type        | Default                                                    | Description                                                       |
+| ----------- | ----------- | ---------------------------------------------------------- | ----------------------------------------------------------------- |
+| `precision` | `Precision` | every field, with `fraction`                               | The last field the value gives. A precision leaves out `fraction` |
+| `timeZone`  | `string`    | the host's time zone                                       | An IANA time zone name, such as `America/New_York` or `UTC`       |
+| `offset`    | `boolean`   | `true` from the hour on, `false` for a year, month, or day | Whether the value gives its offset from UTC                       |
 
 ### `DT`, `TM`, `DTM`
 

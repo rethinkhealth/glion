@@ -11,6 +11,7 @@ export interface DT {
   month?: number;
   /** 1 to the number of days in `month`. */
   day?: number;
+  /** The last field the value gives: `202603` is `month`. */
   precision: Extract<Precision, "year" | "month" | "day">;
 }
 
@@ -33,6 +34,11 @@ export interface TM {
    * Absent when the value gives no offset. `+0000` and `-0000` are both `0`.
    */
   offset?: number;
+  /**
+   * The last field the value gives: `1430` is `minute`. Digits after the
+   * second are in `fraction`, and the precision stays `second`; the offset
+   * does not count.
+   */
   precision: Extract<Precision, "hour" | "minute" | "second">;
 }
 
@@ -63,6 +69,11 @@ export interface DTM {
    * Absent when the value gives no offset. `+0000` and `-0000` are both `0`.
    */
   offset?: number;
+  /**
+   * The last field the value gives, from `year` to `second`: `202603-0500` is
+   * `month`. Digits after the second are in `fraction`, and the precision
+   * stays `second`; the offset does not count.
+   */
   precision: Precision;
 }
 
