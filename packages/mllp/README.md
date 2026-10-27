@@ -232,7 +232,7 @@ Available in every middleware and handler. The pipeline is lazy: only the decode
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ctx.req.raw`          | The payload decoded as UTF-8.                                                                                                                                                         |
 | `ctx.connection`       | `{ id, remoteAddress, remotePort, localPort, secure, state }`.                                                                                                                        |
-| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`). The routing fields are read from the MSH when the payload does not decode or parse.                                                                           |
+| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                                                                                                                                               |
 | `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                                                               |
 | `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                                                                                           |
 | `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                                                                                              |
