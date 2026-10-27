@@ -37,15 +37,23 @@ export const MllpServerErrorCode = {
 export type MllpServerErrorCode =
   (typeof MllpServerErrorCode)[keyof typeof MllpServerErrorCode];
 
+/** The message of each {@link MllpServerErrorCode}. */
+const messages = {
+  INCOMPATIBLE_CHARSET:
+    "The inbound message is not valid UTF-8; only UTF-8 is supported.",
+  NEXT_CALLED_TWICE:
+    "A middleware called `next()` a second time; a middleware calls `next()` at most once.",
+  NO_PARSER:
+    "No parser is registered; `app.parser()` registers the processor that `handle()` reads each message with.",
+  PROTOCOL_VIOLATION:
+    "The MLLP byte stream is not framed as MLLP requires, and the connection is closing; the error's cause says how.",
+} as const satisfies Record<MllpServerErrorCode, string>;
+
 /** The one error class the `@glion/mllp` server raises. Branch on `code`. */
 export class MllpServerError extends Error {
   readonly code: MllpServerErrorCode;
-  constructor(
-    code: MllpServerErrorCode,
-    message: string,
-    opts?: { cause?: unknown }
-  ) {
-    super(message, opts);
+  constructor(code: MllpServerErrorCode, opts?: { cause?: unknown }) {
+    super(messages[code], opts);
     this.name = "MllpServerError";
     this.code = code;
   }

@@ -32,8 +32,7 @@ export function compose(
     async function dispatch(i: number): Promise<void> {
       if (i <= index) {
         const misuse = new MllpServerError(
-          MllpServerErrorCode.NEXT_CALLED_TWICE,
-          "A middleware called `next()` a second time; a middleware calls `next()` at most once."
+          MllpServerErrorCode.NEXT_CALLED_TWICE
         );
         fail(misuse);
         throw misuse;

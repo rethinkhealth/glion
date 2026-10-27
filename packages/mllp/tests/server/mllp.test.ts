@@ -91,7 +91,9 @@ describe("Mllp", () => {
 
       await expect(
         app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION)
-      ).rejects.toThrow("No parser registered");
+      ).rejects.toThrow(
+        "No parser is registered; `app.parser()` registers the processor that `handle()` reads each message with."
+      );
     });
 
     it("missing-parser error has NO_PARSER code", async () => {

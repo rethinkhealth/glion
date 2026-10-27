@@ -371,11 +371,9 @@ function handleConnection(
         // infrastructure, not an application error.
         if (streamError instanceof MllpCodecError) {
           await reportError(
-            new MllpServerError(
-              MllpServerErrorCode.PROTOCOL_VIOLATION,
-              "The MLLP byte stream was violated and the connection is closing (see the error's cause).",
-              { cause: streamError }
-            ),
+            new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION, {
+              cause: streamError,
+            }),
             connection,
             lifecycle
           );

@@ -178,10 +178,7 @@ export class Mllp {
     connection: ConnectionInfo
   ): Promise<Response | undefined> {
     if (!this.#processor) {
-      throw new MllpServerError(
-        MllpServerErrorCode.NO_PARSER,
-        "No parser registered. Call app.parser() before handling messages."
-      );
+      throw new MllpServerError(MllpServerErrorCode.NO_PARSER);
     }
 
     // Reading is sync — only decode() and parse() run here. Transform and

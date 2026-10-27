@@ -51,11 +51,9 @@ export function readMessage(
   } catch (error) {
     return {
       bytes: payload,
-      error: new MllpServerError(
-        MllpServerErrorCode.INCOMPATIBLE_CHARSET,
-        "The inbound message is not valid UTF-8; only UTF-8 is supported.",
-        { cause: error }
-      ),
+      error: new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET, {
+        cause: error,
+      }),
       file: new VFile(""),
       header: headerOf(parseHL7v2(LENIENT_DECODER.decode(payload))),
       raw: "",
