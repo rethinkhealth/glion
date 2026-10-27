@@ -185,16 +185,14 @@ export function serve(options: ServeOptions): Server {
     tls,
   } = options;
   if (typeof handle !== "function") {
-    throw new MllpServerError(
-      MllpServerErrorCode.INVALID_OPTION,
-      "The `handle` option is not a function; `serve()` replies to each message with the `handle` it is given, as in `serve({ handle: app.handle, port: 2575 })`."
-    );
+    throw new MllpServerError(MllpServerErrorCode.INVALID_OPTION, {
+      option: "handle",
+    });
   }
   if (!Number.isInteger(port) || port < 0 || port > MAX_PORT) {
-    throw new MllpServerError(
-      MllpServerErrorCode.INVALID_OPTION,
-      "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`."
-    );
+    throw new MllpServerError(MllpServerErrorCode.INVALID_OPTION, {
+      option: "port",
+    });
   }
   const shutdown = new AbortController();
   const connections = new Set<Promise<void>>();

@@ -335,7 +335,10 @@ describe("serve() integration", () => {
     const options = { handle: app.handle, port: Number.NaN };
 
     expect(() => serve(options)).toThrow(
-      expect.objectContaining({ code: MllpServerErrorCode.INVALID_OPTION })
+      expect.objectContaining({
+        code: MllpServerErrorCode.INVALID_OPTION,
+        option: "port",
+      })
     );
   });
 

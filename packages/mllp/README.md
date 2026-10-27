@@ -178,12 +178,12 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 
 Server-side failures are raised (or passed to `onError`) as `MllpServerError` — branch on its stable `code`; the underlying codec or charset error rides on `cause`:
 
-| Code                 | Meaning                                                                                                                           |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_CALLED_TWICE`  | A middleware called `next()` a second time; the message is answered as a middleware throw.                                        |
-| `NO_PARSER`          | `app.handle()` ran before a parser was registered via `app.parser()`.                                                             |
-| `INVALID_OPTION`     | `serve()` was given no `handle` function, or a `port` that is not an integer from 0 to 65535.                                     |
-| `PROTOCOL_VIOLATION` | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). Raised by `handleConnection()`. |
+| Code                 | Meaning                                                                                                                                             |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_CALLED_TWICE`  | A middleware called `next()` a second time; the message is answered as a middleware throw.                                                          |
+| `NO_PARSER`          | `app.handle()` ran before a parser was registered via `app.parser()`.                                                                               |
+| `INVALID_OPTION`     | `serve()` was given no `handle` function, or a `port` that is not an integer from 0 to 65535. The error's `option` names which: `handle` or `port`. |
+| `PROTOCOL_VIOLATION` | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). Raised by `handleConnection()`.                   |
 
 ## Routing
 
