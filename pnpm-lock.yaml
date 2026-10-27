@@ -2184,7 +2184,7 @@ importers:
     devDependencies:
       '@cloudflare/vitest-plugin':
         specifier: 1.4.5
-        version: 1.4.5(@cloudflare/workers-types@5.20261019.1)(@types/node@25.6.0)(vitest@4.1.12)
+        version: 1.4.5(@cloudflare/workers-types@5.20261019.1)(@types/node@26.6.5)(vitest@4.1.12)
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
