@@ -57,7 +57,7 @@
     "@glion/tsconfig": "workspace:*",
     "@stryker-mutator/core": "10.0.0",
     "@stryker-mutator/vitest-runner": "10.0.0",
-    "@types/node": "25.6.0",
+    "@types/node": "26.6.5",
     "@types/pluralize": "^0.0.33",
     "@vitest/coverage-v8": "4.1.12",
     "publint": "0.3.18",
