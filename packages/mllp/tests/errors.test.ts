@@ -45,23 +45,27 @@ describe("MllpServerError", () => {
     );
   });
 
-  it("states that the value given as the reply is not a Reply", () => {
-    expect(new MllpServerError(MllpServerErrorCode.INVALID_REPLY).message).toBe(
-      "The value given as the reply is not a `Reply`; a reply is built by `ctx.ack()` or `ctx.reply()`."
-    );
-  });
-
-  it("states that the reply's MSA-1 is a NAK code", () => {
-    expect(new MllpServerError(MllpServerErrorCode.REPLY_IS_NAK).message).toBe(
-      "The reply's acknowledgment code (MSA-1) is a NAK code; a reply accepts the message, and a NAK is the reply to a thrown error."
-    );
-  });
-
-  it("states that the reply does not start with an MSH", () => {
+  it("states that the value given as the response is not an MllpResponse", () => {
     expect(
-      new MllpServerError(MllpServerErrorCode.REPLY_WITHOUT_MSH).message
+      new MllpServerError(MllpServerErrorCode.INVALID_RESPONSE).message
     ).toBe(
-      "The reply does not start with the message header segment (`MSH`); an HL7v2 message starts with one."
+      "The value given as the response is not an `MllpResponse`; a response is built by `ctx.ack()` or `ctx.reply()`."
+    );
+  });
+
+  it("states that the response's MSA-1 is a NAK code", () => {
+    expect(
+      new MllpServerError(MllpServerErrorCode.RESPONSE_IS_NAK).message
+    ).toBe(
+      "The response's acknowledgment code (MSA-1) is a NAK code; a response accepts the message, and a NAK is the response to a thrown error."
+    );
+  });
+
+  it("states that the response does not start with an MSH", () => {
+    expect(
+      new MllpServerError(MllpServerErrorCode.RESPONSE_WITHOUT_MSH).message
+    ).toBe(
+      "The response does not start with the message header segment (`MSH`); an HL7v2 message starts with one."
     );
   });
 

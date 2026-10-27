@@ -319,7 +319,7 @@ describe("serve() integration", () => {
 
   it("closes a connection that dropped while its message was being handled", async () => {
     // The idle timeout destroys the server's socket while the route handler
-    // runs, so the reply is written to a destroyed socket.
+    // runs, so the response is written to a destroyed socket.
     const app = createApp().on("*", async (ctx) => {
       await delay(150);
       return ctx.ack();
@@ -503,10 +503,10 @@ describe("serve() integration", () => {
       expect(errors[0]?.causeName).toBe("MllpCodecError");
     });
 
-    it("onError fires with PROTOCOL_VIOLATION when a reply contains a reserved byte", async () => {
+    it("onError fires with PROTOCOL_VIOLATION when a response contains a reserved byte", async () => {
       const errors: { code?: string }[] = [];
       server = serve({
-        // The reply carries a VT (0x0B): it cannot be framed for the wire.
+        // The response carries a VT (0x0B): it cannot be framed for the wire.
         handle: async () =>
           new TextEncoder().encode(
             "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|\u000Bbad"

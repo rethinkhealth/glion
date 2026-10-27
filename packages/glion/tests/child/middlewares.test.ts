@@ -1,6 +1,6 @@
 // oxlint-disable require-await, no-empty-function
 import type { AckCode } from "@glion/ack";
-import type { Context, Middleware, Reply } from "@glion/mllp";
+import type { Context, Middleware, MllpResponse } from "@glion/mllp";
 import type { NodeEnv } from "@glion/mllp/node";
 import { describe, expect, it } from "vitest";
 
@@ -10,9 +10,9 @@ import {
 } from "../../src/child/middlewares";
 import type { PartialEvent } from "../../src/events";
 
-/** A reply stub: the middleware reads only its `code`. */
-const reply = (code?: AckCode): Reply =>
-  ({ bytes: new Uint8Array(), code }) as unknown as Reply;
+/** A response stub: the middleware reads only its `code`. */
+const reply = (code?: AckCode): MllpResponse =>
+  ({ bytes: new Uint8Array(), code }) as unknown as MllpResponse;
 
 /**
  * Minimal context stub for middleware tests.
@@ -66,7 +66,7 @@ describe("createMsgTelemetry", () => {
     expect(event.ack).toBeNull();
   });
 
-  it("reports the AA code of the reply", async () => {
+  it("reports the AA code of the response", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));
 
@@ -79,7 +79,7 @@ describe("createMsgTelemetry", () => {
     expect(event.ack).toBe("AA");
   });
 
-  it("reports the AE code of the reply", async () => {
+  it("reports the AE code of the response", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));
 
@@ -92,7 +92,7 @@ describe("createMsgTelemetry", () => {
     expect(event.ack).toBe("AE");
   });
 
-  it("reports the AR code of the reply", async () => {
+  it("reports the AR code of the response", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));
 
@@ -105,7 +105,7 @@ describe("createMsgTelemetry", () => {
     expect(event.ack).toBe("AR");
   });
 
-  it("reports ack=null when the reply has no acknowledgment code", async () => {
+  it("reports ack=null when the response has no acknowledgment code", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));
 

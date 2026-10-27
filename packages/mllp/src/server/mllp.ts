@@ -15,10 +15,10 @@ import { acknowledge } from "./acknowledge";
 import { compose } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
-import { isReply, toReply } from "./reply";
-import type { Reply } from "./reply";
 import { messageHeader, salvageHeader, parseRequest } from "./request";
 import type { MllpRequest } from "./request";
+import { isResponse, toResponse } from "./response";
+import type { MllpResponse } from "./response";
 import { Router } from "./router";
 import type {
   EnvArgs,
@@ -168,7 +168,7 @@ export class Mllp<E = unknown> {
 
   /**
    * Process one message through the middleware chain and router, and return
-   * the reply serialized as UTF-8, or `undefined` for none. `payload` is the
+   * the response serialized as UTF-8, or `undefined` for none. `payload` is the
    * message without MLLP framing; `env` becomes `ctx.env`. Bound to the app,
    * so it can be passed on as a function.
    *
@@ -178,34 +178,38 @@ export class Mllp<E = unknown> {
    * 3. Middleware, then the route handler.
    * 4. Compile — only when a handler calls `ctx.result()`.
    *
-   * The reply is what the route handler's outcome describes:
+   * The response is what the route handler's outcome describes:
    *
-   * - It returns a `Reply`, such as `ctx.ack()`: that reply.
-   * - It returns `null`: no reply.
+   * - It returns an `MllpResponse`, such as `ctx.ack()`: that response.
+   * - It returns `null`: no response.
    * - It returns anything else: `AE`, and `ctx.error` is an `MllpServerError`
-   *   `INVALID_REPLY`.
+   *   `INVALID_RESPONSE`.
    * - It throws an `AckException`: its `code` in MSA-1.
    * - It throws anything else: `AE`.
    * - No route matches: `AR`.
    *
-   * No reply carries MSA-3: an error's `message` and an `AckException`'s
+   * No response carries MSA-3: an error's `message` and an `AckException`'s
    * `text` are never sent.
    *
    * A middleware throw is answered the same way. A middleware replaces the
-   * reply by returning a `Reply` or writing `ctx.res`, and an error raised
-   * after it replaces it with the error's NAK. A route filter that throws
-   * runs only the global middleware and is answered as a throw. An `ACK`
-   * gets no reply unless a handler or middleware gives one.
+   * response by returning an `MllpResponse` or writing `ctx.res`, and an error
+   * raised after it replaces it with the error's NAK. A route filter that
+   * throws runs only the global middleware and is answered as a throw. An
+   * `ACK`, and a payload that does not start with an MSH, get no response
+   * unless a handler or middleware gives one.
    *
-   * A payload that is not UTF-8, that the processor throws on, or that the
-   * processor reports a fatal message for runs no middleware: the reply is
-   * the NAK of the error, or of the first fatal message, `AE` unless the
-   * processor threw an `AckException`. The NAK answers the MSH read from the
-   * bytes before the first CR; a payload whose MSH is not UTF-8, an `ACK`,
-   * and one with no MSH get no reply.
+   * A payload that is not UTF-8, or that the parser throws on, runs no
+   * middleware: the handlers `onError()` registered observe the error, and
+   * the response is its NAK, `AE` unless the parser threw an `AckException`.
+   * The NAK answers the MSH read from the bytes before the first CR; a
+   * payload whose MSH is not UTF-8, an `ACK`, and one with no MSH get no
+   * response.
    *
-   * `ctx.error` holds the latest error the message raised, and the reply
-   * answers it. The handlers `onError()` registered observe every error.
+   * `ctx.error` holds the latest error the message raised, and the response
+   * answers it.
+   *
+   * @throws {MllpServerError} `NO_PARSER` when no processor has been
+   *   registered via `app.parser()`.
    */
   readonly handle = async (
     payload: Uint8Array,
@@ -242,9 +246,9 @@ export class Mllp<E = unknown> {
     // each other's acknowledgments.
     const answerable = ctx.messageType !== "ACK";
     const { serializer, ...defaults } = this.#options;
-    const nakOf = (error: Error): Reply | undefined =>
+    const nakOf = (error: Error): MllpResponse | undefined =>
       answerable
-        ? toReply(
+        ? toResponse(
             acknowledge(request.tree, {
               ...defaults,
               code: nakCode(error),
@@ -266,7 +270,7 @@ export class Mllp<E = unknown> {
       };
     }
 
-    const answer = (error: Error): Reply | undefined => {
+    const answer = (error: Error): MllpResponse | undefined => {
       ctx.error = error;
       await this.#observe(error, env);
       return nakOf(error);
@@ -300,7 +304,7 @@ export class Mllp<E = unknown> {
       return undefined;
     }
     const { serializer, ...defaults } = this.#options;
-    return toReply(
+    return toResponse(
       acknowledge(header, { ...defaults, code: nakCode(error) }),
       serializer
     ).bytes;
@@ -309,13 +313,13 @@ export class Mllp<E = unknown> {
 
 /**
  * Run the route handler, or reject a message no route matches. A message no
- * route matches that is not `answerable` leaves the reply as it is.
+ * route matches that is not `answerable` leaves the response as it is.
  */
 async function route<E>(
   ctx: MessageContext<E>,
   handler: Handler<E> | undefined,
   answerable: boolean
-): Promise<Reply | null | undefined> {
+): Promise<MllpResponse | null | undefined> {
   if (!handler) {
     if (!answerable) {
       return undefined;
@@ -325,10 +329,10 @@ async function route<E>(
     );
   }
   const reply: unknown = await handler(ctx);
-  if (reply === null || isReply(reply)) {
+  if (reply === null || isResponse(reply)) {
     return reply;
   }
-  throw new MllpServerError(MllpServerErrorCode.INVALID_REPLY);
+  throw new MllpServerError(MllpServerErrorCode.INVALID_RESPONSE);
 }
 
 /** MSA-1 of the NAK `error` gets: an `AckException`'s code, else `AE`. */

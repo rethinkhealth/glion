@@ -1,7 +1,7 @@
 import type { Root } from "@glion/ast";
 import { expectTypeOf } from "vitest";
 
-import type { Reply } from "../../src/server/reply";
+import type { MllpResponse } from "../../src/server/response";
 import { matchPattern, parsePattern } from "../../src/server/types";
 import type {
   AckOptions,
@@ -93,9 +93,9 @@ describe("matchPattern", () => {
 });
 
 describe("Handler", () => {
-  it("returns a Reply or null for no reply", () => {
-    expectTypeOf<() => Reply>().toExtend<Handler>();
-    expectTypeOf<() => Promise<Reply | null>>().toExtend<Handler>();
+  it("returns an MllpResponse or null for no response", () => {
+    expectTypeOf<() => MllpResponse>().toExtend<Handler>();
+    expectTypeOf<() => Promise<MllpResponse | null>>().toExtend<Handler>();
   });
 
   it("does not return a tree, or nothing", () => {
@@ -106,8 +106,8 @@ describe("Handler", () => {
 });
 
 describe("MiddlewareReturn", () => {
-  it("is a Reply, null for no reply, or nothing", () => {
-    expectTypeOf<Reply>().toExtend<MiddlewareReturn>();
+  it("is an MllpResponse, null for no response, or nothing", () => {
+    expectTypeOf<MllpResponse>().toExtend<MiddlewareReturn>();
     expectTypeOf<Promise<null>>().toExtend<MiddlewareReturn>();
     expectTypeOf<Promise<void>>().toExtend<MiddlewareReturn>();
   });

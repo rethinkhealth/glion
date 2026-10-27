@@ -69,7 +69,7 @@ describe("handleConnection", () => {
     ]);
   });
 
-  it("writes nothing for a message handle() gives no reply", async () => {
+  it("writes nothing for a message handle() gives no response", async () => {
     const remote = memorySocket();
     remote.send(frame(encode(ADT)));
     remote.end();
@@ -96,7 +96,7 @@ describe("handleConnection", () => {
     await expect(closed).rejects.toMatchObject({ code: "PROTOCOL_VIOLATION" });
   });
 
-  it("rejects with PROTOCOL_VIOLATION when a reply carries an FS byte", async () => {
+  it("rejects with PROTOCOL_VIOLATION when a response carries an FS byte", async () => {
     const remote = memorySocket();
     remote.send(frame(encode(ADT)));
     remote.end();

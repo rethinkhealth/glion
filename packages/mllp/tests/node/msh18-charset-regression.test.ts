@@ -131,7 +131,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
 
     const response = await sendBytes(server.port, latin1, 1000);
 
-    // No silent corruption: the handler never sees a mangled body, the reply
+    // No silent corruption: the handler never sees a mangled body, the response
     // is AE echoing MSH-10 in MSA-2, and onError() observes the CharsetError.
     expect(handlerRan).toBe(false);
     expect(response?.toString("utf8")).toContain("\rMSA|AE|MSG001");

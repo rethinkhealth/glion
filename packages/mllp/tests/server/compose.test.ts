@@ -5,9 +5,9 @@ import { VFile } from "vfile";
 
 import { compose } from "../../src/server/compose";
 import { createContext } from "../../src/server/context";
-import { toReply } from "../../src/server/reply";
-import type { Reply } from "../../src/server/reply";
 import { parseRequest } from "../../src/server/request";
+import { toResponse } from "../../src/server/response";
+import type { MllpResponse } from "../../src/server/response";
 import type { Context, Middleware } from "../../src/server/types";
 
 const SAMPLE_MESSAGE = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|CTL1|P|2.5.1";
@@ -27,9 +27,9 @@ function makeCtx(): Context {
   });
 }
 
-const reply = (message: string): Reply =>
-  toReply(parseHL7v2.parse(message), toHl7v2);
-const text = (value: Reply | undefined) =>
+const reply = (message: string): MllpResponse =>
+  toResponse(parseHL7v2.parse(message), toHl7v2);
+const text = (value: MllpResponse | undefined) =>
   value ? new TextDecoder().decode(value.bytes) : undefined;
 
 function noAnswer(): undefined {
@@ -156,7 +156,7 @@ describe("compose", () => {
     expect(text(ctx.res)).toContain("MSA|AE|CTL1|second");
   });
 
-  it("clears the reply when a middleware returns null", async () => {
+  it("clears the response when a middleware returns null", async () => {
     const outer: Middleware = async (_ctx, next) => {
       await next();
       return null;
@@ -170,7 +170,7 @@ describe("compose", () => {
     expect(ctx.res).toBeUndefined();
   });
 
-  it("replaces a reply written to ctx.res when a middleware outside it throws", async () => {
+  it("replaces a response written to ctx.res when a middleware outside it throws", async () => {
     const nak = reply("MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1");
     const outer: Middleware = async (_ctx, next) => {
       await next();

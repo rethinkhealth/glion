@@ -4,12 +4,12 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { VFile } from "vfile";
 
 import { createContext } from "../../src/server/context";
-import { toReply } from "../../src/server/reply";
 import { parseRequest } from "../../src/server/request";
+import { toResponse } from "../../src/server/response";
 import { Router } from "../../src/server/router";
 import type { Context, Middleware } from "../../src/server/types";
 
-const RESPONSE_OK = toReply(
+const RESPONSE_OK = toResponse(
   parseHL7v2.parse("MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001"),
   toHl7v2
 );

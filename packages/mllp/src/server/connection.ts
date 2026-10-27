@@ -2,7 +2,7 @@
  * One MLLP connection over any runtime's socket.
  *
  * `VT MSH|…|ADT^A01|… FS CR` arrives on `readable`; `unframe()` gives the
- * message bytes to `handle`; its reply goes back on `writable` as
+ * message bytes to `handle`; its response goes back on `writable` as
  * `VT MSH|…|ACK^A01^ACK|… FS CR`. One message at a time, until the remote
  * system closes the connection or the signal aborts.
  *
@@ -44,17 +44,17 @@ export interface HandleConnectionOptions {
 
 /**
  * Handles every message the remote system sends on `socket` with `handle`,
- * and writes each reply back with MLLP framing.
+ * and writes each response back with MLLP framing.
  *
  * Resolves once the connection has closed: the remote system closed it, or
  * `signal` aborted. Closes `socket` either way.
  *
- * @param handle - The reply to one message, both without MLLP framing, or
+ * @param handle - The response to one message, both without MLLP framing, or
  *   `undefined` for none. Called once per message, never concurrently.
  * @param socket - The accepted connection.
  * @param options - The signal that ends the connection.
  * @throws {MllpServerError} `PROTOCOL_VIOLATION` when the bytes break MLLP
- *   framing: the remote system's, or a reply that carries a VT or FS byte.
+ *   framing: the remote system's, or a response that carries a VT or FS byte.
  * @throws What `handle` throws, and any error of `socket` other than its
  *   teardown.
  */
@@ -68,7 +68,7 @@ export async function handleConnection(
   const writer = socket.writable.getWriter();
 
   let handling = false;
-  // Mid-message, the loop ends the socket once the reply is written.
+  // Mid-message, the loop ends the socket once the response is written.
   const end = () => {
     if (!handling) {
       socket.close();

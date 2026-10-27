@@ -1,6 +1,6 @@
 import { MllpServerError, MllpServerErrorCode } from "../errors";
-import { isReply } from "./reply";
-import type { Reply } from "./reply";
+import { isResponse } from "./response";
+import type { MllpResponse } from "./response";
 import type { Context, Middleware } from "./types";
 
 /**
@@ -11,19 +11,19 @@ import type { Context, Middleware } from "./types";
  * next middleware. A middleware that returns without calling next()
  * short-circuits the chain.
  *
- * A middleware gives the reply by returning a `Reply`, or `null` for no
- * reply, or by writing `ctx.res`; a later one replaces it. Returning nothing
- * leaves the reply as it is.
+ * A middleware gives the response by returning an `MllpResponse`, or `null` for
+ * no response, or by writing `ctx.res`; a later one replaces it. Returning
+ * nothing leaves the response as it is.
  *
- * A middleware that throws, returns a value that is not a reply
- * (`MllpServerError` `INVALID_REPLY`), or calls `next()` a second time
- * (`NEXT_CALLED_TWICE`) has that error passed to `onError`, and the reply
+ * A middleware that throws, returns a value that is not a response
+ * (`MllpServerError` `INVALID_RESPONSE`), or calls `next()` a second time
+ * (`NEXT_CALLED_TWICE`) has that error passed to `onError`, and the response
  * `onError` returns is written to `ctx.res`. `onError` MUST NOT throw. The
  * second `next()` call also throws that error to its caller.
  */
 export function compose<E>(
   middlewares: Middleware<E>[],
-  onError: (error: Error) => Reply | undefined
+  onError: (error: Error) => MllpResponse | undefined
 ): (ctx: Context<E>) => Promise<void> {
   return async (ctx: Context<E>): Promise<void> => {
     let index = -1;
@@ -51,8 +51,8 @@ export function compose<E>(
         if (result === null) {
           ctx.res = undefined;
         } else if (result !== undefined) {
-          if (!isReply(result)) {
-            throw new MllpServerError(MllpServerErrorCode.INVALID_REPLY);
+          if (!isResponse(result)) {
+            throw new MllpServerError(MllpServerErrorCode.INVALID_RESPONSE);
           }
           ctx.res = result;
         }

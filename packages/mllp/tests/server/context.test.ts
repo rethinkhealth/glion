@@ -6,8 +6,8 @@ import { value } from "@glion/util-query";
 import { unified } from "unified";
 
 import { createContext } from "../../src/server/context";
-import type { Reply } from "../../src/server/reply";
 import { parseRequest } from "../../src/server/request";
+import type { MllpResponse } from "../../src/server/response";
 import type { AckOptions } from "../../src/server/types";
 
 const SAMPLE_MESSAGE = [
@@ -18,7 +18,7 @@ const SAMPLE_MESSAGE = [
 
 const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
 
-const decode = (reply: Reply) => new TextDecoder().decode(reply.bytes);
+const decode = (reply: MllpResponse) => new TextDecoder().decode(reply.bytes);
 
 function makeCtx(payload = SAMPLE_BYTES) {
   return createContext({
@@ -221,7 +221,7 @@ describe("createContext", () => {
   });
 
   describe("ctx.ack()", () => {
-    it("is the acknowledgment as a Reply, AA by default", () => {
+    it("is the acknowledgment as an MllpResponse, AA by default", () => {
       const reply = makeCtx().ack();
 
       expect(reply.code).toBe("AA");
@@ -235,14 +235,14 @@ describe("createContext", () => {
       expect(decode(reply).split("\r")[1]).toBe("MSA|CA|MSG001");
     });
 
-    it("throws REPLY_IS_NAK for a NAK code", () => {
+    it("throws RESPONSE_IS_NAK for a NAK code", () => {
       const ctx = makeCtx();
 
       expect(() => ctx.ack({ code: "AE" } as unknown as AckOptions)).toThrow(
         expect.objectContaining({
-          code: "REPLY_IS_NAK",
+          code: "RESPONSE_IS_NAK",
           message:
-            "The reply's acknowledgment code (MSA-1) is a NAK code; a reply accepts the message, and a NAK is the reply to a thrown error.",
+            "The response's acknowledgment code (MSA-1) is a NAK code; a response accepts the message, and a NAK is the response to a thrown error.",
         })
       );
     });
@@ -270,33 +270,33 @@ describe("createContext", () => {
       expect(reply.code).toBeUndefined();
     });
 
-    it("throws REPLY_IS_NAK for a message whose MSA-1 is a NAK code", () => {
+    it("throws RESPONSE_IS_NAK for a message whose MSA-1 is a NAK code", () => {
       const ctx = makeCtx();
       const nak = parseHL7v2.parse("MSH|^~\\&||||||||||2.5.1\rMSA|CR|MSG001");
 
       expect(() => ctx.reply(nak)).toThrow(
-        expect.objectContaining({ code: "REPLY_IS_NAK" })
+        expect.objectContaining({ code: "RESPONSE_IS_NAK" })
       );
     });
 
-    it("throws REPLY_WITHOUT_MSH for a message that does not start with an MSH", () => {
+    it("throws RESPONSE_WITHOUT_MSH for a message that does not start with an MSH", () => {
       const ctx = makeCtx();
 
       expect(() => ctx.reply(parseHL7v2.parse("MSA|AA|MSG001"))).toThrow(
         expect.objectContaining({
-          code: "REPLY_WITHOUT_MSH",
+          code: "RESPONSE_WITHOUT_MSH",
           message:
-            "The reply does not start with the message header segment (`MSH`); an HL7v2 message starts with one.",
+            "The response does not start with the message header segment (`MSH`); an HL7v2 message starts with one.",
         })
       );
       expect(() => ctx.reply({ children: [], type: "root" })).toThrow(
-        expect.objectContaining({ code: "REPLY_WITHOUT_MSH" })
+        expect.objectContaining({ code: "RESPONSE_WITHOUT_MSH" })
       );
     });
   });
 
   describe("ctx.res", () => {
-    it("starts as no reply, and holds the Reply written to it", () => {
+    it("starts as no response, and holds the MllpResponse written to it", () => {
       const ctx = makeCtx();
       expect(ctx.res).toBeUndefined();
 
@@ -308,14 +308,14 @@ describe("createContext", () => {
       expect(ctx.res).toBeUndefined();
     });
 
-    it("throws INVALID_REPLY for a value that is not a Reply, and keeps the reply it held", () => {
+    it("throws INVALID_RESPONSE for a value that is not an MllpResponse, and keeps the response it held", () => {
       const ctx = makeCtx();
       const reply = ctx.ack();
       ctx.res = reply;
 
       expect(() => {
-        ctx.res = parseHL7v2.parse(SAMPLE_MESSAGE) as unknown as Reply;
-      }).toThrow(expect.objectContaining({ code: "INVALID_REPLY" }));
+        ctx.res = parseHL7v2.parse(SAMPLE_MESSAGE) as unknown as MllpResponse;
+      }).toThrow(expect.objectContaining({ code: "INVALID_RESPONSE" }));
       expect(ctx.res).toBe(reply);
     });
   });

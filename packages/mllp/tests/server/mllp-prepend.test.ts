@@ -4,7 +4,7 @@ import type { Root } from "@glion/ast";
 import { parseHL7v2 } from "@glion/hl7v2";
 
 import { Mllp } from "../../src/server/mllp";
-import type { Reply } from "../../src/server/reply";
+import type { MllpResponse } from "../../src/server/response";
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -13,7 +13,7 @@ const SAMPLE_ADT = [
 ].join("\r");
 
 const hl7 = (message: string): Root => parseHL7v2.parse(message);
-const text = (reply: Reply | undefined) =>
+const text = (reply: MllpResponse | undefined) =>
   reply ? new TextDecoder().decode(reply.bytes) : undefined;
 
 function toBytes(msg: string): Uint8Array {
