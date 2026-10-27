@@ -55,7 +55,7 @@ The server class. Built with a fluent chainable API:
 
 ### `acknowledge(origin, options?)`
 
-Returns the acknowledgment of the parsed message `origin` as a `Root`: an MSH and an MSA segment. MSH-1 and MSH-2 declare the `delimiters` option, never the original message's delimiters. The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each field copied whole, sets MSH-7 to the current local time and MSH-9 to `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1), and echoes MSH-12.1. The MSA holds MSA-1 and MSA-2, which echoes the original MSH-10. It never contains MSA-3 or an ERR segment, so the acknowledgment has the same fields in every HL7v2 version.
+Returns the acknowledgment of the parsed message `origin` as a `Root`: an MSH and an MSA segment. MSH-1 and MSH-2 declare the `delimiters` option, never the original message's delimiters. The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each field copied whole, sets MSH-7 to the current time to the second, with the host's offset from UTC, and MSH-9 to `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1), and echoes MSH-12.1. The MSA holds MSA-1 and MSA-2, which echoes the original MSH-10. It never contains MSA-3 or an ERR segment, so the acknowledgment has the same fields in every HL7v2 version.
 
 | Option         | Type                                             | Description                                                                     |
 | -------------- | ------------------------------------------------ | ------------------------------------------------------------------------------- |
@@ -71,7 +71,7 @@ import { acknowledge } from "@glion/mllp";
 import { toHl7v2 } from "@glion/to-hl7v2";
 
 toHl7v2(acknowledge(ctx.ast, { code: AckCode.ApplicationReject }));
-// MSH|^~\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|<uid>|P|2.5.1
+// MSH|^~\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|<uid>|P|2.5.1
 // MSA|AR|MSG001
 ```
 

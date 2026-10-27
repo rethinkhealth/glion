@@ -26,7 +26,7 @@ describe("acknowledge", () => {
     const origin = parseHL7v2.parse(ADT_A01);
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" }))).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
     );
   });
 
@@ -38,7 +38,7 @@ describe("acknowledge", () => {
         acknowledge(origin, { code: AckCode.ApplicationError, id: "ACK001" })
       )
     ).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AE|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AE|MSG001"
     );
   });
 
@@ -48,7 +48,7 @@ describe("acknowledge", () => {
     expect(
       toHl7v2(acknowledge(origin, { code: AckCode.CommitAccept, id: "ACK001" }))
     ).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|CA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|CA|MSG001"
     );
   });
 
@@ -58,7 +58,7 @@ describe("acknowledge", () => {
     );
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" }))).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK|ACK001|P|2.3\rMSA|AA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK|ACK001|P|2.3\rMSA|AA|MSG001"
     );
   });
 
@@ -68,7 +68,7 @@ describe("acknowledge", () => {
     );
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" })).split("\r")[0]).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01|ACK001|P|2.3"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01|ACK001|P|2.3"
     );
   });
 
@@ -78,7 +78,7 @@ describe("acknowledge", () => {
     );
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" })).split("\r")[0]).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp^1.2.3^ISO|^2.16.840^ISO|20240115023000||ACK^A01^ACK|ACK001|P^T|2.5.1"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp^1.2.3^ISO|^2.16.840^ISO|20240115023000-0500||ACK^A01^ACK|ACK001|P^T|2.5.1"
     );
   });
 
@@ -91,7 +91,7 @@ describe("acknowledge", () => {
     const msh3 = select(ack, "MSH.3")?.node as Field;
 
     expect(toHl7v2(ack).split("\r")[0]).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|ACK001|P|2.5.1"
     );
     expect(msh3.data).toBeUndefined();
     expect(msh3.position).toBeUndefined();
@@ -103,7 +103,7 @@ describe("acknowledge", () => {
     );
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" }))).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
     );
   });
 
@@ -115,7 +115,16 @@ describe("acknowledge", () => {
     });
 
     expect(toHl7v2(ack).split("\r")[0]).toBe(
-      "MSH|^~\\&|Glion|Lab|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1"
+      "MSH|^~\\&|Glion|Lab|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|ACK001|P|2.5.1"
+    );
+  });
+
+  it("writes MSH-7 to the second with the host's offset from UTC at that moment", () => {
+    vi.setSystemTime(new Date(2024, 6, 15, 2, 30, 0, 456));
+    const origin = parseHL7v2.parse(ADT_A01);
+
+    expect(toHl7v2(acknowledge(origin, { id: "ACK001" })).split("\r")[0]).toBe(
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240715023000-0400||ACK^A01^ACK|ACK001|P|2.5.1"
     );
   });
 
@@ -125,7 +134,7 @@ describe("acknowledge", () => {
     );
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" }))).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
     );
   });
 
@@ -137,7 +146,7 @@ describe("acknowledge", () => {
     });
 
     expect(toHl7v2(ack)).toBe(
-      "MSH#$~\\&#RecvApp#RecvFac#SendApp#SendFac#20240115023000##ACK$A01$ACK#ACK001#P#2.5.1\rMSA#AA#MSG001"
+      "MSH#$~\\&#RecvApp#RecvFac#SendApp#SendFac#20240115023000-0500##ACK$A01$ACK#ACK001#P#2.5.1\rMSA#AA#MSG001"
     );
   });
 
@@ -146,7 +155,7 @@ describe("acknowledge", () => {
     const ack = acknowledge(origin, { id: "ACK001", processingId: "T" });
 
     expect(toHl7v2(ack).split("\r")[0]).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|T|2.5.1"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|ACK001|T|2.5.1"
     );
   });
 
@@ -156,7 +165,7 @@ describe("acknowledge", () => {
     );
 
     expect(toHl7v2(acknowledge(origin, { id: "ACK001" })).split("\r")[0]).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|ACK001|P|2.5.1"
     );
   });
 
@@ -179,7 +188,7 @@ describe("acknowledge", () => {
     const after = toHl7v2(acknowledge(origin, { id: "ACK001" }));
 
     expect(before).toBe(
-      "MSH|^~\\&|RecvApp|RecvFac|SendApp|Smith\\T\\Jones|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|Smith\\T\\Jones|20240115023000-0500||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
     );
     expect(after).toBe(before);
   });

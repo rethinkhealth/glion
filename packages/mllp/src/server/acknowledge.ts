@@ -3,7 +3,7 @@ import type { Delimiters, Field, Root } from "@glion/ast";
 import { c, f, m, r, s } from "@glion/builder";
 import { select, value } from "@glion/util-query";
 import { gte, valid } from "@glion/util-semver";
-import { formatDTM, Precision } from "@glion/util-timestamp";
+import { formatDTM, nowDTM, Precision } from "@glion/util-timestamp";
 import { uid } from "@glion/util-uid";
 import { DEFAULT_DELIMITERS } from "@glion/utils";
 
@@ -32,7 +32,8 @@ export interface AcknowledgeOptions {
  *
  * MSH-1 and MSH-2 declare `delimiters`, never the original message's. The
  * MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each
- * field copied whole, sets MSH-7 to the current local time and MSH-9 to
+ * field copied whole, sets MSH-7 to the current time to the second, with the
+ * host's offset from UTC, and MSH-9 to
  * `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1, which has no MSH-9.3),
  * and echoes MSH-12.1. The MSA holds MSA-1 and MSA-2, which echoes the
  * original MSH-10. Never writes MSA-3 or an ERR segment.
@@ -45,18 +46,6 @@ export function acknowledge(
   const delimiters = { ...DEFAULT_DELIMITERS, ...options.delimiters };
   const triggerEvent = field(origin, "MSH.9.2");
   const version = field(origin, "MSH.12.1");
-  // TODO(#1113): read the time, with its offset, from nowDTM().
-  // https://github.com/rethinkhealth/glion/issues/1113
-  const date = new Date();
-  const timestamp = formatDTM({
-    day: date.getDate(),
-    hour: date.getHours(),
-    minute: date.getMinutes(),
-    month: date.getMonth() + 1,
-    precision: Precision.Second,
-    second: date.getSeconds(),
-    year: date.getFullYear(),
-  });
 
   return m(
     s(
@@ -69,7 +58,7 @@ export function acknowledge(
       sending ? f(sending.facility) : copy(origin, "MSH.6"),
       copy(origin, "MSH.3"),
       copy(origin, "MSH.4"),
-      f(timestamp),
+      f(formatDTM(nowDTM({ precision: Precision.Second }))),
       f(""),
       messageType(triggerEvent, version),
       f(options.id ?? uid()),
