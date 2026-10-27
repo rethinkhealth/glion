@@ -55,15 +55,16 @@ The server class. Built with a fluent chainable API:
 
 ### `acknowledge(origin, options?)`
 
-Returns the acknowledgment of the parsed message `origin` as a `Root`: an MSH and an MSA segment. MSH-1 and MSH-2 declare the `delimiters` option, never the original message's delimiters. The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each field copied whole, sets MSH-7 to the current time to the second, with the host's offset from UTC, and MSH-9 to `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1), and echoes MSH-12.1. The MSA holds MSA-1 and MSA-2, which echoes the original MSH-10. It never contains MSA-3 or an ERR segment, so the acknowledgment has the same fields in every HL7v2 version.
+Returns the acknowledgment of the parsed message `origin` as a `Root`: an MSH and an MSA segment. MSH-1 and MSH-2 declare the `delimiters` option, never the original message's delimiters. The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each field copied whole, sets MSH-7 to the current time to the second in the `timeZone` option, with that zone's offset from UTC, and MSH-9 to `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1), and echoes MSH-12.1. The MSA holds MSA-1 and MSA-2, which echoes the original MSH-10. It never contains MSA-3 or an ERR segment, so the acknowledgment has the same fields in every HL7v2 version.
 
-| Option         | Type                                             | Description                                                                     |
-| -------------- | ------------------------------------------------ | ------------------------------------------------------------------------------- |
-| `code`         | `AckCode`, optional                              | MSA-1. Defaults to `AA`.                                                        |
-| `id`           | `string`, optional                               | MSH-10. Defaults to a fresh `uid()`.                                            |
-| `sending`      | `{ application, facility }`, optional            | MSH-3.1 and MSH-4.1. Default to the original MSH-5 and MSH-6, copied whole.     |
-| `processingId` | `string`, optional                               | MSH-11. Defaults to the original MSH-11, copied whole, else `P`.                |
-| `delimiters`   | `Partial<Omit<Delimiters, "segment">>`, optional | MSH-1 and MSH-2. Each delimiter not given is the standard one: `\|` and `^~\&`. |
+| Option         | Type                                             | Description                                                                                                                                                                                    |
+| -------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`         | `AckCode`, optional                              | MSA-1. Defaults to `AA`.                                                                                                                                                                       |
+| `id`           | `string`, optional                               | MSH-10. Defaults to a fresh `uid()`.                                                                                                                                                           |
+| `sending`      | `{ application, facility }`, optional            | MSH-3.1 and MSH-4.1. Default to the original MSH-5 and MSH-6, copied whole.                                                                                                                    |
+| `processingId` | `string`, optional                               | MSH-11. Defaults to the original MSH-11, copied whole, else `P`.                                                                                                                               |
+| `delimiters`   | `Partial<Omit<Delimiters, "segment">>`, optional | MSH-1 and MSH-2. Each delimiter not given is the standard one: `\|` and `^~\&`.                                                                                                                |
+| `timeZone`     | `string`, optional                               | IANA time zone MSH-7 is read in, such as `America/New_York`. Defaults to the host's time zone; `UTC` gives the offset `-0000`. Throws a `RangeError` for a name that is not an IANA time zone. |
 
 ```ts
 import { AckCode } from "@glion/ack";

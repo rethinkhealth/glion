@@ -25,6 +25,11 @@ export interface AcknowledgeOptions {
    * standard one: `|` and `^~\&`.
    */
   delimiters?: Partial<Omit<Delimiters, "segment">>;
+  /**
+   * The IANA time zone MSH-7 is read in, such as `America/New_York`. Defaults
+   * to the host's time zone. `UTC` gives the offset `-0000`.
+   */
+  timeZone?: string;
 }
 
 /**
@@ -32,17 +37,19 @@ export interface AcknowledgeOptions {
  *
  * MSH-1 and MSH-2 declare `delimiters`, never the original message's. The
  * MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each
- * field copied whole, sets MSH-7 to the current time to the second, with the
- * host's offset from UTC, and MSH-9 to
+ * field copied whole, sets MSH-7 to the current time to the second in
+ * `timeZone`, with that zone's offset from UTC, and MSH-9 to
  * `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1, which has no MSH-9.3),
  * and echoes MSH-12.1. The MSA holds MSA-1 and MSA-2, which echoes the
  * original MSH-10. Never writes MSA-3 or an ERR segment.
+ *
+ * @throws {RangeError} When `options.timeZone` is not an IANA time zone name.
  */
 export function acknowledge(
   origin: Root,
   options: AcknowledgeOptions = {}
 ): Root {
-  const { code = AckCode.ApplicationAccept, sending } = options;
+  const { code = AckCode.ApplicationAccept, sending, timeZone } = options;
   const delimiters = { ...DEFAULT_DELIMITERS, ...options.delimiters };
   const triggerEvent = field(origin, "MSH.9.2");
   const version = field(origin, "MSH.12.1");
@@ -58,7 +65,7 @@ export function acknowledge(
       sending ? f(sending.facility) : copy(origin, "MSH.6"),
       copy(origin, "MSH.3"),
       copy(origin, "MSH.4"),
-      f(formatDTM(nowDTM({ precision: Precision.Second }))),
+      f(formatDTM(nowDTM({ precision: Precision.Second, timeZone }))),
       f(""),
       messageType(triggerEvent, version),
       f(options.id ?? uid()),

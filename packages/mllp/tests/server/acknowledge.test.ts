@@ -128,6 +128,35 @@ describe("acknowledge", () => {
     );
   });
 
+  it("writes MSH-7 in the given time zone, with that zone's offset from UTC", () => {
+    const origin = parseHL7v2.parse(ADT_A01);
+    const ack = acknowledge(origin, {
+      id: "ACK001",
+      timeZone: "Asia/Kathmandu",
+    });
+
+    expect(toHl7v2(ack).split("\r")[0]).toBe(
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115131500+0545||ACK^A01^ACK|ACK001|P|2.5.1"
+    );
+  });
+
+  it("writes MSH-7 in UTC with the offset -0000 when the time zone is UTC", () => {
+    const origin = parseHL7v2.parse(ADT_A01);
+    const ack = acknowledge(origin, { id: "ACK001", timeZone: "UTC" });
+
+    expect(toHl7v2(ack).split("\r")[0]).toBe(
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115073000-0000||ACK^A01^ACK|ACK001|P|2.5.1"
+    );
+  });
+
+  it("throws a RangeError when the time zone is not an IANA time zone name", () => {
+    const origin = parseHL7v2.parse(ADT_A01);
+
+    expect(() =>
+      acknowledge(origin, { timeZone: "Mars/Olympus_Mons" })
+    ).toThrow(RangeError);
+  });
+
   it("writes MSH-1 and MSH-2 with the default delimiters, whatever the original message declares", () => {
     const origin = parseHL7v2.parse(
       "MSH#$~\\&#SendApp#SendFac#RecvApp#RecvFac#20240101120000##ADT$A01#MSG001#P#2.5.1"
