@@ -1,82 +1,56 @@
-import type { Precision } from "./precision";
-import type { Layout } from "./scan";
-import {
-  checkDate,
-  checkOffset,
-  checkTime,
-  numberAt,
-  readLayout,
-} from "./scan";
+import { checkDate, checkOffset, checkTime } from "./check";
 import type { DT, DTM, ParseResult, TM } from "./types";
+
+/** The parts a format matched, by name. */
+type Parts = Record<string, string | undefined>;
 
 const INVALID_FORMAT = {
   issue: { code: "invalid-format" },
   success: false,
 } as const satisfies ParseResult<never>;
 
-// The precision each count of leading digits gives: `202603` is `month`.
-const DT_PRECISION = new Map<number, DT["precision"]>([
-  [4, "year"],
-  [6, "month"],
-  [8, "day"],
-]);
+// The HL7v2 formats. Each bracket of the format is an optional group, and
+// each part is named after the field it fills.
 
-const TM_PRECISION = new Map<number, Exclude<TM["precision"], "fraction">>([
-  [2, "hour"],
-  [4, "minute"],
-  [6, "second"],
-]);
+// DT: YYYY[MM[DD]]
+const DT_FORMAT = /^(?<year>\d{4})(?:(?<month>\d{2})(?<day>\d{2})?)?$/;
 
-const DTM_PRECISION = new Map<number, Exclude<DTM["precision"], "fraction">>([
-  [4, "year"],
-  [6, "month"],
-  [8, "day"],
-  [10, "hour"],
-  [12, "minute"],
-  [14, "second"],
-]);
+// TM: HH[MM[SS[.S[S[S[S]]]]]][+/-ZZZZ]
+const TM_FORMAT =
+  /^(?<hour>\d{2})(?:(?<minute>\d{2})(?:(?<second>\d{2})(?:\.(?<fraction>\d{1,4}))?)?)?(?<offset>[+-]\d{4})?$/;
 
-const DATE_DIGITS = 8;
+// DTM: YYYY[MM[DD[HH[MM[SS[.S[S[S[S]]]]]]]]][+/-ZZZZ]
+const DTM_FORMAT =
+  /^(?<year>\d{4})(?:(?<month>\d{2})(?:(?<day>\d{2})(?:(?<hour>\d{2})(?:(?<minute>\d{2})(?:(?<second>\d{2})(?:\.(?<fraction>\d{1,4}))?)?)?)?)?)?(?<offset>[+-]\d{4})?$/;
 
-type DateFields = Pick<DTM, "year" | "month" | "day">;
-type TimeFields = Pick<TM, "hour" | "minute" | "second">;
-
-/**
- * The precision of a TM or DTM: the one `byDigits` gives for its leading
- * digits, or `fraction` when digits follow the seconds. `undefined` when
- * `byDigits` gives none, or digits follow a field before the seconds.
- */
-function precisionOf<P extends Precision>(
-  layout: Layout,
-  byDigits: ReadonlyMap<number, P>
-): P | "fraction" | undefined {
-  const precision = byDigits.get(layout.digits);
-  if (layout.fraction === undefined) {
-    return precision;
+/** The date `parts` give. Each part the value gives makes it more precise. */
+function readDate(parts: Parts): DT {
+  const date: DT = { precision: "year", year: Number(parts.year) };
+  if (parts.month !== undefined) {
+    date.month = Number(parts.month);
+    date.precision = "month";
   }
-  return precision === "second" ? "fraction" : undefined;
-}
-
-/** The date fields of the first `digits` digits of `value`. */
-function readDate(value: string, digits: number): DateFields {
-  const date: DateFields = { year: numberAt(value, 0, 4) };
-  if (digits >= 6) {
-    date.month = numberAt(value, 4, 2);
-  }
-  if (digits >= 8) {
-    date.day = numberAt(value, 6, 2);
+  if (parts.day !== undefined) {
+    date.day = Number(parts.day);
+    date.precision = "day";
   }
   return date;
 }
 
-/** The time fields of `digits` digits of `value` from `start`, at least 2. */
-function readTime(value: string, start: number, digits: number): TimeFields {
-  const time: TimeFields = { hour: numberAt(value, start, 2) };
-  if (digits >= 4) {
-    time.minute = numberAt(value, start + 2, 2);
+/** The time `parts` give. Each part the value gives makes it more precise. */
+function readTime(parts: Parts): TM {
+  const time: TM = { hour: Number(parts.hour), precision: "hour" };
+  if (parts.minute !== undefined) {
+    time.minute = Number(parts.minute);
+    time.precision = "minute";
   }
-  if (digits >= 6) {
-    time.second = numberAt(value, start + 4, 2);
+  if (parts.second !== undefined) {
+    time.second = Number(parts.second);
+    time.precision = "second";
+  }
+  if (parts.fraction !== undefined) {
+    time.fraction = parts.fraction;
+    time.precision = "fraction";
   }
   return time;
 }
@@ -95,22 +69,14 @@ function readTime(value: string, start: number, digits: number): TimeFields {
  *   ```;
  */
 export function parseDT(value: string): ParseResult<DT> {
-  const layout = readLayout(value);
-  if (layout === undefined) {
-    return INVALID_FORMAT;
-  }
-  const precision = DT_PRECISION.get(layout.digits);
-  const dateOnly = layout.fraction === undefined && layout.offset === undefined;
-  if (precision === undefined || !dateOnly) {
+  const parts = DT_FORMAT.exec(value)?.groups;
+  if (parts === undefined) {
     return INVALID_FORMAT;
   }
 
-  const date = readDate(value, layout.digits);
-  const issue = checkDate(date.year, date.month, date.day);
-  if (issue) {
-    return { issue, success: false };
-  }
-  return { data: { ...date, precision }, success: true };
+  const data = readDate(parts);
+  const issue = checkDate(data.year, data.month, data.day);
+  return issue ? { issue, success: false } : { data, success: true };
 }
 
 /**
@@ -127,31 +93,18 @@ export function parseDT(value: string): ParseResult<DT> {
  *   ```;
  */
 export function parseTM(value: string): ParseResult<TM> {
-  const layout = readLayout(value);
-  if (layout === undefined) {
-    return INVALID_FORMAT;
-  }
-  const precision = precisionOf(layout, TM_PRECISION);
-  if (precision === undefined) {
+  const parts = TM_FORMAT.exec(value)?.groups;
+  if (parts === undefined) {
     return INVALID_FORMAT;
   }
 
-  const time = readTime(value, 0, layout.digits);
+  const data = readTime(parts);
+  if (parts.offset !== undefined) {
+    data.offset = parts.offset;
+  }
   const issue =
-    checkTime(time.hour, time.minute, time.second) ??
-    checkOffset(layout.offset);
-  if (issue) {
-    return { issue, success: false };
-  }
-
-  const data: TM = { ...time, precision };
-  if (layout.fraction !== undefined) {
-    data.fraction = layout.fraction;
-  }
-  if (layout.offset !== undefined) {
-    data.offset = layout.offset.text;
-  }
-  return { data, success: true };
+    checkTime(data.hour, data.minute, data.second) ?? checkOffset(data.offset);
+  return issue ? { issue, success: false } : { data, success: true };
 }
 
 /**
@@ -171,35 +124,22 @@ export function parseTM(value: string): ParseResult<TM> {
  *   ```;
  */
 export function parseDTM(value: string): ParseResult<DTM> {
-  const layout = readLayout(value);
-  if (layout === undefined) {
-    return INVALID_FORMAT;
-  }
-  const precision = precisionOf(layout, DTM_PRECISION);
-  if (precision === undefined) {
+  const parts = DTM_FORMAT.exec(value)?.groups;
+  if (parts === undefined) {
     return INVALID_FORMAT;
   }
 
-  // `20260307` is a date; `2026030714` adds the time from the 9th digit.
-  const date = readDate(value, layout.digits);
-  const time: Partial<TimeFields> =
-    layout.digits > DATE_DIGITS
-      ? readTime(value, DATE_DIGITS, layout.digits - DATE_DIGITS)
-      : {};
+  // A time follows the whole date and makes the value as precise as itself.
+  const data: DTM =
+    parts.hour === undefined
+      ? readDate(parts)
+      : { ...readDate(parts), ...readTime(parts) };
+  if (parts.offset !== undefined) {
+    data.offset = parts.offset;
+  }
   const issue =
-    checkDate(date.year, date.month, date.day) ??
-    checkTime(time.hour, time.minute, time.second) ??
-    checkOffset(layout.offset);
-  if (issue) {
-    return { issue, success: false };
-  }
-
-  const data: DTM = { ...date, ...time, precision };
-  if (layout.fraction !== undefined) {
-    data.fraction = layout.fraction;
-  }
-  if (layout.offset !== undefined) {
-    data.offset = layout.offset.text;
-  }
-  return { data, success: true };
+    checkDate(data.year, data.month, data.day) ??
+    checkTime(data.hour, data.minute, data.second) ??
+    checkOffset(data.offset);
+  return issue ? { issue, success: false } : { data, success: true };
 }
