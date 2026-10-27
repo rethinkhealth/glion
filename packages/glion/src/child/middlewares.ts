@@ -29,7 +29,7 @@ import { performance } from "node:perf_hooks";
 
 import { isAckCode } from "@glion/ack";
 import type { AckCode } from "@glion/ack";
-import type { Context, Middleware, Response } from "@glion/mllp";
+import type { Context, ErrorHandler, Middleware, Response } from "@glion/mllp";
 
 import type { PartialEvent } from "../events";
 
@@ -65,6 +65,24 @@ export function createMsgTelemetry(
         trigger: `${ctx.messageType}^${ctx.triggerEvent}`,
       });
     }
+  };
+}
+
+/**
+ * Creates the `app.onError()` handler that emits an "error" event for a
+ * payload no middleware runs on: one that is not UTF-8, or that the parser
+ * throws on.
+ */
+export function createErrorTelemetry(
+  emit: (event: PartialEvent) => void
+): ErrorHandler {
+  return (error, connection) => {
+    emit({
+      conn: connection.id,
+      message: error.message,
+      stack: error.stack,
+      t: "error",
+    });
   };
 }
 

@@ -1,4 +1,6 @@
 // oxlint-disable require-await
+import { setTimeout as sleep } from "node:timers/promises";
+
 import {
   AckApplicationError,
   AckApplicationReject,
@@ -430,9 +432,9 @@ function observe(seen: { error?: Error; msa?: string }): Middleware {
 const SAMPLE_ACK =
   "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240101120000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001";
 
-/** SAMPLE_ADT with an NTE in ISO-8859-1: one 0xE9 byte, not UTF-8. */
+/** SAMPLE_ADT with an NTE in ISO-8859-1, `Café`: one 0xE9 byte, not UTF-8. */
 const LATIN1_ADT = Uint8Array.from(
-  `${SAMPLE_ADT}\rNTE|1||Jos\u00E9`,
+  `${SAMPLE_ADT}\rNTE|1||Caf\u00E9`,
   (ch) => ch.codePointAt(0) as number
 );
 
@@ -837,104 +839,71 @@ describe("acknowledgment defaults", () => {
     expect(ran).toEqual([]);
   });
 
-  it("replies AE echoing MSH-10 to a payload that is not UTF-8, running only the global middleware", async () => {
+  it("replies AE echoing MSH-10 to a payload that is not UTF-8, running no middleware and no route", async () => {
     const app = createApp();
-    const seen: { error?: Error; msa?: string } = {};
     const ran: string[] = [];
-    app.use(observe(seen));
-    app.use("*", async (_ctx, next) => {
-      ran.push("scoped");
+    app.use(async (_ctx, next) => {
+      ran.push("global");
       await next();
     });
     app.on("*", () => {
       ran.push("handler");
       return RESPONSE_OK;
     });
-    const latin1 = Uint8Array.from(
-      `${SAMPLE_ADT}\rNTE|1||Jos\u00E9`,
-      (ch) => ch.codePointAt(0) as number
-    );
 
-    const response = await app.handle(latin1, MOCK_CONNECTION);
+    const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
     expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
-    expect(seen.error).toBeInstanceOf(MllpServerError);
-    expect((seen.error as MllpServerError).code).toBe("INCOMPATIBLE_CHARSET");
     expect(ran).toEqual([]);
   });
 
-  it("replies AE to a payload that is not UTF-8 even when a middleware accepts it without next()", async () => {
-    const app = createApp();
-    const seen: { error?: Error; msa?: string } = {};
-    app.use(observe(seen));
-    app.use((ctx) => ctx.ack());
+  it("lets each onError() handler observe the INCOMPATIBLE_CHARSET of a payload that is not UTF-8, in order", async () => {
+    const seen: [string, Error, ConnectionInfo][] = [];
+    const app = createApp()
+      .onError((raised, connection) => {
+        seen.push(["first", raised, connection]);
+      })
+      .onError((raised, connection) => {
+        seen.push(["second", raised, connection]);
+      });
 
-    const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
-    expect(seen.msa).toBe("MSA|AE|MSG001");
+    await app.handle(LATIN1_ADT, MOCK_CONNECTION);
+    expect(seen.map(([name]) => name)).toEqual(["first", "second"]);
+    expect(seen[0]?.[1]).toBeInstanceOf(MllpServerError);
+    expect((seen[0]?.[1] as MllpServerError).code).toBe("INCOMPATIBLE_CHARSET");
+    expect(seen[0]?.[2]).toBe(MOCK_CONNECTION);
   });
 
-  it("replies with the NAK of a middleware's throw to a payload that is not UTF-8", async () => {
-    const app = createApp();
-    const seen: { error?: Error; msa?: string } = {};
-    const thrown = new AckApplicationReject("Sender not allowed", {});
-    app.use(observe(seen));
-    app.use(() => {
-      throw thrown;
-    });
-
-    const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
-    expect(seen.error).toBe(thrown);
-  });
-
-  it("shows the middleware the reply a payload that is not UTF-8 gets, whatever they write", async () => {
-    const app = createApp();
-    const seen: (string | undefined)[] = [];
-    app.use(async (ctx, next) => {
-      seen.push(ctx.res?.raw);
-      await next();
-      seen.push(ctx.res?.raw);
-    });
-    app.use(async (ctx, next) => {
-      await next();
-      ctx.res = ctx.ack();
-    });
-
-    const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
-    expect(seen).toEqual([response?.raw, response?.raw]);
-  });
-
-  it("keeps the NAK of the latest error to a payload that is not UTF-8 when a middleware outside it writes an accept", async () => {
-    const app = createApp();
-    app.use(async (ctx, next) => {
-      await next();
-      ctx.res = ctx.ack();
-    });
-    app.use(() => {
-      throw new AckApplicationReject("Sender not allowed", {});
-    });
-
-    const response = await app.handle(LATIN1_ADT, MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
-  });
-
-  it("reads the routing fields of a payload that is not UTF-8 from its MSH", async () => {
-    const app = createApp();
-    const fields: string[] = [];
-    app.use(async (ctx, next) => {
-      fields.push(ctx.messageType, ctx.triggerEvent, ctx.controlId);
-      await next();
+  it("waits for an onError() handler that returns a promise before it resolves", async () => {
+    let observed = false;
+    const app = createApp().onError(async () => {
+      await sleep(5);
+      observed = true;
     });
 
     await app.handle(LATIN1_ADT, MOCK_CONNECTION);
-    expect(fields).toEqual(["ADT", "A01", "MSG001"]);
+    expect(observed).toBe(true);
+  });
+
+  it("sends no reply to a payload whose MSH is not UTF-8, and still lets onError() observe it", async () => {
+    const seen: Error[] = [];
+    const app = createApp().onError((raised) => {
+      seen.push(raised);
+    });
+    // MSH-4, the sending facility, is `Café` in ISO-8859-1.
+    const payload = Uint8Array.from(
+      SAMPLE_ADT.replace("|SendFac|", "|Caf\u00E9|"),
+      (ch) => ch.codePointAt(0) as number
+    );
+
+    expect(await app.handle(payload, MOCK_CONNECTION)).toBeUndefined();
+    expect(seen).toHaveLength(1);
   });
 
   it("sends no reply to an ACK that is not UTF-8", async () => {
     const app = createApp();
     app.on("*", () => RESPONSE_OK);
     const ack = Uint8Array.from(
-      `${SAMPLE_ACK}|Jos\u00E9 unknown`,
+      `${SAMPLE_ACK}|Caf\u00E9`,
       (ch) => ch.codePointAt(0) as number
     );
 
@@ -1078,12 +1047,19 @@ describe("acknowledgment defaults", () => {
     expect(seen.error).toBeUndefined();
   });
 
-  it("replies AE echoing MSH-10, without running the route handler, when the parser throws", async () => {
+  it("replies AE echoing MSH-10, running no middleware and no route, when the parser throws", async () => {
     const thrown = new Error("parser failed");
-    const app = new Mllp().parser(unified().use(throwingParser(thrown)));
-    const seen: { error?: Error; msa?: string } = {};
+    const seen: Error[] = [];
     const ran: string[] = [];
-    app.use(observe(seen));
+    const app = new Mllp()
+      .parser(unified().use(throwingParser(thrown)))
+      .onError((raised) => {
+        seen.push(raised);
+      });
+    app.use(async (_ctx, next) => {
+      ran.push("global");
+      await next();
+    });
     app.on("*", () => {
       ran.push("handler");
       return RESPONSE_OK;
@@ -1091,7 +1067,18 @@ describe("acknowledgment defaults", () => {
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
-    expect(seen.error).toBe(thrown);
+    expect(seen).toEqual([thrown]);
     expect(ran).toEqual([]);
+  });
+
+  it("replies with the code of an AckException the parser throws", async () => {
+    const app = new Mllp().parser(
+      unified().use(
+        throwingParser(new AckApplicationReject("Unreadable message", {}))
+      )
+    );
+
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AR|MSG001");
   });
 });

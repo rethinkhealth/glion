@@ -36,18 +36,12 @@ export interface Response {
 export interface Context {
   /** Incoming message data */
   readonly req: {
-    /**
-     * The payload decoded as UTF-8, without MLLP framing. Empty when the
-     * payload is not UTF-8.
-     */
+    /** The payload decoded as UTF-8, without MLLP framing. */
     readonly raw: string;
-    /** Raw bytes from MLLP frame payload */
-    readonly bytes: Uint8Array;
   };
   /**
-   * The error this message raised: a payload that is not UTF-8
-   * (`MllpServerError` `INCOMPATIBLE_CHARSET`), a parser or route filter
-   * throw, a middleware or handler throw, a `next()` called twice
+   * The error this message raised: a route filter, middleware or handler
+   * throw, a `next()` called twice
    * (`NEXT_CALLED_TWICE`), or the `AckApplicationReject` of a message no
    * route matches. A later error replaces it; a middleware that throws one
    * passes this as its `cause` to keep it. `undefined` while none has.
@@ -120,6 +114,15 @@ export interface Context {
   /** Read-only snapshot of all variables */
   readonly var: Readonly<Record<string, unknown>>;
 }
+
+/**
+ * Observes an error raised by a payload no middleware runs on. `connection`
+ * is the one `handle()` was given. MUST NOT throw.
+ */
+export type ErrorHandler = (
+  error: Error,
+  connection: ConnectionInfo
+) => Promise<void> | undefined;
 
 /**
  * Options for `new Mllp()`: the delimiters and the time zone of every

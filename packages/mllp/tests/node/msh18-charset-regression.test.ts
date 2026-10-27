@@ -15,10 +15,11 @@ import { Mllp } from "../../src/server/mllp";
  *
  * The server decodes each inbound payload as UTF-8 via `decodeBytes(payload)`
  * (from `@glion/util-charset`), fatally. A non-UTF-8 feed (e.g. ISO 8859/1)
- * therefore fails LOUDLY — set on `ctx.error` as an `MllpServerError`
- * (`INCOMPATIBLE_CHARSET`) and answered `AE` — rather than being silently
- * corrupted to U+FFFD and ACKed as if valid, which was the #659 bug. The
- * codec's `CharsetError` is not leaked; it rides on `cause`.
+ * therefore fails LOUDLY — no middleware or handler runs, `app.onError()`
+ * observes an `MllpServerError` (`INCOMPATIBLE_CHARSET`), and the sender is
+ * answered `AE` — rather than being silently corrupted to U+FFFD and ACKed as
+ * if valid, which was the #659 bug. The codec's `CharsetError` is not leaked;
+ * it rides on `cause`.
  *
  * Honouring the charset a message declares in MSH-18 (so such a feed decodes
  * intact instead of erroring) is deferred to
@@ -97,16 +98,12 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     }
   });
 
-  it("sets MllpServerError on ctx.error (not the codec's CharsetError) and answers AE, never AA", async () => {
+  it("gives onError() an MllpServerError (not the codec's CharsetError) and answers AE, never AA", async () => {
     let handlerRan = false;
     const errors: Error[] = [];
 
-    const app = new Mllp().parser(parseHL7v2);
-    app.use(async (ctx, next) => {
-      await next();
-      if (ctx.error) {
-        errors.push(ctx.error);
-      }
+    const app = new Mllp().parser(parseHL7v2).onError((raised) => {
+      errors.push(raised);
     });
     app.on("*", (ctx) => {
       handlerRan = true;
@@ -118,12 +115,12 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     server = serve(app, { port: 0 });
     await waitForReady(server.port);
 
-    // PID-5 family name "José" with "é" as the single Latin-1 byte 0xE9 (invalid
+    // PID-5 family name "Müller" with "ü" as the single Latin-1 byte 0xFC (invalid
     // UTF-8), and MSH-18 declaring 8859/1 — which we do not yet honour (see
     // https://github.com/rethinkhealth/glion/issues/662).
     const message = [
       "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1||||||8859/1",
-      "PID|1||12345^^^MRN||José^John",
+      "PID|1||12345^^^MRN||Müller^Anna",
     ].join("\r");
     // String iteration never yields an empty string, so codePointAt(0) is
     // always defined — and every character here is Latin-1, so the code
@@ -136,12 +133,12 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     const response = await sendBytes(server.port, latin1, 1000);
 
     // No silent corruption: the handler never sees a mangled body, the reply
-    // is AE echoing MSH-10 in MSA-2, and the decode failure is ctx.error as
-    // the server's own MllpServerError(INCOMPATIBLE_CHARSET) — not the
+    // is AE echoing MSH-10 in MSA-2, and onError() observes the server's own
+    // MllpServerError(INCOMPATIBLE_CHARSET) — not the
     // codec's CharsetError, which is kept on `cause` for diagnostics.
     expect(handlerRan).toBe(false);
     expect(response?.toString("utf8")).toContain("\rMSA|AE|MSG001");
-    expect(errors.length).toBeGreaterThan(0);
+    expect(errors).toHaveLength(1);
     const [error] = errors;
     expect(error).toBeInstanceOf(MllpServerError);
     expect((error as MllpServerError).code).toBe(

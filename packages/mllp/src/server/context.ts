@@ -34,10 +34,9 @@ export interface CreateContextOptions {
 /**
  * Create a new Context for a message `readRequest()` read.
  *
- * `ctx.error` starts as the message's `error`. The routing fields are read
- * from the message's MSH once, so they keep the values as parsed whatever
- * the transforms or a handler change in the tree (see ADR-0013). `ctx.ack()`
- * reads the MSH when it is called.
+ * The routing fields are read from the message's MSH once, so they keep the
+ * values as parsed whatever the transforms or a handler change in the tree (see
+ * ADR-0013). `ctx.ack()` reads the MSH when it is called.
  *
  * The expensive pipeline stages are lazy:
  *
@@ -52,7 +51,7 @@ export interface CreateContextOptions {
 export function createContext(options: CreateContextOptions): MessageContext {
   const { app, request, connection, processor } = options;
   const { serializer, ...defaults } = app;
-  const { bytes, error, file, raw, tree: parsed } = request;
+  const { file, raw, tree: parsed } = request;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
 
@@ -112,14 +111,14 @@ export function createContext(options: CreateContextOptions): MessageContext {
     ast: parsed,
     connection: Object.freeze(connection),
     controlId,
-    error,
+    error: undefined,
     file,
     get<K extends string>(key: K): unknown {
       return variables.get(key);
     },
     messageStructure,
     messageType,
-    req: Object.freeze({ bytes, raw }),
+    req: Object.freeze({ raw }),
     res: undefined as Response | undefined,
     result: getResult,
     set<K extends string>(key: K, value: unknown): void {

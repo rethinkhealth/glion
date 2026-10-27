@@ -7,6 +7,7 @@ import {
 } from "@glion/ack";
 import type { AckNakCode } from "@glion/ack";
 import { toHl7v2 } from "@glion/to-hl7v2";
+import { value as queryValue } from "@glion/util-query";
 import { nowDTM } from "@glion/util-timestamp";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
@@ -14,10 +15,12 @@ import { acknowledge } from "./acknowledge";
 import { compose, isResponse } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
-import { messageHeader, readRequest } from "./request";
+import { messageHeader, readHeader, readRequest } from "./request";
+import type { MllpRequest } from "./request";
 import { Router } from "./router";
 import type {
   ConnectionInfo,
+  ErrorHandler,
   Handler,
   Hl7v2Processor,
   Middleware,
@@ -48,6 +51,7 @@ import type {
  */
 export class Mllp {
   readonly #router = new Router();
+  readonly #errorHandlers: ErrorHandler[] = [];
   readonly #options: MllpOptions & Required<Pick<MllpOptions, "serializer">>;
   #processor: Hl7v2Processor | undefined;
 
@@ -136,6 +140,18 @@ export class Mllp {
   }
 
   /**
+   * Register a handler for an error raised by a payload no middleware runs
+   * on: one that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`), or
+   * that the parser throws on. The handler observes the error; it does not
+   * change the response. Each handler registered runs, in the order
+   * registered, before `handle()` resolves.
+   */
+  onError(handler: ErrorHandler): this {
+    this.#errorHandlers.push(handler);
+    return this;
+  }
+
+  /**
    * Process one MLLP frame payload through the middleware chain and router,
    * and return the reply, or `undefined` for none. This is the integration
    * point — analogous to Hono's `fetch()`.
@@ -161,12 +177,16 @@ export class Mllp {
    * A middleware throw is answered the same way. A middleware replaces the
    * reply by returning a response or writing `ctx.res`, and an error raised
    * after it replaces it with the error's NAK. A route filter that throws
-   * runs only the global middleware and is answered as a throw. A payload
-   * that does not decode or parse runs only the global middleware, and its
-   * reply is the NAK of the latest error whatever they return or write: a
-   * message whose content was never read is never accepted. An `ACK`, and a
-   * payload that does not start with an MSH, get no reply unless a handler
-   * or middleware gives one.
+   * runs only the global middleware and is answered as a throw. An `ACK`,
+   * and a payload that does not start with an MSH, get no reply unless a
+   * handler or middleware gives one.
+   *
+   * A payload that is not UTF-8, or that the parser throws on, runs no
+   * middleware: the handlers `onError()` registered observe the error, and
+   * the reply is its NAK, `AE` unless the parser threw an `AckException`.
+   * The NAK answers the MSH read from the bytes before the first CR; a
+   * payload whose MSH is not UTF-8, an `ACK`, and one with no MSH get no
+   * reply.
    *
    * `ctx.error` holds the latest error the message raised, and the reply
    * answers it.
@@ -184,7 +204,16 @@ export class Mllp {
 
     // Reading is sync — only decode() and parse() run here. Transform and
     // compile are deferred to ctx.tree() / ctx.result().
-    const request = readRequest(payload, this.#processor);
+    let request: MllpRequest;
+    try {
+      request = readRequest(payload, this.#processor);
+    } catch (error) {
+      return this.#reject(
+        payload,
+        error instanceof Error ? error : new Error(String(error)),
+        connection
+      );
+    }
     const ctx = createContext({
       app: this.#options,
       connection,
@@ -210,62 +239,51 @@ export class Mllp {
           }
         : undefined;
 
-    // A payload that did not decode or parse: its content was never read.
-    const received = request.error;
-    let nak = received && nakOf(received);
-    let terminal: Middleware = noReply;
-    let middlewares: Middleware[] = [];
-    if (received) {
-      // Content never read is never accepted: the middleware observe the
-      // message, and the latest error's NAK is the reply.
-      ctx.res = nak;
-      middlewares = this.#router
-        .globalMiddleware()
-        .map((middleware) => keepingReply(middleware, () => nak));
-    } else {
-      try {
-        const matched = this.#router.match(ctx);
-        middlewares = matched.middlewares;
-        terminal = () => route(ctx, matched.handler, answerable);
-      } catch (error) {
-        middlewares = this.#router.globalMiddleware();
-        terminal = () => {
-          throw error;
-        };
-      }
+    let terminal: Middleware;
+    let middlewares: Middleware[];
+    try {
+      const matched = this.#router.match(ctx);
+      middlewares = matched.middlewares;
+      terminal = () => route(ctx, matched.handler, answerable);
+    } catch (error) {
+      middlewares = this.#router.globalMiddleware();
+      terminal = () => {
+        throw error;
+      };
     }
 
     const answer = (error: Error): Response | undefined => {
       ctx.error = error;
-      nak = nakOf(error);
-      return nak;
+      return nakOf(error);
     };
 
     await compose([...middlewares, terminal], answer)(ctx);
     return ctx.res;
   }
-}
 
-/** A terminal that leaves the reply as it is. */
-function noReply(): undefined {
-  return undefined;
-}
-
-/**
- * `middleware`, its return value dropped and the current `nak()` kept as the
- * reply.
- */
-function keepingReply(
-  middleware: Middleware,
-  nak: () => Response | undefined
-): Middleware {
-  return async (ctx, next) => {
-    try {
-      await middleware(ctx, next);
-    } finally {
-      ctx.res = nak();
+  /**
+   * The NAK of `error` for a payload no middleware ran on, once the handlers
+   * `onError()` registered have observed it.
+   */
+  async #reject(
+    payload: Uint8Array,
+    error: Error,
+    connection: ConnectionInfo
+  ): Promise<Response | undefined> {
+    for (const handler of this.#errorHandlers) {
+      await handler(error, connection);
     }
-  };
+    const header = readHeader(payload);
+    if (!header || queryValue(header, "MSH.9.1")?.value === "ACK") {
+      return undefined;
+    }
+    const { serializer, ...defaults } = this.#options;
+    return {
+      raw: serializer(
+        acknowledge(header, { ...defaults, code: nakCode(error) })
+      ),
+    };
+  }
 }
 
 /**

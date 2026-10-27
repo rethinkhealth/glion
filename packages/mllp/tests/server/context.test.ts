@@ -5,7 +5,6 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 import { unified } from "unified";
 
-import { MllpServerError } from "../../src/errors";
 import { createContext } from "../../src/server/context";
 import { readRequest } from "../../src/server/request";
 
@@ -34,20 +33,12 @@ function makeCtx(payload = SAMPLE_BYTES) {
 }
 
 describe("createContext", () => {
-  it("exposes req.raw and req.bytes", () => {
-    const ctx = makeCtx();
-    expect(ctx.req.raw).toBe(SAMPLE_MESSAGE);
-    expect(ctx.req.bytes).toBe(SAMPLE_BYTES);
+  it("exposes req.raw", () => {
+    expect(makeCtx().req.raw).toBe(SAMPLE_MESSAGE);
   });
 
-  it("has no error for a payload that decodes and parses", () => {
+  it("starts with no error", () => {
     expect(makeCtx().error).toBeUndefined();
-  });
-
-  it("starts ctx.error as the error the message was read with", () => {
-    const ctx = makeCtx(new Uint8Array([0x4d, 0x53, 0x48, 0xff]));
-    expect(ctx.error).toBeInstanceOf(MllpServerError);
-    expect((ctx.error as MllpServerError).code).toBe("INCOMPATIBLE_CHARSET");
   });
 
   it("keeps the routing fields as parsed, and acknowledges the MSH as it is, when a handler changes ctx.ast", () => {

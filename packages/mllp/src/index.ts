@@ -15,6 +15,7 @@ export type {
   AckOptions,
   ConnectionInfo,
   Context,
+  ErrorHandler,
   Handler,
   Hl7v2Processor,
   Middleware,

@@ -1,41 +1,31 @@
 import type { Root, Segment } from "@glion/ast";
 import { m } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
-import { decodeBytes } from "@glion/util-charset";
+import { CharsetError, decodeBytes } from "@glion/util-charset";
 import { VFile } from "vfile";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import type { Hl7v2Processor } from "./types";
 
-/** Decodes UTF-8, with U+FFFD for each byte that is not UTF-8. */
-const LENIENT_DECODER = new TextDecoder();
+/** CR, the byte that ends each segment. */
+const SEGMENT_TERMINATOR = 0x0d;
 
 /** A request: the message the server read from one MLLP frame payload. */
 export interface MllpRequest {
-  /** The MLLP frame payload. */
-  readonly bytes: Uint8Array;
-  /** The payload decoded as UTF-8. Empty when the payload is not UTF-8. */
+  /** The payload decoded as UTF-8. */
   readonly raw: string;
   /** The file the processor parsed, holding `raw`. */
   readonly file: VFile;
-  /**
-   * The processor's tree. When the payload did not decode or parse, only the
-   * MSH it starts with, or no segment when it starts with none.
-   */
+  /** The processor's tree. */
   readonly tree: Root;
-  /**
-   * Why the payload was not read: `MllpServerError` `INCOMPATIBLE_CHARSET`,
-   * or what the processor's parser threw. `undefined` when it was read.
-   */
-  readonly error: Error | undefined;
 }
 
 /**
  * Reads `payload`: decodes it as UTF-8 and parses it with `processor`.
  *
- * The MSH of a payload that does not decode or parse is read by
- * `@glion/parser` from the payload decoded with U+FFFD for each byte that is
- * not UTF-8. Never throws for a payload of bytes.
+ * @throws {MllpServerError} `INCOMPATIBLE_CHARSET` when `payload` is not
+ * UTF-8.
+ * @throws What the processor's parser throws.
  */
 export function readRequest(
   payload: Uint8Array,
@@ -45,46 +35,37 @@ export function readRequest(
   try {
     raw = decodeBytes(payload);
   } catch (error) {
-    return {
-      bytes: payload,
-      error: new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET, {
-        cause: error,
-      }),
-      file: new VFile(""),
-      raw: "",
-      tree: headerOnly(parseHL7v2(LENIENT_DECODER.decode(payload))),
-    };
+    throw new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET, {
+      cause: error,
+    });
   }
-
   const file = new VFile(raw);
+  return { file, raw, tree: processor.parse(file) };
+}
+
+/**
+ * The MSH `payload` starts with, alone in a tree, read by `@glion/parser`
+ * from the bytes before the first CR; `undefined` when those bytes are not
+ * UTF-8 or are not an MSH.
+ */
+export function readHeader(payload: Uint8Array): Root | undefined {
+  const end = payload.indexOf(SEGMENT_TERMINATOR);
+  let text: string;
   try {
-    const tree = processor.parse(file);
-    return {
-      bytes: payload,
-      error: undefined,
-      file,
-      raw,
-      tree,
-    };
+    text = decodeBytes(end === -1 ? payload : payload.subarray(0, end));
   } catch (error) {
-    return {
-      bytes: payload,
-      error: error instanceof Error ? error : new Error(String(error)),
-      file,
-      raw,
-      tree: headerOnly(parseHL7v2(raw)),
-    };
+    // An MSH that is not UTF-8 cannot be echoed as the sender wrote it.
+    if (error instanceof CharsetError) {
+      return undefined;
+    }
+    throw error;
   }
+  const header = messageHeader(parseHL7v2(text));
+  return header && m(header);
 }
 
 /** The MSH segment `tree` starts with, or `undefined` when it starts with none. */
 export function messageHeader(tree: Root): Segment | undefined {
   const [first] = tree.children;
   return first?.type === "segment" && first.name === "MSH" ? first : undefined;
-}
-
-/** `tree` with only the MSH it starts with, or no segment. */
-function headerOnly(tree: Root): Root {
-  const header = messageHeader(tree);
-  return header ? m(header) : m();
 }

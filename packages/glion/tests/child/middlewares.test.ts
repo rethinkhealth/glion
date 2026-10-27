@@ -2,7 +2,10 @@
 import type { Context, Middleware } from "@glion/mllp";
 import { describe, expect, it } from "vitest";
 
-import { createMsgTelemetry } from "../../src/child/middlewares";
+import {
+  createErrorTelemetry,
+  createMsgTelemetry,
+} from "../../src/child/middlewares";
 import type { PartialEvent } from "../../src/events";
 
 /**
@@ -252,5 +255,24 @@ describe("createMsgTelemetry", () => {
       const event = events[0] as Record<string, unknown>;
       expect(event.ack).toBe("AE");
     });
+  });
+});
+
+describe("createErrorTelemetry", () => {
+  it("emits an error event with the error and the connection it came on", () => {
+    const events: PartialEvent[] = [];
+    const handler = createErrorTelemetry((e) => events.push(e));
+    const raised = new Error("The inbound message is not valid UTF-8.");
+
+    handler(raised, makeCtx().connection);
+
+    expect(events).toEqual([
+      {
+        conn: 1,
+        message: raised.message,
+        stack: raised.stack,
+        t: "error",
+      },
+    ]);
   });
 });

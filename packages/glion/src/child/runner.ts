@@ -29,7 +29,7 @@
  *
  *     1. Read manifest JSON from argv[2]
  *     2. Import the pre-built entry module → Mllp instance
- *     3. Install the msg event middleware (telemetry)
+ *     3. Install the msg event middleware and the error handler (telemetry)
  *     4. Start the MLLP server (TCP bind)
  *     5. Emit "ready" event with the actual bound port
  *     6. Install SIGTERM/SIGINT shutdown handlers
@@ -60,7 +60,7 @@ import { installConsoleCapture } from "./console";
 import { installCrashHandlers } from "./crash-handlers";
 import { createEmitter } from "./emitter";
 import { loadEntry } from "./load-entry";
-import { createMsgTelemetry } from "./middlewares";
+import { createErrorTelemetry, createMsgTelemetry } from "./middlewares";
 import { installShutdownHandlers } from "./shutdown-handlers";
 
 // ── Emitter ──────────────────────────────────────────────────────
@@ -133,6 +133,8 @@ async function main(): Promise<void> {
   // with timing, trigger, control ID, and ACK code. Prepended so it
   // sits outermost and its timing covers all user middleware.
   app.use(createMsgTelemetry(emit), { prepend: true });
+  // A payload no middleware runs on reaches the telemetry through onError().
+  app.onError(createErrorTelemetry(emit));
 
   // Step 4: Read TLS certificates (if configured).
   // Paths are absolute (resolved by the parent's config loader).

@@ -72,12 +72,13 @@ const app = new Mllp({
 
 The rest of the API chains:
 
-| Method                      | Description                                                                 |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `.parser(processor)`        | Attach a `unified` processor (or `@glion/parser` alone) as the parse stage. |
-| `.use(middleware)`          | Register global middleware that runs for every message.                     |
-| `.use(pattern, middleware)` | Register scoped middleware that runs only for matching message types.       |
-| `.on(pattern, handler)`     | Register a terminal route handler for a message type or trigger event.      |
+| Method                      | Description                                                                                                                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.parser(processor)`        | Attach a `unified` processor (or `@glion/parser` alone) as the parse stage.                                                                                                                                  |
+| `.use(middleware)`          | Register global middleware that runs for every message.                                                                                                                                                      |
+| `.use(pattern, middleware)` | Register scoped middleware that runs only for matching message types.                                                                                                                                        |
+| `.on(pattern, handler)`     | Register a terminal route handler for a message type or trigger event.                                                                                                                                       |
+| `.onError(handler)`         | Register a handler that observes the error of a payload no middleware runs on: one that is not UTF-8, or that the parser throws on. Each handler registered runs, in order; it does not change the response. |
 
 ### `acknowledge(origin, options?)`
 
@@ -127,6 +128,7 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Context`          | Request context with message data and routing fields.                                                                                                                                       |
 | `MllpOptions`      | The options of `new Mllp()`: `timeZone` and `delimiters`, as `acknowledge()` takes them, and `serializer`.                                                                                  |
+| `ErrorHandler`     | The handler `app.onError()` takes: `(error, connection) => Promise<void> \| undefined`. MUST NOT throw.                                                                                     |
 | `AckOptions`       | The options of `ctx.ack()`: those of `acknowledge()` without `timeZone` and `delimiters`, which the app is given, and with an accept code (`AA` or `CA`) in `code`.                         |
 | `Response`         | Response object `{ raw: string }`.                                                                                                                                                          |
 | `Hl7v2Processor`   | Unified `Processor` type for HL7v2 (`Processor<Root, Root \| undefined, Root \| undefined>` — head/tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable). |
@@ -175,11 +177,11 @@ The reply is the acknowledgment the route handler's outcome describes:
 
 A message no route matches is answered as a thrown `AckApplicationReject`: `AR`. A middleware throw is answered the same way as a handler throw. A middleware replaces the reply by returning a response or writing `ctx.res`, before or after `next()`, and an error raised after that replaces it with the error's NAK. A middleware that returns a response without calling `next()` replies with it; one that returns nothing sends no reply. `ctx.ack()` gives only `AA` or `CA`: a NAK is the reply to a throw.
 
-A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`) or that the parser throws on runs only the global middleware, and is answered with the NAK of the latest error whatever they return or write, `AE` unless a middleware throws another: a message whose content was never read is never accepted. An `ACK`, and a payload that does not start with an MSH such as an empty frame, get no reply unless a handler or middleware gives one. No reply carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
+A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`), or that the parser throws on, runs no middleware and no route: the handlers `app.onError()` registered observe the error, and the reply is its NAK, `AE` unless the parser threw an `AckException`. The NAK answers the MSH read from the bytes before the first CR, so a payload whose MSH is not UTF-8 gets no reply. An `ACK`, and a payload that does not start with an MSH such as an empty frame, get no reply unless a handler or middleware gives one. No reply carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
 
 `ctx.error` holds the latest error the message raised, and the reply answers it. An error a middleware throws after the route handler replied replaces that reply too: the sender gets the NAK, and may send the message again. A middleware changes the NAK's code by throwing an `AckException` after `next()`, with the error it answers as its `cause`. A `next()` called a second time throws `MllpServerError` `NEXT_CALLED_TWICE`, and is answered as a middleware throw.
 
-The acknowledgment answers the MSH of the tree the app's parser read, as it is when the acknowledgment is built: a transform or a handler that changes the MSH before then changes the acknowledgment too. A payload that did not decode or parse is read by `@glion/parser`, with U+FFFD for each byte that is not UTF-8, and `ctx.ast` holds only its MSH, to answer it.
+The acknowledgment answers the MSH of the tree the app's parser read, as it is when the acknowledgment is built: a transform or a handler that changes the MSH before then changes the acknowledgment too.
 
 An acknowledgment is built by [`acknowledge()`](#acknowledgeorigin-options).
 
@@ -228,8 +230,7 @@ Available in every middleware and handler. The pipeline is lazy: only the decode
 
 | Property               | Description                                                                                                                                                                           |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ctx.req.raw`          | The payload decoded as UTF-8; empty when it is not UTF-8.                                                                                                                             |
-| `ctx.req.bytes`        | Raw bytes from the MLLP frame.                                                                                                                                                        |
+| `ctx.req.raw`          | The payload decoded as UTF-8.                                                                                                                                                         |
 | `ctx.connection`       | `{ id, remoteAddress, remotePort, localPort, secure, state }`.                                                                                                                        |
 | `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`). The routing fields are read from the MSH when the payload does not decode or parse.                                                                           |
 | `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                                                               |
@@ -332,7 +333,7 @@ app.use(async (ctx, next) => {
 });
 ```
 
-Register it with `app.use()` before other middleware so it wraps them all. An error a middleware throws replaces `ctx.error` and the reply; the error it answers stays on its `cause`. `onError` sees no error a message raised.
+Register it with `app.use()` before other middleware so it wraps them all. An error a middleware throws replaces `ctx.error` and the reply; the error it answers stays on its `cause`. `serve()`'s `onError` sees no error a message raised.
 
 ## Connections
 
