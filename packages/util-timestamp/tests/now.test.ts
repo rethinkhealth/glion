@@ -1,6 +1,7 @@
 import fc from "fast-check";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { TimestampOffsetError } from "../src/errors";
 import { formatDTM } from "../src/format";
 import { nowDTM } from "../src/now";
 import { Precision } from "../src/precision";
@@ -207,16 +208,36 @@ describe("nowDTM in a named time zone", () => {
     );
   });
 
+  // Monrovia kept local mean time, UTC-0:44:30, until 1972: an offset with
+  // seconds, which `+/-HHMM` cannot hold. Its fields alone can be written.
+  it("throws a TimestampOffsetError for an offset with seconds", () => {
+    vi.setSystemTime("1970-01-01T00:00:00Z");
+    const timeZone = "Africa/Monrovia";
+    expect(() => nowDTM({ timeZone })).toThrow(TimestampOffsetError);
+    expect(() => nowDTM({ timeZone })).toThrow(
+      expect.objectContaining({ offset: "GMT-00:44:30" })
+    );
+    expect(formatDTM(nowDTM({ offset: false, timeZone }))).toBe(
+      "19691231231530.000"
+    );
+  });
+
   it("throws a RangeError for a name that is not a time zone", () => {
     expect(() => nowDTM({ timeZone: "Mars/Olympus_Mons" })).toThrow(RangeError);
   });
 });
 
 // Intl reads the host's zone when it is given none, so the host is moved to
-// UTC by giving every formatter that zone by default. `nowDTM` is imported
-// again, so no formatter built for New York is kept.
+// UTC by giving every formatter that zone by default. A call in another zone
+// comes first, so the formatter for the host's zone is built again.
 describe("nowDTM on a host whose time zone is UTC", () => {
-  it("writes offset zero as +0000", async () => {
+  // Another call in a named zone replaces the formatter built for the UTC
+  // host, so the tests after this one read New York again.
+  afterEach(() => {
+    nowDTM({ timeZone: "UTC" });
+  });
+
+  it("writes offset zero as +0000", () => {
     const HostDateTimeFormat = Intl.DateTimeFormat;
     vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
       function utcHostDateTimeFormat(locale, options) {
@@ -226,11 +247,10 @@ describe("nowDTM on a host whose time zone is UTC", () => {
         });
       }
     );
-    vi.resetModules();
-    const { nowDTM: nowOnUtcHost } = await import("../src/now");
+    nowDTM({ timeZone: "Asia/Kathmandu" });
 
     vi.setSystemTime("2024-01-15T07:30:00Z");
-    expect(formatDTM(nowOnUtcHost({ precision: Precision.Minute }))).toBe(
+    expect(formatDTM(nowDTM({ precision: Precision.Minute }))).toBe(
       "202401150730+0000"
     );
   });

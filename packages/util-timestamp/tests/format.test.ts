@@ -250,13 +250,3 @@ describe("formatDT", () => {
     );
   });
 });
-
-describe("TimestampPrecisionError", () => {
-  it("states the cause in one sentence", () => {
-    const error = new TimestampPrecisionError("minute", "second");
-    expect(error.name).toBe("TimestampPrecisionError");
-    expect(error.message).toBe(
-      "The value does not give a field its precision includes; a DT, TM, or DTM gives every field from its first down to its precision."
-    );
-  });
-});

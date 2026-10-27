@@ -80,7 +80,7 @@ formatDTM({
 
 ### `nowDTM(options?: NowDTMOptions): DTM`
 
-Returns the current time as a DTM, read in the host's time zone or in `timeZone`, with that zone's offset from UTC at this moment, daylight saving time included. The precision defaults to `fraction`: every field, and the milliseconds as a 3-digit `fraction`. A value that stops at the year, month, or day is a date and has no offset unless `offset` is `true`. With `timeZone: "UTC"`, in any case, the offset is `-0000`, UTC with no local time zone; every other zone at offset zero, such as `Etc/UTC`, `Europe/London` in winter, or a host whose time zone is UTC, gives `+0000`. The fields are the date and time in that zone: a value for a facility in another zone needs that zone. Throws a `RangeError` when `timeZone` is neither an IANA time zone name nor an offset from UTC.
+Returns the current time as a DTM, read in the host's time zone or in `timeZone`, with that zone's offset from UTC at this moment, daylight saving time included. The precision defaults to `fraction`: every field, and the milliseconds as a 3-digit `fraction`. A value that stops at the year, month, or day is a date and has no offset unless `offset` is `true`. With `timeZone: "UTC"`, in any case, the offset is `-0000`, UTC with no local time zone; every other zone at offset zero, such as `Etc/UTC`, `Europe/London` in winter, or a host whose time zone is UTC, gives `+0000`. The fields are the date and time in that zone: a value for a facility in another zone needs that zone. Throws a `RangeError` when `timeZone` is neither an IANA time zone name nor an offset from UTC, and a `TimestampOffsetError` when the value gives its offset and the zone's offset at this moment is not in whole minutes, such as `Africa/Monrovia` before 1972 (UTC−0:44:30).
 
 In a TS, HL7v2 v2.1 accepts only `minute` or `second`. v2.2 adds `day`, and a fraction of exactly 4 digits, which `nowDTM` does not write. v2.3 and later accept every precision, and a fraction of 1 to 4 digits.
 
@@ -133,6 +133,10 @@ A DT is `year`, `month`, or `day`; a TM is `hour`, `minute`, `second`, or `fract
 ### `TimestampPrecisionError`
 
 Thrown by `formatDT`, `formatTM`, and `formatDTM` when the value does not give a field its precision includes. `field` is the missing field, such as `"minute"`, and `precision` the value's precision; both are `Precision` values.
+
+### `TimestampOffsetError`
+
+Thrown by `nowDTM` when the value gives its offset and the zone's offset at this moment is not in whole minutes, which `+/-HHMM` cannot hold. `offset` is the offset as Intl writes it, such as `"GMT-00:44:30"`.
 
 ### `ParseResult<T>` and `TimestampIssue`
 

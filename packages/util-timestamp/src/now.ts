@@ -1,9 +1,13 @@
+import { TimestampOffsetError } from "./errors";
 import { Precision } from "./precision";
 import type { DTM, Offset } from "./types";
 
 // The whole fields of a DTM, in order. Each is named as a precision and as an
 // Intl part.
 const FIELDS = ["year", "month", "day", "hour", "minute", "second"] as const;
+
+// An HL7v2 offset from UTC: a sign, then hours and minutes.
+const OFFSET = /^[+-]\d{4}$/;
 
 // The last formatter built, kept for the next call with the same `timeZone`:
 // building one takes about 20 µs, and reading the time with it about 3 µs. A
@@ -54,6 +58,8 @@ export interface NowDTMOptions {
  *
  * @throws {RangeError} When `options.timeZone` is neither an IANA time zone
  *   name nor an offset from UTC.
+ * @throws {TimestampOffsetError} When the value gives its offset, and the
+ *   zone's offset at this moment is not in whole minutes.
  */
 export function nowDTM(options: NowDTMOptions = {}): DTM {
   const { precision = Precision.Fraction, timeZone } = options;
@@ -107,13 +113,16 @@ export function nowDTM(options: NowDTMOptions = {}): DTM {
   const withOffset = options.offset ?? value.hour !== undefined;
   if (withOffset) {
     // `GMT-05:00` is written `-0500`, and `GMT` alone `+0000`.
-    const offset = String(fields.timeZoneName)
-      .replace("GMT", "")
-      .replace(":", "");
+    const offset =
+      String(fields.timeZoneName).replace("GMT", "").replace(":", "") ||
+      "+0000";
+    // Before standard time, an offset could have seconds: Monrovia in 1971 is
+    // `GMT-00:44:30`, which `+/-HHMM` cannot hold.
+    if (!OFFSET.test(offset)) {
+      throw new TimestampOffsetError(String(fields.timeZoneName));
+    }
     value.offset =
-      timeZone?.toUpperCase() === "UTC"
-        ? "-0000"
-        : ((offset || "+0000") as Offset);
+      timeZone?.toUpperCase() === "UTC" ? "-0000" : (offset as Offset);
   }
   return value;
 }

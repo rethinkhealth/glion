@@ -19,3 +19,20 @@ export class TimestampPrecisionError extends Error {
     this.precision = precision;
   }
 }
+
+/**
+ * An offset from UTC {@link nowDTM} cannot write as `+/-HHMM`, such as the
+ * `-00:44:30` of `Africa/Monrovia` before 1972.
+ */
+export class TimestampOffsetError extends Error {
+  override readonly name = "TimestampOffsetError";
+  /** The offset as Intl writes it, such as `GMT-00:44:30`. */
+  readonly offset: string;
+
+  constructor(offset: string) {
+    super(
+      "The time zone's offset from UTC at this moment is not in whole minutes; HL7v2 writes an offset as `+/-HHMM`."
+    );
+    this.offset = offset;
+  }
+}
