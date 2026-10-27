@@ -10,7 +10,7 @@ import { MllpServerError } from "../../src/errors";
 import {
   messageHeader,
   readHeader,
-  readRequest,
+  parseRequest,
 } from "../../src/server/request";
 
 /** A unified parser plugin whose parse step throws `thrown`. */
@@ -37,9 +37,9 @@ function withInvalidByte(text: string, at: number): Uint8Array {
   ]);
 }
 
-describe("readRequest", () => {
-  it("reads a UTF-8 payload with the processor", () => {
-    const request = readRequest(BYTES, parseHL7v2);
+describe("parseRequest", () => {
+  it("parses a UTF-8 payload with the processor", () => {
+    const request = parseRequest(BYTES, parseHL7v2);
 
     expect(request.raw).toBe(MESSAGE);
     expect(String(request.file)).toBe(MESSAGE);
@@ -48,18 +48,18 @@ describe("readRequest", () => {
 
   it("finds no MSH in a payload that does not start with one", () => {
     expect(
-      messageHeader(readRequest(new Uint8Array(), parseHL7v2).tree)
+      messageHeader(parseRequest(new Uint8Array(), parseHL7v2).tree)
     ).toBeUndefined();
     expect(
       messageHeader(
-        readRequest(new TextEncoder().encode("PID|1"), parseHL7v2).tree
+        parseRequest(new TextEncoder().encode("PID|1"), parseHL7v2).tree
       )
     ).toBeUndefined();
   });
 
   it("throws INCOMPATIBLE_CHARSET, with the CharsetError as its cause, for a payload that is not UTF-8", () => {
     const read = () =>
-      readRequest(withInvalidByte(MESSAGE, MESSAGE.length - 1), parseHL7v2);
+      parseRequest(withInvalidByte(MESSAGE, MESSAGE.length - 1), parseHL7v2);
 
     expect(read).toThrow(MllpServerError);
     expect(read).toThrow(
@@ -74,7 +74,7 @@ describe("readRequest", () => {
     const thrown = new Error("parser failed");
 
     expect(() =>
-      readRequest(BYTES, unified().use(throwingParser(thrown)))
+      parseRequest(BYTES, unified().use(throwingParser(thrown)))
     ).toThrow(thrown);
   });
 });

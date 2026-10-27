@@ -15,7 +15,7 @@ import { acknowledge } from "./acknowledge";
 import { compose, isResponse } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
-import { messageHeader, readHeader, readRequest } from "./request";
+import { messageHeader, readHeader, parseRequest } from "./request";
 import type { MllpRequest } from "./request";
 import { Router } from "./router";
 import type {
@@ -206,7 +206,7 @@ export class Mllp {
     // compile are deferred to ctx.tree() / ctx.result().
     let request: MllpRequest;
     try {
-      request = readRequest(payload, this.#processor);
+      request = parseRequest(payload, this.#processor);
     } catch (error) {
       return this.#reject(
         payload,

@@ -21,7 +21,7 @@ export type MessageContext = Omit<Context, "error"> & {
  * Options for creating a Context instance.
  */
 export interface CreateContextOptions {
-  /** The request, as `readRequest()` read it with `processor`. */
+  /** The request, as `parseRequest()` parsed it with `processor`. */
   request: MllpRequest;
   /** Connection metadata */
   connection: ConnectionInfo;
@@ -32,7 +32,7 @@ export interface CreateContextOptions {
 }
 
 /**
- * Create a new Context for a message `readRequest()` read.
+ * Create a new Context for a message `parseRequest()` parsed.
  *
  * The routing fields are read from the message's MSH once, so they keep the
  * values as parsed whatever the transforms or a handler change in the tree (see

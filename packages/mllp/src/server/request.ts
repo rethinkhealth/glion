@@ -21,13 +21,13 @@ export interface MllpRequest {
 }
 
 /**
- * Reads `payload`: decodes it as UTF-8 and parses it with `processor`.
+ * Decodes `payload` as UTF-8 and parses it with `processor`.
  *
  * @throws {MllpServerError} `INCOMPATIBLE_CHARSET` when `payload` is not
  * UTF-8.
  * @throws What the processor's parser throws.
  */
-export function readRequest(
+export function parseRequest(
   payload: Uint8Array,
   processor: Hl7v2Processor
 ): MllpRequest {
