@@ -128,6 +128,15 @@ describe("nowDTM in a named time zone", () => {
     ).toBe("202401150400-0330");
   });
 
+  // IANA's `Etc/GMT` zones count the other way: `Etc/GMT+5` is 5 hours
+  // behind UTC, so 07:30 UTC is 02:30 there, at `-0500`.
+  it("gives the offset of an Etc/GMT zone, whose name has the opposite sign", () => {
+    at("2024-01-15T07:30:00Z");
+    expect(
+      formatDTM(nowDTM({ precision: Precision.Minute, timeZone: "Etc/GMT+5" }))
+    ).toBe("202401150230-0500");
+  });
+
   // On 2024-03-31 at 01:00 UTC, London's clocks jump from 01:00 GMT to 02:00
   // BST. A different zone and date from the host's tests, so the named zone
   // is shown to follow its own rules.

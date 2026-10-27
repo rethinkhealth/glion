@@ -42,6 +42,8 @@ describe("parseDT", () => {
     [" 20260307", "a leading space"],
     ["2026030A", "a letter in place of a digit"],
     ["2026:307", "a colon in place of a digit"],
+    ["20260307\n", "a trailing line feed"],
+    ["٢٠٢٦٠٣٠٧", "Arabic-Indic digits"],
   ])("rejects %j, %s, as invalid-format", (value) => {
     expect(parseDT(value)).toStrictEqual({
       issue: { code: "invalid-format" },
@@ -190,6 +192,8 @@ describe("parseTM", () => {
     ["1430Z", "a Z suffix"],
     ["1430-05A0", "a letter in the offset"],
     ["1430+0:00", "a colon in the offset"],
+    ["1430\n", "a trailing line feed"],
+    ["１４３０", "full-width digits"],
   ])("rejects %j, %s, as invalid-format", (value) => {
     expect(parseTM(value)).toStrictEqual({
       issue: { code: "invalid-format" },
@@ -328,6 +332,8 @@ describe("parseDTM", () => {
     ["-0500", "an offset without a date"],
     ["20260307143045-05000", "a five-digit offset"],
     ["20260307143045-0500 ", "a trailing space"],
+    ["20260307143045-0500\n", "a trailing line feed"],
+    ["２０２６０３０７", "full-width digits"],
   ])("rejects %j, %s, as invalid-format", (value) => {
     expect(parseDTM(value)).toStrictEqual({
       issue: { code: "invalid-format" },
