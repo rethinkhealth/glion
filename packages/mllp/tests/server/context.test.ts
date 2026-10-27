@@ -18,6 +18,7 @@ const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
 
 function makeCtx(payload = SAMPLE_BYTES) {
   return createContext({
+    app: {},
     connection: {
       id: 1,
       localPort: 2575,
@@ -130,6 +131,7 @@ describe("createContext", () => {
       const parseOnly = unified().use(hl7v2Parser).freeze();
 
       const ctx = createContext({
+        app: {},
         connection: {
           id: 1,
           localPort: 2575,
@@ -162,6 +164,7 @@ describe("createContext", () => {
 
     it("works with full pipeline processor (parse + transform + compile)", async () => {
       const ctx = createContext({
+        app: {},
         connection: {
           id: 1,
           localPort: 2575,

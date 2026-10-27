@@ -50,7 +50,18 @@ To run the app with live reload during development and a production start comman
 
 ### `Mllp`
 
-The server class. Built with a fluent chainable API:
+The server class. `new Mllp(options?)` takes the options every acknowledgment the app writes uses: the default `AA`, the NAK of a thrown error, and `ctx.ack()`.
+
+| Option       | Type                                             | Description                                                                                                                                                      |
+| ------------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `timeZone`   | `string`, optional                               | IANA time zone MSH-7 is read in, such as `America/New_York`. Defaults to the host's time zone. The constructor throws a `RangeError` for a name that is not one. |
+| `delimiters` | `Partial<Omit<Delimiters, "segment">>`, optional | MSH-1 and MSH-2. Each delimiter not given is the standard one: `\|` and `^~\&`.                                                                                  |
+
+```ts
+const app = new Mllp({ timeZone: "America/New_York" }).parser(parseHL7v2);
+```
+
+The rest of the API chains:
 
 | Method                      | Description                                                                 |
 | --------------------------- | --------------------------------------------------------------------------- |
@@ -106,7 +117,8 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 | Type               | Description                                                                                                                                                                                 |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Context`          | Request context with message data and routing fields.                                                                                                                                       |
-| `AckOptions`       | The options of `ctx.ack()`: those of `acknowledge()`, with an accept code (`AA` or `CA`) in `code`.                                                                                         |
+| `MllpOptions`      | The options of `new Mllp()`: `timeZone` and `delimiters`, as `acknowledge()` takes them.                                                                                                    |
+| `AckOptions`       | The options of `ctx.ack()`: those of `acknowledge()` without `timeZone` and `delimiters`, which the app is given, and with an accept code (`AA` or `CA`) in `code`.                         |
 | `Response`         | Response object `{ raw: string }`.                                                                                                                                                          |
 | `Hl7v2Processor`   | Unified `Processor` type for HL7v2 (`Processor<Root, Root \| undefined, Root \| undefined>` — head/tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable). |
 | `Middleware`       | Middleware function `(ctx, next) => ...`.                                                                                                                                                   |
@@ -205,23 +217,23 @@ Available in every middleware and handler. The pipeline is lazy: only the decode
 
 ### Sync properties
 
-| Property               | Description                                                                                                                               |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `ctx.req.raw`          | The payload decoded as UTF-8; empty when it is not UTF-8.                                                                                 |
-| `ctx.req.bytes`        | Raw bytes from the MLLP frame.                                                                                                            |
-| `ctx.connection`       | `{ id, remoteAddress, remotePort, localPort, secure, state }`.                                                                            |
-| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`). The routing fields are read from the MSH when the payload does not decode or parse.                               |
-| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                   |
-| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                                               |
-| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                                                  |
-| `ctx.controlId`        | MSH-10 message control ID.                                                                                                                |
-| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire.                                                                                   |
-| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).                                                                                            |
-| `ctx.set(key, value)`  | Store a variable.                                                                                                                         |
-| `ctx.get(key)`         | Retrieve a variable.                                                                                                                      |
-| `ctx.var`              | Read-only snapshot of all variables.                                                                                                      |
-| `ctx.error`            | The latest error the message raised, or `undefined`. Read-only.                                                                           |
-| `ctx.ack(options?)`    | The acknowledgment of this message as a reply: `acknowledge()` of its MSH as the app's parser read it, serialized. MSA-1 is `AA` or `CA`. |
+| Property               | Description                                                                                                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctx.req.raw`          | The payload decoded as UTF-8; empty when it is not UTF-8.                                                                                                                             |
+| `ctx.req.bytes`        | Raw bytes from the MLLP frame.                                                                                                                                                        |
+| `ctx.connection`       | `{ id, remoteAddress, remotePort, localPort, secure, state }`.                                                                                                                        |
+| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`). The routing fields are read from the MSH when the payload does not decode or parse.                                                                           |
+| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                                                               |
+| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                                                                                           |
+| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                                                                                              |
+| `ctx.controlId`        | MSH-10 message control ID.                                                                                                                                                            |
+| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire.                                                                                                                               |
+| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).                                                                                                                                        |
+| `ctx.set(key, value)`  | Store a variable.                                                                                                                                                                     |
+| `ctx.get(key)`         | Retrieve a variable.                                                                                                                                                                  |
+| `ctx.var`              | Read-only snapshot of all variables.                                                                                                                                                  |
+| `ctx.error`            | The latest error the message raised, or `undefined`. Read-only.                                                                                                                       |
+| `ctx.ack(options?)`    | The acknowledgment of this message as a reply: `acknowledge()` of its MSH as the app's parser read it, with the app's `timeZone` and `delimiters`, serialized. MSA-1 is `AA` or `CA`. |
 
 ### Async methods
 

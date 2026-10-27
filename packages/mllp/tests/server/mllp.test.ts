@@ -448,6 +448,54 @@ describe("acknowledgment defaults", () => {
     expect(msa).toBe("MSA|AA|MSG001");
   });
 
+  it("dates the default AA in the time zone the app is given", async () => {
+    const app = new Mllp({ timeZone: "Asia/Kathmandu" }).parser(parseHL7v2);
+    app.on("ADT^A01", () => {
+      // processed, nothing to return
+    });
+
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    expect(response?.raw.split("\r")[0]).toMatch(
+      /^MSH\|\^~\\&\|RecvApp\|RecvFac\|SendApp\|SendFac\|\d{14}\+0545\|\|ACK\^A01\^ACK\|/
+    );
+  });
+
+  it("writes the NAK of a thrown error with the delimiters and in the time zone the app is given", async () => {
+    const app = new Mllp({
+      delimiters: { field: "#" },
+      timeZone: "Asia/Kathmandu",
+    }).parser(parseHL7v2);
+    app.on("ADT^A01", () => {
+      throw new Error("Lookup failed");
+    });
+
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    const [msh, msa] = response?.raw.split("\r") ?? [];
+    expect(msh).toMatch(
+      /^MSH#\^~\\&#RecvApp#RecvFac#SendApp#SendFac#\d{14}\+0545##ACK\^A01\^ACK#/
+    );
+    expect(msa).toBe("MSA#AE#MSG001");
+  });
+
+  it("writes ctx.ack() with the delimiters and in the time zone the app is given", async () => {
+    const app = new Mllp({
+      delimiters: { field: "#" },
+      timeZone: "Asia/Kathmandu",
+    }).parser(parseHL7v2);
+    app.on("ADT^A01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
+
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    const [msh, msa] = response?.raw.split("\r") ?? [];
+    expect(msh).toMatch(/^MSH#\^~\\&#.*#\d{14}\+0545##ACK\^A01\^ACK#/);
+    expect(msa).toBe("MSA#CA#MSG001");
+  });
+
+  it("throws a RangeError when the app is given a time zone that is not an IANA time zone name", () => {
+    expect(() => new Mllp({ timeZone: "Mars/Olympus_Mons" })).toThrow(
+      RangeError
+    );
+  });
+
   it("replies with ctx.ack() and the code it is given", async () => {
     const app = createApp();
     app.on("ADT^A01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));

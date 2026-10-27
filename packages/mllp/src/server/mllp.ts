@@ -7,6 +7,7 @@ import {
 } from "@glion/ack";
 import type { AckNakCode } from "@glion/ack";
 import { toHl7v2 } from "@glion/to-hl7v2";
+import { nowDTM } from "@glion/util-timestamp";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { acknowledge } from "./acknowledge";
@@ -20,6 +21,7 @@ import type {
   Handler,
   Hl7v2Processor,
   Middleware,
+  MllpOptions,
   Response,
   RouteFilter,
 } from "./types";
@@ -46,7 +48,22 @@ import type {
  */
 export class Mllp {
   readonly #router = new Router();
+  readonly #options: MllpOptions;
   #processor: Hl7v2Processor | undefined;
+
+  /**
+   * @throws {RangeError} When `options.timeZone` is not an IANA time zone
+   * name.
+   */
+  constructor(options: MllpOptions = {}) {
+    // Reads the clock in the zone once, so an unknown zone throws here rather
+    // than on every message.
+    nowDTM({ timeZone: options.timeZone });
+    this.#options = {
+      delimiters: options.delimiters,
+      timeZone: options.timeZone,
+    };
+  }
 
   /**
    * Register an HL7v2 processor for incoming messages.
@@ -171,6 +188,7 @@ export class Mllp {
     // compile are deferred to ctx.tree() / ctx.result().
     const message = readMessage(payload, this.#processor);
     const ctx = createContext({
+      app: this.#options,
       connection,
       message,
       processor: this.#processor,
@@ -184,7 +202,12 @@ export class Mllp {
     const nakOf = (error: Error): Response | undefined =>
       answerable
         ? {
-            raw: toHl7v2(acknowledge(message.header, { code: nakCode(error) })),
+            raw: toHl7v2(
+              acknowledge(message.header, {
+                ...this.#options,
+                code: nakCode(error),
+              })
+            ),
           }
         : undefined;
 

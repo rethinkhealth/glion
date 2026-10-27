@@ -122,7 +122,20 @@ export interface Context {
 }
 
 /** The options of `ctx.ack()`: those of `acknowledge()`, with an accept code. */
-export type AckOptions = Omit<AcknowledgeOptions, "code"> & {
+/**
+ * Options for `new Mllp()`: the delimiters and the time zone of every
+ * acknowledgment the app writes, as `acknowledge()` takes them.
+ */
+export type MllpOptions = Pick<AcknowledgeOptions, "delimiters" | "timeZone">;
+
+/**
+ * The options of `ctx.ack()`: those of `acknowledge()`, without the ones the
+ * app is given.
+ */
+export type AckOptions = Omit<
+  AcknowledgeOptions,
+  "code" | keyof MllpOptions
+> & {
   /** MSA-1: `AA` or `CA`. Defaults to `AA`. A NAK is the reply to a throw. */
   code?: AckSuccessCode;
 };

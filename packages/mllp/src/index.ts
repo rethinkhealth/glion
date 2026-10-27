@@ -19,6 +19,7 @@ export type {
   Hl7v2Processor,
   Middleware,
   MiddlewareReturn,
+  MllpOptions,
   Response,
   RouteFilter,
   RoutePattern,

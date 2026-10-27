@@ -9,6 +9,7 @@ import type {
   ConnectionInfo,
   Context,
   Hl7v2Processor,
+  MllpOptions,
   Response,
 } from "./types";
 
@@ -27,6 +28,8 @@ export interface CreateContextOptions {
   connection: ConnectionInfo;
   /** HL7v2 unified processor */
   processor: Hl7v2Processor;
+  /** The app's options, which `ctx.ack()` writes the acknowledgment with. */
+  app: MllpOptions;
 }
 
 /**
@@ -48,7 +51,7 @@ export interface CreateContextOptions {
  * the tree, the transform and compile steps never execute.
  */
 export function createContext(options: CreateContextOptions): MessageContext {
-  const { message, connection, processor } = options;
+  const { app, message, connection, processor } = options;
   const { bytes, error, file, header, raw, tree: parsed } = message;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
@@ -102,7 +105,7 @@ export function createContext(options: CreateContextOptions): MessageContext {
   // ── Build context ──────────────────────────────────────────────────
   const ctx: MessageContext = {
     ack(ackOptions?: AckOptions): Response {
-      return { raw: toHl7v2(acknowledge(header, ackOptions)) };
+      return { raw: toHl7v2(acknowledge(header, { ...ackOptions, ...app })) };
     },
     ast: parsed,
     connection: Object.freeze(connection),

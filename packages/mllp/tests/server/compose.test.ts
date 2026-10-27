@@ -10,6 +10,7 @@ const SAMPLE_MESSAGE = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|CTL1|P|2.5.1";
 
 function makeCtx(): Context {
   return createContext({
+    app: {},
     connection: {
       id: 1,
       localPort: 2575,

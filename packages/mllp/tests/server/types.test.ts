@@ -1,3 +1,6 @@
+import { expectTypeOf } from "vitest";
+
+import type { AckOptions } from "../../src/server/types";
 import { matchPattern, parsePattern } from "../../src/server/types";
 
 describe("parsePattern", () => {
@@ -80,5 +83,12 @@ describe("matchPattern", () => {
     expect(matchPattern(pattern, "ADT", "A01")).toBe(true);
     expect(matchPattern(pattern, "ADT", "A08")).toBe(true);
     expect(matchPattern(pattern, "ORU", "R01")).toBe(false);
+  });
+});
+
+describe("AckOptions", () => {
+  it("takes neither the time zone nor the delimiters, which the app is given", () => {
+    expectTypeOf<AckOptions>().not.toHaveProperty("timeZone");
+    expectTypeOf<AckOptions>().not.toHaveProperty("delimiters");
   });
 });
