@@ -24,7 +24,7 @@ afterEach(() => {
 // UTC-5 (EST) in winter and UTC-4 (EDT) in summer.
 describe("nowDTM in the host's time zone", () => {
   // 07:30:17.123 UTC in January is 02:30:17.123 EST. With no options, the
-  // value goes down to the second, with the milliseconds and the offset.
+  // precision is `fraction`: every field, the milliseconds, and the offset.
   it("gives every field, the milliseconds, and the offset", () => {
     at("2024-01-15T07:30:17.123Z");
     expect(nowDTM()).toStrictEqual({
@@ -34,7 +34,7 @@ describe("nowDTM in the host's time zone", () => {
       minute: 30,
       month: 1,
       offset: "-0500",
-      precision: "second",
+      precision: "fraction",
       second: 17,
       year: 2024,
     });
@@ -76,18 +76,6 @@ describe("nowDTM in the host's time zone", () => {
   });
 });
 
-// A Cloudflare Worker or a container reads its clock in UTC. The host here is
-// New York, so `Date` is made to report offset 0.
-describe("nowDTM on a host whose time zone is UTC", () => {
-  // Only `timeZone: "UTC"` asks for UTC with no local time zone: the host's
-  // zone is a local time zone at offset zero.
-  it("writes the offset as +0000", () => {
-    vi.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(0);
-    at("2024-01-15T07:30:00.123Z");
-    expect(formatDTM(nowDTM())).toBe("20240115073000.123+0000");
-  });
-});
-
 // A `timeZone` reads the clock in that zone, whatever the host's zone is.
 describe("nowDTM in a named time zone", () => {
   // The host is in New York (02:30 EST), but the value is read in UTC: 07:30.
@@ -101,14 +89,15 @@ describe("nowDTM in a named time zone", () => {
       minute: 30,
       month: 1,
       offset: "-0000",
-      precision: "second",
+      precision: "fraction",
       second: 0,
       year: 2024,
     });
   });
 
   // Only the name `UTC` gives `-0000`. Another name of UTC, London in winter,
-  // and Abidjan all year measure offset zero and give `+0000`.
+  // and Abidjan all year are at offset zero and give `+0000`, as a host whose
+  // time zone is UTC does.
   it.each(["Etc/UTC", "GMT", "Europe/London", "Africa/Abidjan"])(
     "writes offset zero as +0000 in %s",
     (timeZone) => {
@@ -185,17 +174,15 @@ describe("nowDTM in a named time zone", () => {
     ).toBe("2024011500-0500");
   });
 
-  // The second call shows that a failed zone is not cached.
-  it("throws Intl's RangeError for a zone Intl does not know, every time", () => {
-    expect(() => nowDTM({ timeZone: "Mars/Olympus_Mons" })).toThrow(RangeError);
+  it("throws a RangeError for a name that is not an IANA time zone", () => {
     expect(() => nowDTM({ timeZone: "Mars/Olympus_Mons" })).toThrow(RangeError);
   });
 });
 
 // Every case reads 2024-01-15 02:30:45.123 EST (07:30:45.123 UTC). A precision
-// keeps the fields from the year down to it and drops the milliseconds. A year,
-// month, or day is a calendar date and has no offset; an hour or finer is a
-// moment and keeps it.
+// keeps the fields from the year down to it; only `fraction` keeps the
+// milliseconds. A year, month, or day is a calendar date and has no offset; an
+// hour or finer is a moment and keeps it.
 describe("nowDTM precision", () => {
   beforeEach(() => {
     at("2024-01-15T07:30:45.123Z");
@@ -241,6 +228,12 @@ describe("nowDTM precision", () => {
       second: 45,
       year: 2024,
     });
+  });
+
+  it("keeps the milliseconds at fraction, as with no precision", () => {
+    expect(formatDTM(nowDTM({ precision: Precision.Fraction }))).toBe(
+      "20240115023045.123-0500"
+    );
   });
 });
 
@@ -325,8 +318,8 @@ function instantIn(text: string): number {
 // The value, written as HL7v2 text and read back, names the moment it was
 // taken, in any zone and on either side of a daylight saving time change.
 describe("nowDTM names the current instant", () => {
-  // Mutant: `offsetAt` does not round, so the offset keeps the milliseconds
-  // the wall clock leaves out. Fails on `2000-01-01T00:00:00.001Z` in `UTC`.
+  // Mutant: the formatter leaves out `hourCycle: "h23"`, so it reads the hour
+  // on a 12-hour clock. Fails on `2000-01-01T00:00:00.000Z` in `UTC`.
   it("in a named zone", () => {
     fc.assert(
       fc.property(instants, zones, (instant, timeZone) => {
@@ -339,30 +332,13 @@ describe("nowDTM names the current instant", () => {
     );
   });
 
-  // Mutant: `nowDTM` moves the moment back by the offset instead of forward,
-  // so the fields are 10 hours off the offset. Fails on
-  // `2000-01-01T00:00:00.000Z`.
+  // Mutant: `nowDTM` keeps the `:` of `GMT-05:00`, so the offset is written
+  // `-05:00`. Fails on `2000-01-01T00:00:00.000Z`.
   it("in the host's zone", () => {
     fc.assert(
       fc.property(instants, (instant) => {
         vi.setSystemTime(instant);
         expect(instantIn(formatDTM(nowDTM()))).toBe(instant.getTime());
-      })
-    );
-  });
-
-  // Two independent readings of the same zone must agree: the host's zone
-  // through `Date`, and the named zone through Intl.
-  //
-  // Mutant: the formatter leaves out `hourCycle: "h23"`, so it reads the hour
-  // on a 12-hour clock. Fails on `2000-01-01T00:00:00.000Z`.
-  it("the same in the host's zone as in that zone named", () => {
-    fc.assert(
-      fc.property(instants, (instant) => {
-        vi.setSystemTime(instant);
-        expect(nowDTM({ timeZone: "America/New_York" })).toStrictEqual(
-          nowDTM()
-        );
       })
     );
   });

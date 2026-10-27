@@ -27,7 +27,10 @@ export interface TM {
   minute?: number;
   /** 0 to 59. */
   second?: number;
-  /** The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`. */
+  /**
+   * The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`.
+   * Present when `precision` is `fraction`.
+   */
   fraction?: string;
   /**
    * The offset from UTC as written, `+/-HHMM`: `"-0500"`. Absent when the
@@ -36,11 +39,10 @@ export interface TM {
    */
   offset?: string;
   /**
-   * The last field the value gives: `1430` is `minute`. Digits after the
-   * second are in `fraction`, and the precision stays `second`; the offset
-   * does not count.
+   * The last field the value gives: `1430` is `minute`, and `143045.12` is
+   * `fraction`. The offset does not count.
    */
-  precision: Extract<Precision, "hour" | "minute" | "second">;
+  precision: Extract<Precision, "hour" | "minute" | "second" | "fraction">;
 }
 
 /**
@@ -63,7 +65,10 @@ export interface DTM {
   minute?: number;
   /** 0 to 59. */
   second?: number;
-  /** The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`. */
+  /**
+   * The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`.
+   * Present when `precision` is `fraction`.
+   */
   fraction?: string;
   /**
    * The offset from UTC as written, `+/-HHMM`: `"-0500"`. Absent when the
@@ -72,9 +77,9 @@ export interface DTM {
    */
   offset?: string;
   /**
-   * The last field the value gives, from `year` to `second`: `202603-0500` is
-   * `month`. Digits after the second are in `fraction`, and the precision
-   * stays `second`; the offset does not count.
+   * The last field the value gives, from `year` to `fraction`: `202603-0500`
+   * is `month`, and `20260307143045.12` is `fraction`. The offset does not
+   * count.
    */
   precision: Precision;
 }

@@ -155,6 +155,7 @@ describe("parseTM", () => {
     });
   });
 
+  // Digits after the seconds make the precision `fraction`.
   it("reads seconds with a fraction and an offset east of UTC", () => {
     expect(parseTM("143045.1230+0545")).toStrictEqual({
       data: {
@@ -162,7 +163,7 @@ describe("parseTM", () => {
         hour: 14,
         minute: 30,
         offset: "+0545",
-        precision: "second",
+        precision: "fraction",
         second: 45,
       },
       success: true,
@@ -295,7 +296,7 @@ describe("parseDTM", () => {
         minute: 30,
         month: 3,
         offset: "-0500",
-        precision: "second",
+        precision: "fraction",
         second: 45,
         year: 2026,
       },

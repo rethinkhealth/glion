@@ -141,6 +141,7 @@ export function parseTM(value: string): ParseResult<TM> {
   }
   if (layout.fraction !== undefined) {
     data.fraction = layout.fraction;
+    data.precision = "fraction";
   }
   if (layout.offset !== undefined) {
     data.offset = layout.offset.text;
@@ -186,6 +187,7 @@ export function parseDTM(value: string): ParseResult<DTM> {
   const data: DTM = { ...date, ...time, precision };
   if (layout.fraction !== undefined) {
     data.fraction = layout.fraction;
+    data.precision = "fraction";
   }
   if (layout.offset !== undefined) {
     data.offset = layout.offset.text;
