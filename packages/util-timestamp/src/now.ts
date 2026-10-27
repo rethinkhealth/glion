@@ -10,40 +10,14 @@ import type { DTM } from "./types";
 //    2024-01-15 02:30:00.123.
 // 3. `fieldsOf` keeps the wall clock's fields down to `precision`, and
 //    `nowDTM` adds `fraction` and, to a value with an hour, `offsetText`'s
-//    `-0500`: `20240115023000.123-0500`. In UTC, the offset is `-0000`.
+//    `-0500`: `20240115023000.123-0500`. With `timeZone: "UTC"`, the offset
+//    is `-0000`.
 
 const MILLISECONDS_PER_MINUTE = 60_000;
 const MINUTES_PER_HOUR = 60;
 const FRACTION_DIGITS = 3;
 
 const PRECISIONS = Object.values(Precision);
-
-// The IANA names of UTC with no local time zone, whose offset is written
-// `-0000`: the zones that link to `Etc/UTC` and `Etc/GMT`, and `+00:00`, which
-// Node gives a host with `TZ=GMT`.
-// Stryker disable StringLiteral: V8 resolves every name here but `+00:00` to `UTC`, so Node reads no other; JavaScriptCore keeps the name given.
-const UTC_ZONES: ReadonlySet<string> = new Set([
-  "+00:00",
-  "Etc/GMT",
-  "Etc/GMT+0",
-  "Etc/GMT-0",
-  "Etc/GMT0",
-  "Etc/Greenwich",
-  "Etc/UCT",
-  "Etc/UTC",
-  "Etc/Universal",
-  "Etc/Zulu",
-  "GMT",
-  "GMT+0",
-  "GMT-0",
-  "GMT0",
-  "Greenwich",
-  "UCT",
-  "UTC",
-  "Universal",
-  "Zulu",
-]);
-// Stryker restore StringLiteral
 
 /** Options for {@link nowDTM}. */
 export interface NowDTMOptions {
@@ -60,6 +34,10 @@ export interface NowDTMOptions {
    * The IANA time zone the fields are read in, such as `America/New_York` or
    * `UTC`. Defaults to the host's time zone. The fields are the date and time
    * in that zone: a value for a facility in another zone needs that zone.
+   *
+   * `UTC` gives the offset `-0000`. Every other zone gives the offset it
+   * measures, `+0000` at offset zero, including `Etc/UTC` and a host whose
+   * time zone is UTC.
    */
   timeZone?: string;
   /**
@@ -70,38 +48,26 @@ export interface NowDTMOptions {
   offset?: boolean;
 }
 
-/** A time zone's formatter, and whether the zone is UTC with no local time. */
-interface Zone {
-  formatter: Intl.DateTimeFormat;
-  utc: boolean;
-}
+// A formatter costs about 25 µs to build and 2 µs to read, so each `timeZone`
+// gets one on first use.
+const formatters = new Map<string, Intl.DateTimeFormat>();
 
-// A zone costs about 25 µs to build and 2 µs to read, so each `timeZone`
-// string, and the host's zone under `undefined`, gets one on first use.
-const zones = new Map<string | undefined, Zone>();
-
-function newZone(timeZone: string | undefined): Zone {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    hour: "numeric",
-    hourCycle: "h23",
-    minute: "numeric",
-    month: "numeric",
-    second: "numeric",
-    timeZone,
-    year: "numeric",
-  });
-  return {
-    formatter,
-    utc: UTC_ZONES.has(formatter.resolvedOptions().timeZone),
-  };
-}
-
-function zoneOf(timeZone: string | undefined): Zone {
-  const zone = zones.get(timeZone) ?? newZone(timeZone);
-  // Stryker disable next-line CallExpression: the cache saves time only; while the process's time zone stays the same, a zone built on every call reads the same fields and the same `utc`.
-  zones.set(timeZone, zone);
-  return zone;
+function formatterOf(timeZone: string): Intl.DateTimeFormat {
+  const formatter =
+    formatters.get(timeZone) ??
+    new Intl.DateTimeFormat("en-US", {
+      day: "numeric",
+      hour: "numeric",
+      hourCycle: "h23",
+      minute: "numeric",
+      month: "numeric",
+      second: "numeric",
+      timeZone,
+      year: "numeric",
+    });
+  // Stryker disable next-line CallExpression: the cache saves time only; a formatter built on every call reads the same fields.
+  formatters.set(timeZone, formatter);
+  return formatter;
 }
 
 function numberOf(
@@ -124,7 +90,7 @@ function offsetAt(date: Date, timeZone: string | undefined): number {
   // Intl reads the wall clock in the zone (02:30:00 in New York), and that
   // time, read as if it were UTC, minus the real moment (07:30:00.123 UTC) is
   // the offset: -5 h less 123 ms, rounded to -300.
-  const parts = zoneOf(timeZone).formatter.formatToParts(date);
+  const parts = formatterOf(timeZone).formatToParts(date);
   const wallClock = Date.UTC(
     numberOf(parts, "year"),
     numberOf(parts, "month") - 1,
@@ -136,14 +102,8 @@ function offsetAt(date: Date, timeZone: string | undefined): number {
   return Math.round((wallClock - date.getTime()) / MILLISECONDS_PER_MINUTE);
 }
 
-/**
- * `minutes` as `+/-HHMM`, such as `-300` as `"-0500"`, or `"-0000"` when they
- * are `0` and `timeZone` is UTC with no local time zone (HL7v2 v2.9).
- */
-function offsetText(minutes: number, timeZone: string | undefined): string {
-  if (minutes === 0 && zoneOf(timeZone).utc) {
-    return "-0000";
-  }
+/** `minutes` as `+/-HHMM`, such as `-300` as `"-0500"`. */
+function offsetText(minutes: number): string {
   const sign = minutes < 0 ? "-" : "+";
   const magnitude = Math.abs(minutes);
   return `${sign}${pad(Math.floor(magnitude / MINUTES_PER_HOUR), 2)}${pad(magnitude % MINUTES_PER_HOUR, 2)}`;
@@ -182,9 +142,8 @@ function fieldsOf(wallClock: Date, precision: Precision): DTM {
  * field down to the second, and the milliseconds as a 3-digit `fraction`; with
  * it, the value stops at that field and has no `fraction`. A value that stops
  * at the year, month, or day has no offset unless `options.offset` is `true`.
- * In UTC, such as `UTC`, `Etc/UTC`, or `GMT`, the offset is `-0000`; a zone
- * at offset zero with local time, such as `Europe/London` in winter, gives
- * `+0000`.
+ * With `timeZone: "UTC"`, the offset is `-0000`; every other zone at offset
+ * zero, such as `Europe/London` in winter, gives `+0000`.
  *
  * @example
  *   ```ts
@@ -208,7 +167,8 @@ export function nowDTM(options: NowDTMOptions = {}): DTM {
   // A date, like `20240115`, is a calendar day, not a moment: by default it
   // has no offset, as HL7v2 writes a DT or a date of birth.
   if (options.offset ?? value.hour !== undefined) {
-    value.offset = offsetText(minutes, timeZone);
+    // HL7v2 v2.9: `-0000` is UTC with no local time zone.
+    value.offset = timeZone === "UTC" ? "-0000" : offsetText(minutes);
   }
   return value;
 }

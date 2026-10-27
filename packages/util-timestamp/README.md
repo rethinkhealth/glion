@@ -71,7 +71,7 @@ formatDTM({ year: 99, precision: "year" }); // "0099"
 
 ### `nowDTM(options?: NowDTMOptions): DTM`
 
-Returns the current time as a DTM, read in the host's time zone or in `timeZone`, with that zone's offset from UTC at this moment, daylight saving time included. Without a `precision`, the value gives every field down to the second, and the milliseconds as a 3-digit `fraction`. A value that stops at the year, month, or day is a date and has no offset unless `offset` is `true`. In UTC, such as `UTC`, `Etc/UTC`, or `GMT`, the offset is `-0000`; a zone at offset zero with local time, such as `Europe/London` in winter, gives `+0000`. The fields are the date and time in that zone: a value for a facility in another zone needs that zone. Throws Intl's `RangeError` when `timeZone` is not a time zone Intl knows.
+Returns the current time as a DTM, read in the host's time zone or in `timeZone`, with that zone's offset from UTC at this moment, daylight saving time included. Without a `precision`, the value gives every field down to the second, and the milliseconds as a 3-digit `fraction`. A value that stops at the year, month, or day is a date and has no offset unless `offset` is `true`. With `timeZone: "UTC"`, the offset is `-0000`, UTC with no local time zone; every other zone at offset zero, such as `Etc/UTC`, `Europe/London` in winter, or a host whose time zone is UTC, gives `+0000`. The fields are the date and time in that zone: a value for a facility in another zone needs that zone. Throws Intl's `RangeError` when `timeZone` is not a time zone Intl knows.
 
 In a TS, HL7v2 v2.1 accepts only the minute or the second, with no `fraction`; v2.2 adds the day and `fraction`; v2.3 and later accept every precision.
 

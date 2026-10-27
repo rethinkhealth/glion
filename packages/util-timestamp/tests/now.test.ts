@@ -77,41 +77,21 @@ describe("nowDTM in the host's time zone", () => {
 });
 
 // A Cloudflare Worker or a container reads its clock in UTC. The host here is
-// New York, so `Date` is made to report offset 0 and Intl the zone `UTC`. Each
-// test imports `nowDTM` afresh, as the host's zone is read once and kept.
+// New York, so `Date` is made to report offset 0.
 describe("nowDTM on a host whose time zone is UTC", () => {
-  beforeEach(() => {
-    const resolved = new Intl.DateTimeFormat().resolvedOptions();
+  // Only `timeZone: "UTC"` asks for UTC with no local time zone: the host's
+  // zone is a local time zone at offset zero.
+  it("writes the offset as +0000", () => {
     vi.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(0);
-    vi.spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions").mockReturnValue({
-      ...resolved,
-      timeZone: "UTC",
-    });
-    vi.resetModules();
-  });
-
-  it("writes the offset as -0000", async () => {
-    const { nowDTM: freshNowDTM } = await import("../src/now");
     at("2024-01-15T07:30:00.123Z");
-    expect(formatDTM(freshNowDTM())).toBe("20240115073000.123-0000");
-  });
-
-  // The process's zone can change while it runs (`process.env.TZ`). The
-  // offset `Date` measures then still names the instant, even though the zone
-  // was first read as UTC.
-  it("writes the offset it measures after the zone changes", async () => {
-    const { nowDTM: freshNowDTM } = await import("../src/now");
-    at("2024-01-15T07:30:00.123Z");
-    expect(formatDTM(freshNowDTM())).toBe("20240115073000.123-0000");
-    vi.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(300);
-    expect(formatDTM(freshNowDTM())).toBe("20240115023000.123-0500");
+    expect(formatDTM(nowDTM())).toBe("20240115073000.123+0000");
   });
 });
 
 // A `timeZone` reads the clock in that zone, whatever the host's zone is.
 describe("nowDTM in a named time zone", () => {
   // The host is in New York (02:30 EST), but the value is read in UTC: 07:30.
-  // UTC has no local time zone, so the offset is `-0000`.
+  // `UTC` is UTC with no local time zone, so the offset is `-0000`.
   it("reads the fields and the offset in that zone, not the host's", () => {
     at("2024-01-15T07:30:00.123Z");
     expect(nowDTM({ timeZone: "UTC" })).toStrictEqual({
@@ -127,38 +107,10 @@ describe("nowDTM in a named time zone", () => {
     });
   });
 
-  // Every IANA name of UTC, and the offset zone of zero.
-  it.each([
-    "+00:00",
-    "Etc/GMT",
-    "Etc/GMT+0",
-    "Etc/GMT-0",
-    "Etc/GMT0",
-    "Etc/Greenwich",
-    "Etc/UCT",
-    "Etc/UTC",
-    "Etc/Universal",
-    "Etc/Zulu",
-    "GMT",
-    "GMT+0",
-    "GMT-0",
-    "GMT0",
-    "Greenwich",
-    "UCT",
-    "UTC",
-    "Universal",
-    "Zulu",
-  ])("writes UTC as -0000 in %s", (timeZone) => {
-    at("2024-01-15T07:30:00Z");
-    expect(formatDTM(nowDTM({ precision: Precision.Minute, timeZone }))).toBe(
-      "202401150730-0000"
-    );
-  });
-
-  // London in winter and Abidjan all year are local time zones at offset
-  // zero, so they keep `+0000`.
-  it.each(["Europe/London", "Africa/Abidjan"])(
-    "writes a local time zone at offset zero as +0000 in %s",
+  // Only the name `UTC` gives `-0000`. Another name of UTC, London in winter,
+  // and Abidjan all year measure offset zero and give `+0000`.
+  it.each(["Etc/UTC", "GMT", "Europe/London", "Africa/Abidjan"])(
+    "writes offset zero as +0000 in %s",
     (timeZone) => {
       at("2024-01-15T07:30:00Z");
       expect(formatDTM(nowDTM({ precision: Precision.Minute, timeZone }))).toBe(
