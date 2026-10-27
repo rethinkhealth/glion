@@ -1,8 +1,5 @@
 import { checkDate, checkOffset, checkTime } from "./check";
-import type { DT, DTM, ParseResult, TM } from "./types";
-
-/** The parts a format matched, by name. */
-type Parts = Record<string, string | undefined>;
+import type { DT, DTM, Offset, ParseResult, TM } from "./types";
 
 const INVALID_FORMAT = {
   issue: { code: "invalid-format" },
@@ -10,46 +7,55 @@ const INVALID_FORMAT = {
 } as const satisfies ParseResult<never>;
 
 // The HL7v2 formats. Each bracket of the format is an optional group, and
-// each part is named after the field it fills.
+// each field is one capture, in the order the format writes them.
 
 // DT: YYYY[MM[DD]]
-const DT_FORMAT = /^(?<year>\d{4})(?:(?<month>\d{2})(?<day>\d{2})?)?$/;
+const DT_FORMAT = /^(\d{4})(?:(\d{2})(\d{2})?)?$/;
 
 // TM: HH[MM[SS[.S[S[S[S]]]]]][+/-ZZZZ]
 const TM_FORMAT =
-  /^(?<hour>\d{2})(?:(?<minute>\d{2})(?:(?<second>\d{2})(?:\.(?<fraction>\d{1,4}))?)?)?(?<offset>[+-]\d{4})?$/;
+  /^(\d{2})(?:(\d{2})(?:(\d{2})(?:\.(\d{1,4}))?)?)?([+-]\d{4})?$/;
 
 // DTM: YYYY[MM[DD[HH[MM[SS[.S[S[S[S]]]]]]]]][+/-ZZZZ]
 const DTM_FORMAT =
-  /^(?<year>\d{4})(?:(?<month>\d{2})(?:(?<day>\d{2})(?:(?<hour>\d{2})(?:(?<minute>\d{2})(?:(?<second>\d{2})(?:\.(?<fraction>\d{1,4}))?)?)?)?)?)?(?<offset>[+-]\d{4})?$/;
+  /^(\d{4})(?:(\d{2})(?:(\d{2})(?:(\d{2})(?:(\d{2})(?:(\d{2})(?:\.(\d{1,4}))?)?)?)?)?)?([+-]\d{4})?$/;
 
-/** The date `parts` give. Each part the value gives makes it more precise. */
-function readDate(parts: Parts): DT {
-  const date: DT = { precision: "year", year: Number(parts.year) };
-  if (parts.month !== undefined) {
-    date.month = Number(parts.month);
+/** The date the captured fields give. Each field makes it more precise. */
+function readDate(
+  year: string | undefined,
+  month: string | undefined,
+  day: string | undefined
+): DT {
+  const date: DT = { precision: "year", year: Number(year) };
+  if (month !== undefined) {
+    date.month = Number(month);
     date.precision = "month";
   }
-  if (parts.day !== undefined) {
-    date.day = Number(parts.day);
+  if (day !== undefined) {
+    date.day = Number(day);
     date.precision = "day";
   }
   return date;
 }
 
-/** The time `parts` give. Each part the value gives makes it more precise. */
-function readTime(parts: Parts): TM {
-  const time: TM = { hour: Number(parts.hour), precision: "hour" };
-  if (parts.minute !== undefined) {
-    time.minute = Number(parts.minute);
+/** The time the captured fields give. Each field makes it more precise. */
+function readTime(
+  hour: string | undefined,
+  minute: string | undefined,
+  second: string | undefined,
+  fraction: string | undefined
+): TM {
+  const time: TM = { hour: Number(hour), precision: "hour" };
+  if (minute !== undefined) {
+    time.minute = Number(minute);
     time.precision = "minute";
   }
-  if (parts.second !== undefined) {
-    time.second = Number(parts.second);
+  if (second !== undefined) {
+    time.second = Number(second);
     time.precision = "second";
   }
-  if (parts.fraction !== undefined) {
-    time.fraction = parts.fraction;
+  if (fraction !== undefined) {
+    time.fraction = fraction;
     time.precision = "fraction";
   }
   return time;
@@ -69,12 +75,13 @@ function readTime(parts: Parts): TM {
  *   ```;
  */
 export function parseDT(value: string): ParseResult<DT> {
-  const parts = DT_FORMAT.exec(value)?.groups;
-  if (parts === undefined) {
+  const match = DT_FORMAT.exec(value);
+  if (match === null) {
     return INVALID_FORMAT;
   }
 
-  const data = readDate(parts);
+  const [, year, month, day] = match;
+  const data = readDate(year, month, day);
   const issue = checkDate(data.year, data.month, data.day);
   return issue ? { issue, success: false } : { data, success: true };
 }
@@ -93,14 +100,15 @@ export function parseDT(value: string): ParseResult<DT> {
  *   ```;
  */
 export function parseTM(value: string): ParseResult<TM> {
-  const parts = TM_FORMAT.exec(value)?.groups;
-  if (parts === undefined) {
+  const match = TM_FORMAT.exec(value);
+  if (match === null) {
     return INVALID_FORMAT;
   }
 
-  const data = readTime(parts);
-  if (parts.offset !== undefined) {
-    data.offset = parts.offset;
+  const [, hour, minute, second, fraction, offset] = match;
+  const data = readTime(hour, minute, second, fraction);
+  if (offset !== undefined) {
+    data.offset = offset as Offset;
   }
   const issue =
     checkTime(data.hour, data.minute, data.second) ?? checkOffset(data.offset);
@@ -124,18 +132,22 @@ export function parseTM(value: string): ParseResult<TM> {
  *   ```;
  */
 export function parseDTM(value: string): ParseResult<DTM> {
-  const parts = DTM_FORMAT.exec(value)?.groups;
-  if (parts === undefined) {
+  const match = DTM_FORMAT.exec(value);
+  if (match === null) {
     return INVALID_FORMAT;
   }
 
+  const [, year, month, day, hour, minute, second, fraction, offset] = match;
   // A time follows the whole date and makes the value as precise as itself.
   const data: DTM =
-    parts.hour === undefined
-      ? readDate(parts)
-      : { ...readDate(parts), ...readTime(parts) };
-  if (parts.offset !== undefined) {
-    data.offset = parts.offset;
+    hour === undefined
+      ? readDate(year, month, day)
+      : {
+          ...readDate(year, month, day),
+          ...readTime(hour, minute, second, fraction),
+        };
+  if (offset !== undefined) {
+    data.offset = offset as Offset;
   }
   const issue =
     checkDate(data.year, data.month, data.day) ??

@@ -61,19 +61,28 @@ parseDTM("20261307"); // { success: false, issue: { code: "month-out-of-range", 
 
 ### `formatDT(date: DT): string`, `formatTM(time: TM): string`, `formatDTM(dateTime: DTM): string`
 
-Write a value as HL7v2 text, with the fields it has. For every valid value, `formatDTM(parseDTM(value).data) === value`, and the same for DT and TM.
+Write a value as HL7v2 text, from its first field down to its precision, then, for a TM or DTM, its offset. A field past the precision is not written. For every valid value, `formatDTM(parseDTM(value).data) === value`, and the same for DT and TM. Throw a `TimestampPrecisionError` when the value does not give a field its precision includes.
 
 ```ts
 formatDT({ year: 2026, month: 3, precision: "month" }); // "202603"
 formatTM({ hour: 9, offset: "+0545", precision: "hour" }); // "09+0545"
 formatDTM({ year: 99, precision: "year" }); // "0099"
+formatDTM({
+  year: 2024,
+  month: 1,
+  day: 15,
+  hour: 2,
+  second: 5,
+  precision: "second",
+});
+// throws TimestampPrecisionError: no minute
 ```
 
 ### `nowDTM(options?: NowDTMOptions): DTM`
 
-Returns the current time as a DTM, read in the host's time zone or in `timeZone`, with that zone's offset from UTC at this moment, daylight saving time included. The precision defaults to `fraction`: every field, and the milliseconds as a 3-digit `fraction`. A value that stops at the year, month, or day is a date and has no offset unless `offset` is `true`. With `timeZone: "UTC"`, the offset is `-0000`, UTC with no local time zone; every other zone at offset zero, such as `Etc/UTC`, `Europe/London` in winter, or a host whose time zone is UTC, gives `+0000`. The fields are the date and time in that zone: a value for a facility in another zone needs that zone. Throws a `RangeError` when `timeZone` is not an IANA time zone name.
+Returns the current time as a DTM, read in the host's time zone or in `timeZone`, with that zone's offset from UTC at this moment, daylight saving time included. The precision defaults to `fraction`: every field, and the milliseconds as a 3-digit `fraction`. A value that stops at the year, month, or day is a date and has no offset unless `offset` is `true`. With `timeZone: "UTC"`, in any case, the offset is `-0000`, UTC with no local time zone; every other zone at offset zero, such as `Etc/UTC`, `Europe/London` in winter, or a host whose time zone is UTC, gives `+0000`. The fields are the date and time in that zone: a value for a facility in another zone needs that zone. Throws a `RangeError` when `timeZone` is neither an IANA time zone name nor an offset from UTC.
 
-In a TS, HL7v2 v2.1 accepts only `minute` or `second`; v2.2 adds `day` and `fraction`; v2.3 and later accept every precision.
+In a TS, HL7v2 v2.1 accepts only `minute` or `second`. v2.2 adds `day`, and a fraction of exactly 4 digits, which `nowDTM` does not write. v2.3 and later accept every precision, and a fraction of 1 to 4 digits.
 
 ```ts
 import { formatDTM, nowDTM, Precision } from "@glion/util-timestamp";
@@ -85,11 +94,11 @@ formatDTM(nowDTM({ offset: false, precision: Precision.Minute })); // "202401150
 formatDTM(nowDTM({ precision: Precision.Day })); // "20240115"
 ```
 
-| Option      | Type        | Default                                                    | Description                                                 |
-| ----------- | ----------- | ---------------------------------------------------------- | ----------------------------------------------------------- |
-| `precision` | `Precision` | `fraction`, with the milliseconds                          | The last field the value gives                              |
-| `timeZone`  | `string`    | the host's time zone                                       | An IANA time zone name, such as `America/New_York` or `UTC` |
-| `offset`    | `boolean`   | `true` from the hour on, `false` for a year, month, or day | Whether the value gives its offset from UTC                 |
+| Option      | Type        | Default                                                    | Description                                                                                          |
+| ----------- | ----------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `precision` | `Precision` | `fraction`, with the milliseconds                          | The last field the value gives                                                                       |
+| `timeZone`  | `string`    | the host's time zone                                       | An IANA time zone name, such as `America/New_York` or `UTC`, or an offset from UTC, such as `-05:00` |
+| `offset`    | `boolean`   | `true` from the hour on, `false` for a year, month, or day | Whether the value gives its offset from UTC                                                          |
 
 ### `DT`, `TM`, `DTM`
 
@@ -104,7 +113,7 @@ The parsed value. A field is present only when the value gives it.
 | `minute`    | `number` | TM, DTM     | `0` to `59`                                                                                                                                                     |
 | `second`    | `number` | TM, DTM     | `0` to `59`                                                                                                                                                     |
 | `fraction`  | `string` | TM, DTM     | The 1 to 4 digits after the second, as written: `"1230"` for `.1230`. Present when `precision` is `fraction`                                                    |
-| `offset`    | `string` | TM, DTM     | The offset from UTC as written, `+/-HHMM`: `"-0500"`. From v2.9, `"-0000"` is UTC with no local time zone known, and `"+0000"` a local time zone at offset zero |
+| `offset`    | `Offset` | TM, DTM     | The offset from UTC as written, `+/-HHMM`: `"-0500"`. From v2.9, `"-0000"` is UTC with no local time zone known, and `"+0000"` a local time zone at offset zero |
 | `precision` | `string` | DT, TM, DTM | The last field the value gives, one of the `Precision` values                                                                                                   |
 
 ### `Precision`
@@ -120,6 +129,10 @@ The parsed value. A field is present only when the value gives it.
 | `Precision.Fraction` | `"fraction"` | `YYYYMMDDHHMMSS.S[S[S[S]]]` |
 
 A DT is `year`, `month`, or `day`; a TM is `hour`, `minute`, `second`, or `fraction`. The number of digits after the second is the length of `fraction`.
+
+### `TimestampPrecisionError`
+
+Thrown by `formatDT`, `formatTM`, and `formatDTM` when the value does not give a field its precision includes. `field` is the missing field, such as `"minute"`, and `precision` the value's precision; both are `Precision` values.
 
 ### `ParseResult<T>` and `TimestampIssue`
 

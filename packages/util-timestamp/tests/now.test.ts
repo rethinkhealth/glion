@@ -5,12 +5,8 @@ import { formatDTM } from "../src/format";
 import { nowDTM } from "../src/now";
 import { Precision } from "../src/precision";
 
-/** Sets the clock `nowDTM` reads to `instant`, an ISO 8601 UTC time. */
-function at(instant: string): void {
-  vi.setSystemTime(new Date(instant));
-}
-
-// Only `Date` is faked, so `new Date()` returns the instant `at` sets.
+// Only `Date` is faked, so `new Date()` returns the instant
+// `vi.setSystemTime` sets.
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"] });
 });
@@ -26,7 +22,7 @@ describe("nowDTM in the host's time zone", () => {
   // 07:30:17.123 UTC in January is 02:30:17.123 EST. With no options, the
   // precision is `fraction`: every field, the milliseconds, and the offset.
   it("gives every field, the milliseconds, and the offset", () => {
-    at("2024-01-15T07:30:17.123Z");
+    vi.setSystemTime("2024-01-15T07:30:17.123Z");
     expect(nowDTM()).toStrictEqual({
       day: 15,
       fraction: "123",
@@ -43,7 +39,7 @@ describe("nowDTM in the host's time zone", () => {
 
   // 5 ms is written `.005`, not `.5`, which would mean 500 ms.
   it("writes the milliseconds as 3 digits", () => {
-    at("2024-01-15T07:30:00.005Z");
+    vi.setSystemTime("2024-01-15T07:30:00.005Z");
     expect(formatDTM(nowDTM())).toBe("20240115023000.005-0500");
   });
 
@@ -51,11 +47,11 @@ describe("nowDTM in the host's time zone", () => {
   // 03:00 EDT. One second before, it is 01:59:59 at -0500; at the change, it
   // is 03:00:00 at -0400. The local hour 02 never happens that day.
   it("gives the offset at each side of the change to daylight saving time", () => {
-    at("2024-03-10T06:59:59Z");
+    vi.setSystemTime("2024-03-10T06:59:59Z");
     expect(formatDTM(nowDTM({ precision: Precision.Second }))).toBe(
       "20240310015959-0500"
     );
-    at("2024-03-10T07:00:00Z");
+    vi.setSystemTime("2024-03-10T07:00:00Z");
     expect(formatDTM(nowDTM({ precision: Precision.Second }))).toBe(
       "20240310030000-0400"
     );
@@ -65,11 +61,11 @@ describe("nowDTM in the host's time zone", () => {
   // 01:00 EST, so 01:xx happens twice. Only the offset tells the two apart:
   // 01:59:59-0400 is followed one second later by 01:00:00-0500.
   it("gives the offset at each side of the change back to standard time", () => {
-    at("2024-11-03T05:59:59Z");
+    vi.setSystemTime("2024-11-03T05:59:59Z");
     expect(formatDTM(nowDTM({ precision: Precision.Second }))).toBe(
       "20241103015959-0400"
     );
-    at("2024-11-03T06:00:00Z");
+    vi.setSystemTime("2024-11-03T06:00:00Z");
     expect(formatDTM(nowDTM({ precision: Precision.Second }))).toBe(
       "20241103010000-0500"
     );
@@ -81,7 +77,7 @@ describe("nowDTM in a named time zone", () => {
   // The host is in New York (02:30 EST), but the value is read in UTC: 07:30.
   // `UTC` is UTC with no local time zone, so the offset is `-0000`.
   it("reads the fields and the offset in that zone, not the host's", () => {
-    at("2024-01-15T07:30:00.123Z");
+    vi.setSystemTime("2024-01-15T07:30:00.123Z");
     expect(nowDTM({ timeZone: "UTC" })).toStrictEqual({
       day: 15,
       fraction: "123",
@@ -101,7 +97,7 @@ describe("nowDTM in a named time zone", () => {
   it.each(["Etc/UTC", "GMT", "Europe/London", "Africa/Abidjan"])(
     "writes offset zero as +0000 in %s",
     (timeZone) => {
-      at("2024-01-15T07:30:00Z");
+      vi.setSystemTime("2024-01-15T07:30:00Z");
       expect(formatDTM(nowDTM({ precision: Precision.Minute, timeZone }))).toBe(
         "202401150730+0000"
       );
@@ -110,7 +106,7 @@ describe("nowDTM in a named time zone", () => {
 
   // Kathmandu is UTC+5:45 all year: 07:30 UTC is 13:15 there.
   it("gives an offset east of UTC that is not whole hours", () => {
-    at("2024-01-15T07:30:00Z");
+    vi.setSystemTime("2024-01-15T07:30:00Z");
     expect(
       formatDTM(
         nowDTM({ precision: Precision.Minute, timeZone: "Asia/Kathmandu" })
@@ -120,7 +116,7 @@ describe("nowDTM in a named time zone", () => {
 
   // St. John's, Newfoundland, is UTC-3:30 in winter: 07:30 UTC is 04:00 there.
   it("gives an offset west of UTC that is not whole hours", () => {
-    at("2024-01-15T07:30:00Z");
+    vi.setSystemTime("2024-01-15T07:30:00Z");
     expect(
       formatDTM(
         nowDTM({ precision: Precision.Minute, timeZone: "America/St_Johns" })
@@ -131,7 +127,7 @@ describe("nowDTM in a named time zone", () => {
   // IANA's `Etc/GMT` zones count the other way: `Etc/GMT+5` is 5 hours
   // behind UTC, so 07:30 UTC is 02:30 there, at `-0500`.
   it("gives the offset of an Etc/GMT zone, whose name has the opposite sign", () => {
-    at("2024-01-15T07:30:00Z");
+    vi.setSystemTime("2024-01-15T07:30:00Z");
     expect(
       formatDTM(nowDTM({ precision: Precision.Minute, timeZone: "Etc/GMT+5" }))
     ).toBe("202401150230-0500");
@@ -141,13 +137,13 @@ describe("nowDTM in a named time zone", () => {
   // BST. A different zone and date from the host's tests, so the named zone
   // is shown to follow its own rules.
   it("gives the offset at each side of the change to daylight saving time", () => {
-    at("2024-03-31T00:59:59Z");
+    vi.setSystemTime("2024-03-31T00:59:59Z");
     expect(
       formatDTM(
         nowDTM({ precision: Precision.Second, timeZone: "Europe/London" })
       )
     ).toBe("20240331005959+0000");
-    at("2024-03-31T01:00:00Z");
+    vi.setSystemTime("2024-03-31T01:00:00Z");
     expect(
       formatDTM(
         nowDTM({ precision: Precision.Second, timeZone: "Europe/London" })
@@ -158,13 +154,13 @@ describe("nowDTM in a named time zone", () => {
   // On 2024-10-27 at 01:00 UTC, London's clocks fall back from 02:00 BST to
   // 01:00 GMT: 01:59:59+0100 is followed by 01:00:00+0000.
   it("gives the offset at each side of the change back to standard time", () => {
-    at("2024-10-27T00:59:59Z");
+    vi.setSystemTime("2024-10-27T00:59:59Z");
     expect(
       formatDTM(
         nowDTM({ precision: Precision.Second, timeZone: "Europe/London" })
       )
     ).toBe("20241027015959+0100");
-    at("2024-10-27T01:00:00Z");
+    vi.setSystemTime("2024-10-27T01:00:00Z");
     expect(
       formatDTM(
         nowDTM({ precision: Precision.Second, timeZone: "Europe/London" })
@@ -175,7 +171,7 @@ describe("nowDTM in a named time zone", () => {
   // 05:00 UTC is midnight in New York. A 24-hour clock writes it `00`; a
   // formatter on a 12-hour clock would give 12.
   it("writes midnight as hour 00", () => {
-    at("2024-01-15T05:00:00Z");
+    vi.setSystemTime("2024-01-15T05:00:00Z");
     expect(
       formatDTM(
         nowDTM({ precision: Precision.Hour, timeZone: "America/New_York" })
@@ -183,8 +179,60 @@ describe("nowDTM in a named time zone", () => {
     ).toBe("2024011500-0500");
   });
 
-  it("throws a RangeError for a name that is not an IANA time zone", () => {
+  // Time zone names are not case-sensitive: `utc` is `UTC`.
+  it("writes -0000 for UTC in any case", () => {
+    vi.setSystemTime("2024-01-15T07:30:00Z");
+    expect(
+      formatDTM(nowDTM({ precision: Precision.Minute, timeZone: "utc" }))
+    ).toBe("202401150730-0000");
+  });
+
+  it("reads the fields at a fixed offset from UTC", () => {
+    vi.setSystemTime("2024-07-15T07:30:00Z");
+    expect(
+      formatDTM(nowDTM({ precision: Precision.Minute, timeZone: "-05:00" }))
+    ).toBe("202407150230-0500");
+  });
+
+  // One call after another, each reads the clock in its own zone.
+  it("reads each call in the zone it names", () => {
+    vi.setSystemTime("2024-01-15T07:30:00Z");
+    const options = { offset: false, precision: Precision.Minute };
+    expect(formatDTM(nowDTM({ ...options, timeZone: "Asia/Kathmandu" }))).toBe(
+      "202401151315"
+    );
+    expect(formatDTM(nowDTM(options))).toBe("202401150230");
+    expect(formatDTM(nowDTM({ ...options, timeZone: "UTC" }))).toBe(
+      "202401150730"
+    );
+  });
+
+  it("throws a RangeError for a name that is not a time zone", () => {
     expect(() => nowDTM({ timeZone: "Mars/Olympus_Mons" })).toThrow(RangeError);
+  });
+});
+
+// Intl reads the host's zone when it is given none, so the host is moved to
+// UTC by giving every formatter that zone by default. `nowDTM` is imported
+// again, so no formatter built for New York is kept.
+describe("nowDTM on a host whose time zone is UTC", () => {
+  it("writes offset zero as +0000", async () => {
+    const HostDateTimeFormat = Intl.DateTimeFormat;
+    vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
+      function utcHostDateTimeFormat(locale, options) {
+        return new HostDateTimeFormat(locale, {
+          ...options,
+          timeZone: options?.timeZone ?? "UTC",
+        });
+      }
+    );
+    vi.resetModules();
+    const { nowDTM: nowOnUtcHost } = await import("../src/now");
+
+    vi.setSystemTime("2024-01-15T07:30:00Z");
+    expect(formatDTM(nowOnUtcHost({ precision: Precision.Minute }))).toBe(
+      "202401150730+0000"
+    );
   });
 });
 
@@ -194,7 +242,7 @@ describe("nowDTM in a named time zone", () => {
 // hour or finer is a moment and keeps it.
 describe("nowDTM precision", () => {
   beforeEach(() => {
-    at("2024-01-15T07:30:45.123Z");
+    vi.setSystemTime("2024-01-15T07:30:45.123Z");
   });
 
   it("cuts the value to the year, without the offset", () => {
@@ -249,14 +297,14 @@ describe("nowDTM precision", () => {
 // `offset` overrides the default either way and keeps the fields as they are.
 describe("nowDTM with the offset set", () => {
   it("leaves the offset out", () => {
-    at("2024-01-15T07:30:45.123Z");
+    vi.setSystemTime("2024-01-15T07:30:45.123Z");
     expect(
       formatDTM(nowDTM({ offset: false, precision: Precision.Minute }))
     ).toBe("202401150230");
   });
 
   it("leaves the offset out in a named zone", () => {
-    at("2024-01-15T07:30:45.123Z");
+    vi.setSystemTime("2024-01-15T07:30:45.123Z");
     expect(formatDTM(nowDTM({ offset: false, timeZone: "UTC" }))).toBe(
       "20240115073045.123"
     );
@@ -265,7 +313,7 @@ describe("nowDTM with the offset set", () => {
   // At 03:00 UTC on 1 February it is still 31 January in New York: the offset
   // says whose calendar the date was read in.
   it("gives a date its offset with `offset: true`", () => {
-    at("2024-02-01T03:00:00Z");
+    vi.setSystemTime("2024-02-01T03:00:00Z");
     expect(formatDTM(nowDTM({ offset: true, precision: Precision.Day }))).toBe(
       "20240131-0500"
     );
