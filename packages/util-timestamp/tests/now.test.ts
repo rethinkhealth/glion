@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TimestampOffsetError } from "../src/errors";
 import { formatDTM } from "../src/format";
 import { nowDTM } from "../src/now";
+import { parseDTM } from "../src/parse";
 import { Precision } from "../src/precision";
 
 // Only `Date` is faked, so `new Date()` returns the instant
@@ -340,24 +341,15 @@ describe("nowDTM with the offset set", () => {
   });
 });
 
-// Zones with whole-hour, half-hour (St. John's, Lord Howe), and 45-minute
-// (Kathmandu, Chatham) offsets. Lord Howe moves its clocks by only 30 minutes
-// for daylight saving time.
-const zones = fc.constantFrom(
-  "UTC",
-  "America/New_York",
-  "America/St_Johns",
-  "Europe/London",
-  "Asia/Kathmandu",
-  "Australia/Lord_Howe",
-  "Pacific/Chatham"
-);
+// Every zone Intl knows, and `UTC`, which Intl lists only as `Etc/UTC`.
+const zones = fc.constantFrom("UTC", ...Intl.supportedValuesOf("timeZone"));
 
-// Any millisecond in 2000-2099, which crosses every daylight saving time
-// change of those years.
+// Any millisecond from 1800 to 2500. Before standard time, most zones kept
+// local mean time, whose offsets have seconds: New York was UTC-4:56:02 until
+// 1883, and Monrovia UTC-0:44:30 until 1972.
 const instants = fc.date({
-  max: new Date("2099-12-31T23:59:59.999Z"),
-  min: new Date("2000-01-01T00:00:00.000Z"),
+  max: new Date("2500-12-31T23:59:59.999Z"),
+  min: new Date("1800-01-01T00:00:00.000Z"),
   noInvalidDate: true,
 });
 
@@ -392,31 +384,75 @@ function instantIn(text: string): number {
   );
 }
 
-// The value, written as HL7v2 text and read back, names the moment it was
-// taken, in any zone and on either side of a daylight saving time change.
+/**
+ * The offset from UTC, in seconds, of the zone at the instant the clock is
+ * set to: the date and time `nowDTM` reads there, less that instant.
+ */
+function offsetInSeconds(timeZone?: string): number {
+  const {
+    year,
+    month = 1,
+    day = 1,
+    hour = 0,
+    minute = 0,
+    second = 0,
+    fraction = "0",
+  } = nowDTM({ offset: false, timeZone });
+  const local = Date.UTC(year, month - 1, day, hour, minute, second);
+  return (local + Number(fraction) - Date.now()) / 1000;
+}
+
+// The value, written as HL7v2 text, is one `parseDTM` accepts and names the
+// moment it was taken, in any zone and on either side of a daylight saving
+// time change. An offset with seconds cannot be written as `+/-HHMM`, so
+// there `nowDTM` throws a TimestampOffsetError instead, and only there.
 describe("nowDTM names the current instant", () => {
-  // Mutant: the formatter leaves out `hourCycle: "h23"`, so it reads the hour
-  // on a 12-hour clock. Fails on `2000-01-01T00:00:00.000Z` in `UTC`.
-  it("in a named zone", () => {
+  // Mutant: `nowDTM` leaves out the check of the offset, so Monrovia's is
+  // written `-0044:30`. Fails on `1970-01-01T00:00:00.000Z` in
+  // `Africa/Monrovia`.
+  it("in any zone, or throws for an offset with seconds", () => {
     fc.assert(
       fc.property(instants, zones, (instant, timeZone) => {
         vi.setSystemTime(instant);
-        expect(instantIn(formatDTM(nowDTM({ timeZone })))).toBe(
-          instant.getTime()
-        );
+        if (offsetInSeconds(timeZone) % 60 === 0) {
+          const text = formatDTM(nowDTM({ timeZone }));
+          expect(parseDTM(text).success).toBe(true);
+          expect(instantIn(text)).toBe(instant.getTime());
+        } else {
+          expect(() => nowDTM({ timeZone })).toThrow(TimestampOffsetError);
+        }
       }),
-      { examples: [[new Date("2024-01-15T07:30:00.999Z"), "UTC"]] }
+      {
+        examples: [
+          [new Date("2024-01-15T07:30:00.999Z"), "UTC"],
+          [new Date("1970-01-01T00:00:00.000Z"), "Africa/Monrovia"],
+        ],
+        numRuns: 1000,
+      }
     );
   });
 
-  // Mutant: `nowDTM` keeps the `:` of `GMT-05:00`, so the offset is written
-  // `-05:00`. Fails on `2000-01-01T00:00:00.000Z`.
-  it("in the host's zone", () => {
+  // Mutant: `nowDTM` writes `-0000` in every zone, so New York's time reads
+  // as UTC. Fails on `2024-01-15T07:30:00.999Z`.
+  it("in the host's zone, or throws for an offset with seconds", () => {
     fc.assert(
       fc.property(instants, (instant) => {
         vi.setSystemTime(instant);
-        expect(instantIn(formatDTM(nowDTM()))).toBe(instant.getTime());
-      })
+        if (offsetInSeconds() % 60 === 0) {
+          const text = formatDTM(nowDTM());
+          expect(parseDTM(text).success).toBe(true);
+          expect(instantIn(text)).toBe(instant.getTime());
+        } else {
+          expect(() => nowDTM()).toThrow(TimestampOffsetError);
+        }
+      }),
+      {
+        examples: [
+          [new Date("2024-01-15T07:30:00.999Z")],
+          [new Date("1850-01-01T00:00:00.000Z")],
+        ],
+        numRuns: 1000,
+      }
     );
   });
 });
