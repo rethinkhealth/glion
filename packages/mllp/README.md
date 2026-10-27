@@ -143,12 +143,11 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 
 Server-side failures are raised (or passed to `onError`) as `MllpServerError` — branch on its stable `code`; the underlying codec or charset error rides on `cause`:
 
-| Code                   | Meaning                                                                                           |
-| ---------------------- | ------------------------------------------------------------------------------------------------- |
-| `NEXT_CALLED_TWICE`    | A middleware called `next()` a second time; the message is answered as a middleware throw.        |
-| `NO_PARSER`            | `app.handle()` ran before a parser was registered via `app.parser()`.                             |
-| `INCOMPATIBLE_CHARSET` | An inbound message could not be decoded as UTF-8 (the `CharsetError` is on `cause`).              |
-| `PROTOCOL_VIOLATION`   | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). |
+| Code                 | Meaning                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| `NEXT_CALLED_TWICE`  | A middleware called `next()` a second time; the message is answered as a middleware throw.        |
+| `NO_PARSER`          | `app.handle()` ran before a parser was registered via `app.parser()`.                             |
+| `PROTOCOL_VIOLATION` | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). |
 
 ## Routing
 
@@ -177,7 +176,7 @@ The reply is the acknowledgment the route handler's outcome describes:
 
 A message no route matches is answered as a thrown `AckApplicationReject`: `AR`. A middleware throw is answered the same way as a handler throw. A middleware replaces the reply by returning a response or writing `ctx.res`, before or after `next()`, and an error raised after that replaces it with the error's NAK. A middleware that returns a response without calling `next()` replies with it; one that returns nothing sends no reply. `ctx.ack()` gives only `AA` or `CA`: a NAK is the reply to a throw.
 
-A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`), or that the parser throws on, runs no middleware and no route: the handlers `app.onError()` registered observe the error, and the reply is its NAK, `AE` unless the parser threw an `AckException`. The NAK answers the MSH read from the bytes before the first CR, so a payload whose MSH is not UTF-8 gets no reply. An `ACK`, and a payload that does not start with an MSH such as an empty frame, get no reply unless a handler or middleware gives one. No reply carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
+A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8, for which `@glion/util-charset` throws a `CharsetError` with `code` `INCOMPATIBLE_CHARSET`, or that the parser throws on, runs no middleware and no route: the handlers `app.onError()` registered observe the error, and the reply is its NAK, `AE` unless the parser threw an `AckException`. The NAK answers the MSH read from the bytes before the first CR, so a payload whose MSH is not UTF-8 gets no reply. An `ACK`, and a payload that does not start with an MSH such as an empty frame, get no reply unless a handler or middleware gives one. No reply carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
 
 `ctx.error` holds the latest error the message raised, and the reply answers it. An error a middleware throws after the route handler replied replaces that reply too: the sender gets the NAK, and may send the message again. A middleware changes the NAK's code by throwing an `AckException` after `next()`, with the error it answers as its `cause`. A `next()` called a second time throws `MllpServerError` `NEXT_CALLED_TWICE`, and is answered as a middleware throw.
 

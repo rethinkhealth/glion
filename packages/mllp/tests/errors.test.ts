@@ -3,12 +3,6 @@ import { describe, expect, it } from "vitest";
 import { MllpServerError, MllpServerErrorCode } from "../src/errors";
 
 describe("MllpServerError", () => {
-  it("states that an inbound message is not UTF-8", () => {
-    expect(
-      new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET).message
-    ).toBe("The inbound message is not valid UTF-8; only UTF-8 is supported.");
-  });
-
   it("states that a middleware called next() a second time", () => {
     expect(
       new MllpServerError(MllpServerErrorCode.NEXT_CALLED_TWICE).message

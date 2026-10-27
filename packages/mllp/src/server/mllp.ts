@@ -15,7 +15,7 @@ import { acknowledge } from "./acknowledge";
 import { compose, isResponse } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
-import { messageHeader, readHeader, parseRequest } from "./request";
+import { messageHeader, salvageHeader, parseRequest } from "./request";
 import type { MllpRequest } from "./request";
 import { Router } from "./router";
 import type {
@@ -141,7 +141,7 @@ export class Mllp {
 
   /**
    * Register a handler for an error raised by a payload no middleware runs
-   * on: one that is not UTF-8 (`MllpServerError` `INCOMPATIBLE_CHARSET`), or
+   * on: one that is not UTF-8 (`CharsetError`), or
    * that the parser throws on. The handler observes the error; it does not
    * change the response. Each handler registered runs, in the order
    * registered, before `handle()` resolves.
@@ -273,7 +273,7 @@ export class Mllp {
     for (const handler of this.#errorHandlers) {
       await handler(error, connection);
     }
-    const header = readHeader(payload);
+    const header = salvageHeader(payload);
     if (!header || queryValue(header, "MSH.9.1")?.value === "ACK") {
       return undefined;
     }

@@ -10,13 +10,6 @@
  */
 
 export const MllpServerErrorCode = {
-  /**
-   * An inbound message could not be decoded as UTF-8 — the only character set
-   * supported for now. The underlying `@glion/util-charset` `CharsetError` is
-   * kept on `cause`; callers branch on this code without importing that
-   * package.
-   */
-  INCOMPATIBLE_CHARSET: "INCOMPATIBLE_CHARSET",
   /** A middleware called `next()` a second time. */
   NEXT_CALLED_TWICE: "NEXT_CALLED_TWICE",
   /**
@@ -39,8 +32,6 @@ export type MllpServerErrorCode =
 
 /** The message of each {@link MllpServerErrorCode}. */
 const messages = {
-  INCOMPATIBLE_CHARSET:
-    "The inbound message is not valid UTF-8; only UTF-8 is supported.",
   NEXT_CALLED_TWICE:
     "A middleware called `next()` a second time; a middleware calls `next()` at most once.",
   NO_PARSER:

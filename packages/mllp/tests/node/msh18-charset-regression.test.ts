@@ -5,7 +5,6 @@ import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-codec";
 import { CharsetError } from "@glion/util-charset";
 
-import { MllpServerError, MllpServerErrorCode } from "../../src/errors";
 import { serve } from "../../src/node/serve";
 import type { Server } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
@@ -16,10 +15,9 @@ import { Mllp } from "../../src/server/mllp";
  * The server decodes each inbound payload as UTF-8 via `decodeBytes(payload)`
  * (from `@glion/util-charset`), fatally. A non-UTF-8 feed (e.g. ISO 8859/1)
  * therefore fails LOUDLY — no middleware or handler runs, `app.onError()`
- * observes an `MllpServerError` (`INCOMPATIBLE_CHARSET`), and the sender is
- * answered `AE` — rather than being silently corrupted to U+FFFD and ACKed as
- * if valid, which was the #659 bug. The codec's `CharsetError` is not leaked;
- * it rides on `cause`.
+ * observes the `CharsetError` it throws, and the sender is answered `AE` —
+ * rather than being silently corrupted to U+FFFD and ACKed as if valid, which
+ * was the #659 bug.
  *
  * Honouring the charset a message declares in MSH-18 (so such a feed decodes
  * intact instead of erroring) is deferred to
@@ -98,7 +96,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     }
   });
 
-  it("gives onError() an MllpServerError (not the codec's CharsetError) and answers AE, never AA", async () => {
+  it("gives onError() the CharsetError and answers AE, never AA", async () => {
     let handlerRan = false;
     const errors: Error[] = [];
 
@@ -133,17 +131,10 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     const response = await sendBytes(server.port, latin1, 1000);
 
     // No silent corruption: the handler never sees a mangled body, the reply
-    // is AE echoing MSH-10 in MSA-2, and onError() observes the server's own
-    // MllpServerError(INCOMPATIBLE_CHARSET) — not the
-    // codec's CharsetError, which is kept on `cause` for diagnostics.
+    // is AE echoing MSH-10 in MSA-2, and onError() observes the CharsetError.
     expect(handlerRan).toBe(false);
     expect(response?.toString("utf8")).toContain("\rMSA|AE|MSG001");
     expect(errors).toHaveLength(1);
-    const [error] = errors;
-    expect(error).toBeInstanceOf(MllpServerError);
-    expect((error as MllpServerError).code).toBe(
-      MllpServerErrorCode.INCOMPATIBLE_CHARSET
-    );
-    expect((error as MllpServerError).cause).toBeInstanceOf(CharsetError);
+    expect(errors[0]).toBeInstanceOf(CharsetError);
   });
 });

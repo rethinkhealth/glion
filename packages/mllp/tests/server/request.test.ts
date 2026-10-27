@@ -6,10 +6,9 @@ import { CharsetError } from "@glion/util-charset";
 import { unified } from "unified";
 import type { Plugin } from "unified";
 
-import { MllpServerError } from "../../src/errors";
 import {
   messageHeader,
-  readHeader,
+  salvageHeader,
   parseRequest,
 } from "../../src/server/request";
 
@@ -57,17 +56,10 @@ describe("parseRequest", () => {
     ).toBeUndefined();
   });
 
-  it("throws INCOMPATIBLE_CHARSET, with the CharsetError as its cause, for a payload that is not UTF-8", () => {
-    const read = () =>
-      parseRequest(withInvalidByte(MESSAGE, MESSAGE.length - 1), parseHL7v2);
-
-    expect(read).toThrow(MllpServerError);
-    expect(read).toThrow(
-      expect.objectContaining({
-        cause: expect.any(CharsetError),
-        code: "INCOMPATIBLE_CHARSET",
-      })
-    );
+  it("throws the CharsetError of a payload that is not UTF-8", () => {
+    expect(() =>
+      parseRequest(withInvalidByte(MESSAGE, MESSAGE.length - 1), parseHL7v2)
+    ).toThrow(CharsetError);
   });
 
   it("throws what the parser throws", () => {
@@ -79,31 +71,33 @@ describe("parseRequest", () => {
   });
 });
 
-describe("readHeader", () => {
+describe("salvageHeader", () => {
   it("reads the MSH alone", () => {
-    expect(toHl7v2(readHeader(BYTES) ?? m())).toBe(MSH);
+    expect(toHl7v2(salvageHeader(BYTES) ?? m())).toBe(MSH);
   });
 
   it("reads the MSH of a payload whose later segments are not UTF-8", () => {
-    const header = readHeader(withInvalidByte(MESSAGE, MESSAGE.length - 1));
+    const header = salvageHeader(withInvalidByte(MESSAGE, MESSAGE.length - 1));
 
     expect(toHl7v2(header ?? m())).toBe(MSH);
   });
 
   it("reads a payload with no CR whole", () => {
-    expect(toHl7v2(readHeader(new TextEncoder().encode(MSH)) ?? m())).toBe(MSH);
+    expect(toHl7v2(salvageHeader(new TextEncoder().encode(MSH)) ?? m())).toBe(
+      MSH
+    );
   });
 
   it("reads no MSH when the MSH is not UTF-8", () => {
     expect(
-      readHeader(withInvalidByte(MESSAGE, MSH.indexOf("SendFac")))
+      salvageHeader(withInvalidByte(MESSAGE, MSH.indexOf("SendFac")))
     ).toBeUndefined();
   });
 
   it("reads no MSH from a payload that does not start with one", () => {
-    expect(readHeader(new Uint8Array())).toBeUndefined();
+    expect(salvageHeader(new Uint8Array())).toBeUndefined();
     expect(
-      readHeader(new TextEncoder().encode("PID|1\rMSH|^~\\&"))
+      salvageHeader(new TextEncoder().encode("PID|1\rMSH|^~\\&"))
     ).toBeUndefined();
   });
 });

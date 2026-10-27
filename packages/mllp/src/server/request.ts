@@ -4,7 +4,6 @@ import { parseHL7v2 } from "@glion/parser";
 import { CharsetError, decodeBytes } from "@glion/util-charset";
 import { VFile } from "vfile";
 
-import { MllpServerError, MllpServerErrorCode } from "../errors";
 import type { Hl7v2Processor } from "./types";
 
 /** CR, the byte that ends each segment. */
@@ -23,32 +22,25 @@ export interface MllpRequest {
 /**
  * Decodes `payload` as UTF-8 and parses it with `processor`.
  *
- * @throws {MllpServerError} `INCOMPATIBLE_CHARSET` when `payload` is not
- * UTF-8.
+ * @throws {CharsetError} When `payload` is not UTF-8.
  * @throws What the processor's parser throws.
  */
 export function parseRequest(
   payload: Uint8Array,
   processor: Hl7v2Processor
 ): MllpRequest {
-  let raw: string;
-  try {
-    raw = decodeBytes(payload);
-  } catch (error) {
-    throw new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET, {
-      cause: error,
-    });
-  }
+  const raw = decodeBytes(payload);
   const file = new VFile(raw);
-  return { file, raw, tree: processor.parse(file) };
+  const tree = processor.parse(file);
+  return { file, raw, tree };
 }
 
 /**
- * The MSH `payload` starts with, alone in a tree, read by `@glion/parser`
+ * The MSH `payload` starts with, salvaged alone in a tree by `@glion/parser`
  * from the bytes before the first CR; `undefined` when those bytes are not
- * UTF-8 or are not an MSH.
+ * UTF-8 or are not an MSH. Best effort: the rest of `payload` is not read.
  */
-export function readHeader(payload: Uint8Array): Root | undefined {
+export function salvageHeader(payload: Uint8Array): Root | undefined {
   const end = payload.indexOf(SEGMENT_TERMINATOR);
   let text: string;
   try {

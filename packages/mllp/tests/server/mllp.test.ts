@@ -12,6 +12,7 @@ import { parseHL7v2 } from "@glion/hl7v2";
 import { defaultPreprocessors, hl7v2Parser } from "@glion/parser";
 import type { PreprocessorStep } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
+import { CharsetError } from "@glion/util-charset";
 import { value } from "@glion/util-query";
 import { unified } from "unified";
 import type { Plugin } from "unified";
@@ -856,7 +857,7 @@ describe("acknowledgment defaults", () => {
     expect(ran).toEqual([]);
   });
 
-  it("lets each onError() handler observe the INCOMPATIBLE_CHARSET of a payload that is not UTF-8, in order", async () => {
+  it("lets each onError() handler observe the CharsetError of a payload that is not UTF-8, in order", async () => {
     const seen: [string, Error, ConnectionInfo][] = [];
     const app = createApp()
       .onError((raised, connection) => {
@@ -868,8 +869,7 @@ describe("acknowledgment defaults", () => {
 
     await app.handle(LATIN1_ADT, MOCK_CONNECTION);
     expect(seen.map(([name]) => name)).toEqual(["first", "second"]);
-    expect(seen[0]?.[1]).toBeInstanceOf(MllpServerError);
-    expect((seen[0]?.[1] as MllpServerError).code).toBe("INCOMPATIBLE_CHARSET");
+    expect(seen[0]?.[1]).toBeInstanceOf(CharsetError);
     expect(seen[0]?.[2]).toBe(MOCK_CONNECTION);
   });
 
