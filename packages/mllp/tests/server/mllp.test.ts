@@ -964,7 +964,7 @@ describe("acknowledgment defaults", () => {
     expect(seen.error?.message).toBe("metrics backend unavailable");
   });
 
-  it("echoes MSH-10 as parsed when the route handler rewrites it in the transformed tree", async () => {
+  it("echoes the MSH-10 a route handler writes to the tree before the acknowledgment", async () => {
     const app = createApp();
     app.on("ADT^A01", async (ctx) => {
       const tree = await ctx.tree();
@@ -973,7 +973,7 @@ describe("acknowledgment defaults", () => {
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-    expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AA|ENGINE-0001");
   });
 
   it("answers the MSH the app's parser read, after its own preprocessing", async () => {

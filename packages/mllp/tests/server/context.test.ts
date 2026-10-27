@@ -50,7 +50,7 @@ describe("createContext", () => {
     expect((ctx.error as MllpServerError).code).toBe("INCOMPATIBLE_CHARSET");
   });
 
-  it("acknowledges MSH-10 as received when a handler changes ctx.ast", () => {
+  it("keeps the routing fields as parsed, and acknowledges the MSH as it is, when a handler changes ctx.ast", () => {
     const ctx = makeCtx();
     const controlId = value(ctx.ast, "MSH.10")?.node;
     if (controlId?.type !== "subcomponent") {
@@ -59,7 +59,7 @@ describe("createContext", () => {
     controlId.value = "CHANGED";
 
     expect(ctx.controlId).toBe("MSG001");
-    expect(ctx.ack().raw.split("\r")[1]).toBe("MSA|AA|MSG001");
+    expect(ctx.ack().raw.split("\r")[1]).toBe("MSA|AA|CHANGED");
   });
 
   it("exposes connection metadata", () => {

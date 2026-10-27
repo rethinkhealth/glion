@@ -179,7 +179,7 @@ A route filter that throws runs only the global middleware and is answered as a 
 
 `ctx.error` holds the latest error the message raised, and the reply answers it. An error a middleware throws after the route handler replied replaces that reply too: the sender gets the NAK, and may send the message again. A middleware changes the NAK's code by throwing an `AckException` after `next()`, with the error it answers as its `cause`. A `next()` called a second time throws `MllpServerError` `NEXT_CALLED_TWICE`, and is answered as a middleware throw.
 
-The acknowledgment answers the MSH as the app's parser read it, copied when the message arrives: neither the transforms `ctx.tree()` runs nor a handler that changes the tree changes it. A payload that did not decode or parse is read by `@glion/parser`, with U+FFFD for each byte that is not UTF-8, only to answer it.
+The acknowledgment answers the MSH of the tree the app's parser read, as it is when the acknowledgment is built: a transform or a handler that changes the MSH before then changes the acknowledgment too. A payload that did not decode or parse is read by `@glion/parser`, with U+FFFD for each byte that is not UTF-8, and `ctx.ast` holds only its MSH, to answer it.
 
 An acknowledgment is built by [`acknowledge()`](#acknowledgeorigin-options).
 

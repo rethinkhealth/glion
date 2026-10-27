@@ -34,10 +34,10 @@ export interface CreateContextOptions {
 /**
  * Create a new Context for a message `readMessage()` read.
  *
- * `ctx.error` starts as the message's `error`. The routing fields and
- * `ctx.ack()` read the message's `header`, so they keep the values as
- * received, whatever the transforms or a handler change in the tree (see
- * ADR-0013).
+ * `ctx.error` starts as the message's `error`. The routing fields are read
+ * from the message's MSH once, so they keep the values as parsed whatever
+ * the transforms or a handler change in the tree (see ADR-0013). `ctx.ack()`
+ * reads the MSH when it is called.
  *
  * The expensive pipeline stages are lazy:
  *
@@ -52,15 +52,15 @@ export interface CreateContextOptions {
 export function createContext(options: CreateContextOptions): MessageContext {
   const { app, message, connection, processor } = options;
   const { serializer, ...defaults } = app;
-  const { bytes, error, file, header, raw, tree: parsed } = message;
+  const { bytes, error, file, raw, tree: parsed } = message;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
 
-  const controlId = queryValue(header, "MSH.10")?.value ?? "";
-  const messageType = queryValue(header, "MSH.9.1")?.value ?? "";
-  const triggerEvent = queryValue(header, "MSH.9.2")?.value ?? "";
-  const messageStructure = queryValue(header, "MSH.9.3")?.value ?? "";
-  const version = queryValue(header, "MSH.12.1")?.value ?? "";
+  const controlId = queryValue(parsed, "MSH.10")?.value ?? "";
+  const messageType = queryValue(parsed, "MSH.9.1")?.value ?? "";
+  const triggerEvent = queryValue(parsed, "MSH.9.2")?.value ?? "";
+  const messageStructure = queryValue(parsed, "MSH.9.3")?.value ?? "";
+  const version = queryValue(parsed, "MSH.12.1")?.value ?? "";
 
   // ── Lazy: transform (async, cached) ────────────────────────────────
   // run() applies all transformers: annotations, lint.
@@ -106,7 +106,7 @@ export function createContext(options: CreateContextOptions): MessageContext {
   const ctx: MessageContext = {
     ack(ackOptions?: AckOptions): Response {
       return {
-        raw: serializer(acknowledge(header, { ...ackOptions, ...defaults })),
+        raw: serializer(acknowledge(parsed, { ...ackOptions, ...defaults })),
       };
     },
     ast: parsed,

@@ -1,11 +1,10 @@
-import type { Root } from "@glion/ast";
-import { m, s } from "@glion/builder";
+import type { Root, Segment } from "@glion/ast";
+import { m } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
 import { decodeBytes } from "@glion/util-charset";
 import { VFile } from "vfile";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
-import { copyField } from "./acknowledge";
 import type { Hl7v2Processor } from "./types";
 
 /** Decodes UTF-8, with U+FFFD for each byte that is not UTF-8. */
@@ -19,14 +18,11 @@ export interface ReceivedMessage {
   readonly raw: string;
   /** The file the processor parsed, holding `raw`. */
   readonly file: VFile;
-  /** The processor's tree. Empty when the payload did not decode or parse. */
-  readonly tree: Root;
   /**
-   * A copy of the MSH the payload starts with, values only, in a tree of its
-   * own; a tree with no segment when the payload starts with none. Changes
-   * to `tree` do not reach it.
+   * The processor's tree. When the payload did not decode or parse, only the
+   * MSH it starts with, or no segment when it starts with none.
    */
-  readonly header: Root;
+  readonly tree: Root;
   /**
    * Why the payload was not read: `MllpServerError` `INCOMPATIBLE_CHARSET`,
    * or what the processor's parser threw. `undefined` when it was read.
@@ -37,9 +33,9 @@ export interface ReceivedMessage {
 /**
  * Reads `payload`: decodes it as UTF-8 and parses it with `processor`.
  *
- * A payload that does not decode or parse still has a `header`: it is read
- * by `@glion/parser` from the payload decoded with U+FFFD for each byte that
- * is not UTF-8. Never throws.
+ * The MSH of a payload that does not decode or parse is read by
+ * `@glion/parser` from the payload decoded with U+FFFD for each byte that is
+ * not UTF-8. Never throws for a payload of bytes.
  */
 export function readMessage(
   payload: Uint8Array,
@@ -55,9 +51,8 @@ export function readMessage(
         cause: error,
       }),
       file: new VFile(""),
-      header: headerOf(parseHL7v2(LENIENT_DECODER.decode(payload))),
       raw: "",
-      tree: m(),
+      tree: headerOnly(parseHL7v2(LENIENT_DECODER.decode(payload))),
     };
   }
 
@@ -68,7 +63,6 @@ export function readMessage(
       bytes: payload,
       error: undefined,
       file,
-      header: headerOf(tree),
       raw,
       tree,
     };
@@ -77,17 +71,20 @@ export function readMessage(
       bytes: payload,
       error: error instanceof Error ? error : new Error(String(error)),
       file,
-      header: headerOf(parseHL7v2(raw)),
       raw,
-      tree: m(),
+      tree: headerOnly(parseHL7v2(raw)),
     };
   }
 }
 
-/** A tree holding a copy of the MSH `tree` starts with, values only. */
-function headerOf(tree: Root): Root {
+/** The MSH segment `tree` starts with, or `undefined` when it starts with none. */
+export function messageHeader(tree: Root): Segment | undefined {
   const [first] = tree.children;
-  return first?.type === "segment" && first.name === "MSH"
-    ? m(s("MSH", ...first.children.map(copyField)))
-    : m();
+  return first?.type === "segment" && first.name === "MSH" ? first : undefined;
+}
+
+/** `tree` with only the MSH it starts with, or no segment. */
+function headerOnly(tree: Root): Root {
+  const header = messageHeader(tree);
+  return header ? m(header) : m();
 }

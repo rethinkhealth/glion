@@ -69,7 +69,7 @@ This is Hono's rule, and it has a cost in MLLP. When a handler has saved a messa
 
 ### 7. The acknowledgment answers the MSH as the app's parser read it
 
-`acknowledge(origin, options?)` builds an MSH and an MSA. It swaps MSH-3/4 with MSH-5/6, copying each field whole, writes MSH-9 as `ACK^<trigger>^ACK` (`ACK^<trigger>` before v2.3.1), echoes MSH-11 and MSH-12.1, and echoes MSH-10 in MSA-2. `ctx.ack()` passes it a copy of the MSH the app's parser read, taken when the payload is read, values only. An app with its own `preprocess` is therefore acknowledged correctly, and neither the transforms nor a handler that changes the tree changes the acknowledgment. A payload that did not decode or parse is read by `@glion/parser` instead, from its text with U+FFFD for each byte that is not UTF-8, only to answer it.
+`acknowledge(origin, options?)` builds an MSH and an MSA. It swaps MSH-3/4 with MSH-5/6, copying each field whole, writes MSH-9 as `ACK^<trigger>^ACK` (`ACK^<trigger>` before v2.3.1), echoes MSH-11 and MSH-12.1, and echoes MSH-10 in MSA-2. `ctx.ack()` passes it the tree the app's parser read, as it is when the acknowledgment is built, so an app with its own `preprocess` is acknowledged correctly. A transform or a handler that changes the MSH before then changes the acknowledgment too; the routing fields keep the values as parsed. A payload that did not decode or parse is read by `@glion/parser` instead, from its text with U+FFFD for each byte that is not UTF-8, and its tree holds only its MSH, to answer it.
 
 ### 8. The acknowledgment is the same in every version, for now
 

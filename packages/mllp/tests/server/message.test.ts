@@ -7,7 +7,7 @@ import { unified } from "unified";
 import type { Plugin } from "unified";
 
 import { MllpServerError } from "../../src/errors";
-import { readMessage } from "../../src/server/message";
+import { messageHeader, readMessage } from "../../src/server/message";
 
 /** A unified parser plugin whose parse step throws `thrown`. */
 function throwingParser(thrown: unknown): Plugin<[], string, Root> {
@@ -34,39 +34,28 @@ function withInvalidByte(text: string, at: number): Uint8Array {
 }
 
 describe("readMessage", () => {
-  it("reads a UTF-8 payload with the processor, and copies its MSH into the header", () => {
+  it("reads a UTF-8 payload with the processor", () => {
     const message = readMessage(BYTES, parseHL7v2);
 
     expect(message.error).toBeUndefined();
     expect(message.bytes).toBe(BYTES);
     expect(message.raw).toBe(MESSAGE);
     expect(String(message.file)).toBe(MESSAGE);
-    expect(message.tree.children).toHaveLength(2);
-    expect(toHl7v2(message.header)).toBe(MSH);
+    expect(toHl7v2(message.tree)).toBe(MESSAGE);
   });
 
-  it("copies the MSH values only, so changes to the tree do not reach the header", () => {
-    const message = readMessage(BYTES, parseHL7v2);
-    const controlId = value(message.tree, "MSH.10")?.node;
-    if (controlId?.type !== "subcomponent") {
-      throw new Error("The sample message has no MSH-10.");
-    }
-    controlId.value = "CHANGED";
-
-    expect(value(message.header, "MSH.10")?.value).toBe("MSG001");
-    expect(JSON.stringify(message.header)).not.toContain("position");
-  });
-
-  it("gives a header with no segment to a payload that does not start with an MSH", () => {
-    expect(readMessage(new Uint8Array(), parseHL7v2).header.children).toEqual(
-      []
-    );
+  it("finds no MSH in a payload that does not start with one", () => {
     expect(
-      readMessage(new TextEncoder().encode("PID|1"), parseHL7v2).header.children
-    ).toEqual([]);
+      messageHeader(readMessage(new Uint8Array(), parseHL7v2).tree)
+    ).toBeUndefined();
+    expect(
+      messageHeader(
+        readMessage(new TextEncoder().encode("PID|1"), parseHL7v2).tree
+      )
+    ).toBeUndefined();
   });
 
-  it("reads a payload that is not UTF-8 as INCOMPATIBLE_CHARSET, with no text and no tree", () => {
+  it("reads a payload that is not UTF-8 as INCOMPATIBLE_CHARSET, with no text and only its MSH in the tree", () => {
     const message = readMessage(
       withInvalidByte(MESSAGE, MESSAGE.length - 1),
       parseHL7v2
@@ -80,27 +69,27 @@ describe("readMessage", () => {
       CharsetError
     );
     expect(message.raw).toBe("");
-    expect(message.tree).toEqual({ children: [], type: "root" });
+    expect(toHl7v2(message.tree)).toBe(MSH);
   });
 
-  it("reads the header of a payload that is not UTF-8, with U+FFFD for each byte that is not", () => {
+  it("reads the MSH of a payload that is not UTF-8, with U+FFFD for each byte that is not", () => {
     const message = readMessage(
       withInvalidByte(MESSAGE, MSH.indexOf("SendFac")),
       parseHL7v2
     );
 
-    expect(value(message.header, "MSH.4")?.value).toBe("�SendFac");
-    expect(value(message.header, "MSH.10")?.value).toBe("MSG001");
+    expect(message.tree.children).toHaveLength(1);
+    expect(value(message.tree, "MSH.4")?.value).toBe("�SendFac");
+    expect(value(message.tree, "MSH.10")?.value).toBe("MSG001");
   });
 
-  it("keeps the parser's error and the text, with no tree, when the parser throws", () => {
+  it("keeps the parser's error, the text, and only the MSH in the tree, when the parser throws", () => {
     const thrown = new Error("parser failed");
     const message = readMessage(BYTES, unified().use(throwingParser(thrown)));
 
     expect(message.error).toBe(thrown);
     expect(message.raw).toBe(MESSAGE);
-    expect(message.tree).toEqual({ children: [], type: "root" });
-    expect(toHl7v2(message.header)).toBe(MSH);
+    expect(toHl7v2(message.tree)).toBe(MSH);
   });
 
   it("wraps a parser's throw that is not an Error", () => {

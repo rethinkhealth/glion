@@ -14,7 +14,7 @@ import { acknowledge } from "./acknowledge";
 import { compose, isResponse } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
-import { readMessage } from "./message";
+import { messageHeader, readMessage } from "./message";
 import { Router } from "./router";
 import type {
   ConnectionInfo,
@@ -196,13 +196,13 @@ export class Mllp {
     // each other's acknowledgments, nor a payload with no MSH, which has no
     // MSH-10 to echo.
     const answerable =
-      message.header.children.length > 0 && ctx.messageType !== "ACK";
+      messageHeader(message.tree) !== undefined && ctx.messageType !== "ACK";
     const { serializer, ...defaults } = this.#options;
     const nakOf = (error: Error): Response | undefined =>
       answerable
         ? {
             raw: serializer(
-              acknowledge(message.header, {
+              acknowledge(message.tree, {
                 ...defaults,
                 code: nakCode(error),
               })
