@@ -140,8 +140,8 @@ describe("Router", () => {
       const ctx = createContext({
         app: { serializer: toHl7v2 },
         env: { region: "north" },
-        request: parseRequest(new TextEncoder().encode(ADT_A01), parseHL7v2),
         processor: parseHL7v2,
+        request: parseRequest(new TextEncoder().encode(ADT_A01), parseHL7v2),
       });
       expect(router.match(ctx).handler).toBe(handler);
     });

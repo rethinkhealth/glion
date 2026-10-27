@@ -75,10 +75,8 @@ export function createMsgTelemetry(
  */
 export function createErrorTelemetry(
   emit: (event: PartialEvent) => void
-): ErrorHandler {
-  return (error, env) => {
-    // The runner serves every app with serve(), which passes a NodeEnv.
-    const { connection } = env as NodeEnv;
+): ErrorHandler<NodeEnv> {
+  return (error, { connection }) => {
     emit({
       conn: connection.id,
       message: error.message,

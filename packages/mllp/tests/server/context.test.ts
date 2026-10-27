@@ -53,8 +53,8 @@ describe("createContext", () => {
     const ctx = createContext({
       app: { serializer: toHl7v2 },
       env,
-      request: parseRequest(SAMPLE_BYTES, parseHL7v2),
       processor: parseHL7v2,
+      request: parseRequest(SAMPLE_BYTES, parseHL7v2),
     });
     expect(ctx.env).toBe(env);
   });
