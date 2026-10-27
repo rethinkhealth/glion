@@ -20,13 +20,8 @@ const fraction = fc
   .chain((count) => digits(count))
   .map((value) => `.${value}`);
 
-// `-0000` is written back as `+0000`, so the generated offsets leave it out.
 const offset = fc
   .tuple(fc.constantFrom("+", "-"), pairInRange(14), pairInRange(59))
-  .filter(
-    ([sign, hours, minutes]) =>
-      sign === "+" || hours !== "00" || minutes !== "00"
-  )
   .map(([sign, hours, minutes]) => `${sign}${hours}${minutes}`);
 
 const date = fc
@@ -77,8 +72,7 @@ describe("format of parse is the value", () => {
     );
   });
 
-  // Mutant: `formatOffset` writes an offset west of UTC with `+`. Fails on
-  // `"09-0545"`.
+  // Mutant: `writeTime` leaves the offset out. Fails on `"09-0545"`.
   it("for every valid TM", () => {
     fc.assert(
       fc.property(tmText, (value) => {
@@ -97,7 +91,7 @@ describe("format of parse is the value", () => {
         const result = parseDTM(value);
         expect(result.success && formatDTM(result.data)).toBe(value);
       }),
-      { examples: [["20260307120000.25"]] }
+      { examples: [["20260307120000.25"], ["2026030712-0000"]] }
     );
   });
 });
@@ -147,26 +141,20 @@ describe("parseDT accepts exactly the days of the calendar", () => {
 });
 
 describe("formatDTM", () => {
-  it("writes an offset of 0 as +0000", () => {
+  it("writes the offset as given", () => {
     expect(
       formatDTM({
         day: 7,
         hour: 12,
         month: 3,
-        offset: 0,
+        offset: "-0000",
         precision: "hour",
         year: 2026,
       })
-    ).toBe("2026030712+0000");
+    ).toBe("2026030712-0000");
   });
 
   it("pads a year below 1000 to four digits", () => {
     expect(formatDTM({ precision: "year", year: 99 })).toBe("0099");
-  });
-
-  it("writes an offset east of UTC with +", () => {
-    expect(formatTM({ hour: 9, offset: 345, precision: "hour" })).toBe(
-      "09+0545"
-    );
   });
 });
