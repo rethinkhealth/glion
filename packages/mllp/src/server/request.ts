@@ -2,12 +2,10 @@ import type { Root, Segment } from "@glion/ast";
 import { m } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
 import { CharsetError, decodeBytes } from "@glion/util-charset";
+import { DEFAULT_DELIMITERS } from "@glion/utils";
 import { VFile } from "vfile";
 
 import type { Hl7v2Processor } from "./types";
-
-/** CR, the byte that ends each segment. */
-const SEGMENT_TERMINATOR = 0x0d;
 
 /** A request: the message the server read from one MLLP frame payload. */
 export interface MllpRequest {
@@ -37,11 +35,17 @@ export function parseRequest(
 
 /**
  * The MSH `payload` starts with, salvaged alone in a tree by `@glion/parser`
- * from the bytes before the first CR; `undefined` when those bytes are not
- * UTF-8 or are not an MSH. Best effort: the rest of `payload` is not read.
+ * from the bytes before the first `delimiter`, the segment terminator;
+ * `undefined` when those bytes are not UTF-8 or are not an MSH. Best effort:
+ * the rest of `payload` is not read.
  */
-export function salvageHeader(payload: Uint8Array): Root | undefined {
-  const end = payload.indexOf(SEGMENT_TERMINATOR);
+export function salvageHeader(
+  payload: Uint8Array,
+  delimiter = DEFAULT_DELIMITERS.segment
+): Root | undefined {
+  const end = payload.findIndex(
+    (byte) => String.fromCodePoint(byte) === delimiter
+  );
   let text: string;
   try {
     text = decodeBytes(end === -1 ? payload : payload.subarray(0, end));
