@@ -119,6 +119,28 @@ describe("acknowledge", () => {
     );
   });
 
+  it("writes MSH-1 and MSH-2 with the default delimiters, whatever the original message declares", () => {
+    const origin = parseHL7v2.parse(
+      "MSH#$~\\&#SendApp#SendFac#RecvApp#RecvFac#20240101120000##ADT$A01#MSG001#P#2.5.1"
+    );
+
+    expect(toHl7v2(acknowledge(origin, { id: "ACK001" }))).toBe(
+      "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000||ACK^A01^ACK|ACK001|P|2.5.1\rMSA|AA|MSG001"
+    );
+  });
+
+  it("writes MSH-1 and MSH-2 with the given delimiters, and the acknowledgment with them", () => {
+    const origin = parseHL7v2.parse(ADT_A01);
+    const ack = acknowledge(origin, {
+      delimiters: { component: "$", field: "#" },
+      id: "ACK001",
+    });
+
+    expect(toHl7v2(ack)).toBe(
+      "MSH#$~\\&#RecvApp#RecvFac#SendApp#SendFac#20240115023000##ACK$A01$ACK#ACK001#P#2.5.1\rMSA#AA#MSG001"
+    );
+  });
+
   it("writes the given processing ID to MSH-11", () => {
     const origin = parseHL7v2.parse(ADT_A01);
     const ack = acknowledge(origin, { id: "ACK001", processingId: "T" });

@@ -1,10 +1,11 @@
 import { AckCode } from "@glion/ack";
-import type { Field, Root } from "@glion/ast";
+import type { Delimiters, Field, Root } from "@glion/ast";
 import { c, f, m, r, s } from "@glion/builder";
 import { select, value } from "@glion/util-query";
 import { gte, valid } from "@glion/util-semver";
 import { formatDTM, Precision } from "@glion/util-timestamp";
 import { uid } from "@glion/util-uid";
+import { DEFAULT_DELIMITERS } from "@glion/utils";
 
 /** Options for {@link acknowledge}. */
 export interface AcknowledgeOptions {
@@ -19,12 +20,18 @@ export interface AcknowledgeOptions {
   sending?: { application: string; facility: string };
   /** MSH-11. Defaults to the original message's MSH-11, copied whole, else `P`. */
   processingId?: string;
+  /**
+   * The delimiters MSH-1 and MSH-2 declare. Each one not given is the
+   * standard one: `|` and `^~\&`.
+   */
+  delimiters?: Partial<Omit<Delimiters, "segment">>;
 }
 
 /**
  * The acknowledgment of `origin`: an MSH and an MSA segment.
  *
- * The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each
+ * MSH-1 and MSH-2 declare `delimiters`, never the original message's. The
+ * MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each
  * field copied whole, sets MSH-7 to the current local time and MSH-9 to
  * `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1, which has no MSH-9.3),
  * and echoes MSH-12.1. The MSA holds MSA-1 and MSA-2, which echoes the
@@ -35,6 +42,7 @@ export function acknowledge(
   options: AcknowledgeOptions = {}
 ): Root {
   const { code = AckCode.ApplicationAccept, sending } = options;
+  const delimiters = { ...DEFAULT_DELIMITERS, ...options.delimiters };
   const triggerEvent = field(origin, "MSH.9.2");
   const version = field(origin, "MSH.12.1");
   // TODO(#1113): read the time, with its offset, from nowDTM().
@@ -53,8 +61,10 @@ export function acknowledge(
   return m(
     s(
       "MSH",
-      f("|"),
-      f("^~\\&"),
+      f(delimiters.field),
+      f(
+        `${delimiters.component}${delimiters.repetition}${delimiters.escape}${delimiters.subcomponent}`
+      ),
       sending ? f(sending.application) : copy(origin, "MSH.5"),
       sending ? f(sending.facility) : copy(origin, "MSH.6"),
       copy(origin, "MSH.3"),

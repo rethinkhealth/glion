@@ -61,6 +61,7 @@
     "@glion/util-semver": "workspace:*",
     "@glion/util-timestamp": "workspace:*",
     "@glion/util-uid": "workspace:*",
+    "@glion/utils": "workspace:*",
     "unified": "11.0.5",
     "vfile": "6.0.3"
   },
