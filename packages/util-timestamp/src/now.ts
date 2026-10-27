@@ -6,8 +6,8 @@ import type { DTM, Offset } from "./types";
 // Intl part.
 const FIELDS = ["year", "month", "day", "hour", "minute", "second"] as const;
 
-// An HL7v2 offset from UTC: a sign, then hours and minutes.
-const OFFSET = /^[+-]\d{4}$/;
+// An HL7v2 offset from UTC, `+/-HHMM`, is 5 characters long.
+const OFFSET_LENGTH = 5;
 
 // The last formatter built, kept for the next call with the same `timeZone`:
 // building one takes about 20 µs, and reading the time with it about 3 µs. A
@@ -117,8 +117,8 @@ export function nowDTM(options: NowDTMOptions = {}): DTM {
       String(fields.timeZoneName).replace("GMT", "").replace(":", "") ||
       "+0000";
     // Before standard time, an offset could have seconds: Monrovia in 1971 is
-    // `GMT-00:44:30`, which `+/-HHMM` cannot hold.
-    if (!OFFSET.test(offset)) {
+    // `GMT-00:44:30`, written `-0044:30`, which `+/-HHMM` cannot hold.
+    if (offset.length !== OFFSET_LENGTH) {
       throw new TimestampOffsetError(String(fields.timeZoneName));
     }
     value.offset =
