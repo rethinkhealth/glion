@@ -1,5 +1,4 @@
 import type { Root } from "@glion/ast";
-import { toHl7v2 } from "@glion/to-hl7v2";
 import { value as queryValue } from "@glion/util-query";
 
 import { acknowledge } from "./acknowledge";
@@ -29,7 +28,7 @@ export interface CreateContextOptions {
   /** HL7v2 unified processor */
   processor: Hl7v2Processor;
   /** The app's options, which `ctx.ack()` writes the acknowledgment with. */
-  app: MllpOptions;
+  app: MllpOptions & Required<Pick<MllpOptions, "serializer">>;
 }
 
 /**
@@ -52,6 +51,7 @@ export interface CreateContextOptions {
  */
 export function createContext(options: CreateContextOptions): MessageContext {
   const { app, message, connection, processor } = options;
+  const { serializer, ...defaults } = app;
   const { bytes, error, file, header, raw, tree: parsed } = message;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
@@ -105,7 +105,9 @@ export function createContext(options: CreateContextOptions): MessageContext {
   // ── Build context ──────────────────────────────────────────────────
   const ctx: MessageContext = {
     ack(ackOptions?: AckOptions): Response {
-      return { raw: toHl7v2(acknowledge(header, { ...ackOptions, ...app })) };
+      return {
+        raw: serializer(acknowledge(header, { ...ackOptions, ...defaults })),
+      };
     },
     ast: parsed,
     connection: Object.freeze(connection),

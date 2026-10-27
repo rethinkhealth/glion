@@ -9,6 +9,7 @@ import type { Root } from "@glion/ast";
 import { parseHL7v2 } from "@glion/hl7v2";
 import { defaultPreprocessors, hl7v2Parser } from "@glion/parser";
 import type { PreprocessorStep } from "@glion/parser";
+import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 import { unified } from "unified";
 import type { Plugin } from "unified";
@@ -495,6 +496,57 @@ describe("acknowledgment defaults", () => {
   it("throws a RangeError when the app is given a time zone that is not an IANA time zone name", () => {
     expect(() => new Mllp({ timeZone: "Mars/Olympus_Mons" })).toThrow(
       RangeError
+    );
+  });
+
+  it("writes the default AA with the serializer the app is given", async () => {
+    const app = new Mllp({
+      serializer: (tree) => `MSA-1 is ${value(tree, "MSA.1")?.value}`,
+    }).parser(parseHL7v2);
+    app.on("ADT^A01", () => {
+      // processed, nothing to return
+    });
+
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    expect(response?.raw).toBe("MSA-1 is AA");
+  });
+
+  it("writes the NAK of a thrown error with the serializer the app is given", async () => {
+    const app = new Mllp({
+      serializer: (tree) => `MSA-1 is ${value(tree, "MSA.1")?.value}`,
+    }).parser(parseHL7v2);
+    app.on("ADT^A01", () => {
+      throw new Error("Lookup failed");
+    });
+
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    expect(response?.raw).toBe("MSA-1 is AE");
+  });
+
+  it("writes ctx.ack() with the serializer the app is given", async () => {
+    const app = new Mllp({
+      serializer: (tree) => `MSA-1 is ${value(tree, "MSA.1")?.value}`,
+    }).parser(parseHL7v2);
+    app.on("ADT^A01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
+
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    expect(response?.raw).toBe("MSA-1 is CA");
+  });
+
+  it("echoes an escape sequence as received when the app parses and serializes without escape handling", async () => {
+    const app = new Mllp({
+      serializer: (tree) => toHl7v2(tree, undefined, { encodeEscapes: false }),
+    }).parser(unified().use(hl7v2Parser, { decodeEscapes: false }).freeze());
+    app.on("ADT^A01", (ctx) => ctx.ack());
+
+    // MSH-3, the sending application, is `R&D` written as `R\T\D`; the
+    // acknowledgment's MSH-5 echoes it.
+    const response = await app.handle(
+      toBytes(SAMPLE_ADT.replace("|SendApp|", "|R\\T\\D|")),
+      MOCK_CONNECTION
+    );
+    expect(response?.raw.split("\r")[0]).toMatch(
+      /^MSH\|\^~\\&\|RecvApp\|RecvFac\|R\\T\\D\|SendFac\|/
     );
   });
 

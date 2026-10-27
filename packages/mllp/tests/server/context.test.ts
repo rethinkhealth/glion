@@ -1,6 +1,7 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 import { hl7v2Parser } from "@glion/parser";
+import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 import { unified } from "unified";
 
@@ -18,7 +19,7 @@ const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
 
 function makeCtx(payload = SAMPLE_BYTES) {
   return createContext({
-    app: {},
+    app: { serializer: toHl7v2 },
     connection: {
       id: 1,
       localPort: 2575,
@@ -131,7 +132,7 @@ describe("createContext", () => {
       const parseOnly = unified().use(hl7v2Parser).freeze();
 
       const ctx = createContext({
-        app: {},
+        app: { serializer: toHl7v2 },
         connection: {
           id: 1,
           localPort: 2575,
@@ -164,7 +165,7 @@ describe("createContext", () => {
 
     it("works with full pipeline processor (parse + transform + compile)", async () => {
       const ctx = createContext({
-        app: {},
+        app: { serializer: toHl7v2 },
         connection: {
           id: 1,
           localPort: 2575,

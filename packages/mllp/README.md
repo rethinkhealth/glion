@@ -56,9 +56,18 @@ The server class. `new Mllp(options?)` takes the options every acknowledgment th
 | ------------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `timeZone`   | `string`, optional                               | IANA time zone MSH-7 is read in, such as `America/New_York`. Defaults to the host's time zone. The constructor throws a `RangeError` for a name that is not one. |
 | `delimiters` | `Partial<Omit<Delimiters, "segment">>`, optional | MSH-1 and MSH-2. Each delimiter not given is the standard one: `\|` and `^~\&`.                                                                                  |
+| `serializer` | `(tree: Root) => string`, optional               | Writes every response as HL7v2 text. Defaults to `toHl7v2` from `@glion/to-hl7v2`, which encodes each value's escape sequences.                                  |
 
 ```ts
 const app = new Mllp({ timeZone: "America/New_York" }).parser(parseHL7v2);
+```
+
+An app whose parser keeps escape sequences as received writes its responses without encoding them:
+
+```ts
+const app = new Mllp({
+  serializer: (tree) => toHl7v2(tree, undefined, { encodeEscapes: false }),
+}).parser(unified().use(hl7v2Parser, { decodeEscapes: false }).freeze());
 ```
 
 The rest of the API chains:
@@ -117,7 +126,7 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 | Type               | Description                                                                                                                                                                                 |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Context`          | Request context with message data and routing fields.                                                                                                                                       |
-| `MllpOptions`      | The options of `new Mllp()`: `timeZone` and `delimiters`, as `acknowledge()` takes them.                                                                                                    |
+| `MllpOptions`      | The options of `new Mllp()`: `timeZone` and `delimiters`, as `acknowledge()` takes them, and `serializer`.                                                                                  |
 | `AckOptions`       | The options of `ctx.ack()`: those of `acknowledge()` without `timeZone` and `delimiters`, which the app is given, and with an accept code (`AA` or `CA`) in `code`.                         |
 | `Response`         | Response object `{ raw: string }`.                                                                                                                                                          |
 | `Hl7v2Processor`   | Unified `Processor` type for HL7v2 (`Processor<Root, Root \| undefined, Root \| undefined>` — head/tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable). |

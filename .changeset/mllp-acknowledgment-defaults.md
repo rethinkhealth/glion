@@ -16,5 +16,6 @@ Breaking: the server replies with the acknowledgment of every message, the way a
 - Build every acknowledgment from the MSH as the app's parser read it, copied when the message arrives: neither the transforms `ctx.tree()` runs nor a handler that changes the tree changes it.
 - Make `ctx.error` and the routing fields (`ctx.messageType`, `ctx.triggerEvent`, `ctx.messageStructure`, `ctx.version`, `ctx.controlId`) read-only.
 - `serve({ onError })` no longer fires for an error a message raised, and no longer receives `messageInfo`. Remove `getMessageInfo()` and the `MessageInfo` type.
-- Add `new Mllp(options?)` with `timeZone` and `delimiters`, which every acknowledgment the app writes uses: the default `AA`, the NAK of a thrown error, and `ctx.ack()`; an unknown `timeZone` throws a `RangeError` from the constructor
+- Add `new Mllp(options?)` with `timeZone` and `delimiters`, which every acknowledgment the app writes uses: the default `AA`, the NAK of a thrown error, and `ctx.ack()`; an unknown `timeZone` throws a `RangeError` from the constructor.
+- Add the `serializer` option to `new Mllp(options?)`, which writes every response as HL7v2 text; it defaults to `toHl7v2` from `@glion/to-hl7v2`.
 - Give `MllpServerError` one fixed message per `code`, held in the class: its constructor takes the code and an optional `cause`. Reword the `NO_PARSER` and `PROTOCOL_VIOLATION` messages.

@@ -1,5 +1,6 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
+import { toHl7v2 } from "@glion/to-hl7v2";
 
 import { createContext } from "../../src/server/context";
 import { readMessage } from "../../src/server/message";
@@ -17,7 +18,7 @@ const CONNECTION = {
 
 function makeCtx(raw: string): Context {
   return createContext({
-    app: {},
+    app: { serializer: toHl7v2 },
     connection: CONNECTION,
     message: readMessage(new TextEncoder().encode(raw), parseHL7v2),
     processor: parseHL7v2,

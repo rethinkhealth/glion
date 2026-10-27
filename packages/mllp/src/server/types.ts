@@ -121,12 +121,21 @@ export interface Context {
   readonly var: Readonly<Record<string, unknown>>;
 }
 
-/** The options of `ctx.ack()`: those of `acknowledge()`, with an accept code. */
 /**
  * Options for `new Mllp()`: the delimiters and the time zone of every
- * acknowledgment the app writes, as `acknowledge()` takes them.
+ * acknowledgment the app writes, as `acknowledge()` takes them, and the
+ * serializer of every response.
  */
-export type MllpOptions = Pick<AcknowledgeOptions, "delimiters" | "timeZone">;
+export interface MllpOptions extends Pick<
+  AcknowledgeOptions,
+  "delimiters" | "timeZone"
+> {
+  /**
+   * Writes a response's tree as HL7v2 text. Defaults to `toHl7v2` from
+   * `@glion/to-hl7v2`, which encodes each value's escape sequences.
+   */
+  serializer?: (tree: Root) => string;
+}
 
 /**
  * The options of `ctx.ack()`: those of `acknowledge()`, without the ones the

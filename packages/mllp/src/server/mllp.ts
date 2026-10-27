@@ -48,7 +48,7 @@ import type {
  */
 export class Mllp {
   readonly #router = new Router();
-  readonly #options: MllpOptions;
+  readonly #options: MllpOptions & Required<Pick<MllpOptions, "serializer">>;
   #processor: Hl7v2Processor | undefined;
 
   /**
@@ -61,6 +61,7 @@ export class Mllp {
     nowDTM({ timeZone: options.timeZone });
     this.#options = {
       delimiters: options.delimiters,
+      serializer: options.serializer ?? toHl7v2,
       timeZone: options.timeZone,
     };
   }
@@ -196,12 +197,13 @@ export class Mllp {
     // MSH-10 to echo.
     const answerable =
       message.header.children.length > 0 && ctx.messageType !== "ACK";
+    const { serializer, ...defaults } = this.#options;
     const nakOf = (error: Error): Response | undefined =>
       answerable
         ? {
-            raw: toHl7v2(
+            raw: serializer(
               acknowledge(message.header, {
-                ...this.#options,
+                ...defaults,
                 code: nakCode(error),
               })
             ),
