@@ -7,7 +7,7 @@ import { unified } from "unified";
 import type { Plugin } from "unified";
 
 import { MllpServerError } from "../../src/errors";
-import { messageHeader, readMessage } from "../../src/server/message";
+import { messageHeader, readRequest } from "../../src/server/request";
 
 /** A unified parser plugin whose parse step throws `thrown`. */
 function throwingParser(thrown: unknown): Plugin<[], string, Root> {
@@ -33,72 +33,72 @@ function withInvalidByte(text: string, at: number): Uint8Array {
   ]);
 }
 
-describe("readMessage", () => {
+describe("readRequest", () => {
   it("reads a UTF-8 payload with the processor", () => {
-    const message = readMessage(BYTES, parseHL7v2);
+    const request = readRequest(BYTES, parseHL7v2);
 
-    expect(message.error).toBeUndefined();
-    expect(message.bytes).toBe(BYTES);
-    expect(message.raw).toBe(MESSAGE);
-    expect(String(message.file)).toBe(MESSAGE);
-    expect(toHl7v2(message.tree)).toBe(MESSAGE);
+    expect(request.error).toBeUndefined();
+    expect(request.bytes).toBe(BYTES);
+    expect(request.raw).toBe(MESSAGE);
+    expect(String(request.file)).toBe(MESSAGE);
+    expect(toHl7v2(request.tree)).toBe(MESSAGE);
   });
 
   it("finds no MSH in a payload that does not start with one", () => {
     expect(
-      messageHeader(readMessage(new Uint8Array(), parseHL7v2).tree)
+      messageHeader(readRequest(new Uint8Array(), parseHL7v2).tree)
     ).toBeUndefined();
     expect(
       messageHeader(
-        readMessage(new TextEncoder().encode("PID|1"), parseHL7v2).tree
+        readRequest(new TextEncoder().encode("PID|1"), parseHL7v2).tree
       )
     ).toBeUndefined();
   });
 
   it("reads a payload that is not UTF-8 as INCOMPATIBLE_CHARSET, with no text and only its MSH in the tree", () => {
-    const message = readMessage(
+    const request = readRequest(
       withInvalidByte(MESSAGE, MESSAGE.length - 1),
       parseHL7v2
     );
 
-    expect(message.error).toBeInstanceOf(MllpServerError);
-    expect((message.error as MllpServerError).code).toBe(
+    expect(request.error).toBeInstanceOf(MllpServerError);
+    expect((request.error as MllpServerError).code).toBe(
       "INCOMPATIBLE_CHARSET"
     );
-    expect((message.error as MllpServerError).cause).toBeInstanceOf(
+    expect((request.error as MllpServerError).cause).toBeInstanceOf(
       CharsetError
     );
-    expect(message.raw).toBe("");
-    expect(toHl7v2(message.tree)).toBe(MSH);
+    expect(request.raw).toBe("");
+    expect(toHl7v2(request.tree)).toBe(MSH);
   });
 
   it("reads the MSH of a payload that is not UTF-8, with U+FFFD for each byte that is not", () => {
-    const message = readMessage(
+    const request = readRequest(
       withInvalidByte(MESSAGE, MSH.indexOf("SendFac")),
       parseHL7v2
     );
 
-    expect(message.tree.children).toHaveLength(1);
-    expect(value(message.tree, "MSH.4")?.value).toBe("�SendFac");
-    expect(value(message.tree, "MSH.10")?.value).toBe("MSG001");
+    expect(request.tree.children).toHaveLength(1);
+    expect(value(request.tree, "MSH.4")?.value).toBe("�SendFac");
+    expect(value(request.tree, "MSH.10")?.value).toBe("MSG001");
   });
 
   it("keeps the parser's error, the text, and only the MSH in the tree, when the parser throws", () => {
     const thrown = new Error("parser failed");
-    const message = readMessage(BYTES, unified().use(throwingParser(thrown)));
+    const request = readRequest(BYTES, unified().use(throwingParser(thrown)));
 
-    expect(message.error).toBe(thrown);
-    expect(message.raw).toBe(MESSAGE);
-    expect(toHl7v2(message.tree)).toBe(MSH);
+    expect(request.error).toBe(thrown);
+    expect(request.raw).toBe(MESSAGE);
+    expect(toHl7v2(request.tree)).toBe(MSH);
   });
 
   it("wraps a parser's throw that is not an Error", () => {
-    const message = readMessage(
+    const request = readRequest(
       BYTES,
       unified().use(throwingParser("parser failed"))
     );
 
-    expect(message.error).toBeInstanceOf(Error);
-    expect(message.error?.message).toBe("parser failed");
+    expect(request.error).toBeInstanceOf(Error);
+    expect(request.error?.message).toBe("parser failed");
   });
 });

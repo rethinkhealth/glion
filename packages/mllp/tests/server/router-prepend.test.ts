@@ -3,7 +3,7 @@ import { parseHL7v2 } from "@glion/hl7v2";
 import { toHl7v2 } from "@glion/to-hl7v2";
 
 import { createContext } from "../../src/server/context";
-import { readMessage } from "../../src/server/message";
+import { readRequest } from "../../src/server/request";
 import { Router } from "../../src/server/router";
 import type { Context, Middleware } from "../../src/server/types";
 
@@ -20,8 +20,8 @@ function makeCtx(raw: string): Context {
   return createContext({
     app: { serializer: toHl7v2 },
     connection: CONNECTION,
-    message: readMessage(new TextEncoder().encode(raw), parseHL7v2),
     processor: parseHL7v2,
+    request: readRequest(new TextEncoder().encode(raw), parseHL7v2),
   });
 }
 

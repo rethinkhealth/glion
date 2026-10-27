@@ -7,7 +7,7 @@ import { unified } from "unified";
 
 import { MllpServerError } from "../../src/errors";
 import { createContext } from "../../src/server/context";
-import { readMessage } from "../../src/server/message";
+import { readRequest } from "../../src/server/request";
 
 const SAMPLE_MESSAGE = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -28,8 +28,8 @@ function makeCtx(payload = SAMPLE_BYTES) {
       secure: false,
       state: new Map(),
     },
-    message: readMessage(payload, parseHL7v2),
     processor: parseHL7v2,
+    request: readRequest(payload, parseHL7v2),
   });
 }
 
@@ -141,8 +141,8 @@ describe("createContext", () => {
           secure: false,
           state: new Map(),
         },
-        message: readMessage(SAMPLE_BYTES, parseOnly),
         processor: parseOnly,
+        request: readRequest(SAMPLE_BYTES, parseOnly),
       });
 
       // Tree is parsed correctly
@@ -174,8 +174,8 @@ describe("createContext", () => {
           secure: false,
           state: new Map(),
         },
-        message: readMessage(SAMPLE_BYTES, parseHL7v2),
         processor: parseHL7v2,
+        request: readRequest(SAMPLE_BYTES, parseHL7v2),
       });
 
       // Tree, file, and result all populated

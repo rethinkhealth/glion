@@ -2,7 +2,7 @@ import type { Root } from "@glion/ast";
 import { value as queryValue } from "@glion/util-query";
 
 import { acknowledge } from "./acknowledge";
-import type { ReceivedMessage } from "./message";
+import type { MllpRequest } from "./request";
 import type {
   AckOptions,
   ConnectionInfo,
@@ -21,8 +21,8 @@ export type MessageContext = Omit<Context, "error"> & {
  * Options for creating a Context instance.
  */
 export interface CreateContextOptions {
-  /** The message, as `readMessage()` read it with `processor`. */
-  message: ReceivedMessage;
+  /** The request, as `readRequest()` read it with `processor`. */
+  request: MllpRequest;
   /** Connection metadata */
   connection: ConnectionInfo;
   /** HL7v2 unified processor */
@@ -32,7 +32,7 @@ export interface CreateContextOptions {
 }
 
 /**
- * Create a new Context for a message `readMessage()` read.
+ * Create a new Context for a message `readRequest()` read.
  *
  * `ctx.error` starts as the message's `error`. The routing fields are read
  * from the message's MSH once, so they keep the values as parsed whatever
@@ -50,9 +50,9 @@ export interface CreateContextOptions {
  * the tree, the transform and compile steps never execute.
  */
 export function createContext(options: CreateContextOptions): MessageContext {
-  const { app, message, connection, processor } = options;
+  const { app, request, connection, processor } = options;
   const { serializer, ...defaults } = app;
-  const { bytes, error, file, raw, tree: parsed } = message;
+  const { bytes, error, file, raw, tree: parsed } = request;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
 

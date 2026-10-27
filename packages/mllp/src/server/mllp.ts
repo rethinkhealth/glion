@@ -14,7 +14,7 @@ import { acknowledge } from "./acknowledge";
 import { compose, isResponse } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
-import { messageHeader, readMessage } from "./message";
+import { messageHeader, readRequest } from "./request";
 import { Router } from "./router";
 import type {
   ConnectionInfo,
@@ -184,25 +184,25 @@ export class Mllp {
 
     // Reading is sync — only decode() and parse() run here. Transform and
     // compile are deferred to ctx.tree() / ctx.result().
-    const message = readMessage(payload, this.#processor);
+    const request = readRequest(payload, this.#processor);
     const ctx = createContext({
       app: this.#options,
       connection,
-      message,
       processor: this.#processor,
+      request,
     });
 
     // The server answers neither an ACK, so two receivers never acknowledge
     // each other's acknowledgments, nor a payload with no MSH, which has no
     // MSH-10 to echo.
     const answerable =
-      messageHeader(message.tree) !== undefined && ctx.messageType !== "ACK";
+      messageHeader(request.tree) !== undefined && ctx.messageType !== "ACK";
     const { serializer, ...defaults } = this.#options;
     const nakOf = (error: Error): Response | undefined =>
       answerable
         ? {
             raw: serializer(
-              acknowledge(message.tree, {
+              acknowledge(request.tree, {
                 ...defaults,
                 code: nakCode(error),
               })
@@ -211,7 +211,7 @@ export class Mllp {
         : undefined;
 
     // A payload that did not decode or parse: its content was never read.
-    const received = message.error;
+    const received = request.error;
     let nak = received && nakOf(received);
     let terminal: Middleware = noReply;
     let middlewares: Middleware[] = [];

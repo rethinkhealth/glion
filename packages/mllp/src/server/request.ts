@@ -10,8 +10,8 @@ import type { Hl7v2Processor } from "./types";
 /** Decodes UTF-8, with U+FFFD for each byte that is not UTF-8. */
 const LENIENT_DECODER = new TextDecoder();
 
-/** A message as the server read it from one MLLP frame payload. */
-export interface ReceivedMessage {
+/** A request: the message the server read from one MLLP frame payload. */
+export interface MllpRequest {
   /** The MLLP frame payload. */
   readonly bytes: Uint8Array;
   /** The payload decoded as UTF-8. Empty when the payload is not UTF-8. */
@@ -37,10 +37,10 @@ export interface ReceivedMessage {
  * `@glion/parser` from the payload decoded with U+FFFD for each byte that is
  * not UTF-8. Never throws for a payload of bytes.
  */
-export function readMessage(
+export function readRequest(
   payload: Uint8Array,
   processor: Hl7v2Processor
-): ReceivedMessage {
+): MllpRequest {
   let raw: string;
   try {
     raw = decodeBytes(payload);
