@@ -443,7 +443,7 @@ describe("acknowledgment defaults", () => {
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
     const [msh, msa] = response?.raw.split("\r") ?? [];
     expect(msh).toMatch(
-      /^MSH\|\^~\\&\|RecvApp\|RecvFac\|SendApp\|SendFac\|\d{14}\|\|ACK\^A01\^ACK\|/
+      /^MSH\|\^~\\&\|RecvApp\|RecvFac\|SendApp\|SendFac\|\d{14}[+-]\d{4}\|\|ACK\^A01\^ACK\|/
     );
     expect(msa).toBe("MSA|AA|MSG001");
   });
