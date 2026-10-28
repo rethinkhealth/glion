@@ -14,10 +14,10 @@ npm install @glion/mllp
 
 ### Package exports
 
-| Subpath            | Description                                           |
-| ------------------ | ----------------------------------------------------- |
-| `@glion/mllp`      | `Mllp`, `handleConnection()`; Web APIs only           |
-| `@glion/mllp/node` | `serve()`, the TCP and TLS server for Node.js and Bun |
+| Subpath            | Description                                                  |
+| ------------------ | ------------------------------------------------------------ |
+| `@glion/mllp`      | `Mllp`, `handleConnection()`, `acknowledge()`; Web APIs only |
+| `@glion/mllp/node` | `serve()`, the TCP and TLS server for Node.js and Bun        |
 
 ## Use
 
@@ -70,6 +70,29 @@ import { handleConnection } from "@glion/mllp";
 await handleConnection((payload) => app.handle(payload, env), socket, {
   signal,
 });
+```
+
+### `acknowledge(origin, options?)`
+
+Returns the acknowledgment of the parsed message `origin` as a `Root`: an MSH and an MSA segment. MSH-1 and MSH-2 declare the `delimiters` option, never the original message's delimiters. The MSH swaps the original sender and receiver (MSH-3/4 ↔ MSH-5/6), each field copied whole, sets MSH-7 to the current time to the second in the `timeZone` option, with that zone's offset from UTC, and MSH-9 to `ACK^<MSH-9.2>^ACK` (`ACK^<MSH-9.2>` before v2.3.1), and echoes MSH-12.1. The MSA holds MSA-1 and MSA-2, which echoes the original MSH-10. It never contains MSA-3 or an ERR segment, so the acknowledgment has the same fields in every HL7v2 version.
+
+| Option         | Type                                             | Description                                                                                                                                                                                    |
+| -------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`         | `AckCode`, optional                              | MSA-1. Defaults to `AA`.                                                                                                                                                                       |
+| `id`           | `string`, optional                               | MSH-10. Defaults to a fresh `uid()`.                                                                                                                                                           |
+| `sending`      | `{ application, facility }`, optional            | MSH-3.1 and MSH-4.1. Default to the original MSH-5 and MSH-6, copied whole.                                                                                                                    |
+| `processingId` | `string`, optional                               | MSH-11. Defaults to the original MSH-11, copied whole, else `P`.                                                                                                                               |
+| `delimiters`   | `Partial<Omit<Delimiters, "segment">>`, optional | MSH-1 and MSH-2. Each delimiter not given is the standard one: `\|` and `^~\&`.                                                                                                                |
+| `timeZone`     | `string`, optional                               | IANA time zone MSH-7 is read in, such as `America/New_York`. Defaults to the host's time zone; `UTC` gives the offset `-0000`. Throws a `RangeError` for a name that is not an IANA time zone. |
+
+```ts
+import { AckCode } from "@glion/ack";
+import { acknowledge } from "@glion/mllp";
+import { toHl7v2 } from "@glion/to-hl7v2";
+
+toHl7v2(acknowledge(ctx.ast, { code: AckCode.ApplicationReject }));
+// MSH|^~\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|<uid>|P|2.5.1
+// MSA|AR|MSG001
 ```
 
 ### `serve(options)` — from `@glion/mllp/node`
