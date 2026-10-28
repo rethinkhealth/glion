@@ -1,3 +1,6 @@
+import type { Root } from "@glion/ast";
+
+import type { AcknowledgeOptions } from "./acknowledge";
 import type { MllpRequest } from "./request";
 
 /**
@@ -9,9 +12,6 @@ export type EnvArgs<E> = undefined extends E ? [env?: E] : [env: E];
 /**
  * MLLP response — a raw HL7v2 string. A connection writes it back as UTF-8
  * with MLLP framing.
- *
- * Acknowledgment helpers (ack/nak) are not built in — register
- * an acknowledgment middleware via `.use()` to generate ACK/NAK responses.
  */
 export interface Response {
   readonly raw: string;
@@ -24,6 +24,14 @@ export interface Response {
 export interface Context<E = unknown> {
   /** The message that arrived, as the app's processor read it. */
   readonly req: MllpRequest;
+  /**
+   * The error this message raised: a route filter, middleware or handler
+   * throw, a `next()` called twice (`NEXT_CALLED_TWICE`), or the
+   * `AckApplicationReject` of a message no route matches. A later error
+   * replaces it; a middleware that throws one passes this as its `cause` to
+   * keep it. `undefined` while none has.
+   */
+  readonly error: Error | undefined;
 
   /**
    * What the runtime passed to `handle()` with this message, such as a
@@ -32,7 +40,10 @@ export interface Context<E = unknown> {
    */
   readonly env: E;
 
-  /** Response to send back. Set by middleware or handler. */
+  /**
+   * Response to send back. A later response replaces it, and an error
+   * replaces it with the error's NAK.
+   */
   res: Response | undefined;
 
   /** Store a variable */
@@ -41,6 +52,33 @@ export interface Context<E = unknown> {
   get<K extends string>(key: K): unknown;
   /** Read-only snapshot of all variables */
   readonly var: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * Observes an error a message raised: a payload that is not UTF-8, a
+ * processor throw, the processor's first fatal message, or the error of a
+ * route filter, middleware or handler. Runs when the error is raised. `env`
+ * is what the runtime passed to `handle()`. MUST NOT throw.
+ */
+export type ErrorHandler<E = unknown> = (
+  error: Error,
+  env: E
+) => Promise<void> | undefined;
+
+/**
+ * Options for `new Mllp()`: the delimiters and the time zone of every
+ * acknowledgment the app writes, as `acknowledge()` takes them, and the
+ * serializer that writes it.
+ */
+export interface MllpOptions extends Pick<
+  AcknowledgeOptions,
+  "delimiters" | "timeZone"
+> {
+  /**
+   * Writes an acknowledgment's tree as HL7v2 text. Defaults to `toHl7v2` from
+   * `@glion/to-hl7v2`, which encodes each value's escape sequences.
+   */
+  serializer?: (tree: Root) => string;
 }
 
 // Re-exported from @glion/parser — the ecosystem home of "a unified
@@ -68,15 +106,6 @@ export type Middleware<E = unknown> = (
  * Terminal route handler — may return a response or void (no response).
  */
 export type Handler<E = unknown> = (
-  ctx: Context<E>
-  // oxlint-disable-next-line typescript/no-invalid-void-type
-) => Promise<Response | undefined | void> | Response | undefined | void;
-
-/**
- * Error handler — receives the error and context, returns a response.
- */
-export type ErrorHandler<E = unknown> = (
-  err: Error,
   ctx: Context<E>
   // oxlint-disable-next-line typescript/no-invalid-void-type
 ) => Promise<Response | undefined | void> | Response | undefined | void;

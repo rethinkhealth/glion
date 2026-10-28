@@ -13,10 +13,10 @@ import { Mllp } from "../../src/server/mllp";
  *
  * The server decodes each inbound payload as UTF-8 via `decodeBytes(payload)`
  * (from `@glion/util-charset`), fatally. A non-UTF-8 feed (e.g. ISO 8859/1)
- * therefore fails LOUDLY — no middleware or handler runs, `app.handle()`
- * rejects with the `CharsetError` it throws, and `serve()` reports it through
- * `onError`, with no response — rather than being silently corrupted to
- * U+FFFD and ACKed as if valid, which was the #659 bug.
+ * therefore fails LOUDLY — no middleware or handler runs, `app.onError()`
+ * observes the `CharsetError` it throws, and the sender is answered `AE` —
+ * rather than being silently corrupted to U+FFFD and ACKed as if valid, which
+ * was the #659 bug.
  *
  * Honouring the charset a message declares in MSH-18 (so such a feed decodes
  * intact instead of erroring) is deferred to
@@ -95,11 +95,13 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     }
   });
 
-  it("gives onError the CharsetError and never ACKs a corrupted body", async () => {
+  it("gives onError() the CharsetError and answers AE, never AA", async () => {
     let handlerRan = false;
     const errors: Error[] = [];
 
-    const app = new Mllp();
+    const app = new Mllp().onError((raised) => {
+      errors.push(raised);
+    });
     app.on("*", (ctx) => {
       handlerRan = true;
       return {
@@ -107,13 +109,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
       };
     });
 
-    server = serve({
-      handle: app.handle,
-      onError: (error) => {
-        errors.push(error);
-      },
-      port: 0,
-    });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     // PID-5 family name "Müller" with "ü" as the single Latin-1 byte 0xFC (invalid
@@ -133,10 +129,10 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
 
     const response = await sendBytes(server.port, latin1, 1000);
 
-    // No silent corruption: the handler never sees a mangled body, no AA is
-    // returned, and onError gets the CharsetError the decoder threw.
+    // No silent corruption: the handler never sees a mangled body, the response
+    // is AE echoing MSH-10 in MSA-2, and onError() observes the CharsetError.
     expect(handlerRan).toBe(false);
-    expect(response).toBeUndefined();
+    expect(response?.toString("utf8")).toContain("\rMSA|AE|MSG001");
     expect(errors).toHaveLength(1);
     expect(errors[0]).toBeInstanceOf(CharsetError);
   });

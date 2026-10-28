@@ -1,47 +1,71 @@
-import type { Context, Middleware } from "./types";
+import { MllpServerError, MllpServerErrorCode } from "../errors";
+import type { Context, Middleware, Response } from "./types";
 
 /**
  * Compose an array of middleware into a single function that executes
  * them in onion-model order (like Hono/Koa).
  *
  * Each middleware receives (ctx, next). Calling next() proceeds to the
- * next middleware. If a middleware returns a Response without
- * calling next(), it short-circuits the chain.
+ * next middleware. A middleware that returns without calling next()
+ * short-circuits the chain.
  *
- * Response handling follows Hono's pattern: return values are written
- * to ctx.res, and middleware can also set ctx.res directly.
- * Last write wins.
+ * A middleware gives the response by returning a `Response` or by writing
+ * `ctx.res`; a later one replaces it. Returning nothing leaves the response
+ * as it is.
+ *
+ * A middleware that throws, or calls `next()` a second time
+ * (`NEXT_CALLED_TWICE`), has that error passed to `onError`, and the response
+ * `onError` returns or resolves to is written to `ctx.res` before the chain
+ * goes on. `onError` MUST NOT throw. The second `next()` call also throws
+ * that error to its caller.
  */
 export function compose<E>(
-  middlewares: Middleware<E>[]
+  middlewares: Middleware<E>[],
+  onError: (
+    error: Error
+  ) => Response | undefined | Promise<Response | undefined>
 ): (ctx: Context<E>) => Promise<void> {
   return async (ctx: Context<E>): Promise<void> => {
     let index = -1;
 
+    const fail = async (error: Error) => {
+      ctx.res = await onError(error);
+    };
+
     async function dispatch(i: number): Promise<void> {
       if (i <= index) {
-        throw new Error("next() called multiple times");
+        const misuse = new MllpServerError(
+          MllpServerErrorCode.NEXT_CALLED_TWICE
+        );
+        await fail(misuse);
+        throw misuse;
       }
       index = i;
 
-      if (i >= middlewares.length) {
+      const middleware = middlewares[i];
+      if (!middleware) {
         return;
       }
-
-      const middleware = middlewares[i] as Middleware<E>;
-      const result = await middleware(ctx, () => dispatch(i + 1));
-
-      // If middleware returned a response, set ctx.res (last write wins)
-      if (
-        result &&
-        typeof result === "object" &&
-        "raw" in result &&
-        typeof result.raw === "string"
-      ) {
-        ctx.res = result;
+      try {
+        const result = await middleware(ctx, () => dispatch(i + 1));
+        if (isResponse(result)) {
+          ctx.res = result;
+        }
+      } catch (error) {
+        await fail(error instanceof Error ? error : new Error(String(error)));
       }
     }
 
     await dispatch(0);
   };
+}
+
+/** Whether `value` is a {@link Response}. */
+export function isResponse(value: unknown): value is Response {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "raw" in value &&
+    typeof value.raw === "string"
+  );
 }

@@ -18,6 +18,8 @@ export const MllpServerErrorCode = {
   CONNECTION_LOST: "CONNECTION_LOST",
   /** `serve()` was called with an option it cannot use. */
   INVALID_OPTION: "INVALID_OPTION",
+  /** A middleware called `next()` a second time. */
+  NEXT_CALLED_TWICE: "NEXT_CALLED_TWICE",
   /**
    * The MLLP byte stream itself was violated and the connection closed:
    * the remote system sent bytes outside a message, glued or unterminated
@@ -50,6 +52,8 @@ const messages = {
       "The options given to `serve()` are an app; `serve()` takes one options object, as in `serve({ handle: app.handle, port: 2575 })`.",
     port: "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`.",
   },
+  NEXT_CALLED_TWICE:
+    "A middleware called `next()` a second time; a middleware calls `next()` at most once.",
   PROTOCOL_VIOLATION:
     "The MLLP byte stream is not framed as MLLP requires, and the connection is closing; the error's cause says how.",
   UNFRAMEABLE_RESPONSE:

@@ -80,7 +80,7 @@ describe("mllp", () => {
   const appNoMatch = new Mllp();
   appNoMatch.on("ORM^O01", () => RESPONSE_OK);
 
-  bench("mllp: handle no matching route", async () => {
+  bench("mllp: handle no matching route (AR reply)", async () => {
     await appNoMatch.handle(smallBytes);
   });
 
@@ -88,9 +88,8 @@ describe("mllp", () => {
   appError.on("ADT^A01", () => {
     throw new Error("handler error");
   });
-  appError.onError(() => RESPONSE_OK);
 
-  bench("mllp: handle handler throws, onError recovers", async () => {
+  bench("mllp: handle handler throws (AE reply)", async () => {
     await appError.handle(smallBytes);
   });
 });

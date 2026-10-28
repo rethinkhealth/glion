@@ -35,7 +35,7 @@ describe("MllpServerError", () => {
 
   it("names no option for any other code", () => {
     expect(
-      new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION).option
+      new MllpServerError(MllpServerErrorCode.NEXT_CALLED_TWICE).option
     ).toBeUndefined();
   });
 
@@ -52,6 +52,14 @@ describe("MllpServerError", () => {
       new MllpServerError(MllpServerErrorCode.UNFRAMEABLE_RESPONSE).message
     ).toBe(
       "The response contains a VT or FS byte, and the connection is closing; MLLP reserves both bytes for framing."
+    );
+  });
+
+  it("states that a middleware called next() a second time", () => {
+    expect(
+      new MllpServerError(MllpServerErrorCode.NEXT_CALLED_TWICE).message
+    ).toBe(
+      "A middleware called `next()` a second time; a middleware calls `next()` at most once."
     );
   });
 
