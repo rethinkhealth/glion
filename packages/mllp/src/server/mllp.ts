@@ -41,12 +41,10 @@ import type {
  *   ```typescript
  *   import { AckCode } from "@glion/ack";
  *   import { Mllp } from "@glion/mllp";
- *   import { parseHL7v2 } from "@glion/hl7v2";
  *
  *   const app = new Mllp()
- *     .parser(parseHL7v2)
  *     .on("ADT^A01", async (ctx) => {
- *       await save(await ctx.result()); // replies AA
+ *       await save(ctx.ast); // replies AA
  *     })
  *     .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
  *   ```;

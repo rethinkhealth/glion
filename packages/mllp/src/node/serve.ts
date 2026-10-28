@@ -140,12 +140,9 @@ export interface Server {
  * @example
  *   ```typescript
  *   import { Mllp } from "@glion/mllp";
- *   import { parseHL7v2 } from "@glion/hl7v2";
  *   import { serve } from "@glion/mllp/node";
  *
- *   const app = new Mllp()
- *   .parser(parseHL7v2)
- *   .on("ADT^A01", async (ctx) => ({ raw: "..." }));
+ *   const app = new Mllp().on("ADT^A01", async (ctx) => ({ raw: "..." }));
  *
  *   const server = serve(app, { port: 2575 });
  *   console.log(`Listening on port ${server.port}`);

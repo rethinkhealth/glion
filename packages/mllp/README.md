@@ -23,15 +23,13 @@ npm install @glion/mllp
 
 ```ts
 import { AckApplicationError, AckCode } from "@glion/ack";
-import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
 import { serve } from "@glion/mllp/node";
 
 const app = new Mllp()
-  .parser(parseHL7v2)
   // Returning nothing replies AA.
   .on("ADT^A01", async (ctx) => {
-    await saveToDatabase(await ctx.result());
+    await saveToDatabase(ctx.ast);
   })
   // ctx.ack() builds the reply.
   .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }))
@@ -59,7 +57,15 @@ The server class. `new Mllp(options?)` takes the options every acknowledgment th
 | `serializer` | `(tree: Root) => string`, optional               | Writes every response as HL7v2 text. Defaults to `toHl7v2` from `@glion/to-hl7v2`, which encodes each value's escape sequences.                                  |
 
 ```ts
-const app = new Mllp({ timeZone: "America/New_York" }).parser(parseHL7v2);
+const app = new Mllp({ timeZone: "America/New_York" });
+```
+
+An app reads each message with `@glion/parser` and `@glion/lint-required-message-header` unless `.parser()` replaces them. An app that checks each message against its profile reads with `parseHL7v2` from `@glion/hl7v2`, and answers `AE` to a message missing a segment or field the profile requires:
+
+```ts
+import { parseHL7v2 } from "@glion/hl7v2";
+
+const app = new Mllp().parser(parseHL7v2);
 ```
 
 An app whose parser keeps escape sequences as received writes its responses without encoding them:
@@ -67,7 +73,12 @@ An app whose parser keeps escape sequences as received writes its responses with
 ```ts
 const app = new Mllp({
   serializer: (tree) => toHl7v2(tree, undefined, { encodeEscapes: false }),
-}).parser(unified().use(hl7v2Parser, { decodeEscapes: false }).freeze());
+}).parser(
+  unified()
+    .use(hl7v2Parser, { decodeEscapes: false })
+    .use(hl7v2LintRequiredMessageHeader, ["error"])
+    .freeze()
+);
 ```
 
 The rest of the API chains:
@@ -245,10 +256,10 @@ Available in every middleware and handler. Before routing, the processor has par
 
 ### Async methods
 
-| Method               | Triggers      | Description                                      |
-| -------------------- | ------------- | ------------------------------------------------ |
-| `await ctx.tree()`   | —             | Resolves to `ctx.ast`.                           |
-| `await ctx.result()` | `stringify()` | Compiled output (e.g. JSON from `hl7v2Jsonify`). |
+| Method               | Triggers      | Description                                                                                                                  |
+| -------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `await ctx.tree()`   | —             | Resolves to `ctx.ast`.                                                                                                       |
+| `await ctx.result()` | `stringify()` | Compiled output (e.g. JSON from `hl7v2Jsonify`), or `undefined` when the processor has no compiler, as the default has none. |
 
 `ctx.result()` is cached: later calls resolve to the same value.
 
@@ -302,10 +313,9 @@ Every connection has TCP keep-alive, with the first probe after 60 s idle, and N
 ```ts
 import fs from "node:fs";
 import { Mllp } from "@glion/mllp";
-import { parseHL7v2 } from "@glion/hl7v2";
 import { serve } from "@glion/mllp/node";
 
-const app = new Mllp().parser(parseHL7v2);
+const app = new Mllp();
 
 const server = serve(app, {
   port: 2575,
