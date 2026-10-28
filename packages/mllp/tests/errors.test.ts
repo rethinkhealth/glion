@@ -11,12 +11,6 @@ describe("MllpServerError", () => {
     );
   });
 
-  it("states that no parser is registered", () => {
-    expect(new MllpServerError(MllpServerErrorCode.NO_PARSER).message).toBe(
-      "No parser is registered; `app.parser()` registers the processor that `handle()` reads each message with."
-    );
-  });
-
   it("states that the byte stream is not framed as MLLP requires", () => {
     expect(
       new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION).message

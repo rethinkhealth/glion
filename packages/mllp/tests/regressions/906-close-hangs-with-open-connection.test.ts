@@ -18,7 +18,6 @@ import net from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
 import tls from "node:tls";
 
-import { parseHL7v2 } from "@glion/hl7v2";
 import { frame } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
@@ -58,7 +57,7 @@ describe("server.close()", () => {
   };
 
   it("resolves while a remote system holds an idle connection open", async () => {
-    const app = new Mllp().parser(parseHL7v2);
+    const app = new Mllp();
     const accepted = Promise.withResolvers<ConnectionInfo>();
     const server = serve(app, { onConnect: accepted.resolve, port: 0 });
     await server.listening;
@@ -76,9 +75,7 @@ describe("server.close()", () => {
   });
 
   it("resolves once a connection that has answered a message is idle again", async () => {
-    const app = new Mllp()
-      .parser(parseHL7v2)
-      .on("ADT^A01", () => ({ raw: ACK }));
+    const app = new Mllp().on("ADT^A01", () => ({ raw: ACK }));
     const server = serve(app, { port: 0 });
     await server.listening;
 
@@ -99,7 +96,7 @@ describe("server.close()", () => {
     // to release `answer`, so the test can call close() mid-message.
     const handling = Promise.withResolvers<true>();
     const answer = Promise.withResolvers<true>();
-    const app = new Mllp().parser(parseHL7v2).on("ADT^A01", async () => {
+    const app = new Mllp().on("ADT^A01", async () => {
       handling.resolve(true);
       await answer.promise;
       return { raw: ACK };
@@ -134,7 +131,7 @@ describe("server.close()", () => {
   });
 
   it("destroys a connection whose remote system never closes its side", async () => {
-    const app = new Mllp().parser(parseHL7v2);
+    const app = new Mllp();
     const accepted = Promise.withResolvers<ConnectionInfo>();
     const server = serve(app, { onConnect: accepted.resolve, port: 0 });
     await server.listening;
@@ -153,7 +150,7 @@ describe("server.close()", () => {
 
   it("resolves only once onDisconnect has settled", async () => {
     const order: string[] = [];
-    const app = new Mllp().parser(parseHL7v2);
+    const app = new Mllp();
     const accepted = Promise.withResolvers<ConnectionInfo>();
     const server = serve(app, {
       onConnect: accepted.resolve,
@@ -187,7 +184,7 @@ describe("server.close()", () => {
       ],
     });
     const connections: ConnectionInfo[] = [];
-    const app = new Mllp().parser(parseHL7v2);
+    const app = new Mllp();
     const server = serve(app, {
       onConnect: (connection) => {
         connections.push(connection);

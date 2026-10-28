@@ -133,7 +133,7 @@ async function main(): Promise<void> {
   // with timing, trigger, control ID, and ACK code. Prepended so it
   // sits outermost and its timing covers all user middleware.
   app.use(createMsgTelemetry(emit), { prepend: true });
-  // A payload no middleware runs on reaches the telemetry through onError().
+  // Every error a message raises reaches the telemetry through onError().
   app.onError(createErrorTelemetry(emit));
 
   // Step 4: Read TLS certificates (if configured).

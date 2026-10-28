@@ -5,13 +5,10 @@ import { once } from "node:events";
 import net from "node:net";
 import tls from "node:tls";
 
-import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
 
-import type { MllpServerError } from "../../src/errors";
-import { MllpServerErrorCode } from "../../src/errors";
 import { serve } from "../../src/node/serve";
 import type { Server } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
@@ -170,7 +167,7 @@ function waitForReady(port: number): Promise<void> {
 const DNS_NAME = 2;
 
 function createApp() {
-  return new Mllp().parser(parseHL7v2);
+  return new Mllp();
 }
 
 describe("serve() integration", () => {
@@ -350,8 +347,13 @@ describe("serve() integration", () => {
       expect(errors).toEqual([]);
     });
 
-    it("onError fires with NO_PARSER when no parser is registered", async () => {
-      const app = new Mllp().on("*", () => ({ raw: "ACK" }));
+    it("onError fires with the error app.handle() rejects with", async () => {
+      const unwritable = new Error("cannot write the reply");
+      const app = new Mllp({
+        serializer: () => {
+          throw unwritable;
+        },
+      }).on("*", (ctx) => ctx.ack());
 
       const errors: unknown[] = [];
 
@@ -364,10 +366,7 @@ describe("serve() integration", () => {
 
       await sendMessage(server.port, SAMPLE_ADT, 500);
 
-      expect(errors).toHaveLength(1);
-      expect((errors[0] as MllpServerError).code).toBe(
-        MllpServerErrorCode.NO_PARSER
-      );
+      expect(errors).toEqual([unwritable]);
     });
 
     it("onError fires with PROTOCOL_VIOLATION when the inbound byte stream violates MLLP framing", async () => {

@@ -38,27 +38,28 @@ A failure is thrown, and its NAK is the reply (§4). A reply only accepts: `ctx.
 
 ### 4. The default replies
 
-| What happened                                          | Reply                                                               |
-| ------------------------------------------------------ | ------------------------------------------------------------------- |
-| The route handler returns a `Reply`                    | that reply                                                          |
-| It returns `null`                                      | none                                                                |
-| It returns anything else                               | `AE` · `INVALID_REPLY`                                              |
-| It throws an `AckException`                            | its `code` in MSA-1                                                 |
-| It throws anything else                                | `AE`                                                                |
-| No route matches                                       | `AR`                                                                |
-| A route filter throws                                  | as a throw, after the global middleware only                        |
-| The payload is not UTF-8, or the parser throws         | its NAK, with no middleware run; `app.onError()` observes the error |
-| The message is an `ACK`, or does not start with an MSH | none, unless a handler or middleware gives one                      |
+| What happened                                     | Reply                                            |
+| ------------------------------------------------- | ------------------------------------------------ |
+| The route handler returns a `Reply`               | that reply                                       |
+| It returns `null`                                 | none                                             |
+| It returns anything else                          | `AE` · `INVALID_REPLY`                           |
+| It throws an `AckException`                       | its `code` in MSA-1                              |
+| It throws anything else                           | `AE`                                             |
+| No route matches                                  | `AR`                                             |
+| A route filter throws                             | as a throw, after the global middleware only     |
+| The payload is not UTF-8, or the processor throws | its NAK, with no middleware run                  |
+| The processor reports a fatal message             | the NAK of the first one, with no middleware run |
+| The message is an `ACK`                           | none, unless a handler or middleware gives one   |
 
 No reply carries text: an error's `message` and an `AckException`'s `text` are never sent (§8). `isAckException()` in `@glion/ack` recognizes an exception made by any installed copy of the package, so a second copy never turns an `AR` into an `AE`.
 
-A payload that did not decode or parse was never read, so no middleware or route runs on it, and no context or tree is made for it. The handlers `app.onError()` registered observe its error, and the server answers it with that error's NAK, `AE` unless the parser threw an `AckException`, the way an HTTP framework answers a body it cannot parse with a 400 or 415 before routing. The NAK answers the MSH read by `@glion/parser` from the bytes before the first CR, decoded strictly; a payload whose MSH is not UTF-8 gets no reply, since nothing can be echoed as the sender wrote it. The server does not acknowledge an `ACK` by itself, so two receivers cannot answer each other's acknowledgments forever. A catch-all route matches an `ACK` too; an app leaves it unanswered with a route for `ACK` that returns `null`. A payload with no MSH, such as an empty keep-alive frame, has no MSH-10 to acknowledge.
+The processor runs whole before routing, its lint rules included: what a message must be is the processor's to say, and the server reads only its fatal messages. The default processor, `@glion/parser` with `@glion/lint-required-message-header` at `"error"`, says a message starts with an MSH; one an app gives in its place MUST say so too. A payload that did not decode, that the processor throws on, or that it reports a fatal message for was never accepted, so no middleware or route runs on it, and no context is made for it. The server answers it with the NAK of the error, or of the first fatal message, `AE` unless the processor threw an `AckException`, the way an HTTP framework answers a body it cannot parse with a 400 or 415 before routing. The NAK answers the MSH read by `@glion/parser` from the bytes before the first CR, decoded strictly; a payload whose MSH is not UTF-8 gets no reply, since nothing can be echoed as the sender wrote it. The server does not acknowledge an `ACK` by itself, so two receivers cannot answer each other's acknowledgments forever. A catch-all route matches an `ACK` too; an app leaves it unanswered with a route for `ACK` that returns `null`. A payload with no MSH, such as an empty keep-alive frame, has no MSH-10 to acknowledge, so it gets no reply.
 
 ### 5. Errors are caught where they are thrown; `next()` never throws
 
 `compose()` catches at every level of the middleware onion, the route handler's included. The error goes to one place, which records it in `ctx.error` and builds its NAK, and the level around it resumes after `await next()`. A middleware reacts to an error by reading `ctx.error` after `next()`, never with a `try`/`catch` around it. A second call to `next()` throws `NEXT_CALLED_TWICE` to its caller and is answered as a middleware throw.
 
-There is no `app.notFound()`, and `app.onError()` only observes the payloads no middleware runs on (§4). A middleware that reads `ctx.error` after `next()` and writes or returns a reply handles every other error. Each handler `app.onError()` registers runs, as with Fastify's `onError` hook and Koa's `error` event, so the CLI's telemetry and an application's own handler both see the error.
+There is no `app.notFound()`. `app.onError()` observes every error a message raises, when it is raised, as Hono's sees every error; unlike Hono's, it does not choose the reply, which stays the NAK of `ctx.error`. A middleware that reads `ctx.error` after `next()` answers an error with another NAK by throwing. Each handler `app.onError()` registers runs, as with Fastify's `onError` hook and Koa's `error` event, so the CLI's telemetry and an application's own handler both see every error.
 
 ### 6. The latest outcome decides the reply
 
@@ -87,7 +88,7 @@ MSH-9 is the one exception. No form is valid in every version: v2.1 has no compo
 
 ### 9. The application's logger reports errors; the library never logs
 
-A message's errors reach the application through `ctx.error`. `serve({ onError })` reports what no message owns: a throwing `onConnect` or `onDisconnect`, a `handle()` rejection such as `NO_PARSER`, broken MLLP framing (`PROTOCOL_VIOLATION`), and a socket fault other than a reset, a broken pipe or a timeout. The connection closes after the last three. Without `onError`, those errors are not reported; `serve()` writes nothing to the console.
+A message's errors reach the application through `ctx.error`. `serve({ onError })` reports what no message owns: a throwing `onConnect` or `onDisconnect`, a `handle()` rejection, such as a `serializer` that throws, broken MLLP framing (`PROTOCOL_VIOLATION`), and a socket fault other than a reset, a broken pipe or a timeout. The connection closes after the last three. Without `onError`, those errors are not reported; `serve()` writes nothing to the console.
 
 ## Consequences
 
@@ -102,8 +103,10 @@ A message's errors reach the application through `ctx.error`. `serve({ onError }
 ## Alternatives considered
 
 - **An acknowledgment middleware the app installs** (the former `ackMiddleware`). Rejected: its position in the onion is movable and optional. Registered late, it missed errors thrown before it; an unrouted message looked like a successful one; and its catch hid every error from the operator.
-- **`app.onError()` and `app.notFound()` beside middleware.** Rejected by the maintainer: a middleware that reads `ctx.error` after `next()` already does both, and one mechanism is simpler than two. `app.onError()` came back only as an observer of the payloads no middleware runs on.
+- **`app.onError()` and `app.notFound()` beside middleware.** Rejected by the maintainer: a middleware that reads `ctx.error` after `next()` already does both, and one mechanism is simpler than two. `app.onError()` came back as an observer of every error, which chooses no reply.
 - **Running the global middleware on an unread payload.** Built, then removed: the middleware saw a tree read with U+FFFD for each byte that was not UTF-8, or an empty one, so the app could act on a message it never read. The NAK is forced, and `app.onError()` observes.
+- **`app.onError()` observing only the payloads no middleware runs on.** Built, then widened: an application that logs its errors in `app.onError()`, as with Hono, would miss every handler failure.
+- **Lint only when a handler builds the tree** (ADR 0013). Built, then replaced: a handler that never asked for the tree accepted a message the processor would have rejected, and the server needed a check of its own to know whether a message started with an MSH.
 - **`handle()` returning `{ response, error, info }`, with `serve()` reporting the error.** Rejected: it puts message decisions in the runtime adapter, and every new runtime would repeat them.
 - **Returning nothing means `AA`.** Built in #1078, then reversed in #1091: a forgotten `return` would accept a message silently, and an explicit reply reads the same in every handler.
 - **The first error decides the reply.** Built, then reversed: one rule, the same as Hono's, and a middleware maps an error to another NAK by throwing it. The cost is the duplicate in §6.
@@ -117,7 +120,7 @@ A message's errors reach the application through `ctx.error`. `serve({ onError }
 ## Related
 
 - [ADR 0011: MLLP Transport Server](./0011-mllp-transport-server.md): its middleware-first error handling is superseded; its default-NAK decision is kept, without sending the error's message.
-- [ADR 0013: MLLP Lazy Pipeline Execution](./0013-mllp-lazy-pipeline-execution.md)
+- [ADR 0013: MLLP Lazy Pipeline Execution](./0013-mllp-lazy-pipeline-execution.md): superseded in part; the processor runs before routing, and only compilation waits for `ctx.result()`.
 - [ADR 0018: Errors, Exceptions, and Acknowledgments in the HL7v2 Ecosystem](./0018-error-and-acknowledgment-model.md): `AckException` stays data-only and bidirectional; the server sends its `text` once #1084 lands.
 - [ADR 0031: Escape Sequences Are Decoded by the Parser and Encoded by the Serializer](./0031-escape-sequences-decoded-by-the-parser.md)
 - #1084: version conformance of outbound messages

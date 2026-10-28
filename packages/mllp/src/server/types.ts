@@ -27,11 +27,9 @@ export interface Response {
 /**
  * The MLLP context object.
  *
- * Routing fields (messageType, triggerEvent, etc.) are extracted from
- * the **pre-transform** parsed tree and are always available synchronously.
- *
- * The transformed tree, VFile, and compiled result are lazy — they
- * trigger pipeline stages on first access. See ADR-0013.
+ * The routing fields are read from the MSH of the tree the processor
+ * produced, once, before routing. The compiled result is lazy: `result()`
+ * runs the compiler on first call.
  */
 export interface Context {
   /** Incoming message data */
@@ -52,35 +50,22 @@ export interface Context {
   readonly connection: ConnectionInfo;
 
   /**
-   * Parsed AST — always available synchronously. Use this for reading
-   * MSH fields, building ACKs, routing, or any operation that doesn't
-   * need to wait for transforms to complete.
-   *
-   * Note: this is the same object reference as the tree returned by
-   * `tree()`. After `tree()` resolves, transformers may have enriched
-   * it in-place (e.g., resolved message structure). The routing fields
-   * (messageType, triggerEvent, etc.) are cached as separate string
-   * properties and keep the values as parsed regardless of transforms.
+   * The tree the processor parsed and ran its transformers on. The routing
+   * fields keep the values they had before routing, whatever a handler
+   * changes in it.
    */
   readonly ast: Root;
 
-  /**
-   * Transformed AST. Triggers `run()` (transformers) on first call.
-   * Cached after first access — subsequent calls return the same tree.
-   */
+  /** Resolves to `ast`. */
   tree(): Promise<Root>;
 
-  /**
-   * VFile with diagnostics and lint messages. Created during context
-   * creation. Diagnostics accumulate after `tree()` triggers transformers.
-   */
+  /** The file the processor read, with its messages; none is fatal. */
   file: VFile;
 
   /**
-   * Compiled result from the processor's compiler (e.g., JSON from
-   * hl7v2Jsonify). Triggers both `run()` and `stringify()` on first call.
-   * Undefined when the processor has no compiler.
-   * Cached after first access.
+   * The processor's compiled result (e.g., JSON from hl7v2Jsonify), or
+   * `undefined` when the processor has no compiler. Runs `stringify()` on
+   * first call, and is cached.
    */
   result(): Promise<unknown | undefined>;
 
@@ -96,15 +81,15 @@ export interface Context {
    */
   res: Response | undefined;
 
-  /** MSH-9.1 message type (e.g., "ADT") — from pre-transform parse */
+  /** MSH-9.1 message type (e.g., "ADT") */
   readonly messageType: string;
-  /** MSH-9.2 trigger event (e.g., "A01") — from pre-transform parse */
+  /** MSH-9.2 trigger event (e.g., "A01") */
   readonly triggerEvent: string;
-  /** MSH-9.3 message structure (e.g., "ADT_A01") — from pre-transform parse */
+  /** MSH-9.3 message structure (e.g., "ADT_A01") */
   readonly messageStructure: string;
-  /** MSH-12 version (e.g., "2.5.1") — from pre-transform parse */
+  /** MSH-12 version (e.g., "2.5.1") */
   readonly version: string;
-  /** MSH-10 message control ID — from pre-transform parse */
+  /** MSH-10 message control ID */
   readonly controlId: string;
 
   /** Store a variable */
@@ -116,8 +101,10 @@ export interface Context {
 }
 
 /**
- * Observes an error raised by a payload no middleware runs on. `connection`
- * is the one `handle()` was given. MUST NOT throw.
+ * Observes an error a message raised: a payload that is not UTF-8, a
+ * processor throw, the processor's first fatal message, or the error of a
+ * route filter, middleware or handler. Runs when the error is raised.
+ * `connection` is the one `handle()` was given. MUST NOT throw.
  */
 export type ErrorHandler = (
   error: Error,

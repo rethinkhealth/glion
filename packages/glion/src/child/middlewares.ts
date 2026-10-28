@@ -1,9 +1,8 @@
 /**
  * MLLP message telemetry middleware.
  *
- * Emits a structured "msg" event for every processed HL7v2 message,
- * capturing timing, trigger event, control ID, and ACK code, then an
- * "error" event when the message raised one. This is the primary
+ * Emits a structured "msg" event for every processed HL7v2 message, capturing
+ * timing, trigger event, control ID, and ACK code. This is the primary
  * observability signal for message throughput and latency — the TUI and
  * JSON-line output both consume these events.
  *
@@ -12,8 +11,7 @@
  * This middleware is PREPENDED via `app.use(mw, { prepend: true })` so it sits
  * at the outermost position in the middleware chain and `performance.now()`
  * measures the full middleware + handler time. After `await next()`,
- * `ctx.res` holds the reply, ACK or NAK, and `ctx.error` the error the
- * message raised.
+ * `ctx.res` holds the reply, ACK or NAK.
  *
  * ## ACK parsing
  *
@@ -56,22 +54,12 @@ export function createMsgTelemetry(
       t: "msg",
       trigger: `${ctx.messageType ?? "?"}^${ctx.triggerEvent ?? "?"}`,
     });
-    if (ctx.error) {
-      emit({
-        conn: ctx.connection.id,
-        message: ctx.error.message,
-        stack: ctx.error.stack,
-        t: "error",
-        trigger: `${ctx.messageType}^${ctx.triggerEvent}`,
-      });
-    }
   };
 }
 
 /**
- * Creates the `app.onError()` handler that emits an "error" event for a
- * payload no middleware runs on: one that is not UTF-8, or that the parser
- * throws on.
+ * Creates the `app.onError()` handler that emits an "error" event for each
+ * error a message raises.
  */
 export function createErrorTelemetry(
   emit: (event: PartialEvent) => void

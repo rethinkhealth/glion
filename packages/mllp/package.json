@@ -54,6 +54,7 @@
     "@glion/ack": "workspace:*",
     "@glion/ast": "workspace:*",
     "@glion/builder": "workspace:*",
+    "@glion/lint-required-message-header": "workspace:*",
     "@glion/mllp-codec": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/to-hl7v2": "workspace:*",

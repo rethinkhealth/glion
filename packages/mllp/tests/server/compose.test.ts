@@ -1,13 +1,20 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 import { toHl7v2 } from "@glion/to-hl7v2";
+import { VFile } from "vfile";
 
 import { compose } from "../../src/server/compose";
 import { createContext } from "../../src/server/context";
-import { parseRequest } from "../../src/server/request";
+import type { MllpRequest } from "../../src/server/request";
 import type { Context, Middleware } from "../../src/server/types";
 
 const SAMPLE_MESSAGE = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|CTL1|P|2.5.1";
+
+/** `raw` as the app reads it, parsed with `parseHL7v2`. */
+function request(raw: string): MllpRequest {
+  const file = new VFile(raw);
+  return { file, raw, tree: parseHL7v2.parse(file) };
+}
 
 function makeCtx(): Context {
   return createContext({
@@ -21,7 +28,7 @@ function makeCtx(): Context {
       state: new Map(),
     },
     processor: parseHL7v2,
-    request: parseRequest(new TextEncoder().encode(SAMPLE_MESSAGE), parseHL7v2),
+    request: request(SAMPLE_MESSAGE),
   });
 }
 

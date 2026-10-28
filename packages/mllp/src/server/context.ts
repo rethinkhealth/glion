@@ -1,4 +1,3 @@
-import type { Root } from "@glion/ast";
 import { value as queryValue } from "@glion/util-query";
 
 import { acknowledge } from "./acknowledge";
@@ -34,81 +33,41 @@ export interface CreateContextOptions {
 /**
  * Create a new Context for a message `parseRequest()` parsed.
  *
- * The routing fields are read from the message's MSH once, so they keep the
- * values as parsed whatever the transforms or a handler change in the tree (see
- * ADR-0013). `ctx.ack()` reads the MSH when it is called.
- *
- * The expensive pipeline stages are lazy:
- *
- * - `ctx.tree()` — triggers `run()` (transformers: annotations, lint). Cached
- *   after first call.
- * - `ctx.result()` — triggers `run()` + `stringify()` (compilation, e.g., JSON
- *   via hl7v2Jsonify). Cached after first call.
- *
- * If no handler matches or middleware short-circuits before accessing
- * the tree, the transform and compile steps never execute.
+ * The routing fields are read from the message's MSH once, so they keep their
+ * values whatever a handler changes in the tree. `ctx.ack()` reads the MSH
+ * when it is called. `ctx.result()` runs the processor's compiler on first
+ * call.
  */
 export function createContext(options: CreateContextOptions): MessageContext {
   const { app, request, connection, processor } = options;
   const { serializer, ...defaults } = app;
-  const { file, raw, tree: parsed } = request;
+  const { file, raw, tree } = request;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
 
-  const controlId = queryValue(parsed, "MSH.10")?.value ?? "";
-  const messageType = queryValue(parsed, "MSH.9.1")?.value ?? "";
-  const triggerEvent = queryValue(parsed, "MSH.9.2")?.value ?? "";
-  const messageStructure = queryValue(parsed, "MSH.9.3")?.value ?? "";
-  const version = queryValue(parsed, "MSH.12.1")?.value ?? "";
+  const controlId = queryValue(tree, "MSH.10")?.value ?? "";
+  const messageType = queryValue(tree, "MSH.9.1")?.value ?? "";
+  const triggerEvent = queryValue(tree, "MSH.9.2")?.value ?? "";
+  const messageStructure = queryValue(tree, "MSH.9.3")?.value ?? "";
+  const version = queryValue(tree, "MSH.12.1")?.value ?? "";
 
-  // ── Lazy: transform (async, cached) ────────────────────────────────
-  // run() applies all transformers: annotations, lint.
-  // Only executes on first call to ctx.tree() or ctx.result().
-  let transformedTree: Root | undefined;
-  let transformPromise: Promise<Root> | undefined;
-
-  function getTree(): Promise<Root> {
-    if (transformedTree) {
-      return Promise.resolve(transformedTree);
-    }
-    if (!transformPromise) {
-      transformPromise = (async () => {
-        // Hl7v2Processor's tail admits `undefined` (so the bare parser is
-        // assignable), which makes unified type run()'s result as
-        // `Root | Node`; an HL7v2 pipeline always yields the (possibly
-        // transformed) Root.
-        const result = (await processor.run(parsed, file)) as Root;
-        transformedTree = result;
-        return result;
-      })();
-    }
-    return transformPromise;
-  }
-
-  // ── Lazy: compile (async, cached) ──────────────────────────────────
-  // stringify() compiles the tree into the final format (e.g., JSON).
-  // Only executes on first call to ctx.result(). Requires tree first.
-  // Promise is cached (including rejections) to match getTree() behavior.
-  let resultPromise: Promise<unknown | undefined> | undefined;
+  let compiled: { value: unknown } | undefined;
 
   function getResult(): Promise<unknown | undefined> {
-    if (!resultPromise) {
-      resultPromise = (async () => {
-        const tree = await getTree();
-        return processor.compiler ? processor.stringify(tree, file) : undefined;
-      })();
-    }
-    return resultPromise;
+    compiled ??= {
+      value: processor.compiler ? processor.stringify(tree, file) : undefined,
+    };
+    return Promise.resolve(compiled.value);
   }
 
   // ── Build context ──────────────────────────────────────────────────
   const ctx: MessageContext = {
     ack(ackOptions?: AckOptions): Response {
       return {
-        raw: serializer(acknowledge(parsed, { ...ackOptions, ...defaults })),
+        raw: serializer(acknowledge(tree, { ...ackOptions, ...defaults })),
       };
     },
-    ast: parsed,
+    ast: tree,
     connection: Object.freeze(connection),
     controlId,
     error: undefined,
@@ -125,7 +84,7 @@ export function createContext(options: CreateContextOptions): MessageContext {
       variables.set(key, value);
       varSnapshot = undefined;
     },
-    tree: getTree,
+    tree: () => Promise.resolve(tree),
     triggerEvent,
     get var(): Readonly<Record<string, unknown>> {
       if (!varSnapshot) {

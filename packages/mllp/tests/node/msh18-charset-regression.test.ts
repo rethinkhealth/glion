@@ -1,7 +1,6 @@
 // oxlint-disable promise/avoid-new
 import net from "node:net";
 
-import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-codec";
 import { CharsetError } from "@glion/util-charset";
 
@@ -100,7 +99,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     let handlerRan = false;
     const errors: Error[] = [];
 
-    const app = new Mllp().parser(parseHL7v2).onError((raised) => {
+    const app = new Mllp().onError((raised) => {
       errors.push(raised);
     });
     app.on("*", (ctx) => {

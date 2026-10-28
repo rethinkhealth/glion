@@ -13,23 +13,28 @@ export interface MllpRequest {
   readonly raw: string;
   /** The file the processor parsed, holding `raw`. */
   readonly file: VFile;
-  /** The processor's tree. */
+  /** The tree the processor parsed and ran its transformers on. */
   readonly tree: Root;
 }
 
 /**
- * Decodes `payload` as UTF-8 and parses it with `processor`.
+ * Decodes `payload` as UTF-8, parses it with `processor`, and runs the
+ * processor's transformers on the tree.
  *
  * @throws {CharsetError} When `payload` is not UTF-8.
- * @throws What the processor's parser throws.
+ * @throws What the processor's parser or transformers throw.
  */
-export function parseRequest(
+export async function parseRequest(
   payload: Uint8Array,
   processor: Hl7v2Processor
-): MllpRequest {
+): Promise<MllpRequest> {
   const raw = decodeBytes(payload);
   const file = new VFile(raw);
-  const tree = processor.parse(file);
+  const parsed = processor.parse(file);
+  // Hl7v2Processor's tail admits `undefined` (so the bare parser is
+  // assignable), which makes unified type run()'s result as `Root | Node`;
+  // an HL7v2 pipeline always yields a Root.
+  const tree = (await processor.run(parsed, file)) as Root;
   return { file, raw, tree };
 }
 
@@ -61,7 +66,7 @@ export function salvageHeader(
 }
 
 /** The MSH segment `tree` starts with, or `undefined` when it starts with none. */
-export function messageHeader(tree: Root): Segment | undefined {
+function messageHeader(tree: Root): Segment | undefined {
   const [first] = tree.children;
   return first?.type === "segment" && first.name === "MSH" ? first : undefined;
 }

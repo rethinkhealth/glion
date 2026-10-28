@@ -17,7 +17,7 @@ import { value } from "@glion/util-query";
 import { unified } from "unified";
 import type { Plugin } from "unified";
 
-import { MllpServerError } from "../../src/errors";
+import type { MllpServerError } from "../../src/errors";
 import { Mllp } from "../../src/server/mllp";
 import type { ConnectionInfo, Middleware } from "../../src/server/types";
 
@@ -66,7 +66,7 @@ function toBytes(msg: string): Uint8Array {
 }
 
 function createApp() {
-  return new Mllp().parser(parseHL7v2);
+  return new Mllp();
 }
 
 describe("Mllp", () => {
@@ -85,30 +85,38 @@ describe("Mllp", () => {
   });
 
   describe("parser() lifecycle stage", () => {
-    it("throws MllpServerError when handle() called without parser", async () => {
-      const app = new Mllp();
-      app.on("*", async () => RESPONSE_OK);
+    it("reads a message with @glion/parser when no processor is given", async () => {
+      const app = new Mllp().on("*", (ctx) => ctx.ack());
 
-      await expect(
-        app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION)
-      ).rejects.toThrow(MllpServerError);
-
-      await expect(
-        app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION)
-      ).rejects.toThrow(
-        "No parser is registered; `app.parser()` registers the processor that `handle()` reads each message with."
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
     });
 
-    it("missing-parser error has NO_PARSER code", async () => {
-      const app = new Mllp();
-      try {
-        await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
-        expect.unreachable("should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpServerError);
-        expect((error as MllpServerError).code).toBe("NO_PARSER");
-      }
+    it("rejects a message that does not start with an MSH, with no reply, when no processor is given", async () => {
+      const ran: string[] = [];
+      const seen: Error[] = [];
+      const app = new Mllp()
+        .onError((raised) => {
+          seen.push(raised);
+        })
+        .use(async (_ctx, next) => {
+          ran.push("middleware");
+          await next();
+        })
+        .on("*", () => {
+          ran.push("handler");
+          return RESPONSE_OK;
+        });
+
+      const response = await app.handle(
+        toBytes("PID|1||12345"),
+        MOCK_CONNECTION
+      );
+      expect(response).toBeUndefined();
+      expect(ran).toEqual([]);
+      expect(seen.map((raised) => raised.message)).toEqual([
+        "The first segment is not the message header segment; a message must start with the message header segment (`MSH`).",
+      ]);
     });
 
     it("last-write-wins when parser() called multiple times", async () => {
@@ -172,7 +180,7 @@ describe("Mllp", () => {
     });
 
     it("populates ctx.result when processor has a compiler", async () => {
-      const app = createApp(); // parseHL7v2 includes hl7v2Jsonify
+      const app = new Mllp().parser(parseHL7v2); // includes hl7v2Jsonify
       let resultExists = false;
 
       app.on("ADT^A01", async (ctx) => {
@@ -180,8 +188,34 @@ describe("Mllp", () => {
         return RESPONSE_OK;
       });
 
-      await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      await app.handle(toBytes(`${SAMPLE_ADT}\rPV1|1|I`), MOCK_CONNECTION);
       expect(resultExists).toBe(true);
+    });
+
+    it("replies AE, running no middleware, to a message the processor reports a fatal message for, and onError() observes it", async () => {
+      const ran: string[] = [];
+      const seen: Error[] = [];
+      const app = new Mllp()
+        .parser(parseHL7v2)
+        .onError((raised) => {
+          seen.push(raised);
+        })
+        .use(async (_ctx, next) => {
+          ran.push("middleware");
+          await next();
+        })
+        .on("*", () => {
+          ran.push("handler");
+          return RESPONSE_OK;
+        });
+
+      // An ADT^A01 with no PV1, which the event schema requires.
+      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
+      expect(ran).toEqual([]);
+      expect(seen.map((raised) => raised.message)).toEqual([
+        "Segment `PV1` is missing; the event schema requires it at this point.",
+      ]);
     });
   });
 
@@ -455,7 +489,7 @@ describe("acknowledgment defaults", () => {
   });
 
   it("dates the default AA in the time zone the app is given", async () => {
-    const app = new Mllp({ timeZone: "Asia/Kathmandu" }).parser(parseHL7v2);
+    const app = new Mllp({ timeZone: "Asia/Kathmandu" });
     app.on("ADT^A01", () => {
       // processed, nothing to return
     });
@@ -470,7 +504,7 @@ describe("acknowledgment defaults", () => {
     const app = new Mllp({
       delimiters: { field: "#" },
       timeZone: "Asia/Kathmandu",
-    }).parser(parseHL7v2);
+    });
     app.on("ADT^A01", () => {
       throw new Error("Lookup failed");
     });
@@ -487,7 +521,7 @@ describe("acknowledgment defaults", () => {
     const app = new Mllp({
       delimiters: { field: "#" },
       timeZone: "Asia/Kathmandu",
-    }).parser(parseHL7v2);
+    });
     app.on("ADT^A01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
@@ -505,7 +539,7 @@ describe("acknowledgment defaults", () => {
   it("writes the default AA with the serializer the app is given", async () => {
     const app = new Mllp({
       serializer: (tree) => `MSA-1 is ${value(tree, "MSA.1")?.value}`,
-    }).parser(parseHL7v2);
+    });
     app.on("ADT^A01", () => {
       // processed, nothing to return
     });
@@ -517,7 +551,7 @@ describe("acknowledgment defaults", () => {
   it("writes the NAK of a thrown error with the serializer the app is given", async () => {
     const app = new Mllp({
       serializer: (tree) => `MSA-1 is ${value(tree, "MSA.1")?.value}`,
-    }).parser(parseHL7v2);
+    });
     app.on("ADT^A01", () => {
       throw new Error("Lookup failed");
     });
@@ -529,7 +563,7 @@ describe("acknowledgment defaults", () => {
   it("writes ctx.ack() with the serializer the app is given", async () => {
     const app = new Mllp({
       serializer: (tree) => `MSA-1 is ${value(tree, "MSA.1")?.value}`,
-    }).parser(parseHL7v2);
+    });
     app.on("ADT^A01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
 
     const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
@@ -882,6 +916,45 @@ describe("acknowledgment defaults", () => {
 
     await app.handle(LATIN1_ADT, MOCK_CONNECTION);
     expect(observed).toBe(true);
+  });
+
+  it("lets onError() observe a handler throw when it is raised, before an outer middleware goes on", async () => {
+    const thrown = new Error("handler failed");
+    const order: string[] = [];
+    const app = createApp()
+      .onError((raised) => {
+        order.push(raised === thrown ? "onError" : "other");
+      })
+      .use(async (_ctx, next) => {
+        await next();
+        order.push("after next()");
+      })
+      .on("*", () => {
+        throw thrown;
+      });
+
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect(order).toEqual(["onError", "after next()"]);
+  });
+
+  it("lets onError() observe each error a message raises, and the AR of a message no route matches", async () => {
+    const seen: Error[] = [];
+    const app = createApp()
+      .onError((raised) => {
+        seen.push(raised);
+      })
+      .use(async (_ctx, next) => {
+        await next();
+        throw new Error("audit write failed");
+      });
+
+    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect(seen.map(({ message }) => message)).toEqual([
+      "No route matches the message's type and trigger event (MSH-9).",
+      "audit write failed",
+    ]);
   });
 
   it("sends no reply to a payload whose MSH is not UTF-8, and still lets onError() observe it", async () => {

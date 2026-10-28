@@ -34,8 +34,8 @@ export type ConnectionCallback = (
 
 /**
  * Error callback invoked with an error on a connection: a throwing `onConnect`
- * or `onDisconnect`, an error `app.handle()` rejects with (a message handled
- * before a parser is registered, {@link MllpServerError} `NO_PARSER`), or a
+ * or `onDisconnect`, an error `app.handle()` rejects with (the error of a
+ * `serializer` that cannot write the reply, for example), or a
  * broken MLLP byte stream (`PROTOCOL_VIOLATION`). Any other error a message
  * raises is answered by the app and never reaches this callback. Stream-level
  * errors (connection reset) do not trigger it.

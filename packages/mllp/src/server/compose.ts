@@ -14,19 +14,22 @@ import type { Context, Middleware, Response } from "./types";
  *
  * A middleware that throws, or calls `next()` a second time
  * (`MllpServerError` `NEXT_CALLED_TWICE`), has that error passed to
- * `onError`, and the response `onError` returns is written to `ctx.res`.
+ * `onError`, and the response `onError` returns or resolves to is written to
+ * `ctx.res` before the chain goes on.
  * `onError` MUST NOT throw. The second `next()` call also throws that error
  * to its caller.
  */
 export function compose(
   middlewares: Middleware[],
-  onError: (error: Error) => Response | undefined
+  onError: (
+    error: Error
+  ) => Response | undefined | Promise<Response | undefined>
 ): (ctx: Context) => Promise<void> {
   return async (ctx: Context): Promise<void> => {
     let index = -1;
 
-    const fail = (error: Error) => {
-      ctx.res = onError(error);
+    const fail = async (error: Error) => {
+      ctx.res = await onError(error);
     };
 
     async function dispatch(i: number): Promise<void> {
@@ -34,7 +37,7 @@ export function compose(
         const misuse = new MllpServerError(
           MllpServerErrorCode.NEXT_CALLED_TWICE
         );
-        fail(misuse);
+        await fail(misuse);
         throw misuse;
       }
       index = i;
@@ -49,7 +52,7 @@ export function compose(
           ctx.res = result;
         }
       } catch (error) {
-        fail(error instanceof Error ? error : new Error(String(error)));
+        await fail(error instanceof Error ? error : new Error(String(error)));
       }
     }
 

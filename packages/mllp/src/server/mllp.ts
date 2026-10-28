@@ -6,16 +6,18 @@ import {
   Severity,
 } from "@glion/ack";
 import type { AckNakCode } from "@glion/ack";
+import hl7v2LintRequiredMessageHeader from "@glion/lint-required-message-header";
+import { hl7v2Parser } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { value as queryValue } from "@glion/util-query";
 import { nowDTM } from "@glion/util-timestamp";
+import { unified } from "unified";
 
-import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { acknowledge } from "./acknowledge";
 import { compose, isResponse } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
-import { messageHeader, salvageHeader, parseRequest } from "./request";
+import { parseRequest, salvageHeader } from "./request";
 import type { MllpRequest } from "./request";
 import { Router } from "./router";
 import type {
@@ -49,11 +51,21 @@ import type {
  *     .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
  *   ```;
  */
+/**
+ * The processor of an app given none: `@glion/parser`, and
+ * `@glion/lint-required-message-header` reporting a fatal message for a
+ * message that does not start with an MSH.
+ */
+const defaultProcessor: Hl7v2Processor = unified()
+  .use(hl7v2Parser)
+  .use(hl7v2LintRequiredMessageHeader, ["error"])
+  .freeze();
+
 export class Mllp {
   readonly #router = new Router();
   readonly #errorHandlers: ErrorHandler[] = [];
   readonly #options: MllpOptions & Required<Pick<MllpOptions, "serializer">>;
-  #processor: Hl7v2Processor | undefined;
+  #processor: Hl7v2Processor = defaultProcessor;
 
   /**
    * @throws {RangeError} When `options.timeZone` is not an IANA time zone
@@ -71,14 +83,15 @@ export class Mllp {
   }
 
   /**
-   * Register an HL7v2 processor for incoming messages.
+   * Replace the HL7v2 processor that reads each message: a unified
+   * `Processor`, such as `parseHL7v2` from `@glion/hl7v2` or
+   * `unified().use(hl7v2Parser).use(...)`. Calling it again replaces the
+   * previous one. Without it, the app reads with `@glion/parser` and
+   * `@glion/lint-required-message-header`.
    *
-   * Accepts a unified `Processor` — either a pre-built one like
-   * `parseHL7v2` from `@glion/hl7v2`, or a custom composition
-   * via `unified().use(hl7v2Parser).use(...)`.
-   *
-   * Must be called before `handle()`. Calling multiple times replaces
-   * the previous processor (last-write-wins).
+   * The processor MUST report a fatal message for a message that does not
+   * start with an MSH, as `@glion/lint-required-message-header` does at
+   * `"error"`: the app answers only a message that starts with one.
    */
   parser(processor: Hl7v2Processor): this {
     this.#processor = processor;
@@ -140,11 +153,12 @@ export class Mllp {
   }
 
   /**
-   * Register a handler for an error raised by a payload no middleware runs
-   * on: one that is not UTF-8 (`CharsetError`), or
-   * that the parser throws on. The handler observes the error; it does not
-   * change the response. Each handler registered runs, in the order
-   * registered, before `handle()` resolves.
+   * Register a handler for every error a message raises: a payload that is
+   * not UTF-8 (`CharsetError`), a processor throw, the processor's first
+   * fatal message, and the error of a route filter, middleware or handler.
+   * The handler observes the error; it does not change the response. Each
+   * handler registered runs, in the order registered, when the error is
+   * raised, and `handle()` waits for it.
    */
   onError(handler: ErrorHandler): this {
     this.#errorHandlers.push(handler);
@@ -156,12 +170,11 @@ export class Mllp {
    * and return the reply, or `undefined` for none. This is the integration
    * point — analogous to Hono's `fetch()`.
    *
-   * The pipeline is lazy (see ADR-0013):
-   *
-   * 1. Decode and parse (sync, fast) — always runs, extracts routing fields
-   * 2. Route match — uses pre-transform routing fields
-   * 3. Middleware, then the route handler
-   * 4. Transform/compile — only when handlers access ctx.tree()/ctx.result()
+   * 1. Decode the payload as UTF-8, parse it, and run the processor's
+   *    transformers, its lint rules among them.
+   * 2. Route match, on the routing fields of the tree.
+   * 3. Middleware, then the route handler.
+   * 4. Compile — only when a handler calls `ctx.result()`.
    *
    * The reply is the acknowledgment the route handler's outcome describes:
    *
@@ -177,42 +190,36 @@ export class Mllp {
    * A middleware throw is answered the same way. A middleware replaces the
    * reply by returning a response or writing `ctx.res`, and an error raised
    * after it replaces it with the error's NAK. A route filter that throws
-   * runs only the global middleware and is answered as a throw. An `ACK`,
-   * and a payload that does not start with an MSH, get no reply unless a
-   * handler or middleware gives one.
+   * runs only the global middleware and is answered as a throw. An `ACK`
+   * gets no reply unless a handler or middleware gives one.
    *
-   * A payload that is not UTF-8, or that the parser throws on, runs no
-   * middleware: the handlers `onError()` registered observe the error, and
-   * the reply is its NAK, `AE` unless the parser threw an `AckException`.
-   * The NAK answers the MSH read from the bytes before the first CR; a
-   * payload whose MSH is not UTF-8, an `ACK`, and one with no MSH get no
-   * reply.
+   * A payload that is not UTF-8, that the processor throws on, or that the
+   * processor reports a fatal message for runs no middleware: the reply is
+   * the NAK of the error, or of the first fatal message, `AE` unless the
+   * processor threw an `AckException`. The NAK answers the MSH read from the
+   * bytes before the first CR; a payload whose MSH is not UTF-8, an `ACK`,
+   * and one with no MSH get no reply.
    *
    * `ctx.error` holds the latest error the message raised, and the reply
-   * answers it.
-   *
-   * @throws {MllpServerError} `NO_PARSER` when no processor has been
-   *   registered via `app.parser()`.
+   * answers it. The handlers `onError()` registered observe every error.
    */
   async handle(
     payload: Uint8Array,
     connection: ConnectionInfo
   ): Promise<Response | undefined> {
-    if (!this.#processor) {
-      throw new MllpServerError(MllpServerErrorCode.NO_PARSER);
-    }
-
-    // Reading is sync — only decode() and parse() run here. Transform and
-    // compile are deferred to ctx.tree() / ctx.result().
     let request: MllpRequest;
     try {
-      request = parseRequest(payload, this.#processor);
+      request = await parseRequest(payload, this.#processor);
     } catch (error) {
       return this.#reject(
         payload,
         error instanceof Error ? error : new Error(String(error)),
         connection
       );
+    }
+    const fatal = request.file.messages.find((message) => message.fatal);
+    if (fatal) {
+      return this.#reject(payload, fatal, connection);
     }
     const ctx = createContext({
       app: this.#options,
@@ -221,11 +228,9 @@ export class Mllp {
       request,
     });
 
-    // The server answers neither an ACK, so two receivers never acknowledge
-    // each other's acknowledgments, nor a payload with no MSH, which has no
-    // MSH-10 to echo.
-    const answerable =
-      messageHeader(request.tree) !== undefined && ctx.messageType !== "ACK";
+    // The server does not answer an ACK, so two receivers never acknowledge
+    // each other's acknowledgments.
+    const answerable = ctx.messageType !== "ACK";
     const { serializer, ...defaults } = this.#options;
     const nakOf = (error: Error): Response | undefined =>
       answerable
@@ -252,13 +257,21 @@ export class Mllp {
       };
     }
 
-    const answer = (error: Error): Response | undefined => {
+    const answer = async (error: Error): Promise<Response | undefined> => {
       ctx.error = error;
+      await this.#observe(error, connection);
       return nakOf(error);
     };
 
     await compose([...middlewares, terminal], answer)(ctx);
     return ctx.res;
+  }
+
+  /** Runs each handler `onError()` registered on `error`, in order. */
+  async #observe(error: Error, connection: ConnectionInfo): Promise<void> {
+    for (const handler of this.#errorHandlers) {
+      await handler(error, connection);
+    }
   }
 
   /**
@@ -270,9 +283,7 @@ export class Mllp {
     error: Error,
     connection: ConnectionInfo
   ): Promise<Response | undefined> {
-    for (const handler of this.#errorHandlers) {
-      await handler(error, connection);
-    }
+    await this.#observe(error, connection);
     const header = salvageHeader(payload);
     if (!header || queryValue(header, "MSH.9.1")?.value === "ACK") {
       return undefined;
