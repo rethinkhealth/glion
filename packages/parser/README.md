@@ -74,6 +74,20 @@ unified()
 
 A node's `position` is the span of the source text, so a decoded value is shorter than its span.
 
+### Line breaks and positions
+
+A segment ends at the segment delimiter, `\r`, at a line feed, `\n`, or at a carriage return and a line feed, `\r\n`, and the last segment may end without one. A byte order mark at the start of the input is skipped. The parser never rewrites its input: every `position` is a span of the text as it was given.
+
+A segment's `position` ends at its last character, before its line break. The root's `position` covers the message from its first character to its last, the line breaks after its last segment included, so a message ends with a segment terminator when the root ends after its last segment:
+
+```ts
+import { parseHL7v2 } from "@glion/parser";
+
+parseHL7v2("MSH|^~\\&\r\nPID|1\r").position; // offsets 0–16
+parseHL7v2("MSH|^~\\&\r\nPID|1\r").children[1].position; // offsets 10–15
+parseHL7v2("MSH|^~\\&\r\nPID|1").position; // offsets 0–15
+```
+
 ### `Hl7v2Processor`
 
 The `unified` `Processor<Root, Root | undefined, Root | undefined>` type every HL7v2 pipeline satisfies — head and tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable. Use it to type a processor built with `unified().use(hl7v2Parser)` regardless of which transformer or compiler plugins are added. `@glion/mllp` re-exports it unchanged.
