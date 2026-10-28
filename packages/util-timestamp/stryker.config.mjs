@@ -1,3 +1,5 @@
 import { strykerConfig } from "@glion/testing/stryker";
 
-export default strykerConfig({ break: 95 });
+// The parsers' grammar is in module-level regexes, which only static mutants
+// change. Each static mutant runs the whole suite, about a second here.
+export default { ...strykerConfig({ break: 95 }), ignoreStatic: false };

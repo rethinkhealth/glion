@@ -1,9 +1,18 @@
+import { TimestampOffsetError } from "./errors";
 import { Precision } from "./precision";
-import type { DTM } from "./types";
+import type { DTM, Offset } from "./types";
 
-// The whole fields of a DTM, in order. Each is also the name of a precision
-// and of an Intl part.
+// The whole fields of a DTM, in order. Each is named as a precision and as an
+// Intl part.
 const FIELDS = ["year", "month", "day", "hour", "minute", "second"] as const;
+
+// An HL7v2 offset from UTC, `+/-HHMM`, is 5 characters long.
+const OFFSET_LENGTH = 5;
+
+// The last formatter built, kept for the next call with the same `timeZone`:
+// building one takes about 20 µs, and reading the time with it about 3 µs. A
+// formatter for the host's zone keeps the zone the host had when it was built.
+let last: { formatter: Intl.DateTimeFormat; timeZone?: string } | undefined;
 
 /** Options for {@link nowDTM}. */
 export interface NowDTMOptions {
@@ -11,18 +20,20 @@ export interface NowDTMOptions {
    * The last field the value gives. Defaults to `fraction`: every field, and
    * the milliseconds as 3 digits.
    *
-   * In a TS, HL7v2 v2.1 accepts only `minute` or `second`; v2.2 adds `day`
-   * and `fraction`; v2.3 and later accept every precision.
+   * In a TS, HL7v2 v2.1 accepts only `minute` or `second`. v2.2 adds `day`,
+   * and a fraction of exactly 4 digits, which `nowDTM` does not write (#1130).
+   * v2.3 and later accept every precision, and a fraction of 1 to 4 digits.
    */
   precision?: Precision;
   /**
-   * The IANA time zone the fields are read in, such as `America/New_York` or
-   * `UTC`. Defaults to the host's time zone. The fields are the date and time
-   * in that zone: a value for a facility in another zone needs that zone.
+   * The time zone the fields are read in: an IANA time zone name, such as
+   * `America/New_York` or `UTC`, or an offset from UTC, such as `-05:00`.
+   * Defaults to the host's time zone. The fields are the date and time in
+   * that zone: a value for a facility in another zone needs that zone.
    *
-   * `UTC` gives the offset `-0000`, UTC with no local time zone (HL7v2 v2.9).
-   * Any other zone at offset zero gives `+0000`, including `Etc/UTC` and a
-   * host whose time zone is UTC.
+   * `UTC`, in any case, gives the offset `-0000`, UTC with no local time zone
+   * (HL7v2 v2.9). Any other zone at offset zero gives `+0000`, including
+   * `Etc/UTC` and a host whose time zone is UTC.
    */
   timeZone?: string;
   /**
@@ -45,49 +56,48 @@ export interface NowDTMOptions {
  *   formatDTM(nowDTM({ precision: Precision.Day })); // "20240115"
  *   ```;
  *
- * @throws {RangeError} When `options.timeZone` is not an IANA time zone name.
+ * @throws {RangeError} When `options.timeZone` is neither an IANA time zone
+ *   name nor an offset from UTC.
+ * @throws {TimestampOffsetError} When the value gives its offset, and the
+ *   zone's offset at this moment is not in whole minutes.
  */
 export function nowDTM(options: NowDTMOptions = {}): DTM {
   const { precision = Precision.Fraction, timeZone } = options;
 
-  // Intl reads the date, the time, and the offset in the zone at one moment.
-  // At 2024-01-15T07:30:00.123Z in New York, the fields are year `2024`,
-  // month `1`, day `15`, hour `02`, minute `30`, second `00`,
-  // fractionalSecond `123`, and timeZoneName `GMT-05:00`.
-  //
-  // The locale sets how each part is written, so it is fixed: `en-US` writes
-  // ASCII digits, the Gregorian calendar, and `GMT-05:00` with an ASCII minus,
-  // whatever the host's locale. `ar-EG` would write the year `٢٠٢٤`, and
-  // `fr-FR` the offset `UTC−05:00`.
-  const parts = new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    // The milliseconds, as 3 digits: 5 ms is `005`.
-    fractionalSecondDigits: 3,
-    hour: "numeric",
-    // A 24-hour clock: `en-US` alone writes 14:00 as `2` and midnight as `12`.
-    hourCycle: "h23",
-    minute: "numeric",
-    month: "numeric",
-    second: "numeric",
-    timeZone,
-    // The offset as hours and minutes, `GMT-05:00` or `GMT+05:45`, rather
-    // than a name such as `EST`.
-    timeZoneName: "longOffset",
-    year: "numeric",
-  }).formatToParts(new Date());
-  // `formatToParts` gives a list, in the locale's order and with the
-  // separators: `[{ type: "month", value: "1" }, { type: "literal", value:
-  // "/" }, …]`. As an object, each part is read by its type: `fields.month`
-  // is `"1"`.
+  // Stryker disable next-line ConditionalExpression: equivalent; a formatter built on every call gives the same value, only slower
+  if (last === undefined || last.timeZone !== timeZone) {
+    // The locale is fixed, so every host writes the parts the same way:
+    // `en-US` writes ASCII digits, the Gregorian calendar, and an ASCII minus.
+    last = {
+      formatter: new Intl.DateTimeFormat("en-US", {
+        day: "numeric",
+        // The milliseconds, as 3 digits: 5 ms is `005`.
+        fractionalSecondDigits: 3,
+        hour: "numeric",
+        // A 24-hour clock: `en-US` alone writes 14:00 as `2`.
+        hourCycle: "h23",
+        minute: "numeric",
+        month: "numeric",
+        second: "numeric",
+        timeZone,
+        // The offset as `GMT-05:00`, rather than a name such as `EST`.
+        timeZoneName: "longOffset",
+        year: "numeric",
+      }),
+      timeZone,
+    };
+  }
+
+  // At 2024-01-15T07:30:00.123Z in New York, `fields` is { year: "2024",
+  // month: "1", day: "15", hour: "02", minute: "30", second: "00",
+  // fractionalSecond: "123", timeZoneName: "GMT-05:00", literal: … }.
   const fields = Object.fromEntries(
-    parts.map((part) => [part.type, part.value])
+    last.formatter
+      .formatToParts(new Date())
+      .map((part) => [part.type, part.value])
   );
 
-  // Each precision is named after the last field it keeps, and those names
-  // are Intl's part types too. So the value takes the fields from the year
-  // on and stops at the precision: `day` keeps 2024, 1, 15. A DTM always has
-  // a year, so it starts with one. `fraction` stops at none of them, and
-  // adds the milliseconds: `123`.
+  // The fields from the year down to the precision: `day` keeps 2024, 1, 15.
   const value: DTM = { precision, year: Number(fields.year) };
   for (const field of FIELDS) {
     value[field] = Number(fields[field]);
@@ -98,13 +108,21 @@ export function nowDTM(options: NowDTMOptions = {}): DTM {
   if (precision === Precision.Fraction) {
     value.fraction = fields.fractionalSecond;
   }
-  // A date, like `20240115`, is a calendar day, not a moment: by default it
-  // has no offset, as HL7v2 writes a DT or a date of birth.
-  if (options.offset ?? value.hour !== undefined) {
-    // `GMT-05:00` is written `-0500`, and `GMT`, offset zero, `+0000`. In
-    // `UTC`, the offset is `-0000`: HL7v2 v2.9's UTC with no local time zone.
-    const offset = String(fields.timeZoneName).slice(3).replace(":", "");
-    value.offset = timeZone === "UTC" ? "-0000" : offset || "+0000";
+
+  // A date names a calendar day, not a moment, so by default it has no offset.
+  const withOffset = options.offset ?? value.hour !== undefined;
+  if (withOffset) {
+    // `GMT-05:00` is written `-0500`, and `GMT` alone `+0000`.
+    const offset =
+      String(fields.timeZoneName).replace("GMT", "").replace(":", "") ||
+      "+0000";
+    // Before standard time, an offset could have seconds: Monrovia in 1971 is
+    // `GMT-00:44:30`, written `-0044:30`, which `+/-HHMM` cannot hold.
+    if (offset.length !== OFFSET_LENGTH) {
+      throw new TimestampOffsetError(String(fields.timeZoneName));
+    }
+    value.offset =
+      timeZone?.toUpperCase() === "UTC" ? "-0000" : (offset as Offset);
   }
   return value;
 }

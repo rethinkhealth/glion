@@ -1,5 +1,8 @@
 import type { Precision } from "./precision";
 
+/** An offset from UTC, written `+/-HHMM`: `"-0500"`. */
+export type Offset = `${"+" | "-"}${number}`;
+
 /**
  * An HL7v2 DT (Date) value, written `YYYY[MM[DD]]`.
  *
@@ -37,7 +40,7 @@ export interface TM {
    * value gives no offset. From HL7v2 v2.9, `"-0000"` is UTC with no local
    * time zone known, and `"+0000"` a local time zone at offset zero.
    */
-  offset?: string;
+  offset?: Offset;
   /**
    * The last field the value gives: `1430` is `minute`, and `143045.12` is
    * `fraction`. The offset does not count.
@@ -75,7 +78,7 @@ export interface DTM {
    * value gives no offset. From HL7v2 v2.9, `"-0000"` is UTC with no local
    * time zone known, and `"+0000"` a local time zone at offset zero.
    */
-  offset?: string;
+  offset?: Offset;
   /**
    * The last field the value gives, from `year` to `fraction`: `202603-0500`
    * is `month`, and `20260307143045.12` is `fraction`. The offset does not
