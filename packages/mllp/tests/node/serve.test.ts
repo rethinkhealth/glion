@@ -6,7 +6,6 @@ import net from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
 import tls from "node:tls";
 
-import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
@@ -170,7 +169,7 @@ function waitForReady(port: number): Promise<void> {
 const DNS_NAME = 2;
 
 function createApp() {
-  return new Mllp<NodeEnv>().parser(parseHL7v2);
+  return new Mllp<NodeEnv>();
 }
 
 describe("serve() integration", () => {
@@ -195,7 +194,7 @@ describe("serve() integration", () => {
   it("receives a message and sends a response", async () => {
     const app = createApp();
     app.on("ADT^A01", (ctx) => ({
-      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
     }));
 
     server = serve({ handle: app.handle, port: 0 });
@@ -209,7 +208,7 @@ describe("serve() integration", () => {
   it("handles multiple messages on one connection", async () => {
     const app = createApp();
     app.on("*", (ctx) => ({
-      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
     }));
 
     server = serve({ handle: app.handle, port: 0 });
@@ -259,7 +258,7 @@ describe("serve() integration", () => {
     let callCount = 0;
     const app = createApp();
     app.onError((_err, ctx) => ({
-      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.controlId}`,
+      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.req.header.controlId}`,
     }));
     app.on("*", (ctx) => {
       callCount++;
@@ -267,7 +266,7 @@ describe("serve() integration", () => {
         throw new Error("intentional test error");
       }
       return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
       };
     });
 
@@ -295,7 +294,7 @@ describe("serve() integration", () => {
         throw new Error("unhandled test error");
       }
       return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
       };
     });
 
@@ -506,7 +505,7 @@ describe("serve() integration", () => {
     it("onError fires with PROTOCOL_VIOLATION when the inbound byte stream violates MLLP framing", async () => {
       const app = createApp();
       app.on("*", (ctx) => ({
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
       }));
 
       const errors: { code?: string; causeName?: string }[] = [];
@@ -621,7 +620,7 @@ describe("serve() integration", () => {
     it("onError does NOT fire when app-level error handler handles the error", async () => {
       const app = createApp();
       app.onError((_err, ctx) => ({
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.req.header.controlId}`,
       }));
       app.on("*", () => {
         throw new Error("handled error");
@@ -699,7 +698,7 @@ describe("serve() integration", () => {
       app.on("*", (ctx) => {
         const count = ctx.env.connection.state.get("count") as number;
         return {
-          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`,
+          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}|count=${count}`,
         };
       });
 
@@ -727,7 +726,7 @@ describe("serve() integration", () => {
       app.on("*", (ctx) => {
         const count = ctx.env.connection.state.get("count") as number;
         return {
-          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`,
+          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}|count=${count}`,
         };
       });
 
@@ -821,7 +820,7 @@ describe("serve() integration", () => {
 
     it("no callbacks = no errors (optional, zero-cost)", async () => {
       const app = createApp().on("*", (ctx) => ({
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
       }));
 
       // No onConnect/onDisconnect/onError

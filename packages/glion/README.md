@@ -18,11 +18,9 @@ Define your app in a single file:
 
 ```ts
 // glion.app.ts
-import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
 
 export default new Mllp()
-  .parser(parseHL7v2)
   .on("ADT^A01", handleAdmit)
   .on("ORU^R01", handleResult);
 ```

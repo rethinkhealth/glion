@@ -1,8 +1,11 @@
-import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
+import hl7v2LintRequiredMessageHeader from "@glion/lint-required-message-header";
+import { hl7v2Parser } from "@glion/parser";
+import { encodeBytes } from "@glion/util-charset";
+import { unified } from "unified";
 
-import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { compose } from "./compose";
 import { createContext } from "./context";
+import { parseRequest } from "./request";
 import { Router } from "./router";
 import type {
   Context,
@@ -45,6 +48,16 @@ export function getMessageInfo(error: unknown): MessageInfo | undefined {
 }
 
 /**
+ * The processor of an app given none: `@glion/parser`, and
+ * `@glion/lint-required-message-header` reporting a fatal message for a
+ * message that does not start with an MSH.
+ */
+const defaultProcessor: Hl7v2Processor = unified()
+  .use(hl7v2Parser)
+  .use(hl7v2LintRequiredMessageHeader, ["error"])
+  .freeze();
+
+/**
  * MLLP application for HL7v2 messaging: routes and middleware over one
  * message at a time, on any runtime.
  *
@@ -53,28 +66,28 @@ export function getMessageInfo(error: unknown): MessageInfo | undefined {
  * @example
  *   ```typescript
  *   import { Mllp } from "@glion/mllp";
- *   import { parseHL7v2 } from "@glion/hl7v2";
  *
- *   const app = new Mllp().parser(parseHL7v2).on("ADT^A01", async (ctx) => {
- *     const tree = await ctx.tree();
+ *   const app = new Mllp().on("ADT^A01", async (ctx) => {
+ *     await save(ctx.req.tree);
  *     return { raw: "..." };
  *   });
  *   ```;
  */
 export class Mllp<E = unknown> {
   readonly #router = new Router<E>();
-  #processor: Hl7v2Processor | undefined;
+  #processor: Hl7v2Processor = defaultProcessor;
   #errorHandler: ErrorHandler<E> | undefined;
 
   /**
-   * Register an HL7v2 processor for incoming messages.
+   * Replace the HL7v2 processor that reads each message: a unified
+   * `Processor`, such as `parseHL7v2` from `@glion/hl7v2` or
+   * `unified().use(hl7v2Parser).use(...)`. Calling it again replaces the
+   * previous one. Without it, the app reads with `@glion/parser` and
+   * `@glion/lint-required-message-header`.
    *
-   * Accepts a unified `Processor` — either a pre-built one like
-   * `parseHL7v2` from `@glion/hl7v2`, or a custom composition
-   * via `unified().use(hl7v2Parser).use(...)`.
-   *
-   * Must be called before `handle()`. Calling multiple times replaces
-   * the previous processor (last-write-wins).
+   * The processor MUST report a fatal message for a message that does not
+   * start with an MSH, as `@glion/lint-required-message-header` does at
+   * `"error"`: the app routes only a message that starts with one.
    */
   parser(processor: Hl7v2Processor): this {
     this.#processor = processor;
@@ -131,7 +144,8 @@ export class Mllp<E = unknown> {
    *
    * Filter functions:
    *
-   * - `(ctx) => ctx.messageType === "ADT" && ctx.version === "2.5.1"`
+   * - `(ctx) => ctx.req.header.messageCode === "ADT" && ctx.req.header.version
+   *   === "2.5.1"`
    */
   on(patternOrFilter: string | RouteFilter<E>, handler: Handler<E>): this {
     this.#router.add(patternOrFilter, handler);
@@ -158,16 +172,16 @@ export class Mllp<E = unknown> {
    * message without MLLP framing; `env` becomes `ctx.env`. Bound to the app,
    * so it can be passed on as a function.
    *
-   * The pipeline is lazy (see ADR-0013):
+   * 1. Decode the payload as UTF-8, parse it, and run the processor's
+   *    transformers, its lint rules among them.
+   * 2. Route match, on `ctx.req.header`.
+   * 3. Middleware, then the route handler.
+   * 4. Compile — only when a handler calls `ctx.req.result()`.
    *
-   * 1. Parse (sync, fast) — always runs, extracts routing fields
-   * 2. Route match — uses pre-transform routing fields
-   * 3. If no match → return undefined (no transform/compile cost)
-   * 4. Transform/compile — only when handlers access ctx.tree()/ctx.result()
-   *
-   * Rejects with `MllpServerError` `INCOMPATIBLE_CHARSET` when `payload` is
-   * not UTF-8, and `NO_PARSER` when no processor has been registered via
-   * `app.parser()`.
+   * A payload that is not UTF-8, that the processor throws on, or that the
+   * processor reports a fatal message for runs no middleware and no route:
+   * `handle()` rejects with the `CharsetError`, the processor's error, or the
+   * first fatal message.
    */
   readonly handle = async (
     payload: Uint8Array,
@@ -175,19 +189,12 @@ export class Mllp<E = unknown> {
   ): Promise<Uint8Array | undefined> => {
     // EnvArgs<E> leaves `env` out only when E admits undefined.
     const env = given as E;
-    const raw = decode(payload);
-    if (!this.#processor) {
-      throw new MllpServerError(MllpServerErrorCode.NO_PARSER);
+    const request = await parseRequest(payload, this.#processor);
+    const fatal = request.file.messages.find((message) => message.fatal);
+    if (fatal) {
+      throw fatal;
     }
-
-    // Context creation is sync — only parse() runs here.
-    // Transform and compile are deferred to ctx.tree() / ctx.result().
-    const ctx = createContext({
-      bytes: payload,
-      env,
-      processor: this.#processor,
-      raw,
-    });
+    const ctx = createContext({ env, request });
 
     // oxlint-disable-next-line typescript/no-invalid-void-type
     let response: Response | undefined | void;
@@ -234,12 +241,13 @@ export class Mllp<E = unknown> {
     ctx: Context<E>
     // oxlint-disable-next-line typescript/no-invalid-void-type
   ): Promise<Response | undefined | void> {
+    const { header } = ctx.req;
     const info: MessageInfo = {
-      controlId: ctx.controlId,
-      messageStructure: ctx.messageStructure,
-      messageType: ctx.messageType,
-      triggerEvent: ctx.triggerEvent,
-      version: ctx.version,
+      controlId: header.controlId,
+      messageStructure: header.messageStructure,
+      messageType: header.messageCode,
+      triggerEvent: header.triggerEvent,
+      version: header.version,
     };
 
     if (this.#errorHandler) {
@@ -257,24 +265,5 @@ export class Mllp<E = unknown> {
 
     errorMessageInfo.set(err, info);
     throw err;
-  }
-}
-
-/**
- * `payload` decoded as UTF-8.
- *
- * @throws {MllpServerError} `INCOMPATIBLE_CHARSET` when `payload` is not
- *   UTF-8, with the `CharsetError` on `cause`.
- */
-function decode(payload: Uint8Array): string {
-  try {
-    return decodeBytes(payload);
-  } catch (error) {
-    if (error instanceof CharsetError) {
-      throw new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET, {
-        cause: error,
-      });
-    }
-    throw error;
   }
 }

@@ -34,7 +34,6 @@ const RED = "\u001B[31m";
 async function msgEvent(raw: string): Promise<PartialEvent> {
   const events: PartialEvent[] = [];
   const ctx = {
-    controlId: "MSG001",
     env: {
       connection: {
         id: 1,
@@ -45,9 +44,10 @@ async function msgEvent(raw: string): Promise<PartialEvent> {
         state: new Map(),
       },
     },
-    messageType: "ADT",
+    req: {
+      header: { controlId: "MSG001", messageCode: "ADT", triggerEvent: "A01" },
+    },
     res: undefined,
-    triggerEvent: "A01",
   } as Context<NodeEnv>;
   await createMsgTelemetry((event) => events.push(event))(ctx, async () => {
     ctx.res = { raw };

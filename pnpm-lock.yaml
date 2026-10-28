@@ -2145,6 +2145,9 @@ importers:
       '@glion/builder':
         specifier: workspace:*
         version: link:../builder
+      '@glion/lint-required-message-header':
+        specifier: workspace:*
+        version: link:../lint-required-message-header
       '@glion/mllp-codec':
         specifier: workspace:*
         version: link:../mllp-codec
