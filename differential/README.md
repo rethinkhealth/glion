@@ -18,4 +18,4 @@ Needs the Lean toolchain (`elan`) and the `@glion/*` packages built (`pnpm build
 pnpm --filter @glion/differential test:spec
 ```
 
-It builds the oracle, runs `tests/`, and runs `properties/` only when `tests/` passes. The root `pnpm test` does not run it.
+It builds the oracle, runs `tests/`, and runs `properties/` only when `tests/` passes. The root `pnpm test` does not run it; the `Differential` workflow does, on every change to `spec/`, `differential/` or `packages/`.
