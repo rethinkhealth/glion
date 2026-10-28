@@ -59,7 +59,7 @@ All four extend `AckException`, which extends `Error`. The `code` property carri
 | ----------- | --------- | ------------------------------------------------------ |
 | `errorCode` | `string`  | ERR-3 condition code (Table 0357 — see `Hl7ErrorCode`) |
 | `severity`  | `string`  | ERR-4 severity (Table 0516 — see `Severity`)           |
-| `text`      | `string`  | MSA-3 text message, when derived from a remote NAK     |
+| `text`      | `string`  | MSA-3 text message                                     |
 | `controlId` | `string`  | MSA-2 control ID, when derived from a remote NAK       |
 | `cause`     | `unknown` | Standard error cause                                   |
 
@@ -74,6 +74,8 @@ new CommitInternalError(message, cause?); // CE, code 207
 ### Type guards
 
 `isAckCode(value)` narrows a string to `AckCode` (any of the six Table 0008 codes). `isAckNakCode(value)` narrows to `AckNakCode` (`AE` / `AR` / `CE` / `CR`); on an `AckCode`, the negative branch narrows to `AckSuccessCode` (`AA` / `CA`).
+
+`isAckException(value)` narrows any value to `AckException`, including one made by another installed copy of `@glion/ack`; `instanceof AckException` matches only this copy's.
 
 ### Constants
 
@@ -91,7 +93,7 @@ HL7v2 distinguishes two levels of acknowledgment — **application** and **commi
 | `AckCommitError`       | CE    | Commit error (enhanced mode). Persistence or downstream failure.       |
 | `AckCommitReject`      | CR    | Commit reject (enhanced mode). Refused at the commit layer.            |
 
-When a server renders the response, the exception's `message` becomes MSA-3 text. `errorCode` and `severity` stay data: the application renders them in whatever ERR shape its HL7v2 version requires.
+An exception's `message` is never sent to the trading partner. `text`, `errorCode` and `severity` stay data: the application renders them in whatever MSA-3 and ERR shape its HL7v2 version requires.
 
 ## Part of Glion
 
