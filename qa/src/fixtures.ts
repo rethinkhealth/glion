@@ -21,18 +21,3 @@ export function discoverFixtures(
     .filter((f) => f.endsWith(".hl7") && filter(f))
     .toSorted();
 }
-
-/**
- * Normalize a message to the text the serializer writes for it: line endings
- * as \r, and one \r after the last segment.
- *
- * The parser accepts \r, \n, and \r\n, with or without a terminator after the
- * last segment, but the serializer always writes \r after every segment.
- */
-export function normalize(msg: string): string {
-  const segments = msg
-    .replaceAll("\r\n", "\r") // CRLF → CR
-    .replaceAll("\n", "\r") // LF → CR
-    .replace(/\r+$/, ""); // trim trailing segment terminators
-  return segments === "" ? "" : `${segments}\r`;
-}

@@ -35,7 +35,7 @@ describe("encode()", () => {
     it("ends every segment with the segment terminator, the last one included", () => {
       const { text, tree } = adtA01();
 
-      expect(decodeBytes(encode(tree).bytes)).toBe(`${text}\r`);
+      expect(decodeBytes(encode(tree).bytes)).toBe(text);
     });
 
     it("encodes the bytes as UTF-8", () => {

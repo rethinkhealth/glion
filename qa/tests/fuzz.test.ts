@@ -17,6 +17,7 @@ import {
   arbAdversarialInput,
   arbHL7v2Message,
   arbHL7v2MessageCustomDelimiters,
+  arbHL7v2Segments,
   arbMutatedCustomDelimiterMessage,
   arbMutatedMessage,
 } from "../src/arbitraries";
@@ -77,19 +78,18 @@ describe("QR3: crash resilience", () => {
     // the delimiters inside it.
     //
     // Mutant: a component delimiter extends no node's end (#1102). Fails on
-    // `"MSH|^~\\&|^|"`.
+    // `"MSH|^~\\&|^|\r"`.
     //
     // Mutant: the root ends at its last segment, before the segment
-    // terminator after it. Fails on `"MSH|^~\\&|^|"`.
+    // terminator after it. Fails on `"MSH|^~\\&|^|\r"`.
     it("positions every node at the text it was read from", () => {
       fc.assert(
         fc.property(arbHL7v2Message, (msg) => {
-          const source = `${msg}\r`;
-          const root = parseHL7v2(source);
+          const root = parseHL7v2(msg);
 
-          expectWrittenAt(source, root, delimiters(root), true);
+          expectWrittenAt(msg, root, delimiters(root), true);
         }),
-        { examples: [["MSH|^~\\&|^|"]], numRuns: NUM_RUNS }
+        { examples: [["MSH|^~\\&|^|\r"]], numRuns: NUM_RUNS }
       );
     });
 
@@ -100,17 +100,18 @@ describe("QR3: crash resilience", () => {
     // Mutant: the line breaks are replaced with `\r` before the message is
     // tokenized. Fails on `"MSH|^~\\&|||\r\nAAA|\r\n"`.
     it("positions every node at its text, whichever line breaks end the segments", () => {
-      const arbLineBreaks = arbHL7v2Message.chain((msg) => {
-        const lines = msg.split("\r");
-        return fc
+      const arbLineBreaks = arbHL7v2Segments.chain((segments) =>
+        fc
           .array(fc.constantFrom("\r", "\n", "\r\n"), {
-            maxLength: lines.length,
-            minLength: lines.length,
+            maxLength: segments.length,
+            minLength: segments.length,
           })
           .map((breaks) =>
-            lines.map((line, index) => `${line}${breaks[index]}`).join("")
-          );
-      });
+            segments
+              .map((segment, index) => `${segment}${breaks[index]}`)
+              .join("")
+          )
+      );
 
       fc.assert(
         fc.property(arbLineBreaks, (source) => {
@@ -135,19 +136,18 @@ describe("QR3: crash resilience", () => {
     // delimiters MSH declares.
     //
     // Mutant: a component delimiter extends no node's end (#1102). Fails on
-    // `"MSH#*!%+#*#"`.
+    // `"MSH#*!%+#*#\r"`.
     //
     // Mutant: the root ends at its last segment, before the segment
-    // terminator after it. Fails on `"MSH#*!%+#*#"`.
+    // terminator after it. Fails on `"MSH#*!%+#*#\r"`.
     it("positions every node at the text it was read from", () => {
       fc.assert(
         fc.property(arbHL7v2MessageCustomDelimiters, (msg) => {
-          const source = `${msg}\r`;
-          const root = parseHL7v2(source);
+          const root = parseHL7v2(msg);
 
-          expectWrittenAt(source, root, delimiters(root), true);
+          expectWrittenAt(msg, root, delimiters(root), true);
         }),
-        { examples: [["MSH#*!%+#*#"]], numRuns: NUM_RUNS }
+        { examples: [["MSH#*!%+#*#\r"]], numRuns: NUM_RUNS }
       );
     });
   });

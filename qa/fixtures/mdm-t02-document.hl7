@@ -1,6 +1,1 @@
-MSH|^~\&|DOCMGMT|HOSP_A|RECV_SYS|HOSP_A|20260322153000||MDM^T02^MDM_T02|DOC00001|P|2.5.1
-EVN|T02|20260322153000
-PID|1||55667^^^MRN||WILLIAMS^SARAH^K||19650410|F
-PV1|1|I|MED^501^B
-TXA|1|HP^History and Physical^HL70270|TX|20260322150000||20260322153000|||||8901^AUTHOR^DOC^M^^^MD||||||AU^Authenticated^HL70271
-OBX|1|TX|HP^History and Physical||Patient presents with complaints of persistent headaches for the past 2 weeks.||||||F
+MSH|^~\&|DOCMGMT|HOSP_A|RECV_SYS|HOSP_A|20260322153000||MDM^T02^MDM_T02|DOC00001|P|2.5.1EVN|T02|20260322153000PID|1||55667^^^MRN||WILLIAMS^SARAH^K||19650410|FPV1|1|I|MED^501^BTXA|1|HP^History and Physical^HL70270|TX|20260322150000||20260322153000|||||8901^AUTHOR^DOC^M^^^MD||||||AU^Authenticated^HL70271OBX|1|TX|HP^History and Physical||Patient presents with complaints of persistent headaches for the past 2 weeks.||||||F
