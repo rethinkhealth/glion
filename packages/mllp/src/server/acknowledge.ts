@@ -7,6 +7,12 @@ import { formatDTM, nowDTM, Precision } from "@glion/util-timestamp";
 import { uid } from "@glion/util-uid";
 import { DEFAULT_DELIMITERS } from "@glion/utils";
 
+/**
+ * MSH-11 when neither the options nor the original message give one: `P`,
+ * Production (HL7v2 Table 0103).
+ */
+const DEFAULT_PROCESSING_ID = "P";
+
 /** Options for {@link acknowledge}. */
 export interface AcknowledgeOptions {
   /** MSA-1. Defaults to `AA`. */
@@ -18,7 +24,10 @@ export interface AcknowledgeOptions {
    * copied whole.
    */
   sending?: { application: string; facility: string };
-  /** MSH-11. Defaults to the original message's MSH-11, copied whole, else `P`. */
+  /**
+   * MSH-11. Defaults to the original message's MSH-11, copied whole, else `P`
+   * (Production).
+   */
   processingId?: string;
   /**
    * The delimiters MSH-1 and MSH-2 declare. Each one not given is the
@@ -71,7 +80,7 @@ export function acknowledge(
       f(options.id ?? uid()),
       options.processingId === undefined && field(origin, "MSH.11")
         ? copy(origin, "MSH.11")
-        : f(options.processingId ?? "P"),
+        : f(options.processingId ?? DEFAULT_PROCESSING_ID),
       f(version)
     ),
     s("MSA", f(code), f(field(origin, "MSH.10")))
