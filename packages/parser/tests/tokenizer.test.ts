@@ -166,6 +166,17 @@ describe("line breaks", () => {
     });
   });
 
+  it("counts a carriage return inside a truncated MSH-2 as a line break", () => {
+    const out = toks("MSH|^~\\\rPID|1");
+
+    expect(out[4]).toMatchObject({ type: "TEXT", value: "^~\\\r" });
+    expect(out[5]?.position.start).toStrictEqual({
+      column: 1,
+      line: 2,
+      offset: 8,
+    });
+  });
+
   it("counts a line break that ends a truncated MSH-2 once", () => {
     const out = toks("MSH|^~\\\r\nPID|1");
 

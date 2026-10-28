@@ -819,6 +819,13 @@ describe("root position", () => {
     expect(span("﻿MSH|^~\\&\r")).toStrictEqual([1, 10]);
   });
 
+  it("covers nothing in an empty message", () => {
+    expect(parseHL7v2("").position).toStrictEqual({
+      end: { column: 1, line: 1, offset: 0 },
+      start: { column: 1, line: 1, offset: 0 },
+    });
+  });
+
   it("covers a message that holds only line breaks", () => {
     expect(span("\r\n\r")).toStrictEqual([0, 3]);
   });

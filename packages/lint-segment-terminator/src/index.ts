@@ -11,6 +11,8 @@ const messages = {
     "The segment ends with a carriage return and a line feed.",
   lineFeed: "The segment ends with a line feed.",
   noTerminator: "The segment has no segment terminator.",
+  otherCharacter:
+    "The segment ends with a character other than a carriage return.",
 } as const;
 
 const notes = {
@@ -19,7 +21,7 @@ const notes = {
 } as const;
 
 /**
- * The line break after `end` in `text`: `\r\n`, `\r`, `\n`, an empty string
+ * The terminator after `end` in `text`: `\r\n`, `\r`, `\n`, an empty string
  * at the end of the text, or the one character there.
  */
 const lineBreakAt = (text: string, end: number): string =>
@@ -45,13 +47,13 @@ const hl7v2LintSegmentTerminator = lintRule<Node>(
     }
     visitParents(tree, "segment", (segment: Segment, ancestors) => {
       const end = segment.position?.end;
-      const offset = end?.offset;
-      if (end === undefined || offset === undefined) {
+      if (end?.offset === undefined) {
         return;
       }
-      // The finding covers the line break that ends the segment, from the
+      const offset = end.offset;
+      // The finding covers the terminator that ends the segment, from the
       // segment's last character to the start of the next line.
-      const reportLineBreak = (reason: string, lineBreak: string) => {
+      const reportTerminator = (reason: string, lineBreak: string) => {
         const message = file.message(reason, {
           ancestors: [...ancestors, segment],
           place: {
@@ -73,11 +75,11 @@ const hl7v2LintSegmentTerminator = lintRule<Node>(
           break;
         }
         case LINE_FEED: {
-          reportLineBreak(messages.lineFeed, lineBreak);
+          reportTerminator(messages.lineFeed, lineBreak);
           break;
         }
         case CARRIAGE_RETURN_LINE_FEED: {
-          reportLineBreak(messages.carriageReturnLineFeed, lineBreak);
+          reportTerminator(messages.carriageReturnLineFeed, lineBreak);
           break;
         }
         case "": {
@@ -92,6 +94,7 @@ const hl7v2LintSegmentTerminator = lintRule<Node>(
         default: {
           // A segment delimiter set to another character in the parser
           // settings.
+          reportTerminator(messages.otherCharacter, lineBreak);
           break;
         }
       }

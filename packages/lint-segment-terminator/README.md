@@ -53,7 +53,7 @@ export default hl7v2LintSegmentTerminator;
 
 ## What it checks
 
-Every segment ends with one carriage return. An empty line after a segment's carriage return is not reported, and neither is a segment that ends with a segment delimiter set to another character in the parser settings.
+Every segment ends with one carriage return. An empty line after a segment's carriage return is not reported.
 
 In these examples, `\r` and `\r\n` stand for the line break that ends each line.
 
@@ -82,7 +82,7 @@ The segment ends with a carriage return and a line feed.
 The segment has no segment terminator.
 ```
 
-A segment that ends with `\n` is reported as `The segment ends with a line feed.` Each message's `note` is `HL7v2 ends every segment with a carriage return, the last one included.`, its `expected` is `["\r"]`, and its `actual` is the line break the segment ends with, when it has one. A line break is reported from the segment's last character to the start of the next line; a missing terminator is reported at the segment's last character.
+A segment that ends with `\n` is reported as `The segment ends with a line feed.`, and one that ends with a segment delimiter set to another character in the parser settings as `The segment ends with a character other than a carriage return.` Each message's `note` is `HL7v2 ends every segment with a carriage return, the last one included.`, its `expected` is `["\r"]`, and its `actual` is the character or characters the segment ends with, when it has a terminator. A terminator is reported from the segment's last character to the start of the next line; a missing terminator is reported at the segment's last character.
 
 ## When not to use it
 

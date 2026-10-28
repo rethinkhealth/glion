@@ -161,12 +161,10 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     ) {
       // The first character is neither delimiter: both were checked above.
       let j = this.i + 1;
-      while (
-        j < n &&
-        s.charAt(j) !== this.delims.field &&
-        !this._lineBreakAt(j)
-      ) {
+      let c = s.charAt(j);
+      while (c !== "" && c !== this.delims.field && !this._lineBreakAt(j)) {
         j += 1;
+        c = s.charAt(j);
       }
       const segmentId = s.slice(this.i, j);
       this._fastAdvance(segmentId);

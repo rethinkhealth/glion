@@ -69,6 +69,7 @@ describe("hl7v2-lint:segment-terminator", () => {
         end: { column: 1, line: 2, offset: 9 },
         start: { column: 9, line: 1, offset: 8 },
       });
+      expect(message?.ancestors).toHaveLength(2);
       expect(message?.actual).toBe("\n");
       expect(message?.expected).toStrictEqual(["\r"]);
       expect(message?.note).toBe(NOTE);
@@ -137,7 +138,7 @@ describe("hl7v2-lint:segment-terminator", () => {
     });
 
     it("is not reported when it has no position", async () => {
-      const file = new VFile("MSH|^~\\&\rPID|1");
+      const file = new VFile("\nMSH|^~\\&\rPID|1");
 
       await unified()
         .use(hl7v2LintSegmentTerminator)
@@ -145,8 +146,10 @@ describe("hl7v2-lint:segment-terminator", () => {
 
       expect(file.messages).toStrictEqual([]);
     });
+  });
 
-    it("is not reported when it ends with a segment delimiter set in the parser settings", async () => {
+  describe("a segment that ends with a segment delimiter set in the parser settings", () => {
+    it("is reported on its segment delimiter", async () => {
       const text = "PID|1$OBX|2$";
       const file = new VFile(text);
       const tree = parseHL7v2(
@@ -157,8 +160,15 @@ describe("hl7v2-lint:segment-terminator", () => {
 
       await unified().use(hl7v2LintSegmentTerminator).run(tree, file);
 
-      expect(tree.children).toHaveLength(2);
-      expect(file.messages).toStrictEqual([]);
+      expect(file.messages.map((message) => message.message)).toStrictEqual([
+        "The segment ends with a character other than a carriage return.",
+        "The segment ends with a character other than a carriage return.",
+      ]);
+      expect(file.messages[0]?.actual).toBe("$");
+      expect(file.messages[0]?.place).toStrictEqual({
+        end: { column: 1, line: 2, offset: 6 },
+        start: { column: 6, line: 1, offset: 5 },
+      });
     });
   });
 });
