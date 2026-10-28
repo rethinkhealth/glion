@@ -158,7 +158,7 @@ Every PR and every commit on `main` publishes preview packages to [pkg.pr.new](h
 
 ## Release Canary
 
-`pnpm check:release` compares every public package's workspace version with the npm registry and fails when a version is missing or was published without a provenance attestation. It runs weekly, and on demand, from `.github/workflows/release-canary.yml`; a publish that fails is already reported by the release workflow itself. A new package fails it until a maintainer has published it once from their own account, because npm trusted publishing cannot create a package; see [ADR 0015](./docs/adr/0015-secure-publishing.md).
+`pnpm check:release` compares every public package's workspace version with the npm registry and fails when a version is missing, was published without a provenance attestation, or is deprecated. It also fails when a package in the `@glion` scope is not a public workspace package and has a version that is not deprecated, so a removed or renamed package must be deprecated with `npm deprecate` from a maintainer account. It runs weekly, and on demand, from `.github/workflows/release-canary.yml`, which keeps one issue open with the findings until a run is clean; a publish that fails is already reported by the release workflow itself. A new package fails it until a maintainer has published it once from their own account, because npm trusted publishing cannot create a package; see [ADR 0015](./docs/adr/0015-secure-publishing.md).
 
 <!-- omit in toc -->
 

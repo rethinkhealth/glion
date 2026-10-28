@@ -1,6 +1,7 @@
 /**
  * @module @glion/check-release/check
- * @file Compares public workspace packages against the npm registry.
+ * @file Compares public workspace packages against the npm registry, both
+ * ways.
  */
 
 /**
@@ -16,9 +17,13 @@
  * The subset of an npm packument the check reads.
  *
  * @typedef {object} Packument
+ * @property {{ latest: string }} dist-tags The distribution tags.
  * @property {Record<
  *   string,
- *   { dist?: { attestations?: { provenance?: object } } }
+ *   {
+ *     deprecated?: string;
+ *     dist?: { attestations?: { provenance?: object } };
+ *   }
  * >} versions
  *   Published versions keyed by version string.
  */
@@ -36,35 +41,52 @@
  */
 
 /**
- * One public package whose workspace version is not fully released.
+ * One package on which the workspace and the registry disagree.
  *
  * `missing-package`: the registry has no package of that name.
  * `missing-version`: the package exists but not at the workspace version.
  * `missing-provenance`: the version exists without a provenance attestation.
+ * `deprecated`: the version exists and is deprecated.
+ * `not-deprecated`: the package is in the registry scope but not a public
+ * workspace package, and at least one of its versions is not deprecated.
  *
  * @typedef {object} Finding
  * @property {string} name The package name.
- * @property {string} version The workspace version that was checked.
- * @property {"missing-package" | "missing-version" | "missing-provenance"} status
- *   What the registry lacks.
+ * @property {string} version The workspace version that was checked, or the
+ *   registry's `latest` version for `not-deprecated`.
+ * @property {"missing-package"
+ *   | "missing-version"
+ *   | "missing-provenance"
+ *   | "deprecated"
+ *   | "not-deprecated"} status
+ *   How the registry differs from the workspace.
  */
 
 /**
- * The findings for every public package in `packages`, in input order.
+ * The findings for every public package in `packages`, in input order,
+ * followed by the findings for every package in `scopePackages` that is not a
+ * public workspace package, in name order.
  *
- * Private packages are skipped. Resolves to an empty array when every public
- * package's workspace version is on the registry with provenance. Rejects
- * when `fetchPackument` rejects.
+ * Resolves to an empty array when every public package's workspace version is
+ * on the registry with provenance and not deprecated, and every version of
+ * every other package in the scope, private workspace packages included, is
+ * deprecated. Rejects when `fetchPackument` rejects.
  *
  * @param {readonly WorkspacePackage[]} packages The workspace packages to
  *   check.
+ * @param {readonly string[]} scopePackages The names of every package the
+ *   registry lists in the scope.
  * @param {FetchPackument} fetchPackument The registry lookup.
- * @returns {Promise<Finding[]>} One finding per public package that is not
- *   fully released.
+ * @returns {Promise<Finding[]>} One finding per package on which the workspace
+ *   and the registry disagree.
  */
-export async function checkRelease(packages, fetchPackument) {
+export async function checkRelease(packages, scopePackages, fetchPackument) {
   const publicPackages = packages.filter((pkg) => pkg.private !== true);
-  const results = await Promise.all(
+  const publicNames = new Set(publicPackages.map(({ name }) => name));
+  const removedPackages = scopePackages
+    .filter((name) => !publicNames.has(name))
+    .toSorted();
+  const released = await Promise.all(
     publicPackages.map(async ({ name, version }) => {
       const packument = await fetchPackument(name);
       if (packument === null) {
@@ -77,8 +99,27 @@ export async function checkRelease(packages, fetchPackument) {
       if (published.dist?.attestations?.provenance === undefined) {
         return { name, status: "missing-provenance", version };
       }
+      if (published.deprecated) {
+        return { name, status: "deprecated", version };
+      }
       return null;
     })
   );
-  return results.filter((finding) => finding !== null);
+  const removed = await Promise.all(
+    removedPackages.map(async (name) => {
+      const packument = await fetchPackument(name);
+      if (
+        packument === null ||
+        Object.values(packument.versions).every(({ deprecated }) => deprecated)
+      ) {
+        return null;
+      }
+      return {
+        name,
+        status: "not-deprecated",
+        version: packument["dist-tags"].latest,
+      };
+    })
+  );
+  return [...released, ...removed].filter((finding) => finding !== null);
 }

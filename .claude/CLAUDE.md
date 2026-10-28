@@ -54,7 +54,7 @@ pnpm syncpack:fix             # Auto-fix mismatches
 pnpm changeset                # Create a new changeset
 pnpm ci:version               # Bump versions
 pnpm changeset publish-plan   # Preview what the release workflow would publish
-pnpm check:release            # Verify every public package version is on npm with provenance
+pnpm check:release            # Verify every public package version is on npm with provenance, and every removed one is deprecated
 pnpm release:notes <version>  # Print the GitHub release notes for a version
 
 # Workflows
