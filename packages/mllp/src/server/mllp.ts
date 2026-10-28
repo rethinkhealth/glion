@@ -231,7 +231,6 @@ export class Mllp<E = unknown> {
     const ctx = createContext({
       app: this.#options,
       env,
-      processor: this.#processor,
       request,
     });
 

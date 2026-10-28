@@ -24,7 +24,6 @@ async function makeCtx(payload = SAMPLE_BYTES) {
   return createContext({
     app: { serializer: toHl7v2 },
     env: undefined,
-    processor: parseHL7v2,
     request: await parseRequest(payload, parseHL7v2),
   });
 }
@@ -59,7 +58,6 @@ describe("createContext", () => {
     const ctx = createContext({
       app: { serializer: toHl7v2 },
       env,
-      processor: parseHL7v2,
       request: await parseRequest(SAMPLE_BYTES, parseHL7v2),
     });
     expect(ctx.env).toBe(env);
@@ -129,7 +127,6 @@ describe("createContext", () => {
       const ctx = createContext({
         app: { serializer: toHl7v2 },
         env: undefined,
-        processor: parseOnly,
         request: await parseRequest(SAMPLE_BYTES, parseOnly),
       });
 
@@ -155,7 +152,6 @@ describe("createContext", () => {
       const ctx = createContext({
         app: { serializer: toHl7v2 },
         env: undefined,
-        processor: parseHL7v2,
         request: await parseRequest(SAMPLE_BYTES, parseHL7v2),
       });
 

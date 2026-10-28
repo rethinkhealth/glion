@@ -84,6 +84,44 @@ describe("parseRequest", () => {
 
     await expect(parseRequest(BYTES, processor)).rejects.toThrow(thrown);
   });
+
+  it("reads the MSH fields that control processing into header", async () => {
+    const msh =
+      "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|T^A|2.5.1|||AL|NE";
+    const { header } = await parseRequest(
+      new TextEncoder().encode(msh),
+      parseHL7v2
+    );
+
+    expect(header).toEqual({
+      acceptAckType: "AL",
+      applicationAckType: "NE",
+      controlId: "MSG001",
+      messageCode: "ADT",
+      messageStructure: "ADT_A01",
+      processingId: "T",
+      triggerEvent: "A01",
+      version: "2.5.1",
+    });
+  });
+
+  it("reads an MSH field the message does not have as an empty string", async () => {
+    const { header } = await parseRequest(BYTES, parseHL7v2);
+
+    expect(header.acceptAckType).toBe("");
+    expect(header.applicationAckType).toBe("");
+  });
+
+  it("keeps the header as read when the tree changes", async () => {
+    const request = await parseRequest(BYTES, parseHL7v2);
+    const [msh] = request.tree.children;
+    if (msh?.type !== "segment") {
+      throw new Error("The message has no MSH.");
+    }
+    msh.children.splice(9, 1);
+
+    expect(request.header.controlId).toBe("MSG001");
+  });
 });
 
 describe("salvageHeader", () => {
