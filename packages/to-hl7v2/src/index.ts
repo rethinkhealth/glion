@@ -55,6 +55,10 @@ export const hl7v2ToHl7v2: Plugin<[Hl7v2ToHl7v2Options?], Root, string> =
  * even a lone Field. Delimiters default to the standard set unless
  * overridden or derivable from an MSH segment in the tree.
  *
+ * A Root or Group is written with the segment terminator after every segment,
+ * the last one included, as HL7v2 Chapter 2 requires. A Segment on its own
+ * is written without one.
+ *
  * @throws {EscapeSequenceError} When `encodeEscapes` is on and a value holds a
  *   character that no escape sequence can write with the delimiters.
  */
@@ -108,19 +112,21 @@ export function toHl7v2(
   const line = (seg: Segment): string =>
     seg.name === "MSH" ? msh(seg) : segment(seg);
 
-  const lines = (nodes: readonly (Segment | Group)[]): string[] =>
-    nodes.flatMap((child) =>
-      child.type === "group" ? lines(child.children) : [line(child)]
-    );
+  const segments = (nodes: readonly (Segment | Group)[]): string =>
+    nodes
+      .map((child) =>
+        child.type === "group"
+          ? segments(child.children)
+          : `${line(child)}${d.segment}`
+      )
+      .join("");
 
   // -- dispatch ----------------------------------------------------------
 
   switch (node.type) {
     case "root":
     case "group": {
-      return lines(node.children as (Segment | Group)[]).join(
-        SEGMENT_TERMINATOR
-      );
+      return segments(node.children as (Segment | Group)[]);
     }
     case "segment": {
       return line(node);

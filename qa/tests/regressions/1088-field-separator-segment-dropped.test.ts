@@ -26,7 +26,7 @@ const processor = unified()
 
 describe("a segment that is only the field separator", () => {
   it("is written back as it was read, on every round trip", async () => {
-    const text = "|\rPID|1";
+    const text = "|\rPID|1\r";
     const first = String(await processor.process(text));
     const second = String(await processor.process(first));
 

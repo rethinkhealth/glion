@@ -18,7 +18,8 @@
  * HL7v2 messages have a nested delimiter structure. We build arbitraries
  * bottom-up, mirroring the HL7v2 hierarchy:
  *
- *     Message      = MSH segment + 0..n additional segments, joined by \r
+ *     Message      = MSH segment + 0..n additional segments, joined by \r,
+ *                    with no \r after the last one
  *     Segment      = NAME | field | field | ...     (segments can repeat in groups)
  *     Field        = repetition [~ repetition ...]  (~ = repetition delimiter; may be empty or single)
  *     Repetition   = component [^ component ...]    (^ = component delimiter; may be single)
@@ -342,7 +343,8 @@ function buildMsh(
  * - Starts with a properly formed MSH segment
  * - Has 3–10 fields in the MSH segment (after the encoding characters)
  * - Has 0–5 additional segments (PID, OBX, etc. with random names)
- * - Uses `\r` as the segment terminator
+ * - Puts `\r` between segments and none after the last one, as many senders write
+ *   it; append `\r` for the form HL7v2 requires
  *
  * This arbitrary is the foundation for:
  *

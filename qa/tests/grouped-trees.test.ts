@@ -328,14 +328,15 @@ describe("QR6: grouped trees", () => {
       );
     });
 
-    // The serializer writes the grouped tree as the message it was read from.
+    // The serializer writes the grouped tree as the message it was read from,
+    // with the segment terminator after its last segment.
     //
     // Mutant: `@glion/to-hl7v2` writes no segment inside a group.
     // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1"`.
     it("serialize to the same text grouped as flat", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ([, text]) => {
-          expect(toHl7v2(await group(parseHL7v2(text)))).toBe(text);
+          expect(toHl7v2(await group(parseHL7v2(text)))).toBe(`${text}\r`);
         }),
         { examples: [[[BAR_P02, BAR_P02_MESSAGE]]], numRuns: 200 }
       );
@@ -434,7 +435,8 @@ describe("QR6: grouped trees", () => {
     });
 
     // Grouping keeps every segment, Z-segments included, in order, and the
-    // serializer writes the message as it was read.
+    // serializer writes the message as it was read, with the segment terminator
+    // after its last segment.
     //
     // Mutant: `@glion/to-hl7v2` writes no segment inside a group.
     // Fails on BAR_P02 and the same message with `ZXX|3` after PID.
@@ -449,7 +451,7 @@ describe("QR6: grouped trees", () => {
           expect(names).toEqual(
             parseHL7v2(text).children.map((child) => (child as Segment).name)
           );
-          expect(toHl7v2(tree)).toBe(text);
+          expect(toHl7v2(tree)).toBe(`${text}\r`);
         }),
         {
           examples: [

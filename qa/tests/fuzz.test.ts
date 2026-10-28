@@ -25,7 +25,9 @@ const NUM_RUNS = 300;
 
 /**
  * Expect `node` and each node under it to cover exactly the text the
- * serializer writes for it. MSH-1 and MSH-2 are written as they are.
+ * serializer writes for it. MSH-1 and MSH-2 are written as they are. The root
+ * ends at its last segment, and the serializer writes the segment terminator
+ * after it.
  */
 const expectWrittenAt = (
   source: string,
@@ -34,8 +36,10 @@ const expectWrittenAt = (
   encodeEscapes: boolean
 ): void => {
   const { end, start } = node.position ?? {};
+  const text = source.slice(start?.offset, end?.offset);
+  const isRoot = node.type === "root";
 
-  expect(source.slice(start?.offset, end?.offset)).toBe(
+  expect(isRoot ? `${text}${d.segment}` : text).toBe(
     toHl7v2(node, d, { encodeEscapes })
   );
   if (!("children" in node)) {

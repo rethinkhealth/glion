@@ -23,14 +23,16 @@ export function discoverFixtures(
 }
 
 /**
- * Normalize a message for comparison: normalize line endings to \r
- * and trim trailing segment terminators.
+ * Normalize a message to the text the serializer writes for it: line endings
+ * as \r, and one \r after the last segment.
  *
- * The parser accepts both \r and \n but the serializer always outputs \r.
+ * The parser accepts \r, \n, and \r\n, with or without a terminator after the
+ * last segment, but the serializer always writes \r after every segment.
  */
 export function normalize(msg: string): string {
-  return msg
+  const segments = msg
     .replaceAll("\r\n", "\r") // CRLF → CR
     .replaceAll("\n", "\r") // LF → CR
     .replace(/\r+$/, ""); // trim trailing segment terminators
+  return segments === "" ? "" : `${segments}\r`;
 }

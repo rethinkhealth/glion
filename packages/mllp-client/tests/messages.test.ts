@@ -32,6 +32,12 @@ describe("encode()", () => {
       expect(decodeBytes(encode(tree).bytes)).toBe(toHl7v2(tree));
     });
 
+    it("ends every segment with the segment terminator, the last one included", () => {
+      const { text, tree } = adtA01();
+
+      expect(decodeBytes(encode(tree).bytes)).toBe(`${text}\r`);
+    });
+
     it("encodes the bytes as UTF-8", () => {
       const { text } = adtA01();
       const tree = parseHL7v2(text.replace("Doe^John", "Dôe^Jöhn"));

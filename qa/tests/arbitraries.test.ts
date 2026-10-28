@@ -64,23 +64,27 @@ describe("HL7v2 message arbitraries", () => {
 
 describe("normalize()", () => {
   it("converts LF to CR", () => {
-    expect(normalize("MSH|a\nPID|b")).toBe("MSH|a\rPID|b");
+    expect(normalize("MSH|a\nPID|b\n")).toBe("MSH|a\rPID|b\r");
   });
 
   it("converts CRLF to CR", () => {
-    expect(normalize("MSH|a\r\nPID|b")).toBe("MSH|a\rPID|b");
+    expect(normalize("MSH|a\r\nPID|b\r\n")).toBe("MSH|a\rPID|b\r");
   });
 
-  it("trims trailing CR", () => {
-    expect(normalize("MSH|a\rPID|b\r")).toBe("MSH|a\rPID|b");
+  it("keeps the CR after the last segment", () => {
+    expect(normalize("MSH|a\rPID|b\r")).toBe("MSH|a\rPID|b\r");
   });
 
-  it("trims multiple trailing CRs", () => {
-    expect(normalize("MSH|a\r\r\r")).toBe("MSH|a");
+  it("adds a CR after a last segment without one", () => {
+    expect(normalize("MSH|a\rPID|b")).toBe("MSH|a\rPID|b\r");
+  });
+
+  it("writes multiple trailing CRs as one", () => {
+    expect(normalize("MSH|a\r\r\r")).toBe("MSH|a\r");
   });
 
   it("handles mixed line endings", () => {
-    expect(normalize("MSH|a\r\nPID|b\nPV1|c\r")).toBe("MSH|a\rPID|b\rPV1|c");
+    expect(normalize("MSH|a\r\nPID|b\nPV1|c")).toBe("MSH|a\rPID|b\rPV1|c\r");
   });
 
   it("returns empty string unchanged", () => {
