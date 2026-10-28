@@ -45,6 +45,7 @@ export function parseHL7v2(
       ...settings?.delimiters,
     },
     input,
+    lineBreaks: opts.lineBreaks,
   };
   const preprocessed = runPreprocessors(
     context,

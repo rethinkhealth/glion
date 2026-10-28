@@ -4,7 +4,7 @@ Compile HL7v2 ASTs back to HL7v2 text — as a `unified` plugin or a standalone 
 
 ## What it does
 
-`@glion/to-hl7v2` serializes an HL7v2 AST — typically produced by `@glion/parser` — into the original HL7v2 wire format. Delimiters are read from the Root node's data when present, so a parse-then-serialize round trip writes the message back as it was read (modulo intentional edits to the tree in between), with a segment terminator after every segment. The standalone `toHl7v2()` helper works on any subtree, not just the Root, which makes it useful for extracting a single segment, field, or component as text.
+`@glion/to-hl7v2` serializes an HL7v2 AST — typically produced by `@glion/parser` — into the original HL7v2 wire format. Delimiters are read from the Root node's data when present, so a parse-then-serialize round trip writes the message back as it was read (modulo intentional edits to the tree in between), with the line break each segment was read with. The standalone `toHl7v2()` helper works on any subtree, not just the Root, which makes it useful for extracting a single segment, field, or component as text.
 
 ## Install
 
@@ -64,7 +64,7 @@ Each subcomponent value is written as it must appear on the wire: the field, com
 
 ## Round-trip guarantees
 
-- **Segment terminator** — every segment of a `Root` or `Group` is written with the segment terminator after it, the last one included: `MSH|^~\&\rPID|1\r`. A message read without a terminator after its last segment, or with `\r\n` line endings, is written this way. A `Segment` on its own is written without one.
+- **Segment terminator** — every segment of a `Root` or `Group` is written followed by its `terminator`, so a message is written back with the line breaks it was read with, a last segment with nothing after it included. An empty `terminator` is written only after the last segment; after any other, the segment delimiter is written, so a segment added after a parsed last segment stays apart from it. A segment with no `terminator` is written followed by the segment delimiter, `\r` unless `delimiters` gives another. A segment `@glion/builder` makes ends with `\r`: `MSH|^~\&\rPID|1\r`. To write every segment with `\r`, apply `@glion/transform-segment-terminator` first. A `Segment` on its own is written without one.
 - **Delimiter preservation** — the delimiters MSH-1 and MSH-2 declare, or `file.data.delimiters`, carry through to the output. Messages that do not use the defaults round-trip correctly.
 - **Escape sequences** — a value `@glion/parser` decoded is written with its escape sequences again, so a message with `\F\`, `\S\`, `\R\`, `\T\`, `\E\`, or `\.br\` in a value reads and writes back as the same text. When a delimiter is the escape code of one of these, that sequence is written back as `\Xdd\`, which reads back as the same value. A `\Xdd\` is written back as the character it decoded to, or as `\.br\` or `\Xdd\` when that character is a control character.
 - **MSH handling** — the special case where `MSH-1` is the field separator and `MSH-2` carries the encoding characters is encoded correctly on serialization.

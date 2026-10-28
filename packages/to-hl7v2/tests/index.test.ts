@@ -3,6 +3,7 @@ import type {
   Field,
   FieldRepetition,
   Nodes,
+  Segment,
   Subcomponent,
 } from "@glion/ast";
 import { c, f, g, m, r, s } from "@glion/builder";
@@ -307,8 +308,55 @@ describe("segment terminator", () => {
     expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1\rPV1|1\r");
   });
 
-  it("writes a carriage return after each segment, whatever the delimiters", () => {
-    const tree = m(s("MSH", f("*"), f("%$#&")), s("PID", f("1")));
+  it("writes each segment's terminator, whatever the delimiters give", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+
+    expect(toHl7v2(tree, { segment: "\n" })).toBe("MSH|^~\\&\rPID|1\r");
+  });
+
+  it("writes each segment as it ended in the text it was read from", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")), s("PV1"));
+    const [msh, pid, pv1] = tree.children as Segment[];
+    (msh as Segment).terminator = "\r\n";
+    (pid as Segment).terminator = "\n";
+    (pv1 as Segment).terminator = "";
+
+    expect(toHl7v2(tree)).toBe("MSH|^~\\&\r\nPID|1\nPV1");
+  });
+
+  // A segment read last with nothing after it has the terminator `""`. Once
+  // another segment follows it, writing `""` would join the two.
+  it("writes the segment delimiter after an empty terminator on a segment that is no longer the last", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+    (tree.children[1] as Segment).terminator = "";
+    tree.children.push(s("ZPI", f("x")));
+
+    expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1\rZPI|x\r");
+  });
+
+  it("writes the segment delimiter after an empty terminator on a segment followed by one in a later group", () => {
+    const pid = s("PID", f("1"));
+    pid.terminator = "";
+    const tree = m(g("PATIENT", pid), g("VISIT", s("PV1", f("1"))));
+
+    expect(toHl7v2(tree)).toBe("PID|1\rPV1|1\r");
+  });
+
+  it("writes the segment delimiter the delimiters give after a segment with no terminator", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+    for (const segment of tree.children as Segment[]) {
+      segment.terminator = undefined;
+    }
+
+    expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1\r");
+    expect(toHl7v2(tree, { segment: "\n" })).toBe("MSH|^~\\&\nPID|1\n");
+  });
+
+  it("writes the segment delimiter that file.data.delimiters gives after a segment with no terminator", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+    for (const segment of tree.children as Segment[]) {
+      segment.terminator = undefined;
+    }
     const file = new VFile();
     file.data.delimiters = {
       component: "%",

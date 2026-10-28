@@ -203,6 +203,11 @@ function createParserCore() {
       case "SEGMENT_END": {
         const endPos = lastContentEnd || tok.position.start;
         updatePositionsToEnd(endPos);
+        // A tokenizer that gives no characters leaves the segment without a
+        // terminator, as if it were not read from text.
+        if (seg && tok.value !== undefined) {
+          seg.terminator = tok.value;
+        }
         resetState();
         return;
       }
@@ -270,6 +275,10 @@ function createParserCore() {
   const finalize = () => {
     if (lastContentEnd && seg) {
       updatePositionsToEnd(lastContentEnd);
+    }
+    // A segment still open at the end of the text has no terminator.
+    if (seg) {
+      seg.terminator = "";
     }
     if (seg && !segmentHasContent && !seg.name) {
       // Drop trailing empty segment only when it was lazily opened by

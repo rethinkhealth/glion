@@ -184,6 +184,14 @@ export interface Segment extends Parent {
    */
   children: Field[];
   /**
+   * The characters that end the segment: `\r`, the segment terminator HL7v2
+   * requires, or what ended it in the text it was read from (`\n`, `\r\n`,
+   * or a segment delimiter set in the parser settings). An empty string when
+   * nothing followed the last segment of the text. Absent when the segment was
+   * not read from text; a serializer then writes the segment delimiter.
+   */
+  terminator?: string | undefined;
+  /**
    * Data associated with the segment.
    */
   data?: SegmentData | undefined;

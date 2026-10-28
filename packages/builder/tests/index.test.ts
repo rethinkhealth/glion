@@ -36,6 +36,7 @@ describe("builder", () => {
               },
             ],
             name: "MSH",
+            terminator: "\r",
             type: "segment",
           },
         ],
@@ -67,6 +68,7 @@ describe("builder", () => {
               },
             ],
             name: "MSH",
+            terminator: "\r",
             type: "segment",
           },
           {
@@ -87,6 +89,7 @@ describe("builder", () => {
               },
             ],
             name: "PID",
+            terminator: "\r",
             type: "segment",
           },
         ],
@@ -118,6 +121,7 @@ describe("builder", () => {
               },
             ],
             name: "PID",
+            terminator: "\r",
             type: "segment",
           },
           {
@@ -138,6 +142,7 @@ describe("builder", () => {
               },
             ],
             name: "PV1",
+            terminator: "\r",
             type: "segment",
           },
         ],
@@ -190,6 +195,7 @@ describe("builder", () => {
           },
         ],
         name: "MSH",
+        terminator: "\r",
         type: "segment",
       });
     });
@@ -232,6 +238,7 @@ describe("builder", () => {
           },
         ],
         name: "MSH",
+        terminator: "\r",
         type: "segment",
       });
     });

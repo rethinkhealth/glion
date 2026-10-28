@@ -132,6 +132,26 @@ describe("preprocessor steps", () => {
       expect(result.delimiters).toBe(DEFAULT_DELIMITERS);
     });
 
+    it("reads a line feed after MSH as the field separator when line breaks are off", () => {
+      const result = detectDelimiters({
+        delimiters: DEFAULT_DELIMITERS,
+        input: "MSH\n^~\\&\nPID\n1\r",
+        lineBreaks: false,
+      });
+
+      expect(result.delimiters.field).toBe("\n");
+    });
+
+    it("reads the encoding characters past a line feed when line breaks are off", () => {
+      const result = detectDelimiters({
+        delimiters: DEFAULT_DELIMITERS,
+        input: "MSH*%$\n#*APP\r",
+        lineBreaks: false,
+      });
+
+      expect(result.delimiters.escape).toBe("\n");
+    });
+
     it("does not change delimiters if input does not start with MSH", () => {
       const ctx: ParserContext = {
         delimiters: DEFAULT_DELIMITERS,

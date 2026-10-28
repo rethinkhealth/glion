@@ -128,7 +128,8 @@ exports[`mSH bootstrap only at file start > emits MSH as TEXT, then a synthetic 
       },
     },
     "type": "SEGMENT_END",
-    "value": undefined,
+    "value": "
+",
   },
   {
     "position": {
@@ -192,7 +193,8 @@ exports[`mSH bootstrap only at file start > emits MSH as TEXT, then a synthetic 
       },
     },
     "type": "SEGMENT_END",
-    "value": undefined,
+    "value": "
+",
   },
   {
     "position": {

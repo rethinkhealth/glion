@@ -5,8 +5,10 @@ import type {
   Root,
   Segment,
 } from "@glion/ast";
+import { DEFAULT_DELIMITERS } from "@glion/utils";
 
 import { parseHL7v2 } from "../src/parser";
+import type { ParseOptions } from "../src/types";
 
 /**
  * Comprehensive test suite for the HL7v2 parser.
@@ -849,5 +851,77 @@ describe("root position", () => {
     expect(msh?.position?.end.offset).toBe(8);
     expect(pid?.position?.start.offset).toBe(10);
     expect(pid?.position?.end.offset).toBe(15);
+  });
+});
+
+describe("segment terminator", () => {
+  const terminators = (source: string, options?: ParseOptions) =>
+    (parseHL7v2(source, options).children as Segment[]).map(
+      (segment) => segment.terminator
+    );
+
+  it("records the line break that ends each segment", () => {
+    expect(terminators("MSH|^~\\&\rPID|1\nPV1|1\r\nOBX|1\r")).toStrictEqual([
+      "\r",
+      "\n",
+      "\r\n",
+      "\r",
+    ]);
+  });
+
+  it("records an empty terminator on a last segment with nothing after it", () => {
+    expect(terminators("MSH|^~\\&\rPID|1")).toStrictEqual(["\r", ""]);
+  });
+
+  it("records only the first line break after a segment", () => {
+    expect(terminators("MSH|^~\\&\r\rPID|1\r\n\r")).toStrictEqual([
+      "\r",
+      "\r\n",
+    ]);
+  });
+
+  it("records the segment delimiter the parser settings give", () => {
+    const tree = parseHL7v2(
+      "PID|1$OBX|2$",
+      {},
+      { delimiters: { ...DEFAULT_DELIMITERS, segment: "$" } }
+    );
+
+    expect(
+      (tree.children as Segment[]).map((segment) => segment.terminator)
+    ).toStrictEqual(["$", "$"]);
+  });
+});
+
+describe("line breaks off", () => {
+  const options: ParseOptions = { lineBreaks: false };
+
+  it("reads a line feed in a value as data", () => {
+    const tree = parseHL7v2(
+      "MSH|^~\\&\rOBX|1|TX|||line one\nline two\r",
+      options
+    );
+    const [, obx] = tree.children as Segment[];
+
+    expect(tree.children).toHaveLength(2);
+    expect(obx?.children[4]?.children[0]?.children[0]?.children[0]?.value).toBe(
+      "line one\nline two"
+    );
+    expect(obx?.terminator).toBe("\r");
+  });
+
+  it("ends a segment at the carriage return of a carriage return and a line feed", () => {
+    const tree = parseHL7v2("MSH|^~\\&\r\nPID|1\r", options);
+    const [msh, next] = tree.children as Segment[];
+
+    expect(msh?.terminator).toBe("\r");
+    expect(next?.name).toBe("\nPID");
+  });
+
+  it("reads a message whose segments end with a line feed as one segment", () => {
+    const tree = parseHL7v2("MSH|^~\\&\nPID|1\n", options);
+
+    expect(tree.children).toHaveLength(1);
+    expect((tree.children[0] as Segment).terminator).toBe("");
   });
 });

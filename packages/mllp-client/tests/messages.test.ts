@@ -38,6 +38,22 @@ describe("encode()", () => {
       expect(decodeBytes(encode(tree).bytes)).toBe(text);
     });
 
+    it("ends every segment with a carriage return, whatever line break it was read with", () => {
+      const { text } = adtA01();
+      const tree = parseHL7v2(text.replaceAll("\r", "\r\n").slice(0, -2));
+
+      expect(decodeBytes(encode(tree).bytes)).toBe(text);
+    });
+
+    it("leaves the tree's segment terminators as they were read", () => {
+      const { text } = adtA01();
+      const tree = parseHL7v2(text.replaceAll("\r", "\n"));
+
+      encode(tree);
+
+      expect(toHl7v2(tree)).toBe(text.replaceAll("\r", "\n"));
+    });
+
     it("encodes the bytes as UTF-8", () => {
       const { text } = adtA01();
       const tree = parseHL7v2(text.replace("Doe^John", "Dôe^Jöhn"));

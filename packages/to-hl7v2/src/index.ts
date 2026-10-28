@@ -55,9 +55,11 @@ export const hl7v2ToHl7v2: Plugin<[Hl7v2ToHl7v2Options?], Root, string> =
  * even a lone Field. Delimiters default to the standard set unless
  * overridden or derivable from an MSH segment in the tree.
  *
- * A Root or Group is written with the segment terminator after every segment,
- * the last one included, as HL7v2 Chapter 2 requires. A Segment on its own
- * is written without one.
+ * A Root or Group writes each segment followed by its `terminator`, or by the
+ * segment delimiter when it has none, so a parsed message is written back as
+ * it was read. An empty `terminator` is written only after the last segment;
+ * after any other, the segment delimiter is written. A Segment on its own is
+ * written without one.
  *
  * @throws {EscapeSequenceError} When `encodeEscapes` is on and a value holds a
  *   character that no escape sequence can write with the delimiters.
@@ -117,15 +119,33 @@ export function toHl7v2(
   const line = (seg: Segment): string =>
     seg.name === "MSH" ? msh(seg) : segment(seg);
 
-  const written = (child: Segment | Group): string => {
+  // The segments of a Root or Group, groups included, in the order they are
+  // written.
+  const segmentsOf = (child: Segment | Group): Segment[] => {
     switch (child.type) {
       case "group": {
-        return child.children.map(written).join("");
+        return child.children.flatMap(segmentsOf);
       }
       case "segment": {
-        return `${line(child)}${SEGMENT_TERMINATOR}`;
+        return [child];
       }
     }
+  };
+
+  // Each segment, then its terminator, or the segment delimiter when it has
+  // none. An empty terminator, read from a last segment with nothing after
+  // it, stays empty only after the last segment written: after `PID|1` with
+  // `ZPI|x` appended, it would make them one segment, `PID|1ZPI|x`.
+  const segments = (children: readonly (Segment | Group)[]): string => {
+    const written = children.flatMap(segmentsOf);
+    const last = written.length - 1;
+    return written
+      .map((seg, index) => {
+        const terminator = seg.terminator ?? d.segment;
+        const joinsTheNext = terminator === "" && index < last;
+        return `${line(seg)}${joinsTheNext ? d.segment : terminator}`;
+      })
+      .join("");
   };
 
   // -- dispatch ----------------------------------------------------------
@@ -133,7 +153,7 @@ export function toHl7v2(
   switch (node.type) {
     case "root":
     case "group": {
-      return (node.children as (Segment | Group)[]).map(written).join("");
+      return segments(node.children as (Segment | Group)[]);
     }
     case "segment": {
       return line(node);

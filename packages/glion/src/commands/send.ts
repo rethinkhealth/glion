@@ -20,6 +20,7 @@ import type { MllpClientOptions, MllpSocket } from "@glion/mllp-client";
 import { nodeSocket } from "@glion/mllp-client/node";
 import { parseHL7v2 } from "@glion/parser";
 import { EscapeSequenceError, toHl7v2 } from "@glion/to-hl7v2";
+import { terminateSegments } from "@glion/transform-segment-terminator";
 import { value } from "@glion/util-query";
 
 import { MAX_PORT } from "../constants";
@@ -568,7 +569,7 @@ type RequestResult =
  */
 function prepareRequest(tree: Root): RequestResult {
   try {
-    const canonical = toHl7v2(tree);
+    const canonical = toHl7v2(terminateSegments(tree));
     return {
       ok: true,
       request: {

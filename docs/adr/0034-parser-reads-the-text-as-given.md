@@ -4,7 +4,7 @@
 
 Proposed (2026-10-28)
 
-Answers #1137 and #1139.
+Answers #1137 and #1139. Decision 3 is amended by ADR 0035.
 
 ## Context
 
@@ -27,7 +27,7 @@ The parser reads the message it is given and never rewrites it.
 2. **Every position is a span of the message as given.** A byte order mark at the start of the input is not part of the message: `stripBOM` removes it, and positions count from the character after it. A segment ends at its last character, before its line break. The root covers the message from its first character to its last, the line breaks after its last segment included.
 3. **The serializer writes `\r` after every segment.** `@glion/to-hl7v2` ends every segment of a message with the segment terminator, the last one included, whatever line breaks the message was read with.
 
-Recording how each segment ended, a parser option to read `\r` alone, and a lint rule that reports the deviations are #1147.
+Recording how each segment ended, a parser option to read `\r` alone, and a lint rule that reports the deviations are ADR 0035 (#1147).
 
 ## Consequences
 

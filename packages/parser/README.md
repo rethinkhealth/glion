@@ -33,10 +33,11 @@ Register the parser as the reader for a `unified` processor. The parser reads fr
 
 ### Options
 
-| Option          | Type                  | Description                                                                                                                                                                                    |
-| --------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `decodeEscapes` | `boolean`             | Whether a subcomponent value holds the characters its escape sequences stand for (`true`, the default) or the escape sequences as written. The encoding characters in MSH-2 are never decoded. |
-| `delimiters`    | `Partial<Delimiters>` | Override one or more delimiters. The parser merges with MSH-derived values and defaults.                                                                                                       |
+| Option          | Type                  | Description                                                                                                                                                                                                                             |
+| --------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `decodeEscapes` | `boolean`             | Whether a subcomponent value holds the characters its escape sequences stand for (`true`, the default) or the escape sequences as written. The encoding characters in MSH-2 are never decoded.                                          |
+| `lineBreaks`    | `boolean`             | Whether a line feed, or a carriage return and a line feed, also ends a segment (`true`, the default), or only a carriage return and the segment delimiter do (`false`), as HL7v2 Chapter 2 requires. With `false`, a line feed is data. |
+| `delimiters`    | `Partial<Delimiters>` | Override one or more delimiters. The parser merges with MSH-derived values and defaults.                                                                                                                                                |
 
 The default delimiters are `|` (field), `^` (component), `~` (repetition), `&` (subcomponent), and `\` (escape). A segment ends with a carriage return, `\r`, which HL7v2 fixes and no setting changes.
 
@@ -76,7 +77,7 @@ A node's `position` is the span of the source text, so a decoded value is shorte
 
 ### Line breaks and positions
 
-A segment ends at a carriage return, `\r`, at a line feed, `\n`, or at a carriage return and a line feed, `\r\n`, and the last segment may end without one. No setting changes what ends a segment. A byte order mark at the start of the input is not part of the message: the default `stripBOM` step removes it, and positions count from the character after it. The parser never rewrites the message otherwise: every `position` is a span of its text as it was given. A `preprocess` step that rewrites the input moves positions into the rewritten text.
+A segment ends at a carriage return, `\r`, at a line feed, `\n`, at a carriage return and a line feed, `\r\n`, or at a segment delimiter the settings give, and the last segment may end without one. A segment delimiter from the settings does not replace the carriage return. With `lineBreaks: false`, a line feed does not end a segment: only a carriage return and the settings' segment delimiter do. Each segment's `terminator` holds what ended it, and `""` for a last segment with nothing after it; an empty line after a segment is not recorded. A byte order mark at the start of the input is not part of the message: the default `stripBOM` step removes it, and positions count from the character after it. The parser never rewrites the message otherwise: every `position` is a span of its text as it was given. A `preprocess` step that rewrites the input moves positions into the rewritten text.
 
 A segment's `position` ends at its last character, before its line break. The root's `position` covers the message from its first character to its last, the line breaks after its last segment included, so a message ends with a segment terminator when the root ends after its last segment:
 
@@ -86,6 +87,8 @@ import { parseHL7v2 } from "@glion/parser";
 parseHL7v2("MSH|^~\\&\r\nPID|1\r").position; // offsets 0–16
 parseHL7v2("MSH|^~\\&\r\nPID|1\r").children[1].position; // offsets 10–15
 parseHL7v2("MSH|^~\\&\r\nPID|1").position; // offsets 0–15
+parseHL7v2("MSH|^~\\&\r\nPID|1").children[0].terminator; // "\r\n"
+parseHL7v2("MSH|^~\\&\r\nPID|1").children[1].terminator; // ""
 ```
 
 ### `Hl7v2Processor`

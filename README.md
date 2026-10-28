@@ -96,6 +96,7 @@ Composable plugins that annotate, enrich, and transform the AST.
 - **[@glion/annotate-profile-tables][glion-annotate-profile-tables]** — annotate primitive values with their entry in the table of the message's HL7v2 version.
 - **[@glion/decode-escapes][glion-decode-escapes]** — decode HL7v2 escape sequences (`\F\`, `\S\`, `\T\`, `\Xdd\`, `\.br\`) in a tree parsed with `decodeEscapes: false`.
 - **[@glion/encode-escapes][glion-encode-escapes]** — encode delimiter characters in subcomponent values as HL7v2 escape sequences before serialization.
+- **[@glion/transform-segment-terminator][glion-transform-segment-terminator]** — end every segment with a carriage return, the segment terminator HL7v2 requires, whatever line break it was read with.
 - **[@glion/transform-trim-trailing-fields][glion-transform-trim-trailing-fields]** — remove the empty fields at the end of each segment, so `PID|1|DOE||` is written as `PID|1|DOE`.
 - **[@glion/transform-profile-groups][glion-transform-profile-groups]** — nest segments in the segment groups their event schema defines, such as `PATIENT_RESULT` and `ORDER_OBSERVATION`.
 
@@ -114,6 +115,7 @@ Linting rules and presets for HL7v2 message quality and conformance.
 - **[@glion/lint-required-message-header][glion-lint-required-message-header]** — ensure every message includes a required header segment such as `MSH`.
 - **[@glion/lint-max-message-size][glion-lint-max-message-size]** — report when a message exceeds a configurable maximum size in bytes or segment count.
 - **[@glion/lint-no-trailing-empty-field][glion-lint-no-trailing-empty-field]** — flag empty fields at the end of a segment, which can cause ambiguity or interoperability issues.
+- **[@glion/lint-segment-terminator][glion-lint-segment-terminator]** — warn when a segment ends with a line feed, or with a carriage return and a line feed, or the last segment has no segment terminator.
 - **[@glion/lint-segment-header-length][glion-lint-segment-header-length]** — validate that segment headers are exactly three characters, as required by the HL7v2 specification.
 - **[@glion/lint-message-version][glion-lint-message-version]** — warn when a message version is unsupported or outside expected constraints.
 
@@ -240,6 +242,7 @@ HL7® and Health Level Seven® are registered trademarks of Health Level Seven I
 [glion-lint-profile-withdrawn]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-withdrawn#readme
 [glion-lint-required-message-header]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-required-message-header#readme
 [glion-lint-segment-header-length]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-segment-header-length#readme
+[glion-lint-segment-terminator]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-segment-terminator#readme
 [glion-mllp]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp#readme
 [glion-mllp-client]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client#readme
 [glion-mllp-codec]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-codec#readme
@@ -249,6 +252,7 @@ HL7® and Health Level Seven® are registered trademarks of Health Level Seven I
 [glion-preset-lint-recommended]: https://github.com/rethinkhealth/glion/tree/main/packages/preset-lint-recommended#readme
 [glion-profiles]: https://github.com/rethinkhealth/glion/tree/main/packages/profiles#readme
 [glion-to-hl7v2]: https://github.com/rethinkhealth/glion/tree/main/packages/to-hl7v2#readme
+[glion-transform-segment-terminator]: https://github.com/rethinkhealth/glion/tree/main/packages/transform-segment-terminator#readme
 [glion-transform-trim-trailing-fields]: https://github.com/rethinkhealth/glion/tree/main/packages/transform-trim-trailing-fields#readme
 [glion-transform-profile-groups]: https://github.com/rethinkhealth/glion/tree/main/packages/transform-profile-groups#readme
 [glion-util-charset]: https://github.com/rethinkhealth/glion/tree/main/packages/util-charset#readme

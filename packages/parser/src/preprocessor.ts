@@ -27,16 +27,20 @@ export const stripBOM: PreprocessorStep = (ctx) => {
  * given.
  */
 export const detectDelimiters: PreprocessorStep = (ctx) => {
-  const header = readMessageHeader(ctx.input);
+  // The header is read with the segment delimiter the context gives:
+  // `MSH|^~\` then `\r` declares `^~\`.
+  const { segment } = ctx.delimiters;
+  const segmentEnd = { lineBreaks: ctx.lineBreaks ?? true, segment };
+  const header = readMessageHeader(ctx.input, segmentEnd);
   if (!header) {
     return ctx;
   }
-  // MSH-2 ends at the field delimiter MSH-1 declares: `MSH|^~\|APP` and
-  // `MSH|^~\` then `\r` both declare `^~\`.
+  // MSH-2 ends at the field delimiter MSH-1 declares.
   const encodingCharacters = readEncodingCharacters(
     ctx.input,
     header,
-    header.fieldSeparator
+    header.fieldSeparator,
+    segmentEnd
   );
   ctx.delimiters = {
     component: encodingCharacters.charAt(0) || DEFAULT_DELIMITERS.component,

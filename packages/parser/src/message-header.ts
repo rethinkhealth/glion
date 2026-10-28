@@ -14,6 +14,7 @@
 // `^~\`.
 
 import { segmentTerminatorAt } from "./segment-terminators";
+import type { SegmentEnd } from "./segment-terminators";
 
 const MAX_ENCODING_CHARACTERS = 4;
 
@@ -33,11 +34,14 @@ export interface MessageHeader {
  * opens with another segment, or with `MSH` and then a segment terminator,
  * which holds no fields.
  */
-export const readMessageHeader = (input: string): MessageHeader | undefined => {
+export const readMessageHeader = (
+  input: string,
+  segmentEnd: SegmentEnd
+): MessageHeader | undefined => {
   const fieldSeparatorAt = MESSAGE_HEADER.length;
   const opensWithMessageHeader =
     input.startsWith(MESSAGE_HEADER) &&
-    segmentTerminatorAt(input, fieldSeparatorAt) === undefined;
+    segmentTerminatorAt(input, fieldSeparatorAt, segmentEnd) === undefined;
   if (!opensWithMessageHeader) {
     return undefined;
   }
@@ -55,7 +59,8 @@ export const readMessageHeader = (input: string): MessageHeader | undefined => {
 export const readEncodingCharacters = (
   input: string,
   header: MessageHeader,
-  field: string
+  field: string,
+  segmentEnd: SegmentEnd
 ): string => {
   const from = header.encodingCharactersStart;
   const limit = Math.min(from + MAX_ENCODING_CHARACTERS, input.length);
@@ -63,7 +68,7 @@ export const readEncodingCharacters = (
   while (
     end < limit &&
     input.charAt(end) !== field &&
-    segmentTerminatorAt(input, end) === undefined
+    segmentTerminatorAt(input, end, segmentEnd) === undefined
   ) {
     end += 1;
   }

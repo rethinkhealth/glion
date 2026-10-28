@@ -9,6 +9,7 @@ import { isAckNakCode, isAckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
+import { terminateSegments } from "@glion/transform-segment-terminator";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
 
 import {
@@ -28,7 +29,8 @@ export interface EncodingResponse {
 }
 
 /**
- * `tree` as the message to send, in canonical HL7v2.
+ * `tree` as the message to send, in canonical HL7v2: every segment ends with
+ * a carriage return, whatever line break it was read with.
  *
  * @throws {MllpInvalidMessageError} The message has no MSH-10, or it could not
  *   be serialized or encoded.
@@ -42,7 +44,10 @@ export function encode(tree: Root): EncodingResponse {
   }
 
   try {
-    return { bytes: encodeBytes(toHl7v2(tree)), controlId };
+    return {
+      bytes: encodeBytes(toHl7v2(terminateSegments(tree))),
+      controlId,
+    };
   } catch (error) {
     throw new MllpInvalidMessageError(error);
   }
