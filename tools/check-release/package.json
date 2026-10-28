@@ -2,7 +2,7 @@
   "name": "@glion/check-release",
   "version": "0.0.0",
   "private": true,
-  "description": "Internal tool: verify that every public workspace package version is on npm with provenance.",
+  "description": "Internal tool: verify that every public workspace package version is on npm with provenance and not deprecated, and every other @glion package is deprecated.",
   "license": "MIT",
   "bin": {
     "glion-check-release": "./src/cli.mjs"

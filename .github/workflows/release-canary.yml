@@ -10,15 +10,20 @@ concurrency:
   group: ${{ github.workflow }}
 
 jobs:
-  canary:
-    name: Release canary
+  check:
+    name: Compare the workspace with npm
     timeout-minutes: 10
     runs-on: ubuntu-latest
     permissions:
       contents: read # checkout
+    outputs:
+      report: ${{ steps.compare.outputs.report }}
+      sha: ${{ steps.compare.outputs.sha }}
+      status: ${{ steps.compare.outputs.status }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: main
           persist-credentials: false
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -29,8 +34,72 @@ jobs:
           node-version: 24
           package-manager-cache: false
 
-      - name: Install dependencies
-        run: pnpm ci:install
+      # Exit codes: 0 matches, 1 findings, 2 could not read the workspace or the registry.
+      - name: Verify every workspace version is on npm with provenance, and every removed package is deprecated
+        id: compare
+        run: |
+          status=0
+          node tools/check-release/src/cli.mjs > "$RUNNER_TEMP/report.txt" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/report.txt"
+          delimiter="EOF_$(openssl rand -hex 16)"
+          {
+            echo "sha=$(git rev-parse HEAD)"
+            echo "status=$status"
+            echo "report<<$delimiter"
+            cat "$RUNNER_TEMP/report.txt"
+            echo "$delimiter"
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Verify every workspace version is on npm with provenance
-        run: pnpm check:release
+      - name: Fail when npm does not match the workspace
+        if: steps.compare.outputs.status != '0'
+        env:
+          STATUS: ${{ steps.compare.outputs.status }}
+        run: exit "$STATUS"
+
+  report:
+    name: Open, update, or close the canary issue
+    needs: check
+    if: ${{ !cancelled() && (needs.check.outputs.status == '0' || needs.check.outputs.status == '1') }}
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write # open, update, and close the canary issue
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+      LABEL: release-canary
+      REPORT: ${{ needs.check.outputs.report }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      SHA: ${{ needs.check.outputs.sha }}
+      STATUS: ${{ needs.check.outputs.status }}
+    steps:
+      - name: Open, update, or close the canary issue
+        run: |
+          issue=$(gh api "repos/$GH_REPO/issues?labels=$LABEL&state=open" --jq '.[0].number // empty')
+          checked="Checked \`main\` at $SHA in [this run]($RUN_URL)."
+
+          if [ "$STATUS" = "0" ]; then
+            if [ -n "$issue" ]; then
+              gh issue close "$issue" --comment "npm matches the workspace again. $checked"
+            fi
+            exit 0
+          fi
+
+          {
+            echo "The weekly release canary found packages on npm that do not match \`main\`."
+            echo
+            echo "~~~"
+            echo "$REPORT"
+            echo "~~~"
+            echo
+            echo "This issue gets a comment when the findings change, and closes on the first clean run."
+          } > "$RUNNER_TEMP/issue.md"
+
+          if [ -z "$issue" ]; then
+            gh label create "$LABEL" --force --color d93f0b --description "Opened by the weekly release canary"
+            issue=$(gh issue create --title "npm does not match the workspace" --label "$LABEL" --body-file "$RUNNER_TEMP/issue.md" | grep -o '[0-9]*$')
+            gh issue comment "$issue" --body "$checked"
+          elif [ "$(gh api "repos/$GH_REPO/issues/$issue" --jq .body)" != "$(cat "$RUNNER_TEMP/issue.md")" ]; then
+            gh issue edit "$issue" --body-file "$RUNNER_TEMP/issue.md"
+            gh issue comment "$issue" --body "The findings changed. $checked"
+          fi
