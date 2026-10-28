@@ -194,7 +194,9 @@ describe("compose", () => {
     };
     const handler: Middleware = async (ctx) => {
       expect(ctx.get("before")).toBe(true);
-      return reply(`MSH|^~\\&||||||||||2.5.1\rMSA|AA|${ctx.controlId}`);
+      return reply(
+        `MSH|^~\\&||||||||||2.5.1\rMSA|AA|${ctx.req.header.controlId}`
+      );
     };
 
     const ctx = await makeCtx();

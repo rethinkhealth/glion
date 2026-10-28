@@ -95,7 +95,7 @@ describe("Router", () => {
     it("matches with a filter function", async () => {
       const router = new Router();
       const handler = async () => RESPONSE_OK;
-      router.add((ctx) => ctx.messageType === "ADT", handler);
+      router.add((ctx) => ctx.req.header.messageCode === "ADT", handler);
 
       expect(router.match(await makeCtx(ADT_A01)).handler).toBe(handler);
       expect(router.match(await makeCtx(ORU_R01)).handler).toBeUndefined();
@@ -105,7 +105,9 @@ describe("Router", () => {
       const router = new Router();
       const handler = async () => RESPONSE_OK;
       router.add(
-        (ctx) => ctx.messageType === "ADT" && ctx.triggerEvent === "A01",
+        (ctx) =>
+          ctx.req.header.messageCode === "ADT" &&
+          ctx.req.header.triggerEvent === "A01",
         handler
       );
 
@@ -117,7 +119,9 @@ describe("Router", () => {
       const router = new Router();
       const handler = async () => RESPONSE_OK;
       router.add(
-        (ctx) => ctx.messageType === "ADT" && ctx.version === "2.3",
+        (ctx) =>
+          ctx.req.header.messageCode === "ADT" &&
+          ctx.req.header.version === "2.3",
         handler
       );
 
@@ -128,7 +132,7 @@ describe("Router", () => {
     it("filter can inspect controlId", async () => {
       const router = new Router();
       const handler = async () => RESPONSE_OK;
-      router.add((ctx) => ctx.controlId === "MSG001", handler);
+      router.add((ctx) => ctx.req.header.controlId === "MSG001", handler);
 
       expect(router.match(await makeCtx(ADT_A01)).handler).toBe(handler);
       expect(router.match(await makeCtx(ORU_R01)).handler).toBeUndefined();
@@ -162,7 +166,7 @@ describe("Router", () => {
       const router = new Router();
       const filterHandler = async () => RESPONSE_OK;
       const stringHandler = async () => RESPONSE_OK;
-      router.add((ctx) => ctx.messageType === "ADT", filterHandler);
+      router.add((ctx) => ctx.req.header.messageCode === "ADT", filterHandler);
       router.add("ADT^A01", stringHandler);
 
       // Filter registered first, should win
@@ -174,7 +178,7 @@ describe("Router", () => {
       const stringHandler = async () => RESPONSE_OK;
       const filterHandler = async () => RESPONSE_OK;
       router.add("ADT^A01", stringHandler);
-      router.add((ctx) => ctx.messageType === "ADT", filterHandler);
+      router.add((ctx) => ctx.req.header.messageCode === "ADT", filterHandler);
 
       expect(router.match(await makeCtx(ADT_A01)).handler).toBe(stringHandler);
     });
@@ -209,7 +213,7 @@ describe("Router", () => {
     it("collects scoped middleware with filter function", async () => {
       const router = new Router();
       const mw: Middleware = async (_ctx, next) => next();
-      router.addMiddleware((ctx) => ctx.version === "2.5.1", mw);
+      router.addMiddleware((ctx) => ctx.req.header.version === "2.5.1", mw);
 
       const result251 = router.match(await makeCtx(ADT_A01));
       expect(result251.middlewares).toContain(mw);

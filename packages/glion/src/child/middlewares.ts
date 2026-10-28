@@ -45,12 +45,12 @@ export function createMsgTelemetry(
     emit({
       ack: ctx.res?.code ?? null,
       conn: connection.id,
-      control: ctx.controlId ?? "?",
+      control: ctx.req.header.controlId ?? "?",
       ms: Math.round(ms * 1000) / 1000,
       pattern: null,
       remote: `${connection.remoteAddress}:${connection.remotePort}`,
       t: "msg",
-      trigger: `${ctx.messageType ?? "?"}^${ctx.triggerEvent ?? "?"}`,
+      trigger: `${ctx.req.header.messageCode ?? "?"}^${ctx.req.header.triggerEvent ?? "?"}`,
     });
   };
 }

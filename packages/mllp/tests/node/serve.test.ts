@@ -197,7 +197,7 @@ describe("serve() integration", () => {
     app.on("ADT^A01", (ctx) =>
       ctx.reply(
         parseHL7v2.parse(
-          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`
+          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
         )
       )
     );
@@ -215,7 +215,7 @@ describe("serve() integration", () => {
     app.on("*", (ctx) =>
       ctx.reply(
         parseHL7v2.parse(
-          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`
+          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
         )
       )
     );
@@ -271,7 +271,7 @@ describe("serve() integration", () => {
       }
       return ctx.reply(
         parseHL7v2.parse(
-          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`
+          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
         )
       );
     });
@@ -468,7 +468,7 @@ describe("serve() integration", () => {
       app.on("*", (ctx) =>
         ctx.reply(
           parseHL7v2.parse(
-            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`
+            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
           )
         )
       );
@@ -562,7 +562,7 @@ describe("serve() integration", () => {
         const count = ctx.env.connection.state.get("count") as number;
         return ctx.reply(
           parseHL7v2.parse(
-            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`
+            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}|count=${count}`
           )
         );
       });
@@ -592,7 +592,7 @@ describe("serve() integration", () => {
         const count = ctx.env.connection.state.get("count") as number;
         return ctx.reply(
           parseHL7v2.parse(
-            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`
+            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}|count=${count}`
           )
         );
       });
@@ -691,7 +691,7 @@ describe("serve() integration", () => {
       const app = createApp().on("*", (ctx) =>
         ctx.reply(
           parseHL7v2.parse(
-            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`
+            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
           )
         )
       );

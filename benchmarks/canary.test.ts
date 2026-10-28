@@ -175,11 +175,11 @@ describe("canary — suites measure real work", () => {
     const routed: string[] = [];
     const app = new Mllp();
     app.on("ADT^A01", (ctx) => {
-      routed.push(ctx.triggerEvent);
+      routed.push(ctx.req.header.triggerEvent);
       return ctx.ack();
     });
     app.on("ORU^R01", (ctx) => {
-      routed.push(ctx.triggerEvent);
+      routed.push(ctx.req.header.triggerEvent);
       return ctx.ack();
     });
     const encoder = new TextEncoder();

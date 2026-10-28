@@ -157,7 +157,9 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 
 | Type                      | Description                                                                                                                                                                                 |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Context`                 | Request context with message data and routing fields.                                                                                                                                       |
+| `Context`                 | The context of one message: the request (`req`), the response (`res`), and what the app adds.                                                                                               |
+| `MllpRequest`             | The message that arrived: `raw`, `tree`, `file`, `header` and `result()`.                                                                                                                   |
+| `MessageHeader`           | The MSH fields that control processing, as `ctx.req.header` holds them.                                                                                                                     |
 | `MllpOptions`             | The options of `new Mllp()`: `timeZone` and `delimiters`, as `acknowledge()` takes them, and `serializer`.                                                                                  |
 | `ErrorHandler`            | The handler `app.onError()` takes: `(error, env) => Promise<void> \| undefined`, where `env` is what the runtime passed to `handle()`. MUST NOT throw.                                      |
 | `MllpResponse`            | A response: an HL7v2 message serialized as UTF-8 (`bytes`), with its MSA-1 (`code`). Built by `ctx.ack()` and `ctx.reply()`.                                                                |
@@ -274,17 +276,19 @@ Available in every middleware and handler. `ctx.req` is the message that arrived
 
 Before routing, the processor has parsed the message and run its transformers, lint rules among them.
 
-| Property                 | Description                                                                                                                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ctx.req.raw`            | The payload decoded as UTF-8.                                                                                                                                                                |
-| `ctx.req.tree`           | The tree the processor parsed and ran its transformers on.                                                                                                                                   |
-| `ctx.req.file`           | VFile holding the processor's messages; none is fatal.                                                                                                                                       |
-| `await ctx.req.result()` | Compiled output (e.g. JSON from `hl7v2Jsonify`), or `undefined` when the processor has no compiler, as the default has none. Runs `stringify()` once; later calls resolve to the same value. |
+| Property                 | Description                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctx.req.raw`            | The payload decoded as UTF-8.                                                                                                                                                                                                                                                                                                                                         |
+| `ctx.req.tree`           | The tree the processor parsed and ran its transformers on.                                                                                                                                                                                                                                                                                                            |
+| `ctx.req.file`           | VFile holding the processor's messages; none is fatal.                                                                                                                                                                                                                                                                                                                |
+| `ctx.req.header`         | The MSH fields that control processing, read before routing: `messageCode` (MSH-9.1), `triggerEvent` (MSH-9.2), `messageStructure` (MSH-9.3), `controlId` (MSH-10), `processingId` (MSH-11.1), `version` (MSH-12.1), `acceptAckType` (MSH-15) and `applicationAckType` (MSH-16). An absent field is an empty string; a change to `ctx.req.tree` does not change them. |
+| `await ctx.req.result()` | Compiled output (e.g. JSON from `hl7v2Jsonify`), or `undefined` when the processor has no compiler, as the default has none. Runs `stringify()` once; later calls resolve to the same value.                                                                                                                                                                          |
 
 ```ts
 import { value } from "@glion/util-query";
 
 app.on("ORU^R01", async (ctx) => {
+  // Any other field: read the tree with @glion/util-query.
   const mrn = value(ctx.req.tree, "PID.3.1")?.value;
   await saveToDatabase(mrn, await ctx.req.result());
   return ctx.ack();
@@ -293,21 +297,16 @@ app.on("ORU^R01", async (ctx) => {
 
 ### Response and app
 
-| Property               | Description                                                                                                                                                                                                          |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ctx.env`              | What the runtime passed to `handle()`: a `NodeEnv` under `serve()`, a Workers environment, or `undefined`.                                                                                                           |
-| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                                                                                                                                                                              |
-| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                                                                                              |
-| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                                                                                                                          |
-| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                                                                                                                             |
-| `ctx.controlId`        | MSH-10 message control ID.                                                                                                                                                                                           |
-| `ctx.set(key, value)`  | Store a variable.                                                                                                                                                                                                    |
-| `ctx.get(key)`         | Retrieve a variable.                                                                                                                                                                                                 |
-| `ctx.var`              | Read-only snapshot of all variables.                                                                                                                                                                                 |
-| `ctx.error`            | The latest error the message raised, or `undefined`. Read-only.                                                                                                                                                      |
-| `ctx.res`              | The response, an `MllpResponse`, or `undefined` for none. Writing a value that is not an `MllpResponse` throws `INVALID_RESPONSE`.                                                                                   |
-| `ctx.ack(options?)`    | The acknowledgment of this message as an `MllpResponse`: `acknowledge()` of the MSH of `ctx.req.tree` as it is when `ack()` is called, with the app's `timeZone` and `delimiters` and an accept code (`AckOptions`). |
-| `ctx.reply(message)`   | `message`, an HL7v2 message as a `Root`, as an `MllpResponse`.                                                                                                                                                       |
+| Property              | Description                                                                                                                                                                                                          |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctx.env`             | What the runtime passed to `handle()`: a `NodeEnv` under `serve()`, a Workers environment, or `undefined`.                                                                                                           |
+| `ctx.set(key, value)` | Store a variable.                                                                                                                                                                                                    |
+| `ctx.get(key)`        | Retrieve a variable.                                                                                                                                                                                                 |
+| `ctx.var`             | Read-only snapshot of all variables.                                                                                                                                                                                 |
+| `ctx.error`           | The latest error the message raised, or `undefined`. Read-only.                                                                                                                                                      |
+| `ctx.res`             | The response, an `MllpResponse`, or `undefined` for none. Writing a value that is not an `MllpResponse` throws `INVALID_RESPONSE`.                                                                                   |
+| `ctx.ack(options?)`   | The acknowledgment of this message as an `MllpResponse`: `acknowledge()` of the MSH of `ctx.req.tree` as it is when `ack()` is called, with the app's `timeZone` and `delimiters` and an accept code (`AckOptions`). |
+| `ctx.reply(message)`  | `message`, an HL7v2 message as a `Root`, as an `MllpResponse`.                                                                                                                                                       |
 
 ## Error handling
 

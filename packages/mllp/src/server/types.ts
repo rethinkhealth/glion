@@ -14,9 +14,6 @@ export type EnvArgs<E> = undefined extends E ? [env?: E] : [env: E];
 /**
  * The MLLP context of one message: the request that arrived, the response
  * going back, and what the app adds.
- *
- * The routing fields are read from the MSH of the tree the processor
- * produced, once, before routing.
  */
 export interface Context<E = unknown> {
   /** The message that arrived, as the app's processor read it. */
@@ -63,17 +60,6 @@ export interface Context<E = unknown> {
    *   an `MllpResponse` or `undefined`.
    */
   res: MllpResponse | undefined;
-
-  /** MSH-9.1 message type (e.g., "ADT") */
-  readonly messageType: string;
-  /** MSH-9.2 trigger event (e.g., "A01") */
-  readonly triggerEvent: string;
-  /** MSH-9.3 message structure (e.g., "ADT_A01") */
-  readonly messageStructure: string;
-  /** MSH-12 version (e.g., "2.5.1") */
-  readonly version: string;
-  /** MSH-10 message control ID */
-  readonly controlId: string;
 
   /** Store a variable */
   set<K extends string>(key: K, value: unknown): void;
@@ -164,8 +150,8 @@ export type RouteFilter<E = unknown> = (ctx: Context<E>) => boolean;
 export interface RoutePattern {
   /** Original pattern string (e.g., "ADT^A01") */
   readonly source: string;
-  /** Message type to match, or "*" for wildcard */
-  readonly messageType: string;
+  /** MSH-9.1 message code to match, or "*" for wildcard */
+  readonly messageCode: string;
   /** Trigger event to match, or "*" for wildcard */
   readonly triggerEvent: string;
 }
@@ -176,31 +162,32 @@ export interface RoutePattern {
  */
 export function parsePattern(pattern: string): RoutePattern {
   if (pattern === "*") {
-    return { messageType: "*", source: pattern, triggerEvent: "*" };
+    return { messageCode: "*", source: pattern, triggerEvent: "*" };
   }
 
   const caretIndex = pattern.indexOf("^");
   if (caretIndex === -1) {
-    return { messageType: pattern, source: pattern, triggerEvent: "*" };
+    return { messageCode: pattern, source: pattern, triggerEvent: "*" };
   }
 
   return {
-    messageType: pattern.slice(0, caretIndex) || "*",
+    messageCode: pattern.slice(0, caretIndex) || "*",
     source: pattern,
     triggerEvent: pattern.slice(caretIndex + 1) || "*",
   };
 }
 
 /**
- * Test whether a route pattern matches a given message type and trigger event.
+ * Test whether a route pattern matches a given message code (MSH-9.1) and
+ * trigger event (MSH-9.2).
  */
 export function matchPattern(
   pattern: RoutePattern,
-  messageType: string,
+  messageCode: string,
   triggerEvent: string
 ): boolean {
   const typeMatch =
-    pattern.messageType === "*" || pattern.messageType === messageType;
+    pattern.messageCode === "*" || pattern.messageCode === messageCode;
   const eventMatch =
     pattern.triggerEvent === "*" || pattern.triggerEvent === triggerEvent;
   return typeMatch && eventMatch;

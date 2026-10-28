@@ -1,6 +1,11 @@
 // oxlint-disable require-await, no-empty-function
 import type { AckCode } from "@glion/ack";
-import type { Context, Middleware, MllpResponse } from "@glion/mllp";
+import type {
+  Context,
+  MessageHeader,
+  Middleware,
+  MllpResponse,
+} from "@glion/mllp";
 import type { NodeEnv } from "@glion/mllp/node";
 import { describe, expect, it } from "vitest";
 
@@ -18,9 +23,11 @@ const reply = (code?: AckCode): MllpResponse =>
  * Minimal context stub for middleware tests.
  * Only the fields read by createMsgTelemetry are needed.
  */
-function makeCtx(overrides: Partial<Context<NodeEnv>> = {}): Context<NodeEnv> {
+function makeCtx(
+  overrides: Partial<Context<NodeEnv>> = {},
+  header: Partial<MessageHeader> = {}
+): Context<NodeEnv> {
   return {
-    controlId: "MSG001",
     env: {
       connection: {
         id: 1,
@@ -31,9 +38,15 @@ function makeCtx(overrides: Partial<Context<NodeEnv>> = {}): Context<NodeEnv> {
         state: new Map(),
       },
     },
-    messageType: "ADT",
+    req: {
+      header: {
+        controlId: "MSG001",
+        messageCode: "ADT",
+        triggerEvent: "A01",
+        ...header,
+      },
+    },
     res: undefined,
-    triggerEvent: "A01",
     ...overrides,
   } as Context<NodeEnv>;
 }
@@ -128,14 +141,17 @@ describe("createMsgTelemetry", () => {
     expect(events.map(({ t }) => t)).toEqual(["msg"]);
   });
 
-  it("uses ? for missing messageType/triggerEvent", async () => {
+  it("uses ? for missing messageCode/triggerEvent", async () => {
     const events: PartialEvent[] = [];
     const mw = createMsgTelemetry((e) => events.push(e));
 
-    const ctx = makeCtx({
-      messageType: undefined as unknown as string,
-      triggerEvent: undefined as unknown as string,
-    });
+    const ctx = makeCtx(
+      {},
+      {
+        messageCode: undefined as unknown as string,
+        triggerEvent: undefined as unknown as string,
+      }
+    );
     await mw(ctx, async () => {});
 
     const event = events[0] as Record<string, unknown>;

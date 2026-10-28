@@ -147,7 +147,8 @@ export class Mllp<E = unknown> {
    *
    * Filter functions:
    *
-   * - `(ctx) => ctx.messageType === "ADT" && ctx.version === "2.5.1"`
+   * - `(ctx) => ctx.req.header.messageCode === "ADT" && ctx.req.header.version
+   *   === "2.5.1"`
    */
   on(patternOrFilter: string | RouteFilter<E>, handler: Handler<E>): this {
     this.#router.add(patternOrFilter, handler);
@@ -175,7 +176,7 @@ export class Mllp<E = unknown> {
    *
    * 1. Decode the payload as UTF-8, parse it, and run the processor's
    *    transformers, its lint rules among them.
-   * 2. Route match, on the routing fields of the tree.
+   * 2. Route match, on `ctx.req.header`.
    * 3. Middleware, then the route handler.
    * 4. Compile — only when a handler calls `ctx.req.result()`.
    *
@@ -236,7 +237,7 @@ export class Mllp<E = unknown> {
 
     // The server does not answer an ACK, so two receivers never acknowledge
     // each other's acknowledgments.
-    const answerable = ctx.messageType !== "ACK";
+    const answerable = request.header.messageCode !== "ACK";
     const { serializer, ...defaults } = this.#options;
     const nakOf = (error: Error): MllpResponse | undefined =>
       answerable

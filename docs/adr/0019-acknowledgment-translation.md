@@ -70,7 +70,7 @@ This is Hono's rule, and it has a cost in MLLP. When a handler has saved a messa
 
 ### 7. The acknowledgment answers the MSH as the app's parser read it
 
-`acknowledge(origin, options?)` builds an MSH and an MSA. It swaps MSH-3/4 with MSH-5/6, copying each field whole, writes MSH-9 as `ACK^<trigger>^ACK` (`ACK^<trigger>` before v2.3.1), echoes MSH-11 and MSH-12.1, and echoes MSH-10 in MSA-2. `ctx.ack()` passes it the tree the app's parser read, as it is when the acknowledgment is built, so an app with its own `preprocess` is acknowledged correctly. A transform or a handler that changes the MSH before then changes the acknowledgment too; the routing fields keep the values as parsed. The NAK of a payload that did not decode or parse answers the MSH read from its bytes before the first CR (§4).
+`acknowledge(origin, options?)` builds an MSH and an MSA. It swaps MSH-3/4 with MSH-5/6, copying each field whole, writes MSH-9 as `ACK^<trigger>^ACK` (`ACK^<trigger>` before v2.3.1), echoes MSH-11 and MSH-12.1, and echoes MSH-10 in MSA-2. `ctx.ack()` passes it the tree the app's parser read, as it is when the acknowledgment is built, so an app with its own `preprocess` is acknowledged correctly. A transform or a handler that changes the MSH before then changes the acknowledgment too; `ctx.req.header` keeps the values as parsed. The NAK of a payload that did not decode or parse answers the MSH read from its bytes before the first CR (§4).
 
 ### 8. The acknowledgment is the same in every version, for now
 

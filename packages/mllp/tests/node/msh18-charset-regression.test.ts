@@ -107,7 +107,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
       handlerRan = true;
       return ctx.reply(
         parseHL7v2.parse(
-          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`
+          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
         )
       );
     });

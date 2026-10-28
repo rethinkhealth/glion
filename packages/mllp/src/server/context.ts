@@ -35,7 +35,7 @@ export function createContext<E>(
 ): MessageContext<E> {
   const { app, request, env } = options;
   const { serializer, ...defaults } = app;
-  const { header, tree } = request;
+  const { tree } = request;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
   let res: MllpResponse | undefined;
@@ -52,14 +52,11 @@ export function createContext<E>(
         serializer
       );
     },
-    controlId: header.controlId,
     env,
     error: undefined,
     get<K extends string>(key: K): unknown {
       return variables.get(key);
     },
-    messageStructure: header.messageStructure,
-    messageType: header.messageCode,
     reply(message: Root): MllpResponse {
       if (!messageHeader(message)) {
         throw new MllpServerError(MllpServerErrorCode.RESPONSE_WITHOUT_MSH);
@@ -84,14 +81,12 @@ export function createContext<E>(
       variables.set(key, value);
       varSnapshot = undefined;
     },
-    triggerEvent: header.triggerEvent,
     get var(): Readonly<Record<string, unknown>> {
       if (!varSnapshot) {
         varSnapshot = Object.freeze(Object.fromEntries(variables));
       }
       return varSnapshot;
     },
-    version: header.version,
   };
 
   return ctx;

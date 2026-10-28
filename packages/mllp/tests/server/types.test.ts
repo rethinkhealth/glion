@@ -13,7 +13,7 @@ describe("parsePattern", () => {
   it("parses wildcard pattern", () => {
     const result = parsePattern("*");
     expect(result).toEqual({
-      messageType: "*",
+      messageCode: "*",
       source: "*",
       triggerEvent: "*",
     });
@@ -22,7 +22,7 @@ describe("parsePattern", () => {
   it("parses exact pattern", () => {
     const result = parsePattern("ADT^A01");
     expect(result).toEqual({
-      messageType: "ADT",
+      messageCode: "ADT",
       source: "ADT^A01",
       triggerEvent: "A01",
     });
@@ -31,7 +31,7 @@ describe("parsePattern", () => {
   it("parses message type wildcard", () => {
     const result = parsePattern("ADT^*");
     expect(result).toEqual({
-      messageType: "ADT",
+      messageCode: "ADT",
       source: "ADT^*",
       triggerEvent: "*",
     });
@@ -40,7 +40,7 @@ describe("parsePattern", () => {
   it("parses trigger event wildcard", () => {
     const result = parsePattern("*^A01");
     expect(result).toEqual({
-      messageType: "*",
+      messageCode: "*",
       source: "*^A01",
       triggerEvent: "A01",
     });
@@ -49,7 +49,7 @@ describe("parsePattern", () => {
   it("parses message type only (no caret)", () => {
     const result = parsePattern("ADT");
     expect(result).toEqual({
-      messageType: "ADT",
+      messageCode: "ADT",
       source: "ADT",
       triggerEvent: "*",
     });

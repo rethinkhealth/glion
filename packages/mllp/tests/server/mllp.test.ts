@@ -303,10 +303,10 @@ describe("Mllp", () => {
   });
 
   describe("filter function routing", () => {
-    it("routes with filter on messageType", async () => {
+    it("routes with filter on the message code", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.messageType === "ADT",
+        (ctx) => ctx.req.header.messageCode === "ADT",
         async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
@@ -317,7 +317,7 @@ describe("Mllp", () => {
     it("filter rejects non-matching messages", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.messageType === "ADT",
+        (ctx) => ctx.req.header.messageCode === "ADT",
         async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
@@ -328,7 +328,9 @@ describe("Mllp", () => {
     it("filter can inspect triggerEvent", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.messageType === "ADT" && ctx.triggerEvent === "A01",
+        (ctx) =>
+          ctx.req.header.messageCode === "ADT" &&
+          ctx.req.header.triggerEvent === "A01",
         async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
@@ -339,7 +341,7 @@ describe("Mllp", () => {
     it("filter can inspect version", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.version === "2.3",
+        (ctx) => ctx.req.header.version === "2.3",
         async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
@@ -353,7 +355,7 @@ describe("Mllp", () => {
     it("filter can inspect controlId", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.controlId === "MSG001",
+        (ctx) => ctx.req.header.controlId === "MSG001",
         async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
@@ -381,7 +383,7 @@ describe("Mllp", () => {
       const app = createApp();
       app.on("ADT^A01", async (ctx) => ctx.reply(RESPONSE_OK));
       app.on(
-        (ctx) => ctx.messageType === "ADT",
+        (ctx) => ctx.req.header.messageCode === "ADT",
         async (ctx) => ctx.reply(RESPONSE_OTHER)
       );
 
@@ -392,7 +394,7 @@ describe("Mllp", () => {
     it("filter wins over string pattern when registered first", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.messageType === "ADT",
+        (ctx) => ctx.req.header.messageCode === "ADT",
         async (ctx) => ctx.reply(RESPONSE_OK)
       );
       app.on("ADT^A01", async (ctx) => ctx.reply(RESPONSE_OTHER));
@@ -406,7 +408,7 @@ describe("Mllp", () => {
       const middlewareRan = { value: false };
 
       app.use(
-        (ctx) => ctx.version === "2.3",
+        (ctx) => ctx.req.header.version === "2.3",
         async (_ctx, next) => {
           middlewareRan.value = true;
           await next();
@@ -763,7 +765,7 @@ describe("acknowledgment defaults", () => {
       throw new Error("audit write failed");
     });
     app.on("ADT^A01", (ctx) => {
-      saved.push(ctx.controlId);
+      saved.push(ctx.req.header.controlId);
       return ctx.ack();
     });
 
@@ -1251,7 +1253,7 @@ describe("acknowledgment defaults", () => {
       });
     });
     app.on("ADT^A01", (ctx) => {
-      saved.push(ctx.controlId);
+      saved.push(ctx.req.header.controlId);
       return ctx.ack();
     });
 

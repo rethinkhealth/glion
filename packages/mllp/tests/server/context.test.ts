@@ -39,7 +39,7 @@ describe("createContext", () => {
     expect(ctx.error).toBeUndefined();
   });
 
-  it("keeps the routing fields as parsed, and acknowledges the MSH as it is, when a handler changes ctx.req.tree", async () => {
+  it("keeps the header as parsed, and acknowledges the MSH as it is, when a handler changes ctx.req.tree", async () => {
     const ctx = await makeCtx();
     const controlId = value(ctx.req.tree, "MSH.10")?.node;
     if (controlId?.type !== "subcomponent") {
@@ -47,7 +47,7 @@ describe("createContext", () => {
     }
     controlId.value = "CHANGED";
 
-    expect(ctx.controlId).toBe("MSG001");
+    expect(ctx.req.header.controlId).toBe("MSG001");
     expect(new TextDecoder().decode(ctx.ack().bytes).split("\r")[1]).toBe(
       "MSA|AA|CHANGED"
     );
@@ -61,31 +61,6 @@ describe("createContext", () => {
       request: await parseRequest(SAMPLE_BYTES, parseHL7v2),
     });
     expect(ctx.env).toBe(env);
-  });
-
-  it("extracts messageType from MSH-9.1", async () => {
-    const ctx = await makeCtx();
-    expect(ctx.messageType).toBe("ADT");
-  });
-
-  it("extracts triggerEvent from MSH-9.2", async () => {
-    const ctx = await makeCtx();
-    expect(ctx.triggerEvent).toBe("A01");
-  });
-
-  it("extracts messageStructure from MSH-9.3", async () => {
-    const ctx = await makeCtx();
-    expect(ctx.messageStructure).toBe("ADT_A01");
-  });
-
-  it("extracts version from MSH-12", async () => {
-    const ctx = await makeCtx();
-    expect(ctx.version).toBe("2.5.1");
-  });
-
-  it("extracts controlId from MSH-10", async () => {
-    const ctx = await makeCtx();
-    expect(ctx.controlId).toBe("MSG001");
   });
 
   it("holds the request parseRequest() read as req", async () => {
@@ -119,9 +94,9 @@ describe("createContext", () => {
       expect(tree.children.length).toBeGreaterThan(0);
 
       // Routing fields extracted from tree
-      expect(ctx.messageType).toBe("ADT");
-      expect(ctx.triggerEvent).toBe("A01");
-      expect(ctx.controlId).toBe("MSG001");
+      expect(ctx.req.header.messageCode).toBe("ADT");
+      expect(ctx.req.header.triggerEvent).toBe("A01");
+      expect(ctx.req.header.controlId).toBe("MSG001");
 
       // VFile exists (always created)
       expect(ctx.req.file).toBeDefined();
@@ -309,6 +284,6 @@ describe("createContext", () => {
 
     const ctx = await makeCtx(vidBytes);
 
-    expect(ctx.version).toBe("2.5.1");
+    expect(ctx.req.header.version).toBe("2.5.1");
   });
 });

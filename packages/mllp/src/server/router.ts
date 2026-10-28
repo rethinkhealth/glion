@@ -32,7 +32,12 @@ export interface MatchResult<E> {
  */
 function patternMatcher<E>(pattern: string): (ctx: Context<E>) => boolean {
   const parsed = parsePattern(pattern);
-  return (ctx) => matchPattern(parsed, ctx.messageType, ctx.triggerEvent);
+  return (ctx) =>
+    matchPattern(
+      parsed,
+      ctx.req.header.messageCode,
+      ctx.req.header.triggerEvent
+    );
 }
 
 /**
@@ -49,7 +54,8 @@ function patternMatcher<E>(pattern: string): (ctx: Context<E>) => boolean {
  *
  * Filter functions:
  *
- * - `(ctx) => ctx.messageType === "ADT" && ctx.version === "2.5.1"`
+ * - `(ctx) => ctx.req.header.messageCode === "ADT" && ctx.req.header.version ===
+ *   "2.5.1"`
  */
 export class Router<E = unknown> {
   readonly #routes: Route<E>[] = [];
