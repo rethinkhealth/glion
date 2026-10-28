@@ -68,6 +68,18 @@ The standard's text leaves some things open. Where the proofs need a rule, the s
 
 The `Spec` workflow also runs an axiom audit over every declaration (only `propext` and `Quot.sound` are allowed, so `sorry`, `native_decide` and new axioms fail) and replays every proof in `leanchecker`, a second kernel.
 
+## The specification as a program
+
+`Oracle.lean` builds the `oracle` program: it reads one message per line as JSON and answers with its encoding (`encode`) and the rules it breaks (`Message.failures`).
+
+```sh
+lake build oracle
+echo '{"delimiters":"|^~\\&","header":[],"segments":[]}' | .lake/build/bin/oracle
+# {"failures":[],"text":"MSH|^~\\&\r"}
+```
+
+[`differential/`](../differential) runs glion against it.
+
 ## Running
 
 ```sh

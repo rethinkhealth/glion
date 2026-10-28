@@ -6,3 +6,7 @@ name = "Hl7v2"
 
 [[lean_lib]]
 name = "Statements"
+
+[[lean_exe]]
+name = "oracle"
+root = "Oracle"
