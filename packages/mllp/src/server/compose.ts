@@ -12,10 +12,10 @@ import type { Context, Middleware } from "./types";
  * to ctx.res, and middleware can also set ctx.res directly.
  * Last write wins.
  */
-export function compose(
-  middlewares: Middleware[]
-): (ctx: Context) => Promise<void> {
-  return async (ctx: Context): Promise<void> => {
+export function compose<E>(
+  middlewares: Middleware<E>[]
+): (ctx: Context<E>) => Promise<void> {
+  return async (ctx: Context<E>): Promise<void> => {
     let index = -1;
 
     async function dispatch(i: number): Promise<void> {
@@ -28,7 +28,7 @@ export function compose(
         return;
       }
 
-      const middleware = middlewares[i] as Middleware;
+      const middleware = middlewares[i] as Middleware<E>;
       const result = await middleware(ctx, () => dispatch(i + 1));
 
       // If middleware returned a response, set ctx.res (last write wins)

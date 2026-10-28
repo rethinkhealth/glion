@@ -109,7 +109,8 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
       };
     });
 
-    server = serve(app, {
+    server = serve({
+      handle: app.handle,
       onError: (error) => {
         errors.push(error);
       },

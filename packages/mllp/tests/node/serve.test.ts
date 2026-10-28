@@ -3,6 +3,7 @@
 // oxlint-disable promise/avoid-new
 import { once } from "node:events";
 import net from "node:net";
+import { setTimeout as delay } from "node:timers/promises";
 import tls from "node:tls";
 
 import { parseHL7v2 } from "@glion/hl7v2";
@@ -10,8 +11,9 @@ import { CR, frame, FS } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
 
+import { MllpServerErrorCode } from "../../src/errors";
 import { serve } from "../../src/node/serve";
-import type { Server } from "../../src/node/serve";
+import type { ConnectionInfo, NodeEnv, Server } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
 
 const SAMPLE_ADT = [
@@ -168,7 +170,7 @@ function waitForReady(port: number): Promise<void> {
 const DNS_NAME = 2;
 
 function createApp() {
-  return new Mllp().parser(parseHL7v2);
+  return new Mllp<NodeEnv>().parser(parseHL7v2);
 }
 
 describe("serve() integration", () => {
@@ -183,7 +185,7 @@ describe("serve() integration", () => {
 
   it("starts and listens on an OS-assigned port", async () => {
     const app = createApp();
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
 
     expect(server.port).toBeGreaterThan(0);
     // Verify we can connect
@@ -196,7 +198,7 @@ describe("serve() integration", () => {
       raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
     }));
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     const response = await sendMessage(server.port, SAMPLE_ADT);
@@ -210,7 +212,7 @@ describe("serve() integration", () => {
       raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
     }));
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     const client = createPersistentClient(server.port);
@@ -233,7 +235,7 @@ describe("serve() integration", () => {
     // oxlint-disable-next-line unicorn/no-useless-undefined
     app.on("ADT^A01", () => undefined);
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     const response = await sendMessage(server.port, SAMPLE_ADT, 500);
@@ -245,7 +247,7 @@ describe("serve() integration", () => {
     // Only register handler for ORM^O01
     app.on("ORM^O01", async () => ({ raw: "should not reach" }));
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     // Send ADT^A01 which has no matching handler
@@ -269,7 +271,7 @@ describe("serve() integration", () => {
       };
     });
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     // First message — handler throws, error handler sends AR
@@ -297,7 +299,7 @@ describe("serve() integration", () => {
       };
     });
 
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     const client = createPersistentClient(server.port);
@@ -315,6 +317,89 @@ describe("serve() integration", () => {
     }
   });
 
+  it("answers every message a remote system sent before closing its side", async () => {
+    const app = createApp().on("*", async (ctx) => {
+      await delay(20);
+      return {
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+      };
+    });
+    server = serve({ handle: app.handle, port: 0 });
+    await server.listening;
+
+    const client = net.connect({
+      allowHalfOpen: true,
+      host: "127.0.0.1",
+      port: server.port,
+    });
+    const chunks: Buffer[] = [];
+    client.on("data", (chunk: Buffer) => chunks.push(chunk));
+    client.write(frame(encodeBytes(SAMPLE_ADT)));
+    client.write(frame(encodeBytes(SAMPLE_ORU)));
+    client.end();
+    await once(client, "end");
+
+    const replies = Buffer.concat(chunks).toString("utf8");
+    expect(replies).toContain("\rMSA|AA|MSG001");
+    expect(replies).toContain("\rMSA|AA|MSG002");
+  });
+
+  it("closes a connection that dropped while its message was being handled", async () => {
+    // The idle timeout destroys the server's socket while the route handler
+    // runs, so the response is written to a destroyed socket.
+    const app = createApp().on("*", async (ctx) => {
+      await delay(150);
+      return {
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+      };
+    });
+    const disconnected = Promise.withResolvers<ConnectionInfo>();
+    server = serve({
+      handle: app.handle,
+      onDisconnect: disconnected.resolve,
+      port: 0,
+      socketTimeout: 50,
+    });
+    await server.listening;
+
+    const client = net.connect({ host: "127.0.0.1", port: server.port });
+    client.on("error", () => {});
+    client.write(frame(encodeBytes(SAMPLE_ADT)));
+
+    await disconnected.promise;
+    client.destroy();
+  });
+
+  it("throws INVALID_OPTION when the port is not a TCP port", () => {
+    const app = createApp();
+    const options = { handle: app.handle, port: Number.NaN };
+
+    expect(() => serve(options)).toThrow(
+      expect.objectContaining({
+        code: MllpServerErrorCode.INVALID_OPTION,
+        option: "port",
+      })
+    );
+  });
+
+  it("throws INVALID_OPTION when called with the app and options", () => {
+    const app = createApp();
+    // The call shape before `handle` was an option, made from JavaScript.
+    const call = serve as unknown as (...args: unknown[]) => Server;
+
+    expect(() => call(app, { port: 2575 })).toThrow(
+      "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`."
+    );
+  });
+
+  it("throws INVALID_OPTION when handle is not a function", () => {
+    const call = serve as unknown as (...args: unknown[]) => Server;
+
+    expect(() => call({ port: 2575 })).toThrow(
+      "The `handle` option is not a function; `serve()` replies to each message with the `handle` it is given, as in `serve({ handle: app.handle, port: 2575 })`."
+    );
+  });
+
   // ── Lifecycle callbacks ─────────────────────────────────────────────
 
   describe("lifecycle callbacks", () => {
@@ -322,7 +407,8 @@ describe("serve() integration", () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
       const connections: number[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onConnect: (conn) => {
           connections.push(conn.id);
         },
@@ -342,7 +428,8 @@ describe("serve() integration", () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
       let disconnectedId: number | undefined;
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onDisconnect: (conn) => {
           disconnectedId = conn.id;
         },
@@ -368,7 +455,8 @@ describe("serve() integration", () => {
 
       const errors: { message: string; connId: number }[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (err, conn) => {
           errors.push({ connId: conn.id, message: err.message });
         },
@@ -389,7 +477,8 @@ describe("serve() integration", () => {
       }));
 
       const errors: { code?: string; causeName?: string }[] = [];
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (err) => {
           const e = err as Error & { code?: string; cause?: Error };
           errors.push({ causeName: e.cause?.name, code: e.code });
@@ -431,7 +520,8 @@ describe("serve() integration", () => {
       }));
 
       const errors: { code?: string }[] = [];
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (err) => {
           errors.push({ code: (err as Error & { code?: string }).code });
         },
@@ -452,7 +542,8 @@ describe("serve() integration", () => {
 
       let capturedInfo: unknown;
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (_err, _conn, messageInfo) => {
           capturedInfo = messageInfo;
         },
@@ -478,7 +569,8 @@ describe("serve() integration", () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
       let capturedInfo: unknown = "sentinel";
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onConnect: () => {
           throw new Error("connect failed");
         },
@@ -504,7 +596,8 @@ describe("serve() integration", () => {
 
       const errors: string[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (err) => {
           errors.push(err.message);
         },
@@ -527,7 +620,8 @@ describe("serve() integration", () => {
 
       const errors: string[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onError: (err) => {
           errors.push(err.message);
         },
@@ -544,7 +638,8 @@ describe("serve() integration", () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
       const ids: number[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onConnect: (conn) => {
           ids.push(conn.id);
         },
@@ -564,18 +659,18 @@ describe("serve() integration", () => {
     it("connection state persists across messages on the same socket", async () => {
       const app = createApp();
       app.use((ctx, next) => {
-        const count = (ctx.connection.state.get("count") as number) ?? 0;
-        ctx.connection.state.set("count", count + 1);
+        const count = (ctx.env.connection.state.get("count") as number) ?? 0;
+        ctx.env.connection.state.set("count", count + 1);
         return next();
       });
       app.on("*", (ctx) => {
-        const count = ctx.connection.state.get("count") as number;
+        const count = ctx.env.connection.state.get("count") as number;
         return {
           raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`,
         };
       });
 
-      server = serve(app, { port: 0 });
+      server = serve({ handle: app.handle, port: 0 });
 
       const client = createPersistentClient(server.port);
       try {
@@ -592,18 +687,18 @@ describe("serve() integration", () => {
     it("multiple connections get separate state Maps", async () => {
       const app = createApp();
       app.use((ctx, next) => {
-        const count = (ctx.connection.state.get("count") as number) ?? 0;
-        ctx.connection.state.set("count", count + 1);
+        const count = (ctx.env.connection.state.get("count") as number) ?? 0;
+        ctx.env.connection.state.set("count", count + 1);
         return next();
       });
       app.on("*", (ctx) => {
-        const count = ctx.connection.state.get("count") as number;
+        const count = ctx.env.connection.state.get("count") as number;
         return {
           raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`,
         };
       });
 
-      server = serve(app, { port: 0 });
+      server = serve({ handle: app.handle, port: 0 });
 
       // Two separate connections — each should have count=1
       const resp1 = await sendMessage(server.port, SAMPLE_ADT);
@@ -618,7 +713,8 @@ describe("serve() integration", () => {
       let disconnectCount = 0;
       const errors: string[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onConnect: () => {
           throw new Error("onConnect failed");
         },
@@ -647,7 +743,8 @@ describe("serve() integration", () => {
       const app = createApp().on("*", () => ({ raw: "ACK" }));
       const errors: string[] = [];
 
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         onDisconnect: () => {
           throw new Error("onDisconnect failed");
         },
@@ -676,7 +773,7 @@ describe("serve() integration", () => {
         .spyOn(console, "error")
         .mockImplementation(() => {});
       try {
-        server = serve(app, { port: 0 });
+        server = serve({ handle: app.handle, port: 0 });
 
         await sendMessage(server.port, SAMPLE_ADT, 500);
 
@@ -695,7 +792,7 @@ describe("serve() integration", () => {
       }));
 
       // No onConnect/onDisconnect/onError
-      server = serve(app, { port: 0 });
+      server = serve({ handle: app.handle, port: 0 });
 
       const resp = await sendMessage(server.port, SAMPLE_ADT);
       expect(resp).toContain("MSA|AA|MSG001");
@@ -708,7 +805,8 @@ describe("serve() integration", () => {
     it("closes a connection past the limit before reading from it, and keeps the open one", async () => {
       const app = createApp().on("ADT^A01", () => ({ raw: ACK }));
       const connected: number[] = [];
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         maxConnections: 1,
         onConnect: ({ id }) => {
           connected.push(id);
@@ -752,7 +850,8 @@ describe("serve() integration", () => {
         ],
       });
       const app = createApp().on("ADT^A01", () => ({ raw: ACK }));
-      server = serve(app, {
+      server = serve({
+        handle: app.handle,
         maxConnections: 1,
         port: 0,
         tls: { cert: pem.cert, key: pem.private },
@@ -783,7 +882,7 @@ describe("serve() integration", () => {
 
   it("graceful close — connecting after close fails", async () => {
     const app = createApp();
-    server = serve(app, { port: 0 });
+    server = serve({ handle: app.handle, port: 0 });
     const port = server.port;
 
     await waitForReady(port);

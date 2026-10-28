@@ -1,5 +1,6 @@
 // oxlint-disable require-await, no-empty-function
 import type { Context, Middleware } from "@glion/mllp";
+import type { NodeEnv } from "@glion/mllp/node";
 import { describe, expect, it } from "vitest";
 
 import { createMsgTelemetry } from "../../src/child/middlewares";
@@ -9,22 +10,24 @@ import type { PartialEvent } from "../../src/events";
  * Minimal context stub for middleware tests.
  * Only the fields read by createMsgTelemetry are needed.
  */
-function makeCtx(overrides: Partial<Context> = {}): Context {
+function makeCtx(overrides: Partial<Context<NodeEnv>> = {}): Context<NodeEnv> {
   return {
-    connection: {
-      id: 1,
-      localPort: 2575,
-      remoteAddress: "127.0.0.1",
-      remotePort: 41_376,
-      secure: false,
-      state: new Map(),
-    },
     controlId: "MSG001",
+    env: {
+      connection: {
+        id: 1,
+        localPort: 2575,
+        remoteAddress: "127.0.0.1",
+        remotePort: 41_376,
+        secure: false,
+        state: new Map(),
+      },
+    },
     messageType: "ADT",
     res: undefined,
     triggerEvent: "A01",
     ...overrides,
-  } as Context;
+  } as Context<NodeEnv>;
 }
 
 describe("createMsgTelemetry", () => {

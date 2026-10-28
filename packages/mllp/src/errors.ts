@@ -17,6 +17,8 @@ export const MllpServerErrorCode = {
    * package.
    */
   INCOMPATIBLE_CHARSET: "INCOMPATIBLE_CHARSET",
+  /** `serve()` was called with an option it cannot use. */
+  INVALID_OPTION: "INVALID_OPTION",
   /**
    * `app.handle()` was called before a parser was registered via
    * `app.parser()`.
@@ -35,21 +37,51 @@ export const MllpServerErrorCode = {
 export type MllpServerErrorCode =
   (typeof MllpServerErrorCode)[keyof typeof MllpServerErrorCode];
 
+/** An option `serve()` checks before it listens. */
+type CheckedOption = "handle" | "port";
+
 /** The message of each {@link MllpServerErrorCode}. */
 const messages = {
   INCOMPATIBLE_CHARSET:
     "The inbound message is not valid UTF-8; only UTF-8 is supported.",
+  INVALID_OPTION: {
+    handle:
+      "The `handle` option is not a function; `serve()` replies to each message with the `handle` it is given, as in `serve({ handle: app.handle, port: 2575 })`.",
+    port: "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`.",
+  },
   NO_PARSER:
     "No parser is registered; `app.handle()` reads each message with the processor `app.parser()` is given.",
   PROTOCOL_VIOLATION:
     "The MLLP byte stream is not framed as MLLP requires, and the connection is closing; the error's cause says how.",
-} as const satisfies Record<MllpServerErrorCode, string>;
+} as const satisfies Record<
+  Exclude<MllpServerErrorCode, "INVALID_OPTION">,
+  string
+> & { INVALID_OPTION: Record<CheckedOption, string> };
+
+/** The arguments of `new MllpServerError()`. */
+type MllpServerErrorArgs =
+  | [
+      code: typeof MllpServerErrorCode.INVALID_OPTION,
+      opts: { option: CheckedOption },
+    ]
+  | [
+      code: Exclude<MllpServerErrorCode, "INVALID_OPTION">,
+      opts?: { cause?: unknown },
+    ];
 
 /** The one error class the `@glion/mllp` server raises. Branch on `code`. */
 export class MllpServerError extends Error {
   readonly code: MllpServerErrorCode;
-  constructor(code: MllpServerErrorCode, opts?: { cause?: unknown }) {
-    super(messages[code], opts);
+  /** The option `serve()` cannot use, when `code` is `INVALID_OPTION`. */
+  readonly option: CheckedOption | undefined;
+  constructor(...[code, opts]: MllpServerErrorArgs) {
+    if (code === MllpServerErrorCode.INVALID_OPTION) {
+      super(messages.INVALID_OPTION[opts.option]);
+      this.option = opts.option;
+    } else {
+      super(messages[code], opts);
+      this.option = undefined;
+    }
     this.name = "MllpServerError";
     this.code = code;
   }

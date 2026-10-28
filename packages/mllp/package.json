@@ -46,6 +46,7 @@
     "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
     "test": "vitest run",
+    "test:cf": "vitest run --config vitest.workers.config.ts",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "publint": "publint --strict"
@@ -60,6 +61,7 @@
     "vfile": "6.0.3"
   },
   "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.4.5",
     "@glion/check-readme": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/testing": "workspace:*",

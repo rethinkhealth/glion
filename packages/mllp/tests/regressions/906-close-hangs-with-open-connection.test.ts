@@ -25,8 +25,8 @@ import { generate } from "selfsigned";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { serve } from "../../src/node/serve";
+import type { ConnectionInfo } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
-import type { ConnectionInfo } from "../../src/server/types";
 
 const ADT_A01 =
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1";
@@ -60,7 +60,11 @@ describe("server.close()", () => {
   it("resolves while a remote system holds an idle connection open", async () => {
     const app = new Mllp().parser(parseHL7v2);
     const accepted = Promise.withResolvers<ConnectionInfo>();
-    const server = serve(app, { onConnect: accepted.resolve, port: 0 });
+    const server = serve({
+      handle: app.handle,
+      onConnect: accepted.resolve,
+      port: 0,
+    });
     await server.listening;
 
     // The remote system connects and sends nothing: the server sits in its
@@ -79,7 +83,7 @@ describe("server.close()", () => {
     const app = new Mllp()
       .parser(parseHL7v2)
       .on("ADT^A01", () => ({ raw: ACK }));
-    const server = serve(app, { port: 0 });
+    const server = serve({ handle: app.handle, port: 0 });
     await server.listening;
 
     // One full exchange: the message goes out, its ACK comes back, and the
@@ -104,7 +108,7 @@ describe("server.close()", () => {
       await answer.promise;
       return { raw: ACK };
     });
-    const server = serve(app, { port: 0 });
+    const server = serve({ handle: app.handle, port: 0 });
     await server.listening;
 
     const remote = await connect(server.port);
@@ -136,7 +140,11 @@ describe("server.close()", () => {
   it("destroys a connection whose remote system never closes its side", async () => {
     const app = new Mllp().parser(parseHL7v2);
     const accepted = Promise.withResolvers<ConnectionInfo>();
-    const server = serve(app, { onConnect: accepted.resolve, port: 0 });
+    const server = serve({
+      handle: app.handle,
+      onConnect: accepted.resolve,
+      port: 0,
+    });
     await server.listening;
 
     // `allowHalfOpen` keeps the remote's side open after it receives the
@@ -155,7 +163,8 @@ describe("server.close()", () => {
     const order: string[] = [];
     const app = new Mllp().parser(parseHL7v2);
     const accepted = Promise.withResolvers<ConnectionInfo>();
-    const server = serve(app, {
+    const server = serve({
+      handle: app.handle,
       onConnect: accepted.resolve,
       // An audit write that outlives the socket: the socket has closed
       // before this resolves.
@@ -188,7 +197,8 @@ describe("server.close()", () => {
     });
     const connections: ConnectionInfo[] = [];
     const app = new Mllp().parser(parseHL7v2);
-    const server = serve(app, {
+    const server = serve({
+      handle: app.handle,
       onConnect: (connection) => {
         connections.push(connection);
       },

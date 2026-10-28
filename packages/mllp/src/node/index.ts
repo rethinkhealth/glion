@@ -15,7 +15,9 @@
 export { serve } from "./serve";
 export type {
   ConnectionCallback,
+  ConnectionInfo,
   ErrorCallback,
+  NodeEnv,
   Server,
   ServeOptions,
 } from "./serve";

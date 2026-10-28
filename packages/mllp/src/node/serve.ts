@@ -1,30 +1,47 @@
 /**
  * Node.js MLLP server entry point.
  *
- * Binds an {@link Mllp} application to a TCP (or TLS) socket using the
- * Node.js `net` / `tls` modules. Incoming bytes are decoded from the MLLP
- * framing protocol, dispatched through the application's middleware stack,
- * and the resulting acknowledgements are encoded and written back to the
- * client.
+ * Listens on a TCP (or TLS) port with the Node.js `net` / `tls` modules and
+ * runs {@link handleConnection} on every connection it accepts, with the
+ * connection in `env`.
  *
  * @module
  */
 
 import type { TlsOptions } from "node:tls";
 
-import { frame, MllpCodecError, unframe } from "@glion/mllp-codec";
-import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
-
 import { MllpServerError, MllpServerErrorCode } from "../errors";
-import type { AdapterSocket } from "../server/adapter";
-import type { MessageInfo, Mllp } from "../server/mllp";
+import { handleConnection } from "../server/connection";
 import { getMessageInfo } from "../server/mllp";
-import type { ConnectionInfo } from "../server/types";
-import { nodeAdapter } from "./adapter";
+import type { MessageInfo } from "../server/mllp";
+import { listen } from "./adapter";
+import type { NodeSocket } from "./adapter";
+
+const MAX_PORT = 65_535;
 
 /** Monotonically-increasing connection ID counter. */
 // oxlint-disable-next-line prefer-const
 let nextConnectionId = 1;
+
+/** A connection the server has accepted. */
+export interface ConnectionInfo {
+  readonly id: number;
+  readonly remoteAddress: string;
+  readonly remotePort: number;
+  readonly localPort: number;
+  readonly secure: boolean;
+  /** State kept across the messages of this connection. */
+  readonly state: Map<string, unknown>;
+}
+
+/**
+ * What {@link serve} passes to `handle()` with each message: `ctx.env` of an
+ * `Mllp<NodeEnv>`.
+ */
+export interface NodeEnv {
+  /** The connection the message arrived on. */
+  readonly connection: ConnectionInfo;
+}
 
 /**
  * Lifecycle callback invoked for connection events.
@@ -34,21 +51,15 @@ export type ConnectionCallback = (
 ) => void | Promise<void>;
 
 /**
- * Error callback invoked when a message handler error is unhandled.
- * Receives the error and the connection it occurred on.
+ * Error callback invoked with an error on a connection: a throwing
+ * `onConnect` or `onDisconnect`, an error `handle` rejects with, a broken MLLP
+ * byte stream (`PROTOCOL_VIOLATION`), or a socket error other than a reset,
+ * a broken pipe or a timeout. The connection closes after either of the last
+ * two; it stays open after an error `handle` rejects with, and that message
+ * gets no reply.
  *
- * For handler errors, `messageInfo` contains the routing fields
- * (messageType, triggerEvent, controlId, version) of the message that
- * caused the error — useful for audit logging in healthcare contexts.
- * For lifecycle callback errors (onConnect/onDisconnect), `messageInfo`
- * is `undefined`.
- *
- * This fires for application-level errors (handler/middleware throws with no
- * app-level error handler, or the app-level error handler itself throws) and
- * for a server-level failure decoding an inbound message — surfaced as an
- * {@link MllpServerError} (`code` `INCOMPATIBLE_CHARSET`), never the codec's
- * own error. Stream-level errors (connection reset) do not trigger this
- * callback.
+ * `messageInfo` holds the routing fields of the message whose `handle`
+ * rejected, when `handle` is an app's; `undefined` for any other error.
  */
 export type ErrorCallback = (
   error: Error,
@@ -60,6 +71,15 @@ export type ErrorCallback = (
  * Options for starting an MLLP server with {@link serve}.
  */
 export interface ServeOptions {
+  /**
+   * Replies to each message: an app's `handle`. Called with the message
+   * without MLLP framing, and the {@link NodeEnv} of its connection.
+   */
+  handle: (
+    payload: Uint8Array,
+    env: NodeEnv
+  ) => Promise<Uint8Array | undefined>;
+
   /**
    * The hostname or IP address to bind the server to.
    * When omitted the OS will bind to all available interfaces (`0.0.0.0`).
@@ -87,19 +107,15 @@ export interface ServeOptions {
    * Called when a TCP connection is closed (including force-close).
    * Always fires, even if `onConnect` threw.
    *
-   * If this callback throws, the error is routed to `onError`
-   * (or `console.error` as last resort).
+   * If this callback throws, the error is passed to `onError`.
    */
   onDisconnect?: ConnectionCallback;
 
   /**
-   * Called when a message handler error is unhandled — either no app-level
-   * error handler is registered, or the app-level error handler itself
-   * threw. Also called when lifecycle callbacks (`onConnect`,
-   * `onDisconnect`) throw.
+   * Called with an error on a connection; see {@link ErrorCallback}.
    *
-   * Only logs `error.message` and connection ID to avoid leaking PHI
-   * in the `console.error` fallback. Production deployments should
+   * Without it, or when it throws, `console.error` logs only `error.message`
+   * and the connection ID, to avoid leaking PHI. Production deployments should
    * always provide this callback.
    */
   onError?: ErrorCallback;
@@ -147,105 +163,123 @@ export interface Server {
 /**
  * Start an MLLP server bound to a TCP (or TLS) port.
  *
- * The server accepts incoming connections, decodes MLLP-framed HL7v2
- * messages, passes them through the provided {@link Mllp} application, and
- * writes back any response (typically an ACK/NAK) using MLLP framing.
- *
  * @example
  *   ```typescript
- *   import { Mllp } from "@glion/mllp";
  *   import { parseHL7v2 } from "@glion/hl7v2";
+ *   import { Mllp } from "@glion/mllp";
  *   import { serve } from "@glion/mllp/node";
  *
  *   const app = new Mllp()
- *   .parser(parseHL7v2)
- *   .on("ADT^A01", async (ctx) => ({ raw: "..." }));
+ *     .parser(parseHL7v2)
+ *     .on("ADT^A01", async (ctx) => ({ raw: "..." }));
  *
- *   const server = serve(app, { port: 2575 });
- *   console.log(`Listening on port ${server.port}`);
- *   ```
+ *   const server = serve({ handle: app.handle, port: 2575 });
+ *   await server.listening;
+ *   ```;
  *
- * @param app - The {@link Mllp} application that will handle each message.
- * @param options - Server configuration: port, TLS, limits, timeouts, and
- *   callbacks.
+ * @param options - The handler, port, TLS, limits, timeouts, and callbacks.
  * @returns A {@link Server} handle that exposes the bound port and a `close()`
  *   method for graceful shutdown.
+ * @throws {MllpServerError} `INVALID_OPTION` when `handle` is not a function,
+ *   or `port` is not an integer from 0 to 65535.
  */
-export function serve(app: Mllp, options: ServeOptions): Server {
-  const adapter = nodeAdapter({
-    maxConnections: options.maxConnections,
-    socketTimeout: options.socketTimeout,
-    tls: options.tls,
-  });
+export function serve(options: ServeOptions): Server {
+  const {
+    handle,
+    hostname,
+    maxConnections,
+    onConnect,
+    onDisconnect,
+    onError,
+    port,
+    socketTimeout,
+    tls,
+  } = options;
+  if (typeof handle !== "function") {
+    throw new MllpServerError(MllpServerErrorCode.INVALID_OPTION, {
+      option: "handle",
+    });
+  }
+  if (!Number.isInteger(port) || port < 0 || port > MAX_PORT) {
+    throw new MllpServerError(MllpServerErrorCode.INVALID_OPTION, {
+      option: "port",
+    });
+  }
+  const shutdown = new AbortController();
+  const connections = new Set<Promise<void>>();
 
-  const lifecycle: LifecycleOptions = {
-    onConnect: options.onConnect,
-    onDisconnect: options.onDisconnect,
-    onError: options.onError,
+  /** Runs one connection; resolves once `onDisconnect` has settled. */
+  const run = async (socket: NodeSocket): Promise<void> => {
+    const connection: ConnectionInfo = Object.freeze({
+      id: nextConnectionId++,
+      localPort: socket.localPort,
+      remoteAddress: socket.remoteAddress,
+      remotePort: socket.remotePort,
+      secure: socket.secure,
+      state: new Map(),
+    });
+    const env: NodeEnv = { connection };
+    const report = (error: unknown, messageInfo?: MessageInfo) =>
+      reportError(onError, toError(error), connection, messageInfo);
+    /** The reply to one message; none once `report` has the error. */
+    const reply = async (payload: Uint8Array) => {
+      try {
+        return await handle(payload, env);
+      } catch (error) {
+        await report(error, getMessageInfo(error));
+      }
+    };
+    try {
+      await onConnect?.(connection);
+      await handleConnection(reply, socket, { signal: shutdown.signal });
+    } catch (error) {
+      await report(error);
+    } finally {
+      // Ends the socket when onConnect threw; idempotent otherwise.
+      socket.close();
+      try {
+        await onDisconnect?.(connection);
+      } catch (disconnectError) {
+        await report(disconnectError);
+      }
+    }
   };
 
-  const connections = new Set<OpenConnection>();
-  let closing = false;
-
-  /** Lists `connection` among the open connections until it has closed. */
-  const track = async (connection: OpenConnection) => {
-    connections.add(connection);
-    await connection.closed;
-    connections.delete(connection);
+  /** Lists a connection among the open ones until it has closed. */
+  const track = async (closed: Promise<void>) => {
+    connections.add(closed);
+    await closed;
+    connections.delete(closed);
   };
 
-  const handle = adapter.listen(
-    {
-      hostname: options.hostname,
-      port: options.port,
-    },
+  const listener = listen(
+    { hostname, maxConnections, port, socketTimeout, tls },
     (socket) => {
       // A TLS connection can finish its handshake after `close()` started.
-      if (closing) {
+      if (shutdown.signal.aborted) {
         socket.close();
         return;
       }
       // oxlint-disable-next-line no-void
-      void track(handleConnection(app, socket, lifecycle));
+      void track(run(socket));
     }
   );
 
   return {
     async close() {
-      closing = true;
-      for (const connection of connections) {
-        connection.end();
-      }
-      await handle.close();
-      await Promise.all([...connections].map(({ closed }) => closed));
+      shutdown.abort();
+      await listener.close();
+      await Promise.all(connections);
     },
-    listening: handle.listening,
+    listening: listener.listening,
     get port() {
-      return handle.port;
+      return listener.port;
     },
   };
 }
 
-/** A connection the server has accepted. */
-interface OpenConnection {
-  /**
-   * Ends the connection once the message in progress, if any, has been
-   * answered. A message read after `end()` is not handled. Idempotent.
-   */
-  end(): void;
-
-  /**
-   * Resolves once the connection has closed and `onDisconnect` has settled.
-   * Never rejects.
-   */
-  readonly closed: Promise<void>;
-}
-
-/** Lifecycle callback options extracted from ServeOptions. */
-interface LifecycleOptions {
-  onConnect?: ConnectionCallback;
-  onDisconnect?: ConnectionCallback;
-  onError?: ErrorCallback;
+function toError(value: unknown): Error {
+  return value instanceof Error ? value : new Error(String(value));
 }
 
 /**
@@ -254,186 +288,24 @@ interface LifecycleOptions {
  * to avoid leaking PHI from HL7v2 message content.
  */
 async function reportError(
-  error: unknown,
+  onError: ErrorCallback | undefined,
+  error: Error,
   connection: ConnectionInfo,
-  lifecycle: LifecycleOptions,
-  messageInfo?: MessageInfo
+  messageInfo: MessageInfo | undefined
 ): Promise<void> {
-  const err = error instanceof Error ? error : new Error(String(error));
   try {
-    if (lifecycle.onError) {
-      await lifecycle.onError(err, connection, messageInfo);
+    if (onError) {
+      await onError(error, connection, messageInfo);
     } else {
       // Safe fallback: only message + connection ID, no PHI
       console.error(
-        `[mllp] Unhandled error on connection ${connection.id}: ${err.message}`
+        `[mllp] Unhandled error on connection ${connection.id}: ${error.message}`
       );
     }
   } catch {
     // onError itself threw — last resort
     console.error(
-      `[mllp] Unhandled error on connection ${connection.id}: ${err.message}`
+      `[mllp] Unhandled error on connection ${connection.id}: ${error.message}`
     );
   }
-}
-
-/**
- * Handle a single MLLP connection.
- *
- * Sets up a decode-handle-encode loop for the lifetime of the socket:
- *
- * 1. **Decode** — Raw bytes from the socket's readable stream are piped through an
- *    MLLP decoder (`TransformStream`) that strips the MLLP start/end block
- *    characters and emits complete HL7v2 messages.
- * 2. **Handle** — Each decoded message is passed to the {@link Mllp} application
- *    which runs its middleware stack and returns an optional response (e.g. an
- *    ACK or NAK).
- * 3. **Encode** — If the application produced a response, the raw response bytes
- *    are MLLP-encoded (wrapped in start/end block characters) and written back
- *    to the socket.
- *
- * The loop runs until the remote end closes the connection, an
- * unrecoverable error occurs, or {@link OpenConnection.end} is called. Stream
- * locks are released in a `finally` block to prevent resource leaks.
- *
- * Lifecycle callbacks fire at connection boundaries:
- *
- * - `onConnect` after the connection is established
- * - `onDisconnect` when the connection closes (always fires)
- * - `onError` when a handler error is unhandled (not for transport errors)
- *
- * @param app - The MLLP application to dispatch messages to.
- * @param socket - The adapter socket wrapping the underlying TCP connection.
- * @param lifecycle - Optional lifecycle callbacks from ServeOptions.
- * @returns The connection, to end it and to wait for it to close.
- */
-function handleConnection(
-  app: Mllp,
-  socket: AdapterSocket,
-  lifecycle: LifecycleOptions
-): OpenConnection {
-  const reader = socket.readable.pipeThrough(unframe()).getReader();
-  const writer = socket.writable.getWriter();
-
-  let handling = false;
-  let ending = false;
-  const end = () => {
-    ending = true;
-    // Mid-message, the loop ends the socket once the reply is written.
-    if (!handling) {
-      socket.close();
-    }
-  };
-
-  const connection: ConnectionInfo = {
-    id: nextConnectionId++,
-    localPort: socket.localPort,
-    remoteAddress: socket.remoteAddress,
-    remotePort: socket.remotePort,
-    secure: socket.secure,
-    state: new Map(),
-  };
-
-  const processMessages = async () => {
-    try {
-      // ── onConnect ──────────────────────────────────────────────────
-      try {
-        await lifecycle.onConnect?.(connection);
-      } catch (connectError) {
-        await reportError(connectError, connection, lifecycle);
-        // Tear down — onDisconnect still fires in the outer finally
-        return;
-      }
-
-      // ── Message loop ───────────────────────────────────────────────
-      try {
-        while (true) {
-          const { done, value: payload } = await reader.read();
-          if (done || ending) {
-            break;
-          }
-          handling = true;
-
-          // Inner try/catch separates per-message errors from stream errors.
-          // Decode failures and handler errors both route to onError and the
-          // connection survives; stream errors (connection reset) flow to the
-          // outer catch for cleanup.
-          let response: Awaited<ReturnType<Mllp["handle"]>>;
-          try {
-            // unframe() emits the de-framed payload bytes; decode them to
-            // text (UTF-8) for the handler, which also receives the raw bytes.
-            // A non-UTF-8 feed throws here rather than being silently corrupted.
-            const text = decodeBytes(payload);
-            response = await app.handle(text, payload, connection);
-          } catch (messageError) {
-            // The connection survives a per-message error either way.
-            const error = toMessageError(messageError);
-            await reportError(
-              error,
-              connection,
-              lifecycle,
-              getMessageInfo(error)
-            );
-          }
-
-          // Write is outside the handler error catch — write failures
-          // are transport errors and flow to the outer catch.
-          if (response) {
-            await writer.write(frame(encodeBytes(response.raw)));
-          }
-          handling = false;
-          if (ending) {
-            break;
-          }
-        }
-      } catch (streamError) {
-        // A codec error is a protocol violation, not plumbing — the remote
-        // system broke MLLP framing, or a handler's response carried a
-        // reserved VT/FS byte and could not be framed. The server is never
-        // silent about it: translate (never leak the codec's own type) and
-        // route to onError; the connection still closes below — framing
-        // violations are terminal. Everything else here is transport-level
-        // (connection reset, stream teardown) and stays unrouted: that is
-        // infrastructure, not an application error.
-        if (streamError instanceof MllpCodecError) {
-          await reportError(
-            new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION, {
-              cause: streamError,
-            }),
-            connection,
-            lifecycle
-          );
-        }
-      }
-    } finally {
-      // ── Cleanup & onDisconnect ─────────────────────────────────────
-      // Always runs, even if onConnect threw.
-      reader.releaseLock();
-      writer.releaseLock();
-
-      try {
-        await lifecycle.onDisconnect?.(connection);
-      } catch (disconnectError) {
-        await reportError(disconnectError, connection, lifecycle);
-      }
-
-      socket.close();
-    }
-  };
-
-  return { closed: processMessages(), end };
-}
-
-/**
- * A decode failure is the server's own error — translated into an
- * MllpServerError so the codec's CharsetError never reaches onError (it is
- * kept on `cause`). A handler or middleware throw is the consumer's own error
- * and passes through unchanged.
- */
-function toMessageError(error: unknown): unknown {
-  return error instanceof CharsetError
-    ? new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET, {
-        cause: error,
-      })
-    : error;
 }

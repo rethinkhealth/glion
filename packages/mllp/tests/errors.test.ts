@@ -3,6 +3,32 @@ import { describe, expect, it } from "vitest";
 import { MllpServerError, MllpServerErrorCode } from "../src/errors";
 
 describe("MllpServerError", () => {
+  it("states that the handle option is not a function, and names the option", () => {
+    const error = new MllpServerError(MllpServerErrorCode.INVALID_OPTION, {
+      option: "handle",
+    });
+    expect(error.message).toBe(
+      "The `handle` option is not a function; `serve()` replies to each message with the `handle` it is given, as in `serve({ handle: app.handle, port: 2575 })`."
+    );
+    expect(error.option).toBe("handle");
+  });
+
+  it("states that the port option is not a TCP port, and names the option", () => {
+    const error = new MllpServerError(MllpServerErrorCode.INVALID_OPTION, {
+      option: "port",
+    });
+    expect(error.message).toBe(
+      "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`."
+    );
+    expect(error.option).toBe("port");
+  });
+
+  it("names no option for any other code", () => {
+    expect(
+      new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION).option
+    ).toBeUndefined();
+  });
+
   it("states that the inbound message is not UTF-8", () => {
     expect(
       new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET).message

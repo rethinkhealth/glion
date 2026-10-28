@@ -2,20 +2,14 @@ import type { Root } from "@glion/ast";
 import type { VFile } from "vfile";
 
 /**
- * Connection metadata for an MLLP socket.
+ * The `env` argument of `handle()`: optional when `E` admits `undefined`,
+ * required otherwise.
  */
-export interface ConnectionInfo {
-  readonly id: number;
-  readonly remoteAddress: string;
-  readonly remotePort: number;
-  readonly localPort: number;
-  readonly secure: boolean;
-  readonly state: Map<string, unknown>;
-}
+export type EnvArgs<E> = undefined extends E ? [env?: E] : [env: E];
 
 /**
- * MLLP response — a raw HL7v2 string that the server encodes
- * with MLLP framing before sending back over TCP.
+ * MLLP response — a raw HL7v2 string. A connection writes it back as UTF-8
+ * with MLLP framing.
  *
  * Acknowledgment helpers (ack/nak) are not built in — register
  * an acknowledgment middleware via `.use()` to generate ACK/NAK responses.
@@ -33,7 +27,7 @@ export interface Response {
  * The transformed tree, VFile, and compiled result are lazy — they
  * trigger pipeline stages on first access. See ADR-0013.
  */
-export interface Context {
+export interface Context<E = unknown> {
   /** Incoming message data */
   readonly req: {
     /** Original HL7 message string (without MLLP framing) */
@@ -42,8 +36,12 @@ export interface Context {
     readonly bytes: Uint8Array;
   };
 
-  /** TCP connection metadata */
-  readonly connection: ConnectionInfo;
+  /**
+   * What the runtime passed to `handle()` with this message, such as a
+   * Workers environment or the connection `serve()` accepted it on.
+   * `undefined` when it passed none.
+   */
+  readonly env: E;
 
   /**
    * Parsed AST — always available synchronously. Use this for reading
@@ -116,25 +114,25 @@ export type MiddlewareReturn =
   // oxlint-disable-next-line typescript/no-invalid-void-type
   | void;
 
-export type Middleware = (
-  ctx: Context,
+export type Middleware<E = unknown> = (
+  ctx: Context<E>,
   next: () => Promise<void>
 ) => MiddlewareReturn;
 
 /**
  * Terminal route handler — may return a response or void (no response).
  */
-export type Handler = (
-  ctx: Context
+export type Handler<E = unknown> = (
+  ctx: Context<E>
   // oxlint-disable-next-line typescript/no-invalid-void-type
 ) => Promise<Response | undefined | void> | Response | undefined | void;
 
 /**
  * Error handler — receives the error and context, returns a response.
  */
-export type ErrorHandler = (
+export type ErrorHandler<E = unknown> = (
   err: Error,
-  ctx: Context
+  ctx: Context<E>
   // oxlint-disable-next-line typescript/no-invalid-void-type
 ) => Promise<Response | undefined | void> | Response | undefined | void;
 
@@ -142,7 +140,7 @@ export type ErrorHandler = (
  * A filter function for route or middleware matching.
  * Receives the full context and returns true if the route/middleware applies.
  */
-export type RouteFilter = (ctx: Context) => boolean;
+export type RouteFilter<E = unknown> = (ctx: Context<E>) => boolean;
 
 /**
  * Parsed route pattern for matching against incoming messages.

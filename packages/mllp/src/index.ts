@@ -8,11 +8,13 @@
 // Server
 // -------------
 export { MllpServerError, MllpServerErrorCode } from "./errors";
+export { handleConnection } from "./server/connection";
+export type { HandleConnectionOptions, MllpSocket } from "./server/connection";
 export { getMessageInfo, Mllp } from "./server/mllp";
 export type { MessageInfo } from "./server/mllp";
 export type {
-  ConnectionInfo,
   Context,
+  EnvArgs,
   ErrorHandler,
   Handler,
   Hl7v2Processor,

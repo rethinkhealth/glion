@@ -2,22 +2,12 @@
 import { parseHL7v2 } from "@glion/hl7v2";
 
 import { Mllp } from "../../src/server/mllp";
-import type { ConnectionInfo } from "../../src/server/types";
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
   "EVN|A01|20240101120000",
   "PID|1||12345^^^MRN||Doe^John",
 ].join("\r");
-
-const MOCK_CONNECTION: ConnectionInfo = {
-  id: 1,
-  localPort: 2575,
-  remoteAddress: "127.0.0.1",
-  remotePort: 12_345,
-  secure: false,
-  state: new Map(),
-};
 
 function toBytes(msg: string): Uint8Array {
   return new TextEncoder().encode(msg);
@@ -44,7 +34,7 @@ describe("Mllp.use({ prepend })", () => {
       order.push("handler");
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT));
     expect(order).toEqual(["first", "second", "handler"]);
   });
 
@@ -67,7 +57,7 @@ describe("Mllp.use({ prepend })", () => {
       order.push("handler");
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT));
     expect(order).toEqual(["prepended", "first", "handler"]);
   });
 
@@ -94,7 +84,7 @@ describe("Mllp.use({ prepend })", () => {
       // handler does nothing
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT));
     expect(capturedRes).toContain("MSA|AA");
   });
 
@@ -119,7 +109,7 @@ describe("Mllp.use({ prepend })", () => {
       // handler does nothing
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT));
     // Inner middleware finishes before outer sets ctx.res → undefined
     expect(capturedRes).toBeUndefined();
   });
@@ -147,7 +137,7 @@ describe("Mllp.use({ prepend })", () => {
       order.push("handler");
     });
 
-    await app.handle(SAMPLE_ADT, toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    await app.handle(toBytes(SAMPLE_ADT));
     expect(order).toEqual(["prepended", "global", "scoped", "handler"]);
   });
 

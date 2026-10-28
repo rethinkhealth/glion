@@ -1,10 +1,12 @@
+import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
+
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { compose } from "./compose";
 import { createContext } from "./context";
 import { Router } from "./router";
 import type {
-  ConnectionInfo,
   Context,
+  EnvArgs,
   ErrorHandler,
   Handler,
   Hl7v2Processor,
@@ -15,7 +17,7 @@ import type {
 
 /**
  * Routing fields from the message that caused an error.
- * Attached to errors thrown by `Mllp.handle()` so that callers
+ * Attached to errors `Mllp.handle()` rejects with, so that callers
  * (e.g., `serve()`) can include message context in error callbacks.
  */
 export interface MessageInfo {
@@ -43,10 +45,10 @@ export function getMessageInfo(error: unknown): MessageInfo | undefined {
 }
 
 /**
- * MLLP application for HL7v2 messaging.
+ * MLLP application for HL7v2 messaging: routes and middleware over one
+ * message at a time, on any runtime.
  *
- * A pure routing and middleware engine with no TCP/server concerns.
- * Use `serve()` to bind this to a TCP server.
+ * `E` is the type of `ctx.env`, what the runtime passes to `handle()`.
  *
  * @example
  *   ```typescript
@@ -59,10 +61,10 @@ export function getMessageInfo(error: unknown): MessageInfo | undefined {
  *   });
  *   ```;
  */
-export class Mllp {
-  readonly #router = new Router();
+export class Mllp<E = unknown> {
+  readonly #router = new Router<E>();
   #processor: Hl7v2Processor | undefined;
-  #errorHandler: ErrorHandler | undefined;
+  #errorHandler: ErrorHandler<E> | undefined;
 
   /**
    * Register an HL7v2 processor for incoming messages.
@@ -88,18 +90,21 @@ export class Mllp {
    * - A scoped middleware: `app.use('ADT^*', middleware)` or `app.use(filter,
    *   middleware)`
    */
-  use(middleware: Middleware, options?: { prepend?: boolean }): this;
-  use(patternOrFilter: string | RouteFilter, middleware: Middleware): this;
+  use(middleware: Middleware<E>, options?: { prepend?: boolean }): this;
   use(
-    first: string | RouteFilter | Middleware,
-    second?: Middleware | { prepend?: boolean }
+    patternOrFilter: string | RouteFilter<E>,
+    middleware: Middleware<E>
+  ): this;
+  use(
+    first: string | RouteFilter<E> | Middleware<E>,
+    second?: Middleware<E> | { prepend?: boolean }
   ): this {
     // Scoped middleware: use('ADT^*', middleware) or use(filter, middleware)
     if (
       (typeof first === "string" || typeof first === "function") &&
       typeof second === "function"
     ) {
-      this.#router.addMiddleware(first as string | RouteFilter, second);
+      this.#router.addMiddleware(first as string | RouteFilter<E>, second);
       return this;
     }
 
@@ -107,7 +112,7 @@ export class Mllp {
     if (typeof first === "function") {
       const prepend =
         second && typeof second === "object" ? second.prepend : false;
-      this.#router.addMiddleware(first as Middleware, prepend);
+      this.#router.addMiddleware(first as Middleware<E>, prepend);
       return this;
     }
 
@@ -128,7 +133,7 @@ export class Mllp {
    *
    * - `(ctx) => ctx.messageType === "ADT" && ctx.version === "2.5.1"`
    */
-  on(patternOrFilter: string | RouteFilter, handler: Handler): this {
+  on(patternOrFilter: string | RouteFilter<E>, handler: Handler<E>): this {
     this.#router.add(patternOrFilter, handler);
     return this;
   }
@@ -142,14 +147,16 @@ export class Mllp {
    * If the error handler returns a response, it is used as the reply.
    * If the error handler itself throws, the new error is re-thrown.
    */
-  onError(handler: ErrorHandler): this {
+  onError(handler: ErrorHandler<E>): this {
     this.#errorHandler = handler;
     return this;
   }
 
   /**
-   * Process a raw HL7v2 message through the middleware chain and router.
-   * This is the integration point — analogous to Hono's `fetch()`.
+   * Process one message through the middleware chain and router, and return
+   * the response encoded as UTF-8, or `undefined` for none. `payload` is the
+   * message without MLLP framing; `env` becomes `ctx.env`. Bound to the app,
+   * so it can be passed on as a function.
    *
    * The pipeline is lazy (see ADR-0013):
    *
@@ -158,15 +165,17 @@ export class Mllp {
    * 3. If no match → return undefined (no transform/compile cost)
    * 4. Transform/compile — only when handlers access ctx.tree()/ctx.result()
    *
-   * Throws `MllpServerError` (`NO_PARSER`) if no processor has been registered
-   * via `app.parser()`.
+   * Rejects with `MllpServerError` `INCOMPATIBLE_CHARSET` when `payload` is
+   * not UTF-8, and `NO_PARSER` when no processor has been registered via
+   * `app.parser()`.
    */
-  async handle(
-    raw: string,
-    bytes: Uint8Array,
-    connection: ConnectionInfo
-    // oxlint-disable-next-line typescript/no-invalid-void-type
-  ): Promise<Response | undefined | void> {
+  readonly handle = async (
+    payload: Uint8Array,
+    ...[given]: EnvArgs<E>
+  ): Promise<Uint8Array | undefined> => {
+    // EnvArgs<E> leaves `env` out only when E admits undefined.
+    const env = given as E;
+    const raw = decode(payload);
     if (!this.#processor) {
       throw new MllpServerError(MllpServerErrorCode.NO_PARSER);
     }
@@ -174,12 +183,14 @@ export class Mllp {
     // Context creation is sync — only parse() runs here.
     // Transform and compile are deferred to ctx.tree() / ctx.result().
     const ctx = createContext({
-      bytes,
-      connection,
+      bytes: payload,
+      env,
       processor: this.#processor,
       raw,
     });
 
+    // oxlint-disable-next-line typescript/no-invalid-void-type
+    let response: Response | undefined | void;
     try {
       // Match route and collect middleware
       const match = this.#router.match(ctx);
@@ -188,20 +199,21 @@ export class Mllp {
       // Add the handler as the terminal middleware
       if (match.handler) {
         const handler = match.handler;
-        middlewares.push((handlerCtx: Context) => handler(handlerCtx));
+        middlewares.push((handlerCtx: Context<E>) => handler(handlerCtx));
       }
 
       // Compose and execute
       await compose(middlewares)(ctx);
 
-      return ctx.res;
+      response = ctx.res;
     } catch (error) {
-      return this.#handleError(
+      response = await this.#handleError(
         error instanceof Error ? error : new Error(String(error)),
         ctx
       );
     }
-  }
+    return response ? encodeBytes(response.raw) : undefined;
+  };
 
   /**
    * Handle an error during message processing.
@@ -219,7 +231,7 @@ export class Mllp {
    */
   async #handleError(
     err: Error,
-    ctx: Context
+    ctx: Context<E>
     // oxlint-disable-next-line typescript/no-invalid-void-type
   ): Promise<Response | undefined | void> {
     const info: MessageInfo = {
@@ -245,5 +257,24 @@ export class Mllp {
 
     errorMessageInfo.set(err, info);
     throw err;
+  }
+}
+
+/**
+ * `payload` decoded as UTF-8.
+ *
+ * @throws {MllpServerError} `INCOMPATIBLE_CHARSET` when `payload` is not
+ *   UTF-8, with the `CharsetError` on `cause`.
+ */
+function decode(payload: Uint8Array): string {
+  try {
+    return decodeBytes(payload);
+  } catch (error) {
+    if (error instanceof CharsetError) {
+      throw new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET, {
+        cause: error,
+      });
+    }
+    throw error;
   }
 }
