@@ -115,7 +115,7 @@ describe("decode()", () => {
       // ERR-8 stands in for MSA-3 on a NAK only; an accept has no ERR to read.
       const { text, controlId } = ack("AA");
       const bytes = encodeBytes(
-        [text, "ERR|||0^Message accepted^HL70357|I||||Ignore me"].join("\r")
+        `${text}ERR|||0^Message accepted^HL70357|I||||Ignore me\r`
       );
 
       expect(decode(bytes, controlId)).toMatchObject({ text: undefined });
@@ -169,7 +169,7 @@ describe("decode()", () => {
     it("carries ERR-3 as the error code and ERR-4 as the severity", () => {
       const { text, controlId } = ack("AE", { msa3: "Required field missing" });
       const bytes = encodeBytes(
-        [text, "ERR|||204^Required field missing^HL70357|E|||PID.5"].join("\r")
+        `${text}ERR|||204^Required field missing^HL70357|E|||PID.5\r`
       );
 
       expect(refusal(bytes, controlId)).toMatchObject({
@@ -182,7 +182,7 @@ describe("decode()", () => {
     it("says what the remote system gave, in the message", () => {
       const { text, controlId } = ack("AE", { msa3: "Required field missing" });
       const bytes = encodeBytes(
-        [text, "ERR|||204^Required field missing^HL70357|E|||PID.5"].join("\r")
+        `${text}ERR|||204^Required field missing^HL70357|E|||PID.5\r`
       );
 
       expect(refusal(bytes, controlId)).toMatchObject({
@@ -216,7 +216,7 @@ describe("decode()", () => {
     it("prefers MSA-3 over ERR-8 when both are present", () => {
       const { text, controlId } = ack("AR", { msa3: "From MSA-3" });
       const bytes = encodeBytes(
-        [text, "ERR|||207^Application error^HL70357|E||||From ERR-8"].join("\r")
+        `${text}ERR|||207^Application error^HL70357|E||||From ERR-8\r`
       );
 
       expect(refusal(bytes, controlId)).toMatchObject({ text: "From MSA-3" });

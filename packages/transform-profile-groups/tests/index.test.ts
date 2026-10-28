@@ -29,7 +29,8 @@ const nodeOutline = (node: Group | Segment): Outline => {
 const outline = (tree: Root): Outline[] =>
   (tree.children as (Group | Segment)[]).map(nodeOutline);
 
-const message = (...lines: string[]) => lines.join("\r");
+const message = (...segments: string[]) =>
+  segments.map((segment) => `${segment}\r`).join("");
 
 const ORU = message(
   "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5",

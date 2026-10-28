@@ -62,7 +62,7 @@ describe("createMsgTelemetry", () => {
     const ctx = makeCtx();
     await mw(ctx, async () => {
       ctx.res = {
-        raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001",
+        raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001\r",
       };
     });
 
@@ -92,7 +92,7 @@ describe("createMsgTelemetry", () => {
     const ctx = makeCtx();
     await mw(ctx, async () => {
       ctx.res = {
-        raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|MSG001|Rejected",
+        raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|MSG001|Rejected\r",
       };
     });
 
@@ -106,7 +106,7 @@ describe("createMsgTelemetry", () => {
 
     const ctx = makeCtx();
     await mw(ctx, async () => {
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rPID|1||12345" };
+      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rPID|1||12345\r" };
     });
 
     const event = events[0] as Record<string, unknown>;
@@ -149,7 +149,7 @@ describe("createMsgTelemetry", () => {
       const ackMw: Middleware = async (ctx, next) => {
         await next();
         ctx.res = {
-          raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001",
+          raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001\r",
         };
       };
 
@@ -188,7 +188,7 @@ describe("createMsgTelemetry", () => {
       const ackMw: Middleware = async (ctx, next) => {
         await next();
         ctx.res = {
-          raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001",
+          raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001\r",
         };
       };
 

@@ -10,6 +10,10 @@ import { describe, expect, it } from "vitest";
 import type { SegmentOrderOptions } from "../src";
 import hl7v2LintSegmentOrder from "../src";
 
+/** The HL7v2 message `segments` make, each followed by the segment terminator. */
+const hl7 = (...segments: string[]) =>
+  segments.map((segment) => `${segment}\r`).join("");
+
 /**
  * An MSH segment naming `messageType` in MSH-9 and `version` in MSH-12; with
  * no `definition`, the rule checks the message against the event schema they
@@ -35,14 +39,14 @@ const run = async (tree: Root, options?: SegmentOrderOptions) => {
  * The findings of the rule on a message whose segments are given as HL7v2
  * text, checked against the event schema its MSH names.
  */
-const lint = (...segments: string[]) => run(parseHL7v2(segments.join("\r")));
+const lint = (...segments: string[]) => run(parseHL7v2(hl7(...segments)));
 
 /**
  * The findings of the rule on a message whose segments are given as HL7v2
  * text, checked against `definition`.
  */
 const lintAgainst = (definition: EventSchema, ...segments: string[]) =>
-  run(parseHL7v2(segments.join("\r")), { definition });
+  run(parseHL7v2(hl7(...segments)), { definition });
 
 /** The text of each finding, in order. */
 const reasons = (messages: readonly { reason: string }[]) =>
@@ -165,7 +169,7 @@ describe("hl7v2LintSegmentOrder", () => {
     // before), the nodes that hold that point (`ancestors`), and which rule
     // made it.
     it("reports the segment missing where it would be inserted", async () => {
-      const tree = parseHL7v2([MSH, "PV1|1"].join("\r"));
+      const tree = parseHL7v2(hl7(MSH, "PV1|1"));
       const [message, ...rest] = await run(tree, { definition: MSH_PID_PV1 });
 
       expect(rest).toEqual([]);
@@ -180,7 +184,7 @@ describe("hl7v2LintSegmentOrder", () => {
       expect(message?.source).toBe("hl7v2-lint");
     });
 
-    // The message stops after MSH, so PID would go after its last character.
+    // The message stops after MSH, so PID would go on the line after it.
     it("reports a segment missing at the end at the end of the message", async () => {
       const [message, ...rest] = await lintAgainst(MSH_PID, MSH);
 
@@ -188,7 +192,7 @@ describe("hl7v2LintSegmentOrder", () => {
       expect(message?.message).toBe(
         "Segment `PID` is missing; the event schema requires it at this point."
       );
-      expect(message?.place).toEqual({ column: 9, line: 1, offset: 8 });
+      expect(message?.place).toEqual({ column: 1, line: 2, offset: 9 });
     });
 
     // An ADT_A01 needs EVN after MSH and PV1 after PID; both are reported.
@@ -450,7 +454,7 @@ describe("hl7v2LintSegmentOrder", () => {
     // rule made it. The first segment of the message is out of place too:
     // the message is read from it.
     it("reports the segment out of place on itself", async () => {
-      const tree = parseHL7v2(["XXX|1", MSH, "PID|1"].join("\r"));
+      const tree = parseHL7v2(hl7("XXX|1", MSH, "PID|1"));
       const [message, ...rest] = await run(tree, { definition: MSH_PID });
 
       expect(rest).toEqual([]);
@@ -613,7 +617,7 @@ describe("hl7v2LintSegmentOrder", () => {
   describe("limits", () => {
     // PID is missing and 25 XXX segments are out of place: 26 edits.
     it("reports 20 edits, then the count of the rest on the message", async () => {
-      const tree = parseHL7v2([MSH, ...repeated("XXX|1", 25)].join("\r"));
+      const tree = parseHL7v2(hl7(MSH, ...repeated("XXX|1", 25)));
       const messages = await run(tree, { definition: MSH_PID });
 
       expect(messages).toHaveLength(21);
@@ -793,9 +797,7 @@ describe("hl7v2LintSegmentOrder", () => {
     // MSH, XXX, then 999 PID: 1,001 segments. XXX is the first that does not
     // fit, and PID is what the schema allows there.
     it("reports only the first segment that does not fit in a message of more than 1,000 segments", async () => {
-      const tree = parseHL7v2(
-        [MSH, "XXX|1", ...repeated("PID|1", 999)].join("\r")
-      );
+      const tree = parseHL7v2(hl7(MSH, "XXX|1", ...repeated("PID|1", 999)));
       const [message, ...rest] = await run(tree, { definition: MSH_PID });
 
       expect(rest).toEqual([]);
@@ -813,7 +815,7 @@ describe("hl7v2LintSegmentOrder", () => {
     // MSH and 1,000 OBX: 1,001 segments, and the message stops where another
     // OBX or the required PV1 must follow.
     it("reports a message of more than 1,000 segments that ends early at its end, with the segment IDs valid there", async () => {
-      const tree = parseHL7v2([MSH, ...repeated("OBX|1", 1000)].join("\r"));
+      const tree = parseHL7v2(hl7(MSH, ...repeated("OBX|1", 1000)));
       const [message, ...rest] = await run(tree, { definition: MSH_OBX_PV1 });
 
       expect(rest).toEqual([]);
@@ -918,7 +920,7 @@ describe("hl7v2LintSegmentOrder", () => {
 
       expect(
         reasons(
-          await run(parseHL7v2([MSH, "EVN|A01", "PID|1"].join("\r")), {
+          await run(parseHL7v2(hl7(MSH, "EVN|A01", "PID|1")), {
             definition,
           })
         )
@@ -929,7 +931,7 @@ describe("hl7v2LintSegmentOrder", () => {
 
     // The function sees the message being checked and its file.
     it("checks the message against the event schema a function returns for it", async () => {
-      const tree = parseHL7v2([MSH, "PV1|1"].join("\r"));
+      const tree = parseHL7v2(hl7(MSH, "PV1|1"));
       const file = new VFile();
       const seen: unknown[] = [];
 
@@ -952,7 +954,7 @@ describe("hl7v2LintSegmentOrder", () => {
     it("awaits an event schema the function resolves asynchronously", async () => {
       expect(
         reasons(
-          await run(parseHL7v2([MSH, "PV1|1"].join("\r")), {
+          await run(parseHL7v2(hl7(MSH, "PV1|1")), {
             definition: async () => await Promise.resolve(MSH_PID_PV1),
           })
         )
@@ -967,9 +969,7 @@ describe("hl7v2LintSegmentOrder", () => {
       expect(
         reasons(
           await run(
-            parseHL7v2(
-              [msh("ADT^A01^ADT_A01", "2.5"), "EVN|A01", "PID|1"].join("\r")
-            ),
+            parseHL7v2(hl7(msh("ADT^A01^ADT_A01", "2.5"), "EVN|A01", "PID|1")),
             { definition: () => {} }
           )
         )

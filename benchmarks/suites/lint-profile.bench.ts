@@ -19,9 +19,9 @@ const BASE = hl7File("adt-a01-sparse");
 
 describe("lint-profile", () => {
   const small = parseHL7v2(BASE);
-  const medium = parseHL7v2(hl7(BASE, ...repeat(obxLine, 10)));
-  const large = parseHL7v2(hl7(BASE, ...repeat(obxLine, 50)));
-  const xl = parseHL7v2(hl7(BASE, ...repeat(obxLine, 100)));
+  const medium = parseHL7v2(`${BASE}${hl7(...repeat(obxLine, 10))}`);
+  const large = parseHL7v2(`${BASE}${hl7(...repeat(obxLine, 50))}`);
+  const xl = parseHL7v2(`${BASE}${hl7(...repeat(obxLine, 100))}`);
   const violations = parseHL7v2(hl7File("adt-a01-violations"));
 
   bench("lint-profile: validate 3 segments", async () => {

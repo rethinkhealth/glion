@@ -5,10 +5,10 @@ import { Mllp } from "../../src/server/mllp";
 import type { ConnectionInfo } from "../../src/server/types";
 
 const SAMPLE_ADT = [
-  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
-  "EVN|A01|20240101120000",
-  "PID|1||12345^^^MRN||Doe^John",
-].join("\r");
+  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1\r",
+  "EVN|A01|20240101120000\r",
+  "PID|1||12345^^^MRN||Doe^John\r",
+].join("");
 
 const MOCK_CONNECTION: ConnectionInfo = {
   id: 1,
@@ -78,7 +78,7 @@ describe("Mllp.use({ prepend })", () => {
     // Register an inner middleware that sets ctx.res (simulates an acknowledgment middleware)
     app.use(async (ctx, next) => {
       await next();
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
+      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001\r" };
     });
 
     // Prepend an outer middleware that reads ctx.res after next() (simulates telemetry)
@@ -105,7 +105,7 @@ describe("Mllp.use({ prepend })", () => {
     // Register outer middleware that sets ctx.res after next()
     app.use(async (ctx, next) => {
       await next();
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
+      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001\r" };
     });
 
     // Append inner middleware (default) that reads ctx.res after next()

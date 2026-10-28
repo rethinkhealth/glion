@@ -22,9 +22,9 @@ import { unified } from "unified";
 import { reporter } from "vfile-reporter";
 
 const message = [
-  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5",
-  "EVN|A01",
-].join("\r");
+  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5\r",
+  "EVN|A01\r",
+].join("");
 
 const file = await unified()
   .use(hl7v2Parser)

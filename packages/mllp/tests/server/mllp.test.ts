@@ -8,21 +8,21 @@ import { Mllp } from "../../src/server/mllp";
 import type { ConnectionInfo } from "../../src/server/types";
 
 const SAMPLE_ADT = [
-  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
-  "EVN|A01|20240101120000",
-  "PID|1||12345^^^MRN||Doe^John",
-].join("\r");
+  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1\r",
+  "EVN|A01|20240101120000\r",
+  "PID|1||12345^^^MRN||Doe^John\r",
+].join("");
 
 const SAMPLE_ORU = [
-  "MSH|^~\\&|Lab|Fac|App|Fac|20240101||ORU^R01|MSG002|P|2.5.1",
-  "PID|1||99999",
-  "OBR|1||LAB123|CBC",
-].join("\r");
+  "MSH|^~\\&|Lab|Fac|App|Fac|20240101||ORU^R01|MSG002|P|2.5.1\r",
+  "PID|1||99999\r",
+  "OBR|1||LAB123|CBC\r",
+].join("");
 
 const SAMPLE_ADT_V23 = [
-  "MSH|^~\\&|OldApp|OldFac|RecvApp|RecvFac|20240101120000||ADT^A01|MSG005|P|2.3",
-  "PID|1||67890",
-].join("\r");
+  "MSH|^~\\&|OldApp|OldFac|RecvApp|RecvFac|20240101120000||ADT^A01|MSG005|P|2.3\r",
+  "PID|1||67890\r",
+].join("");
 
 const MOCK_CONNECTION: ConnectionInfo = {
   id: 1,
@@ -33,9 +33,9 @@ const MOCK_CONNECTION: ConnectionInfo = {
   state: new Map(),
 };
 
-const RESPONSE_OK = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
+const RESPONSE_OK = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001\r" };
 const RESPONSE_REJECT = {
-  raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|MSG002|Unsupported",
+  raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|MSG002|Unsupported\r",
 };
 
 function toBytes(msg: string): Uint8Array {
@@ -270,7 +270,7 @@ describe("Mllp", () => {
     const handlerRan = { value: false };
 
     app.use(async () => ({
-      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|MSG001|Blocked by middleware",
+      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|MSG001|Blocked by middleware\r",
     }));
     app.on("*", async () => {
       handlerRan.value = true;
@@ -292,7 +292,7 @@ describe("Mllp", () => {
       throw new Error("Handler crashed");
     });
     app.onError(async () => ({
-      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|MSG001|Custom error handling",
+      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AE|MSG001|Custom error handling\r",
     }));
 
     const response = await app.handle(

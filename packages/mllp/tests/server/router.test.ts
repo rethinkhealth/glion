@@ -26,24 +26,24 @@ function makeCtx(raw: string): Context {
 }
 
 const ADT_A01 = [
-  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
-  "PID|1||12345",
-].join("\r");
+  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1\r",
+  "PID|1||12345\r",
+].join("");
 
 const ADT_A08 = [
-  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A08|MSG002|P|2.5.1",
-  "PID|1||12345",
-].join("\r");
+  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A08|MSG002|P|2.5.1\r",
+  "PID|1||12345\r",
+].join("");
 
 const ORU_R01 = [
-  "MSH|^~\\&|Lab|Fac|App|Fac|20240101||ORU^R01|MSG003|P|2.5.1",
-  "OBR|1||LAB123|CBC",
-].join("\r");
+  "MSH|^~\\&|Lab|Fac|App|Fac|20240101||ORU^R01|MSG003|P|2.5.1\r",
+  "OBR|1||LAB123|CBC\r",
+].join("");
 
 const ADT_A01_V23 = [
-  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01|MSG004|P|2.3",
-  "PID|1||12345",
-].join("\r");
+  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01|MSG004|P|2.3\r",
+  "PID|1||12345\r",
+].join("");
 
 describe("Router", () => {
   describe("string pattern matching", () => {

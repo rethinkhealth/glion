@@ -10,10 +10,10 @@ import { frame } from "@glion/mllp-codec";
 
 /** An ADT^A01 with control ID `MSG00001`, CR-delimited. */
 export const ADT = [
-  "MSH|^~\\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5",
-  "EVN|A01|20260531120000",
-  "PID|1||12345^^^MRN||DOE^JOHN",
-].join("\r");
+  "MSH|^~\\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5\r",
+  "EVN|A01|20260531120000\r",
+  "PID|1||12345^^^MRN||DOE^JOHN\r",
+].join("");
 
 /** An MLLP-framed acknowledgment of {@link ADT} with MSA-1 `code`. */
 export function ackFrame(code: string, withErr = false): Uint8Array {
@@ -24,7 +24,9 @@ export function ackFrame(code: string, withErr = false): Uint8Array {
   if (withErr) {
     segments.push("ERR|||207^bad^HL70357|E");
   }
-  return frame(new TextEncoder().encode(segments.join("\r")));
+  return frame(
+    new TextEncoder().encode(segments.map((segment) => `${segment}\r`).join(""))
+  );
 }
 
 /** A socket that answers every write with `ack`. */

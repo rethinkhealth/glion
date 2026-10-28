@@ -49,8 +49,8 @@ const preset = unified().use(hl7v2PresetAnnotateProfileRecommended);
 const BASE = hl7File("adt-a01-coded");
 
 describe("annotate-profile", () => {
-  const medium = parseHL7v2(hl7(BASE, ...repeat(obxCodedLine, 10)));
-  const large = parseHL7v2(hl7(BASE, ...repeat(obxCodedLine, 50)));
+  const medium = parseHL7v2(`${BASE}${hl7(...repeat(obxCodedLine, 10))}`);
+  const large = parseHL7v2(`${BASE}${hl7(...repeat(obxCodedLine, 50))}`);
 
   bench("annotate: baseline structuredClone (52 segments)", () => {
     structuredClone(large);

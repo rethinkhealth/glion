@@ -33,10 +33,10 @@ await using client = new MllpClient({
 
 const adt = parseHL7v2(
   [
-    "MSH|^~\\&|SENDER|FAC|RECV|FAC|20260101120000||ADT^A01|MSG00001|P|2.5",
-    "EVN|A01|20260101120000",
-    "PID|1||12345^^^MRN||DOE^JOHN||19800101|M",
-  ].join("\r")
+    "MSH|^~\\&|SENDER|FAC|RECV|FAC|20260101120000||ADT^A01|MSG00001|P|2.5\r",
+    "EVN|A01|20260101120000\r",
+    "PID|1||12345^^^MRN||DOE^JOHN||19800101|M\r",
+  ].join("")
 );
 
 const ack = await client.send(adt);

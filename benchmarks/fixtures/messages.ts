@@ -2,9 +2,9 @@
  * Canonical benchmark fixtures — the shared vocabulary of the suite.
  *
  * HL7v2 text is the single canonical form: named messages live as .hl7
- * files in ./messages (loaded via {@link hl7File}, newlines normalized to
- * CR), and scale comes from composing per-index line builders with
- * {@link repeat} — `hl7(BASE, ...repeat(obxLine, 50))`. Tree suites parse
+ * files in ./messages (loaded via {@link hl7File}), and scale comes from
+ * composing per-index line builders with {@link repeat} —
+ * `` `${BASE}${hl7(...repeat(obxLine, 50))}` ``. Tree suites parse
  * the text with `parseHL7v2`, exactly as production pipelines do; nothing
  * here hand-builds ASTs.
  *
@@ -20,12 +20,9 @@ import { join } from "node:path";
 
 const MESSAGES_DIR = join(import.meta.dirname, "messages");
 
-/** Read a canonical .hl7 message by basename; newlines normalized to CR. */
+/** Read a canonical .hl7 message by basename. */
 export function hl7File(name: string): string {
-  return readFileSync(join(MESSAGES_DIR, `${name}.hl7`), "utf8")
-    .replaceAll("\r\n", "\r")
-    .replaceAll("\n", "\r")
-    .replace(/\r+$/, "");
+  return readFileSync(join(MESSAGES_DIR, `${name}.hl7`), "utf8");
 }
 
 /**
@@ -36,9 +33,9 @@ export function repeat<T>(build: (index: number) => T, count: number): T[] {
   return Array.from({ length: count }, (_, i) => build(i + 1));
 }
 
-/** Join segments (or whole message parts) into one HL7v2 message (CR-separated). */
+/** The HL7v2 message `segments` make, each followed by the segment terminator. */
 export function hl7(...segments: string[]): string {
-  return segments.join("\r");
+  return segments.map((segment) => `${segment}\r`).join("");
 }
 
 // ---------------------------------------------------------------------------
@@ -76,7 +73,7 @@ export const ADT_A01_SMALL = hl7File("adt-a01-small");
 export const ADT_A01_MINIMAL = hl7File("adt-a01-minimal");
 
 // v2.5, mostly-empty fields (adt-a01-sparse.hl7) — extend with sparse OBX
-// lines: hl7(hl7File("adt-a01-sparse"), ...repeat(obxLine, N)).
+// lines: `${hl7File("adt-a01-sparse")}${hl7(...repeat(obxLine, N))}`.
 // v2.5, CWE-coded fields (adt-a01-coded.hl7) — extend with obxCodedLine.
 // v2.5, guaranteed profile violations (adt-a01-violations.hl7): EVN-1
 // outside table 0003, PID-1 repetition + maxLength, required fields empty.

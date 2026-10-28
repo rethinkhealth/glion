@@ -21,14 +21,14 @@ import hl7v2LintSegmentOrder from "../../src";
 import type { SegmentOrderOptions } from "../../src";
 
 const ORU = [
-  "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5",
-  "PID|1||12345^^^MRN||Doe^John",
-  "ZPI|1|site patient",
-  "OBR|1|ORD1||CBC",
-  "ZDS|1|site order",
-  "OBX|1|NM|WBC||5.0",
-  "ZRS|1|site result",
-].join("\r");
+  "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5\r",
+  "PID|1||12345^^^MRN||Doe^John\r",
+  "ZPI|1|site patient\r",
+  "OBR|1|ORD1||CBC\r",
+  "ZDS|1|site order\r",
+  "OBX|1|NM|WBC||5.0\r",
+  "ZRS|1|site result\r",
+].join("");
 
 const lint = async (options?: SegmentOrderOptions) => {
   const file = new VFile();
@@ -60,12 +60,12 @@ describe("Z-segments the event schema does not name", () => {
       .run(
         parseHL7v2(
           [
-            "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5",
-            "EVN|A01|20250601120000",
-            "PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F",
-            "ZPD|1|site patient data",
-            "PV1|1|I|WARD^101^1",
-          ].join("\r")
+            "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5\r",
+            "EVN|A01|20250601120000\r",
+            "PID|1||PATID1234^^^HOSP^MR||DOE^JANE||19800101|F\r",
+            "ZPD|1|site patient data\r",
+            "PV1|1|I|WARD^101^1\r",
+          ].join("")
         ),
         file
       );

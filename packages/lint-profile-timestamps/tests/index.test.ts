@@ -17,7 +17,7 @@ const processor = unified()
   .use(hl7v2LintTimestamps);
 
 async function lint(...segments: string[]) {
-  const file = new VFile(segments.join("\r"));
+  const file = new VFile(segments.map((segment) => `${segment}\r`).join(""));
   await processor.run(processor.parse(file), file);
   return file.messages.filter((message) => message.ruleId === "timestamps");
 }

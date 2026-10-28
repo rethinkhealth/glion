@@ -23,11 +23,11 @@ import hl7v2PresetLintProfileRecommended from "../../src";
 describe("a valid v2.7.1 ADT^A01", () => {
   it("gets no finding from a field checked against another field's profile", async () => {
     const message = [
-      "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01^ADT_A01|MSG001|P|2.7.1",
-      "EVN||20241201",
-      "PID|1||12345^^^HOSP^MR||Doe^John",
-      "PV1|1|I",
-    ].join("\r");
+      "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01^ADT_A01|MSG001|P|2.7.1\r",
+      "EVN||20241201\r",
+      "PID|1||12345^^^HOSP^MR||Doe^John\r",
+      "PV1|1|I\r",
+    ].join("");
     const file = new VFile();
 
     await unified()

@@ -223,7 +223,7 @@ describe("hl7v2-lint:no-trailing-empty-field", () => {
     });
 
     it("reports a range from the first trailing empty field to the end of the segment", async () => {
-      const file = new VFile("MSH|^~\\&|A\rPID|1|DOE|||\rPV1|1");
+      const file = new VFile("MSH|^~\\&|A\rPID|1|DOE|||\rPV1|1\r");
       const processor = unified()
         .use(hl7v2Parser)
         .use(hl7v2LintNoTrailingEmptyField);

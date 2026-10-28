@@ -32,7 +32,7 @@ const ADT_A01 =
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1";
 
 const ACK =
-  "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240101120000||ACK|ACK001|P|2.5.1\rMSA|AA|MSG001";
+  "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240101120000||ACK|ACK001|P|2.5.1\rMSA|AA|MSG001\r";
 
 /** X.509 GeneralName tag for a DNS name (RFC 5280 §4.2.1.6). */
 const DNS_NAME = 2;

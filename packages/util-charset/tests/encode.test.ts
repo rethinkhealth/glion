@@ -9,7 +9,7 @@ describe("encodeBytes", () => {
 
   it("round-trips with decodeBytes", () => {
     const text =
-      "MSH|^~\\&|S|F|R|F|20240101||ADT^A01|MSG001|P|2.5.1\rPID|1||x||José";
+      "MSH|^~\\&|S|F|R|F|20240101||ADT^A01|MSG001|P|2.5.1\rPID|1||x||José\r";
     expect(decodeBytes(encodeBytes(text))).toBe(text);
   });
 });

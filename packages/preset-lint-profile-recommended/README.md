@@ -22,9 +22,9 @@ import { VFile } from "vfile";
 import { reporter } from "vfile-reporter";
 
 const message = [
-  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01|MSG00001|P|2.5",
-  "PID|1||PATID1234^^^HOSP^MR",
-].join("\r");
+  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01|MSG00001|P|2.5\r",
+  "PID|1||PATID1234^^^HOSP^MR\r",
+].join("");
 
 const file = new VFile();
 await unified()

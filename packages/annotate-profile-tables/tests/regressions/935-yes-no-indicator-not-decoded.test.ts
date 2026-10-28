@@ -25,9 +25,9 @@ import { describe, expect, it } from "vitest";
 import { hl7v2AnnotateProfileTables } from "../../src";
 
 const message = [
-  "MSH|^~\\&|A||B||201410060645||ORU^R01|182|T|2.5",
-  "PID|1||10006579^^^1^MR^1||DUCK^DONALD||19241010|M||||||||||||||||||||||N",
-].join("\r");
+  "MSH|^~\\&|A||B||201410060645||ORU^R01|182|T|2.5\r",
+  "PID|1||10006579^^^1^MR^1||DUCK^DONALD||19241010|M||||||||||||||||||||||N\r",
+].join("");
 
 describe("a v2.5 PID valued with a Yes/no indicator", () => {
   it("decodes PID-30 against table 0136", async () => {
