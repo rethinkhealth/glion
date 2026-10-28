@@ -33,7 +33,7 @@
     "@glion/tsconfig": "workspace:*",
     "@glion/util-query": "workspace:*",
     "@glion/util-visit": "workspace:*",
-    "@types/node": "25.6.0",
+    "@types/node": "26.6.5",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
     "vitest": "4.1.12"

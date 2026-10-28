@@ -1,6 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
+import { TimestampPrecisionError } from "../src/errors";
 import { formatDT, formatDTM, formatTM } from "../src/format";
 import { parseDT, parseDTM, parseTM } from "../src/parse";
 
@@ -20,13 +21,8 @@ const fraction = fc
   .chain((count) => digits(count))
   .map((value) => `.${value}`);
 
-// `-0000` is written back as `+0000`, so the generated offsets leave it out.
 const offset = fc
   .tuple(fc.constantFrom("+", "-"), pairInRange(14), pairInRange(59))
-  .filter(
-    ([sign, hours, minutes]) =>
-      sign === "+" || hours !== "00" || minutes !== "00"
-  )
   .map(([sign, hours, minutes]) => `${sign}${hours}${minutes}`);
 
 const date = fc
@@ -77,8 +73,7 @@ describe("format of parse is the value", () => {
     );
   });
 
-  // Mutant: `formatOffset` writes an offset west of UTC with `+`. Fails on
-  // `"09-0545"`.
+  // Mutant: `writeTime` leaves the offset out. Fails on `"09-0545"`.
   it("for every valid TM", () => {
     fc.assert(
       fc.property(tmText, (value) => {
@@ -97,7 +92,7 @@ describe("format of parse is the value", () => {
         const result = parseDTM(value);
         expect(result.success && formatDTM(result.data)).toBe(value);
       }),
-      { examples: [["20260307120000.25"]] }
+      { examples: [["20260307120000.25"], ["2026030712-0000"]] }
     );
   });
 });
@@ -147,26 +142,111 @@ describe("parseDT accepts exactly the days of the calendar", () => {
 });
 
 describe("formatDTM", () => {
-  it("writes an offset of 0 as +0000", () => {
+  it("writes the offset as given", () => {
     expect(
       formatDTM({
         day: 7,
         hour: 12,
         month: 3,
-        offset: 0,
+        offset: "-0000",
         precision: "hour",
         year: 2026,
       })
-    ).toBe("2026030712+0000");
+    ).toBe("2026030712-0000");
   });
 
   it("pads a year below 1000 to four digits", () => {
     expect(formatDTM({ precision: "year", year: 99 })).toBe("0099");
   });
 
-  it("writes an offset east of UTC with +", () => {
-    expect(formatTM({ hour: 9, offset: 345, precision: "hour" })).toBe(
-      "09+0545"
+  // The precision says which fields are written: a field past it is not.
+  it("writes the fields down to the precision, and no further", () => {
+    expect(
+      formatDTM({
+        day: 7,
+        fraction: "12",
+        hour: 14,
+        minute: 30,
+        month: 3,
+        offset: "-0500",
+        precision: "minute",
+        second: 45,
+        year: 2026,
+      })
+    ).toBe("202603071430-0500");
+  });
+
+  // Without the minute, `05` would be read as the minute: 02:05, not 02:00:05.
+  it("throws when a field down to the precision is missing", () => {
+    const write = () =>
+      formatDTM({
+        day: 15,
+        hour: 2,
+        month: 1,
+        precision: "second",
+        second: 5,
+        year: 2024,
+      });
+    expect(write).toThrow(TimestampPrecisionError);
+    expect(write).toThrow(
+      expect.objectContaining({ field: "minute", precision: "second" })
+    );
+  });
+
+  it("throws when the precision is fraction and there is no fraction", () => {
+    expect(() =>
+      formatDTM({
+        day: 15,
+        hour: 2,
+        minute: 30,
+        month: 1,
+        precision: "fraction",
+        second: 0,
+        year: 2024,
+      })
+    ).toThrow(
+      expect.objectContaining({ field: "fraction", precision: "fraction" })
+    );
+  });
+});
+
+describe("formatTM", () => {
+  it("writes the fields down to the precision, and no further", () => {
+    expect(
+      formatTM({ fraction: "5", hour: 14, minute: 30, precision: "hour" })
+    ).toBe("14");
+  });
+
+  it("writes the fraction at precision fraction", () => {
+    expect(
+      formatTM({
+        fraction: "1230",
+        hour: 14,
+        minute: 30,
+        offset: "+0100",
+        precision: "fraction",
+        second: 45,
+      })
+    ).toBe("143045.1230+0100");
+  });
+
+  it("throws when a field down to the precision is missing", () => {
+    expect(() => formatTM({ hour: 14, precision: "minute" })).toThrow(
+      expect.objectContaining({ field: "minute", precision: "minute" })
+    );
+  });
+});
+
+describe("formatDT", () => {
+  it("writes the fields down to the precision, and no further", () => {
+    expect(formatDT({ day: 7, month: 3, precision: "month", year: 2026 })).toBe(
+      "202603"
+    );
+  });
+
+  it("throws when a field down to the precision is missing", () => {
+    expect(() => formatDT({ precision: "day", year: 2026 })).toThrow(
+      expect.objectContaining({ field: "month", precision: "day" })
     );
   });
 });

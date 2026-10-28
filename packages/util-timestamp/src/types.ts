@@ -1,5 +1,8 @@
 import type { Precision } from "./precision";
 
+/** An offset from UTC, written `+/-HHMM`: `"-0500"`. */
+export type Offset = `${"+" | "-"}${number}`;
+
 /**
  * An HL7v2 DT (Date) value, written `YYYY[MM[DD]]`.
  *
@@ -11,6 +14,7 @@ export interface DT {
   month?: number;
   /** 1 to the number of days in `month`. */
   day?: number;
+  /** The last field the value gives: `202603` is `month`. */
   precision: Extract<Precision, "year" | "month" | "day">;
 }
 
@@ -26,14 +30,22 @@ export interface TM {
   minute?: number;
   /** 0 to 59. */
   second?: number;
-  /** The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`. */
+  /**
+   * The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`.
+   * Present when `precision` is `fraction`.
+   */
   fraction?: string;
   /**
-   * The offset from UTC in minutes, positive east of UTC: `-0500` is `-300`.
-   * Absent when the value gives no offset. `+0000` and `-0000` are both `0`.
+   * The offset from UTC as written, `+/-HHMM`: `"-0500"`. Absent when the
+   * value gives no offset. From HL7v2 v2.9, `"-0000"` is UTC with no local
+   * time zone known, and `"+0000"` a local time zone at offset zero.
    */
-  offset?: number;
-  precision: Extract<Precision, "hour" | "minute" | "second">;
+  offset?: Offset;
+  /**
+   * The last field the value gives: `1430` is `minute`, and `143045.12` is
+   * `fraction`. The offset does not count.
+   */
+  precision: Extract<Precision, "hour" | "minute" | "second" | "fraction">;
 }
 
 /**
@@ -56,13 +68,22 @@ export interface DTM {
   minute?: number;
   /** 0 to 59. */
   second?: number;
-  /** The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`. */
+  /**
+   * The 1 to 4 digits after the seconds, as written: `"1230"` for `.1230`.
+   * Present when `precision` is `fraction`.
+   */
   fraction?: string;
   /**
-   * The offset from UTC in minutes, positive east of UTC: `-0500` is `-300`.
-   * Absent when the value gives no offset. `+0000` and `-0000` are both `0`.
+   * The offset from UTC as written, `+/-HHMM`: `"-0500"`. Absent when the
+   * value gives no offset. From HL7v2 v2.9, `"-0000"` is UTC with no local
+   * time zone known, and `"+0000"` a local time zone at offset zero.
    */
-  offset?: number;
+  offset?: Offset;
+  /**
+   * The last field the value gives, from `year` to `fraction`: `202603-0500`
+   * is `month`, and `20260307143045.12` is `fraction`. The offset does not
+   * count.
+   */
   precision: Precision;
 }
 
