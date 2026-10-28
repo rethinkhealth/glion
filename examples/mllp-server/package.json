@@ -11,7 +11,6 @@
     "@glion/cli": "latest",
     "@glion/hl7v2": "latest",
     "@glion/mllp": "latest",
-    "@glion/mllp-ack": "latest",
     "consola": "3.4.2"
   },
   "devDependencies": {
