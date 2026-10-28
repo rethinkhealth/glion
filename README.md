@@ -114,7 +114,6 @@ Linting rules and presets for HL7v2 message quality and conformance.
 - **[@glion/lint-required-message-header][glion-lint-required-message-header]** — ensure every message includes a required header segment such as `MSH`.
 - **[@glion/lint-max-message-size][glion-lint-max-message-size]** — report when a message exceeds a configurable maximum size in bytes or segment count.
 - **[@glion/lint-no-trailing-empty-field][glion-lint-no-trailing-empty-field]** — flag empty fields at the end of a segment, which can cause ambiguity or interoperability issues.
-- **[@glion/lint-segment-terminator][glion-lint-segment-terminator]** — warn when a segment ends with a line feed, or with a carriage return and a line feed, or the last segment has no segment terminator.
 - **[@glion/lint-segment-header-length][glion-lint-segment-header-length]** — validate that segment headers are exactly three characters, as required by the HL7v2 specification.
 - **[@glion/lint-message-version][glion-lint-message-version]** — warn when a message version is unsupported or outside expected constraints.
 
@@ -241,7 +240,6 @@ HL7® and Health Level Seven® are registered trademarks of Health Level Seven I
 [glion-lint-profile-withdrawn]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-profile-withdrawn#readme
 [glion-lint-required-message-header]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-required-message-header#readme
 [glion-lint-segment-header-length]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-segment-header-length#readme
-[glion-lint-segment-terminator]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-segment-terminator#readme
 [glion-mllp]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp#readme
 [glion-mllp-client]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-client#readme
 [glion-mllp-codec]: https://github.com/rethinkhealth/glion/tree/main/packages/mllp-codec#readme
