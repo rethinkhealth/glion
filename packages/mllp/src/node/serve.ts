@@ -161,7 +161,7 @@ export interface Server {
  *   import { serve } from "@glion/mllp/node";
  *
  *   const app = new Mllp().on("ADT^A01", async (ctx) => {
- *     await save(ctx.ast);
+ *     await save(ctx.req.tree);
  *     return ctx.ack();
  *   });
  *

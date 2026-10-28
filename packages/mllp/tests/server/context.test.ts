@@ -39,9 +39,9 @@ describe("createContext", () => {
     expect(ctx.error).toBeUndefined();
   });
 
-  it("keeps the routing fields as parsed, and acknowledges the MSH as it is, when a handler changes ctx.ast", async () => {
+  it("keeps the routing fields as parsed, and acknowledges the MSH as it is, when a handler changes ctx.req.tree", async () => {
     const ctx = await makeCtx();
-    const controlId = value(ctx.ast, "MSH.10")?.node;
+    const controlId = value(ctx.req.tree, "MSH.10")?.node;
     if (controlId?.type !== "subcomponent") {
       throw new Error("The sample message has no MSH-10.");
     }
@@ -88,31 +88,14 @@ describe("createContext", () => {
     expect(ctx.controlId).toBe("MSG001");
   });
 
-  it("ast is the tree the processor read", async () => {
-    const ctx = await makeCtx();
-    expect(ctx.ast).toBeDefined();
-    expect(ctx.ast.type).toBe("root");
-    expect(ctx.ast.children.length).toBeGreaterThan(0);
-  });
-
-  it("tree() returns the tree the processor read", async () => {
-    const ctx = await makeCtx();
-    const tree = await ctx.tree();
-    expect(tree).toBeDefined();
-    expect(tree.type).toBe("root");
-    expect(tree.children.length).toBeGreaterThan(0);
-  });
-
-  it("populates file as VFile", async () => {
-    const ctx = await makeCtx();
-    expect(ctx.file).toBeDefined();
-  });
-
-  it("populates result from compiler", async () => {
-    // parseHL7v2 includes hl7v2Jsonify, so result should be defined
-    const ctx = await makeCtx();
-    const result = await ctx.result();
-    expect(result).toBeDefined();
+  it("holds the request parseRequest() read as req", async () => {
+    const request = await parseRequest(SAMPLE_BYTES, parseHL7v2);
+    const ctx = createContext({
+      app: { serializer: toHl7v2 },
+      env: undefined,
+      request,
+    });
+    expect(ctx.req).toBe(request);
   });
 
   it("initializes res as undefined", async () => {
@@ -131,7 +114,7 @@ describe("createContext", () => {
       });
 
       // Tree is parsed correctly
-      const tree = await ctx.tree();
+      const { tree } = ctx.req;
       expect(tree.type).toBe("root");
       expect(tree.children.length).toBeGreaterThan(0);
 
@@ -141,10 +124,10 @@ describe("createContext", () => {
       expect(ctx.controlId).toBe("MSG001");
 
       // VFile exists (always created)
-      expect(ctx.file).toBeDefined();
+      expect(ctx.req.file).toBeDefined();
 
       // No compiler → result is undefined
-      const result = await ctx.result();
+      const result = await ctx.req.result();
       expect(result).toBeUndefined();
     });
 
@@ -156,10 +139,10 @@ describe("createContext", () => {
       });
 
       // Tree, file, and result all populated
-      const tree = await ctx.tree();
+      const { tree } = ctx.req;
       expect(tree.type).toBe("root");
-      expect(ctx.file).toBeDefined();
-      const result = await ctx.result();
+      expect(ctx.req.file).toBeDefined();
+      const result = await ctx.req.result();
       expect(result).toBeDefined();
 
       // Result is the compiled JSON from hl7v2Jsonify
@@ -168,16 +151,11 @@ describe("createContext", () => {
   });
 
   describe("compiled result", () => {
-    it("tree() resolves to ast", async () => {
-      const ctx = await makeCtx();
-      expect(await ctx.tree()).toBe(ctx.ast);
-    });
-
     it("result() calls stringify() exactly once on repeated calls", async () => {
       const spy = vi.spyOn(parseHL7v2, "stringify");
       const ctx = await makeCtx();
-      const a = await ctx.result();
-      const b = await ctx.result();
+      const a = await ctx.req.result();
+      const b = await ctx.req.result();
       expect(a).toBe(b);
       expect(spy).toHaveBeenCalledOnce();
       spy.mockRestore();
@@ -186,7 +164,7 @@ describe("createContext", () => {
     it("concurrent result() calls share one promise (stringify() called once)", async () => {
       const spy = vi.spyOn(parseHL7v2, "stringify");
       const ctx = await makeCtx();
-      const [a, b] = await Promise.all([ctx.result(), ctx.result()]);
+      const [a, b] = await Promise.all([ctx.req.result(), ctx.req.result()]);
       expect(a).toBe(b);
       expect(spy).toHaveBeenCalledOnce();
       spy.mockRestore();

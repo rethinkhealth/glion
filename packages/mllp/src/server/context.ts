@@ -35,7 +35,7 @@ export function createContext<E>(
 ): MessageContext<E> {
   const { app, request, env } = options;
   const { serializer, ...defaults } = app;
-  const { file, header, raw, result, tree } = request;
+  const { header, tree } = request;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
   let res: MllpResponse | undefined;
@@ -52,11 +52,9 @@ export function createContext<E>(
         serializer
       );
     },
-    ast: tree,
     controlId: header.controlId,
     env,
     error: undefined,
-    file,
     get<K extends string>(key: K): unknown {
       return variables.get(key);
     },
@@ -72,7 +70,7 @@ export function createContext<E>(
       }
       return reply;
     },
-    req: Object.freeze({ raw }),
+    req: request,
     get res(): MllpResponse | undefined {
       return res;
     },
@@ -82,12 +80,10 @@ export function createContext<E>(
       }
       res = value;
     },
-    result,
     set<K extends string>(key: K, value: unknown): void {
       variables.set(key, value);
       varSnapshot = undefined;
     },
-    tree: () => Promise.resolve(tree),
     triggerEvent: header.triggerEvent,
     get var(): Readonly<Record<string, unknown>> {
       if (!varSnapshot) {

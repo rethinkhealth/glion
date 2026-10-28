@@ -85,16 +85,6 @@ describe("mllp", () => {
     await app10.handle(smallBytes);
   });
 
-  const appTree = new Mllp();
-  appTree.on("ADT^A01", async (ctx) => {
-    await ctx.tree();
-    return ctx.reply(RESPONSE_OK);
-  });
-
-  bench("mllp: handle with handler awaiting tree()", async () => {
-    await appTree.handle(smallBytes);
-  });
-
   const appNoMatch = new Mllp();
   appNoMatch.on("ORM^O01", (ctx) => ctx.reply(RESPONSE_OK));
 

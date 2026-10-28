@@ -140,14 +140,14 @@ describe("Mllp", () => {
       secondSpy.mockRestore();
     });
 
-    it("ctx.ast is always available synchronously", async () => {
+    it("ctx.req.tree is the tree the processor read", async () => {
       const app = createApp();
       let astType = "";
       let childrenCount = 0;
 
       app.on("ADT^A01", (ctx) => {
-        astType = ctx.ast.type;
-        childrenCount = ctx.ast.children.length;
+        astType = ctx.req.tree.type;
+        childrenCount = ctx.req.tree.children.length;
         return ctx.reply(RESPONSE_OK);
       });
 
@@ -156,26 +156,12 @@ describe("Mllp", () => {
       expect(childrenCount).toBeGreaterThan(0);
     });
 
-    it("ctx.tree() returns the transformed tree lazily", async () => {
-      const app = createApp();
-      let treeType = "";
-
-      app.on("ADT^A01", async (ctx) => {
-        const tree = await ctx.tree();
-        treeType = tree.type;
-        return ctx.reply(RESPONSE_OK);
-      });
-
-      await app.handle(toBytes(SAMPLE_ADT));
-      expect(treeType).toBe("root");
-    });
-
-    it("populates ctx.file with VFile", async () => {
+    it("populates ctx.req.file with VFile", async () => {
       const app = createApp();
       let fileExists = false;
 
       app.on("ADT^A01", async (ctx) => {
-        fileExists = ctx.file !== undefined;
+        fileExists = ctx.req.file !== undefined;
         return ctx.reply(RESPONSE_OK);
       });
 
@@ -183,12 +169,12 @@ describe("Mllp", () => {
       expect(fileExists).toBe(true);
     });
 
-    it("populates ctx.result when processor has a compiler", async () => {
+    it("populates ctx.req.result() when processor has a compiler", async () => {
       const app = new Mllp().parser(parseHL7v2); // includes hl7v2Jsonify
       let resultExists = false;
 
       app.on("ADT^A01", async (ctx) => {
-        resultExists = (await ctx.result()) !== undefined;
+        resultExists = (await ctx.req.result()) !== undefined;
         return ctx.reply(RESPONSE_OK);
       });
 
@@ -439,7 +425,7 @@ describe("Mllp", () => {
     it("filter with ast inspection", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.ast.children.length > 2,
+        (ctx) => ctx.req.tree.children.length > 2,
         async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
@@ -1226,8 +1212,7 @@ describe("acknowledgment defaults", () => {
   it("echoes the MSH-10 a route handler writes to the tree before the acknowledgment", async () => {
     const app = createApp();
     app.on("ADT^A01", async (ctx) => {
-      const tree = await ctx.tree();
-      const msh10 = value(tree, "MSH.10")?.node as { value: string };
+      const msh10 = value(ctx.req.tree, "MSH.10")?.node as { value: string };
       msh10.value = "ENGINE-0001";
       return ctx.ack();
     });

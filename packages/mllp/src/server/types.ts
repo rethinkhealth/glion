@@ -1,8 +1,8 @@
 import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
-import type { VFile } from "vfile";
 
 import type { AcknowledgeOptions } from "./acknowledge";
+import type { MllpRequest } from "./request";
 import type { MllpResponse } from "./response";
 
 /**
@@ -12,18 +12,15 @@ import type { MllpResponse } from "./response";
 export type EnvArgs<E> = undefined extends E ? [env?: E] : [env: E];
 
 /**
- * The MLLP context object.
+ * The MLLP context of one message: the request that arrived, the response
+ * going back, and what the app adds.
  *
  * The routing fields are read from the MSH of the tree the processor
- * produced, once, before routing. The compiled result is lazy: `result()`
- * runs the compiler on first call.
+ * produced, once, before routing.
  */
 export interface Context<E = unknown> {
-  /** Incoming message data */
-  readonly req: {
-    /** The payload decoded as UTF-8, without MLLP framing. */
-    readonly raw: string;
-  };
+  /** The message that arrived, as the app's processor read it. */
+  readonly req: MllpRequest;
   /**
    * The error this message raised: a route filter, middleware or handler
    * throw, a response that is not an HL7v2 message (`INVALID_RESPONSE`), a
@@ -42,29 +39,9 @@ export interface Context<E = unknown> {
   readonly env: E;
 
   /**
-   * The tree the processor parsed and ran its transformers on. The routing
-   * fields keep the values they had before routing, whatever a handler
-   * changes in it.
-   */
-  readonly ast: Root;
-
-  /** Resolves to `ast`. */
-  tree(): Promise<Root>;
-
-  /** The file the processor read, with its messages; none is fatal. */
-  file: VFile;
-
-  /**
-   * The processor's compiled result (e.g., JSON from hl7v2Jsonify), or
-   * `undefined` when the processor has no compiler. Runs `stringify()` on
-   * first call, and is cached.
-   */
-  result(): Promise<unknown | undefined>;
-
-  /**
-   * The acknowledgment of this message as a response: `acknowledge()` of its
-   * MSH as the processor parsed it, serialized. Changes the transforms or a
-   * handler make to the tree do not change it. MSA-1 defaults to `AA`.
+   * The acknowledgment of this message as a response: `acknowledge()` of the
+   * MSH of `req.tree` as it is when called, serialized. MSA-1 defaults to
+   * `AA`.
    *
    * @throws {MllpServerError} `RESPONSE_IS_NAK` when `options.code` is a NAK
    *   code.

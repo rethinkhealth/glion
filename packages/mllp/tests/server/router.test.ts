@@ -150,10 +150,10 @@ describe("Router", () => {
       expect(router.match(ctx).handler).toBe(handler);
     });
 
-    it("filter can inspect the raw parsed AST", async () => {
+    it("filter can inspect the request tree", async () => {
       const router = new Router();
       const handler = async () => RESPONSE_OK;
-      router.add((ctx) => ctx.ast.children.length > 1, handler);
+      router.add((ctx) => ctx.req.tree.children.length > 1, handler);
 
       expect(router.match(await makeCtx(ADT_A01)).handler).toBe(handler);
     });

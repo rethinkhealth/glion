@@ -44,7 +44,7 @@ import type {
  *
  *   const app = new Mllp()
  *     .on("ADT^A01", async (ctx) => {
- *       await save(ctx.ast);
+ *       await save(ctx.req.tree);
  *       return ctx.ack();
  *     })
  *     .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
@@ -177,7 +177,7 @@ export class Mllp<E = unknown> {
    *    transformers, its lint rules among them.
    * 2. Route match, on the routing fields of the tree.
    * 3. Middleware, then the route handler.
-   * 4. Compile — only when a handler calls `ctx.result()`.
+   * 4. Compile — only when a handler calls `ctx.req.result()`.
    *
    * The response is what the route handler's outcome describes:
    *

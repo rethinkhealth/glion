@@ -120,7 +120,7 @@ A message's errors reach the application through `ctx.error`. `serve({ onError }
 ## Related
 
 - [ADR 0011: MLLP Transport Server](./0011-mllp-transport-server.md): its middleware-first error handling is superseded; its default-NAK decision is kept, without sending the error's message.
-- [ADR 0013: MLLP Lazy Pipeline Execution](./0013-mllp-lazy-pipeline-execution.md): superseded in part; the processor runs before routing, and only compilation waits for `ctx.result()`.
+- [ADR 0013: MLLP Lazy Pipeline Execution](./0013-mllp-lazy-pipeline-execution.md): superseded in part; the processor runs before routing, and only compilation waits for `ctx.req.result()`.
 - [ADR 0018: Errors, Exceptions, and Acknowledgments in the HL7v2 Ecosystem](./0018-error-and-acknowledgment-model.md): `AckException` stays data-only and bidirectional; the server sends its `text` once #1084 lands.
 - [ADR 0031: Escape Sequences Are Decoded by the Parser and Encoded by the Serializer](./0031-escape-sequences-decoded-by-the-parser.md)
 - #1084: version conformance of outbound messages
