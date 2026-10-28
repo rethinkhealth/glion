@@ -62,6 +62,8 @@ The standard's text leaves some things open. Where the proofs need a rule, the s
 
 [GUIDE.md](GUIDE.md) is a path for learning enough Lean to read this specification, and a checklist for reviewing a change to it.
 
+[docs/](docs/README.md) holds lessons that read the specification file by file, from the first definitions to the proofs and to checking glion against the oracle.
+
 ## What CI checks
 
 `Statements.lean` records each headline theorem's statement, the axioms its proof uses, and the rule names. `lake build` fails when any of them changes, so a change to what the specification claims always shows as a diff to that file, and the PR must explain it. A proof can change freely as long as the build passes.
