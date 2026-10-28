@@ -3,7 +3,6 @@
  * `@cloudflare/vitest-plugin`, with Node.js compatibility off.
  */
 
-import { parseHL7v2 } from "@glion/hl7v2";
 import { frame } from "@glion/mllp-codec";
 import { describe, expect, it } from "vitest";
 
@@ -12,11 +11,9 @@ import { handleConnection, Mllp } from "../../src/index";
 const ADT =
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1";
 
-const app = new Mllp<{ region: string }>()
-  .parser(parseHL7v2)
-  .on("ADT^A01", (ctx) => {
-    ctx.set("region", ctx.env.region);
-  });
+const app = new Mllp<{ region: string }>().on("ADT^A01", (ctx) => {
+  ctx.set("region", ctx.env.region);
+});
 
 describe("@glion/mllp in workerd", () => {
   it("replies AA to a message given to handle()", async () => {

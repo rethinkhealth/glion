@@ -21,7 +21,9 @@ import type { Context, Middleware, Response } from "./types";
  */
 export function compose<E>(
   middlewares: Middleware<E>[],
-  onError: (error: Error) => Response | undefined
+  onError: (
+    error: Error
+  ) => Response | undefined | Promise<Response | undefined>
 ): (ctx: Context<E>) => Promise<void> {
   return async (ctx: Context<E>): Promise<void> => {
     let index = -1;

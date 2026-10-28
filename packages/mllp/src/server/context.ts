@@ -68,7 +68,7 @@ export function createContext<E>(
         raw: serializer(acknowledge(tree, { ...ackOptions, ...defaults })),
       };
     },
-    ast: parsed,
+    ast: tree,
     controlId,
     env,
     error: undefined,

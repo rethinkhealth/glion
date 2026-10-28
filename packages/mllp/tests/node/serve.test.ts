@@ -10,6 +10,7 @@ import { CR, frame, FS } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
 
+import { MllpServerErrorCode } from "../../src/errors";
 import { serve } from "../../src/node/serve";
 import type { ConnectionInfo, NodeEnv, Server } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
@@ -538,7 +539,7 @@ describe("serve() integration", () => {
     });
 
     it("connection state persists across messages on the same socket", async () => {
-      const app = new Mllp<NodeEnv>().parser(parseHL7v2);
+      const app = new Mllp<NodeEnv>();
       app.use((ctx, next) => {
         const count = (ctx.env.connection.state.get("count") as number) ?? 0;
         ctx.env.connection.state.set("count", count + 1);
@@ -566,7 +567,7 @@ describe("serve() integration", () => {
     });
 
     it("multiple connections get separate state Maps", async () => {
-      const app = new Mllp<NodeEnv>().parser(parseHL7v2);
+      const app = new Mllp<NodeEnv>();
       app.use((ctx, next) => {
         const count = (ctx.env.connection.state.get("count") as number) ?? 0;
         ctx.env.connection.state.set("count", count + 1);

@@ -11,8 +11,8 @@
  * This middleware MUST be PREPENDED via `app.use(mw, { prepend: true })`, so
  * it sits at the outermost position in the middleware chain: its `await
  * next()` completes after every user middleware has run, so `ctx.res` is the
- * reply that is sent and `ctx.error` the error the message raised, and
- * `performance.now()` measures the full middleware + handler time.
+ * reply that is sent, and `performance.now()` measures the full middleware +
+ * handler time.
  *
  * ## ACK parsing
  *
@@ -57,15 +57,6 @@ export function createMsgTelemetry(
       t: "msg",
       trigger: `${ctx.messageType ?? "?"}^${ctx.triggerEvent ?? "?"}`,
     });
-    if (ctx.error) {
-      emit({
-        conn: connection.id,
-        message: ctx.error.message,
-        stack: ctx.error.stack,
-        t: "error",
-        trigger: `${ctx.messageType}^${ctx.triggerEvent}`,
-      });
-    }
   };
 }
 

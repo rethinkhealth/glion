@@ -25,7 +25,7 @@ describe("MllpServerError", () => {
 
   it("names no option for any other code", () => {
     expect(
-      new MllpServerError(MllpServerErrorCode.NO_PARSER).option
+      new MllpServerError(MllpServerErrorCode.NEXT_CALLED_TWICE).option
     ).toBeUndefined();
   });
 

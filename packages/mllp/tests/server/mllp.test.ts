@@ -79,24 +79,32 @@ describe("Mllp", () => {
     it("reads a message with @glion/parser when no processor is given", async () => {
       const app = new Mllp().on("*", (ctx) => ctx.ack());
 
-      await expect(app.handle(toBytes(SAMPLE_ADT))).rejects.toThrow(
-        MllpServerError
-      );
-
-      await expect(app.handle(toBytes(SAMPLE_ADT))).rejects.toThrow(
-        "No parser is registered; `app.parser()` registers the processor that `handle()` reads each message with."
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT));
+      expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
     });
 
-    it("missing-parser error has NO_PARSER code", async () => {
-      const app = new Mllp();
-      try {
-        await app.handle(toBytes(SAMPLE_ADT));
-        expect.unreachable("should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpServerError);
-        expect((error as MllpServerError).code).toBe("NO_PARSER");
-      }
+    it("rejects a message that does not start with an MSH, with no reply, when no processor is given", async () => {
+      const ran: string[] = [];
+      const seen: Error[] = [];
+      const app = new Mllp()
+        .onError((raised) => {
+          seen.push(raised);
+        })
+        .use(async (_ctx, next) => {
+          ran.push("middleware");
+          await next();
+        })
+        .on("*", () => {
+          ran.push("handler");
+          return RESPONSE_OK;
+        });
+
+      const response = await app.handle(toBytes("PID|1||12345"));
+      expect(response).toBeUndefined();
+      expect(ran).toEqual([]);
+      expect(seen.map((raised) => raised.message)).toEqual([
+        "The first segment is not the message header segment; a message must start with the message header segment (`MSH`).",
+      ]);
     });
 
     it("last-write-wins when parser() called multiple times", async () => {
@@ -168,7 +176,7 @@ describe("Mllp", () => {
         return RESPONSE_OK;
       });
 
-      await app.handle(toBytes(SAMPLE_ADT));
+      await app.handle(toBytes(`${SAMPLE_ADT}\rPV1|1|I`));
       expect(resultExists).toBe(true);
     });
 
@@ -190,7 +198,7 @@ describe("Mllp", () => {
         });
 
       // An ADT^A01 with no PV1, which the event schema requires.
-      const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+      const response = await app.handle(toBytes(SAMPLE_ADT));
       expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
       expect(ran).toEqual([]);
       expect(seen.map((raised) => raised.message)).toEqual([
@@ -353,7 +361,7 @@ describe("Mllp", () => {
     });
 
     it("filter can inspect ctx.env", async () => {
-      const app = new Mllp<{ region: string }>().parser(parseHL7v2);
+      const app = new Mllp<{ region: string }>();
       app.on(
         (ctx) => ctx.env.region === "north",
         async () => RESPONSE_OK
@@ -450,7 +458,7 @@ describe("handle() env", () => {
   it("passes the env it is given to ctx.env unchanged", async () => {
     const env = { region: "north" };
     let seen: unknown;
-    const app = new Mllp<typeof env>().parser(parseHL7v2).on("*", (ctx) => {
+    const app = new Mllp<typeof env>().on("*", (ctx) => {
       seen = ctx.env;
     });
 
@@ -926,7 +934,7 @@ describe("acknowledgment defaults", () => {
         throw thrown;
       });
 
-    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    const response = await app.handle(toBytes(SAMPLE_ADT));
     expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(order).toEqual(["onError", "after next()"]);
   });
@@ -942,7 +950,7 @@ describe("acknowledgment defaults", () => {
         throw new Error("audit write failed");
       });
 
-    const response = await app.handle(toBytes(SAMPLE_ADT), MOCK_CONNECTION);
+    const response = await app.handle(toBytes(SAMPLE_ADT));
     expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(seen.map(({ message }) => message)).toEqual([
       "No route matches the message's type and trigger event (MSH-9).",

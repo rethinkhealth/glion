@@ -48,13 +48,13 @@ describe("createContext", () => {
     expect(ctx.ack().raw.split("\r")[1]).toBe("MSA|AA|CHANGED");
   });
 
-  it("exposes what the runtime passed to handle() as ctx.env", () => {
+  it("exposes what the runtime passed to handle() as ctx.env", async () => {
     const env = { region: "north" };
     const ctx = createContext({
       app: { serializer: toHl7v2 },
       env,
       processor: parseHL7v2,
-      request: parseRequest(SAMPLE_BYTES, parseHL7v2),
+      request: await parseRequest(SAMPLE_BYTES, parseHL7v2),
     });
     expect(ctx.env).toBe(env);
   });

@@ -49,6 +49,16 @@ import type {
  *     .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
  *   ```;
  */
+/**
+ * The processor of an app given none: `@glion/parser`, and
+ * `@glion/lint-required-message-header` reporting a fatal message for a
+ * message that does not start with an MSH.
+ */
+const defaultProcessor: Hl7v2Processor = unified()
+  .use(hl7v2Parser)
+  .use(hl7v2LintRequiredMessageHeader, ["error"])
+  .freeze();
+
 export class Mllp<E = unknown> {
   readonly #router = new Router<E>();
   readonly #errorHandlers: ErrorHandler<E>[] = [];
@@ -197,14 +207,10 @@ export class Mllp<E = unknown> {
    */
   readonly handle = async (
     payload: Uint8Array,
-    ...[env]: EnvArgs<E>
+    ...[given]: EnvArgs<E>
   ): Promise<Response | undefined> => {
-    if (!this.#processor) {
-      throw new MllpServerError(MllpServerErrorCode.NO_PARSER);
-    }
-
-    // Reading is sync — only decode() and parse() run here. Transform and
-    // compile are deferred to ctx.tree() / ctx.result().
+    // EnvArgs<E> leaves `env` out only when E admits undefined.
+    const env = given as E;
     let request: MllpRequest;
     try {
       request = await parseRequest(payload, this.#processor);
@@ -212,18 +218,16 @@ export class Mllp<E = unknown> {
       return this.#reject(
         payload,
         error instanceof Error ? error : new Error(String(error)),
-        // EnvArgs<E> leaves `env` out only when E admits undefined.
-        env as E
+        env
       );
     }
     const fatal = request.file.messages.find((message) => message.fatal);
     if (fatal) {
-      return this.#reject(payload, fatal, connection);
+      return this.#reject(payload, fatal, env);
     }
     const ctx = createContext({
       app: this.#options,
-      // EnvArgs<E> leaves `env` out only when E admits undefined.
-      env: env as E,
+      env,
       processor: this.#processor,
       request,
     });
@@ -259,7 +263,7 @@ export class Mllp<E = unknown> {
 
     const answer = async (error: Error): Promise<Response | undefined> => {
       ctx.error = error;
-      await this.#observe(error, connection);
+      await this.#observe(error, env);
       return nakOf(error);
     };
 
@@ -268,9 +272,9 @@ export class Mllp<E = unknown> {
   };
 
   /** Runs each handler `onError()` registered on `error`, in order. */
-  async #observe(error: Error, connection: ConnectionInfo): Promise<void> {
+  async #observe(error: Error, env: E): Promise<void> {
     for (const handler of this.#errorHandlers) {
-      await handler(error, connection);
+      await handler(error, env);
     }
   }
 
@@ -283,9 +287,7 @@ export class Mllp<E = unknown> {
     error: Error,
     env: E
   ): Promise<Response | undefined> {
-    for (const handler of this.#errorHandlers) {
-      await handler(error, env);
-    }
+    await this.#observe(error, env);
     const header = salvageHeader(payload);
     if (!header || queryValue(header, "MSH.9.1")?.value === "ACK") {
       return undefined;

@@ -10,6 +10,12 @@ import type { Context, Middleware } from "../../src/server/types";
 
 const RESPONSE_OK = { raw: "MSA|AA|OK" };
 
+/** `raw` as the app reads it, parsed with `parseHL7v2`. */
+function request(raw: string): MllpRequest {
+  const file = new VFile(raw);
+  return { file, raw, tree: parseHL7v2.parse(file) };
+}
+
 function makeCtx(raw: string): Context {
   return createContext({
     app: { serializer: toHl7v2 },
@@ -141,7 +147,7 @@ describe("Router", () => {
         app: { serializer: toHl7v2 },
         env: { region: "north" },
         processor: parseHL7v2,
-        request: parseRequest(new TextEncoder().encode(ADT_A01), parseHL7v2),
+        request: request(ADT_A01),
       });
       expect(router.match(ctx).handler).toBe(handler);
     });

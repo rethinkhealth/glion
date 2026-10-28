@@ -99,8 +99,10 @@ export interface Context<E = unknown> {
 }
 
 /**
- * Observes an error raised by a payload no middleware runs on. `env` is what
- * the runtime passed to `handle()`. MUST NOT throw.
+ * Observes an error a message raised: a payload that is not UTF-8, a
+ * processor throw, the processor's first fatal message, or the error of a
+ * route filter, middleware or handler. Runs when the error is raised. `env`
+ * is what the runtime passed to `handle()`. MUST NOT throw.
  */
 export type ErrorHandler<E = unknown> = (
   error: Error,

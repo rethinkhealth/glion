@@ -8,6 +8,12 @@ import type { MllpRequest } from "../../src/server/request";
 import { Router } from "../../src/server/router";
 import type { Context, Middleware } from "../../src/server/types";
 
+/** `raw` as the app reads it, parsed with `parseHL7v2`. */
+function request(raw: string): MllpRequest {
+  const file = new VFile(raw);
+  return { file, raw, tree: parseHL7v2.parse(file) };
+}
+
 function makeCtx(raw: string): Context {
   return createContext({
     app: { serializer: toHl7v2 },

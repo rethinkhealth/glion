@@ -9,7 +9,7 @@ Breaking: make the app the part that runs on any runtime. `app.handle(payload, e
 - Add `handleConnection(handle, socket, { signal })`, which replies to every message on a socket with `readable` and `writable` Web Streams, and the `MllpSocket` and `HandleConnectionOptions` types. It rejects with `MllpServerError` `PROTOCOL_VIOLATION` when the MLLP framing breaks.
 - Change `serve(app, options)` to `serve({ handle: app.handle, ...options })`.
 - Move `ConnectionInfo` from `@glion/mllp` to `@glion/mllp/node`, and add `NodeEnv` there.
-- Close the connection when `handle()` rejects, as with `NO_PARSER`, and report the error to `onError`. Before, the connection stayed open and every message on it went unanswered.
+- Close the connection when `handle()` rejects, as when a `serializer` throws, and report the error to `onError`. Before, the connection stayed open and every message on it went unanswered.
 - Make `Context`, `Middleware`, `Handler` and `RouteFilter` generic over `env`; each defaults to `unknown`.
 - Answer every message a remote system sent before closing its side of the connection. Before, Node ended the server's side too, and replies still being built were lost.
 - End the connection when the remote system resets it or it times out while a message is being handled. Before, writing the reply waited forever, and `server.close()` never resolved.
