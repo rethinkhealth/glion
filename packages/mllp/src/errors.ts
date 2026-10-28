@@ -25,8 +25,8 @@ export const MllpServerErrorCode = {
   /**
    * The MLLP byte stream itself was violated and the connection closed:
    * the remote system sent bytes outside a message, glued or unterminated
-   * messages, an over-cap message — or a handler's response contained a
-   * reserved VT/FS byte and could not be framed. The underlying
+   * messages, an over-cap message — or a response given to the connection
+   * contained a reserved VT/FS byte and could not be framed. The underlying
    * `@glion/mllp-codec` `MllpCodecError` is kept on `cause`; branch on this
    * code without importing that package.
    */
@@ -35,15 +35,21 @@ export const MllpServerErrorCode = {
 export type MllpServerErrorCode =
   (typeof MllpServerErrorCode)[keyof typeof MllpServerErrorCode];
 
+/** The message of each {@link MllpServerErrorCode}. */
+const messages = {
+  INCOMPATIBLE_CHARSET:
+    "The inbound message is not valid UTF-8; only UTF-8 is supported.",
+  NO_PARSER:
+    "No parser is registered; `app.handle()` reads each message with the processor `app.parser()` is given.",
+  PROTOCOL_VIOLATION:
+    "The MLLP byte stream is not framed as MLLP requires, and the connection is closing; the error's cause says how.",
+} as const satisfies Record<MllpServerErrorCode, string>;
+
 /** The one error class the `@glion/mllp` server raises. Branch on `code`. */
 export class MllpServerError extends Error {
   readonly code: MllpServerErrorCode;
-  constructor(
-    code: MllpServerErrorCode,
-    message: string,
-    opts?: { cause?: unknown }
-  ) {
-    super(message, opts);
+  constructor(code: MllpServerErrorCode, opts?: { cause?: unknown }) {
+    super(messages[code], opts);
     this.name = "MllpServerError";
     this.code = code;
   }

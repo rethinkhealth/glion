@@ -397,11 +397,9 @@ function handleConnection(
         // infrastructure, not an application error.
         if (streamError instanceof MllpCodecError) {
           await reportError(
-            new MllpServerError(
-              MllpServerErrorCode.PROTOCOL_VIOLATION,
-              "The MLLP byte stream was violated and the connection is closing (see the error's cause).",
-              { cause: streamError }
-            ),
+            new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION, {
+              cause: streamError,
+            }),
             connection,
             lifecycle
           );
@@ -434,10 +432,8 @@ function handleConnection(
  */
 function toMessageError(error: unknown): unknown {
   return error instanceof CharsetError
-    ? new MllpServerError(
-        MllpServerErrorCode.INCOMPATIBLE_CHARSET,
-        "The inbound message is not valid UTF-8; only UTF-8 is supported.",
-        { cause: error }
-      )
+    ? new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET, {
+        cause: error,
+      })
     : error;
 }

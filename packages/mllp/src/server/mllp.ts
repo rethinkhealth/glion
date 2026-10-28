@@ -168,10 +168,7 @@ export class Mllp {
     // oxlint-disable-next-line typescript/no-invalid-void-type
   ): Promise<Response | undefined | void> {
     if (!this.#processor) {
-      throw new MllpServerError(
-        MllpServerErrorCode.NO_PARSER,
-        "No parser registered. Call app.parser() before handling messages."
-      );
+      throw new MllpServerError(MllpServerErrorCode.NO_PARSER);
     }
 
     // Context creation is sync — only parse() runs here.
