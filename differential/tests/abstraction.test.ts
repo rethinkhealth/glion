@@ -72,6 +72,74 @@ describe("toSpecMessage", () => {
     ).toEqual([{ fields: [[[["a", "", "b"]]]], id: "PID" }]);
   });
 
+  // Each tree below is written as the same text as the parser's empty node,
+  // and would map to the same message.
+  it("throws on a field whose only repetition is empty", () => {
+    const tree = parser.parse("MSH|^~\\&\rPID|x\r");
+    const [, pid] = tree.children;
+    if (pid?.type !== "segment") {
+      throw new Error("The parser did not return PID.");
+    }
+    pid.children = [
+      { children: [{ children: [], type: "field-repetition" }], type: "field" },
+    ];
+
+    expect(() => toSpecMessage(tree)).toThrow(
+      "The tree holds a field whose only repetition is empty; the parser writes an empty field with no repetitions."
+    );
+  });
+
+  it("throws on a repetition whose only component is empty", () => {
+    const tree = parser.parse("MSH|^~\\&\rPID|x\r");
+    const [, pid] = tree.children;
+    if (pid?.type !== "segment") {
+      throw new Error("The parser did not return PID.");
+    }
+    pid.children = [
+      {
+        children: [
+          {
+            children: [{ children: [], type: "component" }],
+            type: "field-repetition",
+          },
+        ],
+        type: "field",
+      },
+    ];
+
+    expect(() => toSpecMessage(tree)).toThrow(
+      "The tree holds a repetition whose only component is empty; the parser writes an empty repetition with no components."
+    );
+  });
+
+  it("throws on a component whose only subcomponent is empty", () => {
+    const tree = parser.parse("MSH|^~\\&\rPID|x\r");
+    const [, pid] = tree.children;
+    if (pid?.type !== "segment") {
+      throw new Error("The parser did not return PID.");
+    }
+    pid.children = [
+      {
+        children: [
+          {
+            children: [
+              {
+                children: [{ type: "subcomponent", value: "" }],
+                type: "component",
+              },
+            ],
+            type: "field-repetition",
+          },
+        ],
+        type: "field",
+      },
+    ];
+
+    expect(() => toSpecMessage(tree)).toThrow(
+      "The tree holds a component whose only subcomponent is empty; the parser writes an empty component with no subcomponents."
+    );
+  });
+
   it("throws on a tree with no segment", () => {
     const tree: Root = { children: [], type: "root" };
 

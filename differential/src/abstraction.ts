@@ -2,9 +2,9 @@ import type { Component, Field, FieldRepetition, Root } from "@glion/ast";
 
 import type { SpecField, SpecMessage } from "./oracle";
 
-// The abstraction function: glion's tree in, the specification's message out. Both describe
-// the same text, so this code decides nothing about HL7v2; it only lines the
-// two shapes up. A mistake here makes a correct parser look wrong, or a wrong
+// The abstraction function: glion's tree in, the specification's message out.
+// Both describe the same text, so this code decides nothing about HL7v2; it
+// only lines the two shapes up. A mistake here makes a correct parser look wrong, or a wrong
 // one look right, so it is read like a statement.
 //
 // `MSH|^~\&|a\rPID|1^^2||x~\r`, as glion parses it (node types shortened):
@@ -35,18 +35,47 @@ import type { SpecField, SpecMessage } from "./oracle";
 //    the specification writes it as one empty element of the level below,
 //    because its rules forbid an empty list at any level
 //    (`well_formed_field_has_repetition` and the two after it).
+//
+// The mapping is one to one. The parser gives a node children only when the
+// text forces them (README of `@glion/parser`, "Empty-field representation"),
+// so a lone empty child is another tree for the same text:
+//
+//   field [rep []]   field [rep [comp []]]   field [rep [comp [sub ""]]]
+//
+// Each would map to [[[""]]] and hide a parser that wrote it; each throws.
 
 // An empty component (`^^`) has no subcomponents in glion: [] → [""].
-const component = (node: Component): string[] =>
-  node.children.length === 0 ? [""] : node.children.map((s) => s.value);
+const component = (node: Component): string[] => {
+  const [only] = node.children;
+  if (node.children.length === 1 && only?.value === "") {
+    throw new Error(
+      "The tree holds a component whose only subcomponent is empty; the parser writes an empty component with no subcomponents."
+    );
+  }
+  return node.children.length === 0 ? [""] : node.children.map((s) => s.value);
+};
 
 // An empty repetition (`x~`) has no components in glion: [] → [[""]].
-const repetition = (node: FieldRepetition): string[][] =>
-  node.children.length === 0 ? [[""]] : node.children.map(component);
+const repetition = (node: FieldRepetition): string[][] => {
+  const [only] = node.children;
+  if (node.children.length === 1 && only?.children.length === 0) {
+    throw new Error(
+      "The tree holds a repetition whose only component is empty; the parser writes an empty repetition with no components."
+    );
+  }
+  return node.children.length === 0 ? [[""]] : node.children.map(component);
+};
 
 // An empty field (`||`) has no repetitions in glion: [] → [[[""]]].
-const field = (node: Field): SpecField =>
-  node.children.length === 0 ? [[[""]]] : node.children.map(repetition);
+const field = (node: Field): SpecField => {
+  const [only] = node.children;
+  if (node.children.length === 1 && only?.children.length === 0) {
+    throw new Error(
+      "The tree holds a field whose only repetition is empty; the parser writes an empty field with no repetitions."
+    );
+  }
+  return node.children.length === 0 ? [[[""]]] : node.children.map(repetition);
+};
 
 /**
  * The specification's message for a tree glion parsed: MSH-1 and MSH-2 become
