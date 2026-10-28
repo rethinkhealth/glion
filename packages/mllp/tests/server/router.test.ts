@@ -4,7 +4,7 @@ import { toHl7v2 } from "@glion/to-hl7v2";
 import { VFile } from "vfile";
 
 import { createContext } from "../../src/server/context";
-import { parseRequest } from "../../src/server/request";
+import type { MllpRequest } from "../../src/server/request";
 import { toResponse } from "../../src/server/response";
 import { Router } from "../../src/server/router";
 import type { Context, Middleware } from "../../src/server/types";

@@ -20,7 +20,7 @@ const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
 
 const decode = (reply: MllpResponse) => new TextDecoder().decode(reply.bytes);
 
-function makeCtx(payload = SAMPLE_BYTES) {
+async function makeCtx(payload = SAMPLE_BYTES) {
   return createContext({
     app: { serializer: toHl7v2 },
     env: undefined,
@@ -221,22 +221,24 @@ describe("createContext", () => {
   });
 
   describe("ctx.ack()", () => {
-    it("is the acknowledgment as an MllpResponse, AA by default", () => {
-      const reply = makeCtx().ack();
+    it("is the acknowledgment as an MllpResponse, AA by default", async () => {
+      const ctx = await makeCtx();
+      const reply = ctx.ack();
 
       expect(reply.code).toBe("AA");
       expect(decode(reply).split("\r")[1]).toBe("MSA|AA|MSG001");
     });
 
-    it("writes the accept code it is given", () => {
-      const reply = makeCtx().ack({ code: "CA" });
+    it("writes the accept code it is given", async () => {
+      const ctx = await makeCtx();
+      const reply = ctx.ack({ code: "CA" });
 
       expect(reply.code).toBe("CA");
       expect(decode(reply).split("\r")[1]).toBe("MSA|CA|MSG001");
     });
 
-    it("throws RESPONSE_IS_NAK for a NAK code", () => {
-      const ctx = makeCtx();
+    it("throws RESPONSE_IS_NAK for a NAK code", async () => {
+      const ctx = await makeCtx();
 
       expect(() => ctx.ack({ code: "AE" } as unknown as AckOptions)).toThrow(
         expect.objectContaining({
@@ -249,11 +251,12 @@ describe("createContext", () => {
   });
 
   describe("ctx.reply()", () => {
-    it("serializes the message when called, with its MSA-1 as the code", () => {
+    it("serializes the message when called, with its MSA-1 as the code", async () => {
       const tree = parseHL7v2.parse(
         "MSH|^~\\&|RecvApp|RecvFac|||||RSP^K22^RSP_K21|R1|P|2.5.1\rMSA|AA|MSG001\rQAK|Q1|OK"
       );
-      const reply = makeCtx().reply(tree);
+      const ctx = await makeCtx();
+      const reply = ctx.reply(tree);
       tree.children.pop();
 
       expect(reply.code).toBe("AA");
@@ -262,16 +265,17 @@ describe("createContext", () => {
       );
     });
 
-    it("gives a message with no acknowledgment code in MSA-1 no code", () => {
-      const reply = makeCtx().reply(
+    it("gives a message with no acknowledgment code in MSA-1 no code", async () => {
+      const ctx = await makeCtx();
+      const reply = ctx.reply(
         parseHL7v2.parse("MSH|^~\\&|||||||ADT^A08|R2|P|2.5.1\rPID|1||12345")
       );
 
       expect(reply.code).toBeUndefined();
     });
 
-    it("throws RESPONSE_IS_NAK for a message whose MSA-1 is a NAK code", () => {
-      const ctx = makeCtx();
+    it("throws RESPONSE_IS_NAK for a message whose MSA-1 is a NAK code", async () => {
+      const ctx = await makeCtx();
       const nak = parseHL7v2.parse("MSH|^~\\&||||||||||2.5.1\rMSA|CR|MSG001");
 
       expect(() => ctx.reply(nak)).toThrow(
@@ -279,8 +283,8 @@ describe("createContext", () => {
       );
     });
 
-    it("throws RESPONSE_WITHOUT_MSH for a message that does not start with an MSH", () => {
-      const ctx = makeCtx();
+    it("throws RESPONSE_WITHOUT_MSH for a message that does not start with an MSH", async () => {
+      const ctx = await makeCtx();
 
       expect(() => ctx.reply(parseHL7v2.parse("MSA|AA|MSG001"))).toThrow(
         expect.objectContaining({
@@ -296,8 +300,8 @@ describe("createContext", () => {
   });
 
   describe("ctx.res", () => {
-    it("starts as no response, and holds the MllpResponse written to it", () => {
-      const ctx = makeCtx();
+    it("starts as no response, and holds the MllpResponse written to it", async () => {
+      const ctx = await makeCtx();
       expect(ctx.res).toBeUndefined();
 
       const reply = ctx.ack();
@@ -308,8 +312,8 @@ describe("createContext", () => {
       expect(ctx.res).toBeUndefined();
     });
 
-    it("throws INVALID_RESPONSE for a value that is not an MllpResponse, and keeps the response it held", () => {
-      const ctx = makeCtx();
+    it("throws INVALID_RESPONSE for a value that is not an MllpResponse, and keeps the response it held", async () => {
+      const ctx = await makeCtx();
       const reply = ctx.ack();
       ctx.res = reply;
 

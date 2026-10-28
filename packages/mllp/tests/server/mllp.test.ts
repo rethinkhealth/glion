@@ -17,7 +17,7 @@ import { value } from "@glion/util-query";
 import { unified } from "unified";
 import type { Plugin } from "unified";
 
-import type { MllpServerError } from "../../src/errors";
+import { MllpServerError } from "../../src/errors";
 import { Mllp } from "../../src/server/mllp";
 import type { MllpResponse } from "../../src/server/response";
 import type { AckOptions, Middleware } from "../../src/server/types";
@@ -92,12 +92,11 @@ describe("Mllp", () => {
   });
 
   describe("parser() lifecycle stage", () => {
-    it("throws MllpServerError when handle() called without parser", async () => {
-      const app = new Mllp();
-      app.on("*", async (ctx) => ctx.reply(RESPONSE_OK));
+    it("reads a message with @glion/parser when no processor is given", async () => {
+      const app = new Mllp().on("*", (ctx) => ctx.ack());
 
       const response = await app.handle(toBytes(SAMPLE_ADT));
-      expect(response?.raw.split("\r")[1]).toBe("MSA|AA|MSG001");
+      expect(text(response)?.split("\r")[1]).toBe("MSA|AA|MSG001");
     });
 
     it("rejects a message that does not start with an MSH, with no reply, when no processor is given", async () => {
@@ -111,9 +110,9 @@ describe("Mllp", () => {
           ran.push("middleware");
           await next();
         })
-        .on("*", () => {
+        .on("*", (ctx) => {
           ran.push("handler");
-          return RESPONSE_OK;
+          return ctx.reply(RESPONSE_OK);
         });
 
       const response = await app.handle(toBytes("PID|1||12345"));
@@ -209,14 +208,14 @@ describe("Mllp", () => {
           ran.push("middleware");
           await next();
         })
-        .on("*", () => {
+        .on("*", (ctx) => {
           ran.push("handler");
-          return RESPONSE_OK;
+          return ctx.reply(RESPONSE_OK);
         });
 
       // An ADT^A01 with no PV1, which the event schema requires.
       const response = await app.handle(toBytes(SAMPLE_ADT));
-      expect(response?.raw.split("\r")[1]).toBe("MSA|AE|MSG001");
+      expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
       expect(ran).toEqual([]);
       expect(seen.map((raised) => raised.message)).toEqual([
         "Segment `PV1` is missing; the event schema requires it at this point.",
@@ -519,7 +518,7 @@ describe("acknowledgment defaults", () => {
   });
 
   it("dates the AR of a message no route matches in the time zone the app is given", async () => {
-    const app = new Mllp({ timeZone: "Asia/Kathmandu" }).parser(parseHL7v2);
+    const app = new Mllp({ timeZone: "Asia/Kathmandu" });
     app.on("ORU^R01", (ctx) => ctx.ack());
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -569,7 +568,7 @@ describe("acknowledgment defaults", () => {
   it("writes the AR of a message no route matches with the serializer the app is given", async () => {
     const app = new Mllp({
       serializer: (tree) => `MSA-1 is ${value(tree, "MSA.1")?.value}`,
-    }).parser(parseHL7v2);
+    });
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
     expect(text(response)).toBe("MSA-1 is AR");
@@ -944,6 +943,45 @@ describe("acknowledgment defaults", () => {
 
     await app.handle(LATIN1_ADT);
     expect(observed).toBe(true);
+  });
+
+  it("lets onError() observe a handler throw when it is raised, before an outer middleware goes on", async () => {
+    const thrown = new Error("handler failed");
+    const order: string[] = [];
+    const app = createApp()
+      .onError((raised) => {
+        order.push(raised === thrown ? "onError" : "other");
+      })
+      .use(async (_ctx, next) => {
+        await next();
+        order.push("after next()");
+      })
+      .on("*", () => {
+        throw thrown;
+      });
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect(order).toEqual(["onError", "after next()"]);
+  });
+
+  it("lets onError() observe each error a message raises, and the AR of a message no route matches", async () => {
+    const seen: Error[] = [];
+    const app = createApp()
+      .onError((raised) => {
+        seen.push(raised);
+      })
+      .use(async (_ctx, next) => {
+        await next();
+        throw new Error("audit write failed");
+      });
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect(seen.map(({ message }) => message)).toEqual([
+      "No route matches the message's type and trigger event (MSH-9).",
+      "audit write failed",
+    ]);
   });
 
   it("sends no response to a payload whose MSH is not UTF-8, and still lets onError() observe it", async () => {

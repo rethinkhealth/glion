@@ -59,7 +59,6 @@ const ENV: NodeEnv = {
 async function msgEvent(handler: Handler<NodeEnv>): Promise<PartialEvent> {
   const events: PartialEvent[] = [];
   const app = new Mllp<NodeEnv>()
-    .parser(parseHL7v2)
     .use(
       createMsgTelemetry((event) => events.push(event)),
       { prepend: true }

@@ -5,7 +5,7 @@ import { VFile } from "vfile";
 
 import { compose } from "../../src/server/compose";
 import { createContext } from "../../src/server/context";
-import { parseRequest } from "../../src/server/request";
+import type { MllpRequest } from "../../src/server/request";
 import { toResponse } from "../../src/server/response";
 import type { MllpResponse } from "../../src/server/response";
 import type { Context, Middleware } from "../../src/server/types";

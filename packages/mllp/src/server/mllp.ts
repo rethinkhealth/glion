@@ -11,11 +11,12 @@ import { value as queryValue } from "@glion/util-query";
 import { nowDTM } from "@glion/util-timestamp";
 import { unified } from "unified";
 
+import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { acknowledge } from "./acknowledge";
 import { compose } from "./compose";
 import { createContext } from "./context";
 import type { MessageContext } from "./context";
-import { messageHeader, salvageHeader, parseRequest } from "./request";
+import { parseRequest, salvageHeader } from "./request";
 import type { MllpRequest } from "./request";
 import { isResponse, toResponse } from "./response";
 import type { MllpResponse } from "./response";
@@ -43,7 +44,7 @@ import type {
  *
  *   const app = new Mllp()
  *     .on("ADT^A01", async (ctx) => {
- *       await save(await ctx.result());
+ *       await save(ctx.ast);
  *       return ctx.ack();
  *     })
  *     .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
@@ -195,32 +196,24 @@ export class Mllp<E = unknown> {
    * response by returning an `MllpResponse` or writing `ctx.res`, and an error
    * raised after it replaces it with the error's NAK. A route filter that
    * throws runs only the global middleware and is answered as a throw. An
-   * `ACK`, and a payload that does not start with an MSH, get no response
-   * unless a handler or middleware gives one.
+   * `ACK` gets no response unless a handler or middleware gives one.
    *
-   * A payload that is not UTF-8, or that the parser throws on, runs no
-   * middleware: the handlers `onError()` registered observe the error, and
-   * the response is its NAK, `AE` unless the parser threw an `AckException`.
-   * The NAK answers the MSH read from the bytes before the first CR; a
-   * payload whose MSH is not UTF-8, an `ACK`, and one with no MSH get no
-   * response.
+   * A payload that is not UTF-8, that the processor throws on, or that the
+   * processor reports a fatal message for runs no middleware: the response is
+   * the NAK of the error, or of the first fatal message, `AE` unless the
+   * processor threw an `AckException`. The NAK answers the MSH read from the
+   * bytes before the first CR; a payload whose MSH is not UTF-8, an `ACK`,
+   * and one with no MSH get no response.
    *
    * `ctx.error` holds the latest error the message raised, and the response
-   * answers it.
-   *
-   * @throws {MllpServerError} `NO_PARSER` when no processor has been
-   *   registered via `app.parser()`.
+   * answers it. The handlers `onError()` registered observe every error.
    */
   readonly handle = async (
     payload: Uint8Array,
-    ...[env]: EnvArgs<E>
+    ...[given]: EnvArgs<E>
   ): Promise<Uint8Array | undefined> => {
-    if (!this.#processor) {
-      throw new MllpServerError(MllpServerErrorCode.NO_PARSER);
-    }
-
-    // Reading is sync — only decode() and parse() run here. Transform and
-    // compile are deferred to ctx.tree() / ctx.result().
+    // EnvArgs<E> leaves `env` out only when E admits undefined.
+    const env = given as E;
     let request: MllpRequest;
     try {
       request = await parseRequest(payload, this.#processor);
@@ -270,7 +263,7 @@ export class Mllp<E = unknown> {
       };
     }
 
-    const answer = (error: Error): MllpResponse | undefined => {
+    const answer = async (error: Error): Promise<MllpResponse | undefined> => {
       ctx.error = error;
       await this.#observe(error, env);
       return nakOf(error);
@@ -296,9 +289,7 @@ export class Mllp<E = unknown> {
     error: Error,
     env: E
   ): Promise<Uint8Array | undefined> {
-    for (const handler of this.#errorHandlers) {
-      await handler(error, env);
-    }
+    await this.#observe(error, env);
     const header = salvageHeader(payload);
     if (!header || queryValue(header, "MSH.9.1")?.value === "ACK") {
       return undefined;

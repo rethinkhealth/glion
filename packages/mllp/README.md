@@ -27,10 +27,9 @@ import { Mllp } from "@glion/mllp";
 import { serve } from "@glion/mllp/node";
 
 const app = new Mllp()
-  .parser(parseHL7v2)
   // A handler returns its response: ctx.ack() is AA.
   .on("ADT^A01", async (ctx) => {
-    await saveToDatabase(await ctx.result());
+    await saveToDatabase(ctx.ast);
     return ctx.ack();
   })
   .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }))
@@ -84,14 +83,14 @@ const app = new Mllp({
 
 The rest of the API chains:
 
-| Method                      | Description                                                                                                                                                                                                                       |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.parser(processor)`        | Attach a `unified` processor (or `@glion/parser` alone) as the parse stage.                                                                                                                                                       |
-| `.use(middleware)`          | Register global middleware that runs for every message.                                                                                                                                                                           |
-| `.use(pattern, middleware)` | Register scoped middleware that runs only for matching message types.                                                                                                                                                             |
-| `.on(pattern, handler)`     | Register a terminal route handler for a message type or trigger event.                                                                                                                                                            |
-| `.onError(handler)`         | Register a handler that observes the error of a payload no middleware runs on: one that is not UTF-8, or that the parser throws on. Each handler registered runs, in order; it does not change the response.                      |
-| `.handle(payload, env?)`    | Reply to one message, given as bytes without MLLP framing; resolves to the response serialized as UTF-8 bytes, or `undefined` for none. `env` becomes `ctx.env`, and is required when `E` excludes `undefined`. Bound to the app. |
+| Method                      | Description                                                                                                                                                                                                                                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.parser(processor)`        | Replace the `unified` processor that reads each message; by default, `@glion/parser` and `@glion/lint-required-message-header` at `"error"`. It MUST report a fatal message for a message that does not start with an MSH.                                                                              |
+| `.use(middleware)`          | Register global middleware that runs for every message.                                                                                                                                                                                                                                                 |
+| `.use(pattern, middleware)` | Register scoped middleware that runs only for matching message types.                                                                                                                                                                                                                                   |
+| `.on(pattern, handler)`     | Register a terminal route handler for a message type or trigger event.                                                                                                                                                                                                                                  |
+| `.onError(handler)`         | Register a handler that observes every error a message raises, when it is raised: a payload that is not UTF-8, a processor throw, the processor's first fatal message, and the error of a route filter, middleware or handler. Each handler registered runs, in order; it does not change the response. |
+| `.handle(payload, env?)`    | Reply to one message, given as bytes without MLLP framing; resolves to the response serialized as UTF-8 bytes, or `undefined` for none. `env` becomes `ctx.env`, and is required when `E` excludes `undefined`. Bound to the app.                                                                       |
 
 ### `handleConnection(handle, socket, options?)`
 
@@ -138,17 +137,17 @@ toHl7v2(acknowledge(ctx.ast, { code: AckCode.ApplicationReject }));
 
 Start a Node.js or Bun TCP server that runs `handleConnection()` on every connection it accepts. Each message reaches `handle` with a `NodeEnv`, `{ connection }`, where `connection` is a `ConnectionInfo`: `id`, `remoteAddress`, `remotePort`, `localPort`, `secure`, and a `state` map kept across the messages of the connection.
 
-| Option           | Type                                                          | Description                                                                                                                                                                                                                                                                                           |
-| ---------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `handle`         | `(payload, env: NodeEnv) => Promise<Uint8Array \| undefined>` | The response to each message; `app.handle`.                                                                                                                                                                                                                                                           |
-| `port`           | `number`                                                      | TCP port to listen on.                                                                                                                                                                                                                                                                                |
-| `hostname`       | `string`, optional                                            | Interface to bind. Defaults to all interfaces.                                                                                                                                                                                                                                                        |
-| `tls`            | `tls.TlsOptions`, optional                                    | Node's TLS server options, passed to `tls.createServer()` unchanged. Plain TCP without it. See [TLS](#tls).                                                                                                                                                                                           |
-| `maxConnections` | `number`, optional                                            | Most connections open at once; one past it is closed before any message is read. Unlimited when unset. See [Connections](#connections).                                                                                                                                                               |
-| `socketTimeout`  | `number`, optional                                            | Socket inactivity timeout in ms — an idle socket past it is destroyed. `0` (default) disables.                                                                                                                                                                                                        |
-| `onConnect`      | `ConnectionCallback`, optional                                | Called when a new TCP connection is accepted.                                                                                                                                                                                                                                                         |
-| `onDisconnect`   | `ConnectionCallback`, optional                                | Called when a connection closes — always fires, even if `onConnect` threw.                                                                                                                                                                                                                            |
-| `onError`        | `ErrorCallback`, optional                                     | Called when a lifecycle callback throws, `handle` rejects (`NO_PARSER`), the byte stream breaks (`PROTOCOL_VIOLATION`), or the socket fails other than by a reset, a broken pipe or a timeout; the connection closes after the last three. Without it, these errors are not reported. Must not throw. |
+| Option           | Type                                                          | Description                                                                                                                                                                                                                                                                                                          |
+| ---------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `handle`         | `(payload, env: NodeEnv) => Promise<Uint8Array \| undefined>` | The response to each message; `app.handle`.                                                                                                                                                                                                                                                                          |
+| `port`           | `number`                                                      | TCP port to listen on.                                                                                                                                                                                                                                                                                               |
+| `hostname`       | `string`, optional                                            | Interface to bind. Defaults to all interfaces.                                                                                                                                                                                                                                                                       |
+| `tls`            | `tls.TlsOptions`, optional                                    | Node's TLS server options, passed to `tls.createServer()` unchanged. Plain TCP without it. See [TLS](#tls).                                                                                                                                                                                                          |
+| `maxConnections` | `number`, optional                                            | Most connections open at once; one past it is closed before any message is read. Unlimited when unset. See [Connections](#connections).                                                                                                                                                                              |
+| `socketTimeout`  | `number`, optional                                            | Socket inactivity timeout in ms — an idle socket past it is destroyed. `0` (default) disables.                                                                                                                                                                                                                       |
+| `onConnect`      | `ConnectionCallback`, optional                                | Called when a new TCP connection is accepted.                                                                                                                                                                                                                                                                        |
+| `onDisconnect`   | `ConnectionCallback`, optional                                | Called when a connection closes — always fires, even if `onConnect` threw.                                                                                                                                                                                                                                           |
+| `onError`        | `ErrorCallback`, optional                                     | Called when a lifecycle callback throws, `handle` rejects (a `serializer` that throws), the byte stream breaks (`PROTOCOL_VIOLATION`), or the socket fails other than by a reset, a broken pipe or a timeout; the connection closes after the last three. Without it, these errors are not reported. Must not throw. |
 
 ### Wire framing
 
@@ -181,7 +180,6 @@ Server-side failures are raised (or passed to `onError`) as `MllpServerError` �
 
 | Code                   | Meaning                                                                                                                                             |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NO_PARSER`            | `app.handle()` ran before a parser was registered via `app.parser()`.                                                                               |
 | `INVALID_RESPONSE`     | A route handler or middleware gave, or wrote to `ctx.res`, a value that is not an `MllpResponse`; the message is answered `AE`.                     |
 | `NEXT_CALLED_TWICE`    | A middleware called `next()` a second time; the message is answered as a middleware throw.                                                          |
 | `INVALID_OPTION`       | `serve()` was given no `handle` function, or a `port` that is not an integer from 0 to 65535. The error's `option` names which: `handle` or `port`. |
@@ -225,7 +223,7 @@ return ctx.reply(response); // an RSP^K22 built with @glion/builder
 
 A message no route matches is answered as a thrown `UnsupportedMessageTypeReject`: `AR`. A middleware replaces the response by returning an `MllpResponse`, or `null` for no response, or by writing `ctx.res`, before or after `next()`; one that returns nothing leaves it as it is. A middleware throw is answered the same way as a handler throw, and its NAK replaces the response given before it. A value that is not an `MllpResponse`, returned by a middleware or written to `ctx.res`, is answered `AE` with `INVALID_RESPONSE`.
 
-A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8, for which `@glion/util-charset` throws a `CharsetError` with `code` `INCOMPATIBLE_CHARSET`, or that the parser throws on, runs no middleware and no route: the handlers `app.onError()` registered observe the error, and the response is its NAK, `AE` unless the parser threw an `AckException`. The NAK answers the MSH read from the bytes before the first CR, so a payload whose MSH is not UTF-8 gets no response. An `ACK`, and a payload that does not start with an MSH such as an empty frame, get no response unless a handler or middleware gives one. No response carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
+A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`@glion/util-charset` throws a `CharsetError` with `code` `INCOMPATIBLE_CHARSET`), that the processor throws on, or that the processor reports a fatal message for runs no middleware and no route: the response is the NAK of the error, or of the first fatal message, `AE` unless the processor threw an `AckException`. The default processor reports a fatal message for a payload that does not start with an MSH, such as an empty frame. `parseHL7v2` from `@glion/hl7v2` also reports one for each finding of a rule it sets to `"error"`, such as a segment the event schema requires. The NAK answers the MSH read from the bytes before the first CR, so a payload whose MSH is not UTF-8, or that has none, gets no response. An `ACK` gets no response unless a handler or middleware gives one. No response carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
 
 `ctx.error` holds the latest error the message raised, and the response answers it. An error a middleware throws after the route handler replied replaces that response too: the sender gets the NAK, and may send the message again. A middleware changes the NAK's code by throwing an `AckException` after `next()`, with the error it answers as its `cause`. A `next()` called a second time throws `MllpServerError` `NEXT_CALLED_TWICE`, and is answered as a middleware throw.
 
@@ -274,24 +272,24 @@ Available in every middleware and handler. Before routing, the processor has par
 
 ### Sync properties
 
-| Property               | Description                                                                                                                                                                                    |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ctx.req.raw`          | The payload decoded as UTF-8.                                                                                                                                                                  |
-| `ctx.env`              | What the runtime passed to `handle()`: a `NodeEnv` under `serve()`, a Workers environment, or `undefined`.                                                                                     |
-| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                                                                                                                                                        |
-| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                                                                        |
-| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                                                                                                    |
-| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                                                                                                       |
-| `ctx.controlId`        | MSH-10 message control ID.                                                                                                                                                                     |
-| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire.                                                                                                                                        |
-| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).                                                                                                                                                 |
-| `ctx.set(key, value)`  | Store a variable.                                                                                                                                                                              |
-| `ctx.get(key)`         | Retrieve a variable.                                                                                                                                                                           |
-| `ctx.var`              | Read-only snapshot of all variables.                                                                                                                                                           |
-| `ctx.error`            | The latest error the message raised, or `undefined`. Read-only.                                                                                                                                |
-| `ctx.res`              | The response, an `MllpResponse`, or `undefined` for none. Writing a value that is not an `MllpResponse` throws `INVALID_RESPONSE`.                                                             |
-| `ctx.ack(options?)`    | The acknowledgment of this message as an `MllpResponse`: `acknowledge()` of its MSH as the app's parser read it, with the app's `timeZone` and `delimiters` and an accept code (`AckOptions`). |
-| `ctx.reply(message)`   | `message`, an HL7v2 message as a `Root`, as an `MllpResponse`.                                                                                                                                 |
+| Property               | Description                                                                                                                                                                                        |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctx.req.raw`          | The payload decoded as UTF-8.                                                                                                                                                                      |
+| `ctx.env`              | What the runtime passed to `handle()`: a `NodeEnv` under `serve()`, a Workers environment, or `undefined`.                                                                                         |
+| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                                                                                                                                                            |
+| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                                                                                                            |
+| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                                                                                                        |
+| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                                                                                                           |
+| `ctx.controlId`        | MSH-10 message control ID.                                                                                                                                                                         |
+| `ctx.ast`              | The tree the processor parsed and ran its transformers on.                                                                                                                                         |
+| `ctx.file`             | VFile holding the processor's messages; none is fatal.                                                                                                                                             |
+| `ctx.set(key, value)`  | Store a variable.                                                                                                                                                                                  |
+| `ctx.get(key)`         | Retrieve a variable.                                                                                                                                                                               |
+| `ctx.var`              | Read-only snapshot of all variables.                                                                                                                                                               |
+| `ctx.error`            | The latest error the message raised, or `undefined`. Read-only.                                                                                                                                    |
+| `ctx.res`              | The response, an `MllpResponse`, or `undefined` for none. Writing a value that is not an `MllpResponse` throws `INVALID_RESPONSE`.                                                                 |
+| `ctx.ack(options?)`    | The acknowledgment of this message as an `MllpResponse`: `acknowledge()` of its MSH as it is when `ack()` is called, with the app's `timeZone` and `delimiters` and an accept code (`AckOptions`). |
+| `ctx.reply(message)`   | `message`, an HL7v2 message as a `Root`, as an `MllpResponse`.                                                                                                                                     |
 
 ### Async methods
 
@@ -300,44 +298,26 @@ Available in every middleware and handler. Before routing, the processor has par
 | `await ctx.tree()`   | —             | Resolves to `ctx.ast`.                                                                                                       |
 | `await ctx.result()` | `stringify()` | Compiled output (e.g. JSON from `hl7v2Jsonify`), or `undefined` when the processor has no compiler, as the default has none. |
 
-Both are cached — subsequent calls return the same value instantly.
-
-### `ctx.ast` vs `await ctx.tree()`
-
-Use `ctx.ast` when the parsed message is enough — reading MSH fields, building ACK/NAK responses, route filter functions, or middleware that doesn't need annotations. The parser has already decoded escape sequences, so every value is content:
-
-```ts
-// Fast — no pipeline cost.
-app.use((ctx, next) => {
-  console.log(`Received ${ctx.messageType}^${ctx.triggerEvent}`);
-  return next();
-});
-```
-
-Use `await ctx.tree()` when you need the fully processed tree — handlers that inspect annotations, lint findings, or resolved message structures:
-
-```ts
-// Triggers transform pipeline on first call.
-app.on("ADT^A01", async (ctx) => {
-  const tree = await ctx.tree();
-  // tree has annotations, message structure resolved, etc.
-  return ctx.ack();
-});
-```
-
-Use `await ctx.result()` when you need the compiled output:
+`ctx.result()` is cached: later calls resolve to the same value.
 
 ```ts
 app.on("ORU^R01", async (ctx) => {
-  const json = await ctx.result(); // triggers transform + compile
-  await saveToDatabase(json);
+  await saveToDatabase(await ctx.result());
   return ctx.ack();
 });
 ```
 
 ## Error handling
 
-`await next()` throws only when called a second time. After it, `ctx.error` is the error the message raised and `ctx.res` its response. A middleware logs the error there, and may answer it with another NAK by throwing:
+`app.onError()` observes every error a message raises, when it is raised; it does not change the response:
+
+```ts
+app.onError((error) => {
+  logger.error(error);
+});
+```
+
+`await next()` throws only when called a second time. After it, `ctx.error` is the latest error the message raised and `ctx.res` its response. A middleware answers the error with another NAK by throwing:
 
 ```ts
 import { AckApplicationReject } from "@glion/ack";
@@ -415,8 +395,8 @@ A Worker passes its bindings as `env`, typed by `Mllp<Env>`:
 ```ts
 import { Mllp } from "@glion/mllp";
 
-const app = new Mllp<Env>().parser(parseHL7v2).on("ADT^A01", async (ctx) => {
-  await ctx.env.ADMISSIONS.send(await ctx.result());
+const app = new Mllp<Env>().on("ADT^A01", async (ctx) => {
+  await ctx.env.ADMISSIONS.send(ctx.req.raw);
   return ctx.ack();
 });
 

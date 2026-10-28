@@ -6,6 +6,7 @@ import net from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
 import tls from "node:tls";
 
+import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
@@ -439,8 +440,13 @@ describe("serve() integration", () => {
       expect(errors).toEqual([]);
     });
 
-    it("onError fires with NO_PARSER when no parser is registered", async () => {
-      const app = new Mllp().on("*", (ctx) => ctx.ack());
+    it("onError fires with the error app.handle() rejects with", async () => {
+      const unwritable = new Error("cannot write the reply");
+      const app = new Mllp({
+        serializer: () => {
+          throw unwritable;
+        },
+      }).on("*", (ctx) => ctx.ack());
 
       const errors: unknown[] = [];
 

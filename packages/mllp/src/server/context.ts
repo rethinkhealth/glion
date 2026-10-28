@@ -70,7 +70,7 @@ export function createContext<E>(
         throw new MllpServerError(MllpServerErrorCode.RESPONSE_IS_NAK);
       }
       return toResponse(
-        acknowledge(parsed, { ...ackOptions, ...defaults }),
+        acknowledge(tree, { ...ackOptions, ...defaults }),
         serializer
       );
     },
@@ -84,11 +84,11 @@ export function createContext<E>(
     },
     messageStructure,
     messageType,
-    reply(tree: Root): MllpResponse {
-      if (!messageHeader(tree)) {
+    reply(message: Root): MllpResponse {
+      if (!messageHeader(message)) {
         throw new MllpServerError(MllpServerErrorCode.RESPONSE_WITHOUT_MSH);
       }
-      const reply = toResponse(tree, serializer);
+      const reply = toResponse(message, serializer);
       if (reply.code && isAckNakCode(reply.code)) {
         throw new MllpServerError(MllpServerErrorCode.RESPONSE_IS_NAK);
       }

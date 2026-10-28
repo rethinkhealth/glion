@@ -18,12 +18,15 @@ import type { Context, Middleware } from "./types";
  * A middleware that throws, returns a value that is not a response
  * (`MllpServerError` `INVALID_RESPONSE`), or calls `next()` a second time
  * (`NEXT_CALLED_TWICE`) has that error passed to `onError`, and the response
- * `onError` returns is written to `ctx.res`. `onError` MUST NOT throw. The
- * second `next()` call also throws that error to its caller.
+ * `onError` returns or resolves to is written to `ctx.res` before the chain
+ * goes on. `onError` MUST NOT throw. The second `next()` call also throws
+ * that error to its caller.
  */
 export function compose<E>(
   middlewares: Middleware<E>[],
-  onError: (error: Error) => MllpResponse | undefined
+  onError: (
+    error: Error
+  ) => MllpResponse | undefined | Promise<MllpResponse | undefined>
 ): (ctx: Context<E>) => Promise<void> {
   return async (ctx: Context<E>): Promise<void> => {
     let index = -1;

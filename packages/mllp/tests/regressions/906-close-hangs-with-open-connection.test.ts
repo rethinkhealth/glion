@@ -18,6 +18,7 @@ import net from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
 import tls from "node:tls";
 
+import { parseHL7v2 } from "@glion/hl7v2";
 import { frame } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
@@ -79,9 +80,9 @@ describe("server.close()", () => {
   });
 
   it("resolves once a connection that has answered a message is idle again", async () => {
-    const app = new Mllp()
-      .parser(parseHL7v2)
-      .on("ADT^A01", (ctx) => ctx.reply(parseHL7v2.parse(ACK)));
+    const app = new Mllp().on("ADT^A01", (ctx) =>
+      ctx.reply(parseHL7v2.parse(ACK))
+    );
     const server = serve({ handle: app.handle, port: 0 });
     await server.listening;
 
@@ -102,7 +103,7 @@ describe("server.close()", () => {
     // to release `answer`, so the test can call close() mid-message.
     const handling = Promise.withResolvers<true>();
     const answer = Promise.withResolvers<true>();
-    const app = new Mllp().parser(parseHL7v2).on("ADT^A01", async (ctx) => {
+    const app = new Mllp().on("ADT^A01", async (ctx) => {
       handling.resolve(true);
       await answer.promise;
       return ctx.reply(parseHL7v2.parse(ACK));

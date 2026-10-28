@@ -66,7 +66,7 @@ export function salvageHeader(
 }
 
 /** The MSH segment `tree` starts with, or `undefined` when it starts with none. */
-function messageHeader(tree: Root): Segment | undefined {
+export function messageHeader(tree: Root): Segment | undefined {
   const [first] = tree.children;
   return first?.type === "segment" && first.name === "MSH" ? first : undefined;
 }

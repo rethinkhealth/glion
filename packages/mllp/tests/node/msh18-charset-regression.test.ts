@@ -1,6 +1,7 @@
 // oxlint-disable promise/avoid-new
 import net from "node:net";
 
+import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-codec";
 import { CharsetError } from "@glion/util-charset";
 

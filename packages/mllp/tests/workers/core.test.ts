@@ -11,12 +11,10 @@ import { handleConnection, Mllp } from "../../src/index";
 const ADT =
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1";
 
-const app = new Mllp<{ region: string }>()
-  .parser(parseHL7v2)
-  .on("ADT^A01", (ctx) => {
-    ctx.set("region", ctx.env.region);
-    return ctx.ack();
-  });
+const app = new Mllp<{ region: string }>().on("ADT^A01", (ctx) => {
+  ctx.set("region", ctx.env.region);
+  return ctx.ack();
+});
 
 describe("@glion/mllp in workerd", () => {
   it("replies AA to a message given to handle()", async () => {

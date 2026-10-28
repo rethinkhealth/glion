@@ -50,11 +50,12 @@ export type ConnectionCallback = (
 
 /**
  * Error callback invoked with an error on a connection: a throwing
- * `onConnect` or `onDisconnect`, an error `handle` rejects with (such as
- * {@link MllpServerError} `NO_PARSER`), a broken MLLP byte stream
- * (`PROTOCOL_VIOLATION`), or a socket error other than a reset, a broken pipe
- * or a timeout. The connection closes after any of the last three. An error a
- * message raises is answered by the app and never reaches this callback.
+ * `onConnect` or `onDisconnect`, an error `handle` rejects with (the error
+ * of a `serializer` that cannot write the reply, for example), a broken MLLP
+ * byte stream (`PROTOCOL_VIOLATION`), or a socket error other than a reset,
+ * a broken pipe or a timeout. The connection closes after any of the last
+ * three. Any other error a message raises is answered by the app and never
+ * reaches this callback.
  */
 export type ErrorCallback = (
   error: Error,
@@ -159,8 +160,8 @@ export interface Server {
  *   import { Mllp } from "@glion/mllp";
  *   import { serve } from "@glion/mllp/node";
  *
- *   const app = new Mllp().parser(parseHL7v2).on("ADT^A01", async (ctx) => {
- *     await save(await ctx.result());
+ *   const app = new Mllp().on("ADT^A01", async (ctx) => {
+ *     await save(ctx.ast);
  *     return ctx.ack();
  *   });
  *
