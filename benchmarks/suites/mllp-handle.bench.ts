@@ -7,7 +7,6 @@
  * (real-socket timing is outside what CodSpeed's instruction counting
  * can measure).
  */
-import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
 import type { ConnectionInfo, Middleware } from "@glion/mllp";
 import { bench, describe } from "vitest";
@@ -37,7 +36,7 @@ const largeBytes = textEncoder.encode(ORU_R01_LARGE);
 const noop: Middleware = async (_ctx, next) => next();
 
 function withMiddleware(count: number): Mllp {
-  const app = new Mllp().parser(parseHL7v2);
+  const app = new Mllp();
   for (let i = 0; i < count; i++) {
     app.use(noop);
   }
@@ -50,7 +49,7 @@ function withMiddleware(count: number): Mllp {
 // ---------------------------------------------------------------------------
 
 describe("mllp", () => {
-  const app = new Mllp().parser(parseHL7v2);
+  const app = new Mllp();
   app.on("ADT^A01", () => RESPONSE_OK);
   app.on("ORU^R01", () => RESPONSE_OK);
 
@@ -62,7 +61,7 @@ describe("mllp", () => {
     await app.handle(largeBytes, MOCK_CONNECTION);
   });
 
-  const appMulti = new Mllp().parser(parseHL7v2);
+  const appMulti = new Mllp();
   appMulti.on("ORU^R01", () => RESPONSE_OK);
   appMulti.on("ORM^O01", () => RESPONSE_OK);
   appMulti.on("SIU^S12", () => RESPONSE_OK);
@@ -87,7 +86,7 @@ describe("mllp", () => {
     await app10.handle(smallBytes, MOCK_CONNECTION);
   });
 
-  const appTree = new Mllp().parser(parseHL7v2);
+  const appTree = new Mllp();
   appTree.on("ADT^A01", async (ctx) => {
     await ctx.tree();
     return RESPONSE_OK;
@@ -97,14 +96,14 @@ describe("mllp", () => {
     await appTree.handle(smallBytes, MOCK_CONNECTION);
   });
 
-  const appNoMatch = new Mllp().parser(parseHL7v2);
+  const appNoMatch = new Mllp();
   appNoMatch.on("ORM^O01", () => RESPONSE_OK);
 
   bench("mllp: handle no matching route (AR reply)", async () => {
     await appNoMatch.handle(smallBytes, MOCK_CONNECTION);
   });
 
-  const appError = new Mllp().parser(parseHL7v2);
+  const appError = new Mllp();
   appError.on("ADT^A01", () => {
     throw new Error("handler error");
   });

@@ -10,6 +10,8 @@ import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileDatatypes } from "@glion/annotate-profile-datatypes";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
 import { hl7v2AnnotateProfileTables } from "@glion/annotate-profile-tables";
+import { Mllp } from "@glion/mllp";
+import type { ConnectionInfo } from "@glion/mllp";
 import { MllpClient } from "@glion/mllp-client";
 import { frame, unframe } from "@glion/mllp-codec";
 import { parseHL7v2 } from "@glion/parser";
@@ -168,6 +170,31 @@ describe("canary — suites measure real work", () => {
     }
     expect(payloads).toHaveLength(1);
     expect(payloads[0]).toEqual(payload);
+  });
+
+  it("mllp-handle: the default processor routes ADT_A01_MINIMAL and ORU_R01_LARGE to their handlers", async () => {
+    const connection: ConnectionInfo = {
+      id: 1,
+      localPort: 2575,
+      remoteAddress: "127.0.0.1",
+      remotePort: 12_345,
+      secure: false,
+      state: new Map(),
+    };
+    const routed: string[] = [];
+    const app = new Mllp();
+    app.on("ADT^A01", (ctx) => {
+      routed.push(ctx.triggerEvent);
+      return ctx.ack();
+    });
+    app.on("ORU^R01", (ctx) => {
+      routed.push(ctx.triggerEvent);
+      return ctx.ack();
+    });
+    const encoder = new TextEncoder();
+    await app.handle(encoder.encode(ADT_A01_MINIMAL), connection);
+    await app.handle(encoder.encode(ORU_R01_LARGE), connection);
+    expect(routed).toEqual(["A01", "R01"]);
   });
 
   it("mllp-client: the in-memory wire returns an AA response", async () => {
