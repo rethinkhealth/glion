@@ -6,6 +6,7 @@ import net from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
 import tls from "node:tls";
 
+import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
@@ -14,7 +15,6 @@ import { MllpServerErrorCode } from "../../src/errors";
 import { serve } from "../../src/node/serve";
 import type { ConnectionInfo, NodeEnv, Server } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
-import type { Context, Response } from "../../src/server/types";
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -173,13 +173,6 @@ function createApp() {
   return new Mllp();
 }
 
-/** An ACK of the message in `ctx`, echoing its MSH-10. */
-function ack(ctx: Context): Response {
-  return {
-    raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-  };
-}
-
 describe("serve() integration", () => {
   let server: Server | undefined;
 
@@ -201,9 +194,13 @@ describe("serve() integration", () => {
 
   it("receives a message and sends a response", async () => {
     const app = createApp();
-    app.on("ADT^A01", (ctx) => ({
-      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-    }));
+    app.on("ADT^A01", (ctx) =>
+      ctx.reply(
+        parseHL7v2.parse(
+          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
+        )
+      )
+    );
 
     server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
@@ -215,9 +212,13 @@ describe("serve() integration", () => {
 
   it("handles multiple messages on one connection", async () => {
     const app = createApp();
-    app.on("*", (ctx) => ({
-      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-    }));
+    app.on("*", (ctx) =>
+      ctx.reply(
+        parseHL7v2.parse(
+          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
+        )
+      )
+    );
 
     server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
@@ -236,22 +237,21 @@ describe("serve() integration", () => {
     }
   });
 
-  it("sends no response when handler returns undefined", async () => {
+  it("replies AA when the handler returns ctx.ack()", async () => {
     const app = createApp();
-    // oxlint-disable-next-line unicorn/no-useless-undefined
-    app.on("ADT^A01", () => undefined);
+    app.on("ADT^A01", (ctx) => ctx.ack());
 
     server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
-    const response = await sendMessage(server.port, SAMPLE_ADT, 500);
-    expect(response).toBeUndefined();
+    const response = await sendMessage(server.port, SAMPLE_ADT);
+    expect(response).toContain("\rMSA|AA|MSG001");
   });
 
   it("replies AR when no handler matches", async () => {
     const app = createApp();
     // Only register handler for ORM^O01
-    app.on("ORM^O01", async (ctx) => ack(ctx));
+    app.on("ORM^O01", async (ctx) => ctx.ack());
 
     server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
@@ -269,9 +269,11 @@ describe("serve() integration", () => {
       if (callCount === 1) {
         throw new Error("unhandled test error");
       }
-      return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-      };
+      return ctx.reply(
+        parseHL7v2.parse(
+          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
+        )
+      );
     });
 
     server = serve({ handle: app.handle, port: 0 });
@@ -292,7 +294,7 @@ describe("serve() integration", () => {
   });
 
   it("reports nothing when the remote system resets the connection in the middle of a message", async () => {
-    const app = createApp().on("*", () => ({ raw: "ACK" }));
+    const app = createApp().on("*", (ctx) => ctx.ack());
     const errors: Error[] = [];
     const disconnected = Promise.withResolvers<ConnectionInfo>();
     server = serve({
@@ -411,7 +413,7 @@ describe("serve() integration", () => {
 
   describe("lifecycle callbacks", () => {
     it("onConnect fires with a valid connection ID", async () => {
-      const app = createApp().on("*", (ctx) => ack(ctx));
+      const app = createApp().on("*", (ctx) => ctx.ack());
       const connections: number[] = [];
 
       server = serve({
@@ -432,7 +434,7 @@ describe("serve() integration", () => {
     });
 
     it("onDisconnect fires when client disconnects", async () => {
-      const app = createApp().on("*", (ctx) => ack(ctx));
+      const app = createApp().on("*", (ctx) => ctx.ack());
       let disconnectedId: number | undefined;
 
       server = serve({
@@ -481,9 +483,7 @@ describe("serve() integration", () => {
         serializer: () => {
           throw unwritable;
         },
-      }).on("*", () => {
-        throw new Error("rejected");
-      });
+      }).on("*", (ctx) => ctx.ack());
 
       const errors: unknown[] = [];
 
@@ -502,9 +502,13 @@ describe("serve() integration", () => {
 
     it("onError fires with PROTOCOL_VIOLATION when the inbound byte stream violates MLLP framing", async () => {
       const app = createApp();
-      app.on("*", (ctx) => ({
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-      }));
+      app.on("*", (ctx) =>
+        ctx.reply(
+          parseHL7v2.parse(
+            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
+          )
+        )
+      );
 
       const errors: { code?: string; causeName?: string }[] = [];
       server = serve({
@@ -563,7 +567,7 @@ describe("serve() integration", () => {
     });
 
     it("connection IDs are unique across connections", async () => {
-      const app = createApp().on("*", (ctx) => ack(ctx));
+      const app = createApp().on("*", (ctx) => ctx.ack());
       const ids: number[] = [];
 
       server = serve({
@@ -593,9 +597,11 @@ describe("serve() integration", () => {
       });
       app.on("*", (ctx) => {
         const count = ctx.env.connection.state.get("count") as number;
-        return {
-          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}|count=${count}`,
-        };
+        return ctx.reply(
+          parseHL7v2.parse(
+            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}|count=${count}`
+          )
+        );
       });
 
       server = serve({ handle: app.handle, port: 0 });
@@ -621,9 +627,11 @@ describe("serve() integration", () => {
       });
       app.on("*", (ctx) => {
         const count = ctx.env.connection.state.get("count") as number;
-        return {
-          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}|count=${count}`,
-        };
+        return ctx.reply(
+          parseHL7v2.parse(
+            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}|count=${count}`
+          )
+        );
       });
 
       server = serve({ handle: app.handle, port: 0 });
@@ -637,7 +645,7 @@ describe("serve() integration", () => {
     });
 
     it("onConnect throwing tears down connection, onDisconnect still fires", async () => {
-      const app = createApp().on("*", (ctx) => ack(ctx));
+      const app = createApp().on("*", (ctx) => ctx.ack());
       let disconnectCount = 0;
       const errors: string[] = [];
 
@@ -668,7 +676,7 @@ describe("serve() integration", () => {
     });
 
     it("onDisconnect throwing is caught and routed to onError", async () => {
-      const app = createApp().on("*", (ctx) => ack(ctx));
+      const app = createApp().on("*", (ctx) => ctx.ack());
       const errors: string[] = [];
 
       server = serve({
@@ -692,7 +700,7 @@ describe("serve() integration", () => {
     });
 
     it("closes the connection and writes nothing to the console when an error has no onError", async () => {
-      const app = createApp().on("*", (ctx) => ack(ctx));
+      const app = createApp().on("*", (ctx) => ctx.ack());
       const disconnected = Promise.withResolvers<ConnectionInfo>();
       const consoleSpy = vi
         .spyOn(console, "error")
@@ -717,9 +725,13 @@ describe("serve() integration", () => {
     });
 
     it("no callbacks = no errors (optional, zero-cost)", async () => {
-      const app = createApp().on("*", (ctx) => ({
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-      }));
+      const app = createApp().on("*", (ctx) =>
+        ctx.reply(
+          parseHL7v2.parse(
+            `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
+          )
+        )
+      );
 
       // No onConnect/onDisconnect/onError
       server = serve({ handle: app.handle, port: 0 });
@@ -733,7 +745,9 @@ describe("serve() integration", () => {
     const ACK = "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|MSG001";
 
     it("closes a connection past the limit before reading from it, and keeps the open one", async () => {
-      const app = createApp().on("ADT^A01", () => ({ raw: ACK }));
+      const app = createApp().on("ADT^A01", (ctx) =>
+        ctx.reply(parseHL7v2.parse(ACK))
+      );
       const connected: number[] = [];
       server = serve({
         handle: app.handle,
@@ -779,7 +793,9 @@ describe("serve() integration", () => {
           },
         ],
       });
-      const app = createApp().on("ADT^A01", () => ({ raw: ACK }));
+      const app = createApp().on("ADT^A01", (ctx) =>
+        ctx.reply(parseHL7v2.parse(ACK))
+      );
       server = serve({
         handle: app.handle,
         maxConnections: 1,

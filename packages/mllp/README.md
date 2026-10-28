@@ -4,7 +4,7 @@ Routes and middleware that respond to HL7v2 messages, on any runtime, with an ML
 
 ## What it does
 
-An `Mllp` app routes each HL7v2 message to a handler by message type and trigger event, and runs middleware around it. `app.handle(payload, env?)` replies to one message and depends on no runtime: a Cloudflare Worker or an AWS Lambda function calls it with each message it receives. `handleConnection()` runs the MLLP exchange over any socket that exposes Web Streams, and `serve()` from `@glion/mllp/node` listens on a TCP or TLS port and runs it on every connection.
+An `Mllp` app routes each HL7v2 message to a handler by message type and trigger event, runs middleware around it, and replies with its acknowledgment. `app.handle(payload, env?)` replies to one message and depends on no runtime: a Cloudflare Worker or an AWS Lambda function calls it with each message it receives. `handleConnection()` runs the MLLP exchange over any socket that exposes Web Streams, and `serve()` from `@glion/mllp/node` listens on a TCP or TLS port and runs it on every connection.
 
 ## Install
 
@@ -22,16 +22,17 @@ npm install @glion/mllp
 ## Use
 
 ```ts
-import { AckApplicationError } from "@glion/ack";
+import { AckApplicationError, AckCode } from "@glion/ack";
 import { Mllp } from "@glion/mllp";
 import { serve } from "@glion/mllp/node";
 
 const app = new Mllp()
-  // A handler returns its response.
+  // A handler returns its response: ctx.ack() is AA.
   .on("ADT^A01", async (ctx) => {
     await saveToDatabase(ctx.req.tree);
-    return { raw: buildAckFor(ctx) };
+    return ctx.ack();
   })
+  .on("ORM^O01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }))
   // A thrown AckException replies with its code.
   .on("ORU^R01", () => {
     throw new AckApplicationError("No patient with this MRN", {});
@@ -47,13 +48,13 @@ To run the app with live reload during development and a production start comman
 
 ### `Mllp`
 
-The app. `Mllp<E>` types `ctx.env` as `E`; it defaults to `unknown`. `new Mllp(options?)` takes the options every acknowledgment the app writes uses: the NAK of a thrown error, and the `AR` of a message no route matches.
+The app. `Mllp<E>` types `ctx.env` as `E`; it defaults to `unknown`. `new Mllp(options?)` takes the options every acknowledgment the app writes uses: `ctx.ack()`, the NAK of a thrown error, and the `AR` of a message no route matches.
 
 | Option       | Type                                             | Description                                                                                                                                                      |
 | ------------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `timeZone`   | `string`, optional                               | IANA time zone MSH-7 is read in, such as `America/New_York`. Defaults to the host's time zone. The constructor throws a `RangeError` for a name that is not one. |
 | `delimiters` | `Partial<Omit<Delimiters, "segment">>`, optional | MSH-1 and MSH-2. Each delimiter not given is the standard one: `\|` and `^~\&`.                                                                                  |
-| `serializer` | `(tree: Root) => string`, optional               | Writes every acknowledgment as HL7v2 text. Defaults to `toHl7v2` from `@glion/to-hl7v2`, which encodes each value's escape sequences.                            |
+| `serializer` | `(tree: Root) => string`, optional               | Writes every response as HL7v2 text. Defaults to `toHl7v2` from `@glion/to-hl7v2`, which encodes each value's escape sequences.                                  |
 
 ```ts
 const app = new Mllp({ timeZone: "America/New_York" });
@@ -67,7 +68,7 @@ import { parseHL7v2 } from "@glion/hl7v2";
 const app = new Mllp().parser(parseHL7v2);
 ```
 
-An app whose parser keeps escape sequences as received writes its acknowledgments without encoding them:
+An app whose parser keeps escape sequences as received writes its responses without encoding them:
 
 ```ts
 const app = new Mllp({
@@ -89,7 +90,7 @@ The rest of the API chains:
 | `.use(pattern, middleware)` | Register scoped middleware that runs only for matching message types.                                                                                                                                                                                                                                   |
 | `.on(pattern, handler)`     | Register a terminal route handler for a message type or trigger event.                                                                                                                                                                                                                                  |
 | `.onError(handler)`         | Register a handler that observes every error a message raises, when it is raised: a payload that is not UTF-8, a processor throw, the processor's first fatal message, and the error of a route filter, middleware or handler. Each handler registered runs, in order; it does not change the response. |
-| `.handle(payload, env?)`    | Reply to one message, given as bytes without MLLP framing; resolves to the response's `raw` as UTF-8 bytes, or `undefined` for none. `env` becomes `ctx.env`, and is required when `E` excludes `undefined`. Bound to the app.                                                                          |
+| `.handle(payload, env?)`    | Reply to one message, given as bytes without MLLP framing; resolves to the response serialized as UTF-8 bytes, or `undefined` for none. `env` becomes `ctx.env`, and is required when `E` excludes `undefined`. Bound to the app.                                                                       |
 
 ### `handleConnection(handle, socket, options?)`
 
@@ -127,7 +128,7 @@ import { AckCode } from "@glion/ack";
 import { acknowledge } from "@glion/mllp";
 import { toHl7v2 } from "@glion/to-hl7v2";
 
-toHl7v2(acknowledge(ctx.ast, { code: AckCode.ApplicationReject }));
+toHl7v2(acknowledge(ctx.req.tree, { code: AckCode.ApplicationReject }));
 // MSH|^~\&|RecvApp|RecvFac|SendApp|SendFac|20240115023000-0500||ACK^A01^ACK|<uid>|P|2.5.1
 // MSA|AR|MSG001
 ```
@@ -159,12 +160,13 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 | `Context`                 | The context of one message: the request (`req`), the response (`res`), and what the app adds.                                                                                               |
 | `MllpRequest`             | The message that arrived: `raw`, `tree`, `file`, `header` and `result()`.                                                                                                                   |
 | `MessageHeader`           | The MSH fields that control processing, as `ctx.req.header` holds them.                                                                                                                     |
-| `Response`                | Response object `{ raw: string }`.                                                                                                                                                          |
+| `MllpOptions`             | The options of `new Mllp()`: `timeZone` and `delimiters`, as `acknowledge()` takes them, and `serializer`.                                                                                  |
+| `ErrorHandler`            | The handler `app.onError()` takes: `(error, env) => Promise<void> \| undefined`, where `env` is what the runtime passed to `handle()`. MUST NOT throw.                                      |
+| `MllpResponse`            | A response: an HL7v2 message serialized as UTF-8 (`bytes`), with its MSA-1 (`code`). Built by `ctx.ack()` and `ctx.reply()`.                                                                |
+| `AckOptions`              | The options of `ctx.ack()`: those of `acknowledge()` without `timeZone` and `delimiters`, which the app is given, and with an accept code (`AA` or `CA`) in `code`.                         |
 | `Hl7v2Processor`          | Unified `Processor` type for HL7v2 (`Processor<Root, Root \| undefined, Root \| undefined>` — head/tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable). |
 | `Middleware`              | Middleware function `(ctx, next) => ...`.                                                                                                                                                   |
-| `Handler`                 | Terminal route handler `(ctx) => Response`.                                                                                                                                                 |
-| `ErrorHandler`            | The handler `app.onError()` takes: `(error, env) => Promise<void> \| undefined`, where `env` is what the runtime passed to `handle()`. MUST NOT throw.                                      |
-| `MllpOptions`             | The options of `new Mllp()`: `timeZone` and `delimiters`, as `acknowledge()` takes them, and `serializer`.                                                                                  |
+| `Handler`                 | Terminal route handler `(ctx) => MllpResponse \| null`: the response, or `null` for none.                                                                                                   |
 | `RouteFilter`             | Filter function `(ctx) => boolean` used for routing.                                                                                                                                        |
 | `MiddlewareReturn`        | Return type of middleware functions.                                                                                                                                                        |
 | `RoutePattern`            | Parsed route pattern.                                                                                                                                                                       |
@@ -182,8 +184,11 @@ Server-side failures are raised (or passed to `onError`) as `MllpServerError` �
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `CONNECTION_LOST`      | The connection was torn down (a reset, a broken pipe, a timeout). A socket's `readable` errors with it, and `handleConnection()` then resolves.                                               |
 | `INVALID_OPTION`       | `serve()` was given an app as its options, no `handle` function, or a `port` that is not an integer from 0 to 65535. The error's `option` names which: `options`, `handle` or `port`.         |
+| `INVALID_RESPONSE`     | A route handler or middleware gave, or wrote to `ctx.res`, a value that is not an `MllpResponse`; the message is answered `AE`.                                                               |
 | `NEXT_CALLED_TWICE`    | A middleware called `next()` a second time; the message is answered as a middleware throw.                                                                                                    |
 | `PROTOCOL_VIOLATION`   | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). Raised by `handleConnection()`.                                                             |
+| `RESPONSE_IS_NAK`      | `ctx.ack()` was given a NAK code, or `ctx.reply()` a message whose MSA-1 is one; a NAK is the response to a throw.                                                                            |
+| `RESPONSE_WITHOUT_MSH` | `ctx.reply()` was given a message that does not start with an MSH.                                                                                                                            |
 | `UNFRAMEABLE_RESPONSE` | A response given to the connection contains a VT or FS byte, which MLLP reserves for framing, and the connection closed (the `MllpCodecError` is on `cause`). Raised by `handleConnection()`. |
 
 ## Routing
@@ -202,24 +207,33 @@ Routes are matched first-match-wins — register specific routes before catch-al
 
 ## Replies
 
-A route handler returns its response, a `Response`, or nothing for none. A failure is answered with a NAK: a thrown error is the only way to give one, so `ctx.error` holds every failure.
+A route handler returns its response, an `MllpResponse`. `ctx.ack()` builds the acknowledgment of the message, and `ctx.reply(message)` any other HL7v2 message, such as a query response; both serialize it when called. A response accepts the message: `ctx.ack()` takes `AA` or `CA`, and `ctx.reply()` throws `MllpServerError` `RESPONSE_IS_NAK` for a message whose MSA-1 is a NAK code. A NAK is the response to a throw, so `ctx.error` holds every failure.
 
-| The route handler        | Response             |
-| ------------------------ | -------------------- |
-| Returns a `Response`     | That response.       |
-| Returns nothing          | No response.         |
-| Throws an `AckException` | Its `code` in MSA-1. |
-| Throws anything else     | `AE`.                |
+| The route handler         | Response                                                      |
+| ------------------------- | ------------------------------------------------------------- |
+| Returns an `MllpResponse` | That response.                                                |
+| Returns `null`            | No response.                                                  |
+| Returns anything else     | `AE`; `ctx.error` is an `MllpServerError` `INVALID_RESPONSE`. |
+| Throws an `AckException`  | Its `code` in MSA-1.                                          |
+| Throws anything else      | `AE`.                                                         |
 
-A message no route matches is answered as a thrown `UnsupportedMessageTypeReject`: `AR`. A middleware replaces the response by returning a `Response`, or by writing `ctx.res`, before or after `next()`; one that returns nothing leaves it as it is. A middleware throw is answered the same way as a handler throw, and its NAK replaces the response given before it.
+```ts
+import { AckCode } from "@glion/ack";
 
-A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`@glion/util-charset` throws a `CharsetError` with `code` `INCOMPATIBLE_CHARSET`), that the processor throws on, or that the processor reports a fatal message for runs no middleware and no route: the response is the NAK of the error, or of the first fatal message, `AE` unless the processor threw an `AckException`. The default processor reports a fatal message for a payload that does not start with an MSH, such as an empty frame. `parseHL7v2` from `@glion/hl7v2` also reports one for each finding of a rule it sets to `"error"`, such as a segment the event schema requires. The NAK answers the MSH read from the bytes before the first CR, so a payload whose MSH is not UTF-8, or that has none, gets no response. An `ACK` gets no response unless a handler or middleware gives one. No NAK carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
+return ctx.ack(); // AA
+return ctx.ack({ code: AckCode.CommitAccept }); // CA
+return ctx.reply(response); // an RSP^K22 built with @glion/builder
+```
+
+A message no route matches is answered as a thrown `UnsupportedMessageTypeReject`: `AR`. A middleware replaces the response by returning an `MllpResponse`, or `null` for no response, or by writing `ctx.res`, before or after `next()`; one that returns nothing leaves it as it is. A middleware throw is answered the same way as a handler throw, and its NAK replaces the response given before it. A value that is not an `MllpResponse`, returned by a middleware or written to `ctx.res`, is answered `AE` with `INVALID_RESPONSE`.
+
+A route filter that throws runs only the global middleware and is answered as a throw. A payload that is not UTF-8 (`@glion/util-charset` throws a `CharsetError` with `code` `INCOMPATIBLE_CHARSET`), that the processor throws on, or that the processor reports a fatal message for runs no middleware and no route: the response is the NAK of the error, or of the first fatal message, `AE` unless the processor threw an `AckException`. The default processor reports a fatal message for a payload that does not start with an MSH, such as an empty frame. `parseHL7v2` from `@glion/hl7v2` also reports one for each finding of a rule it sets to `"error"`, such as a segment the event schema requires. The NAK answers the MSH read from the bytes before the first CR, so a payload whose MSH is not UTF-8, or that has none, gets no response. An `ACK` gets no response unless a handler or middleware gives one. No response carries MSA-3: an error's `message` and an `AckException`'s `text` are never sent, and the acknowledgment has the same fields in every HL7v2 version.
 
 `ctx.error` holds the latest error the message raised, and the response answers it. An error a middleware throws after the route handler replied replaces that response too: the sender gets the NAK, and may send the message again. A middleware changes the NAK's code by throwing an `AckException` after `next()`, with the error it answers as its `cause`. A `next()` called a second time throws `MllpServerError` `NEXT_CALLED_TWICE`, and is answered as a middleware throw.
 
-The NAK answers the MSH of the tree the processor read, as it is when the NAK is built: a handler that changes the MSH before it throws changes the NAK too.
+The acknowledgment answers the MSH of the tree the processor read, as it is when the acknowledgment is built: a handler that changes the MSH before then changes the acknowledgment too.
 
-A NAK is built by [`acknowledge()`](#acknowledgeorigin-options).
+An acknowledgment is built by [`acknowledge()`](#acknowledgeorigin-options).
 
 ## Middleware
 
@@ -249,10 +263,10 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-// Read the outcome after next(): the response, and the error.
+// Read the outcome after next(): the response's MSA-1, and the error.
 app.use(async (ctx, next) => {
   await next();
-  report(ctx.res, ctx.error);
+  report(ctx.res?.code, ctx.error);
 });
 ```
 
@@ -279,20 +293,22 @@ app.on("ORU^R01", async (ctx) => {
   // Any other field: read the tree with @glion/util-query.
   const mrn = value(ctx.req.tree, "PID.3.1")?.value;
   await saveToDatabase(mrn, await ctx.req.result());
-  return { raw: buildAckFor(ctx) };
+  return ctx.ack();
 });
 ```
 
 ### Response and app
 
-| Property              | Description                                                                                                |
-| --------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `ctx.env`             | What the runtime passed to `handle()`: a `NodeEnv` under `serve()`, a Workers environment, or `undefined`. |
-| `ctx.set(key, value)` | Store a variable.                                                                                          |
-| `ctx.get(key)`        | Retrieve a variable.                                                                                       |
-| `ctx.var`             | Read-only snapshot of all variables.                                                                       |
-| `ctx.error`           | The latest error the message raised, or `undefined`. Read-only.                                            |
-| `ctx.res`             | The response, or `undefined` for none.                                                                     |
+| Property              | Description                                                                                                                                                                                                          |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctx.env`             | What the runtime passed to `handle()`: a `NodeEnv` under `serve()`, a Workers environment, or `undefined`.                                                                                                           |
+| `ctx.set(key, value)` | Store a variable.                                                                                                                                                                                                    |
+| `ctx.get(key)`        | Retrieve a variable.                                                                                                                                                                                                 |
+| `ctx.var`             | Read-only snapshot of all variables.                                                                                                                                                                                 |
+| `ctx.error`           | The latest error the message raised, or `undefined`. Read-only.                                                                                                                                                      |
+| `ctx.res`             | The response, an `MllpResponse`, or `undefined` for none. Writing a value that is not an `MllpResponse` throws `INVALID_RESPONSE`.                                                                                   |
+| `ctx.ack(options?)`   | The acknowledgment of this message as an `MllpResponse`: `acknowledge()` of the MSH of `ctx.req.tree` as it is when `ack()` is called, with the app's `timeZone` and `delimiters` and an accept code (`AckOptions`). |
+| `ctx.reply(message)`  | `message`, an HL7v2 message as a `Root`, as an `MllpResponse`.                                                                                                                                                       |
 
 ## Error handling
 
@@ -321,7 +337,7 @@ Register it with `app.use()` before other middleware so it wraps them all. An er
 
 ## Connections
 
-The server accepts any number of connections at once and handles them concurrently. On each connection, messages reach the app one at a time, in the order they arrived, and the server writes the reply before it reads the next message. Messages on different connections are not ordered: a sending system that needs its messages processed in order sends them over one connection.
+The server accepts any number of connections at once and handles them concurrently. On each connection, messages reach the app one at a time, in the order they arrived, and the server writes the response before it reads the next message. Messages on different connections are not ordered: a sending system that needs its messages processed in order sends them over one connection.
 
 `connection.state` belongs to one connection and is discarded when it closes. `onConnect` and `onDisconnect` fire once per connection.
 
@@ -384,7 +400,7 @@ import { Mllp } from "@glion/mllp";
 
 const app = new Mllp<Env>().on("ADT^A01", async (ctx) => {
   await ctx.env.ADMISSIONS.send(ctx.req.raw);
-  return { raw: buildAckFor(ctx) };
+  return ctx.ack();
 });
 
 export default {

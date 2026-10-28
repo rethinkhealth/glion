@@ -1,5 +1,6 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
+import { toHl7v2 } from "@glion/to-hl7v2";
 
 import { createContext } from "../../src/server/context";
 import { parseRequest } from "../../src/server/request";
@@ -8,6 +9,7 @@ import type { Context, Middleware } from "../../src/server/types";
 
 async function makeCtx(raw: string): Promise<Context> {
   return createContext({
+    app: { serializer: toHl7v2 },
     env: undefined,
     request: await parseRequest(new TextEncoder().encode(raw), parseHL7v2),
   });

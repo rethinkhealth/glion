@@ -1,21 +1,15 @@
+import type { AckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 
 import type { AcknowledgeOptions } from "./acknowledge";
 import type { MllpRequest } from "./request";
+import type { MllpResponse } from "./response";
 
 /**
  * The `env` argument of `handle()`: optional when `E` admits `undefined`,
  * required otherwise.
  */
 export type EnvArgs<E> = undefined extends E ? [env?: E] : [env: E];
-
-/**
- * MLLP response — a raw HL7v2 string. A connection writes it back as UTF-8
- * with MLLP framing.
- */
-export interface Response {
-  readonly raw: string;
-}
 
 /**
  * The MLLP context of one message: the request that arrived, the response
@@ -26,7 +20,8 @@ export interface Context<E = unknown> {
   readonly req: MllpRequest;
   /**
    * The error this message raised: a route filter, middleware or handler
-   * throw, a `next()` called twice (`NEXT_CALLED_TWICE`), or the
+   * throw, a response that is not an HL7v2 message (`INVALID_RESPONSE`), a
+   * `next()` called twice (`NEXT_CALLED_TWICE`), or the
    * `AckApplicationReject` of a message no route matches. A later error
    * replaces it; a middleware that throws one passes this as its `cause` to
    * keep it. `undefined` while none has.
@@ -41,10 +36,30 @@ export interface Context<E = unknown> {
   readonly env: E;
 
   /**
-   * Response to send back. A later response replaces it, and an error
-   * replaces it with the error's NAK.
+   * The acknowledgment of this message as a response: `acknowledge()` of the
+   * MSH of `req.tree` as it is when called, serialized. MSA-1 defaults to
+   * `AA`.
+   *
+   * @throws {MllpServerError} `RESPONSE_IS_NAK` when `options.code` is a NAK
+   *   code.
    */
-  res: Response | undefined;
+  ack(options?: AckOptions): MllpResponse;
+  /**
+   * `message` as a response, serialized now: a query response, for example.
+   *
+   * @throws {MllpServerError} `RESPONSE_WITHOUT_MSH` when `message` does not
+   *   start with an MSH, and `RESPONSE_IS_NAK` when its MSA-1 is a NAK code.
+   * @throws What the app's `serializer` throws for a tree it cannot write.
+   */
+  reply(message: Root): MllpResponse;
+  /**
+   * The response, or `undefined` for none. A later response replaces it, and an
+   * error replaces it with the error's NAK.
+   *
+   * @throws {MllpServerError} `INVALID_RESPONSE` when set to a value that is not
+   *   an `MllpResponse` or `undefined`.
+   */
+  res: MllpResponse | undefined;
 
   /** Store a variable */
   set<K extends string>(key: K, value: unknown): void;
@@ -68,32 +83,45 @@ export type ErrorHandler<E = unknown> = (
 /**
  * Options for `new Mllp()`: the delimiters and the time zone of every
  * acknowledgment the app writes, as `acknowledge()` takes them, and the
- * serializer that writes it.
+ * serializer of every response.
  */
 export interface MllpOptions extends Pick<
   AcknowledgeOptions,
   "delimiters" | "timeZone"
 > {
   /**
-   * Writes an acknowledgment's tree as HL7v2 text. Defaults to `toHl7v2` from
+   * Writes a response's tree as HL7v2 text. Defaults to `toHl7v2` from
    * `@glion/to-hl7v2`, which encodes each value's escape sequences.
    */
   serializer?: (tree: Root) => string;
 }
+
+/**
+ * The options of `ctx.ack()`: those of `acknowledge()`, without the ones the
+ * app is given.
+ */
+export type AckOptions = Omit<
+  AcknowledgeOptions,
+  "code" | keyof MllpOptions
+> & {
+  /** MSA-1: `AA` or `CA`. Defaults to `AA`. A NAK is the response to a throw. */
+  code?: AckSuccessCode;
+};
 
 // Re-exported from @glion/parser — the ecosystem home of "a unified
 // processor over HL7v2 trees"; the client's `parser` option shares it.
 export type { Hl7v2Processor } from "@glion/parser";
 
 /**
- * Middleware function signature (Hono/Koa onion model).
+ * Middleware function signature (Hono/Koa onion model). A returned
+ * `MllpResponse` is the response, a returned `null` is no response, and
+ * returning nothing leaves the response as it is.
  */
 export type MiddlewareReturn =
   // oxlint-disable-next-line typescript/no-invalid-void-type
-  | Promise<Response | undefined | void>
-  | Promise<void>
-  | Response
-  | undefined
+  | Promise<MllpResponse | null | void>
+  | MllpResponse
+  | null
   // oxlint-disable-next-line typescript/no-invalid-void-type
   | void;
 
@@ -103,12 +131,12 @@ export type Middleware<E = unknown> = (
 ) => MiddlewareReturn;
 
 /**
- * Terminal route handler — may return a response or void (no response).
+ * Terminal route handler. Returns the response, built by `ctx.ack()` or
+ * `ctx.reply()`, or `null` for no response.
  */
 export type Handler<E = unknown> = (
   ctx: Context<E>
-  // oxlint-disable-next-line typescript/no-invalid-void-type
-) => Promise<Response | undefined | void> | Response | undefined | void;
+) => Promise<MllpResponse | null> | MllpResponse | null;
 
 /**
  * A filter function for route or middleware matching.

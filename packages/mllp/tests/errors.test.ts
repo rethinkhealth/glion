@@ -71,6 +71,30 @@ describe("MllpServerError", () => {
     );
   });
 
+  it("states that the value given as the response is not an MllpResponse", () => {
+    expect(
+      new MllpServerError(MllpServerErrorCode.INVALID_RESPONSE).message
+    ).toBe(
+      "The value given as the response is not an `MllpResponse`; a response is built by `ctx.ack()` or `ctx.reply()`."
+    );
+  });
+
+  it("states that the response's MSA-1 is a NAK code", () => {
+    expect(
+      new MllpServerError(MllpServerErrorCode.RESPONSE_IS_NAK).message
+    ).toBe(
+      "The response's acknowledgment code (MSA-1) is a NAK code; a response accepts the message, and a NAK is the response to a thrown error."
+    );
+  });
+
+  it("states that the response does not start with an MSH", () => {
+    expect(
+      new MllpServerError(MllpServerErrorCode.RESPONSE_WITHOUT_MSH).message
+    ).toBe(
+      "The response does not start with the message header segment (`MSH`); an HL7v2 message starts with one."
+    );
+  });
+
   it("keeps its code, its name, and the cause it is given", () => {
     const cause = new Error("codec");
     const error = new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION, {

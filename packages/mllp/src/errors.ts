@@ -18,6 +18,12 @@ export const MllpServerErrorCode = {
   CONNECTION_LOST: "CONNECTION_LOST",
   /** `serve()` was called with an option it cannot use. */
   INVALID_OPTION: "INVALID_OPTION",
+  /**
+   * A route handler or middleware gave as the response, or wrote to `ctx.res`,
+   * a value that is not an `MllpResponse`: a route handler that returned
+   * `undefined`, for example.
+   */
+  INVALID_RESPONSE: "INVALID_RESPONSE",
   /** A middleware called `next()` a second time. */
   NEXT_CALLED_TWICE: "NEXT_CALLED_TWICE",
   /**
@@ -28,6 +34,13 @@ export const MllpServerErrorCode = {
    * code without importing that package.
    */
   PROTOCOL_VIOLATION: "PROTOCOL_VIOLATION",
+  /**
+   * `ctx.ack()` was given a NAK code, or `ctx.reply()` a message whose MSA-1
+   * is one. A NAK is the response to a thrown error.
+   */
+  RESPONSE_IS_NAK: "RESPONSE_IS_NAK",
+  /** `ctx.reply()` was given a message that does not start with an MSH. */
+  RESPONSE_WITHOUT_MSH: "RESPONSE_WITHOUT_MSH",
   /**
    * A response given to the connection contains a VT or FS byte, which MLLP
    * reserves for framing, and the connection closed. The underlying
@@ -52,10 +65,16 @@ const messages = {
       "The options given to `serve()` are an app; `serve()` takes one options object, as in `serve({ handle: app.handle, port: 2575 })`.",
     port: "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`.",
   },
+  INVALID_RESPONSE:
+    "The value given as the response is not an `MllpResponse`; a response is built by `ctx.ack()` or `ctx.reply()`.",
   NEXT_CALLED_TWICE:
     "A middleware called `next()` a second time; a middleware calls `next()` at most once.",
   PROTOCOL_VIOLATION:
     "The MLLP byte stream is not framed as MLLP requires, and the connection is closing; the error's cause says how.",
+  RESPONSE_IS_NAK:
+    "The response's acknowledgment code (MSA-1) is a NAK code; a response accepts the message, and a NAK is the response to a thrown error.",
+  RESPONSE_WITHOUT_MSH:
+    "The response does not start with the message header segment (`MSH`); an HL7v2 message starts with one.",
   UNFRAMEABLE_RESPONSE:
     "The response contains a VT or FS byte, and the connection is closing; MLLP reserves both bytes for framing.",
 } as const satisfies Record<

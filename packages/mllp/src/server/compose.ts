@@ -1,5 +1,7 @@
 import { MllpServerError, MllpServerErrorCode } from "../errors";
-import type { Context, Middleware, Response } from "./types";
+import { isResponse } from "./response";
+import type { MllpResponse } from "./response";
+import type { Context, Middleware } from "./types";
 
 /**
  * Compose an array of middleware into a single function that executes
@@ -9,12 +11,13 @@ import type { Context, Middleware, Response } from "./types";
  * next middleware. A middleware that returns without calling next()
  * short-circuits the chain.
  *
- * A middleware gives the response by returning a `Response` or by writing
- * `ctx.res`; a later one replaces it. Returning nothing leaves the response
- * as it is.
+ * A middleware gives the response by returning an `MllpResponse`, or `null` for
+ * no response, or by writing `ctx.res`; a later one replaces it. Returning
+ * nothing leaves the response as it is.
  *
- * A middleware that throws, or calls `next()` a second time
- * (`NEXT_CALLED_TWICE`), has that error passed to `onError`, and the response
+ * A middleware that throws, returns a value that is not a response
+ * (`MllpServerError` `INVALID_RESPONSE`), or calls `next()` a second time
+ * (`NEXT_CALLED_TWICE`) has that error passed to `onError`, and the response
  * `onError` returns or resolves to is written to `ctx.res` before the chain
  * goes on. `onError` MUST NOT throw. The second `next()` call also throws
  * that error to its caller.
@@ -23,7 +26,7 @@ export function compose<E>(
   middlewares: Middleware<E>[],
   onError: (
     error: Error
-  ) => Response | undefined | Promise<Response | undefined>
+  ) => MllpResponse | undefined | Promise<MllpResponse | undefined>
 ): (ctx: Context<E>) => Promise<void> {
   return async (ctx: Context<E>): Promise<void> => {
     let index = -1;
@@ -47,8 +50,13 @@ export function compose<E>(
         return;
       }
       try {
-        const result = await middleware(ctx, () => dispatch(i + 1));
-        if (isResponse(result)) {
+        const result: unknown = await middleware(ctx, () => dispatch(i + 1));
+        if (result === null) {
+          ctx.res = undefined;
+        } else if (result !== undefined) {
+          if (!isResponse(result)) {
+            throw new MllpServerError(MllpServerErrorCode.INVALID_RESPONSE);
+          }
           ctx.res = result;
         }
       } catch (error) {
@@ -58,14 +66,4 @@ export function compose<E>(
 
     await dispatch(0);
   };
-}
-
-/** Whether `value` is a {@link Response}. */
-export function isResponse(value: unknown): value is Response {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "raw" in value &&
-    typeof value.raw === "string"
-  );
 }

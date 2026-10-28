@@ -164,7 +164,7 @@ export interface Server {
  *
  *   const app = new Mllp().on("ADT^A01", async (ctx) => {
  *     await save(ctx.req.tree);
- *     return { raw: "..." };
+ *     return ctx.ack();
  *   });
  *
  *   const server = serve({ handle: app.handle, port: 2575 });

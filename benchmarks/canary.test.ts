@@ -176,11 +176,11 @@ describe("canary — suites measure real work", () => {
     const app = new Mllp();
     app.on("ADT^A01", (ctx) => {
       routed.push(ctx.req.header.triggerEvent);
-      return { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
+      return ctx.ack();
     });
     app.on("ORU^R01", (ctx) => {
       routed.push(ctx.req.header.triggerEvent);
-      return { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG002" };
+      return ctx.ack();
     });
     const encoder = new TextEncoder();
     await app.handle(encoder.encode(ADT_A01_MINIMAL));

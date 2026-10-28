@@ -15,6 +15,7 @@ import { once } from "node:events";
 import { connect } from "node:tls";
 import type { TLSSocket } from "node:tls";
 
+import { parseHL7v2 } from "@glion/hl7v2";
 import { frame } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { generate } from "selfsigned";
@@ -94,7 +95,9 @@ describe("serve() with tls.requestCert", () => {
   });
 
   const listen = async () => {
-    const app = new Mllp().on("ADT^A01", () => ({ raw: ACK }));
+    const app = new Mllp().on("ADT^A01", (ctx) =>
+      ctx.reply(parseHL7v2.parse(ACK))
+    );
     server = serve({
       handle: app.handle,
       onConnect: (connection) => {

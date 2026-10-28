@@ -1,15 +1,19 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
+import { toHl7v2 } from "@glion/to-hl7v2";
 
 import { compose } from "../../src/server/compose";
 import { createContext } from "../../src/server/context";
 import { parseRequest } from "../../src/server/request";
-import type { Context, Middleware, Response } from "../../src/server/types";
+import { toResponse } from "../../src/server/response";
+import type { MllpResponse } from "../../src/server/response";
+import type { Context, Middleware } from "../../src/server/types";
 
 const SAMPLE_MESSAGE = "MSH|^~\\&|S|F|R|RF|20240101||ADT^A01|CTL1|P|2.5.1";
 
 async function makeCtx(): Promise<Context> {
   return createContext({
+    app: { serializer: toHl7v2 },
     env: undefined,
     request: await parseRequest(
       new TextEncoder().encode(SAMPLE_MESSAGE),
@@ -18,8 +22,10 @@ async function makeCtx(): Promise<Context> {
   });
 }
 
-const reply = (raw: string): Response => ({ raw });
-const text = (value: Response | undefined) => value?.raw;
+const reply = (message: string): MllpResponse =>
+  toResponse(parseHL7v2.parse(message), toHl7v2);
+const text = (value: MllpResponse | undefined) =>
+  value ? new TextDecoder().decode(value.bytes) : undefined;
 
 function noAnswer(): undefined {
   return undefined;
@@ -143,6 +149,20 @@ describe("compose", () => {
       reply(`MSH|^~\\&||||||||||2.5.1\rMSA|AE|CTL1|${error.message}`)
     )(ctx);
     expect(text(ctx.res)).toContain("MSA|AE|CTL1|second");
+  });
+
+  it("clears the response when a middleware returns null", async () => {
+    const outer: Middleware = async (_ctx, next) => {
+      await next();
+      return null;
+    };
+    const ctx = await makeCtx();
+
+    await compose(
+      [outer, () => reply("MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1")],
+      noAnswer
+    )(ctx);
+    expect(ctx.res).toBeUndefined();
   });
 
   it("replaces a response written to ctx.res when a middleware outside it throws", async () => {
