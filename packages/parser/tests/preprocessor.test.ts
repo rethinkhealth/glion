@@ -86,6 +86,22 @@ describe("preprocessor steps", () => {
       });
     });
 
+    it("reads the encoding characters up to a field delimiter before the fourth", () => {
+      const result = detectDelimiters({
+        delimiters: DEFAULT_DELIMITERS,
+        input: "MSH*%$*APP",
+      });
+
+      expect(result.delimiters).toStrictEqual({
+        component: "%",
+        escape: "\\",
+        field: "*",
+        repetition: "$",
+        segment: "\r",
+        subcomponent: "&",
+      });
+    });
+
     it("does not change delimiters when a line break follows MSH", () => {
       const result = detectDelimiters({
         delimiters: DEFAULT_DELIMITERS,

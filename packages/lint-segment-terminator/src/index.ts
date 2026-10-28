@@ -1,7 +1,7 @@
 import type { Nodes, Root, Segment } from "@glion/ast";
+import { visit } from "@glion/util-visit";
 import { lintRule } from "unified-lint-rule";
 import type { Point, Position } from "unist";
-import { visitParents } from "unist-util-visit-parents";
 import type { VFile } from "vfile";
 
 const CARRIAGE_RETURN = "\r";
@@ -76,7 +76,7 @@ const hl7v2LintSegmentTerminator = lintRule<Root>(
     if (text === "") {
       return;
     }
-    visitParents(tree, "segment", (segment: Segment, ancestors) => {
+    visit(tree, "segment", (segment, ancestors) => {
       const end = segment.position?.end;
       if (end?.offset === undefined) {
         return;

@@ -206,6 +206,22 @@ describe("line breaks", () => {
     });
   });
 
+  it("reads the first four characters of MSH-2 as one token, and a fifth, the truncation character, as the next", () => {
+    expect(toks("MSH|^~\\&#|A").slice(4, 7)).toMatchObject([
+      { type: "TEXT", value: "^~\\&" },
+      { type: "TEXT", value: "#" },
+      { type: "FIELD_DELIM" },
+    ]);
+  });
+
+  it("ends MSH-2 at a field delimiter before its fourth character", () => {
+    expect(toks("MSH|^~\\|APP").slice(4)).toMatchObject([
+      { type: "TEXT", value: "^~\\" },
+      { type: "FIELD_DELIM" },
+      { type: "TEXT", value: "APP" },
+    ]);
+  });
+
   it("reads MSH followed by a line break as a Segment ID with no fields", () => {
     expect(
       toks("MSH\rPID|1").map(({ type, value }) => [type, value])

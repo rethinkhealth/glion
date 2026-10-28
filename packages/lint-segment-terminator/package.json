@@ -46,9 +46,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@glion/util-visit": "workspace:*",
     "unified": "11.0.5",
-    "unified-lint-rule": "3.0.1",
-    "unist-util-visit-parents": "6.0.2"
+    "unified-lint-rule": "3.0.1"
   },
   "devDependencies": {
     "@glion/ast": "workspace:*",

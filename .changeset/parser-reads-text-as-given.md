@@ -6,6 +6,6 @@
 
 **Breaking:** the root's `position` covers the message from its first character to its last, the line breaks after its last segment included: `MSH|^~\&\rPID|1\r` gives a root at 0–15, not 0–14. A segment still ends at its last character, before its line break. A finding placed at the end of the message, such as a segment missing at the end in `@glion/lint-profile-segment-order`, is now at the start of the line after the last segment.
 
-**Breaking:** the `stripBOM` and `normalizeNewlines` preprocessing steps are removed, and `defaultPreprocessors` holds only `detectDelimiters`, which reads MSH after a byte order mark.
+**Breaking:** the `stripBOM` and `normalizeNewlines` preprocessing steps are removed, and `defaultPreprocessors` holds only `detectDelimiters`, which reads MSH after a byte order mark. A custom `preprocess` step receives the input as given, a byte order mark included.
 
-An MSH-2 shorter than four characters ends at the first line break, and so do the encoding characters `detectDelimiters` reads: `MSH|^~\` followed by `\r` no longer swallows the next segment into MSH-2 (#1140). `MSH` followed by a line break is read as a segment with no fields.
+An MSH-2 shorter than four characters ends at the first field delimiter or line break, and so do the encoding characters `detectDelimiters` reads: `MSH|^~\` followed by `\r` no longer swallows the next segment into MSH-2, and `MSH|^~\|APP` no longer swallows MSH-3 (#1140). `MSH` followed by a line break is read as a segment with no fields.

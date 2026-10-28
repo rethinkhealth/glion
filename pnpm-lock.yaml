@@ -2136,15 +2136,15 @@ importers:
 
   packages/lint-segment-terminator:
     dependencies:
+      '@glion/util-visit':
+        specifier: workspace:*
+        version: link:../util-visit
       unified:
         specifier: 11.0.5
         version: 11.0.5
       unified-lint-rule:
         specifier: 3.0.1
         version: 3.0.1
-      unist-util-visit-parents:
-        specifier: 6.0.2
-        version: 6.0.2
     devDependencies:
       '@glion/ast':
         specifier: workspace:*
