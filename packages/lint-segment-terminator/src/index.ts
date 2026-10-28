@@ -1,6 +1,8 @@
-import type { Node, Segment } from "@glion/ast";
+import type { Nodes, Root, Segment } from "@glion/ast";
 import { lintRule } from "unified-lint-rule";
+import type { Point, Position } from "unist";
 import { visitParents } from "unist-util-visit-parents";
+import type { VFile } from "vfile";
 
 const CARRIAGE_RETURN = "\r";
 const LINE_FEED = "\n";
@@ -24,18 +26,47 @@ const notes = {
  * The terminator after `end` in `text`: `\r\n`, `\r`, `\n`, an empty string
  * at the end of the text, or the one character there.
  */
-const lineBreakAt = (text: string, end: number): string =>
+const terminatorAt = (text: string, end: number): string =>
   text.startsWith(CARRIAGE_RETURN_LINE_FEED, end)
     ? CARRIAGE_RETURN_LINE_FEED
     : text.charAt(end);
 
 /**
+ * The span of a terminator of `length` characters after a segment that ends
+ * at `end`, `offset` characters into the text: to the start of the next line.
+ */
+const terminatorPlace = (end: Point, offset: number, length: number) => ({
+  end: { column: 1, line: end.line + 1, offset: offset + length },
+  start: end,
+});
+
+/** Reports `reason` on `segment`, at `place`, with the terminator found. */
+const report = (
+  file: VFile,
+  reason: string,
+  segment: Segment,
+  ancestors: readonly Nodes[],
+  place: Point | Position,
+  actual?: string
+): void => {
+  const message = file.message(reason, {
+    ancestors: [...ancestors, segment],
+    place,
+  });
+  message.actual = actual;
+  message.expected = [CARRIAGE_RETURN];
+  message.note = notes.segmentTerminator;
+};
+
+/**
  * Lint rule that reports a segment that does not end with a carriage return.
  *
- * Reads the text after each segment in the file the tree was parsed from. A
- * segment without a position, or a file with no text, is not checked.
+ * Reads the text after each segment in the file the tree was parsed from, so
+ * positions MUST point into that text, as `@glion/parser`'s do unless a
+ * `preprocess` step rewrites the input. A segment without a position, or a
+ * file with no text, is not checked.
  */
-const hl7v2LintSegmentTerminator = lintRule<Node>(
+const hl7v2LintSegmentTerminator = lintRule<Root>(
   {
     origin: "hl7v2-lint:segment-terminator",
     url: "https://github.com/rethinkhealth/glion/tree/main/packages/lint-segment-terminator#readme",
@@ -50,51 +81,49 @@ const hl7v2LintSegmentTerminator = lintRule<Node>(
       if (end?.offset === undefined) {
         return;
       }
-      const offset = end.offset;
-      // The finding covers the terminator that ends the segment, from the
-      // segment's last character to the start of the next line.
-      const reportTerminator = (reason: string, lineBreak: string) => {
-        const message = file.message(reason, {
-          ancestors: [...ancestors, segment],
-          place: {
-            end: {
-              column: 1,
-              line: end.line + 1,
-              offset: offset + lineBreak.length,
-            },
-            start: end,
-          },
-        });
-        message.actual = lineBreak;
-        message.expected = [CARRIAGE_RETURN];
-        message.note = notes.segmentTerminator;
-      };
-      const lineBreak = lineBreakAt(text, offset);
-      switch (lineBreak) {
+      const { offset } = end;
+      const terminator = terminatorAt(text, offset);
+      switch (terminator) {
         case CARRIAGE_RETURN: {
           break;
         }
         case LINE_FEED: {
-          reportTerminator(messages.lineFeed, lineBreak);
+          report(
+            file,
+            messages.lineFeed,
+            segment,
+            ancestors,
+            terminatorPlace(end, offset, terminator.length),
+            terminator
+          );
           break;
         }
         case CARRIAGE_RETURN_LINE_FEED: {
-          reportTerminator(messages.carriageReturnLineFeed, lineBreak);
+          report(
+            file,
+            messages.carriageReturnLineFeed,
+            segment,
+            ancestors,
+            terminatorPlace(end, offset, terminator.length),
+            terminator
+          );
           break;
         }
         case "": {
-          const message = file.message(messages.noTerminator, {
-            ancestors: [...ancestors, segment],
-            place: end,
-          });
-          message.expected = [CARRIAGE_RETURN];
-          message.note = notes.segmentTerminator;
+          report(file, messages.noTerminator, segment, ancestors, end);
           break;
         }
         default: {
           // A segment delimiter set to another character in the parser
           // settings.
-          reportTerminator(messages.otherCharacter, lineBreak);
+          report(
+            file,
+            messages.otherCharacter,
+            segment,
+            ancestors,
+            terminatorPlace(end, offset, terminator.length),
+            terminator
+          );
           break;
         }
       }

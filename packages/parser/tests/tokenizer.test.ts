@@ -157,6 +157,16 @@ describe("line breaks", () => {
     ]);
   });
 
+  it("ends a Segment ID at a carriage return and a line feed when the segment delimiter is another character", () => {
+    const delimiters = { ...DEFAULT_DELIMITERS, segment: "$" };
+
+    expect(toks("PI\rD\r\nOBX|1", {}, delimiters).slice(0, 3)).toMatchObject([
+      { type: "TEXT", value: "PI\rD" },
+      { type: "SEGMENT_END" },
+      { type: "TEXT", value: "OBX" },
+    ]);
+  });
+
   it("reads a carriage return without a line feed as text when the segment delimiter is another character", () => {
     const delimiters = { ...DEFAULT_DELIMITERS, segment: "$" };
 
@@ -166,30 +176,46 @@ describe("line breaks", () => {
     });
   });
 
-  it("counts a carriage return inside a truncated MSH-2 as a line break", () => {
+  it("ends MSH-2 at a carriage return before its fourth character", () => {
     const out = toks("MSH|^~\\\rPID|1");
 
-    expect(out[4]).toMatchObject({ type: "TEXT", value: "^~\\\r" });
-    expect(out[5]?.position.start).toStrictEqual({
-      column: 1,
-      line: 2,
-      offset: 8,
+    expect(out[4]).toMatchObject({ type: "TEXT", value: "^~\\" });
+    expect(out[5]).toMatchObject({
+      position: { end: { offset: 8 }, start: { offset: 7 } },
+      type: "SEGMENT_END",
+    });
+    expect(out[6]).toMatchObject({
+      position: { start: { column: 1, line: 2, offset: 8 } },
+      type: "TEXT",
+      value: "PID",
     });
   });
 
-  it("counts a line break that ends a truncated MSH-2 once", () => {
+  it("ends MSH-2 at a carriage return and a line feed before its fourth character", () => {
     const out = toks("MSH|^~\\\r\nPID|1");
 
-    expect(out[4]).toMatchObject({ type: "TEXT", value: "^~\\\r" });
+    expect(out[4]).toMatchObject({ type: "TEXT", value: "^~\\" });
     expect(out[5]).toMatchObject({
-      position: { end: { offset: 9 }, start: { offset: 8 } },
+      position: { end: { offset: 9 }, start: { offset: 7 } },
       type: "SEGMENT_END",
     });
-    expect(out[6]?.position.start).toStrictEqual({
-      column: 1,
-      line: 2,
-      offset: 9,
+    expect(out[6]).toMatchObject({
+      position: { start: { column: 1, line: 2, offset: 9 } },
+      type: "TEXT",
+      value: "PID",
     });
+  });
+
+  it("reads MSH followed by a line break as a Segment ID with no fields", () => {
+    expect(
+      toks("MSH\rPID|1").map(({ type, value }) => [type, value])
+    ).toStrictEqual([
+      ["TEXT", "MSH"],
+      ["SEGMENT_END", undefined],
+      ["TEXT", "PID"],
+      ["FIELD_DELIM", undefined],
+      ["TEXT", "1"],
+    ]);
   });
 });
 

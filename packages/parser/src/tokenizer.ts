@@ -10,10 +10,11 @@ const MSH_SEGMENT_END = 3;
 const MSH_FIELD_SEPERATOR_START = 3;
 const MSH_FIELD_SEPERATOR_END = 4;
 const MSH_FIELD_DELIMITER_START = 4;
-const MSH_FIELD_DELIMITER_END = 8;
+const MAX_ENCODING_CHARACTERS = 4;
 const BYTE_ORDER_MARK = "\uFEFF";
 const LINE_FEED = "\n";
 const CARRIAGE_RETURN = "\r";
+const CARRIAGE_RETURN_LINE_FEED = "\r\n";
 
 /**
  * The offset the message starts at in `input`: 1 after a byte order mark,
@@ -21,6 +22,41 @@ const CARRIAGE_RETURN = "\r";
  */
 export const messageStart = (input: string): number =>
   input.startsWith(BYTE_ORDER_MARK) ? 1 : 0;
+
+/**
+ * The length of the line break at `at` in `input`, or 0: a segment ends at
+ * `segment`, the segment delimiter, at a line feed, or at a carriage return
+ * and a line feed.
+ */
+export const lineBreakAt = (
+  input: string,
+  at: number,
+  segment: string
+): number => {
+  if (input.startsWith(CARRIAGE_RETURN_LINE_FEED, at)) {
+    return CARRIAGE_RETURN_LINE_FEED.length;
+  }
+  const c = input.charAt(at);
+  return c === segment || c === LINE_FEED ? 1 : 0;
+};
+
+/**
+ * The offset the encoding characters MSH-2 declares end at, for an MSH-2 that
+ * starts at `from`: four characters on, or the first line break before that.
+ * In `MSH|^~\` followed by a line break, they are `^~\`.
+ */
+export const encodingCharactersEnd = (
+  input: string,
+  from: number,
+  segment: string
+): number => {
+  const limit = Math.min(from + MAX_ENCODING_CHARACTERS, input.length);
+  let end = from;
+  while (end < limit && !lineBreakAt(input, end, segment)) {
+    end += 1;
+  }
+  return end;
+};
 
 export interface TokenizerOptions {
   /**
@@ -70,17 +106,26 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     this.msh2End = 0;
 
     // Prepare a one-time bootstrap if file starts with MSH
-    if (this.input.startsWith("MSH", this.start)) {
+    // MSH followed by a line break holds no fields to bootstrap.
+    const hasMshFields =
+      this.input.startsWith("MSH", this.start) &&
+      !this._lineBreakAt(this.start + MSH_FIELD_SEPERATOR_START);
+    if (hasMshFields) {
       // Precompute MSH and MSH.2; MSH.1 is the field delimiter char at index 3
       const msh = this._slice(MSH_SEGMENT_START, MSH_SEGMENT_END);
       const msh1 = this._slice(
         MSH_FIELD_SEPERATOR_START,
         MSH_FIELD_SEPERATOR_END
       ); // the field delimiter char at index 3
-      const msh2 = this._slice(
-        MSH_FIELD_DELIMITER_START,
-        MSH_FIELD_DELIMITER_END
-      ); // may be shorter than 4 if truncated
+      const msh2End = encodingCharactersEnd(
+        this.input,
+        this.start + MSH_FIELD_DELIMITER_START,
+        this.delims.segment
+      );
+      const msh2 = this.input.slice(
+        this.start + MSH_FIELD_DELIMITER_START,
+        msh2End
+      );
       this.pendingBootstrap = [
         { advance: msh.length, kind: "TEXT", value: msh },
         { advance: 0, kind: "FIELD_DELIM" },
@@ -89,12 +134,13 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
         { advance: msh2.length, kind: "TEXT", value: msh2 },
       ];
       // NOTE: we have not advanced indices yet; we will as we emit tokens
-      this.msh2End = Math.min(
-        this.start + MSH_FIELD_DELIMITER_END,
-        this.input.length
-      );
+      this.msh2End = msh2End;
       let c = this.input.charAt(this.msh2End);
-      while (c !== "" && c !== this.delims.field) {
+      while (
+        c !== "" &&
+        c !== this.delims.field &&
+        !this._lineBreakAt(this.msh2End)
+      ) {
         this.msh2End += 1;
         c = this.input.charAt(this.msh2End);
       }
@@ -118,7 +164,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
         if (step.kind === "TEXT") {
           const take = Math.min(step.advance, n - this.i);
           const out = step.value.slice(0, take);
-          this._advanceThrough(out);
+          this._fastAdvance(out);
           if (this.pendingBootstrap.length === 0) {
             this.pendingBootstrap = null;
             this.didMshBootstrap = true;
@@ -234,11 +280,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   // A segment ends at the segment delimiter, a line feed, or a carriage
   // return and a line feed: the length of the one at `at`, or 0.
   private _lineBreakAt(at: number): number {
-    const c = this.input.charAt(at);
-    if (c === CARRIAGE_RETURN && this.input.charAt(at + 1) === LINE_FEED) {
-      return 2;
-    }
-    return c === this.delims.segment || c === LINE_FEED ? 1 : 0;
+    return lineBreakAt(this.input, at, this.delims.segment);
   }
 
   private _advance(n: number, isNewline = false) {
@@ -251,22 +293,11 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
   }
 
-  // TEXT tokens and Segment IDs stop at a line break, so the chunk holds none.
+  // A TEXT token, a Segment ID, and MSH-1 and MSH-2 stop at a line break, so
+  // the chunk holds none.
   private _fastAdvance(chunk: string) {
     this.i += chunk.length;
     this.col += chunk.length;
-  }
-
-  // The MSH bootstrap reads fixed offsets, which a truncated MSH can end past
-  // a line break: in `MSH|^~\&\r\nPID`, MSH-2 is `^~\&\r`. A line break the
-  // chunk cuts in two counts in the next token.
-  private _advanceThrough(chunk: string) {
-    const end = this.i + chunk.length;
-    while (this.i < end) {
-      const lineBreak = this._lineBreakAt(this.i);
-      const isWhole = lineBreak > 0 && lineBreak <= end - this.i;
-      this._advance(isWhole ? lineBreak : 1, isWhole);
-    }
   }
 
   private _tok(

@@ -70,6 +70,31 @@ describe("preprocessor steps", () => {
       });
     });
 
+    it("reads the encoding characters up to a line break before the fourth", () => {
+      const result = detectDelimiters({
+        delimiters: DEFAULT_DELIMITERS,
+        input: "MSH*%$#\r\nPID*1",
+      });
+
+      expect(result.delimiters).toStrictEqual({
+        component: "%",
+        escape: "#",
+        field: "*",
+        repetition: "$",
+        segment: "\r",
+        subcomponent: "&",
+      });
+    });
+
+    it("does not change delimiters when a line break follows MSH", () => {
+      const result = detectDelimiters({
+        delimiters: DEFAULT_DELIMITERS,
+        input: "MSH\nPID*1",
+      });
+
+      expect(result.delimiters).toBe(DEFAULT_DELIMITERS);
+    });
+
     it("does not change delimiters if input does not start with MSH", () => {
       const ctx: ParserContext = {
         delimiters: DEFAULT_DELIMITERS,

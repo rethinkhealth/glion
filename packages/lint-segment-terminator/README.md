@@ -41,7 +41,7 @@ console.error(reporter([file]));
 
 ### `unified().use(hl7v2LintSegmentTerminator)`
 
-A `unified` lint rule plugin. Visits every `segment` node, segments inside a segment group included, reads the text after the segment in the file the tree was parsed from, and reports one message per segment that does not end with a carriage return. A segment without a position, or a file with no text, is not checked.
+A `unified` lint rule plugin. Visits every `segment` node, segments inside a segment group included, reads the text after the segment in the file the tree was parsed from, and reports one message per segment that does not end with a carriage return. The positions must point into that text, as `@glion/parser`'s do unless a `preprocess` step rewrites the input. A segment without a position, or a file with no text, is not checked.
 
 ```ts
 import type { Plugin } from "unified";
