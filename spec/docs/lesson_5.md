@@ -90,6 +90,8 @@ a^^b   glion:          [["a"], [], ["b"]]
 
 The same holds one level up for a repetition (`[[""]]`) and a field (`[[[""]]]`). Both describe the same text; the abstraction function picks the specification's form.
 
+The mapping must also be **one to one**. A field holding one empty repetition, `field [rep []]`, is written as the same text as an empty field, `field []`, and a lenient mapping would turn both into `[[[""]]]`. Then a parser that started writing the first shape, against its own README, would pass every property. So the abstraction function throws on a lone empty child at any level: the parser gives a node children only when the text forces them, and the abstraction function holds it to that.
+
 Neither of these is a choice about HL7v2. They are choices about how two representations line up, and the abstraction function is where you check them.
 
 ## Step 4: The generator, inside the domain
