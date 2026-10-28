@@ -199,6 +199,8 @@ function createParserCore() {
       root.position = { end: tok.position.start, start: tok.position.start };
       rootStartSet = true;
     }
+    // The root ends at the last token, the segment terminators included.
+    documentEnd = tok.position.end;
     switch (tok.type) {
       case "SEGMENT_END": {
         const endPos = lastContentEnd || tok.position.start;
@@ -208,7 +210,6 @@ function createParserCore() {
       }
       case "FIELD_DELIM": {
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         // A line that starts with a field delimiter has an empty Segment ID
         ensureSegment(tok.position.start);
         openField(tok.position.end);
@@ -216,21 +217,18 @@ function createParserCore() {
       }
       case "REPETITION_DELIM": {
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         openRepetition(tok.position.start, tok.position.end);
         updatePositionsToEnd(tok.position.end);
         return;
       }
       case "COMPONENT_DELIM": {
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         openComponent(tok.position.start, tok.position.end);
         updatePositionsToEnd(tok.position.end);
         return;
       }
       case "SUBCOMP_DELIM": {
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         ensureComponent(tok.position.start);
         // If comp has no children yet, add empty first subcomponent
         if (comp!.children.length === 0) {
@@ -250,7 +248,6 @@ function createParserCore() {
         if (expectingSegmentName) {
           openSegment(val, tok.position);
           lastContentEnd = tok.position.end;
-          documentEnd = tok.position.end;
           return;
         }
 
@@ -261,7 +258,6 @@ function createParserCore() {
         }
         updatePositionsToEnd(tok.position.end);
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         segmentHasContent = true;
         return;
       }

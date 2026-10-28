@@ -25,9 +25,7 @@ const NUM_RUNS = 300;
 
 /**
  * Expect `node` and each node under it to cover exactly the text the
- * serializer writes for it. MSH-1 and MSH-2 are written as they are. The root
- * ends at its last segment, and the serializer writes the segment terminator
- * after it.
+ * serializer writes for it. MSH-1 and MSH-2 are written as they are.
  */
 const expectWrittenAt = (
   source: string,
@@ -36,10 +34,8 @@ const expectWrittenAt = (
   encodeEscapes: boolean
 ): void => {
   const { end, start } = node.position ?? {};
-  const text = source.slice(start?.offset, end?.offset);
-  const isRoot = node.type === "root";
 
-  expect(isRoot ? `${text}${d.segment}` : text).toBe(
+  expect(source.slice(start?.offset, end?.offset)).toBe(
     toHl7v2(node, d, { encodeEscapes })
   );
   if (!("children" in node)) {
@@ -76,19 +72,60 @@ const expectNested = (node: Nodes, from: number, to: number): void => {
 describe("QR3: crash resilience", () => {
   describe("structurally valid messages", () => {
     // The parser positions every node at the text it was read from: the root
-    // at the whole message, a segment at its line, a field, repetition,
-    // component, or subcomponent at its text with the delimiters inside it.
+    // at the whole message, its segment terminators included, a segment at its
+    // line, a field, repetition, component, or subcomponent at its text with
+    // the delimiters inside it.
     //
     // Mutant: a component delimiter extends no node's end (#1102). Fails on
     // `"MSH|^~\\&|^|"`.
+    //
+    // Mutant: the root ends at its last segment, before the segment
+    // terminator after it. Fails on `"MSH|^~\\&|^|"`.
     it("positions every node at the text it was read from", () => {
       fc.assert(
         fc.property(arbHL7v2Message, (msg) => {
-          const root = parseHL7v2(msg);
+          const source = `${msg}\r`;
+          const root = parseHL7v2(source);
 
-          expectWrittenAt(msg, root, delimiters(root), true);
+          expectWrittenAt(source, root, delimiters(root), true);
         }),
         { examples: [["MSH|^~\\&|^|"]], numRuns: NUM_RUNS }
+      );
+    });
+
+    // A segment ends at a carriage return, a line feed, or both, and every
+    // node is positioned at its text in the message as it was read, whichever
+    // line breaks it holds (#1139). The root covers the whole message.
+    //
+    // Mutant: the line breaks are replaced with `\r` before the message is
+    // tokenized. Fails on `"MSH|^~\\&|||\r\nAAA|\r\n"`.
+    it("positions every node at its text, whichever line breaks end the segments", () => {
+      const arbLineBreaks = arbHL7v2Message.chain((msg) => {
+        const lines = msg.split("\r");
+        return fc
+          .array(fc.constantFrom("\r", "\n", "\r\n"), {
+            maxLength: lines.length,
+            minLength: lines.length,
+          })
+          .map((breaks) =>
+            lines.map((line, index) => `${line}${breaks[index]}`).join("")
+          );
+      });
+
+      fc.assert(
+        fc.property(arbLineBreaks, (source) => {
+          const root = parseHL7v2(source);
+
+          expect(root.position?.start.offset).toBe(0);
+          expect(root.position?.end.offset).toBe(source.length);
+          for (const segment of root.children) {
+            expectWrittenAt(source, segment, delimiters(root), true);
+          }
+        }),
+        {
+          examples: [["MSH|^~\\&|||\r\nAAA|\r\n"], ["MSH|^~\\&|||\nAAA|\r"]],
+          numRuns: NUM_RUNS,
+        }
       );
     });
   });
@@ -99,12 +136,16 @@ describe("QR3: crash resilience", () => {
     //
     // Mutant: a component delimiter extends no node's end (#1102). Fails on
     // `"MSH#*!%+#*#"`.
+    //
+    // Mutant: the root ends at its last segment, before the segment
+    // terminator after it. Fails on `"MSH#*!%+#*#"`.
     it("positions every node at the text it was read from", () => {
       fc.assert(
         fc.property(arbHL7v2MessageCustomDelimiters, (msg) => {
-          const root = parseHL7v2(msg);
+          const source = `${msg}\r`;
+          const root = parseHL7v2(source);
 
-          expectWrittenAt(msg, root, delimiters(root), true);
+          expectWrittenAt(source, root, delimiters(root), true);
         }),
         { examples: [["MSH#*!%+#*#"]], numRuns: NUM_RUNS }
       );

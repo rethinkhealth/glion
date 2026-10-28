@@ -4,9 +4,13 @@ import { HL7v2Tokenizer } from "../src/tokenizer";
 import type { TokenizerOptions } from "../src/tokenizer";
 import type { Token } from "../src/types";
 
-function toks(input: string, options?: TokenizerOptions): Token[] {
+function toks(
+  input: string,
+  options?: TokenizerOptions,
+  delimiters = DEFAULT_DELIMITERS
+): Token[] {
   const t = new HL7v2Tokenizer(options);
-  t.reset({ delimiters: DEFAULT_DELIMITERS, input });
+  t.reset({ delimiters, input });
   const out: Token[] = [];
   for (let k = t.next(); k; k = t.next()) {
     out.push(k);
@@ -99,5 +103,112 @@ describe("escape sequences", () => {
     const out = toks("PID|a\\F\\b", { decodeEscapes: false });
 
     expect(out[2]).toMatchObject({ type: "TEXT", value: "a\\F\\b" });
+  });
+});
+
+describe("line breaks", () => {
+  const lineBreaks = (input: string, delimiters = DEFAULT_DELIMITERS) =>
+    toks(input, {}, delimiters)
+      .filter((token) => token.type === "SEGMENT_END")
+      .map(({ position }) => [position.start.offset, position.end.offset]);
+
+  it("ends a segment at a carriage return, a line feed, or a carriage return and a line feed", () => {
+    expect(lineBreaks("PID|1\rOBX|2\nNTE|3\r\nZZZ")).toStrictEqual([
+      [5, 6],
+      [11, 12],
+      [17, 19],
+    ]);
+  });
+
+  it("reads the text after each line break as a Segment ID", () => {
+    const ids = toks("PID|1\nOB^X|2\r\nN~TE|3")
+      .filter((token, index, all) => all[index - 1]?.type === "SEGMENT_END")
+      .map((token) => token.value);
+
+    expect(ids).toStrictEqual(["OB^X", "N~TE"]);
+  });
+
+  it("ends a value and a Segment ID at a line break", () => {
+    const values = toks("PID|a\nOBX\r\nNTE|b\r\n")
+      .filter((token) => token.type === "TEXT")
+      .map((token) => token.value);
+
+    expect(values).toStrictEqual(["PID", "a", "OBX", "NTE", "b"]);
+  });
+
+  it("counts each line break as one line", () => {
+    const starts = toks("PID|1\r\nOBX|2\nNTE|3")
+      .filter((token) => token.type === "TEXT" && token.value?.length === 3)
+      .map(({ position }) => position.start);
+
+    expect(starts).toStrictEqual([
+      { column: 1, line: 1, offset: 0 },
+      { column: 1, line: 2, offset: 7 },
+      { column: 1, line: 3, offset: 13 },
+    ]);
+  });
+
+  it("ends a segment at the segment delimiter the context gives", () => {
+    const delimiters = { ...DEFAULT_DELIMITERS, segment: "$" };
+
+    expect(lineBreaks("PID|1$OBX|2\r\nNTE", delimiters)).toStrictEqual([
+      [5, 6],
+      [11, 13],
+    ]);
+  });
+
+  it("reads a carriage return without a line feed as text when the segment delimiter is another character", () => {
+    const delimiters = { ...DEFAULT_DELIMITERS, segment: "$" };
+
+    expect(toks("PID|a\rb", {}, delimiters)[2]).toMatchObject({
+      type: "TEXT",
+      value: "a\rb",
+    });
+  });
+
+  it("counts a line break that ends a truncated MSH-2 once", () => {
+    const out = toks("MSH|^~\\\r\nPID|1");
+
+    expect(out[4]).toMatchObject({ type: "TEXT", value: "^~\\\r" });
+    expect(out[5]).toMatchObject({
+      position: { end: { offset: 9 }, start: { offset: 8 } },
+      type: "SEGMENT_END",
+    });
+    expect(out[6]?.position.start).toStrictEqual({
+      column: 1,
+      line: 2,
+      offset: 9,
+    });
+  });
+});
+
+describe("byte order mark", () => {
+  it("starts the message after a byte order mark", () => {
+    const out = toks("\uFEFFMSH|^~\\&|A");
+
+    expect(out[0]).toMatchObject({
+      position: {
+        end: { column: 5, line: 1, offset: 4 },
+        start: { column: 2, line: 1, offset: 1 },
+      },
+      type: "TEXT",
+      value: "MSH",
+    });
+    expect(out[4]).toMatchObject({ type: "TEXT", value: "^~\\&" });
+    expect(out[6]).toMatchObject({ type: "TEXT", value: "A" });
+  });
+
+  it("reads the first line after a byte order mark as a Segment ID", () => {
+    expect(toks("\uFEFFP^D|1")[0]).toMatchObject({
+      type: "TEXT",
+      value: "P^D",
+    });
+  });
+
+  it("reads a byte order mark after the start of the message as text", () => {
+    expect(toks("PID|\uFEFF")[2]).toMatchObject({
+      type: "TEXT",
+      value: "\uFEFF",
+    });
   });
 });

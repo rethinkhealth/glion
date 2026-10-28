@@ -1032,7 +1032,7 @@ exports[`QR1: message conformance > edge-crlf-line-endings.hl7 — pipeline outp
       "place": {
         "column": 1,
         "line": 2,
-        "offset": 74,
+        "offset": 75,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1122,9 +1122,9 @@ exports[`QR1: message conformance > edge-custom-delimiters.hl7 — pipeline outp
     {
       "message": "Segment \`PV1\` is missing; the event schema requires it at this point.",
       "place": {
-        "column": 43,
-        "line": 2,
-        "offset": 116,
+        "column": 1,
+        "line": 3,
+        "offset": 117,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1567,9 +1567,9 @@ exports[`QR1: message conformance > edge-field-repetitions.hl7 — pipeline outp
     {
       "message": "Segment \`PV1\` is missing; the event schema requires it at this point.",
       "place": {
-        "column": 188,
-        "line": 2,
-        "offset": 261,
+        "column": 1,
+        "line": 3,
+        "offset": 262,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1876,9 +1876,9 @@ exports[`QR1: message conformance > edge-non-ascii.hl7 — pipeline output match
     {
       "message": "Segment \`PV1\` is missing; the event schema requires it at this point.",
       "place": {
-        "column": 27,
-        "line": 3,
-        "offset": 192,
+        "column": 1,
+        "line": 4,
+        "offset": 193,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
@@ -1978,9 +1978,9 @@ exports[`QR1: message conformance > edge-z-segments.hl7 — pipeline output matc
     {
       "message": "Segment \`PV1\` is missing; the event schema requires it at this point.",
       "place": {
-        "column": 74,
-        "line": 4,
-        "offset": 242,
+        "column": 1,
+        "line": 5,
+        "offset": 243,
       },
       "ruleId": "segment-order",
       "source": "hl7v2-lint",
