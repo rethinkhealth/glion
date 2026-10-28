@@ -325,7 +325,7 @@ A fast-check property follows the `glion-property-tests` skill: invoke it before
 
 - **Vitest**, base config in `tools/testing/src/vitest.config.ts` (`@glion/testing`).
 - Test files: `**/*.test.ts`, `**/*.test.tsx`.
-- Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier. The one exception is `tests/regressions/`, one file per bug, `<issue>-<symptom>.test.ts`, with the header CONTRIBUTING describes.
+- Tests live in the package's `tests/` directory (plural), never colocated in `src/` and never `test/`. Mirror the `src/` layout inside it — `src/commands/send.ts` is tested by `tests/commands/send.test.ts` — and import across the boundary with an explicit `../../src/...` specifier. Two exceptions: `tests/regressions/`, one file per bug, `<issue>-<symptom>.test.ts`, with the header CONTRIBUTING describes; and `tests/scenarios/`, one file per HL7v2 situation, importing only the package's public entry point, with the rules CONTRIBUTING describes.
 - Each package has its own `vitest.config.ts` for package-specific settings, and a `tests/tsconfig.json` so tests are type-checked by `pnpm check-types` (CI runs it).
 - Coverage reporters: text, html, json.
 - `expect()` inside `it()` / `test()` blocks.

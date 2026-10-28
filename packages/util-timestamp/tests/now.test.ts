@@ -18,9 +18,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// `vitest.config.ts` sets the host's time zone to America/New_York, which is
-// UTC-5 (EST) in winter and UTC-4 (EDT) in summer.
+// With no `timeZone`, the clock is read in the host's time zone.
 describe("nowDTM in the host's time zone", () => {
+  // The host's time zone is America/New_York, set in `vitest.config.ts`.
   // 07:30:17.123 UTC in January is 02:30:17.123 EST. With no options, the
   // precision is `fraction`: every field, the milliseconds, and the offset.
   it("gives every field, the milliseconds, and the offset", () => {
@@ -39,12 +39,14 @@ describe("nowDTM in the host's time zone", () => {
     expect(formatDTM(nowDTM())).toBe("20240115023017.123-0500");
   });
 
+  // The host's time zone is America/New_York, set in `vitest.config.ts`.
   // 5 ms is written `.005`, not `.5`, which would mean 500 ms.
   it("writes the milliseconds as 3 digits", () => {
     vi.setSystemTime("2024-01-15T07:30:00.005Z");
     expect(formatDTM(nowDTM())).toBe("20240115023000.005-0500");
   });
 
+  // The host's time zone is America/New_York, set in `vitest.config.ts`.
   // On 2024-03-10 at 07:00 UTC, New York's clocks jump from 02:00 EST to
   // 03:00 EDT. One second before, it is 01:59:59 at -0500; at the change, it
   // is 03:00:00 at -0400. The local hour 02 never happens that day.
@@ -59,6 +61,7 @@ describe("nowDTM in the host's time zone", () => {
     );
   });
 
+  // The host's time zone is America/New_York, set in `vitest.config.ts`.
   // On 2024-11-03 at 06:00 UTC, New York's clocks fall back from 02:00 EDT to
   // 01:00 EST, so 01:xx happens twice. Only the offset tells the two apart:
   // 01:59:59-0400 is followed one second later by 01:00:00-0500.
@@ -76,6 +79,7 @@ describe("nowDTM in the host's time zone", () => {
 
 // A `timeZone` reads the clock in that zone, whatever the host's zone is.
 describe("nowDTM in a named time zone", () => {
+  // The host's time zone is America/New_York, set in `vitest.config.ts`.
   // The host is in New York (02:30 EST), but the value is read in UTC: 07:30.
   // `UTC` is UTC with no local time zone, so the offset is `-0000`.
   it("reads the fields and the offset in that zone, not the host's", () => {
@@ -196,7 +200,9 @@ describe("nowDTM in a named time zone", () => {
     ).toBe("202407150230-0500");
   });
 
-  // One call after another, each reads the clock in its own zone.
+  // The host's time zone is America/New_York, set in `vitest.config.ts`.
+  // One call after another, each reads the clock in its own zone: Kathmandu,
+  // the host's, then UTC.
   it("reads each call in the zone it names", () => {
     vi.setSystemTime("2024-01-15T07:30:00Z");
     const options = { offset: false, precision: Precision.Minute };
@@ -233,7 +239,8 @@ describe("nowDTM in a named time zone", () => {
 // comes first, so the formatter for the host's zone is built again.
 describe("nowDTM on a host whose time zone is UTC", () => {
   // Another call in a named zone replaces the formatter built for the UTC
-  // host, so the tests after this one read New York again.
+  // host, so the tests after this one read the host's zone again,
+  // America/New_York, set in `vitest.config.ts`.
   afterEach(() => {
     nowDTM({ timeZone: "UTC" });
   });
@@ -257,7 +264,7 @@ describe("nowDTM on a host whose time zone is UTC", () => {
   });
 });
 
-// Every case reads 2024-01-15 02:30:45.123 EST (07:30:45.123 UTC). A precision
+// Every case reads New York at 2024-01-15 02:30:45.123 EST (07:30:45.123 UTC). A precision
 // keeps the fields from the year down to it; only `fraction` keeps the
 // milliseconds. A year, month, or day is a calendar date and has no offset; an
 // hour or finer is a moment and keeps it.
@@ -267,36 +274,52 @@ describe("nowDTM precision", () => {
   });
 
   it("cuts the value to the year, without the offset", () => {
-    expect(nowDTM({ precision: Precision.Year })).toStrictEqual({
+    expect(
+      nowDTM({ precision: Precision.Year, timeZone: "America/New_York" })
+    ).toStrictEqual({
       precision: "year",
       year: 2024,
     });
   });
 
   it("cuts the value to the month, without the offset", () => {
-    expect(formatDTM(nowDTM({ precision: Precision.Month }))).toBe("202401");
+    expect(
+      formatDTM(
+        nowDTM({ precision: Precision.Month, timeZone: "America/New_York" })
+      )
+    ).toBe("202401");
   });
 
   it("cuts the value to the day, without the offset", () => {
-    expect(formatDTM(nowDTM({ precision: Precision.Day }))).toBe("20240115");
+    expect(
+      formatDTM(
+        nowDTM({ precision: Precision.Day, timeZone: "America/New_York" })
+      )
+    ).toBe("20240115");
   });
 
   // The hour is the first precision that names a moment, so the offset
   // starts here.
   it("cuts the value to the hour", () => {
-    expect(formatDTM(nowDTM({ precision: Precision.Hour }))).toBe(
-      "2024011502-0500"
-    );
+    expect(
+      formatDTM(
+        nowDTM({ precision: Precision.Hour, timeZone: "America/New_York" })
+      )
+    ).toBe("2024011502-0500");
   });
 
   it("cuts the value to the minute", () => {
-    expect(formatDTM(nowDTM({ precision: Precision.Minute }))).toBe(
-      "202401150230-0500"
-    );
+    expect(
+      formatDTM(
+        nowDTM({ precision: Precision.Minute, timeZone: "America/New_York" })
+      )
+    ).toBe("202401150230-0500");
   });
 
   it("cuts the value to the second, without the milliseconds", () => {
-    expect(nowDTM({ precision: Precision.Second })).toStrictEqual({
+    expect(
+      nowDTM({ precision: Precision.Second, timeZone: "America/New_York" })
+    ).toStrictEqual({
       day: 15,
       hour: 2,
       minute: 30,
@@ -309,9 +332,11 @@ describe("nowDTM precision", () => {
   });
 
   it("keeps the milliseconds at fraction, as with no precision", () => {
-    expect(formatDTM(nowDTM({ precision: Precision.Fraction }))).toBe(
-      "20240115023045.123-0500"
-    );
+    expect(
+      formatDTM(
+        nowDTM({ precision: Precision.Fraction, timeZone: "America/New_York" })
+      )
+    ).toBe("20240115023045.123-0500");
   });
 });
 
@@ -320,7 +345,13 @@ describe("nowDTM with the offset set", () => {
   it("leaves the offset out", () => {
     vi.setSystemTime("2024-01-15T07:30:45.123Z");
     expect(
-      formatDTM(nowDTM({ offset: false, precision: Precision.Minute }))
+      formatDTM(
+        nowDTM({
+          offset: false,
+          precision: Precision.Minute,
+          timeZone: "America/New_York",
+        })
+      )
     ).toBe("202401150230");
   });
 
@@ -335,9 +366,15 @@ describe("nowDTM with the offset set", () => {
   // says whose calendar the date was read in.
   it("gives a date its offset with `offset: true`", () => {
     vi.setSystemTime("2024-02-01T03:00:00Z");
-    expect(formatDTM(nowDTM({ offset: true, precision: Precision.Day }))).toBe(
-      "20240131-0500"
-    );
+    expect(
+      formatDTM(
+        nowDTM({
+          offset: true,
+          precision: Precision.Day,
+          timeZone: "America/New_York",
+        })
+      )
+    ).toBe("20240131-0500");
   });
 });
 
@@ -432,6 +469,7 @@ describe("nowDTM names the current instant", () => {
     );
   });
 
+  // The host's time zone is America/New_York, set in `vitest.config.ts`.
   // Mutant: `nowDTM` writes `-0000` in every zone, so New York's time reads
   // as UTC. Fails on `2024-01-15T07:30:00.999Z`.
   it("in the host's zone, or throws for an offset with seconds", () => {
