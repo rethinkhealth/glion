@@ -38,8 +38,8 @@ export interface Context<E = unknown> {
 
   /**
    * What the runtime passed to `handle()` with this message, such as a
-   * Workers environment or the connection `serve()` accepted it on.
-   * `undefined` when it passed none.
+   * Workers environment, or under `serve()` a `NodeEnv`, which holds the
+   * connection as `connection`. `undefined` when it passed none.
    */
   readonly env: E;
 
