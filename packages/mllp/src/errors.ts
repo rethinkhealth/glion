@@ -11,6 +11,12 @@
 
 export const MllpServerErrorCode = {
   /**
+   * The connection was torn down before the remote system closed it: a reset,
+   * a broken pipe, a timeout. A socket's `readable` errors with it, and
+   * `handleConnection()` then resolves.
+   */
+  CONNECTION_LOST: "CONNECTION_LOST",
+  /**
    * An inbound message could not be decoded as UTF-8 — the only character set
    * supported for now. The underlying `@glion/util-charset` `CharsetError` is
    * kept on `cause`; callers branch on this code without importing that
@@ -42,6 +48,8 @@ type CheckedOption = "handle" | "port";
 
 /** The message of each {@link MllpServerErrorCode}. */
 const messages = {
+  CONNECTION_LOST:
+    "The connection is lost before the remote system closes it; a message still in transit is not handled.",
   INCOMPATIBLE_CHARSET:
     "The inbound message is not valid UTF-8; only UTF-8 is supported.",
   INVALID_OPTION: {

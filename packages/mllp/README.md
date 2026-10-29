@@ -56,7 +56,7 @@ The app. `Mllp<E>` types `ctx.env` as `E`; it defaults to `unknown`. Built with 
 
 ### `handleConnection(handle, socket, options?)`
 
-Reply to every message on one connection. Reads MLLP frames from `socket.readable`, calls `handle` with each message, one at a time, and writes each response to `socket.writable` with MLLP framing. Resolves once the remote system closes the connection, or `options.signal` aborts; then the message in progress, if any, is answered first. Closes `socket` either way. Rejects with `MllpServerError` `PROTOCOL_VIOLATION` when the bytes break MLLP framing, with what `handle` throws, and with an error `socket`'s streams raise. Once the connection is torn down (a reset, a broken pipe, a timeout), `socket.readable` must end as a close does and a write to `socket.writable` must resolve.
+Reply to every message on one connection. Reads MLLP frames from `socket.readable`, calls `handle` with each message, one at a time, and writes each response to `socket.writable` with MLLP framing. Resolves once the remote system closes the connection, the connection is lost, or `options.signal` aborts; then the message in progress, if any, is answered first. Closes `socket` either way. Rejects with `MllpServerError` `PROTOCOL_VIOLATION` when the bytes break MLLP framing, with what `handle` throws, and with an error `socket`'s streams raise. Once the connection is torn down (a reset, a broken pipe, a timeout), `socket.readable` must error with `MllpServerError` `CONNECTION_LOST` and a write to `socket.writable` must resolve; the messages still in transit are not handled.
 
 | Argument         | Type                                                        | Description                                                                                                      |
 | ---------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -117,6 +117,7 @@ Server-side failures are raised (or passed to `onError`) as `MllpServerError` â€
 
 | Code                   | Meaning                                                                                                                                             |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CONNECTION_LOST`      | The connection was torn down (a reset, a broken pipe, a timeout). A socket's `readable` errors with it, and `handleConnection()` then resolves.     |
 | `NO_PARSER`            | `app.handle()` ran before a parser was registered via `app.parser()`.                                                                               |
 | `INCOMPATIBLE_CHARSET` | `app.handle()` was given a message it could not decode as UTF-8 (the `CharsetError` is on `cause`).                                                 |
 | `INVALID_OPTION`       | `serve()` was given no `handle` function, or a `port` that is not an integer from 0 to 65535. The error's `option` names which: `handle` or `port`. |

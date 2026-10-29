@@ -322,19 +322,117 @@ describe("listen", () => {
     ).rejects.toBe(failure);
   });
 
-  it("ends the readable when the socket is reset", async () => {
+  it("ends the readable when the remote system closes its side", async () => {
     const socket = createMockSocket();
     const reader = acceptOne(socket).readable.getReader();
 
-    socket.emit(
-      "error",
-      Object.assign(new Error("reset"), { code: "ECONNRESET" })
-    );
+    socket.emit("end");
 
     await expect(reader.read()).resolves.toEqual({
       done: true,
       value: undefined,
     });
+  });
+
+  it("errors the readable with CONNECTION_LOST when the socket is reset", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+    const reset = Object.assign(new Error("read ECONNRESET"), {
+      code: "ECONNRESET",
+    });
+
+    socket.emit("error", reset);
+
+    await expect(reader.read()).rejects.toMatchObject({
+      cause: reset,
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when keep-alive finds the remote system gone", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit(
+      "error",
+      Object.assign(new Error("read ETIMEDOUT"), { code: "ETIMEDOUT" })
+    );
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when the remote host is unreachable", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit(
+      "error",
+      Object.assign(new Error("read EHOSTUNREACH"), { code: "EHOSTUNREACH" })
+    );
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when the remote network is unreachable", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit(
+      "error",
+      Object.assign(new Error("read ENETUNREACH"), { code: "ENETUNREACH" })
+    );
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when Bun reports the socket closed", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit(
+      "error",
+      Object.assign(new Error("Socket is closed"), {
+        code: "ERR_SOCKET_CLOSED",
+      })
+    );
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when the socket closes without an end, as the idle timeout destroys it", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit("close");
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("resolves a write the idle timeout cancels", async () => {
+    const socket = createMockSocket();
+    socket.write.mockImplementationOnce(
+      (_chunk: Uint8Array, done: (error: Error) => void) => {
+        done(
+          Object.assign(new Error("write ECANCELED"), { code: "ECANCELED" })
+        );
+        return false;
+      }
+    );
+    const accepted = acceptOne(socket);
+
+    await expect(
+      accepted.writable.getWriter().write(new Uint8Array([0x01]))
+    ).resolves.toBeUndefined();
   });
 
   it("errors the readable with a socket error other than its teardown", async () => {

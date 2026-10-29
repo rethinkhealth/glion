@@ -1,7 +1,9 @@
+import { setTimeout as delay } from "node:timers/promises";
+
 // oxlint-disable require-await
 import { frame } from "@glion/mllp-codec";
 
-import { MllpServerError } from "../../src/errors";
+import { MllpServerError, MllpServerErrorCode } from "../../src/errors";
 import { handleConnection } from "../../src/server/connection";
 import type { MllpSocket } from "../../src/server/connection";
 
@@ -41,6 +43,11 @@ function memorySocket() {
     end() {
       ended = true;
       inbound.close();
+    },
+    /** Tears the connection down, as a reset does. */
+    lose() {
+      ended = true;
+      inbound.error(new MllpServerError(MllpServerErrorCode.CONNECTION_LOST));
     },
     send(bytes: Uint8Array) {
       inbound.enqueue(bytes);
@@ -84,6 +91,31 @@ describe("handleConnection", () => {
 
     await handleConnection(echo, remote.socket);
     expect(remote.socket.closes).toBeGreaterThan(0);
+  });
+
+  it("resolves once the connection is lost, and handles no message still queued", async () => {
+    const remote = memorySocket();
+    remote.send(frame(encode(ADT)));
+    const handled: string[] = [];
+
+    await handleConnection(async (payload) => {
+      handled.push(decode(payload));
+      remote.send(frame(encode(ORU)));
+      remote.lose();
+      return echo(payload);
+    }, remote.socket);
+    expect(handled).toEqual([ADT]);
+    expect(remote.socket.closes).toBeGreaterThan(0);
+  });
+
+  it("resolves once the connection is lost in the middle of a message", async () => {
+    const remote = memorySocket();
+    const closed = handleConnection(echo, remote.socket);
+    remote.send(encode("\u000BMSH|^~\\&|"));
+    await delay(0);
+    remote.lose();
+
+    await expect(closed).resolves.toBeUndefined();
   });
 
   it("rejects with PROTOCOL_VIOLATION when bytes arrive outside a frame", async () => {

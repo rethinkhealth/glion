@@ -17,8 +17,8 @@ import { MllpServerError, MllpServerErrorCode } from "../errors";
  * An accepted connection, as Web Streams.
  *
  * Once the connection is torn down (a reset, a broken pipe, a timeout),
- * `readable` MUST end as when the remote system closes it, and a write to
- * `writable` MUST resolve. Any other error the streams raise is a fault
+ * `readable` MUST error with `MllpServerError` `CONNECTION_LOST`, and a write
+ * to `writable` MUST resolve. Any other error the streams raise is a fault
  * `handleConnection` rejects with.
  */
 export interface MllpSocket {
@@ -46,8 +46,8 @@ export interface HandleConnectionOptions {
  * Handles every message the remote system sends on `socket` with `handle`,
  * and writes each response back with MLLP framing.
  *
- * Resolves once the connection has closed: the remote system closed it, or
- * `signal` aborted. Closes `socket` either way.
+ * Resolves once the connection has closed: the remote system closed it, it
+ * was lost, or `signal` aborted. Closes `socket` either way.
  *
  * @param handle - The response to one message, both without MLLP framing, or
  *   `undefined` for none. Called once per message, never concurrently.
@@ -85,7 +85,8 @@ export async function handleConnection(
       if (signal?.aborted) {
         break;
       }
-      // `undefined` once the remote system has closed its side.
+      // `undefined` once the remote system has closed its side, or the
+      // connection is lost.
       const payload = await receive(reader);
       // A message that arrives after the abort is not handled.
       if (!payload || signal?.aborted) {
@@ -108,7 +109,10 @@ export async function handleConnection(
   }
 }
 
-/** The next message, or `undefined` once the remote system has closed. */
+/**
+ * The next message, or `undefined` once the remote system has closed its side
+ * or the connection is lost.
+ */
 async function receive(
   reader: ReadableStreamDefaultReader<Uint8Array>
 ): Promise<Uint8Array | undefined> {
@@ -116,6 +120,14 @@ async function receive(
     const { done, value } = await reader.read();
     return done ? undefined : value;
   } catch (error) {
+    // A lost connection drops the messages still queued, and a message cut
+    // off by it is not the sender's framing.
+    if (
+      error instanceof MllpServerError &&
+      error.code === MllpServerErrorCode.CONNECTION_LOST
+    ) {
+      return undefined;
+    }
     // unframe() rejects bytes before a VT, a VT inside a message, a message
     // past its size limit, and a stream that ends mid-message. Other errors
     // are the socket's, and pass through unchanged.

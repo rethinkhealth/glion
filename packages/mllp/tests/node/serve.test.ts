@@ -370,6 +370,32 @@ describe("serve() integration", () => {
     client.destroy();
   });
 
+  it("reports nothing when the remote system resets the connection in the middle of a message", async () => {
+    const app = createApp().on("*", () => ({ raw: "ACK" }));
+    const errors: Error[] = [];
+    const disconnected = Promise.withResolvers<ConnectionInfo>();
+    server = serve({
+      handle: app.handle,
+      onDisconnect: disconnected.resolve,
+      onError: (error) => {
+        errors.push(error);
+      },
+      port: 0,
+    });
+    await server.listening;
+
+    const client = net.connect({ host: "127.0.0.1", port: server.port });
+    client.on("error", () => {});
+    await once(client, "connect");
+    // A VT and the message, with no FS CR yet.
+    client.write(frame(encodeBytes(SAMPLE_ADT)).subarray(0, -2));
+    await delay(50);
+    client.resetAndDestroy();
+
+    await disconnected.promise;
+    expect(errors).toEqual([]);
+  });
+
   it("throws INVALID_OPTION when the port is not a TCP port", () => {
     const app = createApp();
     const options = { handle: app.handle, port: Number.NaN };

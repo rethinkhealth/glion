@@ -29,6 +29,14 @@ describe("MllpServerError", () => {
     ).toBeUndefined();
   });
 
+  it("states that the connection is lost", () => {
+    expect(
+      new MllpServerError(MllpServerErrorCode.CONNECTION_LOST).message
+    ).toBe(
+      "The connection is lost before the remote system closes it; a message still in transit is not handled."
+    );
+  });
+
   it("states that the inbound message is not UTF-8", () => {
     expect(
       new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET).message

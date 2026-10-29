@@ -4,7 +4,7 @@
  * Listens with a Node.js `net.Server`, or a `tls.Server` when TLS options are
  * given, and wraps each accepted socket into a {@link NodeSocket}: the core's
  * Web Streams {@link MllpSocket} plus its TCP addresses. A reset, a broken
- * pipe or a timeout ends the streams as a close does.
+ * pipe or a timeout errors the readable with `CONNECTION_LOST`.
  *
  * This module is internal to the `@glion/mllp` package and
  * is consumed by {@link serve} in `./serve.ts`.
@@ -19,6 +19,7 @@ import { createServer as createTlsServer } from "node:tls";
 import type { TlsOptions } from "node:tls";
 import { promisify } from "node:util";
 
+import { MllpServerError, MllpServerErrorCode } from "../errors";
 import type { MllpSocket } from "../server/connection";
 
 /** An accepted Node.js socket, with its TCP addresses. */
@@ -84,15 +85,22 @@ const SOCKET_OPTIONS = {
 const CLOSE_GRACE_MS = 1000;
 
 /**
- * Error codes of a socket the remote system or a timeout has already torn
- * down. Each ends the connection as a close does.
+ * Error codes of a socket the remote system, the network or a timeout has
+ * already torn down. Each ends the connection as `CONNECTION_LOST`.
  */
 const TEARDOWN_CODES = new Set([
-  "ABORT_ERR",
+  // A write in flight when the idle timeout destroys the socket.
+  "ECANCELED",
   "ECONNRESET",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
   "EPIPE",
+  // Bun's code for a socket that is already closed.
+  "ERR_SOCKET_CLOSED",
   "ERR_STREAM_DESTROYED",
   "ERR_STREAM_WRITE_AFTER_END",
+  // Keep-alive probes that the remote system never answered.
+  "ETIMEDOUT",
 ]);
 
 function isTeardown(error: unknown): boolean {
@@ -122,7 +130,7 @@ async function writeToSocket(socket: Socket, chunk: Uint8Array): Promise<void> {
 
 /**
  * The bytes `socket` receives. Ends when the remote system closes its side,
- * and when the socket is torn down.
+ * and errors with `CONNECTION_LOST` when the socket is torn down.
  */
 function readFromSocket(socket: Socket): ReadableStream<Uint8Array> {
   let open = true;
@@ -140,12 +148,16 @@ function readFromSocket(socket: Socket): ReadableStream<Uint8Array> {
           return;
         }
         open = false;
-        if (error && !isTeardown(error)) {
+        if (error) {
           controller.error(error);
         } else {
           controller.close();
         }
       };
+      const lost = (cause?: Error) =>
+        end(
+          new MllpServerError(MllpServerErrorCode.CONNECTION_LOST, { cause })
+        );
       socket.on("data", (chunk: Uint8Array) => {
         if (!open) {
           return;
@@ -157,8 +169,11 @@ function readFromSocket(socket: Socket): ReadableStream<Uint8Array> {
       });
       socket.once("end", () => end());
       // A TLS socket can emit a second error after its first.
-      socket.on("error", end);
-      socket.once("close", () => end());
+      socket.on("error", (error: Error) =>
+        isTeardown(error) ? lost(error) : end(error)
+      );
+      // A close with no end before it is a teardown.
+      socket.once("close", () => lost());
     },
   });
 }
