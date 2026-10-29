@@ -115,13 +115,13 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 
 Server-side failures are raised (or passed to `onError`) as `MllpServerError` — branch on its stable `code`; the underlying codec or charset error rides on `cause`:
 
-| Code                   | Meaning                                                                                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CONNECTION_LOST`      | The connection was torn down (a reset, a broken pipe, a timeout). A socket's `readable` errors with it, and `handleConnection()` then resolves.     |
-| `NO_PARSER`            | `app.handle()` ran before a parser was registered via `app.parser()`.                                                                               |
-| `INCOMPATIBLE_CHARSET` | `app.handle()` was given a message it could not decode as UTF-8 (the `CharsetError` is on `cause`).                                                 |
-| `INVALID_OPTION`       | `serve()` was given no `handle` function, or a `port` that is not an integer from 0 to 65535. The error's `option` names which: `handle` or `port`. |
-| `PROTOCOL_VIOLATION`   | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). Raised by `handleConnection()`.                   |
+| Code                   | Meaning                                                                                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CONNECTION_LOST`      | The connection was torn down (a reset, a broken pipe, a timeout). A socket's `readable` errors with it, and `handleConnection()` then resolves.                                       |
+| `NO_PARSER`            | `app.handle()` ran before a parser was registered via `app.parser()`.                                                                                                                 |
+| `INCOMPATIBLE_CHARSET` | `app.handle()` was given a message it could not decode as UTF-8 (the `CharsetError` is on `cause`).                                                                                   |
+| `INVALID_OPTION`       | `serve()` was given an app as its options, no `handle` function, or a `port` that is not an integer from 0 to 65535. The error's `option` names which: `options`, `handle` or `port`. |
+| `PROTOCOL_VIOLATION`   | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). Raised by `handleConnection()`.                                                     |
 
 ## Routing
 

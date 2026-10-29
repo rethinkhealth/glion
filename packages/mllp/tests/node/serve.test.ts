@@ -442,7 +442,12 @@ describe("serve() integration", () => {
     const call = serve as unknown as (...args: unknown[]) => Server;
 
     expect(() => call(app, { port: 2575 })).toThrow(
-      "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`."
+      expect.objectContaining({
+        code: MllpServerErrorCode.INVALID_OPTION,
+        message:
+          "The options given to `serve()` are an app; `serve()` takes one options object, as in `serve({ handle: app.handle, port: 2575 })`.",
+        option: "options",
+      })
     );
   });
 

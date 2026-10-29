@@ -12,7 +12,7 @@ import type { TlsOptions } from "node:tls";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { handleConnection } from "../server/connection";
-import { getMessageInfo } from "../server/mllp";
+import { getMessageInfo, Mllp } from "../server/mllp";
 import type { MessageInfo } from "../server/mllp";
 import { listen } from "./adapter";
 import type { NodeSocket } from "./adapter";
@@ -180,8 +180,8 @@ export interface Server {
  * @param options - The handler, port, TLS, limits, timeouts, and callbacks.
  * @returns A {@link Server} handle that exposes the bound port and a `close()`
  *   method for graceful shutdown.
- * @throws {MllpServerError} `INVALID_OPTION` when `handle` is not a function,
- *   or `port` is not an integer from 0 to 65535.
+ * @throws {MllpServerError} `INVALID_OPTION` when `options` is an app,
+ *   `handle` is not a function, or `port` is not an integer from 0 to 65535.
  */
 export function serve(options: ServeOptions): Server {
   const {
@@ -195,6 +195,12 @@ export function serve(options: ServeOptions): Server {
     socketTimeout,
     tls,
   } = options;
+  // The call shape before `handle` was an option, `serve(app, options)`.
+  if (options instanceof Mllp) {
+    throw new MllpServerError(MllpServerErrorCode.INVALID_OPTION, {
+      option: "options",
+    });
+  }
   if (typeof handle !== "function") {
     throw new MllpServerError(MllpServerErrorCode.INVALID_OPTION, {
       option: "handle",

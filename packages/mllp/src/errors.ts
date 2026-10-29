@@ -44,7 +44,7 @@ export type MllpServerErrorCode =
   (typeof MllpServerErrorCode)[keyof typeof MllpServerErrorCode];
 
 /** An option `serve()` checks before it listens. */
-type CheckedOption = "handle" | "port";
+type CheckedOption = "handle" | "options" | "port";
 
 /** The message of each {@link MllpServerErrorCode}. */
 const messages = {
@@ -55,6 +55,8 @@ const messages = {
   INVALID_OPTION: {
     handle:
       "The `handle` option is not a function; `serve()` replies to each message with the `handle` it is given, as in `serve({ handle: app.handle, port: 2575 })`.",
+    options:
+      "The options given to `serve()` are an app; `serve()` takes one options object, as in `serve({ handle: app.handle, port: 2575 })`.",
     port: "The `port` option is not an integer from 0 to 65535; `serve()` listens on the TCP port it is given, as in `serve({ handle: app.handle, port: 2575 })`.",
   },
   NO_PARSER:

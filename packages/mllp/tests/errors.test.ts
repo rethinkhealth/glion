@@ -23,6 +23,16 @@ describe("MllpServerError", () => {
     expect(error.option).toBe("port");
   });
 
+  it("states that the options are an app, and names them", () => {
+    const error = new MllpServerError(MllpServerErrorCode.INVALID_OPTION, {
+      option: "options",
+    });
+    expect(error.message).toBe(
+      "The options given to `serve()` are an app; `serve()` takes one options object, as in `serve({ handle: app.handle, port: 2575 })`."
+    );
+    expect(error.option).toBe("options");
+  });
+
   it("names no option for any other code", () => {
     expect(
       new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION).option
