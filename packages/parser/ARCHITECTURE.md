@@ -4,7 +4,7 @@ This document is for contributors and reviewers. It follows one message through 
 
 ## The steps
 
-`parseHL7v2(input, options, settings)` reads a message in four steps. No step rewrites the input, so every position in the tree is a span of the text as it was given.
+`parseHL7v2(input, options, settings)` reads a message in four steps. It throws a `TypeError` when `input` is not a string, such as the `Buffer` a file read without an encoding gives. No step rewrites the message, so every position in the tree is a span of the text as it was given, counted from the character after a byte order mark.
 
 | Step                 | Module            | What it does                                                                                                                                                                        |
 | -------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

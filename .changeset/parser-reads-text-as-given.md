@@ -10,4 +10,4 @@
 
 **Breaking:** the `normalizeNewlines` preprocessing step is removed, and `defaultPreprocessors` holds `stripBOM` and `detectDelimiters`.
 
-An MSH-2 shorter than four characters ends at the first field delimiter or line break, and so do the encoding characters `detectDelimiters` reads: `MSH|^~\` followed by `\r` no longer swallows the next segment into MSH-2, and `MSH|^~\|APP` no longer swallows MSH-3 (#1140). `MSH` followed by a line break is read as a segment with no fields. `HL7v2Tokenizer.next()` before `reset()` returns `null`.
+An MSH-2 shorter than four characters ends at the first field delimiter or line break, and so do the encoding characters `detectDelimiters` reads: `MSH|^~\` followed by `\r` no longer swallows the next segment into MSH-2, and `MSH|^~\|APP` no longer swallows MSH-3 (#1140). `MSH` followed by a line break is read as a segment with no fields. `HL7v2Tokenizer.next()` before `reset()` returns `null`. `parseHL7v2` throws a `TypeError` when its input is not a string, such as the `Buffer` a file read without an encoding gives, instead of failing inside a preprocessing step.

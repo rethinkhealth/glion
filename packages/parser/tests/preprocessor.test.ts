@@ -45,6 +45,15 @@ describe("preprocessor steps", () => {
       ).toBe("MSH|^~\\&");
     });
 
+    it("removes one byte order mark only, and keeps a second, which is data", () => {
+      expect(
+        stripBOM({
+          delimiters: DEFAULT_DELIMITERS,
+          input: "\uFEFF\uFEFFMSH|^~\\&",
+        }).input
+      ).toBe("\uFEFFMSH|^~\\&");
+    });
+
     it("keeps a byte order mark after the start of the input, which is data", () => {
       expect(
         stripBOM({ delimiters: DEFAULT_DELIMITERS, input: "PID|\uFEFF" }).input

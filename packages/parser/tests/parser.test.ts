@@ -23,6 +23,19 @@ import { parseHL7v2 } from "../src/parser";
  */
 
 describe("parser", () => {
+  describe("input", () => {
+    it("reads a message from a string only, and throws a TypeError for the bytes of a file read without an encoding", () => {
+      const bytes = Buffer.from("MSH|^~\\&\rPID|1") as unknown as string;
+
+      expect(() => parseHL7v2(bytes)).toThrow(TypeError);
+      expect(() => parseHL7v2(bytes)).toThrow(
+        new TypeError(
+          "`input` is not a string; `parseHL7v2` reads a message from a string."
+        )
+      );
+    });
+  });
+
   describe("basic Structure Creation", () => {
     it("creates root with correct type and metadata", () => {
       const input = "MSH|^~\\&|SENDER";
