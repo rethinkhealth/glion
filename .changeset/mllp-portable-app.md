@@ -10,6 +10,7 @@ Breaking: make the app the part that runs on any runtime. `app.handle(payload, e
 - Add `handleConnection(handle, socket, { signal })`, which replies to every message on a socket with `readable` and `writable` Web Streams, and the `MllpSocket` and `HandleConnectionOptions` types. It rejects with `MllpServerError` `PROTOCOL_VIOLATION` when the remote system's bytes break MLLP framing, and with the new `UNFRAMEABLE_RESPONSE` when a response carries a VT or FS byte, which before was reported as `PROTOCOL_VIOLATION`.
 - Change `serve(app, options)` to `serve({ handle: app.handle, ...options })`.
 - Move `ConnectionInfo` from `@glion/mllp` to `@glion/mllp/node`, and add `NodeEnv` there.
+- Freeze `ConnectionInfo` before `onConnect` runs, so `onConnect` can no longer add properties to the connection; keep per-connection data in `connection.state`.
 - Make `Context`, `Middleware`, `Handler`, `ErrorHandler` and `RouteFilter` generic over `env`; each defaults to `unknown`.
 - Answer every message a remote system sent before closing its side of the connection. Before, Node ended the server's side too, and replies still being built were lost.
 - End the connection when the remote system resets it or it times out while a message is being handled. Before, writing the reply waited forever, and `server.close()` never resolved.
