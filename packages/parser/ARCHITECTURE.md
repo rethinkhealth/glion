@@ -1,264 +1,122 @@
-# Architecture of the Parsing Process
+# How `@glion/parser` reads a message
 
-This HL7v2 parsing library uses a **two-stage architecture** to convert raw HL7v2 text into an Abstract Syntax Tree (AST). The tokenizer and parser work in tandem to process HL7v2 messages with a focus on performance and correctness. Here's how they collaborate:
+This document is for contributors and reviewers. It follows one message through the parser, then states each rule the parser applies and the module that owns it. The public contract is the [README](./README.md).
 
-## 1. **Two-Stage Architecture**
+## The steps
 
-```
-Raw HL7v2 Text → Tokenizer → Token Stream → Parser → AST
-```
+`parseHL7v2(input, options, settings)` reads a message in four steps. No step rewrites the input, so every position in the tree is a span of the text as it was given.
 
-The architecture separates concerns:
+| Step                 | Module            | What it does                                                                                                    |
+| -------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------- |
+| 1. Context           | `parser.ts`       | Holds the input and the delimiters: the defaults, then the settings' delimiters over them.                      |
+| 2. Preprocessing     | `preprocessor.ts` | Runs the preprocessing steps. The default, `detectDelimiters`, sets the delimiters the message header declares. |
+| 3. Tokenizing        | `tokenizer.ts`    | Reads the input into tokens: delimiters, segment terminators, and runs of text, each with its span.             |
+| 4. Building the tree | `processor.ts`    | Builds the `Root` from the tokens.                                                                              |
 
-- **Tokenizer**: Handles low-level character processing and delimiter recognition
-- **Parser**: Builds hierarchical structure using tokens
+Two modules hold rules that steps 2 and 3 share, so that both read the message the same way:
 
-## 2. **The Tokenizer (`StreamingHL7v2Tokenizer`)**
+| Module                   | Owns                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `segment-terminators.ts` | What ends a segment: the segment delimiter, a carriage return and a line feed, or a line feed.    |
+| `message-header.ts`      | The start of a message: a byte order mark, `MSH`, MSH-1, and the encoding characters MSH-2 holds. |
 
-The tokenizer processes HL7v2 messages **character by character** and emits tokens:
+## One message, step by step
 
-### Key Responsibilities:
+The message `MSH|^~\&|A^B` + CR LF + `PID|1` + CR, 20 characters long.
 
-- **Delimiter Detection**: Recognizes HL7v2 delimiters (`|`, `^`, `~`, `&`, `\r`)
-- **MSH Header Handling**: Special processing for the MSH segment header
-- **Dynamic Delimiter Learning**: Updates delimiters based on MSH.1 and MSH.2 fields
-- **Position Tracking**: Maintains line, column, and offset positions
-- **Streaming Support**: Processes input incrementally via `write()` chunks
+**Preprocessing.** `detectDelimiters` reads the message header. MSH-1 is `|`, so the field delimiter is `|`. MSH-2 holds `^~\&`, so the component, repetition, escape, and subcomponent delimiters are `^`, `~`, `\`, and `&`. The message header does not declare the segment delimiter, so it stays `\r`.
 
-### Token Types Generated:
+**Tokenizing.** The tokenizer reads 14 tokens:
 
-```typescript
-// Text content
-{ type: 'text', value: 'PID', position: {...} }
+| Token             | Value  | Offsets | Rule                                       |
+| ----------------- | ------ | ------- | ------------------------------------------ |
+| `TEXT`            | `MSH`  | 0–3     | message header: the Segment ID             |
+| `FIELD_DELIM`     |        | 3–3     | message header: MSH-1 opens                |
+| `TEXT`            | `\|`   | 3–4     | message header: MSH-1, the field separator |
+| `FIELD_DELIM`     |        | 4–4     | message header: MSH-2 opens                |
+| `TEXT`            | `^~\&` | 4–8     | message header: the encoding characters    |
+| `FIELD_DELIM`     |        | 8–9     | 2. the field delimiter                     |
+| `TEXT`            | `A`    | 9–10    | 5. text                                    |
+| `COMPONENT_DELIM` |        | 10–11   | 4. the component delimiter                 |
+| `TEXT`            | `B`    | 11–12   | 5. text                                    |
+| `SEGMENT_END`     |        | 12–14   | 1. a segment terminator: CR LF, read whole |
+| `TEXT`            | `PID`  | 14–17   | 3. a Segment ID, on line 2                 |
+| `FIELD_DELIM`     |        | 17–18   | 2. the field delimiter                     |
+| `TEXT`            | `1`    | 18–19   | 5. text                                    |
+| `SEGMENT_END`     |        | 19–20   | 1. a segment terminator                    |
 
-// Delimiters create structure
-{ type: 'fieldDelimiter', value: '|', position: {...} }
-{ type: 'componentDelimiter', value: '^', position: {...} }
-{ type: 'repetitionDelimiter', value: '~', position: {...} }
-{ type: 'subcomponentDelimiter', value: '&', position: {...} }
-{ type: 'segmentDelimiter', value: '\r', position: {...} }
+**Building the tree.** The processor opens the segment MSH at its Segment ID. Each field delimiter opens a field, so MSH holds MSH-1 `|`, MSH-2 `^~\&`, and MSH-3 with the components `A` and `B`. The segment terminator closes MSH, which ends at offset 12, its last character. PID holds one field, `1`, and covers 14–19. The root covers 0–20, both segment terminators included.
 
-// Special MSH fields
-{ type: 'mshField', fieldNumber: 1, value: '|', position: {...} }
-{ type: 'mshField', fieldNumber: 2, value: '^~\\&', position: {...} }
-```
+## Rules
 
-### MSH Header Processing:
+### What ends a segment
 
-The tokenizer has special logic for the MSH segment:
+`segmentTerminatorAt(input, at, segment)` in `segment-terminators.ts` is the one place that decides it. At `at` it reads, in this order:
 
-```4:34:packages/hl7v2-parser/src/tokenizer.ts
-    this.state = {
-      position: { line: 1, column: 1, offset: 0 },
-      delimiters: {
-        field: '|',
-        component: '^',
-        repetition: '~',
-        subcomponent: '&',
-        escape: '\\',
-        ...initialDelimiters,
-      },
-      inMSHHeader: false,
-      mshFieldCount: 0,
-    };
-```
+1. a carriage return and a line feed, read whole as one terminator;
+2. the segment delimiter, `\r` unless the settings give another;
+3. a line feed.
 
-## 3. **The Parser (`StreamingHL7v2Parser`)**
+HL7v2 ends every segment with a carriage return. A message saved to a file often ends its segments with the file's line endings instead, so the parser reads those too. With another segment delimiter, such as `$`, a carriage return alone is data: `PID|a` + CR + `b$` holds the value `a` + CR + `b`.
 
-The parser consumes tokens from the tokenizer and builds an AST using a **stack-based approach**:
+Every rule that stops at the end of a segment calls this function: the tokenizer's segment terminator, Segment ID, and text rules, and both readings of the message header.
 
-### Key Concepts:
+### The message header
 
-- **Parse Frames**: Each open construct (segment, field, component, etc.) is a frame on the stack
-- **Open/Close Patterns**: Delimiters trigger opening and closing of frames
-- **Hierarchical Structure**: Maintains the HL7v2 hierarchy: Segment → Field → FieldRepetition → Component → Subcomponent
+`message-header.ts` reads the start of the message:
 
-### Stack Management:
+- A byte order mark at offset 0 is not part of the message, which starts at offset 1.
+- The message opens with a message header segment when it starts with `MSH` followed by a character that is not a segment terminator. `MSH` followed by a segment terminator is a segment with no fields.
+- MSH-1 is the character after `MSH`. No delimiter opens it: the field separator is its value.
+- MSH-2 holds up to four encoding characters, and ends at the next field delimiter or segment terminator. `MSH|^~\|APP` and `MSH|^~\` + CR both declare `^~\`.
 
-```typescript
-interface ParseFrame {
-  type:
-    | "root"
-    | "segment"
-    | "field"
-    | "field-repetition"
-    | "component"
-    | "subcomponent";
-  node: Root | Segment | Field | FieldRepetition | Component | Subcomponent;
-  startPosition: Position;
-}
-```
+Two steps read the header, each with the field delimiter it splits fields at. `detectDelimiters` ends MSH-2 at MSH-1, the only field delimiter it knows. The tokenizer ends MSH-2 at the field delimiter in its context, which `detectDelimiters` set to MSH-1. They differ only when a caller replaces the preprocessing steps and gives a field delimiter other than MSH-1.
 
-### Token Processing Logic:
+The tokenizer emits the header as five tokens, read once in `reset()`, because its general rules would read MSH-1 as a field delimiter and the encoding characters as delimiters. The two `FIELD_DELIM` tokens before MSH-1 and MSH-2 span no characters. An MSH-2 longer than four characters, such as `^~\&#`, is read on by the general rules: `#` is the next token.
 
-```87:126:packages/hl7v2-parser/src/parser.ts
-  private processToken(token: HL7v2Token): void {
-    switch (token.type) {
-      case 'text':
-        this.handleText(token.value);
-        break;
+### Tokenizing
 
-      case 'segmentDelimiter':
-        this.handleSegmentDelimiter(token);
-        break;
+After the header, `next()` tries these rules at the current offset, in order. The first that applies reads the token:
 
-      case 'fieldDelimiter':
-        this.handleFieldDelimiter(token);
-        break;
+1. **A segment terminator** ends the segment.
+2. **The field delimiter** opens a field.
+3. **A Segment ID**, at the start of a segment only: the text up to the first field delimiter or segment terminator, whatever it holds. `^A|B` opens with the Segment ID `^A`, and `Z\R\Z|B` with `Z\R\Z`, not decoded. A segment starts at the start of the message and after each segment terminator.
+4. **The repetition, component, and subcomponent delimiters.**
+5. **Text**, up to the next delimiter or segment terminator.
 
-      case 'repetitionDelimiter':
-        this.handleRepetitionDelimiter(token);
-        break;
+The order matters. The segment terminator comes first, so a line break is never read as text. The field delimiter comes before the Segment ID, so a line that starts with `|` has an empty Segment ID. The Segment ID comes before the other delimiters, so `^` at the start of a line is part of a Segment ID, not a component delimiter.
 
-      case 'componentDelimiter':
-        this.handleComponentDelimiter(token);
-        break;
+### Escape sequences
 
-      case 'subcomponentDelimiter':
-        this.handleSubcomponentDelimiter(token);
-        break;
+A text token whose characters include the escape delimiter is decoded with `decodeEscapes` from `@glion/utils`, unless `decodeEscapes: false` is given. Two kinds of text are never decoded:
 
-      case 'mshField':
-        this.handleMSHField(token);
-        break;
+- a Segment ID, which rule 3 reads without decoding;
+- MSH-2, which holds the encoding characters as written. The tokenizer decodes text only from the offset MSH-2 ends at, so the tail of a long MSH-2, `\F\` in `MSH|^~\&\F\|a`, is not decoded either.
 
-      case 'eof':
-        // Handled in main parse loop
-        break;
+A token's span covers the text as written, so a decoded value can be shorter than its span.
 
-      default:
-        // Handle other token types (escape sequences, etc.)
-        this.handleText(token.value || '');
-        break;
-    }
-  }
-```
+### Positions
 
-## 4. **How They Work Together**
+- Offsets and columns count UTF-16 code units, as `String.prototype.slice` does.
+- Each segment terminator starts a new line, whatever characters it holds: CR LF is one line break.
+- A segment ends at its last character, before its segment terminator.
+- The root covers every token, from the first to the last, so it ends after the segment terminators that follow the last segment, or at the last segment when none follows it.
 
-Here's the collaboration flow when parsing an HL7v2 message like:
+### Building the tree
 
-```
-MSH|^~\&|SendingApp|SendingFacility|ReceivingApp||20241201120000||ADT^A01|12345|P|2.5
-```
+`processor.ts` reads the tokens in order and keeps the segment, field, field repetition, component, and subcomponent being built.
 
-### Step-by-Step Process:
+- A Segment ID opens a segment. A delimiter that arrives before any Segment ID opens a segment with an empty Segment ID.
+- Each delimiter opens the next sibling at its level: a field delimiter opens a field, a repetition delimiter a field repetition, and so on. A sibling it skips is added empty, so `PID|~` holds a field with two empty field repetitions.
+- A field, field repetition, or component with no value has `children: []`. `PID|1||` holds three fields, the last two empty.
+- A segment terminator closes the segment.
 
-1. **Tokenizer receives**: `"MSH|^~\&|SendingApp|..."`
+## Tests
 
-2. **Tokenizer emits tokens**:
+| Directory             | What it checks                                                                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/*.test.ts`     | Each module's contract, mirroring `src/`.                                                                                                         |
+| `tests/regressions/`  | One file per fixed bug, named after the issue and the symptom.                                                                                    |
+| `tests/differential/` | The tokenizer and delimiter detection against a second implementation in `tests/differential/reference/`, over generated text and delimiter sets. |
 
-   ```typescript
-   { type: 'text', value: 'MSH' }
-   { type: 'mshField', fieldNumber: 1, value: '|' }  // MSH.1
-   { type: 'mshField', fieldNumber: 2, value: '^~\&' } // MSH.2
-   { type: 'fieldDelimiter', value: '|' }
-   { type: 'text', value: 'SendingApp' }
-   // ... more tokens
-   ```
-
-3. **Parser consumes tokens**:
-   - `text: 'MSH'` → Accumulates in `currentText`
-   - `fieldDelimiter` → Creates segment, field, field-repetition, component frames and flushes text as subcomponent
-   - `text: 'SendingApp'` → Accumulates in new `currentText`
-   - Next `fieldDelimiter` → Closes to segment level, opens new field hierarchy
-
-4. **Final AST Structure**:
-
-   ```typescript
-   {
-     type: 'root',
-     children: [{
-       type: 'segment',
-       children: [
-         { type: 'field', children: [{ type: 'field-repetition', children: [{ type: 'component', children: [{ type: 'subcomponent', value: 'MSH' }] }] }] },
-         { type: 'field', children: [{ type: 'field-repetition', children: [{ type: 'component', children: [{ type: 'subcomponent', value: 'SendingApp' }] }] }] },
-         // ... more fields
-       ]
-     }]
-   }
-   ```
-
-## 5. **Streaming API**
-
-The `HL7v2StreamingParser` class orchestrates both components:
-
-```16:38:packages/hl7v2-parser/src/streaming.ts
-export class HL7v2StreamingParser {
-  private tokenizer: StreamingHL7v2Tokenizer;
-  private parser: StreamingHL7v2Parser;
-
-  constructor(options: StreamingParseOptions = {}) {
-    this.tokenizer = new StreamingHL7v2Tokenizer(options.delimiters);
-    this.parser = new StreamingHL7v2Parser(this.tokenizer);
-  }
-
-  /**
-   * Add chunk of text to parser
-   */
-  write(chunk: string): void {
-    this.tokenizer.write(chunk);
-  }
-
-  /**
-   * Signal end of input and get the parsed AST
-   */
-  end(): Root {
-    this.tokenizer.end();
-    return this.parser.parse();
-  }
-```
-
-## 6. **Consistent Empty Field Structure**
-
-The parser guarantees a **consistent structure** for all fields, including empty ones:
-
-### Guarantee:
-
-Every component **always** contains at least one subcomponent, even when empty:
-
-```typescript
-// Empty field structure
-{
-  type: 'field',
-  children: [{
-    type: 'field-repetition',
-    children: [{
-      type: 'component',
-      children: [{
-        type: 'subcomponent',
-        value: ''  // Always present, even for empty fields
-      }]
-    }]
-  }]
-}
-```
-
-### Benefits:
-
-- **No ambiguity**: Empty fields are always represented the same way
-- **Simplified consumption**: No need to check for missing children AND empty values
-- **Type safety**: Consumers can rely on the structure always being present
-- **Predictable traversal**: `field.children[0].children[0].children[0]` always exists
-
-### Implementation:
-
-The parser uses helper functions to create consistent structures:
-
-- `createSubcomponent(start)` - Creates an empty subcomponent
-- `createComponent(start)` - Creates a component with an initial subcomponent
-- `createFieldRepetition(start)` - Creates a repetition with initial component
-- `createField(start)` - Creates complete field hierarchy
-
-This ensures that whether a field is explicitly empty or implicitly empty, the AST structure is identical.
-
-## 7. **Key Benefits of This Architecture**
-
-- **Separation of Concerns**: Tokenizer handles character-level parsing, parser handles structure
-- **Consistent Structure**: All fields have predictable hierarchy, even when empty
-- **Performance**: Single-pass parsing with minimal allocations
-- **Flexibility**: Easy to extend with new token types or parsing rules
-- **Position Tracking**: Every token and AST node has precise source positions
-- **Dynamic Delimiters**: Adapts to different HL7v2 encoding characters
-
-This design makes the parser both **robust** and **efficient**, handling the complexities of HL7v2's variable delimiter system while maintaining clean separation between lexical analysis (tokenization) and syntactic analysis (parsing).
+The reference in `tests/differential/reference/` is the tokenizer and delimiter detection as they were written before the modules above were refactored. The properties in `tests/differential/` generate text from the pieces where the rules meet (the header, every delimiter, each segment terminator, escape sequences, a byte order mark) and assert that both implementations emit the same tokens, values, and positions, and detect the same delimiters. A change to what the parser reads is made in `src/` and in the reference, so the two stay one specification written twice.

@@ -816,7 +816,7 @@ describe("root position", () => {
   });
 
   it("starts after a byte order mark", () => {
-    expect(span("﻿MSH|^~\\&\r")).toStrictEqual([1, 10]);
+    expect(span("\uFEFFMSH|^~\\&\r")).toStrictEqual([1, 10]);
   });
 
   it("covers nothing in an empty message", () => {

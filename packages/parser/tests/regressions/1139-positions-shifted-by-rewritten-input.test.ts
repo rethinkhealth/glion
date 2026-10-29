@@ -35,6 +35,6 @@ describe("a position in a message with rewritten line breaks", () => {
   });
 
   it("points at its segment after a byte order mark", () => {
-    expect(textOf("﻿MSH|^~\\&\rPID|1", 1)).toBe("PID|1");
+    expect(textOf("\uFEFFMSH|^~\\&\rPID|1", 1)).toBe("PID|1");
   });
 });

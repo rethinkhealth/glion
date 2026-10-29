@@ -1,58 +1,48 @@
 import { DEFAULT_DELIMITERS, SEGMENT_TERMINATOR } from "@glion/utils";
 
-import {
-  encodingCharactersEnd,
-  lineBreakAt,
-  messageStart,
-  MSH_FIELD_DELIMITER_START,
-  MSH_FIELD_SEPERATOR_START,
-} from "./tokenizer";
+import { readEncodingCharacters, readMessageHeader } from "./message-header";
 import type { ParserContext, PreprocessorStep } from "./types";
 
-// PreprocessorStep is declared in `types.ts` to avoid circular imports
-
 /**
- * Step: auto-detect delimiters from MSH.
+ * Sets the delimiters the message header declares.
+ *
+ * MSH-1 sets the field delimiter, and MSH-2's encoding characters set the
+ * component, repetition, escape, and subcomponent delimiters, in that order.
+ * A delimiter MSH-2 is too short to declare, and the segment delimiter, which
+ * the message header does not declare, are the defaults. A message that does
+ * not open with a message header segment keeps the delimiters it was given.
  */
 export const detectDelimiters: PreprocessorStep = (ctx) => {
-  const start = messageStart(ctx.input);
+  // The segment delimiter is not declared, so the header is read with the
+  // default one: `MSH|^~\` then `\r` declares `^~\`.
   const { segment } = DEFAULT_DELIMITERS;
-  // MSH followed by a line break declares no delimiters.
-  const declaresDelimiters =
-    ctx.input.startsWith("MSH", start) &&
-    !lineBreakAt(ctx.input, start + MSH_FIELD_SEPERATOR_START, segment);
-  if (declaresDelimiters) {
-    const field =
-      ctx.input.charAt(start + MSH_FIELD_SEPERATOR_START) ||
-      DEFAULT_DELIMITERS.field;
-    const msh2Start = start + MSH_FIELD_DELIMITER_START;
-    const enc = ctx.input.slice(
-      msh2Start,
-      encodingCharactersEnd(ctx.input, msh2Start, { field, segment })
-    );
-    const component = enc.charAt(0) || DEFAULT_DELIMITERS.component;
-    const repetition = enc.charAt(1) || DEFAULT_DELIMITERS.repetition;
-    const _escape = enc.charAt(2) || DEFAULT_DELIMITERS.escape;
-    const subcomponent = enc.charAt(3) || DEFAULT_DELIMITERS.subcomponent;
-
-    ctx.delimiters = {
-      component,
-      escape: _escape,
-      field,
-      repetition,
-      subcomponent,
-    };
+  const header = readMessageHeader(ctx.input, segment);
+  if (!header) {
+    return ctx;
   }
+  // MSH-2 ends at the field delimiter MSH-1 declares.
+  const encodingCharacters = readEncodingCharacters(ctx.input, header, {
+    field: header.fieldSeparator,
+    segment,
+  });
+  ctx.delimiters = {
+    component: encodingCharacters.charAt(0) || DEFAULT_DELIMITERS.component,
+    escape: encodingCharacters.charAt(2) || DEFAULT_DELIMITERS.escape,
+    field: header.fieldSeparator || DEFAULT_DELIMITERS.field,
+    repetition: encodingCharacters.charAt(1) || DEFAULT_DELIMITERS.repetition,
+    segment,
+    subcomponent:
+      encodingCharacters.charAt(3) || DEFAULT_DELIMITERS.subcomponent,
+  };
   return ctx;
 };
 
-/**
- * Default preprocessing pipeline.
- */
+/** The preprocessing steps `parseHL7v2` runs when `preprocess` is not given. */
 export const defaultPreprocessors: PreprocessorStep[] = [detectDelimiters];
 
 /**
- * Run the pipeline to initialize ParserContext.
+ * Runs `steps` in order, each on the context the step before returned, and
+ * returns the context the last one returned.
  */
 export function runPreprocessors(
   ctx: ParserContext,

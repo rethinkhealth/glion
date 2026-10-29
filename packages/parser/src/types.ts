@@ -16,8 +16,10 @@ export type Hl7v2Processor = Processor<
   Root | undefined
 >;
 
-// Forward declaration to avoid circular import at runtime
-// Consumers provide functions with compatible signature from `preprocessor.ts`
+/**
+ * A preprocessing step: reads the context before the input is tokenized, and
+ * returns the context to tokenize.
+ */
 export type PreprocessorStep = (ctx: ParserContext) => ParserContext;
 
 export interface ParseOptions {
@@ -28,25 +30,41 @@ export interface ParseOptions {
    */
   decodeEscapes?: boolean;
   /**
-   * Optional preprocessing steps to apply to the input before parsing.
+   * The preprocessing steps to run in place of `defaultPreprocessors`. A step
+   * that rewrites `input` moves every position into the rewritten text.
    */
   preprocess?: PreprocessorStep[];
 }
 
+/** What the tokenizer reads: the input and its delimiters. */
 export interface ParserContext {
+  /** The message as given. */
   input: string;
+  /** The delimiters the tokenizer splits `input` at. */
   delimiters: Delimiters;
   metadata?: Record<string, unknown>;
 }
 
-// ---- Tokens (minimal) ----
+/** A delimiter, a segment terminator, or a run of text, and its span. */
 export interface Token {
   type: TokenType;
-  value?: string; // TEXT or 3-char seg name
+  /**
+   * A TEXT token's text: a Segment ID, MSH-1, the encoding characters, or a
+   * value, its escape sequences decoded unless they are kept. Absent on every
+   * other token.
+   */
+  value?: string;
+  /**
+   * The token's span in the input. A decoded value may be shorter than its
+   * span, and the delimiters before MSH-1 and MSH-2 span no characters.
+   */
   position: Position;
 }
 
-// ---- Tokenizer interface ----
+/**
+ * The kind of a token: a segment terminator (`SEGMENT_END`), a field,
+ * repetition, component, or subcomponent delimiter, or a run of text (`TEXT`).
+ */
 export type TokenType =
   | "SEGMENT_END"
   | "FIELD_DELIM"
@@ -55,7 +73,10 @@ export type TokenType =
   | "SUBCOMP_DELIM"
   | "TEXT";
 
+/** Reads tokens from a context, one at a time. */
 export interface Tokenizer {
+  /** Starts reading `ctx.input` from its beginning. */
   reset(ctx: ParserContext): void;
+  /** The next token, or `null` after the last one. */
   next(): Token | null;
 }

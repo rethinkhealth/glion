@@ -1,67 +1,58 @@
-// src/tokenizer.ts
+// Reads a message into tokens, one `next()` call at a time.
+//
+// A token is a delimiter, a segment terminator, or a run of text between them,
+// with its span in the input. `MSH|^~\&|A^B\rPID|1` reads as:
+//
+//   TEXT "MSH"        0–3    the Segment ID
+//   FIELD_DELIM       3–3    MSH-1 opens; its delimiter takes no characters,
+//   TEXT "|"          3–4      because the field separator is MSH-1's value
+//   FIELD_DELIM       4–4    MSH-2 opens, also without characters
+//   TEXT "^~\&"       4–8    the encoding characters, read as written
+//   FIELD_DELIM       8–9
+//   TEXT "A"          9–10
+//   COMPONENT_DELIM   10–11
+//   TEXT "B"          11–12
+//   SEGMENT_END       12–13
+//   TEXT "PID"        13–16  the Segment ID of the next segment
+//   FIELD_DELIM       16–17
+//   TEXT "1"          17–18
+//
+// The first five tokens are the message header's, read once by `reset()`
+// (`message-header.ts`): the rules below would read MSH-1 as a field delimiter
+// and the encoding characters as delimiters. Every other token is read by
+// `next()`, which tries these rules at the current offset, in order:
+//
+//   1. A segment terminator (`segment-terminators.ts`) ends the segment.
+//   2. The field delimiter opens a field.
+//   3. At the start of a segment, the text up to the first field delimiter or
+//      segment terminator is the Segment ID, whatever it holds: `^A|B` opens
+//      with the Segment ID `^A`.
+//   4. The repetition, component, and subcomponent delimiters.
+//   5. Text up to the next delimiter or segment terminator, its escape
+//      sequences decoded unless it is part of MSH-2.
+//
+// Offsets and columns count UTF-16 code units, as `String.prototype.slice`
+// does. Each segment terminator starts a new line, whatever characters it
+// holds, so `\r\n` counts as one line break.
+
 import type { Delimiters } from "@glion/ast";
 import { decodeEscapes, SEGMENT_TERMINATOR } from "@glion/utils";
 import type { Position } from "unist";
 
+import {
+  MESSAGE_HEADER,
+  messageStart,
+  readEncodingCharacters,
+  readMessageHeader,
+} from "./message-header";
+import { segmentTerminatorAt } from "./segment-terminators";
 import type { ParserContext, Token, Tokenizer, TokenType } from "./types";
 
-const MSH_SEGMENT_START = 0;
-const MSH_SEGMENT_END = 3;
-export const MSH_FIELD_SEPERATOR_START = 3;
-const MSH_FIELD_SEPERATOR_END = 4;
-export const MSH_FIELD_DELIMITER_START = 4;
-const MAX_ENCODING_CHARACTERS = 4;
-const BYTE_ORDER_MARK = "\uFEFF";
-const LINE_FEED = "\n";
-const CARRIAGE_RETURN = "\r";
-const CARRIAGE_RETURN_LINE_FEED = "\r\n";
-
-/**
- * The offset the message starts at in `input`: 1 after a byte order mark,
- * which is not part of the message, and 0 otherwise.
- */
-export const messageStart = (input: string): number =>
-  input.startsWith(BYTE_ORDER_MARK) ? 1 : 0;
-
-/**
- * The length of the line break at `at` in `input`, or 0: a segment ends at
- * `segment`, the segment delimiter, at a line feed, or at a carriage return
- * and a line feed.
- */
-export const lineBreakAt = (
-  input: string,
-  at: number,
-  segment: string
-): number => {
-  const c = input.charAt(at);
-  if (c === CARRIAGE_RETURN && input.charAt(at + 1) === LINE_FEED) {
-    return CARRIAGE_RETURN_LINE_FEED.length;
-  }
-  return c === segment || c === LINE_FEED ? 1 : 0;
-};
-
-/**
- * The offset the encoding characters MSH-2 declares end at, for an MSH-2 that
- * starts at `from`: four characters on, or the first field delimiter or line
- * break before that. In `MSH|^~\|APP` and in `MSH|^~\` followed by a line
- * break, they are `^~\`.
- */
-export const encodingCharactersEnd = (
-  input: string,
-  from: number,
-  delimiters: Pick<Delimiters, "field" | "segment">
-): number => {
-  const limit = Math.min(from + MAX_ENCODING_CHARACTERS, input.length);
-  let end = from;
-  while (
-    end < limit &&
-    input.charAt(end) !== delimiters.field &&
-    !lineBreakAt(input, end, delimiters.segment)
-  ) {
-    end += 1;
-  }
-  return end;
-};
+/** A token of the message header, before `next()` places it. */
+interface HeaderToken {
+  type: "FIELD_DELIM" | "TEXT";
+  value?: string;
+}
 
 export interface TokenizerOptions {
   /**
@@ -73,27 +64,34 @@ export interface TokenizerOptions {
   decodeEscapes?: boolean;
 }
 
+/**
+ * Reads HL7v2 text into tokens. `reset()` MUST be called with a context before
+ * `next()` or iteration.
+ */
 export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   private readonly decodeEscapes: boolean;
-  private input = "";
-  private start = 0;
-  private i = 0;
-  private line = 1;
-  private col = 1;
-  private delims!: Delimiters;
 
-  // Only-run-once MSH bootstrap at the start of the file
-  private didMshBootstrap = false;
-  private pendingBootstrap: null | Array<
-    | { kind: "TEXT"; value: string; advance: number }
-    | { kind: "FIELD_DELIM"; advance: number }
-  > = null; // queue to emit TEXT('MSH'), FIELD_DELIM, TEXT('^~\\&')
-  // MSH-2 holds the encoding characters, which are never escape sequences: in
-  // `MSH|^~\&\F\|a`, MSH-2 is `^~\&\F\`, read as it is written. The offset of
-  // the first field delimiter after MSH-2 starts, or 0 when the input does not
-  // start with MSH. Text up to it is MSH-2, or a Segment ID that is never
-  // decoded either.
-  private msh2End = 0;
+  // The message being read, set by `reset()`.
+  private input!: string;
+  private delimiters!: Delimiters;
+
+  // Where the next token starts.
+  private offset!: number;
+  private line!: number;
+  private column!: number;
+
+  // Whether the next token starts a segment: true at the start of the message
+  // and after each segment terminator, false after any other token.
+  private atSegmentStart!: boolean;
+
+  // The message header's tokens, and how many of them `next()` has emitted.
+  private headerTokens!: readonly HeaderToken[];
+  private headerTokensEmitted!: number;
+
+  // The offset text is decoded from. MSH-2 is read as written: in
+  // `MSH|^~\&\F\|a`, MSH-2 is `^~\&\F\`. So this is the offset MSH-2 ends at,
+  // or 0 when the message does not open with a message header segment.
+  private decodeFrom!: number;
 
   constructor(options: TokenizerOptions = {}) {
     this.decodeEscapes = options.decodeEscapes ?? true;
@@ -101,229 +99,170 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
 
   reset(ctx: ParserContext) {
     this.input = ctx.input;
-    this.delims = ctx.delimiters;
-    this.start = messageStart(this.input);
-    this.i = this.start;
+    this.delimiters = ctx.delimiters;
+    this.offset = messageStart(ctx.input);
     this.line = 1;
-    this.col = 1 + this.start;
-    this.didMshBootstrap = false;
-    this.pendingBootstrap = null;
-    this.msh2End = 0;
+    this.column = 1 + this.offset;
+    this.atSegmentStart = true;
+    this.headerTokens = [];
+    this.headerTokensEmitted = 0;
+    this.decodeFrom = 0;
 
-    // Prepare a one-time bootstrap if file starts with MSH
-    // MSH followed by a line break holds no fields to bootstrap.
-    const hasMshFields =
-      this.input.startsWith("MSH", this.start) &&
-      !lineBreakAt(
+    const header = readMessageHeader(this.input, this.delimiters.segment);
+    if (header) {
+      // MSH-2 ends where `next()` ends every field: at the field delimiter the
+      // context gives, which `detectDelimiters` sets to MSH-1.
+      const encodingCharacters = readEncodingCharacters(
         this.input,
-        this.start + MSH_FIELD_SEPERATOR_START,
-        this.delims.segment
+        header,
+        this.delimiters
       );
-    if (hasMshFields) {
-      // Precompute MSH and MSH.2; MSH.1 is the field delimiter char at index 3
-      const msh = this._slice(MSH_SEGMENT_START, MSH_SEGMENT_END);
-      const msh1 = this._slice(
-        MSH_FIELD_SEPERATOR_START,
-        MSH_FIELD_SEPERATOR_END
-      ); // the field delimiter char at index 3
-      const msh2End = encodingCharactersEnd(
-        this.input,
-        this.start + MSH_FIELD_DELIMITER_START,
-        this.delims
-      );
-      const msh2 = this.input.slice(
-        this.start + MSH_FIELD_DELIMITER_START,
-        msh2End
-      );
-      this.pendingBootstrap = [
-        { advance: msh.length, kind: "TEXT", value: msh },
-        { advance: 0, kind: "FIELD_DELIM" },
-        { advance: msh1.length, kind: "TEXT", value: msh1 },
-        { advance: 0, kind: "FIELD_DELIM" },
-        { advance: msh2.length, kind: "TEXT", value: msh2 },
+      this.headerTokens = [
+        { type: "TEXT", value: MESSAGE_HEADER },
+        { type: "FIELD_DELIM" },
+        { type: "TEXT", value: header.fieldSeparator },
+        { type: "FIELD_DELIM" },
+        { type: "TEXT", value: encodingCharacters },
       ];
-      // NOTE: we have not advanced indices yet; we will as we emit tokens
-      this.msh2End = msh2End;
-      let c = this.input.charAt(this.msh2End);
-      while (
-        c !== "" &&
-        c !== this.delims.field &&
-        !lineBreakAt(this.input, this.msh2End, this.delims.segment)
-      ) {
-        this.msh2End += 1;
-        c = this.input.charAt(this.msh2End);
-      }
+      // MSH-2 may run past its encoding characters, as `^~\&#` does: the
+      // rest is read by `next()` as text, and is not decoded either.
+      this.decodeFrom = this.fieldEnd(header.encodingCharactersStart);
     }
   }
 
   // oxlint-disable-next-line complexity/complexity -- tokenizer hot path: one branch per delimiter class, kept flat for speed
   next(): Token | null {
-    const s = this.input;
-    const n = s.length;
-    if (this.i >= n && !this.pendingBootstrap?.length) {
+    const headerToken = this.headerTokens[this.headerTokensEmitted];
+    if (headerToken) {
+      this.headerTokensEmitted += 1;
+      return this.take(
+        headerToken.type,
+        headerToken.value?.length ?? 0,
+        headerToken.value
+      );
+    }
+
+    const { input, offset } = this;
+    if (offset >= input.length) {
       return null;
     }
 
-    const start = { column: this.col, line: this.line, offset: this.i };
-
-    // ---- One-time MSH bootstrap at file start ----
-    if (!this.didMshBootstrap && this.pendingBootstrap) {
-      const step = this.pendingBootstrap.shift();
-      if (step) {
-        if (step.kind === "TEXT") {
-          const take = Math.min(step.advance, n - this.i);
-          const out = step.value.slice(0, take);
-          this._fastAdvance(out);
-          if (this.pendingBootstrap.length === 0) {
-            this.pendingBootstrap = null;
-            this.didMshBootstrap = true;
-          }
-          return this._tok("TEXT", out, start);
-        }
-        // FIELD_DELIM: advance exactly one char (the delimiter) and emit a FIELD_DELIM token
-        this._advance(Math.min(step.advance, n - this.i));
-        if (this.pendingBootstrap.length === 0) {
-          this.pendingBootstrap = null;
-          this.didMshBootstrap = true;
-        }
-        return this._tok("FIELD_DELIM", undefined, start);
-      }
+    // 1. A segment terminator.
+    const terminator = segmentTerminatorAt(
+      input,
+      offset,
+      this.delimiters.segment
+    );
+    if (terminator !== undefined) {
+      return this.takeSegmentTerminator(terminator);
     }
 
-    // ---- Normal tokenization (delimiters + text) ----
-    if (this.i >= n) {
-      return null;
+    // 2. The field delimiter.
+    const { component, field, repetition, segment, subcomponent } =
+      this.delimiters;
+    const char = input.charAt(offset);
+    if (char === field) {
+      return this.take("FIELD_DELIM", 1);
     }
-    const ch = s.charAt(this.i);
 
-    const lineBreak = lineBreakAt(s, this.i, this.delims.segment);
-    if (lineBreak > 0) {
-      this._advance(lineBreak, true);
-      return this._tok("SEGMENT_END", undefined, start);
-    }
-    if (ch === this.delims.field) {
-      this._advance(1);
-      return this._tok("FIELD_DELIM", undefined, start);
-    }
-    // A Segment ID runs to the first field delimiter and holds no other
+    // 3. A Segment ID runs to the first field delimiter and holds no other
     // delimiters or escape sequences (HL7v2 §2.5.2, §2.7): a line `^A|B` opens
     // with the Segment ID `^A`, and `Z\R\Z|B` with `Z\R\Z`.
-    const previous = s.charAt(this.i - 1);
-    if (
-      this.i === this.start ||
-      previous === this.delims.segment ||
-      previous === LINE_FEED
-    ) {
-      // The first character is neither delimiter: both were checked above.
-      let j = this.i + 1;
-      let c = s.charAt(j);
-      while (
-        c !== "" &&
-        c !== this.delims.field &&
-        !lineBreakAt(s, j, this.delims.segment)
-      ) {
-        j += 1;
-        c = s.charAt(j);
-      }
-      const segmentId = s.slice(this.i, j);
-      this._fastAdvance(segmentId);
-      return this._tok("TEXT", segmentId, start);
-    }
-    if (ch === this.delims.repetition) {
-      this._advance(1);
-      return this._tok("REPETITION_DELIM", undefined, start);
-    }
-    if (ch === this.delims.component) {
-      this._advance(1);
-      return this._tok("COMPONENT_DELIM", undefined, start);
-    }
-    if (ch === this.delims.subcomponent) {
-      this._advance(1);
-      return this._tok("SUBCOMP_DELIM", undefined, start);
+    if (this.atSegmentStart) {
+      const segmentId = input.slice(offset, this.fieldEnd(offset));
+      return this.take("TEXT", segmentId.length, segmentId);
     }
 
-    // TEXT until next delimiter or end
-    let j = this.i;
-    const cmp = this.delims.component,
-      esc = this.delims.escape,
-      fld = this.delims.field,
-      rep = this.delims.repetition,
-      sub = this.delims.subcomponent;
-    let escaped = false;
+    // 4. The repetition, component, and subcomponent delimiters.
+    if (char === repetition) {
+      return this.take("REPETITION_DELIM", 1);
+    }
+    if (char === component) {
+      return this.take("COMPONENT_DELIM", 1);
+    }
+    if (char === subcomponent) {
+      return this.take("SUBCOMP_DELIM", 1);
+    }
 
-    while (j < s.length) {
-      const c = s.charAt(j);
+    // 5. Text up to the next delimiter or segment terminator.
+    let end = offset;
+    // Stryker disable next-line EqualityOperator: at the end of the input, `charAt` reads "", which is no delimiter, so one more step changes nothing
+    while (end < input.length) {
+      const c = input.charAt(end);
       if (
-        c === fld ||
-        c === rep ||
-        c === cmp ||
-        c === sub ||
-        lineBreakAt(s, j, seg) > 0
+        c === field ||
+        c === repetition ||
+        c === component ||
+        c === subcomponent ||
+        segmentTerminatorAt(input, end, segment) !== undefined
       ) {
         break;
       }
-      // Stryker disable next-line ConditionalExpression, EqualityOperator: the flag only skips decoding a run without the escape character, which decodes to itself
-      if (c === esc) {
-        escaped = true;
-      }
-      j += 1;
+      end += 1;
     }
-
-    // Positions and line counts follow the source, so the raw slice advances.
-    const raw = s.slice(this.i, j);
-    this._fastAdvance(raw);
-    const val =
-      // Stryker disable next-line EqualityOperator: no TEXT token starts at msh2End, which is a field delimiter or the end of the input
-      escaped && this.decodeEscapes && start.offset >= this.msh2End
-        ? decodeEscapes(raw, this.delims)
-        : raw;
-    return this._tok("TEXT", val, start);
+    // The token spans the text as written; its value may be shorter.
+    const text = input.slice(offset, end);
+    const value =
+      // Stryker disable next-line EqualityOperator: no TEXT token starts at decodeFrom, which is a field delimiter, a segment terminator, or the end of the input
+      this.decodeEscapes && offset >= this.decodeFrom
+        ? decodeEscapes(text, this.delimiters)
+        : text;
+    return this.take("TEXT", text.length, value);
   }
 
-  // ---- helpers ----
-  private _slice(start: number, end: number): string {
-    return this.input.slice(
-      this.start + start,
-      Math.min(this.start + end, this.input.length)
-    );
-  }
-
-  private _advance(n: number, isNewline = false) {
-    this.i += n;
-    if (isNewline) {
-      this.line += 1;
-      this.col = 1;
-    } else {
-      this.col += n;
+  *[Symbol.iterator](): Iterator<Token> {
+    for (let token = this.next(); token; token = this.next()) {
+      yield token;
     }
   }
 
-  // A TEXT token, a Segment ID, and MSH-1 and MSH-2 stop at a line break, so
-  // the chunk holds none.
-  private _fastAdvance(chunk: string) {
-    this.i += chunk.length;
-    this.col += chunk.length;
+  // The offset of the first field delimiter or segment terminator at or after
+  // `from`, or the end of the input.
+  private fieldEnd(from: number): number {
+    const { input } = this;
+    const { field, segment } = this.delimiters;
+    let end = from;
+    while (
+      // Stryker disable next-line EqualityOperator: at the end of the input, `charAt` reads "", which is no delimiter, so one more step changes nothing
+      end < input.length &&
+      input.charAt(end) !== field &&
+      segmentTerminatorAt(input, end, segment) === undefined
+    ) {
+      end += 1;
+    }
+    return end;
   }
 
-  private _tok(
+  // The token of `type` over the next `length` characters, all on the
+  // current line. Moves past them, inside the segment.
+  private take(type: TokenType, length: number, value?: string): Token {
+    const start = this.point();
+    this.offset += length;
+    this.column += length;
+    this.atSegmentStart = false;
+    return this.token(type, value, start);
+  }
+
+  // The SEGMENT_END token over `terminator`. Moves past it, to the start of
+  // the next line and the next segment.
+  private takeSegmentTerminator(terminator: string): Token {
+    const start = this.point();
+    this.offset += terminator.length;
+    this.line += 1;
+    this.column = 1;
+    this.atSegmentStart = true;
+    return this.token("SEGMENT_END", undefined, start);
+  }
+
+  private point(): Position["start"] {
+    return { column: this.column, line: this.line, offset: this.offset };
+  }
+
+  private token(
     type: TokenType,
     value: string | undefined,
     start: Position["start"]
   ): Token {
-    const end = { column: this.col, line: this.line, offset: this.i };
-    return { position: { end, start }, type, value };
-  }
-
-  // Iterable protocol (sync)
-  [Symbol.iterator](): Iterator<Token> {
-    return {
-      next: () => {
-        const t = this.next();
-        if (!t) {
-          return { done: true, value: undefined as unknown as Token };
-        }
-        return { done: false, value: t };
-      },
-    };
+    return { position: { end: this.point(), start }, type, value };
   }
 }
