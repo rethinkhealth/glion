@@ -1,5 +1,22 @@
 # @glion/cli
 
+## 0.31.0
+
+### Minor Changes
+
+- [#1118](https://github.com/rethinkhealth/glion/pull/1118) [`a64b83a`](https://github.com/rethinkhealth/glion/commit/a64b83a4fc465d4eb705493bf39ec2a26dc30e15) Thanks [@meleksomai](https://github.com/meleksomai)! - `glion.config.ts` takes `maxConnections`, passed to `@glion/mllp`'s `serve()`: `glion start` and `glion dev` close a connection past it before reading any message from it. It must be a whole number of at least 1; unset, the server accepts any number of connections, as before.
+
+### Patch Changes
+
+- Updated dependencies [[`279026b`](https://github.com/rethinkhealth/glion/commit/279026bf82208f46e46aa4fde26e582c2f43af12)]:
+  - @glion/mllp@0.31.0
+  - @glion/ack@0.31.0
+  - @glion/ast@0.31.0
+  - @glion/mllp-client@0.31.0
+  - @glion/parser@0.31.0
+  - @glion/to-hl7v2@0.31.0
+  - @glion/util-query@0.31.0
+
 ## 0.30.0
 
 ### Minor Changes

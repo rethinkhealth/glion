@@ -1,6 +1,6 @@
 {
   "name": "@glion/builder",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "description": "Build HL7v2 AST nodes",
   "keywords": [
     "health",

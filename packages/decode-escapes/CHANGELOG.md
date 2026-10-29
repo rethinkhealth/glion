@@ -1,5 +1,13 @@
 # @rethinkhealth/hl7v2-decode-escapes
 
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/util-visit@0.31.0
+  - @glion/utils@0.31.0
+
 ## 0.30.0
 
 ### Patch Changes

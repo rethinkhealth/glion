@@ -1,5 +1,9 @@
 # @rethinkhealth/hl7v2-utils
 
+## 0.31.0
+
+No changes in this release.
+
 ## 0.30.0
 
 No changes in this release.

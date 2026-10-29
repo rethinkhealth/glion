@@ -1,5 +1,15 @@
 # @glion/lint-profile-timestamps
 
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies [[`d705580`](https://github.com/rethinkhealth/glion/commit/d705580f4ac582c034d3f96a827a66aa2c404408)]:
+  - @glion/util-timestamp@0.31.0
+  - @glion/annotate-profile-datatypes@0.31.0
+  - @glion/ast@0.31.0
+  - @glion/util-visit@0.31.0
+
 ## 0.30.0
 
 ### Patch Changes
