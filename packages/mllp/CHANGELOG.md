@@ -1,5 +1,20 @@
 # @rethinkhealth/hl7v2-mllp
 
+## 0.31.0
+
+### Minor Changes
+
+- [#1117](https://github.com/rethinkhealth/glion/pull/1117) [`279026b`](https://github.com/rethinkhealth/glion/commit/279026bf82208f46e46aa4fde26e582c2f43af12) Thanks [@meleksomai](https://github.com/meleksomai)! - `serve()` takes `maxConnections`, the most connections the server holds open at once. A connection past it is closed as soon as it is accepted, before any message is read; an open connection is never closed to make room. Unset, the server accepts any number of connections, as before.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/ast@0.31.0
+  - @glion/mllp-codec@0.31.0
+  - @glion/parser@0.31.0
+  - @glion/util-charset@0.31.0
+  - @glion/util-query@0.31.0
+
 ## 0.30.0
 
 ### Minor Changes

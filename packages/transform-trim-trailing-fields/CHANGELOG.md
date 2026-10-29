@@ -1,5 +1,14 @@
 # @glion/transform-trim-trailing-fields
 
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/ast@0.31.0
+  - @glion/util-visit@0.31.0
+  - @glion/utils@0.31.0
+
 ## 0.30.0
 
 ### Minor Changes

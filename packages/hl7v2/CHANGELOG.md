@@ -1,5 +1,16 @@
 # @rethinkhealth/hl7v2
 
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/preset-lint-profile-recommended@0.31.0
+  - @glion/ast@0.31.0
+  - @glion/jsonify@0.31.0
+  - @glion/parser@0.31.0
+  - @glion/preset-lint-recommended@0.31.0
+
 ## 0.30.0
 
 ### Minor Changes

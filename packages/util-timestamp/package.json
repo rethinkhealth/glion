@@ -1,6 +1,6 @@
 {
   "name": "@glion/util-timestamp",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "description": "HL7v2 DT, TM, and DTM parsing and formatting, with precision and calendar checks",
   "keywords": [
     "health",

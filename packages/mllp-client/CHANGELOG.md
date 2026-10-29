@@ -1,5 +1,18 @@
 # @glion/mllp-client
 
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @glion/ack@0.31.0
+  - @glion/ast@0.31.0
+  - @glion/mllp-codec@0.31.0
+  - @glion/parser@0.31.0
+  - @glion/to-hl7v2@0.31.0
+  - @glion/util-charset@0.31.0
+  - @glion/util-query@0.31.0
+
 ## 0.30.0
 
 ### Minor Changes
