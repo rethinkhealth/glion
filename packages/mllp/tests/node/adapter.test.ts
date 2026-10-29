@@ -486,6 +486,18 @@ describe("listen", () => {
     await expect(once(socket, "end")).resolves.toEqual([]);
   });
 
+  it("stops reading when the readable is cancelled, and keeps the socket open for a reply", async () => {
+    const socket = createMockSocket();
+    const accepted = acceptOne(socket);
+
+    await accepted.readable.cancel();
+    await accepted.writable.getWriter().write(new Uint8Array([0x01]));
+
+    expect(socket.isPaused()).toBe(true);
+    expect(socket.destroy).not.toHaveBeenCalled();
+    expect(socket.write).toHaveBeenCalledOnce();
+  });
+
   it("writable stream close() calls socket.end()", async () => {
     const socket = createMockSocket();
 

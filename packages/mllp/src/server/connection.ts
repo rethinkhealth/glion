@@ -16,9 +16,10 @@ import { MllpServerError, MllpServerErrorCode } from "../errors";
 /**
  * An accepted connection, as Web Streams.
  *
- * `writable` MUST keep accepting writes after `readable` ends, until
- * `close()`: the remote system can close its side before every reply is
- * written.
+ * `writable` MUST keep accepting writes after `readable` ends or is
+ * cancelled, until `close()`: the remote system can close its side before
+ * every reply is written, and the signal can stop the reading while a reply
+ * is still to be written. Cancelling `readable` MUST NOT end the socket.
  *
  * Once the connection is torn down (a reset, a broken pipe, a timeout),
  * `readable` MUST error with `MllpServerError` `CONNECTION_LOST`, and a write
@@ -30,18 +31,16 @@ export interface MllpSocket {
   readonly readable: ReadableStream<Uint8Array>;
   /** The bytes sent to the remote system. */
   readonly writable: WritableStream<Uint8Array>;
-  /**
-   * Ends the socket; a pending read of `readable` then finishes. MUST NOT
-   * throw. MUST be idempotent.
-   */
+  /** Ends the socket. MUST NOT throw. MUST be idempotent. */
   close(): void;
 }
 
 /** Options for {@link handleConnection}. */
 export interface HandleConnectionOptions {
   /**
-   * Ends the connection once the message in progress, if any, has been
-   * answered. A message read after it aborts is not handled.
+   * Stops reading the connection: the message in progress, if any, is
+   * answered, and the connection then closes. A message not yet read in full
+   * is not handled, and not reported.
    */
   signal?: AbortSignal;
 }
@@ -71,43 +70,27 @@ export async function handleConnection(
   const { signal } = options;
   // `VT MSH|…|ADT^A01|… FS CR` on the wire is read as `MSH|…|ADT^A01|…`:
   // unframe() yields one payload per frame, however the bytes were chunked.
-  const reader = socket.readable.pipeThrough(unframe()).getReader();
+  // An abort stops the reading here, and drops a message still arriving.
+  const reader = socket.readable.pipeThrough(unframe(), { signal }).getReader();
   const writer = socket.writable.getWriter();
-
-  // On abort, an idle connection closes now, which ends the pending read.
-  // Mid-message, the loop ends the socket once the response is written.
-  let handling = false;
-  const end = () => {
-    if (!handling) {
-      socket.close();
-    }
-  };
-  signal?.addEventListener("abort", end, { once: true });
 
   try {
     // One message at a time: read, handle, write, then read the next.
     for (;;) {
-      if (signal?.aborted) {
+      // `undefined` once the remote system has closed its side, the
+      // connection is lost, or the signal has aborted.
+      const payload = await receive(reader, signal);
+      if (!payload) {
         break;
       }
-      // `undefined` once the remote system has closed its side, or the
-      // connection is lost.
-      const payload = await receive(reader);
-      // A message that arrives after the abort is not handled.
-      if (!payload || signal?.aborted) {
-        break;
-      }
-      handling = true;
       const reply = await handle(payload);
       // `undefined` sends nothing; the next message is read all the same.
       if (reply) {
         await writer.write(framed(reply));
       }
-      handling = false;
     }
   } finally {
     // Reached on a close, an abort, or a throw from handle() or the socket.
-    signal?.removeEventListener("abort", end);
     reader.releaseLock();
     writer.releaseLock();
     socket.close();
@@ -115,16 +98,21 @@ export async function handleConnection(
 }
 
 /**
- * The next message, or `undefined` once the remote system has closed its side
- * or the connection is lost.
+ * The next message, or `undefined` once the remote system has closed its side,
+ * the connection is lost, or `signal` has aborted.
  */
 async function receive(
-  reader: ReadableStreamDefaultReader<Uint8Array>
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  signal: AbortSignal | undefined
 ): Promise<Uint8Array | undefined> {
   try {
     const { done, value } = await reader.read();
     return done ? undefined : value;
   } catch (error) {
+    // The pipe rejects with the signal's own reason once it aborts.
+    if (signal?.aborted && error === signal.reason) {
+      return undefined;
+    }
     // A lost connection drops the messages still queued, and a message cut
     // off by it is not the sender's framing.
     if (

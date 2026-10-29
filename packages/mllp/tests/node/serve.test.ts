@@ -343,6 +343,33 @@ describe("serve() integration", () => {
     expect(errors).toEqual([]);
   });
 
+  it("reports nothing for a message the server's close() cuts off, though the remote system answers its FIN", async () => {
+    const app = createApp();
+    const errors: Error[] = [];
+    const connected = Promise.withResolvers<ConnectionInfo>();
+    const running = serve({
+      handle: app.handle,
+      onConnect: connected.resolve,
+      onError: (error) => {
+        errors.push(error);
+      },
+      port: 0,
+    });
+    await running.listening;
+
+    const client = net.connect({ host: "127.0.0.1", port: running.port });
+    client.on("error", () => {});
+    // The remote system answers the server's FIN with its own.
+    client.on("end", () => client.end());
+    await connected.promise;
+    // A VT and the message, with no FS CR yet.
+    client.write(frame(encodeBytes(SAMPLE_ADT)).subarray(0, -2));
+    await delay(50);
+
+    await running.close();
+    expect(errors).toEqual([]);
+  });
+
   it("ends a connection whose onConnect is still running when the server closes", async () => {
     const app = createApp();
     const connecting = Promise.withResolvers<null>();

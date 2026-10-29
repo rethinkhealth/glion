@@ -14,6 +14,7 @@ Breaking: make the app the part that runs on any runtime. `app.handle(payload, e
 - Make `Context`, `Middleware`, `Handler`, `ErrorHandler` and `RouteFilter` generic over `env`; each defaults to `unknown`.
 - Answer every message a remote system sent before closing its side of the connection. Before, Node ended the server's side too, and replies still being built were lost (#1150).
 - End the connection when the remote system resets it or it times out while a message is being handled. Before, writing the reply waited forever, and `server.close()` never resolved (#1151).
+- Stop reading when the `signal` given to `handleConnection()`, or `server.close()`, aborts: the message in progress is answered, and a message still arriving is dropped without being reported. Before, a shutdown in the middle of a message could be reported as the sender's `PROTOCOL_VIOLATION`.
 - Add `MllpServerErrorCode.CONNECTION_LOST`. A socket given to `handleConnection()` errors its `readable` with it once the connection is torn down; `handleConnection()` then resolves without handling the messages still in transit, and reports nothing.
 - Report a socket error other than a reset, a broken pipe or a timeout, such as a failed TLS record, to `onError`. Before, it ended the connection as a close does.
 - Throw `MllpServerError` `INVALID_OPTION` when `serve()` is still called as `serve(app, options)`, is given no `handle` function, or is given a `port` that is not an integer from 0 to 65535; the error's `option` names which: `options`, `handle` or `port`.

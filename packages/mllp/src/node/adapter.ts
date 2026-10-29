@@ -139,9 +139,11 @@ async function writeToSocket(socket: Socket, chunk: Uint8Array): Promise<void> {
 function readFromSocket(socket: Socket): ReadableStream<Uint8Array> {
   let open = true;
   return new ReadableStream<Uint8Array>({
+    // Stops reading; the socket stays open for a reply still to be written,
+    // until close().
     cancel() {
       open = false;
-      socket.destroy();
+      socket.pause();
     },
     pull() {
       socket.resume();

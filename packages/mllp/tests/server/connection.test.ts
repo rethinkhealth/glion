@@ -16,15 +16,10 @@ const decode = (bytes: Uint8Array) => new TextDecoder().decode(bytes);
 /** An accepted connection over Web Streams, and the remote system's end of it. */
 function memorySocket() {
   let inbound!: ReadableStreamDefaultController<Uint8Array>;
-  let ended = false;
   const written: string[] = [];
   const socket: MllpSocket & { closes: number } = {
     close() {
       socket.closes += 1;
-      if (!ended) {
-        ended = true;
-        inbound.close();
-      }
     },
     closes: 0,
     readable: new ReadableStream({
@@ -41,12 +36,10 @@ function memorySocket() {
   return {
     /** Closes the remote system's side. */
     end() {
-      ended = true;
       inbound.close();
     },
     /** Tears the connection down, as a reset does. */
     lose() {
-      ended = true;
       inbound.error(new MllpServerError(MllpServerErrorCode.CONNECTION_LOST));
     },
     send(bytes: Uint8Array) {
@@ -208,6 +201,39 @@ describe("handleConnection", () => {
       { signal: shutdown.signal }
     );
     expect(remote.written).toEqual([decode(frame(encode(`ACK:${ADT}`)))]);
+  });
+
+  it("stops reading when the signal aborts, without waiting for the socket's readable to end", async () => {
+    const shutdown = new AbortController();
+    let closes = 0;
+    const socket: MllpSocket = {
+      close() {
+        closes += 1;
+      },
+      readable: new ReadableStream(),
+      writable: new WritableStream(),
+    };
+
+    const closed = handleConnection(echo, socket, { signal: shutdown.signal });
+    shutdown.abort();
+
+    await expect(closed).resolves.toBeUndefined();
+    expect(closes).toBeGreaterThan(0);
+  });
+
+  it("reports nothing for a message the signal cuts off, though the remote system then closes its side", async () => {
+    const remote = memorySocket();
+    const shutdown = new AbortController();
+    const closed = handleConnection(echo, remote.socket, {
+      signal: shutdown.signal,
+    });
+    remote.send(encode("\u000BMSH|^~\\&|"));
+    await delay(0);
+
+    shutdown.abort();
+    remote.end();
+
+    await expect(closed).resolves.toBeUndefined();
   });
 
   it("handles no message when the signal has already aborted", async () => {
