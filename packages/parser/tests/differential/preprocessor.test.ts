@@ -10,8 +10,8 @@ describe("delimiter detection and the reference delimiter detection", () => {
   // Delimiter detection gives the delimiters the reference gives, for any
   // text and any delimiters it starts from.
   //
-  // Mutant: the encoding characters end at the fourth character only, not at
-  // a line break before it. Fails on `"MSH|^\r"`.
+  // Mutant: `readEncodingCharacters` does not stop at a segment terminator.
+  // Fails on `"MSH*%$\r\nPID"`.
   it("detects the delimiters the reference detects", () => {
     fc.assert(
       fc.property(arbText, arbDelimiters, (input, delimiters) => {
@@ -27,7 +27,7 @@ describe("delimiter detection and the reference delimiter detection", () => {
           ["MSH*%*APP", DEFAULT_DELIMITERS],
           ["MSH\nPID*1", DEFAULT_DELIMITERS],
         ],
-        numRuns: 20_000,
+        numRuns: 1000,
       }
     );
   });

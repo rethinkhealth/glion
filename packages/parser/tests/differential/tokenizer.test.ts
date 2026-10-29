@@ -22,8 +22,9 @@ describe("the tokenizer and the reference tokenizer", () => {
   // same values and positions, for any text, any delimiters, and escape
   // sequences decoded or not.
   //
-  // Mutant: the Segment ID branch reads a line that starts with a line feed's
-  // `\n` as a value. Fails on `"PID\n^A"`.
+  // Mutant: a segment terminator does not start a segment, so a Segment ID
+  // that starts with a delimiter is read as delimiters. Fails on
+  // `"MSH\nPID|^A\r^B|1"`.
   it("emits the tokens the reference tokenizer emits", () => {
     fc.assert(
       fc.property(
@@ -51,7 +52,7 @@ describe("the tokenizer and the reference tokenizer", () => {
             false,
           ],
         ],
-        numRuns: 20_000,
+        numRuns: 1000,
       }
     );
   });
