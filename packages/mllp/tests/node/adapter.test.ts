@@ -337,6 +337,18 @@ describe("listen", () => {
     await expect(reader.read()).rejects.toBe(failure);
   });
 
+  it("keeps listening for errors after the first, as a TLS socket emits more than one", () => {
+    const socket = createMockSocket();
+    acceptOne(socket);
+    const failure = Object.assign(new Error("bad record mac"), {
+      code: "ERR_SSL_DECRYPTION_FAILED_OR_BAD_RECORD_MAC",
+    });
+
+    socket.emit("error", failure);
+
+    expect(() => socket.emit("error", new Error("write EPROTO"))).not.toThrow();
+  });
+
   it("writable stream close() calls socket.end()", async () => {
     const socket = createMockSocket();
 

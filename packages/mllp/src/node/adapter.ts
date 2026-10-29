@@ -152,7 +152,8 @@ function readFromSocket(socket: Socket): ReadableStream<Uint8Array> {
         }
       });
       socket.once("end", () => end());
-      socket.once("error", end);
+      // A TLS socket can emit a second error after its first.
+      socket.on("error", end);
       socket.once("close", () => end());
     },
   });
