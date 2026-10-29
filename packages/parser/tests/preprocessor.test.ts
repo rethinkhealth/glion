@@ -4,19 +4,18 @@ import {
   defaultPreprocessors,
   detectDelimiters,
   runPreprocessors,
+  stripBOM,
 } from "../src/preprocessor";
 import type { ParserContext, PreprocessorStep } from "../src/types";
 
 describe(runPreprocessors, () => {
-  it("leaves the input as it is and detects the delimiters by default", () => {
-    const input = "\uFEFFMSH*%$#&\r\nPID*1";
-
+  it("removes a byte order mark, keeps the line breaks, and detects the delimiters by default", () => {
     const ctx = runPreprocessors(
-      { delimiters: DEFAULT_DELIMITERS, input },
+      { delimiters: DEFAULT_DELIMITERS, input: "\uFEFFMSH*%$#&\r\nPID*1" },
       defaultPreprocessors
     );
 
-    expect(ctx.input).toBe(input);
+    expect(ctx.input).toBe("MSH*%$#&\r\nPID*1");
     expect(ctx.delimiters.field).toBe("*");
   });
 
@@ -38,6 +37,21 @@ describe(runPreprocessors, () => {
 });
 
 describe("preprocessor steps", () => {
+  describe(stripBOM, () => {
+    it("removes a byte order mark from the start of the input", () => {
+      expect(
+        stripBOM({ delimiters: DEFAULT_DELIMITERS, input: "\uFEFFMSH|^~\\&" })
+          .input
+      ).toBe("MSH|^~\\&");
+    });
+
+    it("keeps a byte order mark after the start of the input, which is data", () => {
+      expect(
+        stripBOM({ delimiters: DEFAULT_DELIMITERS, input: "PID|\uFEFF" }).input
+      ).toBe("PID|\uFEFF");
+    });
+  });
+
   describe(detectDelimiters, () => {
     it("detects delimiters from MSH-1 and MSH-2", () => {
       // MSH-1: '*', MSH-2: %$#& etc.
@@ -54,18 +68,19 @@ describe("preprocessor steps", () => {
       expect(result.delimiters?.subcomponent).toBe("&");
     });
 
-    it("detects delimiters from MSH after a byte order mark", () => {
+    // The message header does not declare the segment delimiter.
+    it("keeps the segment delimiter the context gives, and reads the header with it", () => {
       const result = detectDelimiters({
-        delimiters: DEFAULT_DELIMITERS,
-        input: "\uFEFFMSH*%$#&",
+        delimiters: { ...DEFAULT_DELIMITERS, segment: "$" },
+        input: "MSH|^~\\$PID|1",
       });
 
       expect(result.delimiters).toStrictEqual({
-        component: "%",
-        escape: "#",
-        field: "*",
-        repetition: "$",
-        segment: "\r",
+        component: "^",
+        escape: "\\",
+        field: "|",
+        repetition: "~",
+        segment: "$",
         subcomponent: "&",
       });
     });

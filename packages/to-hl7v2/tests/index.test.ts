@@ -20,6 +20,12 @@ describe(toHl7v2, () => {
     expect(result).toBe("MSH|^~\\&|SENDER\r");
   });
 
+  // The parser reads `MSH` followed by a segment terminator as an MSH with no
+  // fields; a field separator after it would be read back as MSH-1.
+  it("writes an MSH with no fields as its Segment ID alone", () => {
+    expect(toHl7v2(m(s("MSH"), s("PID", f("1"))))).toBe("MSH\rPID|1\r");
+  });
+
   it("handles multiple segments with segment delimiter", () => {
     const tree = m(
       s("MSH", f("|"), f("^~\\&"), f(""), f("2.5")),

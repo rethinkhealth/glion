@@ -98,7 +98,12 @@ export function toHl7v2(
 
   // MSH-1 is the field separator itself — skip it and emit structurally.
   // MSH-2 holds the encoding characters, which are never escape sequences.
+  // An MSH with no fields, read from `MSH` and a segment terminator, is its
+  // Segment ID alone.
   const msh = (seg: Segment): string => {
+    if (seg.children.length === 0) {
+      return seg.name;
+    }
     const [, encodingCharacters, ...rest] = seg.children;
     const parts = rest.map(field);
     if (encodingCharacters) {
@@ -112,21 +117,23 @@ export function toHl7v2(
   const line = (seg: Segment): string =>
     seg.name === "MSH" ? msh(seg) : segment(seg);
 
-  const segments = (nodes: readonly (Segment | Group)[]): string =>
-    nodes
-      .map((child) =>
-        child.type === "group"
-          ? segments(child.children)
-          : `${line(child)}${d.segment}`
-      )
-      .join("");
+  const written = (child: Segment | Group): string => {
+    switch (child.type) {
+      case "group": {
+        return child.children.map(written).join("");
+      }
+      case "segment": {
+        return `${line(child)}${d.segment}`;
+      }
+    }
+  };
 
   // -- dispatch ----------------------------------------------------------
 
   switch (node.type) {
     case "root":
     case "group": {
-      return segments(node.children as (Segment | Group)[]);
+      return (node.children as (Segment | Group)[]).map(written).join("");
     }
     case "segment": {
       return line(node);

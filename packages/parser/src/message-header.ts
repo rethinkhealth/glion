@@ -11,12 +11,10 @@
 // No delimiter opens MSH-1: it is whatever character follows `MSH`. MSH-2 holds
 // up to four encoding characters, and ends at the next field delimiter or
 // segment terminator: `MSH|^~\|APP` and `MSH|^~\` then `\r` both declare
-// `^~\`. A byte order mark before `MSH` is not part of the message, so
-// `\uFEFFMSH|^~\&` opens at offset 1.
+// `^~\`.
 
 import { segmentTerminatorAt } from "./segment-terminators";
 
-const BYTE_ORDER_MARK = "\uFEFF";
 const MAX_ENCODING_CHARACTERS = 4;
 
 /** The Segment ID of the message header segment. */
@@ -31,13 +29,6 @@ export interface MessageHeader {
 }
 
 /**
- * The offset the message starts at in `input`: 1 after a byte order mark, and
- * 0 otherwise.
- */
-export const messageStart = (input: string): number =>
-  input.startsWith(BYTE_ORDER_MARK) ? 1 : 0;
-
-/**
  * The message header segment the message opens with, or `undefined` when it
  * opens with another segment, or with `MSH` and then a segment terminator for
  * the segment delimiter `segment`, which holds no fields.
@@ -46,10 +37,9 @@ export const readMessageHeader = (
   input: string,
   segment: string
 ): MessageHeader | undefined => {
-  const start = messageStart(input);
-  const fieldSeparatorAt = start + MESSAGE_HEADER.length;
+  const fieldSeparatorAt = MESSAGE_HEADER.length;
   const opensWithMessageHeader =
-    input.startsWith(MESSAGE_HEADER, start) &&
+    input.startsWith(MESSAGE_HEADER) &&
     segmentTerminatorAt(input, fieldSeparatorAt, segment) === undefined;
   if (!opensWithMessageHeader) {
     return undefined;

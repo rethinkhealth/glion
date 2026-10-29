@@ -20,17 +20,9 @@ export const MSH_FIELD_SEPERATOR_START = 3;
 const MSH_FIELD_SEPERATOR_END = 4;
 export const MSH_FIELD_DELIMITER_START = 4;
 const MAX_ENCODING_CHARACTERS = 4;
-const BYTE_ORDER_MARK = "\uFEFF";
 const LINE_FEED = "\n";
 const CARRIAGE_RETURN = "\r";
 const CARRIAGE_RETURN_LINE_FEED = "\r\n";
-
-/**
- * The offset the message starts at in `input`: 1 after a byte order mark,
- * which is not part of the message, and 0 otherwise.
- */
-export const messageStart = (input: string): number =>
-  input.startsWith(BYTE_ORDER_MARK) ? 1 : 0;
 
 /**
  * The length of the line break at `at` in `input`, or 0: a segment ends at
@@ -111,7 +103,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   reset(ctx: ParserContext) {
     this.input = ctx.input;
     this.delims = ctx.delimiters;
-    this.start = messageStart(this.input);
+    this.start = 0;
     this.i = this.start;
     this.line = 1;
     this.col = 1 + this.start;

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  messageStart,
   readEncodingCharacters,
   readMessageHeader,
 } from "../src/message-header";
@@ -15,28 +14,11 @@ const encodingCharacters = (input: string, field = "|"): string | undefined => {
   );
 };
 
-describe(messageStart, () => {
-  it("starts the message at offset 0", () => {
-    expect(messageStart("MSH|^~\\&")).toBe(0);
-  });
-
-  it("starts the message after a byte order mark", () => {
-    expect(messageStart("﻿MSH|^~\\&")).toBe(1);
-  });
-});
-
 describe(readMessageHeader, () => {
   it("reads MSH-1 as the character after MSH, and MSH-2 as starting after it", () => {
     expect(readMessageHeader("MSH*%$#&*APP", "\r")).toStrictEqual({
       encodingCharactersStart: 4,
       fieldSeparator: "*",
-    });
-  });
-
-  it("reads the message header after a byte order mark", () => {
-    expect(readMessageHeader("﻿MSH|^~\\&", "\r")).toStrictEqual({
-      encodingCharactersStart: 5,
-      fieldSeparator: "|",
     });
   });
 

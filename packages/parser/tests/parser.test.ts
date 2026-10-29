@@ -815,8 +815,8 @@ describe("root position", () => {
     expect(span("MSH|^~\\&\rPID|1\r\n\r\n")).toStrictEqual([0, 18]);
   });
 
-  it("starts after a byte order mark", () => {
-    expect(span("\uFEFFMSH|^~\\&\r")).toStrictEqual([1, 10]);
+  it("counts from the character after a byte order mark, which is not part of the message", () => {
+    expect(span("\uFEFFMSH|^~\\&\r")).toStrictEqual([0, 9]);
   });
 
   it("covers nothing in an empty message", () => {

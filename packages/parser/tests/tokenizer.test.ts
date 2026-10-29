@@ -235,33 +235,22 @@ describe("line breaks", () => {
   });
 });
 
+// `stripBOM` removes a byte order mark from the start of the input before it
+// is tokenized, so the tokenizer reads one as data wherever it is.
 describe("byte order mark", () => {
-  it("starts the message after a byte order mark", () => {
-    const out = toks("\uFEFFMSH|^~\\&|A");
-
-    expect(out[0]).toMatchObject({
-      position: {
-        end: { column: 5, line: 1, offset: 4 },
-        start: { column: 2, line: 1, offset: 1 },
-      },
-      type: "TEXT",
-      value: "MSH",
-    });
-    expect(out[4]).toMatchObject({ type: "TEXT", value: "^~\\&" });
-    expect(out[6]).toMatchObject({ type: "TEXT", value: "A" });
-  });
-
-  it("reads the first line after a byte order mark as a Segment ID", () => {
-    expect(toks("\uFEFFP^D|1")[0]).toMatchObject({
-      type: "TEXT",
-      value: "P^D",
-    });
-  });
-
-  it("reads a byte order mark after the start of the message as text", () => {
+  it("reads a byte order mark as text", () => {
     expect(toks("PID|\uFEFF")[2]).toMatchObject({
       type: "TEXT",
       value: "\uFEFF",
     });
+  });
+});
+
+describe("before reset", () => {
+  it("reads an empty message, which holds no tokens", () => {
+    const tokenizer = new HL7v2Tokenizer();
+
+    expect(tokenizer.next()).toBeNull();
+    expect([...tokenizer]).toStrictEqual([]);
   });
 });

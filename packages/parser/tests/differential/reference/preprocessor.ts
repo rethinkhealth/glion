@@ -10,7 +10,6 @@ import type { PreprocessorStep } from "../../../src/types";
 import {
   encodingCharactersEnd,
   lineBreakAt,
-  messageStart,
   MSH_FIELD_DELIMITER_START,
   MSH_FIELD_SEPERATOR_START,
 } from "./tokenizer";
@@ -19,8 +18,8 @@ import {
  * Step: auto-detect delimiters from MSH.
  */
 export const detectDelimiters: PreprocessorStep = (ctx) => {
-  const start = messageStart(ctx.input);
-  const { segment } = DEFAULT_DELIMITERS;
+  const start = 0;
+  const { segment } = ctx.delimiters;
   // MSH followed by a line break declares no delimiters.
   const declaresDelimiters =
     ctx.input.startsWith("MSH", start) &&

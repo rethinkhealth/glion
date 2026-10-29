@@ -36,12 +36,11 @@
 // holds, so `\r\n` counts as one line break.
 
 import type { Delimiters } from "@glion/ast";
-import { decodeEscapes, SEGMENT_TERMINATOR } from "@glion/utils";
+import { DEFAULT_DELIMITERS, decodeEscapes } from "@glion/utils";
 import type { Position } from "unist";
 
 import {
   MESSAGE_HEADER,
-  messageStart,
   readEncodingCharacters,
   readMessageHeader,
 } from "./message-header";
@@ -65,33 +64,34 @@ export interface TokenizerOptions {
 }
 
 /**
- * Reads HL7v2 text into tokens. `reset()` MUST be called with a context before
- * `next()` or iteration.
+ * Reads HL7v2 text into tokens: the context `reset()` was last given, or an
+ * empty message, which holds none.
  */
 export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   private readonly decodeEscapes: boolean;
 
-  // The message being read, set by `reset()`.
-  private input!: string;
-  private delimiters!: Delimiters;
+  // The message being read. `reset()` sets every field below.
+  private input = "";
+  private delimiters: Delimiters = DEFAULT_DELIMITERS;
 
   // Where the next token starts.
-  private offset!: number;
-  private line!: number;
-  private column!: number;
+  private offset = 0;
+  private line = 1;
+  private column = 1;
 
   // Whether the next token starts a segment: true at the start of the message
   // and after each segment terminator, false after any other token.
-  private atSegmentStart!: boolean;
+  // Stryker disable next-line BooleanLiteral: `next()` reads it only at an offset inside the input, and the empty message has none
+  private atSegmentStart = true;
 
   // The message header's tokens, and how many of them `next()` has emitted.
-  private headerTokens!: readonly HeaderToken[];
-  private headerTokensEmitted!: number;
+  private headerTokens: readonly HeaderToken[] = [];
+  private headerTokensEmitted = 0;
 
   // The offset text is decoded from. MSH-2 is read as written: in
   // `MSH|^~\&\F\|a`, MSH-2 is `^~\&\F\`. So this is the offset MSH-2 ends at,
   // or 0 when the message does not open with a message header segment.
-  private decodeFrom!: number;
+  private decodeFrom = 0;
 
   constructor(options: TokenizerOptions = {}) {
     this.decodeEscapes = options.decodeEscapes ?? true;
@@ -100,9 +100,9 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   reset(ctx: ParserContext) {
     this.input = ctx.input;
     this.delimiters = ctx.delimiters;
-    this.offset = messageStart(ctx.input);
+    this.offset = 0;
     this.line = 1;
-    this.column = 1 + this.offset;
+    this.column = 1;
     this.atSegmentStart = true;
     this.headerTokens = [];
     this.headerTokensEmitted = 0;
