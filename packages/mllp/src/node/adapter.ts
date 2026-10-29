@@ -70,16 +70,20 @@ export interface ListenOptions {
 }
 
 /**
- * Socket options every listener is created with: keep-alive probes after
- * 60 s idle, Nagle's algorithm off, and the server's side left open after the
- * remote system closes its own, until every message it sent is answered.
+ * Socket options every listener is created with, which `tls` can replace:
+ * keep-alive probes after 60 s idle, and Nagle's algorithm off.
  */
 const SOCKET_OPTIONS = {
-  allowHalfOpen: true,
   keepAlive: true,
   keepAliveInitialDelay: 60_000,
   noDelay: true,
 } as const satisfies ServerOpts;
+
+/**
+ * The server's side stays open after the remote system closes its own, until
+ * every message it sent is answered. `tls` cannot replace it.
+ */
+const HALF_OPEN = { allowHalfOpen: true } as const satisfies ServerOpts;
 
 /** Time a socket gets to close after its FIN before it is destroyed. */
 const CLOSE_GRACE_MS = 1000;
@@ -235,7 +239,8 @@ function wrapNodeSocket(socket: Socket, secure: boolean): NodeSocket {
 
 /**
  * Listen with `tls.createServer()` when `options.tls` is set, and with
- * `net.createServer()` otherwise, both with {@link SOCKET_OPTIONS}, and pass
+ * `net.createServer()` otherwise, both with {@link SOCKET_OPTIONS} and
+ * {@link HALF_OPEN}, and pass
  * every accepted socket to `onSocket` as a {@link NodeSocket}. A TLS socket is
  * passed on once its TLS handshake completes.
  *
@@ -270,8 +275,8 @@ export function listen(
   };
 
   const server: Server = secure
-    ? createTlsServer({ ...SOCKET_OPTIONS, ...tls }, onConnection)
-    : createServer(SOCKET_OPTIONS, onConnection);
+    ? createTlsServer({ ...SOCKET_OPTIONS, ...tls, ...HALF_OPEN }, onConnection)
+    : createServer({ ...SOCKET_OPTIONS, ...HALF_OPEN }, onConnection);
   if (maxConnections !== undefined) {
     server.maxConnections = maxConnections;
   }

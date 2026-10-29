@@ -211,6 +211,18 @@ describe("listen", () => {
     );
   });
 
+  it("keeps the server's side open after the remote system closes its own, whatever tls says", () => {
+    listen(
+      { port: 2575, tls: { allowHalfOpen: false, cert: "cert", key: "key" } },
+      noop
+    );
+
+    expect(createTlsServer).toHaveBeenLastCalledWith(
+      expect.objectContaining({ allowHalfOpen: true }),
+      expect.any(Function)
+    );
+  });
+
   it("calls setTimeout when socketTimeout option is provided", () => {
     listen({ port: 2575, socketTimeout: 30_000 }, noop);
 

@@ -16,6 +16,10 @@ import { MllpServerError, MllpServerErrorCode } from "../errors";
 /**
  * An accepted connection, as Web Streams.
  *
+ * `writable` MUST keep accepting writes after `readable` ends, until
+ * `close()`: the remote system can close its side before every reply is
+ * written.
+ *
  * Once the connection is torn down (a reset, a broken pipe, a timeout),
  * `readable` MUST error with `MllpServerError` `CONNECTION_LOST`, and a write
  * to `writable` MUST resolve. Any other error the streams raise is a fault

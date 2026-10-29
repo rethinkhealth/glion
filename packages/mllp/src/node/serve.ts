@@ -133,8 +133,8 @@ export interface ServeOptions {
   socketTimeout?: number;
 
   /**
-   * TLS for the listener, passed to `tls.createServer()` unchanged. Without
-   * it, the server listens on plain TCP.
+   * TLS for the listener, passed to `tls.createServer()` with `allowHalfOpen`
+   * kept on. Without it, the server listens on plain TCP.
    */
   tls?: TlsOptions;
 }
