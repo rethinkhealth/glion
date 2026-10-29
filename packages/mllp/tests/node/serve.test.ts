@@ -396,6 +396,34 @@ describe("serve() integration", () => {
     expect(errors).toEqual([]);
   });
 
+  it("ends a connection whose onConnect is still running when the server closes", async () => {
+    const app = createApp();
+    const connecting = Promise.withResolvers<null>();
+    const release = Promise.withResolvers<null>();
+    const running = serve({
+      handle: app.handle,
+      onConnect: async () => {
+        connecting.resolve(null);
+        await release.promise;
+      },
+      port: 0,
+    });
+    await running.listening;
+
+    const client = net.connect({ host: "127.0.0.1", port: running.port });
+    client.on("error", () => {});
+    await connecting.promise;
+    const ended = once(client, "end").then(() => "ended");
+    const closed = running.close();
+
+    await expect(
+      Promise.race([ended, delay(500).then(() => "still open")])
+    ).resolves.toBe("ended");
+    release.resolve(null);
+    await closed;
+    client.destroy();
+  });
+
   it("throws INVALID_OPTION when the port is not a TCP port", () => {
     const app = createApp();
     const options = { handle: app.handle, port: Number.NaN };

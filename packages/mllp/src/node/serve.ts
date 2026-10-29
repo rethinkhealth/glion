@@ -229,8 +229,16 @@ export function serve(options: ServeOptions): Server {
         await report(error, getMessageInfo(error));
       }
     };
+    // close() ends a connection still in onConnect now, as it does an idle
+    // one; no message is then read from it.
+    const end = () => socket.close();
+    shutdown.signal.addEventListener("abort", end, { once: true });
     try {
-      await onConnect?.(connection);
+      try {
+        await onConnect?.(connection);
+      } finally {
+        shutdown.signal.removeEventListener("abort", end);
+      }
       await handleConnection(reply, socket, { signal: shutdown.signal });
     } catch (error) {
       await report(error);
