@@ -47,7 +47,7 @@ describe("glion send with a message the client cannot prepare", () => {
       stderr,
       // Since #1001 a control character in a value is encoded as \X0B\ and
       // sent; one in a Segment ID still cannot be, so the client refuses it.
-      stdin: Readable.from(`${ADT}\rNT${VT}E|1||free text`),
+      stdin: Readable.from(`${ADT}NT${VT}E|1||free text\r`),
       stdout,
     });
 

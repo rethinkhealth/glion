@@ -224,7 +224,7 @@ describe("runSend (integration, fake socket)", () => {
   it("reports an invalid outcome (exit 2) when a Segment ID contains a reserved VT byte", async () => {
     // A control character in a value is encoded as \X0B\ and sent; one in a
     // Segment ID cannot be, so the client refuses the message.
-    const withVt = `${ADT}\rNT\u000BE|1||free text`;
+    const withVt = `${ADT}NT\u000BE|1||free text\r`;
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
