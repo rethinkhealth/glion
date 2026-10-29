@@ -209,7 +209,9 @@ function wrapNodeSocket(socket: Socket, secure: boolean): NodeSocket {
       // following `end()` can send a clean FIN. A bare `destroy()` while data
       // sits unread in the RX buffer (e.g. tearing down after `onConnect`
       // rejects, before the peer's first frame is consumed) makes the kernel
-      // send an RST, surfacing as ECONNRESET on the peer.
+      // send an RST, surfacing as ECONNRESET on the peer. The bytes are
+      // dropped: the readable's `data` listener would pause the socket again.
+      socket.removeAllListeners("data");
       socket.resume();
       // A remote system that never closes its side would hold the socket open.
       const grace = setTimeout(() => socket.destroy(), CLOSE_GRACE_MS);

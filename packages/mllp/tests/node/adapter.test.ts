@@ -1,5 +1,6 @@
 // oxlint-disable typescript/no-non-null-assertion
 // oxlint-disable no-empty-function
+import { once } from "node:events";
 import type { Server } from "node:net";
 import { createServer } from "node:net";
 import { Readable } from "node:stream";
@@ -457,6 +458,20 @@ describe("listen", () => {
     socket.emit("error", failure);
 
     expect(() => socket.emit("error", new Error("write EPROTO"))).not.toThrow();
+  });
+
+  it("reads through to the remote system's FIN after close(), dropping the bytes nothing read", async () => {
+    const socket = createMockSocket();
+    const accepted = acceptOne(socket);
+    socket.push(new Uint8Array([0x01]));
+    socket.push(new Uint8Array([0x02]));
+    socket.push(new Uint8Array([0x03]));
+    await setImmediatePromise();
+
+    accepted.close();
+    socket.push(null);
+
+    await expect(once(socket, "end")).resolves.toEqual([]);
   });
 
   it("writable stream close() calls socket.end()", async () => {
