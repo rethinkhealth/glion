@@ -51,12 +51,12 @@ export type ConnectionCallback = (
 ) => void | Promise<void>;
 
 /**
- * Error callback invoked with an error on a connection: a throwing
- * `onConnect` or `onDisconnect`, an error `handle` rejects with, a broken MLLP
- * byte stream (`PROTOCOL_VIOLATION`), or a socket error other than a reset,
- * a broken pipe or a timeout. The connection closes after either of the last
- * two; it stays open after an error `handle` rejects with, and that message
- * gets no reply.
+ * Error callback invoked with an error on a connection: a throwing `onConnect`
+ * or `onDisconnect`, an error `handle` rejects with, a broken MLLP byte stream
+ * (`PROTOCOL_VIOLATION`), a response that carries a VT or FS byte
+ * (`UNFRAMEABLE_RESPONSE`), or a socket error other than a reset, a broken pipe
+ * or a timeout. The connection closes after any of the last three; it stays
+ * open after an error `handle` rejects with, and that message gets no reply.
  *
  * `messageInfo` holds the routing fields of the message whose `handle`
  * rejected, when `handle` is an app's; `undefined` for any other error.

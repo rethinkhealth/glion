@@ -57,8 +57,9 @@ export interface HandleConnectionOptions {
  *   `undefined` for none. Called once per message, never concurrently.
  * @param socket - The accepted connection.
  * @param options - The signal that ends the connection.
- * @throws {MllpServerError} `PROTOCOL_VIOLATION` when the bytes break MLLP
- *   framing: the remote system's, or a response that carries a VT or FS byte.
+ * @throws {MllpServerError} `PROTOCOL_VIOLATION` when the remote system's bytes
+ *   break MLLP framing, and `UNFRAMEABLE_RESPONSE` when a response carries a VT
+ *   or FS byte.
  * @throws What `handle` throws, and any error of `socket` other than its
  *   teardown.
  */
@@ -152,7 +153,7 @@ function framed(reply: Uint8Array): Uint8Array {
   } catch (error) {
     // frame() rejects a response that holds a VT or an FS byte.
     if (error instanceof MllpCodecError) {
-      throw new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION, {
+      throw new MllpServerError(MllpServerErrorCode.UNFRAMEABLE_RESPONSE, {
         cause: error,
       });
     }

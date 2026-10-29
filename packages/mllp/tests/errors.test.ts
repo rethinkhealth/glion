@@ -47,6 +47,14 @@ describe("MllpServerError", () => {
     );
   });
 
+  it("states that the response holds a byte MLLP reserves for framing", () => {
+    expect(
+      new MllpServerError(MllpServerErrorCode.UNFRAMEABLE_RESPONSE).message
+    ).toBe(
+      "The response contains a VT or FS byte, and the connection is closing; MLLP reserves both bytes for framing."
+    );
+  });
+
   it("states that the inbound message is not UTF-8", () => {
     expect(
       new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET).message

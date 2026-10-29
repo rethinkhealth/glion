@@ -128,14 +128,14 @@ describe("handleConnection", () => {
     await expect(closed).rejects.toMatchObject({ code: "PROTOCOL_VIOLATION" });
   });
 
-  it("rejects with PROTOCOL_VIOLATION when a response carries an FS byte", async () => {
+  it("rejects with UNFRAMEABLE_RESPONSE when a response carries an FS byte", async () => {
     const remote = memorySocket();
     remote.send(frame(encode(ADT)));
     remote.end();
 
     await expect(
       handleConnection(async () => encode("MSH|\u001C"), remote.socket)
-    ).rejects.toMatchObject({ code: "PROTOCOL_VIOLATION" });
+    ).rejects.toMatchObject({ code: "UNFRAMEABLE_RESPONSE" });
   });
 
   it("rejects with what handle() throws, and closes the socket", async () => {

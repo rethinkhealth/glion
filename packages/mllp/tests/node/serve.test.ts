@@ -571,7 +571,7 @@ describe("serve() integration", () => {
       expect(errors[0]?.causeName).toBe("MllpCodecError");
     });
 
-    it("onError fires with PROTOCOL_VIOLATION when a handler response contains a reserved byte", async () => {
+    it("onError fires with UNFRAMEABLE_RESPONSE when a handler response contains a reserved byte", async () => {
       const app = createApp();
       // The response carries a VT (0x0B): it cannot be framed for the wire.
       app.on("*", () => ({
@@ -590,7 +590,7 @@ describe("serve() integration", () => {
       const response = await sendMessage(server.port, SAMPLE_ADT, 500);
       expect(response).toBeUndefined();
       expect(errors).toHaveLength(1);
-      expect(errors[0]?.code).toBe("PROTOCOL_VIOLATION");
+      expect(errors[0]?.code).toBe("UNFRAMEABLE_RESPONSE");
     });
 
     it("onError receives messageInfo with routing fields for handler errors", async () => {

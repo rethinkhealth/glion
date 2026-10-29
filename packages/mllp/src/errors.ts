@@ -33,12 +33,17 @@ export const MllpServerErrorCode = {
   /**
    * The MLLP byte stream itself was violated and the connection closed:
    * the remote system sent bytes outside a message, glued or unterminated
-   * messages, an over-cap message — or a response given to the connection
-   * contained a reserved VT/FS byte and could not be framed. The underlying
+   * messages, or an over-cap message. The underlying
    * `@glion/mllp-codec` `MllpCodecError` is kept on `cause`; branch on this
    * code without importing that package.
    */
   PROTOCOL_VIOLATION: "PROTOCOL_VIOLATION",
+  /**
+   * A response given to the connection contains a VT or FS byte, which MLLP
+   * reserves for framing, and the connection closed. The underlying
+   * `@glion/mllp-codec` `MllpCodecError` is kept on `cause`.
+   */
+  UNFRAMEABLE_RESPONSE: "UNFRAMEABLE_RESPONSE",
 } as const;
 export type MllpServerErrorCode =
   (typeof MllpServerErrorCode)[keyof typeof MllpServerErrorCode];
@@ -63,6 +68,8 @@ const messages = {
     "No parser is registered; `app.handle()` reads each message with the processor `app.parser()` is given.",
   PROTOCOL_VIOLATION:
     "The MLLP byte stream is not framed as MLLP requires, and the connection is closing; the error's cause says how.",
+  UNFRAMEABLE_RESPONSE:
+    "The response contains a VT or FS byte, and the connection is closing; MLLP reserves both bytes for framing.",
 } as const satisfies Record<
   Exclude<MllpServerErrorCode, "INVALID_OPTION">,
   string
