@@ -34,8 +34,8 @@ export const messageStart = (input: string): number =>
 
 /**
  * The length of the line break at `at` in `input`, or 0: a segment ends at
- * `segment`, the segment delimiter, at a line feed, or at a carriage return
- * and a line feed.
+ * `segment`, the segment delimiter, at a carriage return, at a line feed, or
+ * at a carriage return and a line feed.
  */
 export const lineBreakAt = (
   input: string,
@@ -46,7 +46,7 @@ export const lineBreakAt = (
   if (c === CARRIAGE_RETURN && input.charAt(at + 1) === LINE_FEED) {
     return CARRIAGE_RETURN_LINE_FEED.length;
   }
-  return c === segment || c === LINE_FEED ? 1 : 0;
+  return c === segment || c === LINE_FEED || c === CARRIAGE_RETURN ? 1 : 0;
 };
 
 /**
@@ -221,7 +221,8 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     if (
       this.i === this.start ||
       previous === this.delims.segment ||
-      previous === LINE_FEED
+      previous === LINE_FEED ||
+      previous === CARRIAGE_RETURN
     ) {
       // The first character is neither delimiter: both were checked above.
       let j = this.i + 1;

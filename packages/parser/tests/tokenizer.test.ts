@@ -160,20 +160,20 @@ describe("line breaks", () => {
   it("ends a Segment ID at a carriage return and a line feed when the segment delimiter is another character", () => {
     const delimiters = { ...DEFAULT_DELIMITERS, segment: "$" };
 
-    expect(toks("PI\rD\r\nOBX|1", {}, delimiters).slice(0, 3)).toMatchObject([
-      { type: "TEXT", value: "PI\rD" },
+    expect(toks("PID\r\nOBX|1", {}, delimiters).slice(0, 3)).toMatchObject([
+      { type: "TEXT", value: "PID" },
       { type: "SEGMENT_END" },
       { type: "TEXT", value: "OBX" },
     ]);
   });
 
-  it("reads a carriage return without a line feed as text when the segment delimiter is another character", () => {
+  it("ends a segment at a carriage return when the segment delimiter is another character", () => {
     const delimiters = { ...DEFAULT_DELIMITERS, segment: "$" };
 
-    expect(toks("PID|a\rb", {}, delimiters)[2]).toMatchObject({
-      type: "TEXT",
-      value: "a\rb",
-    });
+    expect(lineBreaks("PID|a\rOBX|1$NTE", delimiters)).toStrictEqual([
+      [5, 6],
+      [11, 12],
+    ]);
   });
 
   it("ends MSH-2 at a carriage return before its fourth character", () => {

@@ -2,7 +2,7 @@
 "@glion/parser": minor
 ---
 
-**Breaking:** the parser reads the text it is given and never rewrites it, so every `position` is a span of that text (ADR 0034). A segment ends at `\r`, `\n`, or `\r\n`, and a byte order mark at the start of the input is skipped. Before, the default preprocessing steps removed the byte order mark and replaced each `\r\n` with `\r`, so every position after a `\r\n` or a byte order mark pointed one character early (#1139).
+**Breaking:** the parser reads the text it is given and never rewrites it, so every `position` is a span of that text (ADR 0034). A segment ends at `\r`, `\n`, or `\r\n`, and a byte order mark at the start of the input is skipped. A segment delimiter given in the settings ends a segment as well, and no longer replaces the carriage return: with `$`, a `\r` alone used to be read as data. Before, the default preprocessing steps removed the byte order mark and replaced each `\r\n` with `\r`, so every position after a `\r\n` or a byte order mark pointed one character early (#1139).
 
 **Breaking:** the root's `position` covers the message from its first character to its last, the line breaks after its last segment included: `MSH|^~\&\rPID|1\r` gives a root at 0–15, not 0–14. A segment still ends at its last character, before its line break. A finding placed at the end of the message, such as a segment missing at the end in `@glion/lint-profile-segment-order`, is now at the start of the line after the last segment.
 

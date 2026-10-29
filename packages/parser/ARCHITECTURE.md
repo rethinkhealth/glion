@@ -15,10 +15,10 @@ This document is for contributors and reviewers. It follows one message through 
 
 Two modules hold rules that steps 2 and 3 share, so that both read the message the same way:
 
-| Module                   | Owns                                                                                              |
-| ------------------------ | ------------------------------------------------------------------------------------------------- |
-| `segment-terminators.ts` | What ends a segment: the segment delimiter, a carriage return and a line feed, or a line feed.    |
-| `message-header.ts`      | The start of a message: a byte order mark, `MSH`, MSH-1, and the encoding characters MSH-2 holds. |
+| Module                   | Owns                                                                                                                                |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `segment-terminators.ts` | What ends a segment: a carriage return, a carriage return and a line feed, a line feed, or the segment delimiter the settings give. |
+| `message-header.ts`      | The start of a message: a byte order mark, `MSH`, MSH-1, and the encoding characters MSH-2 holds.                                   |
 
 ## One message, step by step
 
@@ -51,13 +51,14 @@ The message `MSH|^~\&|A^B` + CR LF + `PID|1` + CR, 20 characters long.
 
 ### What ends a segment
 
-`segmentTerminatorAt(input, at, segment)` in `segment-terminators.ts` is the one place that decides it. At `at` it reads, in this order:
+`segmentTerminatorAt(input, at, segment)` in `segment-terminators.ts` is the one place that decides it. At `at` it reads:
 
 1. a carriage return and a line feed, read whole as one terminator;
-2. the segment delimiter, `\r` unless the settings give another;
-3. a line feed.
+2. a carriage return;
+3. a line feed;
+4. the segment delimiter, when the settings give one other than `\r`.
 
-HL7v2 ends every segment with a carriage return. A message saved to a file often ends its segments with the file's line endings instead, so the parser reads those too. With another segment delimiter, such as `$`, a carriage return alone is data: `PID|a` + CR + `b$` holds the value `a` + CR + `b`.
+HL7v2 ends every segment with a carriage return: "The segment terminator is always a carriage return." A message saved to a file often ends its segments with the file's line endings instead, so the parser reads those too. A segment delimiter from the settings, such as `$`, ends a segment as well and does not replace the carriage return: in `PID|1$OBX|1` + CR + `NTE|1`, both `$` and CR end a segment.
 
 Every rule that stops at the end of a segment calls this function: the tokenizer's segment terminator, Segment ID, and text rules, and both readings of the message header.
 

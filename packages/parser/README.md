@@ -76,7 +76,7 @@ A node's `position` is the span of the source text, so a decoded value is shorte
 
 ### Line breaks and positions
 
-A segment ends at the segment delimiter, `\r`, at a line feed, `\n`, or at a carriage return and a line feed, `\r\n`, and the last segment may end without one. A byte order mark at the start of the input is skipped. The parser never rewrites its input: every `position` is a span of the text as it was given. A `preprocess` step receives the input as given, a byte order mark included, and a step that rewrites the input moves positions into the rewritten text.
+A segment ends at a carriage return, `\r`, at a line feed, `\n`, at a carriage return and a line feed, `\r\n`, or at a segment delimiter the settings give, and the last segment may end without one. A segment delimiter from the settings does not replace the carriage return. A byte order mark at the start of the input is skipped. The parser never rewrites its input: every `position` is a span of the text as it was given. A `preprocess` step receives the input as given, a byte order mark included, and a step that rewrites the input moves positions into the rewritten text.
 
 A segment's `position` ends at its last character, before its line break. The root's `position` covers the message from its first character to its last, the line breaks after its last segment included, so a message ends with a segment terminator when the root ends after its last segment:
 
