@@ -57,6 +57,7 @@
   "devDependencies": {
     "@glion/annotate-profile-context": "workspace:*",
     "@glion/annotate-profile-fields": "workspace:*",
+    "@glion/builder": "workspace:*",
     "@glion/check-readme": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/testing": "workspace:*",

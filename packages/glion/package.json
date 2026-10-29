@@ -66,6 +66,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@glion/builder": "workspace:*",
     "@glion/check-readme": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/mllp-codec": "workspace:*",

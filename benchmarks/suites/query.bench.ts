@@ -4,6 +4,7 @@
  * Focuses on MSH field reads since multiple lint rules and plugins
  * read MSH-9, MSH-12, etc. on every message.
  */
+import { f, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
 import { select, selectAll, value } from "@glion/util-query";
 import { bench, describe } from "vitest";
@@ -14,16 +15,82 @@ import { hl7, ORU_R01_HEADER, oruObx, repeat } from "../fixtures/messages";
 // Fixtures — local: shapes specific to path-lookup benches
 // ---------------------------------------------------------------------------
 
-const SMALL_MESSAGE =
-  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|MSG001|P|2.5.1\rPID|1||12345||Doe^John||19800101|M\r";
+const SMALL_MESSAGE = hl7(
+  // MSH|^~\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|MSG001|P|2.5.1
+  s(
+    "MSH",
+    f("|"),
+    f("^~\\&"),
+    f("SENDER"),
+    f("FAC"),
+    f("RECV"),
+    f("RFAC"),
+    f("20241201120000"),
+    f(),
+    f("ADT", "A01", "ADT_A01"),
+    f("MSG001"),
+    f("P"),
+    f("2.5.1")
+  ),
+  // PID|1||12345||Doe^John||19800101|M
+  s(
+    "PID",
+    f("1"),
+    f(),
+    f("12345"),
+    f(),
+    f("Doe", "John"),
+    f(),
+    f("19800101"),
+    f("M")
+  )
+);
 
 const LARGE_MESSAGE = hl7(
-  "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG002|P|2.5.1",
-  "PID|1||12345^^^MRN||Doe^John^Q||19800101|M",
-  ...Array.from(
-    { length: 50 },
-    (_, i) =>
-      `OBX|${i + 1}|NM|8302-${i}^Test${i}^LN||${(100 + i).toFixed(1)}|mg/dL|50-200|N|||F`
+  // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG002|P|2.5.1
+  s(
+    "MSH",
+    f("|"),
+    f("^~\\&"),
+    f("LAB"),
+    f("FAC"),
+    f("EMR"),
+    f("RFAC"),
+    f("20241201120000"),
+    f(),
+    f("ORU", "R01", "ORU_R01"),
+    f("MSG002"),
+    f("P"),
+    f("2.5.1")
+  ),
+  // PID|1||12345^^^MRN||Doe^John^Q||19800101|M
+  s(
+    "PID",
+    f("1"),
+    f(),
+    f("12345", "", "", "MRN"),
+    f(),
+    f("Doe", "John", "Q"),
+    f(),
+    f("19800101"),
+    f("M")
+  ),
+  ...Array.from({ length: 50 }, (_, i) =>
+    // OBX|<i + 1>|NM|8302-<i>^Test<i>^LN||<100 + i>|mg/dL|50-200|N|||F
+    s(
+      "OBX",
+      f(String(i + 1)),
+      f("NM"),
+      f(`8302-${i}`, `Test${i}`, "LN"),
+      f(),
+      f((100 + i).toFixed(1)),
+      f("mg/dL"),
+      f("50-200"),
+      f("N"),
+      f(),
+      f(),
+      f("F")
+    )
   )
 );
 

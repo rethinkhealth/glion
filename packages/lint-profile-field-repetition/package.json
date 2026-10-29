@@ -55,6 +55,7 @@
     "@glion/check-readme": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/testing": "workspace:*",
+    "@glion/to-hl7v2": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "@stryker-mutator/core": "10.0.0",
     "@stryker-mutator/vitest-runner": "10.0.0",

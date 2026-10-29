@@ -99,6 +99,9 @@ importers:
       '@glion/annotate-profile-tables':
         specifier: workspace:*
         version: link:../packages/annotate-profile-tables
+      '@glion/ast':
+        specifier: workspace:*
+        version: link:../packages/ast
       '@glion/builder':
         specifier: workspace:*
         version: link:../packages/builder
@@ -386,6 +389,9 @@ importers:
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
@@ -890,6 +896,9 @@ importers:
         specifier: 3.25.76
         version: 3.25.76
     devDependencies:
+      '@glion/builder':
+        specifier: workspace:*
+        version: link:../builder
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
@@ -1503,6 +1512,9 @@ importers:
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
@@ -1573,6 +1585,9 @@ importers:
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
@@ -1646,6 +1661,9 @@ importers:
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
@@ -1777,6 +1795,9 @@ importers:
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
@@ -1896,6 +1917,9 @@ importers:
       '@glion/annotate-profile-fields':
         specifier: workspace:*
         version: link:../annotate-profile-fields
+      '@glion/builder':
+        specifier: workspace:*
+        version: link:../builder
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
@@ -1905,6 +1929,9 @@ importers:
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
+      '@glion/to-hl7v2':
+        specifier: workspace:*
+        version: link:../to-hl7v2
       '@glion/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
@@ -2797,6 +2824,9 @@ importers:
       '@glion/annotate-profile-fields':
         specifier: workspace:*
         version: link:../annotate-profile-fields
+      '@glion/builder':
+        specifier: workspace:*
+        version: link:../builder
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
