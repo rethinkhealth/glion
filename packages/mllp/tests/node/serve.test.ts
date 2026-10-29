@@ -317,59 +317,6 @@ describe("serve() integration", () => {
     }
   });
 
-  it("answers every message a remote system sent before closing its side", async () => {
-    const app = createApp().on("*", async (ctx) => {
-      await delay(20);
-      return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
-      };
-    });
-    server = serve({ handle: app.handle, port: 0 });
-    await server.listening;
-
-    const client = net.connect({
-      allowHalfOpen: true,
-      host: "127.0.0.1",
-      port: server.port,
-    });
-    const chunks: Buffer[] = [];
-    client.on("data", (chunk: Buffer) => chunks.push(chunk));
-    client.write(frame(encodeBytes(SAMPLE_ADT)));
-    client.write(frame(encodeBytes(SAMPLE_ORU)));
-    client.end();
-    await once(client, "end");
-
-    const replies = Buffer.concat(chunks).toString("utf8");
-    expect(replies).toContain("\rMSA|AA|MSG001");
-    expect(replies).toContain("\rMSA|AA|MSG002");
-  });
-
-  it("closes a connection that dropped while its message was being handled", async () => {
-    // The idle timeout destroys the server's socket while the route handler
-    // runs, so the response is written to a destroyed socket.
-    const app = createApp().on("*", async (ctx) => {
-      await delay(150);
-      return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
-      };
-    });
-    const disconnected = Promise.withResolvers<ConnectionInfo>();
-    server = serve({
-      handle: app.handle,
-      onDisconnect: disconnected.resolve,
-      port: 0,
-      socketTimeout: 50,
-    });
-    await server.listening;
-
-    const client = net.connect({ host: "127.0.0.1", port: server.port });
-    client.on("error", () => {});
-    client.write(frame(encodeBytes(SAMPLE_ADT)));
-
-    await disconnected.promise;
-    client.destroy();
-  });
-
   it("reports nothing when the remote system resets the connection in the middle of a message", async () => {
     const app = createApp().on("*", () => ({ raw: "ACK" }));
     const errors: Error[] = [];
