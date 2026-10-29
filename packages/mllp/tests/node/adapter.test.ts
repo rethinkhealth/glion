@@ -294,6 +294,18 @@ describe("listen", () => {
     ).resolves.toBeUndefined();
   });
 
+  it("resolves a write still pending when the socket closes, as Bun never calls it back", async () => {
+    const socket = createMockSocket();
+    socket.write.mockImplementationOnce(() => false);
+    const accepted = acceptOne(socket);
+
+    const write = accepted.writable.getWriter().write(new Uint8Array([0x01]));
+    await setImmediatePromise();
+    socket.emit("close");
+
+    await expect(write).resolves.toBeUndefined();
+  });
+
   it("rejects a write the socket fails for a reason other than its teardown", async () => {
     const socket = createMockSocket();
     const failure = new TypeError("not a chunk");

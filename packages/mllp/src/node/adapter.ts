@@ -109,8 +109,12 @@ function isTeardown(error: unknown): boolean {
  */
 async function writeToSocket(socket: Socket, chunk: Uint8Array): Promise<void> {
   const written = Promise.withResolvers<Error | null | undefined>();
+  // Bun never calls back a write still pending when the socket is reset.
+  const closed = () => written.resolve(null);
+  socket.once("close", closed);
   socket.write(chunk, written.resolve);
   const error = await written.promise;
+  socket.off("close", closed);
   if (error && !isTeardown(error)) {
     throw error;
   }
