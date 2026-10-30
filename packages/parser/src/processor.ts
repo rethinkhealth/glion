@@ -203,10 +203,10 @@ function createParserCore() {
       case "SEGMENT_END": {
         const endPos = lastContentEnd || tok.position.start;
         updatePositionsToEnd(endPos);
-        // A tokenizer that gives no characters leaves the segment without a
-        // terminator, as if it were not read from text.
-        if (seg && tok.value !== undefined) {
-          seg.terminator = tok.value;
+        // A tokenizer that gives no characters ends the segment with no
+        // terminator.
+        if (seg) {
+          seg.terminator = tok.value ?? "";
         }
         resetState();
         return;

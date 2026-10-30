@@ -342,17 +342,17 @@ describe("segment terminator", () => {
     expect(toHl7v2(tree)).toBe("PID|1\rPV1|1\r");
   });
 
-  it("writes the segment delimiter the delimiters give after a segment with no terminator", () => {
+  it("writes a segment with no terminator as one with an empty terminator: the segment delimiter the delimiters give before the next segment, and nothing after the last", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
     for (const segment of tree.children as Segment[]) {
       segment.terminator = undefined;
     }
 
-    expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1\r");
-    expect(toHl7v2(tree, { segment: "\n" })).toBe("MSH|^~\\&\nPID|1\n");
+    expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1");
+    expect(toHl7v2(tree, { segment: "\n" })).toBe("MSH|^~\\&\nPID|1");
   });
 
-  it("writes the segment delimiter that file.data.delimiters gives after a segment with no terminator", () => {
+  it("writes the segment delimiter that file.data.delimiters gives between segments with no terminator", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
     for (const segment of tree.children as Segment[]) {
       segment.terminator = undefined;
@@ -367,7 +367,7 @@ describe("segment terminator", () => {
     };
 
     expect(unified().use(hl7v2ToHl7v2).stringify(tree, file)).toBe(
-      "MSH*%$#&\rPID*1\r"
+      "MSH|^~\\&\nPID|1"
     );
   });
 

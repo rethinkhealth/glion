@@ -125,10 +125,10 @@ describe("processor (semantics-agnostic)", () => {
     expect((root.children[0] as Segment).terminator).toBe("\r\n");
   });
 
-  it("records no terminator for a SEGMENT_END token without characters", () => {
+  it("records an empty terminator for a SEGMENT_END token without characters", () => {
     const root = parseHL7v2FromIterator([text("PID"), segEnd(3), text("OBX")]);
 
-    expect(root.children[0]).not.toHaveProperty("terminator");
+    expect((root.children[0] as Segment).terminator).toBe("");
   });
 
   it("finalizes last segment without trailing SEGMENT_END (sync tokens)", () => {

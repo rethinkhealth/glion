@@ -24,7 +24,8 @@ const notes = {
  * Lint rule that reports a segment that does not end with a carriage return.
  *
  * Reads each segment's `terminator`, as `@glion/parser` records it. A segment
- * without one was not read from text and is not checked.
+ * with an empty or absent `terminator` is reported as having no segment
+ * terminator.
  */
 const hl7v2LintSegmentTerminator = lintRule<Root>(
   {
@@ -33,10 +34,9 @@ const hl7v2LintSegmentTerminator = lintRule<Root>(
   },
   (tree, file) => {
     visit(tree, "segment", (segment, ancestors) => {
-      const { terminator } = segment;
+      const terminator = segment.terminator ?? "";
       let reason: string;
       switch (terminator) {
-        case undefined:
         case CARRIAGE_RETURN: {
           return;
         }

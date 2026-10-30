@@ -8,11 +8,11 @@
 | **Profile-aware**    | ❌                                      |
 | **Default severity** | `warning`                               |
 | **Requires**         | `@glion/parser`                         |
-| **Since**            | `@glion/lint-segment-terminator@0.31.0` |
+| **Since**            | `@glion/lint-segment-terminator@0.32.0` |
 
 ## What it does
 
-HL7v2 ends every segment with a carriage return (`\r`, hex `0D`), the last segment of a message included. `@glion/parser` also reads a line feed (`\n`) or a carriage return and a line feed (`\r\n`) as the end of a segment, and reads a message whose last segment has no terminator, so a message that deviates parses like any other; it records what ended each segment in the segment's `terminator`. This rule reports each segment that ends with a line feed, or with a carriage return and a line feed, and a last segment with no segment terminator, as a warning in `file.messages`.
+HL7v2 ends every segment with a carriage return, `\r`, the last segment of a message included. A message saved to a file often ends its segments with `\r\n` or `\n` instead, or has nothing after its last segment. `@glion/parser` reads such a message and records what ended each segment in the segment's `terminator`. This rule reports each segment that does not end with `\r`, as a warning in `file.messages`.
 
 ## Install
 
@@ -41,7 +41,7 @@ console.error(reporter([file]));
 
 ### `unified().use(hl7v2LintSegmentTerminator)`
 
-A `unified` lint rule plugin. Visits every `segment` node, segments inside a segment group included, reads its `terminator`, and reports one message per segment that does not end with a carriage return. A segment without a `terminator` was not read from text and is not checked.
+A `unified` lint rule plugin. Visits every `segment` node, segments inside a segment group included, and reports one message per segment whose `terminator` is not `\r`. A segment with an empty or absent `terminator` is reported as having no segment terminator.
 
 ```ts
 import type { Plugin } from "unified";
@@ -53,40 +53,46 @@ export default hl7v2LintSegmentTerminator;
 
 ## What it checks
 
-Every segment ends with one carriage return. An empty line after a segment's carriage return is not reported.
+Every segment ends with a carriage return. An empty line after it, as in `PID|1\r\r`, is not reported.
 
-In these examples, `\r` and `\r\n` stand for the line break that ends each line.
+| The segment ends with                                       | Reported message                                                  | `actual`    |
+| ----------------------------------------------------------- | ----------------------------------------------------------------- | ----------- |
+| `\r\n`                                                      | `The segment ends with a carriage return and a line feed.`        | `"\r\n"`    |
+| `\n`                                                        | `The segment ends with a line feed.`                              | `"\n"`      |
+| Nothing                                                     | `The segment has no segment terminator.`                          | `undefined` |
+| A segment delimiter set in the parser settings, such as `$` | `The segment ends with a character other than a carriage return.` | `"$"`       |
+
+Every message has the `expected` value `["\r"]` and the `note` `HL7v2 ends every segment with a carriage return, the last one included.` A message about a segment terminator is placed from the segment's last character to the start of the next line; a message about a segment with no segment terminator is placed at the segment's last character.
+
+The examples below are JavaScript strings, so that each line break shows as it is written.
 
 ### Valid
 
 Every segment, the last one included, ends with `\r`:
 
-```hl7
-MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5\r
-PID|1||12345\r
+```ts
+"MSH|^~\\&\rPID|1\r";
 ```
 
 ### Invalid
 
-`MSH` ends with `\r\n`, and `PID`, the last segment, has no segment terminator:
+`MSH` ends with `\r\n`, `PV1` with `\n`, and `OBX`, the last segment, has nothing after it:
 
-```hl7
-MSH|^~\&|SENDER|FAC|RECV|RFAC|20250601120000||ADT^A01^ADT_A01|MSG00001|P|2.5\r\n
-PID|1||12345
+```ts
+"MSH|^~\\&\r\nPID|1\rPV1|1\nOBX|1";
 ```
 
 Reported messages:
 
-```
+```text
 The segment ends with a carriage return and a line feed.
+The segment ends with a line feed.
 The segment has no segment terminator.
 ```
 
-A segment that ends with `\n` is reported as `The segment ends with a line feed.`, and one that ends with a segment delimiter set to another character in the parser settings as `The segment ends with a character other than a carriage return.` Each message's `note` is `HL7v2 ends every segment with a carriage return, the last one included.`, its `expected` is `["\r"]`, and its `actual` is the character or characters the segment ends with, when it has a terminator. A terminator is reported from the segment's last character to the start of the next line; a missing terminator is reported at the segment's last character.
-
 ## When not to use it
 
-A message read from a file saved on a system whose line breaks are `\n` or `\r\n` reports every segment. When such files are the input and the messages are written back after `@glion/transform-segment-terminator`, which ends every segment with `\r`, the rule reports nothing the output keeps.
+When the input is files saved with `\n` or `\r\n` line breaks, the rule reports every segment of every message. A pipeline that reads such files and writes each segment back with `\r` has no use for those reports.
 
 ## Part of Glion
 

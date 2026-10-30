@@ -55,11 +55,11 @@ export const hl7v2ToHl7v2: Plugin<[Hl7v2ToHl7v2Options?], Root, string> =
  * even a lone Field. Delimiters default to the standard set unless
  * overridden or derivable from an MSH segment in the tree.
  *
- * A Root or Group writes each segment followed by its `terminator`, or by the
- * segment delimiter when it has none, so a parsed message is written back as
- * it was read. An empty `terminator` is written only after the last segment;
- * after any other, the segment delimiter is written. A Segment on its own is
- * written without one.
+ * A Root or Group writes each segment followed by its `terminator`, so a
+ * parsed message is written back as it was read. A segment with an empty or
+ * absent `terminator` has no segment terminator: nothing is written after it
+ * when it is the last segment written, and the segment delimiter after any
+ * other. A Segment on its own is written without one.
  *
  * @throws {EscapeSequenceError} When `encodeEscapes` is on and a value holds a
  *   character that no escape sequence can write with the delimiters.
@@ -132,16 +132,16 @@ export function toHl7v2(
     }
   };
 
-  // Each segment, then its terminator, or the segment delimiter when it has
-  // none. An empty terminator, read from a last segment with nothing after
-  // it, stays empty only after the last segment written: after `PID|1` with
-  // `ZPI|x` appended, it would make them one segment, `PID|1ZPI|x`.
+  // Each segment, then its terminator. No terminator, read from a last
+  // segment with nothing after it, stays empty only after the last segment
+  // written: after `PID|1` with `ZPI|x` appended, it would make them one
+  // segment, `PID|1ZPI|x`.
   const segments = (children: readonly (Segment | Group)[]): string => {
     const written = children.flatMap(segmentsOf);
     const last = written.length - 1;
     return written
       .map((seg, index) => {
-        const terminator = seg.terminator ?? d.segment;
+        const terminator = seg.terminator ?? "";
         const joinsTheNext = terminator === "" && index < last;
         return `${line(seg)}${joinsTheNext ? d.segment : terminator}`;
       })
