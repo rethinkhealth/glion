@@ -1,5 +1,7 @@
 import type { Delimiters } from "@glion/ast";
 
+import { SEGMENT_TERMINATOR } from "./constants";
+
 const HEX_RADIX = 16;
 const HEX_PAIR_LENGTH = 2;
 const HEX_PAIRS = /^(?:[0-9a-f]{2})+$/i;
@@ -19,7 +21,7 @@ const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true });
  * The value `value` carries once its HL7v2 escape sequences are decoded.
  *
  * Decodes `\F\`, `\S\`, `\R\`, `\T\`, and `\E\` to the delimiter each stands
- * for, `\.br\` to the segment delimiter, and `\Xdd…\` to the characters its
+ * for, `\.br\` to the segment terminator, and `\Xdd…\` to the characters its
  * bytes, named by pairs of hexadecimal digits, encode in UTF-8. Leaves a
  * formatting command (`\H\`, `\N\`, `\.sp\`, …), a locally defined sequence
  * (`\Z…\`), a character set switch (`\Cxxyy\`, `\Mxxyyzz\`), any other
@@ -78,7 +80,7 @@ export function decodeEscapes(value: string, d: Delimiters): string {
         break;
       }
       case ".br": {
-        decoded += d.segment;
+        decoded += SEGMENT_TERMINATOR;
         break;
       }
       default: {

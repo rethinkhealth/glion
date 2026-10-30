@@ -56,7 +56,6 @@ The tokenizer has special logic for the MSH segment:
         repetition: '~',
         subcomponent: '&',
         escape: '\\',
-        segment: '\r',
         ...initialDelimiters,
       },
       inMSHHeader: false,

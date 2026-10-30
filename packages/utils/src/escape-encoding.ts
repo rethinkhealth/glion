@@ -1,5 +1,6 @@
 import type { Delimiters } from "@glion/ast";
 
+import { SEGMENT_TERMINATOR } from "./constants";
 import { EscapeSequenceError } from "./errors";
 
 const HEX_RADIX = 16;
@@ -28,7 +29,7 @@ const UTF8_ENCODER = new TextEncoder();
  * appear in a value written as an HL7v2 escape sequence.
  *
  * Writes the field, component, repetition, subcomponent, and escape
- * delimiters as `\F\`, `\S\`, `\R\`, `\T\`, and `\E\`, the segment delimiter
+ * delimiters as `\F\`, `\S\`, `\R\`, `\T\`, and `\E\`, the segment terminator
  * as `\.br\`, and any other character below U+0020 as `\Xdd\`. A character
  * whose escape code holds a delimiter, such as `\E\` when `E` is the
  * component separator, is written as `\Xdd\`, the hexadecimal escape of its
@@ -38,9 +39,9 @@ const UTF8_ENCODER = new TextEncoder();
  * defined sequence (`\Z…\`), and a character set switch (`\Cxxyy\`,
  * `\Mxxyyzz\`) are written as they are.
  *
- * The encoded value holds no field, component, repetition, subcomponent, or
- * segment delimiter, and `decodeEscapes(encodeEscapes(value, d), d)` is
- * `value`.
+ * The encoded value holds no field, component, repetition, or subcomponent
+ * delimiter, and no segment terminator, and `decodeEscapes(encodeEscapes(value,
+ * d), d)` is `value`.
  *
  * @param value - The value to write.
  * @param d - The delimiters of the message.
@@ -93,7 +94,6 @@ function needsEncoding(value: string, d: Delimiters): boolean {
       ch === d.repetition ||
       ch === d.subcomponent ||
       ch === d.escape ||
-      ch === d.segment ||
       ch < SPACE
     ) {
       return true;
@@ -178,7 +178,7 @@ function namedEscapeCode(ch: string, d: Delimiters): string | undefined {
     case d.subcomponent: {
       return "T";
     }
-    case d.segment: {
+    case SEGMENT_TERMINATOR: {
       return ".br";
     }
     default: {
@@ -225,7 +225,6 @@ function holdsDelimiter(code: string, d: Delimiters): boolean {
     code.includes(d.component) ||
     code.includes(d.repetition) ||
     code.includes(d.subcomponent) ||
-    code.includes(d.segment) ||
     code.includes(d.escape)
   );
 }

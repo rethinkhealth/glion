@@ -18,7 +18,6 @@ describe("delimiters", () => {
       escape: "#",
       field: "*",
       repetition: "$",
-      segment: "\r",
       subcomponent: "&",
     });
   });
@@ -117,7 +116,6 @@ describe("delimiters", () => {
       escape: "$",
       field: "#",
       repetition: "!",
-      segment: "\r",
       subcomponent: "%",
     });
   });

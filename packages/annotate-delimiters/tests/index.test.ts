@@ -40,7 +40,6 @@ describe("hl7v2AnnotateDelimiters", () => {
       escape: "#",
       field: "*",
       repetition: "$",
-      segment: "\r",
       subcomponent: "&",
     });
   });

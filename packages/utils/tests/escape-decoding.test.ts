@@ -8,7 +8,6 @@ const CUSTOM_DELIMITERS: Delimiters = {
   escape: "#",
   field: "*",
   repetition: "%",
-  segment: "\n",
   subcomponent: "@",
 };
 
@@ -31,7 +30,7 @@ describe(decodeEscapes, () => {
     ).toBe("Value*More$Stuff%Again@Sub#Escaped");
   });
 
-  it("decodes .br to the segment delimiter", () => {
+  it("decodes .br to the segment terminator, a carriage return", () => {
     expect(decodeEscapes("Line1\\.br\\Line2", DEFAULT_DELIMITERS)).toBe(
       "Line1\rLine2"
     );

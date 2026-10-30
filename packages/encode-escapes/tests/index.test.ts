@@ -41,7 +41,7 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(subValue(results)).toBe("before\\E\\after");
   });
 
-  it("encodes segment delimiter as .br", async () => {
+  it("encodes the segment terminator, a carriage return, as .br", async () => {
     const tree = m(s("PID", f("line1\rline2")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
     expect(subValue(results)).toBe("line1\\.br\\line2");
@@ -71,7 +71,6 @@ describe("hl7v2EncodeEscapes plugin", () => {
       escape: "\\",
       field: "*",
       repetition: "%",
-      segment: "\n",
       subcomponent: "@",
     } satisfies Delimiters;
 

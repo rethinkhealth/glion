@@ -1,4 +1,4 @@
-import { DEFAULT_DELIMITERS } from "../src/constants";
+import { DEFAULT_DELIMITERS, SEGMENT_TERMINATOR } from "../src/constants";
 
 describe("DEFAULT_DELIMITERS", () => {
   it("should be defined", () => {
@@ -8,7 +8,6 @@ describe("DEFAULT_DELIMITERS", () => {
       escape: "\\",
       field: "|",
       repetition: "~",
-      segment: "\r",
       subcomponent: "&",
     });
   });
@@ -20,8 +19,13 @@ describe("DEFAULT_DELIMITERS", () => {
       escape: "\\",
       field: "|",
       repetition: "~",
-      segment: "\r",
       subcomponent: "&",
     });
+  });
+});
+
+describe("SEGMENT_TERMINATOR", () => {
+  it("is a carriage return, the segment terminator HL7v2 requires", () => {
+    expect(SEGMENT_TERMINATOR).toBe("\r");
   });
 });

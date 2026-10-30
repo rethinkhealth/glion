@@ -50,13 +50,19 @@ describe("hL7v2Config schema", () => {
         escape: "\\",
         field: "@",
         repetition: "!",
-        segment: "\n",
         subcomponent: "#",
       };
       const result = HL7v2ConfigSchema.parse({
         settings: { delimiters },
       });
       expect(result.settings.delimiters).toStrictEqual(delimiters);
+    });
+
+    it("rejects a segment delimiter: HL7v2 fixes the segment terminator as a carriage return", () => {
+      const result = HL7v2ConfigSchema.safeParse({
+        settings: { delimiters: { segment: "\n" } },
+      });
+      expect(result.success).toBeFalsy();
     });
 
     it("should accept partial delimiter overrides", () => {

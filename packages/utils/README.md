@@ -158,7 +158,7 @@ getByteLength(subcomponent); // 5 (5 bytes in UTF-8: c-a-f-C3-A9)
 
 ### `decodeEscapes(value, delimiters)`
 
-The value `value` carries once its HL7v2 escape sequences are decoded. `\F\`, `\S\`, `\R\`, `\T\`, and `\E\` become the delimiter each stands for, `\.br\` the segment delimiter, and `\Xdd…\` the characters its bytes, named by pairs of hexadecimal digits, encode in UTF-8. A formatting command (`\H\`, `\N\`, `\.sp 2\`, …), a locally defined sequence (`\Z…\`), a character set switch (`\Cxxyy\`, `\Mxxyyzz\`), any other sequence, an `\X…\` whose content is not pairs of hexadecimal digits or whose bytes are not UTF-8, and an escape character without a closing one stay as they are.
+The value `value` carries once its HL7v2 escape sequences are decoded. `\F\`, `\S\`, `\R\`, `\T\`, and `\E\` become the delimiter each stands for, `\.br\` the segment terminator, `\r`, and `\Xdd…\` the characters its bytes, named by pairs of hexadecimal digits, encode in UTF-8. A formatting command (`\H\`, `\N\`, `\.sp 2\`, …), a locally defined sequence (`\Z…\`), a character set switch (`\Cxxyy\`, `\Mxxyyzz\`), any other sequence, an `\X…\` whose content is not pairs of hexadecimal digits or whose bytes are not UTF-8, and an escape character without a closing one stay as they are.
 
 - `value` (`string`) — the value as it is on the wire.
 - `delimiters` (`Delimiters`) — the delimiters of the message.
@@ -173,7 +173,7 @@ decodeEscapes("DOE\\T\\SMITH", DEFAULT_DELIMITERS); // "DOE&SMITH"
 
 ### `encodeEscapes(value, delimiters)`
 
-The value `value` takes on the wire. The field, component, repetition, subcomponent, and escape delimiters are written as `\F\`, `\S\`, `\R\`, `\T\`, and `\E\`, the segment delimiter as `\.br\`, and any other character below U+0020 as `\Xdd\`. A character whose escape code holds a delimiter, such as `\E\` when `E` is the component separator, is written as `\Xdd\`, the hexadecimal escape of its UTF-8 bytes, with a digit `A`–`F` in lowercase when its uppercase form is a delimiter. A formatting command (`\H\`, `\N\`, `\.sp 2\`, `\.in+4\`, …), a locally defined sequence (`\Z…\`), and a character set switch (`\Cxxyy\`, `\Mxxyyzz\`) are written as they are. The encoded value holds no field, component, repetition, subcomponent, or segment delimiter, and `decodeEscapes(encodeEscapes(value, d), d)` is `value`.
+The value `value` takes on the wire. The field, component, repetition, subcomponent, and escape delimiters are written as `\F\`, `\S\`, `\R\`, `\T\`, and `\E\`, the segment terminator, `\r`, as `\.br\`, and any other character below U+0020 as `\Xdd\`. A character whose escape code holds a delimiter, such as `\E\` when `E` is the component separator, is written as `\Xdd\`, the hexadecimal escape of its UTF-8 bytes, with a digit `A`–`F` in lowercase when its uppercase form is a delimiter. A formatting command (`\H\`, `\N\`, `\.sp 2\`, `\.in+4\`, …), a locally defined sequence (`\Z…\`), and a character set switch (`\Cxxyy\`, `\Mxxyyzz\`) are written as they are. The encoded value holds no field, component, repetition, or subcomponent delimiter, and no segment terminator, and `decodeEscapes(encodeEscapes(value, d), d)` is `value`.
 
 - `value` (`string`) — the value to write.
 - `delimiters` (`Delimiters`) — the delimiters of the message.
@@ -198,12 +198,15 @@ const delimiters = {
   escape: "\\",
   field: "X",
   repetition: "~",
-  segment: "\r",
   subcomponent: "&",
 };
 
 encodeEscapes("S", delimiters); // throws EscapeSequenceError
 ```
+
+### `DEFAULT_DELIMITERS` and `SEGMENT_TERMINATOR`
+
+`DEFAULT_DELIMITERS` holds the delimiters MSH-1 and MSH-2 declare by default: `|` (field), `^` (component), `~` (repetition), `\` (escape), and `&` (subcomponent). `SEGMENT_TERMINATOR` is `\r`, the carriage return that ends every segment. HL7v2 fixes it, so it is not one of the delimiters a message declares.
 
 ### Conformance utilities
 

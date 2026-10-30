@@ -1,4 +1,4 @@
-import { DEFAULT_DELIMITERS } from "@glion/utils";
+import { DEFAULT_DELIMITERS, SEGMENT_TERMINATOR } from "@glion/utils";
 
 import type { ParserContext, PreprocessorStep } from "./types";
 
@@ -15,10 +15,10 @@ export const stripBOM: PreprocessorStep = (ctx) => {
 };
 
 /**
- * Step: normalize newlines to the default delimiters.
+ * Step: normalize newlines to the segment terminator.
  */
 export const normalizeNewlines: PreprocessorStep = (ctx) => {
-  ctx.input = ctx.input.replaceAll(/\r?\n/g, ctx.delimiters.segment);
+  ctx.input = ctx.input.replaceAll(/\r?\n/g, SEGMENT_TERMINATOR);
   return ctx;
 };
 
@@ -33,14 +33,12 @@ export const detectDelimiters: PreprocessorStep = (ctx) => {
     const repetition = enc.charAt(1) || DEFAULT_DELIMITERS.repetition;
     const _escape = enc.charAt(2) || DEFAULT_DELIMITERS.escape;
     const subcomponent = enc.charAt(3) || DEFAULT_DELIMITERS.subcomponent;
-    const { segment } = DEFAULT_DELIMITERS;
 
     ctx.delimiters = {
       component,
       escape: _escape,
       field,
       repetition,
-      segment,
       subcomponent,
     };
   }
