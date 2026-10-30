@@ -54,7 +54,6 @@ function createParserCore() {
   let rep: FieldRepetition | null = null;
   let comp: Component | null = null;
   let currentSub: Subcomponent | null = null;
-  let segmentHasContent = false;
   let lastContentEnd: Position["end"] | null = null;
   let expectingSegmentName = true; // Start expecting a segment name
 
@@ -64,46 +63,42 @@ function createParserCore() {
     rep = null;
     comp = null;
     currentSub = null;
-    segmentHasContent = false;
     lastContentEnd = null;
     expectingSegmentName = true;
   };
 
-  const openSegment = (name: string, position: Position) => {
-    seg = {
+  const openSegment = (name: string, position: Position): Segment => {
+    const opened: Segment = {
       children: [],
       name,
       position: { end: position.end, start: position.start },
       terminator: "",
       type: "segment",
     };
-    root.children.push(seg);
+    seg = opened;
+    root.children.push(opened);
     field = null;
     rep = null;
     comp = null;
     currentSub = null;
-    segmentHasContent = false;
     expectingSegmentName = false;
+    return opened;
   };
 
   /**
    * Ensure there is an active segment. If delimiter tokens arrive before
    * any segment name, lazily open a segment with an empty name.
    */
-  const ensureSegment = (start: Position["start"]) => {
-    if (!seg) {
-      openSegment("", { end: start, start });
-    }
-  };
+  const ensureSegment = (start: Position["start"]): Segment =>
+    seg ?? openSegment("", { end: start, start });
 
   const openField = (start: Position["start"]) => {
-    ensureSegment(start);
+    const segment = ensureSegment(start);
     field = createField(start);
-    seg!.children.push(field);
+    segment.children.push(field);
     rep = null;
     comp = null;
     currentSub = null;
-    segmentHasContent = true;
   };
 
   // A delimiter at `at` opens a sibling at `after`; an empty node before the
@@ -119,7 +114,6 @@ function createParserCore() {
     field!.children.push(rep);
     comp = null;
     currentSub = null;
-    segmentHasContent = true;
   };
 
   // Ensure there's a component to add subcomponents to (for SUBCOMP_DELIM)
@@ -136,7 +130,6 @@ function createParserCore() {
       comp = createComponent(start);
       rep.children.push(comp);
     }
-    segmentHasContent = true;
   };
 
   const openComponent = (at: Position["start"], after: Position["start"]) => {
@@ -151,7 +144,6 @@ function createParserCore() {
     comp = createComponent(after);
     rep.children.push(comp);
     currentSub = null;
-    segmentHasContent = true;
   };
 
   const ensureForText = (start: Position["start"]) => {
@@ -169,7 +161,6 @@ function createParserCore() {
     if (!currentSub) {
       currentSub = createSubcomponent(start);
       comp.children.push(currentSub);
-      segmentHasContent = true;
     }
   };
 
@@ -202,13 +193,14 @@ function createParserCore() {
     }
     switch (tok.type) {
       case "SEGMENT_END": {
+        // An empty line is an empty segment: `MSH|^~\&\r\rPID|1` holds MSH,
+        // a segment with an empty Segment ID and no fields, and PID.
+        const segment = ensureSegment(tok.position.start);
         const endPos = lastContentEnd || tok.position.start;
         updatePositionsToEnd(endPos);
         // A tokenizer that gives no characters ends the segment with no
         // terminator.
-        if (seg) {
-          seg.terminator = tok.value ?? "";
-        }
+        segment.terminator = tok.value ?? "";
         resetState();
         return;
       }
@@ -241,7 +233,6 @@ function createParserCore() {
         }
         currentSub = createSubcomponent(tok.position.end);
         comp?.children.push(currentSub);
-        segmentHasContent = true;
         updatePositionsToEnd(tok.position.end);
         return;
       }
@@ -262,7 +253,6 @@ function createParserCore() {
         }
         updatePositionsToEnd(tok.position.end);
         lastContentEnd = tok.position.end;
-        segmentHasContent = true;
         return;
       }
       default: {
@@ -276,17 +266,6 @@ function createParserCore() {
   const finalize = () => {
     if (lastContentEnd && seg) {
       updatePositionsToEnd(lastContentEnd);
-    }
-    if (seg && !segmentHasContent && !seg.name) {
-      // Drop trailing empty segment only when it was lazily opened by
-      // `ensureSegment` (no name, no content). A segment that arrived
-      // with a name carries information — even if no fields followed —
-      // and dropping it would break round-trip idempotency: the
-      // serializer re-emits the name, the next parse would drop it
-      // again, and any sibling segment immediately preceding it would
-      // shift into the trailing position and get dropped on the
-      // following parse.
-      root.children.pop();
     }
 
     // A message with no tokens is empty, and its root covers 0–0.

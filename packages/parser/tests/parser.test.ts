@@ -872,10 +872,12 @@ describe("segment terminator", () => {
     expect(terminators("MSH|^~\\&\rPID|1")).toStrictEqual(["\r", ""]);
   });
 
-  it("records only the first line break after a segment", () => {
+  it("records each line break, an empty line as an empty segment", () => {
     expect(terminators("MSH|^~\\&\r\rPID|1\r\n\r")).toStrictEqual([
       "\r",
+      "\r",
       "\r\n",
+      "\r",
     ]);
   });
 });

@@ -15,7 +15,7 @@ ADR 0034 has the parser read `\r`, `\n`, and `\r\n` as segment ends without rewr
 
 ## Decision
 
-1. **A segment records its terminator.** `Segment.terminator` holds the characters that ended the segment in the text it was read from: `\r`, `\n`, or `\r\n`. A last segment with nothing after it has `""`. An empty line after a segment is not recorded.
+1. **A segment records its terminator.** `Segment.terminator` holds the characters that ended the segment in the text it was read from: `\r`, `\n`, or `\r\n`. A last segment with nothing after it has `""`. An empty line is an empty segment, with an empty Segment ID, no fields, and the terminator that ended it (#1158).
 2. **Every segment states its terminator.** `Segment.terminator` is required, so no reader has to guess what an absent one means, and none takes it for `\r`. A segment without one is a bug in what made the tree: `@glion/to-hl7v2` throws a `TypeError`, and `@glion/lint-segment-terminator` stops and records why.
 3. **The builder ends a segment with `\r`.** `s()` sets `terminator` to `\r` and takes no argument for it. A caller sets the property on the returned node for another terminator.
 4. **The serializer writes the tree.** `@glion/to-hl7v2` writes each segment followed by its `terminator`, so a parsed message is written back with the line breaks it was read with, a missing final terminator included. It adds nothing of its own. An empty `terminator` before another segment throws `SegmentTerminatorError`: written as it is, the two segments would be one, and HL7v2 has no way to write that tree.

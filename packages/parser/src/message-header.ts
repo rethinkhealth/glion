@@ -11,7 +11,8 @@
 // No delimiter opens MSH-1: it is whatever character follows `MSH`. MSH-2 holds
 // up to four encoding characters, and ends at the next field delimiter or
 // segment terminator: `MSH|^~\|APP` and `MSH|^~\` then `\r` both declare
-// `^~\`.
+// `^~\`. Empty lines before `MSH` are skipped: in `\rMSH|^~\&`, `MSH` is at
+// offset 1.
 
 import { segmentTerminatorAt } from "./segment-terminators";
 
@@ -20,8 +21,10 @@ const MAX_ENCODING_CHARACTERS = 4;
 /** The Segment ID of the message header segment. */
 export const MESSAGE_HEADER = "MSH";
 
-/** Where a message header segment's first two fields are. */
+/** Where a message header segment and its first two fields are. */
 export interface MessageHeader {
+  /** The offset `MSH` starts at, after the empty lines before it. */
+  start: number;
   /** MSH-1: the character after `MSH`, or `""` when the input ends there. */
   fieldSeparator: string;
   /** The offset MSH-2 starts at, after MSH-1. */
@@ -29,17 +32,23 @@ export interface MessageHeader {
 }
 
 /**
- * The message header segment the message opens with, or `undefined` when it
- * opens with another segment, or with `MSH` and then a segment terminator,
- * which holds no fields.
+ * The message header segment the message opens with, after any empty lines,
+ * or `undefined` when it opens with another segment, or with `MSH` and then a
+ * segment terminator, which holds no fields.
  */
 export const readMessageHeader = (
   input: string,
   lineBreaks: boolean
 ): MessageHeader | undefined => {
-  const fieldSeparatorAt = MESSAGE_HEADER.length;
+  let start = 0;
+  let emptyLine = segmentTerminatorAt(input, start, lineBreaks);
+  while (emptyLine !== undefined) {
+    start += emptyLine.length;
+    emptyLine = segmentTerminatorAt(input, start, lineBreaks);
+  }
+  const fieldSeparatorAt = start + MESSAGE_HEADER.length;
   const opensWithMessageHeader =
-    input.startsWith(MESSAGE_HEADER) &&
+    input.startsWith(MESSAGE_HEADER, start) &&
     segmentTerminatorAt(input, fieldSeparatorAt, lineBreaks) === undefined;
   if (!opensWithMessageHeader) {
     return undefined;
@@ -47,6 +56,7 @@ export const readMessageHeader = (
   return {
     encodingCharactersStart: fieldSeparatorAt + 1,
     fieldSeparator: input.charAt(fieldSeparatorAt),
+    start,
   };
 };
 

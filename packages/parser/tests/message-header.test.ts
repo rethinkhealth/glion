@@ -22,6 +22,7 @@ describe(readMessageHeader, () => {
     expect(readMessageHeader("MSH*%$#&*APP", LINE_BREAKS)).toStrictEqual({
       encodingCharactersStart: 4,
       fieldSeparator: "*",
+      start: 0,
     });
   });
 
@@ -29,13 +30,26 @@ describe(readMessageHeader, () => {
     expect(readMessageHeader("MSH", LINE_BREAKS)).toStrictEqual({
       encodingCharactersStart: 4,
       fieldSeparator: "",
+      start: 0,
     });
   });
 
   it("reads a line feed after MSH as MSH-1 without line breaks", () => {
     expect(readMessageHeader("MSH\nPID|1", CARRIAGE_RETURN_ONLY)).toStrictEqual(
-      { encodingCharactersStart: 4, fieldSeparator: "\n" }
+      { encodingCharactersStart: 4, fieldSeparator: "\n", start: 0 }
     );
+  });
+
+  it("reads the message header after the empty lines before it", () => {
+    expect(readMessageHeader("\r\n\rMSH|^~\\&", LINE_BREAKS)).toStrictEqual({
+      encodingCharactersStart: 7,
+      fieldSeparator: "|",
+      start: 3,
+    });
+  });
+
+  it("reads no message header when another segment comes before it", () => {
+    expect(readMessageHeader("PID|1\rMSH|^~\\&", LINE_BREAKS)).toBeUndefined();
   });
 
   it("reads no message header when the message opens with another segment", () => {

@@ -92,6 +92,6 @@ describe("a message that holds no text", () => {
     const root = parseHL7v2("\r|");
 
     expect(span(root)).toStrictEqual([0, 2]);
-    expect(span(root.children[0]!)).toStrictEqual([1, 2]);
+    expect(span(root.children[1]!)).toStrictEqual([1, 2]);
   });
 });

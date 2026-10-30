@@ -17,8 +17,9 @@
 //   FIELD_DELIM       16–17
 //   TEXT "1"          17–18
 //
-// The first five tokens are the message header's, read once by `reset()`
-// (`message-header.ts`): the rules below would read MSH-1 as a field delimiter
+// The five tokens of the message header are read once by `reset()`
+// (`message-header.ts`), and emitted when `next()` reaches `MSH`, after any
+// empty lines before it: the rules below would read MSH-1 as a field delimiter
 // and the encoding characters as delimiters. Every other token is read by
 // `next()`, which tries these rules at the current offset, in order:
 //
@@ -86,8 +87,10 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   // Stryker disable next-line BooleanLiteral: `next()` reads it only at an offset inside the input, and the empty message has none
   private atSegmentStart = true;
 
-  // The message header's tokens, and how many of them `next()` has emitted.
+  // The message header's tokens, the offset `MSH` starts at, and how many of
+  // them `next()` has emitted.
   private headerTokens: readonly HeaderToken[] = [];
+  private headerStart = 0;
   private headerTokensEmitted = 0;
 
   // The offset text is decoded from. MSH-2 is read as written: in
@@ -108,6 +111,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     this.column = 1;
     this.atSegmentStart = true;
     this.headerTokens = [];
+    this.headerStart = 0;
     this.headerTokensEmitted = 0;
     this.decodeFrom = 0;
 
@@ -128,6 +132,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
         { type: "FIELD_DELIM" },
         { type: "TEXT", value: encodingCharacters },
       ];
+      this.headerStart = header.start;
       // MSH-2 may run past its encoding characters, as `^~\&#` does: the
       // rest is read by `next()` as text, and is not decoded either.
       this.decodeFrom = this.fieldEnd(header.encodingCharactersStart);
@@ -136,7 +141,10 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
 
   // oxlint-disable-next-line complexity/complexity -- tokenizer hot path: one branch per delimiter class, kept flat for speed
   next(): Token | null {
-    const headerToken = this.headerTokens[this.headerTokensEmitted];
+    const headerToken =
+      this.offset >= this.headerStart
+        ? this.headerTokens[this.headerTokensEmitted]
+        : undefined;
     if (headerToken) {
       this.headerTokensEmitted += 1;
       return this.take(

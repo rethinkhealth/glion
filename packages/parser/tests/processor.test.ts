@@ -139,9 +139,12 @@ describe("processor (semantics-agnostic)", () => {
     expect(seg.children).toHaveLength(1);
   });
 
-  it("handles empty line (segment with no fields) by dropping the empty trailing segment", () => {
-    const root = parseHL7v2FromIterator([segEnd()]);
-    expect(root.children).toHaveLength(0);
+  it("reads an empty line as a segment with an empty Segment ID and no fields", () => {
+    const root = parseHL7v2FromIterator([{ ...segEnd(), value: "\r" }]);
+
+    expect(root.children).toMatchObject([
+      { children: [], name: "", terminator: "\r", type: "segment" },
+    ]);
   });
 
   it("keeps a trailing named-but-fieldless segment (round-trip idempotency)", () => {

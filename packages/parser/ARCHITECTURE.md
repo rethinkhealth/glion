@@ -111,6 +111,8 @@ A token's span covers the text as written, so a decoded value can be shorter tha
 - Each delimiter opens the next sibling at its level: a field delimiter opens a field, a repetition delimiter a field repetition, and so on. A sibling it skips is added empty, so `PID|~` holds a field with two empty field repetitions.
 - A field, field repetition, or component with no value has `children: []`. `PID|1||` holds three fields, the last two empty.
 - A segment terminator closes the segment, and is recorded as its `terminator`. A segment that the input ends inside has the `terminator` `""`.
+- A segment terminator with no segment open is an empty line, and closes an empty segment: an empty Segment ID, no fields, and no width, at the start of its line. `MSH|^~\&` + CR + CR + `PID|1` holds MSH, an empty segment, and PID.
+- The message header is read after any empty lines before it, so in CR + `MSH|^~\&`, MSH-1 and MSH-2 are read and the empty segment comes first.
 
 ## Tests
 
