@@ -47,7 +47,7 @@ Build a `Segment` node with the Segment ID `name`.
 
 - No fields → a segment with no fields.
 - Fields are appended in the order provided; the helper does not auto-flatten.
-- The segment's `terminator` is `\r`, the segment terminator HL7v2 requires. Set `terminator` on the returned node to give it another one, or set it to `undefined` to have `@glion/to-hl7v2` write the segment delimiter it is given.
+- The segment's `terminator` is `\r`, the segment terminator HL7v2 requires. Set `terminator` on the returned node to give it another one.
 
 ### `f(...values: Array<string | Component | FieldRepetition | Array<string | Component | FieldRepetition>>): Field`
 

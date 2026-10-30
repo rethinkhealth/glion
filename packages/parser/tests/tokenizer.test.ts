@@ -314,10 +314,10 @@ describe("any text", () => {
     );
   });
 
-  // A carriage return always ends a segment, whatever segment delimiter the
-  // context gives and whether line breaks end segments (HL7v2 Chapter 2:
-  // "The segment terminator is always a carriage return"): no token but a
-  // segment terminator spans one.
+  // A carriage return always ends a segment, whatever the delimiters and
+  // whether line breaks end segments (HL7v2 Chapter 2: "The segment
+  // terminator is always a carriage return"): no token but a segment
+  // terminator spans one.
   //
   // Mutant: a carriage return ends a segment only when a line feed follows
   // it. Fails on `"\r"`.
@@ -340,12 +340,8 @@ describe("any text", () => {
       ),
       {
         examples: [
-          [
-            "PID|1\rOBX|2$NTE",
-            { ...DEFAULT_DELIMITERS, segment: "$" },
-            true,
-            false,
-          ],
+          ["PID|1\rOBX|2\r\nNTE", DEFAULT_DELIMITERS, true, true],
+          ["PID|1\rOBX|2\r\nNTE", DEFAULT_DELIMITERS, true, false],
         ],
         numRuns: 1000,
       }

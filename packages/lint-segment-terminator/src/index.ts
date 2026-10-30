@@ -53,7 +53,6 @@ const hl7v2LintSegmentTerminator = lintRule<Root>(
           break;
         }
         default: {
-          // A segment delimiter set to another character in the settings.
           reason = messages.otherCharacter;
           break;
         }

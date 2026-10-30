@@ -37,12 +37,12 @@ Reports each segment whose `terminator` is not `\r`. Takes no options.
 
 ## What it checks
 
-| The segment ends with                   | Reported message                                                  |
-| --------------------------------------- | ----------------------------------------------------------------- |
-| `\r\n`                                  | `The segment ends with a carriage return and a line feed.`        |
-| `\n`                                    | `The segment ends with a line feed.`                              |
-| Nothing                                 | `The segment has no segment terminator.`                          |
-| A segment delimiter set in the settings | `The segment ends with a character other than a carriage return.` |
+| The segment ends with | Reported message                                                  |
+| --------------------- | ----------------------------------------------------------------- |
+| `\r\n`                | `The segment ends with a carriage return and a line feed.`        |
+| `\n`                  | `The segment ends with a line feed.`                              |
+| Nothing               | `The segment has no segment terminator.`                          |
+| Any other character   | `The segment ends with a character other than a carriage return.` |
 
 Each message sets `actual` to what the segment ends with and `expected` to `["\r"]`.
 

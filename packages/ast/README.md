@@ -120,7 +120,7 @@ interface Subcomponent <: Literal {
 }
 ```
 
-`Segment.name` carries the segment identifier (for example `"MSH"`, `"PID"`, `"OBX"`) so visitors can filter without traversing the field hierarchy. `Segment.terminator` holds the characters that end the segment: `"\r"`, the segment terminator HL7v2 requires, or what ended it in the text it was read from (`"\n"`, `"\r\n"`, or a segment delimiter set in the parser settings), and `""` when nothing ends the segment, as after the last segment of a text with nothing after it. An absent `terminator` is the same as `""`: the segment has no segment terminator. `Group.id` identifies the logical group (for example `"ORDER_OBSERVATION"`, `"PATIENT_VISIT"`) and holds only uppercase letters, digits, and `_`; `Group.name` is the group name for display, in title case (for example `"Order Observation"`).
+`Segment.name` carries the segment identifier (for example `"MSH"`, `"PID"`, `"OBX"`) so visitors can filter without traversing the field hierarchy. `Segment.terminator` holds the characters that end the segment: `"\r"`, the segment terminator HL7v2 requires, or what ended it in the text it was read from (`"\n"` or `"\r\n"`), and `""` when nothing ends the segment, as after the last segment of a text with nothing after it. An absent `terminator` is the same as `""`: the segment has no segment terminator. `Group.id` identifies the logical group (for example `"ORDER_OBSERVATION"`, `"PATIENT_VISIT"`) and holds only uppercase letters, digits, and `_`; `Group.name` is the group name for display, in title case (for example `"Order Observation"`).
 
 ### Position
 

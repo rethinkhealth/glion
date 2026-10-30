@@ -1,7 +1,6 @@
 import type { Group, Root, Segment } from "@glion/ast";
 import { f, m, s } from "@glion/builder";
 import { hl7v2Parser, parseHL7v2 } from "@glion/parser";
-import { DEFAULT_DELIMITERS } from "@glion/utils";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -218,15 +217,14 @@ describe("hl7v2-lint:segment-terminator", () => {
     });
   });
 
-  describe("a segment that ends with a segment delimiter set in the parser settings", () => {
-    it("is reported on its segment delimiter", async () => {
-      const text = "PID|1$OBX|2$";
+  describe("a segment whose terminator is another character", () => {
+    it("is reported on its terminator", async () => {
+      const text = "PID|1\rOBX|2\r";
       const file = new VFile(text);
-      const tree = parseHL7v2(
-        text,
-        {},
-        { delimiters: { ...DEFAULT_DELIMITERS, segment: "$" } }
-      );
+      const tree = parseHL7v2(text);
+      for (const segment of tree.children as Segment[]) {
+        segment.terminator = "$";
+      }
 
       await unified().use(hl7v2LintSegmentTerminator).run(tree, file);
 

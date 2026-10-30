@@ -55,11 +55,11 @@ export const hl7v2ToHl7v2: Plugin<[Hl7v2ToHl7v2Options?], Root, string> =
  * even a lone Field. Delimiters default to the standard set unless
  * overridden or derivable from an MSH segment in the tree.
  *
- * A Root or Group writes each segment followed by its `terminator`, so a
- * parsed message is written back as it was read. A segment with an empty or
- * absent `terminator` has no segment terminator: nothing is written after it
- * when it is the last segment written, and the segment delimiter after any
- * other. A Segment on its own is written without one.
+ * A Root or Group writes each segment followed by its `terminator`, so a parsed
+ * message is written back as it was read. A segment with an empty or absent
+ * `terminator` has no segment terminator: nothing is written after it when it
+ * is the last segment written, and `\r` after any other. A Segment on its own
+ * is written without one.
  *
  * @throws {EscapeSequenceError} When `encodeEscapes` is on and a value holds a
  *   character that no escape sequence can write with the delimiters.
@@ -143,7 +143,7 @@ export function toHl7v2(
       .map((seg, index) => {
         const terminator = seg.terminator ?? "";
         const joinsTheNext = terminator === "" && index < last;
-        return `${line(seg)}${joinsTheNext ? d.segment : terminator}`;
+        return `${line(seg)}${joinsTheNext ? SEGMENT_TERMINATOR : terminator}`;
       })
       .join("");
   };

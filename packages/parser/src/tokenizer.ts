@@ -45,7 +45,6 @@ import {
   readMessageHeader,
 } from "./message-header";
 import { segmentTerminatorAt } from "./segment-terminators";
-import type { SegmentEnd } from "./segment-terminators";
 import type { ParserContext, Token, Tokenizer, TokenType } from "./types";
 
 /** A token of the message header, before `next()` places it. */
@@ -74,12 +73,8 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   // The message being read. `reset()` sets every field below.
   private input = "";
   private delimiters: Delimiters = DEFAULT_DELIMITERS;
-  // Stryker disable ObjectLiteral,BooleanLiteral: `next()` reads it only at an offset inside the input, and the empty message has none
-  private segmentEnd: SegmentEnd = {
-    lineBreaks: true,
-    segment: DEFAULT_DELIMITERS.segment,
-  };
-  // Stryker restore ObjectLiteral,BooleanLiteral
+  // Stryker disable next-line BooleanLiteral: `next()` reads it only at an offset inside the input, and the empty message has none
+  private lineBreaks = true;
 
   // Where the next token starts.
   private offset = 0;
@@ -107,10 +102,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   reset(ctx: ParserContext) {
     this.input = ctx.input;
     this.delimiters = ctx.delimiters;
-    this.segmentEnd = {
-      lineBreaks: ctx.lineBreaks ?? true,
-      segment: ctx.delimiters.segment,
-    };
+    this.lineBreaks = ctx.lineBreaks ?? true;
     this.offset = 0;
     this.line = 1;
     this.column = 1;
@@ -119,7 +111,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     this.headerTokensEmitted = 0;
     this.decodeFrom = 0;
 
-    const header = readMessageHeader(this.input, this.segmentEnd);
+    const header = readMessageHeader(this.input, this.lineBreaks);
     if (header) {
       // MSH-2 ends where `next()` ends every field: at the field delimiter the
       // context gives, which `detectDelimiters` sets to MSH-1.
@@ -127,7 +119,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
         this.input,
         header,
         this.delimiters.field,
-        this.segmentEnd
+        this.lineBreaks
       );
       this.headerTokens = [
         { type: "TEXT", value: MESSAGE_HEADER },
@@ -160,7 +152,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
 
     // 1. A segment terminator.
-    const terminator = segmentTerminatorAt(input, offset, this.segmentEnd);
+    const terminator = segmentTerminatorAt(input, offset, this.lineBreaks);
     if (terminator !== undefined) {
       return this.takeSegmentTerminator(terminator);
     }
@@ -192,7 +184,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
 
     // 5. Text up to the next delimiter or segment terminator.
-    const { segmentEnd } = this;
+    const { lineBreaks } = this;
     let end = offset;
     // Stryker disable next-line EqualityOperator: at the end of the input, `charAt` reads "", which is no delimiter, so one more step changes nothing
     while (end < input.length) {
@@ -202,7 +194,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
         c === repetition ||
         c === component ||
         c === subcomponent ||
-        segmentTerminatorAt(input, end, segmentEnd) !== undefined
+        segmentTerminatorAt(input, end, lineBreaks) !== undefined
       ) {
         break;
       }
@@ -227,14 +219,14 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   // The offset of the first field delimiter or segment terminator at or after
   // `from`, or the end of the input.
   private fieldEnd(from: number): number {
-    const { input, segmentEnd } = this;
+    const { input, lineBreaks } = this;
     const { field } = this.delimiters;
     let end = from;
     while (
       // Stryker disable next-line EqualityOperator: at the end of the input, `charAt` reads "", which is no delimiter, so one more step changes nothing
       end < input.length &&
       input.charAt(end) !== field &&
-      segmentTerminatorAt(input, end, segmentEnd) === undefined
+      segmentTerminatorAt(input, end, lineBreaks) === undefined
     ) {
       end += 1;
     }

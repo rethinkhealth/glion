@@ -15,10 +15,10 @@ This document is for contributors and reviewers. It follows one message through 
 
 Two modules hold rules that steps 2 and 3 share, so that both read the message the same way:
 
-| Module                   | Owns                                                                                                                                               |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `segment-terminators.ts` | What ends a segment: a carriage return, the segment delimiter the settings give, and by default a carriage return and a line feed, or a line feed. |
-| `message-header.ts`      | The start of a message: `MSH`, MSH-1, and the encoding characters MSH-2 holds.                                                                     |
+| Module                   | Owns                                                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `segment-terminators.ts` | What ends a segment: a carriage return, and by default a carriage return and a line feed, or a line feed. |
+| `message-header.ts`      | The start of a message: `MSH`, MSH-1, and the encoding characters MSH-2 holds.                            |
 
 ## One message, step by step
 
@@ -51,14 +51,14 @@ The message `MSH|^~\&|A^B` + CR LF + `PID|1` + CR, 20 characters long.
 
 ### What ends a segment
 
-`segmentTerminatorAt(input, at, segmentEnd)` in `segment-terminators.ts` is the one place that decides it. `segmentEnd` holds the segment delimiter, `\r` unless the settings give another, and `lineBreaks`, the parser option, `true` unless it is given `false`.
+`segmentTerminatorAt(input, at, lineBreaks)` in `segment-terminators.ts` is the one place that decides it. `lineBreaks` is the parser option, `true` unless it is given `false`.
 
-| `lineBreaks`        | Segment terminators                                                                                  |
-| ------------------- | ---------------------------------------------------------------------------------------------------- |
-| `true`, the default | a carriage return and a line feed, read whole; a carriage return; a line feed; the segment delimiter |
-| `false`             | a carriage return; the segment delimiter                                                             |
+| `lineBreaks`        | Segment terminators                                                           |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `true`, the default | a carriage return and a line feed, read whole; a carriage return; a line feed |
+| `false`             | a carriage return                                                             |
 
-HL7v2 ends every segment with a carriage return: "The segment terminator is always a carriage return." A message saved to a file often ends its segments with the file's line endings instead, so the parser reads those by default. A segment delimiter from the settings, such as `$`, ends a segment as well and does not replace the carriage return: in `PID|1$OBX|1` + CR + `NTE|1`, both `$` and CR end a segment. With `lineBreaks: false` the parser reads what Chapter 2 states: a line feed is data, so a line feed in a TX value stays in the value, and in CR LF the CR ends the segment and the LF starts the next segment's Segment ID.
+HL7v2 ends every segment with a carriage return: "The segment terminator is always a carriage return." A message saved to a file often ends its segments with the file's line endings instead, so the parser reads those by default. With `lineBreaks: false` the parser reads what Chapter 2 states: a line feed is data, so a line feed in a TX value stays in the value, and in CR LF the CR ends the segment and the LF starts the next segment's Segment ID.
 
 Every rule that stops at the end of a segment calls this function: the tokenizer's segment terminator, Segment ID, and text rules, and both readings of the message header.
 

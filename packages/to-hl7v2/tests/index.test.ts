@@ -8,7 +8,6 @@ import type {
 } from "@glion/ast";
 import { c, f, g, m, r, s } from "@glion/builder";
 import { unified } from "unified";
-import { VFile } from "vfile";
 
 import { EscapeSequenceError, hl7v2ToHl7v2, toHl7v2 } from "../src";
 
@@ -308,12 +307,6 @@ describe("segment terminator", () => {
     expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1\rPV1|1\r");
   });
 
-  it("writes each segment's terminator, whatever the delimiters give", () => {
-    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
-
-    expect(toHl7v2(tree, { segment: "\n" })).toBe("MSH|^~\\&\rPID|1\r");
-  });
-
   it("writes each segment as it ended in the text it was read from", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")), s("PV1"));
     const [msh, pid, pv1] = tree.children as Segment[];
@@ -326,7 +319,7 @@ describe("segment terminator", () => {
 
   // A segment read last with nothing after it has the terminator `""`. Once
   // another segment follows it, writing `""` would join the two.
-  it("writes the segment delimiter after an empty terminator on a segment that is no longer the last", () => {
+  it("writes a carriage return after an empty terminator on a segment that is no longer the last", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
     (tree.children[1] as Segment).terminator = "";
     tree.children.push(s("ZPI", f("x")));
@@ -334,7 +327,7 @@ describe("segment terminator", () => {
     expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1\rZPI|x\r");
   });
 
-  it("writes the segment delimiter after an empty terminator on a segment followed by one in a later group", () => {
+  it("writes a carriage return after an empty terminator on a segment followed by one in a later group", () => {
     const pid = s("PID", f("1"));
     pid.terminator = "";
     const tree = m(g("PATIENT", pid), g("VISIT", s("PV1", f("1"))));
@@ -342,33 +335,13 @@ describe("segment terminator", () => {
     expect(toHl7v2(tree)).toBe("PID|1\rPV1|1\r");
   });
 
-  it("writes a segment with no terminator as one with an empty terminator: the segment delimiter the delimiters give before the next segment, and nothing after the last", () => {
+  it("writes a segment with no terminator as one with an empty terminator: a carriage return before the next segment, and nothing after the last", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
     for (const segment of tree.children as Segment[]) {
       segment.terminator = undefined;
     }
 
     expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1");
-    expect(toHl7v2(tree, { segment: "\n" })).toBe("MSH|^~\\&\nPID|1");
-  });
-
-  it("writes the segment delimiter that file.data.delimiters gives between segments with no terminator", () => {
-    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
-    for (const segment of tree.children as Segment[]) {
-      segment.terminator = undefined;
-    }
-    const file = new VFile();
-    file.data.delimiters = {
-      component: "%",
-      escape: "#",
-      field: "*",
-      repetition: "$",
-      subcomponent: "&",
-    };
-
-    expect(unified().use(hl7v2ToHl7v2).stringify(tree, file)).toBe(
-      "MSH|^~\\&\nPID|1"
-    );
   });
 
   it("writes a segment on its own without a segment terminator", () => {

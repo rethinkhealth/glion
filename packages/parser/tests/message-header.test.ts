@@ -5,16 +5,16 @@ import {
   readMessageHeader,
 } from "../src/message-header";
 
-const LINE_BREAKS = { lineBreaks: true, segment: "\r" };
-const SEGMENT_DELIMITER_ONLY = { lineBreaks: false, segment: "\r" };
+const LINE_BREAKS = true;
+const CARRIAGE_RETURN_ONLY = false;
 
 const encodingCharacters = (
   input: string,
   field = "|",
-  segmentEnd = LINE_BREAKS
+  lineBreaks = LINE_BREAKS
 ): string | undefined => {
-  const header = readMessageHeader(input, segmentEnd);
-  return header && readEncodingCharacters(input, header, field, segmentEnd);
+  const header = readMessageHeader(input, lineBreaks);
+  return header && readEncodingCharacters(input, header, field, lineBreaks);
 };
 
 describe(readMessageHeader, () => {
@@ -33,9 +33,9 @@ describe(readMessageHeader, () => {
   });
 
   it("reads a line feed after MSH as MSH-1 without line breaks", () => {
-    expect(
-      readMessageHeader("MSH\nPID|1", SEGMENT_DELIMITER_ONLY)
-    ).toStrictEqual({ encodingCharactersStart: 4, fieldSeparator: "\n" });
+    expect(readMessageHeader("MSH\nPID|1", CARRIAGE_RETURN_ONLY)).toStrictEqual(
+      { encodingCharactersStart: 4, fieldSeparator: "\n" }
+    );
   });
 
   it("reads no message header when the message opens with another segment", () => {
@@ -46,9 +46,6 @@ describe(readMessageHeader, () => {
     expect(readMessageHeader("MSH\rPID|1", LINE_BREAKS)).toBeUndefined();
     expect(readMessageHeader("MSH\r\nPID|1", LINE_BREAKS)).toBeUndefined();
     expect(readMessageHeader("MSH\nPID|1", LINE_BREAKS)).toBeUndefined();
-    expect(
-      readMessageHeader("MSH$PID|1", { lineBreaks: true, segment: "$" })
-    ).toBeUndefined();
   });
 });
 
@@ -75,9 +72,9 @@ describe(readEncodingCharacters, () => {
   });
 
   it("reads a line feed as an encoding character without line breaks", () => {
-    expect(
-      encodingCharacters("MSH|^~\n&|APP", "|", SEGMENT_DELIMITER_ONLY)
-    ).toBe("^~\n&");
+    expect(encodingCharacters("MSH|^~\n&|APP", "|", CARRIAGE_RETURN_ONLY)).toBe(
+      "^~\n&"
+    );
   });
 
   it("ends at the end of the input", () => {

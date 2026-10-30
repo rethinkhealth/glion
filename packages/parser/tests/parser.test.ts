@@ -5,7 +5,6 @@ import type {
   Root,
   Segment,
 } from "@glion/ast";
-import { DEFAULT_DELIMITERS } from "@glion/utils";
 
 import { parseHL7v2 } from "../src/parser";
 import type { ParseOptions } from "../src/types";
@@ -878,18 +877,6 @@ describe("segment terminator", () => {
       "\r",
       "\r\n",
     ]);
-  });
-
-  it("records the segment delimiter the parser settings give", () => {
-    const tree = parseHL7v2(
-      "PID|1$OBX|2$",
-      {},
-      { delimiters: { ...DEFAULT_DELIMITERS, segment: "$" } }
-    );
-
-    expect(
-      (tree.children as Segment[]).map((segment) => segment.terminator)
-    ).toStrictEqual(["$", "$"]);
   });
 });
 
