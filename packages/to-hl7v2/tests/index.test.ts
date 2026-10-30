@@ -307,26 +307,19 @@ describe("segment terminator", () => {
     expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1\rPV1|1\r");
   });
 
-  it("writes the segment terminator the delimiters give", () => {
-    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
-
-    expect(toHl7v2(tree, { segment: "\n" })).toBe("MSH|^~\\&\nPID|1\n");
-  });
-
-  it("writes the segment terminator that file.data.delimiters gives", () => {
-    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+  it("writes a carriage return after each segment, whatever the delimiters", () => {
+    const tree = m(s("MSH", f("*"), f("%$#&")), s("PID", f("1")));
     const file = new VFile();
     file.data.delimiters = {
-      component: "^",
-      escape: "\\",
-      field: "|",
-      repetition: "~",
-      segment: "\n",
+      component: "%",
+      escape: "#",
+      field: "*",
+      repetition: "$",
       subcomponent: "&",
     };
 
     expect(unified().use(hl7v2ToHl7v2).stringify(tree, file)).toBe(
-      "MSH|^~\\&\nPID|1\n"
+      "MSH*%$#&\rPID*1\r"
     );
   });
 

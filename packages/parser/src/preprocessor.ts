@@ -1,4 +1,4 @@
-import { DEFAULT_DELIMITERS, SEGMENT_TERMINATOR } from "@glion/utils";
+import { DEFAULT_DELIMITERS } from "@glion/utils";
 
 import { readEncodingCharacters, readMessageHeader } from "./message-header";
 import type { ParserContext, PreprocessorStep } from "./types";
@@ -22,30 +22,27 @@ export const stripBOM: PreprocessorStep = (ctx) => {
  *
  * MSH-1 sets the field delimiter, and MSH-2's encoding characters set the
  * component, repetition, escape, and subcomponent delimiters, in that order.
- * A delimiter MSH-2 is too short to declare is the default. The segment
- * delimiter, which the message header does not declare, stays the one the
- * context gives. A message that does not open with a message header segment
- * keeps the delimiters it was given.
+ * A delimiter MSH-2 is too short to declare is the default. A message that
+ * does not open with a message header segment keeps the delimiters it was
+ * given.
  */
 export const detectDelimiters: PreprocessorStep = (ctx) => {
-  // The header is read with the segment delimiter the context gives:
-  // `MSH|^~\` then `\r` declares `^~\`.
-  const { segment } = ctx.delimiters;
-  const header = readMessageHeader(ctx.input, segment);
+  const header = readMessageHeader(ctx.input);
   if (!header) {
     return ctx;
   }
-  // MSH-2 ends at the field delimiter MSH-1 declares.
-  const encodingCharacters = readEncodingCharacters(ctx.input, header, {
-    field: header.fieldSeparator,
-    segment,
-  });
+  // MSH-2 ends at the field delimiter MSH-1 declares: `MSH|^~\|APP` and
+  // `MSH|^~\` then `\r` both declare `^~\`.
+  const encodingCharacters = readEncodingCharacters(
+    ctx.input,
+    header,
+    header.fieldSeparator
+  );
   ctx.delimiters = {
     component: encodingCharacters.charAt(0) || DEFAULT_DELIMITERS.component,
     escape: encodingCharacters.charAt(2) || DEFAULT_DELIMITERS.escape,
     field: header.fieldSeparator || DEFAULT_DELIMITERS.field,
     repetition: encodingCharacters.charAt(1) || DEFAULT_DELIMITERS.repetition,
-    segment,
     subcomponent:
       encodingCharacters.charAt(3) || DEFAULT_DELIMITERS.subcomponent,
   };

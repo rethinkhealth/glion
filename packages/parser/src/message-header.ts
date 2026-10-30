@@ -30,17 +30,14 @@ export interface MessageHeader {
 
 /**
  * The message header segment the message opens with, or `undefined` when it
- * opens with another segment, or with `MSH` and then a segment terminator for
- * the segment delimiter `segment`, which holds no fields.
+ * opens with another segment, or with `MSH` and then a segment terminator,
+ * which holds no fields.
  */
-export const readMessageHeader = (
-  input: string,
-  segment: string
-): MessageHeader | undefined => {
+export const readMessageHeader = (input: string): MessageHeader | undefined => {
   const fieldSeparatorAt = MESSAGE_HEADER.length;
   const opensWithMessageHeader =
     input.startsWith(MESSAGE_HEADER) &&
-    segmentTerminatorAt(input, fieldSeparatorAt, segment) === undefined;
+    segmentTerminatorAt(input, fieldSeparatorAt) === undefined;
   if (!opensWithMessageHeader) {
     return undefined;
   }
@@ -52,13 +49,13 @@ export const readMessageHeader = (
 
 /**
  * The encoding characters MSH-2 holds: its characters up to the fourth, the
- * field delimiter `field`, a segment terminator for the segment delimiter
- * `segment`, or the end of `input`, whichever comes first.
+ * field delimiter `field`, a segment terminator, or the end of `input`,
+ * whichever comes first.
  */
 export const readEncodingCharacters = (
   input: string,
   header: MessageHeader,
-  { field, segment }: { field: string; segment: string }
+  field: string
 ): string => {
   const from = header.encodingCharactersStart;
   const limit = Math.min(from + MAX_ENCODING_CHARACTERS, input.length);
@@ -66,7 +63,7 @@ export const readEncodingCharacters = (
   while (
     end < limit &&
     input.charAt(end) !== field &&
-    segmentTerminatorAt(input, end, segment) === undefined
+    segmentTerminatorAt(input, end) === undefined
   ) {
     end += 1;
   }

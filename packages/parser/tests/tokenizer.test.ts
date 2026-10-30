@@ -84,7 +84,7 @@ describe("escape sequences", () => {
     });
   });
 
-  it("counts lines by the source when .br decodes to the segment delimiter", () => {
+  it("counts lines by the source when .br decodes to the segment terminator", () => {
     const out = toks("PID|a\\.br\\b\rOBX|1");
 
     expect(out[2]).toMatchObject({ type: "TEXT", value: "a\rb" });
@@ -150,31 +150,11 @@ describe("line breaks", () => {
     ]);
   });
 
-  it("ends a segment at the segment delimiter the context gives", () => {
-    const delimiters = { ...DEFAULT_DELIMITERS, segment: "$" };
-
-    expect(lineBreaks("PID|1$OBX|2\r\nNTE", delimiters)).toStrictEqual([
-      [5, 6],
-      [11, 13],
-    ]);
-  });
-
-  it("ends a Segment ID at a carriage return and a line feed when the segment delimiter is another character", () => {
-    const delimiters = { ...DEFAULT_DELIMITERS, segment: "$" };
-
-    expect(toks("PID\r\nOBX|1", {}, delimiters).slice(0, 3)).toMatchObject([
+  it("ends a Segment ID at a carriage return and a line feed", () => {
+    expect(toks("PID\r\nOBX|1").slice(0, 3)).toMatchObject([
       { type: "TEXT", value: "PID" },
       { type: "SEGMENT_END" },
       { type: "TEXT", value: "OBX" },
-    ]);
-  });
-
-  it("ends a segment at a carriage return when the segment delimiter is another character", () => {
-    const delimiters = { ...DEFAULT_DELIMITERS, segment: "$" };
-
-    expect(lineBreaks("PID|a\rOBX|1$NTE", delimiters)).toStrictEqual([
-      [5, 6],
-      [11, 12],
     ]);
   });
 
@@ -273,15 +253,14 @@ describe("any text", () => {
     )
     .map((pieces) => pieces.join(""));
 
-  // The default delimiters, and delimiter sets whose segment delimiter is
-  // another character, a line feed, or a delimiter MSH-2 also declares.
-  const arbDelimiters = fc.constantFrom<Delimiters>(
-    DEFAULT_DELIMITERS,
-    { ...DEFAULT_DELIMITERS, segment: "$" },
-    { ...DEFAULT_DELIMITERS, segment: "\n" },
-    { ...DEFAULT_DELIMITERS, segment: "^" },
-    { ...DEFAULT_DELIMITERS, field: "*", segment: "#" }
-  );
+  // The default delimiters, and the delimiters `MSH*%$#&` declares.
+  const arbDelimiters = fc.constantFrom<Delimiters>(DEFAULT_DELIMITERS, {
+    component: "%",
+    escape: "#",
+    field: "*",
+    repetition: "$",
+    subcomponent: "&",
+  });
 
   // Each token starts where the one before it ended, the first at line 1,
   // column 1, offset 0, and the last ends at the end of the input. A segment
@@ -328,13 +307,13 @@ describe("any text", () => {
     );
   });
 
-  // A carriage return always ends a segment, whatever segment delimiter the
-  // context gives (HL7v2 Chapter 2: "The segment terminator is always a
-  // carriage return"): no token but a segment terminator spans one.
+  // A carriage return always ends a segment, whatever the delimiters (HL7v2
+  // Chapter 2: "The segment terminator is always a carriage return"): no
+  // token but a segment terminator spans one.
   //
-  // Mutant: a carriage return ends a segment only when it is the segment
-  // delimiter. Fails on `"\r\n"` with `#` as the segment delimiter.
-  it("reads every carriage return as a segment terminator, whatever the segment delimiter", () => {
+  // Mutant: a carriage return ends a segment only when a line feed follows
+  // it. Fails on `"\r"`.
+  it("reads every carriage return as a segment terminator, whatever the delimiters", () => {
     fc.assert(
       fc.property(
         arbText,
@@ -351,9 +330,7 @@ describe("any text", () => {
         }
       ),
       {
-        examples: [
-          ["PID|1\rOBX|2$NTE", { ...DEFAULT_DELIMITERS, segment: "$" }, true],
-        ],
+        examples: [["PID|1\rOBX|2\r\nNTE", DEFAULT_DELIMITERS, true]],
         numRuns: 1000,
       }
     );

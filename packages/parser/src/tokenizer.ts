@@ -108,14 +108,14 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     this.headerTokensEmitted = 0;
     this.decodeFrom = 0;
 
-    const header = readMessageHeader(this.input, this.delimiters.segment);
+    const header = readMessageHeader(this.input);
     if (header) {
       // MSH-2 ends where `next()` ends every field: at the field delimiter the
       // context gives, which `detectDelimiters` sets to MSH-1.
       const encodingCharacters = readEncodingCharacters(
         this.input,
         header,
-        this.delimiters
+        this.delimiters.field
       );
       this.headerTokens = [
         { type: "TEXT", value: MESSAGE_HEADER },
@@ -148,18 +148,13 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
 
     // 1. A segment terminator.
-    const terminator = segmentTerminatorAt(
-      input,
-      offset,
-      this.delimiters.segment
-    );
+    const terminator = segmentTerminatorAt(input, offset);
     if (terminator !== undefined) {
       return this.takeSegmentTerminator(terminator);
     }
 
     // 2. The field delimiter.
-    const { component, field, repetition, segment, subcomponent } =
-      this.delimiters;
+    const { component, field, repetition, subcomponent } = this.delimiters;
     const char = input.charAt(offset);
     if (char === field) {
       return this.take("FIELD_DELIM", 1);
@@ -194,7 +189,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
         c === repetition ||
         c === component ||
         c === subcomponent ||
-        segmentTerminatorAt(input, end, segment) !== undefined
+        segmentTerminatorAt(input, end) !== undefined
       ) {
         break;
       }
@@ -220,13 +215,13 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   // `from`, or the end of the input.
   private fieldEnd(from: number): number {
     const { input } = this;
-    const { field, segment } = this.delimiters;
+    const { field } = this.delimiters;
     let end = from;
     while (
       // Stryker disable next-line EqualityOperator: at the end of the input, `charAt` reads "", which is no delimiter, so one more step changes nothing
       end < input.length &&
       input.charAt(end) !== field &&
-      segmentTerminatorAt(input, end, segment) === undefined
+      segmentTerminatorAt(input, end) === undefined
     ) {
       end += 1;
     }

@@ -23,7 +23,7 @@ Reading `\n` as the end of a segment has a cost. Chapter 2 never mentions a line
 
 The parser reads the message it is given and never rewrites it.
 
-1. **A segment ends at `\r`, `\n`, or `\r\n`.** The tokenizer reads all three as the end of a segment. A segment delimiter given in the settings ends a segment as well, and does not replace `\r`. The `normalizeNewlines` preprocessing step is removed; `stripBOM` and `detectDelimiters` stay the default steps, and `preprocess` stays for callers who add their own.
+1. **A segment ends at `\r`, `\n`, or `\r\n`.** The tokenizer reads all three as the end of a segment. The `normalizeNewlines` preprocessing step is removed; `stripBOM` and `detectDelimiters` stay the default steps, and `preprocess` stays for callers who add their own.
 2. **Every position is a span of the message as given.** A byte order mark at the start of the input is not part of the message: `stripBOM` removes it, and positions count from the character after it. A segment ends at its last character, before its line break. The root covers the message from its first character to its last, the line breaks after its last segment included.
 3. **The serializer writes `\r` after every segment.** `@glion/to-hl7v2` ends every segment of a message with the segment terminator, the last one included, whatever line breaks the message was read with.
 

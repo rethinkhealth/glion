@@ -4,8 +4,6 @@
 
 **Breaking:** the parser reads the text it is given and never rewrites it, so every `position` is a span of that text (ADR 0034). A segment ends at `\r`, `\n`, or `\r\n`. Before, the default preprocessing steps replaced each `\r\n` with `\r`, so every position after a `\r\n` pointed one character early (#1139). A byte order mark is still removed by `stripBOM`, and positions count from the character after it.
 
-**Breaking:** a segment delimiter given in the settings is kept, and ends a segment as well as the carriage return. Before, `detectDelimiters` replaced it with `\r` for every message that opens with MSH, and with `$` and no MSH, a `\r` alone was read as data.
-
 **Breaking:** the root's `position` covers the message from its first character to its last, the line breaks after its last segment included: `MSH|^~\&\rPID|1\r` gives a root at 0–15, not 0–14. A segment still ends at its last character, before its line break. A finding placed at the end of the message, such as a segment missing at the end in `@glion/lint-profile-segment-order`, is now after those line breaks: with one segment terminator, at the start of the next line.
 
 **Breaking:** the `normalizeNewlines` preprocessing step is removed, and `defaultPreprocessors` holds `stripBOM` and `detectDelimiters`.

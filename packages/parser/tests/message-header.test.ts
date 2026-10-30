@@ -5,39 +5,34 @@ import {
   readMessageHeader,
 } from "../src/message-header";
 
-const DELIMITERS = { field: "|", segment: "\r" };
-
 const encodingCharacters = (input: string, field = "|"): string | undefined => {
-  const header = readMessageHeader(input, "\r");
-  return (
-    header && readEncodingCharacters(input, header, { ...DELIMITERS, field })
-  );
+  const header = readMessageHeader(input);
+  return header && readEncodingCharacters(input, header, field);
 };
 
 describe(readMessageHeader, () => {
   it("reads MSH-1 as the character after MSH, and MSH-2 as starting after it", () => {
-    expect(readMessageHeader("MSH*%$#&*APP", "\r")).toStrictEqual({
+    expect(readMessageHeader("MSH*%$#&*APP")).toStrictEqual({
       encodingCharactersStart: 4,
       fieldSeparator: "*",
     });
   });
 
   it("reads an empty MSH-1 when the input ends after MSH", () => {
-    expect(readMessageHeader("MSH", "\r")).toStrictEqual({
+    expect(readMessageHeader("MSH")).toStrictEqual({
       encodingCharactersStart: 4,
       fieldSeparator: "",
     });
   });
 
   it("reads no message header when the message opens with another segment", () => {
-    expect(readMessageHeader("PID|1", "\r")).toBeUndefined();
+    expect(readMessageHeader("PID|1")).toBeUndefined();
   });
 
   it("reads no message header when a segment terminator follows MSH", () => {
-    expect(readMessageHeader("MSH\rPID|1", "\r")).toBeUndefined();
-    expect(readMessageHeader("MSH\r\nPID|1", "\r")).toBeUndefined();
-    expect(readMessageHeader("MSH\nPID|1", "\r")).toBeUndefined();
-    expect(readMessageHeader("MSH$PID|1", "$")).toBeUndefined();
+    expect(readMessageHeader("MSH\rPID|1")).toBeUndefined();
+    expect(readMessageHeader("MSH\r\nPID|1")).toBeUndefined();
+    expect(readMessageHeader("MSH\nPID|1")).toBeUndefined();
   });
 });
 

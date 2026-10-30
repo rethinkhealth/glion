@@ -78,19 +78,17 @@ describe("preprocessor steps", () => {
       expect(result.delimiters?.subcomponent).toBe("&");
     });
 
-    // The message header does not declare the segment delimiter.
-    it("keeps the segment delimiter the context gives, and reads the header with it", () => {
+    it("ends MSH-2 at a segment terminator before its fourth character", () => {
       const result = detectDelimiters({
-        delimiters: { ...DEFAULT_DELIMITERS, segment: "$" },
-        input: "MSH|^~\\$PID|1",
+        delimiters: DEFAULT_DELIMITERS,
+        input: "MSH*%$\rPID*1",
       });
 
       expect(result.delimiters).toStrictEqual({
-        component: "^",
+        component: "%",
         escape: "\\",
-        field: "|",
-        repetition: "~",
-        segment: "$",
+        field: "*",
+        repetition: "$",
         subcomponent: "&",
       });
     });
@@ -106,7 +104,6 @@ describe("preprocessor steps", () => {
         escape: "#",
         field: "*",
         repetition: "$",
-        segment: "\r",
         subcomponent: "&",
       });
     });
@@ -122,7 +119,6 @@ describe("preprocessor steps", () => {
         escape: "\\",
         field: "*",
         repetition: "$",
-        segment: "\r",
         subcomponent: "&",
       });
     });
@@ -149,12 +145,12 @@ describe("preprocessor steps", () => {
     // MSH-1 sets the field delimiter, and each of MSH-2's encoding characters
     // sets the delimiter of its role, up to the first field delimiter or
     // segment terminator. A role MSH-2 is too short to declare keeps the
-    // default, and the segment delimiter stays the one the context gives.
+    // default.
     //
     // Mutant: `readEncodingCharacters` does not stop at a segment terminator.
     // Fails on `"MSH|\r\n"`, which declares `\r` and `\n` as the component
     // and repetition delimiters.
-    it("sets the delimiters MSH-1 and MSH-2 declare, the default for each role MSH-2 is too short to declare, and keeps the segment delimiter", () => {
+    it("sets the delimiters MSH-1 and MSH-2 declare, and the default for each role MSH-2 is too short to declare", () => {
       // Five distinct characters for MSH-1 and the four encoding characters,
       // none of them a segment terminator.
       const arbDeclared = fc.uniqueArray(fc.constantFrom(..."|^~\\&*%#!@+="), {
@@ -166,18 +162,13 @@ describe("preprocessor steps", () => {
         fc.property(
           arbDeclared,
           fc.integer({ max: 4, min: 0 }),
-          // What follows MSH-2: nothing, a line break, the segment delimiter,
-          // or MSH-3.
-          fc.constantFrom("", "\r", "\n", "\r\n", "<segment>", "<field>APP"),
-          fc.constantFrom("\r", "$"),
-          ([field, ...encoding], length, after, segment) => {
+          // What follows MSH-2: nothing, a segment terminator, or MSH-3.
+          fc.constantFrom("", "\r", "\n", "\r\n", "<field>APP"),
+          ([field, ...encoding], length, after) => {
             const declared = encoding.slice(0, length);
-            const rest = after
-              .replace("<segment>", segment)
-              .replace("<field>", field);
             const ctx = {
-              delimiters: { ...DEFAULT_DELIMITERS, segment },
-              input: `MSH${field}${declared.join("")}${rest}`,
+              delimiters: DEFAULT_DELIMITERS,
+              input: `MSH${field}${declared.join("")}${after.replace("<field>", field)}`,
             };
 
             expect(detectDelimiters(ctx).delimiters).toStrictEqual({
@@ -185,17 +176,15 @@ describe("preprocessor steps", () => {
               escape: declared[2] ?? DEFAULT_DELIMITERS.escape,
               field,
               repetition: declared[1] ?? DEFAULT_DELIMITERS.repetition,
-              segment,
               subcomponent: declared[3] ?? DEFAULT_DELIMITERS.subcomponent,
             });
           }
         ),
         {
           examples: [
-            [["|", "^", "~", "\\", "&"], 4, "\r", "\r"],
-            [["|", "^", "~", "\\", "&"], 2, "\r\n", "\r"],
-            [["*", "%", "#", "!", "@"], 3, "<field>APP", "$"],
-            [["|", "^", "~", "\\", "&"], 1, "<segment>", "$"],
+            [["|", "^", "~", "\\", "&"], 4, "\r"],
+            [["|", "^", "~", "\\", "&"], 2, "\r\n"],
+            [["*", "%", "#", "!", "@"], 3, "<field>APP"],
           ],
           numRuns: 1000,
         }

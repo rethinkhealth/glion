@@ -123,7 +123,7 @@ export function toHl7v2(
         return child.children.map(written).join("");
       }
       case "segment": {
-        return `${line(child)}${d.segment}`;
+        return `${line(child)}${SEGMENT_TERMINATOR}`;
       }
     }
   };

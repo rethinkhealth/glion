@@ -15,16 +15,16 @@ This document is for contributors and reviewers. It follows one message through 
 
 Two modules hold rules that steps 2 and 3 share, so that both read the message the same way:
 
-| Module                   | Owns                                                                                                                                |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `segment-terminators.ts` | What ends a segment: a carriage return, a carriage return and a line feed, a line feed, or the segment delimiter the settings give. |
-| `message-header.ts`      | The start of a message: `MSH`, MSH-1, and the encoding characters MSH-2 holds.                                                      |
+| Module                   | Owns                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `segment-terminators.ts` | What ends a segment: a carriage return, a carriage return and a line feed, or a line feed. |
+| `message-header.ts`      | The start of a message: `MSH`, MSH-1, and the encoding characters MSH-2 holds.             |
 
 ## One message, step by step
 
 The message `MSH|^~\&|A^B` + CR LF + `PID|1` + CR, 20 characters long.
 
-**Preprocessing.** `detectDelimiters` reads the message header. MSH-1 is `|`, so the field delimiter is `|`. MSH-2 holds `^~\&`, so the component, repetition, escape, and subcomponent delimiters are `^`, `~`, `\`, and `&`. The message header does not declare the segment delimiter, so it stays the one the settings give, `\r` by default.
+**Preprocessing.** `detectDelimiters` reads the message header. MSH-1 is `|`, so the field delimiter is `|`. MSH-2 holds `^~\&`, so the component, repetition, escape, and subcomponent delimiters are `^`, `~`, `\`, and `&`. The message header does not declare the segment terminator: HL7v2 fixes it as a carriage return.
 
 **Tokenizing.** The tokenizer reads 14 tokens:
 
@@ -51,14 +51,13 @@ The message `MSH|^~\&|A^B` + CR LF + `PID|1` + CR, 20 characters long.
 
 ### What ends a segment
 
-`segmentTerminatorAt(input, at, segment)` in `segment-terminators.ts` is the one place that decides it. At `at` it reads:
+`segmentTerminatorAt(input, at)` in `segment-terminators.ts` is the one place that decides it. At `at` it reads:
 
 1. a carriage return and a line feed, read whole as one terminator;
 2. a carriage return;
-3. a line feed;
-4. the segment delimiter, when the settings give one other than `\r`.
+3. a line feed.
 
-HL7v2 ends every segment with a carriage return: "The segment terminator is always a carriage return." A message saved to a file often ends its segments with the file's line endings instead, so the parser reads those too. A segment delimiter from the settings, such as `$`, ends a segment as well and does not replace the carriage return: in `PID|1$OBX|1` + CR + `NTE|1`, both `$` and CR end a segment.
+HL7v2 ends every segment with a carriage return: "The segment terminator is always a carriage return." A message saved to a file often ends its segments with the file's line endings instead, so the parser reads those too.
 
 Every rule that stops at the end of a segment calls this function: the tokenizer's segment terminator, Segment ID, and text rules, and both readings of the message header.
 
@@ -119,4 +118,4 @@ A token's span covers the text as written, so a decoded value can be shorter tha
 | `tests/*.test.ts`    | Each module's contract, mirroring `src/`.                      |
 | `tests/regressions/` | One file per fixed bug, named after the issue and the symptom. |
 
-Two contracts are also fast-check properties over generated text, in the test file of the module that owns them. In `tests/tokenizer.test.ts`, every token is positioned at the line and column of its span of the input, and only a segment terminator spans a carriage return, whatever the segment delimiter. In `tests/preprocessor.test.ts`, `detectDelimiters` sets the delimiters MSH-1 and MSH-2 declare, and the default for each role MSH-2 is too short to declare. `qa/tests/fuzz.test.ts` checks the positions of every node of the tree, whichever line breaks end the segments.
+Two contracts are also fast-check properties over generated text, in the test file of the module that owns them. In `tests/tokenizer.test.ts`, every token is positioned at the line and column of its span of the input, and only a segment terminator spans a carriage return, whatever the delimiters. In `tests/preprocessor.test.ts`, `detectDelimiters` sets the delimiters MSH-1 and MSH-2 declare, and the default for each role MSH-2 is too short to declare. `qa/tests/fuzz.test.ts` checks the positions of every node of the tree, whichever line breaks end the segments.
