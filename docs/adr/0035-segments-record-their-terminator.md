@@ -21,7 +21,7 @@ ADR 0034 has the parser read `\r`, `\n`, and `\r\n` as segment ends without rewr
 4. **The serializer writes the tree.** `@glion/to-hl7v2` writes each segment followed by its `terminator`, so a parsed message is written back with the line breaks it was read with, a missing final terminator included. An empty or absent `terminator` is written only after the last segment: after any other, `\r` is written, so a segment added after a parsed last segment does not join it.
 5. **One transform repairs it.** `@glion/transform-segment-terminator` returns a copy of the tree in which every segment ends with `\r`. `@glion/mllp-client` applies it before sending, so a message goes out over MLLP with the segment terminator HL7v2 requires, whatever it was read with.
 6. **The parser reads `\n` and `\r\n` by default, and can be told not to.** `lineBreaks: false` ends a segment only at a carriage return, the segment terminator Chapter 2 requires, and a line feed is data.
-7. **A lint rule reports the deviations from the tree.** `@glion/lint-segment-terminator` reads `segment.terminator`: `""`, an absent `terminator`, `\n`, `\r\n`, and any other character than `\r` are reported. It is in no preset: a message saved to a file on most systems ends every line with `\n`.
+7. **A lint rule reports the deviations from the tree.** `@glion/lint-segment-terminator` reads `segment.terminator`: `""`, an absent `terminator`, `\n`, `\r\n`, and any other character than `\r` are reported. It is in `@glion/preset-lint-recommended` at its default severity, `warning`, so a message read from a file with `\n` or `\r\n` line breaks is reported and still accepted.
 
 ## Consequences
 

@@ -2586,6 +2586,9 @@ importers:
       '@glion/lint-segment-header-length':
         specifier: workspace:*
         version: link:../lint-segment-header-length
+      '@glion/lint-segment-terminator':
+        specifier: workspace:*
+        version: link:../lint-segment-terminator
       unified:
         specifier: 11.0.5
         version: 11.0.5

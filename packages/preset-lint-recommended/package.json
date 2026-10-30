@@ -49,6 +49,7 @@
     "@glion/lint-no-trailing-empty-field": "workspace:*",
     "@glion/lint-required-message-header": "workspace:*",
     "@glion/lint-segment-header-length": "workspace:*",
+    "@glion/lint-segment-terminator": "workspace:*",
     "unified": "11.0.5",
     "unified-lint-rule": "3.0.1"
   },
