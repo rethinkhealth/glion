@@ -341,6 +341,16 @@ All benchmarks live in the `benchmarks/` workspace — never add a `bench/` dire
 
 `examples/*` are not workspace members. Each depends on `@glion/*` at `latest`, so it runs against the published release, and `create-glion` copies it unchanged. An example stays self-contained: no `@glion/testing`, no `@glion/tsconfig`, nothing a scaffolded project could not install. A new directory in `examples/` is a new `pnpm create glion --example <name>`.
 
+## Branches and stacked PRs
+
+Stacked PRs are managed with `gh stack` (the `gh-stack` skill). Every branch, stacked or not, keeps its local git config in step with its PR, so that the GitHub Pull Requests view in VS Code finds the PR and diffs only that layer:
+
+- **Every branch tracks its remote branch.** `gh stack add`, `gh stack submit`, `gh stack push`, and `git push origin <branch>` leave a branch with no upstream. Push a new branch with `git push -u`, or run `git branch --set-upstream-to=origin/<branch> <branch>` after `gh stack` pushes it. Check each layer with `git rev-parse --abbrev-ref <branch>@{upstream}`.
+- **Every branch with a PR records it:** `git config branch.<branch>.github-pr-owner-number 'rethinkhealth#glion#<number>'`.
+- **Every stacked branch diffs against its parent:** `git config branch.<branch>.vscode-merge-base origin/<parent branch>`, and `origin/main` for the bottom layer. Update it when the stack is reordered.
+- **Before a force push, check the remote heads.** Compare `origin/<branch>` with the head you last pushed, and push with `--force-with-lease=<branch>:<that head>`. A moved head may be a maintainer's deliberate change.
+- **Never rename a PR's head branch.** GitHub closes every PR headed on it; change the title or body instead.
+
 ## Adding a new package
 
 1. Create `packages/<new-package-name>/`.
