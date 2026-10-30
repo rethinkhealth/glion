@@ -1,4 +1,6 @@
+import type { Delimiters } from "@glion/ast";
 import { DEFAULT_DELIMITERS } from "@glion/utils";
+import fc from "fast-check";
 
 import { HL7v2Tokenizer } from "../src/tokenizer";
 import type { TokenizerOptions } from "../src/tokenizer";
@@ -232,6 +234,129 @@ describe("line breaks", () => {
       ["FIELD_DELIM", undefined],
       ["TEXT", "1"],
     ]);
+  });
+});
+
+describe("any text", () => {
+  // Text built from the pieces where the tokenizer's rules meet: the message
+  // header, every delimiter, each segment terminator, escape sequences that
+  // decode to a delimiter or a line break, characters that are delimiters in
+  // the other delimiter sets below, a byte order mark, and a character two
+  // UTF-16 code units long.
+  const arbText = fc
+    .array(
+      fc.constantFrom(
+        "MSH",
+        "MSH|^~\\&",
+        "MSH*%$#&",
+        "PID",
+        "A",
+        "|",
+        "^",
+        "~",
+        "&",
+        "\\",
+        "\r",
+        "\n",
+        "\r\n",
+        "\uFEFF",
+        "\\F\\",
+        "\\.br\\",
+        "\\X0D\\",
+        "*",
+        "%",
+        "$",
+        "#",
+        "\u{1F600}"
+      ),
+      { maxLength: 24 }
+    )
+    .map((pieces) => pieces.join(""));
+
+  // The default delimiters, and delimiter sets whose segment delimiter is
+  // another character, a line feed, or a delimiter MSH-2 also declares.
+  const arbDelimiters = fc.constantFrom<Delimiters>(
+    DEFAULT_DELIMITERS,
+    { ...DEFAULT_DELIMITERS, segment: "$" },
+    { ...DEFAULT_DELIMITERS, segment: "\n" },
+    { ...DEFAULT_DELIMITERS, segment: "^" },
+    { ...DEFAULT_DELIMITERS, field: "*", segment: "#" }
+  );
+
+  // Each token starts where the one before it ended, the first at line 1,
+  // column 1, offset 0, and the last ends at the end of the input. A segment
+  // terminator ends its line, so the next token starts at column 1 of the
+  // next line; any other token stays on its line.
+  //
+  // Mutant: a segment terminator does not reset the column. Fails on
+  // `"MSH\r"`.
+  it("positions every token at the line and column of its span of the input", () => {
+    fc.assert(
+      fc.property(
+        arbText,
+        arbDelimiters,
+        fc.boolean(),
+        (input, delimiters, decodeEscapes) => {
+          let point = { column: 1, line: 1, offset: 0 };
+          for (const { position, type } of toks(
+            input,
+            { decodeEscapes },
+            delimiters
+          )) {
+            // A token without an end offset reads as 0 here, and fails the
+            // comparison below.
+            const offset = position.end.offset ?? 0;
+            const next =
+              type === "SEGMENT_END"
+                ? { column: 1, line: point.line + 1, offset }
+                : {
+                    column: point.column + offset - point.offset,
+                    line: point.line,
+                    offset,
+                  };
+
+            expect(position).toStrictEqual({ end: next, start: point });
+            point = next;
+          }
+          expect(point.offset).toBe(input.length);
+        }
+      ),
+      {
+        examples: [["MSH|^~\\&\r\nPID|1\nOBX", DEFAULT_DELIMITERS, true]],
+        numRuns: 1000,
+      }
+    );
+  });
+
+  // A carriage return always ends a segment, whatever segment delimiter the
+  // context gives (HL7v2 Chapter 2: "The segment terminator is always a
+  // carriage return"): no token but a segment terminator spans one.
+  //
+  // Mutant: a carriage return ends a segment only when it is the segment
+  // delimiter. Fails on `"\r\n"` with `#` as the segment delimiter.
+  it("reads every carriage return as a segment terminator, whatever the segment delimiter", () => {
+    fc.assert(
+      fc.property(
+        arbText,
+        arbDelimiters,
+        fc.boolean(),
+        (input, delimiters, decodeEscapes) => {
+          const read = toks(input, { decodeEscapes }, delimiters)
+            .filter(({ type }) => type !== "SEGMENT_END")
+            .map(({ position }) =>
+              input.slice(position.start.offset, position.end.offset)
+            );
+
+          expect(read.join("")).not.toContain("\r");
+        }
+      ),
+      {
+        examples: [
+          ["PID|1\rOBX|2$NTE", { ...DEFAULT_DELIMITERS, segment: "$" }, true],
+        ],
+        numRuns: 1000,
+      }
+    );
   });
 });
 

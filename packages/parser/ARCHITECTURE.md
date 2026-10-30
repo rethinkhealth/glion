@@ -114,10 +114,9 @@ A token's span covers the text as written, so a decoded value can be shorter tha
 
 ## Tests
 
-| Directory             | What it checks                                                                                                                                    |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tests/*.test.ts`     | Each module's contract, mirroring `src/`.                                                                                                         |
-| `tests/regressions/`  | One file per fixed bug, named after the issue and the symptom.                                                                                    |
-| `tests/differential/` | The tokenizer and delimiter detection against a second implementation in `tests/differential/reference/`, over generated text and delimiter sets. |
+| Directory            | What it checks                                                 |
+| -------------------- | -------------------------------------------------------------- |
+| `tests/*.test.ts`    | Each module's contract, mirroring `src/`.                      |
+| `tests/regressions/` | One file per fixed bug, named after the issue and the symptom. |
 
-The reference in `tests/differential/reference/` is the tokenizer and delimiter detection as they were written before the modules above were refactored. The properties in `tests/differential/` generate text from the pieces where the rules meet (the header, every delimiter, each segment terminator, escape sequences, a byte order mark, read as data) and assert that both implementations emit the same tokens, values, and positions, and detect the same delimiters. A change to what the parser reads is made in `src/` and in the reference, so the two stay one specification written twice.
+Two contracts are also fast-check properties over generated text, in the test file of the module that owns them. In `tests/tokenizer.test.ts`, every token is positioned at the line and column of its span of the input, and only a segment terminator spans a carriage return, whatever the segment delimiter. In `tests/preprocessor.test.ts`, `detectDelimiters` sets the delimiters MSH-1 and MSH-2 declare, and the default for each role MSH-2 is too short to declare. `qa/tests/fuzz.test.ts` checks the positions of every node of the tree, whichever line breaks end the segments.
