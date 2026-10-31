@@ -433,6 +433,8 @@ For values, the abstraction function reads glion's string by glion's own convent
 
 `#` is the escape character. The model sends the data `#F#` as `#E#F#E#`; glion reads it back as the string `#F#`; the abstraction function reads that as the sequence `F`. No abstraction function could do better: by `glionValue_collides`, the information is gone from the tree. That is the formal sense in which the defect lies in the tree, not in the parser or the serializer alone.
 
+The generator draws every kind of sequence the model defines, `\X…\` included, so the properties also fail on glion's UTF-8 agreement: glion reads `\X41\` as `A` and writes `A` back, where the model carries the sequence. That failure is kept on purpose. The harness reports every difference between glion and the model, and deciding which ones are defects is the owner's job, not the generator's. A generator narrowed until the properties pass would only record what the harness no longer looks at.
+
 # What you can now say
 
 About escape sequences:

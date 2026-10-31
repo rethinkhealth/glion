@@ -4,7 +4,7 @@
 // for a message is the text the specification writes. Scope: every message
 // `arbSpecMessage` draws; see `src/generators.ts` for what it leaves out.
 //
-// Fails today on two findings:
+// Fails today on three findings:
 //
 // - #1165: data that looks like an escape sequence is written back as one.
 //   With `&` as the escape character, the data `&N&` arrives as `&E&N&E&`
@@ -12,6 +12,9 @@
 //   `{"delimiters":"#*!&^","header":[],"segments":[{"fields":[[[["&N&"],[""]]]],"id":"AAA"}]}`.
 // - #1166: `\P\` is written back as the data `\E\P\E\`:
 //   `{"delimiters":"|^~\\&","header":[[[[[{"sequence":"P"}],""]]]],"segments":[]}`.
+// - glion's agreement for hexadecimal data (#659): `\X41\` is written back
+//   as `A`, and `\X0D\` as `\.br\` (#1167):
+//   `{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[[[{"sequence":"X41"}]]],[[""]]]],"id":"AAA"}]}`.
 //
 // No mutant is recorded until the findings are settled.
 import { hl7v2AnnotateDelimiters } from "@glion/annotate-delimiters";

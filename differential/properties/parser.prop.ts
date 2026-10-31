@@ -11,6 +11,11 @@
 // `#E#F#E#`, and glion reads it back as the sequence `#F#`:
 // `{"delimiters":"!+&#%","header":[[[["#F#"]]]],"segments":[]}`.
 //
+// And on glion's agreement for hexadecimal data (#659): glion decodes `\X41\`
+// to `A`, which §2.7.6 leaves to sender and receiver, and the specification
+// carries as the sequence:
+// `{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[[[{"sequence":"X41"}]]]]],"id":"AAA"}]}`.
+//
 // Mutant: `decodeEscapes` in `@glion/utils` decodes `\S\` to the repetition
 // separator. Fails on
 // `{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[["^",""]],[[""]]]],"id":"AAA"}]}`.

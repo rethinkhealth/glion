@@ -38,18 +38,18 @@ const DELIMITER_POOL = ["|", "^", "~", "\\", "&", "#", "*", "!", "%", "+"];
 // (`well_formed_subcomponent_no_terminator`), and nothing below U+0020.
 const DATA = [..."abcFSTREXYZ019 .-"];
 // Escape sequences of §2.7, by escape code ID and data characters: truncation,
-// a character set, highlighting, local, and the formatting commands of
-// formatted text. No `\X…\`: glion decodes it to characters under its UTF-8
-// agreement (#659), which §2.7.6 leaves to sender and receiver, so every
-// drawn `\X41\` would report that agreement, not a defect. A sequence that
-// holds one of the message's delimiters is not drawn
-// (`well_formed_escape_sequence_no_delimiter`).
+// a character set, highlighting, hexadecimal, local, and the formatting
+// commands of formatted text. A sequence that holds one of the message's
+// delimiters is not drawn (`well_formed_escape_sequence_no_delimiter`).
 const SEQUENCES = [
   "P",
   "C2D41",
   "M2442",
   "H",
   "N",
+  "X41",
+  "XC3A9",
+  "X0D",
   "Zab",
   ".br",
   ".sp",
