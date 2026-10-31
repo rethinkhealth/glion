@@ -30,6 +30,7 @@
  * - "orders": many OBR/OBX pairs, a new ORDER_OBSERVATION every other segment.
  *   The engine closes and reopens nested groups constantly, its worst case.
  */
+import { f, s } from "@glion/builder";
 import { parseHL7v2 as pipeline } from "@glion/hl7v2";
 import hl7v2LintSegmentOrder from "@glion/lint-profile-segment-order";
 import { parseHL7v2 } from "@glion/parser";
@@ -58,12 +59,32 @@ if (!schema) {
 // A message of about `n` segments: many OBR/OBX pairs.
 const ordersMessage = (n: number): string =>
   hl7(
-    ORU_R01_HEADER[0] as string,
-    ORU_R01_HEADER[1] as string,
+    ...ORU_R01_HEADER.slice(0, 2),
     ...repeat(
       (i) => [
-        `OBR|${i}||LAB${i}|CBC^Complete Blood Count`,
-        `OBX|1|NM|WBC^White Blood Cell Count||${5 + (i % 10)}|10*9/L|4.5-11.0|N|||F`,
+        // OBR|<i>||LAB<i>|CBC^Complete Blood Count
+        s(
+          "OBR",
+          f(String(i)),
+          f(),
+          f(`LAB${i}`),
+          f("CBC", "Complete Blood Count")
+        ),
+        // OBX|1|NM|WBC^White Blood Cell Count||<5 + (i % 10)>|10*9/L|4.5-11.0|N|||F
+        s(
+          "OBX",
+          f("1"),
+          f("NM"),
+          f("WBC", "White Blood Cell Count"),
+          f(),
+          f(String(5 + (i % 10))),
+          f("10*9/L"),
+          f("4.5-11.0"),
+          f("N"),
+          f(),
+          f(),
+          f("F")
+        ),
       ],
       Math.max(1, Math.floor((n - 2) / 2))
     ).flat()

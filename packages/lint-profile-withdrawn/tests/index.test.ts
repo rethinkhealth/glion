@@ -1,9 +1,10 @@
 import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileDatatypes } from "@glion/annotate-profile-datatypes";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
-import type { Root } from "@glion/ast";
-import { f, g, m, s } from "@glion/builder";
+import type { Root, Segment } from "@glion/ast";
+import { c, f, g, m, r, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
+import { toHl7v2 } from "@glion/to-hl7v2";
 import { select } from "@glion/util-query";
 import { unified } from "unified";
 import { VFile } from "vfile";
@@ -11,16 +12,30 @@ import { describe, expect, it } from "vitest";
 
 import hl7v2LintWithdrawn from "../src";
 
-/** The HL7v2 message `segments` make, each followed by the segment terminator. */
-const hl7 = (...segments: string[]) =>
-  segments.map((segment) => `${segment}\r`).join("");
+/** The HL7v2 text of the message `segments` make. */
+const hl7 = (...segments: Segment[]) => toHl7v2(m(...segments));
 
 /**
  * An MSH segment declaring `version` in MSH-12; the rule checks the message
  * against that version.
  */
 const msh = (version: string) =>
-  `MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01^ADT_A01|MSG001|P|${version}`;
+  // MSH|^~\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01^ADT_A01|MSG001|P|<version>
+  s(
+    "MSH",
+    f("|"),
+    f("^~\\&"),
+    f("SENDER"),
+    f("FAC"),
+    f("RECV"),
+    f("RFAC"),
+    f("20241201"),
+    f(),
+    f("ADT", "A01", "ADT_A01"),
+    f("MSG001"),
+    f("P"),
+    f(version)
+  );
 
 /**
  * The findings of the rule on `tree`, after the annotators it needs have
@@ -37,8 +52,11 @@ const run = async (tree: Root) => {
   return file.messages;
 };
 
-/** The findings of the rule on a message whose segments are given as HL7v2 text. */
-const lint = (...segments: string[]) => run(parseHL7v2(hl7(...segments)));
+/**
+ * The findings of the rule on a message of `segments`, written as HL7v2 text
+ * and parsed.
+ */
+const lint = (...segments: Segment[]) => run(parseHL7v2(hl7(...segments)));
 
 // HL7v2 marks an element `W` once it is withdrawn: it keeps its position,
 // so later elements keep their numbers, but it must be left empty. The
@@ -51,7 +69,8 @@ describe("hl7v2LintWithdrawn", () => {
       // v2.7 AL1-6 (Identification Date) is withdrawn
       const [message, ...rest] = await lint(
         msh("2.7"),
-        "AL1|1||PENICILLIN|||20240101"
+        // AL1|1||PENICILLIN|||20240101
+        s("AL1", f("1"), f(), f("PENICILLIN"), f(), f(), f("20240101"))
       );
 
       expect(rest).toEqual([]);
@@ -67,7 +86,8 @@ describe("hl7v2LintWithdrawn", () => {
     it("reports the field as HL7v2 text, with its escape sequences", async () => {
       const [message] = await lint(
         msh("2.7"),
-        "AL1|1||PENICILLIN|||2024\\F\\01"
+        // AL1|1||PENICILLIN|||2024\F\01
+        s("AL1", f("1"), f(), f("PENICILLIN"), f(), f(), f("2024|01"))
       );
 
       expect(message?.actual).toBe("2024\\F\\01");
@@ -76,9 +96,13 @@ describe("hl7v2LintWithdrawn", () => {
     // MSH-1 `X` and MSH-2 `E~\&`: the escape character in AL1-6 is written
     // `\E\` or `\X5C\`, and both hold a delimiter.
     it("reports the field without its text when the delimiters cannot write it", async () => {
-      const [message, ...rest] = await lint(
-        "MSHXE~\\&XSNDXFACXRCVXRFACX20241201XXADTEA01EADT_A01XMSG001XPX2.7",
-        "AL1X1XXPCNXXX2024\\b"
+      // The message is given as text: its value holds an escape character
+      // that no escape sequence can write with these delimiters, so
+      // `toHl7v2` throws `EscapeSequenceError` on it.
+      const [message, ...rest] = await run(
+        parseHL7v2(
+          "MSHXE~\\&XSNDXFACXRCVXRFACX20241201XXADTEA01EADT_A01XMSG001XPX2.7\rAL1X1XXPCNXXX2024\\b\r"
+        )
       );
 
       expect(rest).toEqual([]);
@@ -90,17 +114,35 @@ describe("hl7v2LintWithdrawn", () => {
 
     // `|||` leaves AL1-6 present but empty.
     it("accepts an empty withdrawn field", async () => {
-      expect(await lint(msh("2.7"), "AL1|1||PENICILLIN|||")).toEqual([]);
+      expect(
+        await lint(
+          msh("2.7"),
+          // AL1|1||PENICILLIN|||
+          s("AL1", f("1"), f(), f("PENICILLIN"), f(), f(), f())
+        )
+      ).toEqual([]);
     });
 
     // The segment stops at AL1-3, so AL1-6 is not in the message at all.
     it("accepts a withdrawn field absent from the end of its segment", async () => {
-      expect(await lint(msh("2.7"), "AL1|1||PENICILLIN")).toEqual([]);
+      expect(
+        await lint(
+          msh("2.7"),
+          // AL1|1||PENICILLIN
+          s("AL1", f("1"), f(), f("PENICILLIN"))
+        )
+      ).toEqual([]);
     });
 
     // `""` is HL7v2's explicit null: "delete this value", not a value.
     it("accepts the explicit null in a withdrawn field", async () => {
-      expect(await lint(msh("2.7"), 'AL1|1||PENICILLIN|||""')).toEqual([]);
+      expect(
+        await lint(
+          msh("2.7"),
+          // AL1|1||PENICILLIN|||""
+          s("AL1", f("1"), f(), f("PENICILLIN"), f(), f(), f('""'))
+        )
+      ).toEqual([]);
     });
 
     // The first repetition is empty and the next two are valued. The field is
@@ -108,7 +150,16 @@ describe("hl7v2LintWithdrawn", () => {
     it("reports a withdrawn field once when any of its repetitions has a value", async () => {
       const messages = await lint(
         msh("2.7"),
-        "AL1|1||PENICILLIN|||~20240101~20240102"
+        // AL1|1||PENICILLIN|||~20240101~20240102
+        s(
+          "AL1",
+          f("1"),
+          f(),
+          f("PENICILLIN"),
+          f(),
+          f(),
+          f(r(), r("20240101"), r("20240102"))
+        )
       );
 
       expect(messages.map((message) => message.actual)).toEqual([
@@ -119,7 +170,11 @@ describe("hl7v2LintWithdrawn", () => {
     // The first component is empty and the second is `I9`: the field still has a value.
     it("reports a withdrawn field when only a later component has a value", async () => {
       // v2.6 DG1-2 (Diagnosis Coding Method) is withdrawn
-      const messages = await lint(msh("2.6"), "DG1|1|^I9|250.00");
+      const messages = await lint(
+        msh("2.6"),
+        // DG1|1|^I9|250.00
+        s("DG1", f("1"), f("", "I9"), f("250.00"))
+      );
 
       expect(messages.map((message) => message.message)).toEqual([
         "The data element has a value; it is withdrawn in v2.6 and must be empty.",
@@ -129,7 +184,13 @@ describe("hl7v2LintWithdrawn", () => {
     // The same segment as the previous test, in v2.5.1, before DG1-2 was withdrawn.
     it("accepts a value in the same field in a version that does not withdraw it", async () => {
       // v2.5.1 DG1-2 is required
-      expect(await lint(msh("2.5.1"), "DG1|1|I9|250.00")).toEqual([]);
+      expect(
+        await lint(
+          msh("2.5.1"),
+          // DG1|1|I9|250.00
+          s("DG1", f("1"), f("I9"), f("250.00"))
+        )
+      ).toEqual([]);
     });
 
     // Grouping (as `@glion/transform-profile-groups` does) nests segments under
@@ -156,7 +217,11 @@ describe("hl7v2LintWithdrawn", () => {
     // The report points at `I9` on line 2 (columns 7 to 9), and its ancestors
     // end at the field, so tools can highlight exactly the offending value.
     it("places the report on the withdrawn field", async () => {
-      const [message] = await lint(msh("2.6"), "DG1|1|I9|250.00");
+      const [message] = await lint(
+        msh("2.6"),
+        // DG1|1|I9|250.00
+        s("DG1", f("1"), f("I9"), f("250.00"))
+      );
 
       expect(message?.place).toEqual({
         end: { column: 9, line: 2, offset: 77 },
@@ -176,7 +241,18 @@ describe("hl7v2LintWithdrawn", () => {
     // report names the component by its datatype position, `XPN.6`.
     it("reports a withdrawn component that has a value", async () => {
       // v2.7 XPN.6 (Degree) is withdrawn
-      const messages = await lint(msh("2.7"), "PID|1||12345||DOE^JOHN^^^^MD");
+      const messages = await lint(
+        msh("2.7"),
+        // PID|1||12345||DOE^JOHN^^^^MD
+        s(
+          "PID",
+          f("1"),
+          f(),
+          f("12345"),
+          f(),
+          f("DOE", "JOHN", "", "", "", "MD")
+        )
+      );
 
       expect(
         messages.map((message) => [message.message, message.actual])
@@ -193,7 +269,19 @@ describe("hl7v2LintWithdrawn", () => {
     it("reports a withdrawn component once in each repetition that values it", async () => {
       const messages = await lint(
         msh("2.7"),
-        "PID|1||12345||DOE^JOHN^^^^MD~ROE^JANE~POE^JIM^^^^PHD"
+        // PID|1||12345||DOE^JOHN^^^^MD~ROE^JANE~POE^JIM^^^^PHD
+        s(
+          "PID",
+          f("1"),
+          f(),
+          f("12345"),
+          f(),
+          f(
+            r("DOE", "JOHN", "", "", "", "MD"),
+            r("ROE", "JANE"),
+            r("POE", "JIM", "", "", "", "PHD")
+          )
+        )
       );
 
       expect(messages.map((message) => message.actual)).toEqual(["MD", "PHD"]);
@@ -201,9 +289,20 @@ describe("hl7v2LintWithdrawn", () => {
 
     // XPN.6 is empty and XPN.7 (Name Type Code) is `L`: only XPN.6 is withdrawn.
     it("accepts an empty withdrawn component", async () => {
-      expect(await lint(msh("2.7"), "PID|1||12345||DOE^JOHN^^^^^L")).toEqual(
-        []
-      );
+      expect(
+        await lint(
+          msh("2.7"),
+          // PID|1||12345||DOE^JOHN^^^^^L
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345"),
+            f(),
+            f("DOE", "JOHN", "", "", "", "", "L")
+          )
+        )
+      ).toEqual([]);
     });
   });
 
@@ -211,7 +310,13 @@ describe("hl7v2LintWithdrawn", () => {
   // annotates ZPD-2.1.2 by hand, as a site's own annotator would.
   describe("withdrawn subcomponents", () => {
     it("reports a withdrawn subcomponent that has a value", async () => {
-      const tree = parseHL7v2(hl7(msh("2.7"), "ZPD|1|A&B"));
+      const tree = parseHL7v2(
+        hl7(
+          msh("2.7"),
+          // ZPD|1|A&B
+          s("ZPD", f("1"), f(c("A", "B")))
+        )
+      );
       const subcomponent = select(tree, "ZPD.2.1.2");
       if (subcomponent) {
         subcomponent.node.data = {
@@ -246,7 +351,13 @@ describe("hl7v2LintWithdrawn", () => {
   // One report per withdrawn element: the components of a reported element,
   // withdrawn or not, are not reported again.
   it("reports a withdrawn field once when one of its components is withdrawn too", async () => {
-    const tree = parseHL7v2(hl7(msh("2.7"), "ZPD|1|A^B"));
+    const tree = parseHL7v2(
+      hl7(
+        msh("2.7"),
+        // ZPD|1|A^B
+        s("ZPD", f("1"), f("A", "B"))
+      )
+    );
     const field = select(tree, "ZPD.2");
     const component = select(tree, "ZPD.2.2");
     if (field && component) {
@@ -262,7 +373,13 @@ describe("hl7v2LintWithdrawn", () => {
   });
 
   it("reports nothing in a withdrawn field that holds the explicit null, even in a withdrawn component", async () => {
-    const tree = parseHL7v2(hl7(msh("2.7"), 'ZPD|1|""'));
+    const tree = parseHL7v2(
+      hl7(
+        msh("2.7"),
+        // ZPD|1|""
+        s("ZPD", f("1"), f('""'))
+      )
+    );
     const field = select(tree, "ZPD.2");
     const component = select(tree, "ZPD.2.1");
     if (field && component) {
@@ -278,7 +395,13 @@ describe("hl7v2LintWithdrawn", () => {
   });
 
   it("reports a withdrawn component once when one of its subcomponents is withdrawn too", async () => {
-    const tree = parseHL7v2(hl7(msh("2.7"), "ZPD|1|A&B"));
+    const tree = parseHL7v2(
+      hl7(
+        msh("2.7"),
+        // ZPD|1|A&B
+        s("ZPD", f("1"), f(c("A", "B")))
+      )
+    );
     const component = select(tree, "ZPD.2.1");
     const subcomponent = select(tree, "ZPD.2.1.2");
     if (component && subcomponent) {
@@ -305,10 +428,11 @@ describe("hl7v2LintWithdrawn", () => {
   // MSH-12 nothing is reported, even on an element annotated as withdrawn.
   it("reports nothing on an element annotated as withdrawn when the message has no version", async () => {
     const tree = parseHL7v2(
-      [
-        "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01^ADT_A01|MSG001|P|\r",
-        "ZPD|1|X\r",
-      ].join("")
+      hl7(
+        msh(""),
+        // ZPD|1|X
+        s("ZPD", f("1"), f("X"))
+      )
     );
     const field = select(tree, "ZPD.2");
     expect(field?.node.type).toBe("field");
@@ -322,20 +446,48 @@ describe("hl7v2LintWithdrawn", () => {
   // `B` is a different status, reported by `@glion/lint-profile-backward-compatible`.
   it("does not report a backward-compatible field", async () => {
     // v2.5.1 DG1-4 (Diagnosis Description) is backward compatible
-    expect(await lint(msh("2.5.1"), "DG1|1|I9|250.00|DIABETES")).toEqual([]);
+    expect(
+      await lint(
+        msh("2.5.1"),
+        // DG1|1|I9|250.00|DIABETES
+        s("DG1", f("1"), f("I9"), f("250.00"), f("DIABETES"))
+      )
+    ).toEqual([]);
   });
 
   // The standard does not define Z-segments, so they have no optionality.
   it("skips a segment without a profile", async () => {
-    expect(await lint(msh("2.7"), "ZPD|1|X")).toEqual([]);
+    expect(
+      await lint(
+        msh("2.7"),
+        // ZPD|1|X
+        s("ZPD", f("1"), f("X"))
+      )
+    ).toEqual([]);
   });
 
   // MSH-12 is empty, so no profile is loaded and nothing can be checked.
   it("reports nothing when the message has no version", async () => {
     expect(
       await lint(
-        "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01^ADT_A01|MSG001|P|",
-        "AL1|1||PENICILLIN|||20240101"
+        // MSH|^~\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01^ADT_A01|MSG001|P|
+        s(
+          "MSH",
+          f("|"),
+          f("^~\\&"),
+          f("SENDER"),
+          f("FAC"),
+          f("RECV"),
+          f("RFAC"),
+          f("20241201"),
+          f(),
+          f("ADT", "A01", "ADT_A01"),
+          f("MSG001"),
+          f("P"),
+          f()
+        ),
+        // AL1|1||PENICILLIN|||20240101
+        s("AL1", f("1"), f(), f("PENICILLIN"), f(), f(), f("20240101"))
       )
     ).toEqual([]);
   });

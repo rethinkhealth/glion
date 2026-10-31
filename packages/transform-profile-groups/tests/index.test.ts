@@ -1,6 +1,7 @@
 import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
 import type { Group, Root, Segment } from "@glion/ast";
+import { f, m, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
 import type { EventSchema } from "@glion/profiles";
 import { toHl7v2 } from "@glion/to-hl7v2";
@@ -29,18 +30,44 @@ const nodeOutline = (node: Group | Segment): Outline => {
 const outline = (tree: Root): Outline[] =>
   (tree.children as (Group | Segment)[]).map(nodeOutline);
 
-const message = (...segments: string[]) =>
-  segments.map((segment) => `${segment}\r`).join("");
+/** The HL7v2 text of the message `segments` make. */
+const message = (...segments: Segment[]) => toHl7v2(m(...segments));
 
-const ORU = message(
-  "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5",
-  "PID|1||12345^^^MRN||Doe^John",
-  "PV1|1|I",
-  "ORC|RE|ORD1",
-  "OBR|1|ORD1||CBC",
-  "OBX|1|NM|WBC||5.0",
-  "OBX|2|NM|RBC||4.1"
-);
+const ORU_SEGMENTS = [
+  // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5
+  s(
+    "MSH",
+    f("|"),
+    f("^~\\&"),
+    f("LAB"),
+    f("FAC"),
+    f("EMR"),
+    f("RFAC"),
+    f("20241201120000"),
+    f(),
+    f("ORU", "R01", "ORU_R01"),
+    f("MSG1"),
+    f("P"),
+    f("2.5")
+  ),
+  // PID|1||12345^^^MRN||Doe^John
+  s("PID", f("1"), f(), f("12345", "", "", "MRN"), f(), f("Doe", "John")),
+  // PV1|1|I
+  s("PV1", f("1"), f("I")),
+  // ORC|RE|ORD1
+  s("ORC", f("RE"), f("ORD1")),
+  // OBR|1|ORD1||CBC
+  s("OBR", f("1"), f("ORD1"), f(), f("CBC")),
+  // OBX|1|NM|WBC||5.0
+  s("OBX", f("1"), f("NM"), f("WBC"), f(), f("5.0")),
+  // OBX|2|NM|RBC||4.1
+  s("OBX", f("2"), f("NM"), f("RBC"), f(), f("4.1")),
+];
+
+const ORU = message(...ORU_SEGMENTS);
+
+/** `segment` read as the last of its message, with nothing after it. */
+const last = (segment: Segment): Segment => ({ ...segment, terminator: "" });
 
 const grouped = async (text: string, file = new VFile()) => {
   const tree = parseHL7v2(text);
@@ -69,10 +96,28 @@ const SITE_SCHEMA: EventSchema = {
 };
 
 const SITE_MESSAGE = message(
-  "MSH|^~\\&|APP|FAC|APP|FAC|20241201120000||ZAD^Z01^ZAD_Z01|MSG4|P|2.5",
-  "PID|1||12345^^^MRN||Doe^John",
-  "PV1|1|I",
-  "ZPV|1|site"
+  // MSH|^~\&|APP|FAC|APP|FAC|20241201120000||ZAD^Z01^ZAD_Z01|MSG4|P|2.5
+  s(
+    "MSH",
+    f("|"),
+    f("^~\\&"),
+    f("APP"),
+    f("FAC"),
+    f("APP"),
+    f("FAC"),
+    f("20241201120000"),
+    f(),
+    f("ZAD", "Z01", "ZAD_Z01"),
+    f("MSG4"),
+    f("P"),
+    f("2.5")
+  ),
+  // PID|1||12345^^^MRN||Doe^John
+  s("PID", f("1"), f(), f("12345", "", "", "MRN"), f(), f("Doe", "John")),
+  // PV1|1|I
+  s("PV1", f("1"), f("I")),
+  // ZPV|1|site
+  s("ZPV", f("1"), f("site"))
 );
 
 describe("hl7v2TransformProfileGroups", () => {
@@ -97,11 +142,37 @@ describe("hl7v2TransformProfileGroups", () => {
     it("gives each group its ID and its name in title case", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|EMR|FAC|EMR|RFAC|20241201120000||REF^I12^REF_I12|MSG9|P|2.6",
-          "RF1|A",
-          "PRD|RP",
-          "PID|1||12345^^^MRN||Doe^John",
-          "PV1|1|O"
+          // MSH|^~\&|EMR|FAC|EMR|RFAC|20241201120000||REF^I12^REF_I12|MSG9|P|2.6
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("EMR"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("REF", "I12", "REF_I12"),
+            f("MSG9"),
+            f("P"),
+            f("2.6")
+          ),
+          // RF1|A
+          s("RF1", f("A")),
+          // PRD|RP
+          s("PRD", f("RP")),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // PV1|1|O
+          s("PV1", f("1"), f("O"))
         )
       );
 
@@ -113,14 +184,43 @@ describe("hl7v2TransformProfileGroups", () => {
     it("starts a new order in the current patient result for an ORC after an OBX", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG5|P|2.5",
-          "PID|1||12345^^^MRN||Doe^John",
-          "ORC|RE|ORD1",
-          "OBR|1|ORD1||CBC",
-          "OBX|1|NM|WBC||5.0",
-          "ORC|RE|ORD2",
-          "OBR|2|ORD2||BMP",
-          "OBX|1|NM|NA||140"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG5|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG5"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // ORC|RE|ORD1
+          s("ORC", f("RE"), f("ORD1")),
+          // OBR|1|ORD1||CBC
+          s("OBR", f("1"), f("ORD1"), f(), f("CBC")),
+          // OBX|1|NM|WBC||5.0
+          s("OBX", f("1"), f("NM"), f("WBC"), f(), f("5.0")),
+          // ORC|RE|ORD2
+          s("ORC", f("RE"), f("ORD2")),
+          // OBR|2|ORD2||BMP
+          s("OBR", f("2"), f("ORD2"), f(), f("BMP")),
+          // OBX|1|NM|NA||140
+          s("OBX", f("1"), f("NM"), f("NA"), f(), f("140"))
         )
       );
 
@@ -138,11 +238,30 @@ describe("hl7v2TransformProfileGroups", () => {
     it("starts a new patient result for a PID after an order", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG6|P|2.5",
-          "PID|1||111^^^MRN||Doe^John",
-          "OBR|1|ORD1||CBC",
-          "PID|2||222^^^MRN||Roe^Jane",
-          "OBR|1|ORD2||CBC"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG6|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG6"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||111^^^MRN||Doe^John
+          s("PID", f("1"), f(), f("111", "", "", "MRN"), f(), f("Doe", "John")),
+          // OBR|1|ORD1||CBC
+          s("OBR", f("1"), f("ORD1"), f(), f("CBC")),
+          // PID|2||222^^^MRN||Roe^Jane
+          s("PID", f("2"), f(), f("222", "", "", "MRN"), f(), f("Roe", "Jane")),
+          // OBR|1|ORD2||CBC
+          s("OBR", f("1"), f("ORD2"), f(), f("CBC"))
         )
       );
 
@@ -156,14 +275,43 @@ describe("hl7v2TransformProfileGroups", () => {
     it("attaches each NTE to the patient, order, or result it follows", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG8|P|2.5",
-          "PID|1||12345^^^MRN||Doe^John",
-          "NTE|1||Patient comment",
-          "OBR|1|ORD1||CBC",
-          "NTE|1||Order comment",
-          "OBX|1|NM|WBC||5.0",
-          "NTE|1||Result comment",
-          "NTE|2||Second result comment"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG8|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG8"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // NTE|1||Patient comment
+          s("NTE", f("1"), f(), f("Patient comment")),
+          // OBR|1|ORD1||CBC
+          s("OBR", f("1"), f("ORD1"), f(), f("CBC")),
+          // NTE|1||Order comment
+          s("NTE", f("1"), f(), f("Order comment")),
+          // OBX|1|NM|WBC||5.0
+          s("OBX", f("1"), f("NM"), f("WBC"), f(), f("5.0")),
+          // NTE|1||Result comment
+          s("NTE", f("1"), f(), f("Result comment")),
+          // NTE|2||Second result comment
+          s("NTE", f("2"), f(), f("Second result comment"))
         )
       );
 
@@ -185,9 +333,26 @@ describe("hl7v2TransformProfileGroups", () => {
     it("groups a result message without a patient", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG9|P|2.5",
-          "OBR|1|ORD1||CBC",
-          "OBX|1|NM|WBC||5.0"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG9|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG9"),
+            f("P"),
+            f("2.5")
+          ),
+          // OBR|1|ORD1||CBC
+          s("OBR", f("1"), f("ORD1"), f(), f("CBC")),
+          // OBX|1|NM|WBC||5.0
+          s("OBX", f("1"), f("NM"), f("WBC"), f(), f("5.0"))
         )
       );
 
@@ -203,13 +368,41 @@ describe("hl7v2TransformProfileGroups", () => {
     it("keeps a specimen's OBX in the specimen and a closing DSC at the top level", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG10|P|2.5",
-          "PID|1||12345^^^MRN||Doe^John",
-          "OBR|1|ORD1||CBC",
-          "OBX|1|NM|WBC||5.0",
-          "SPM|1|SPEC1",
-          "OBX|1|ST|SPECQUAL||Adequate",
-          "DSC|PTR1"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG10|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG10"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // OBR|1|ORD1||CBC
+          s("OBR", f("1"), f("ORD1"), f(), f("CBC")),
+          // OBX|1|NM|WBC||5.0
+          s("OBX", f("1"), f("NM"), f("WBC"), f(), f("5.0")),
+          // SPM|1|SPEC1
+          s("SPM", f("1"), f("SPEC1")),
+          // OBX|1|ST|SPECQUAL||Adequate
+          s("OBX", f("1"), f("ST"), f("SPECQUAL"), f(), f("Adequate")),
+          // DSC|PTR1
+          s("DSC", f("PTR1"))
         )
       );
 
@@ -232,10 +425,35 @@ describe("hl7v2TransformProfileGroups", () => {
     it("places the chosen alternative of a choice in the enclosing group", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|PHM|FAC|EMR|RFAC|20241201120000||ORM^O01^ORM_O01|MSG2|P|2.5",
-          "PID|1||12345^^^MRN||Doe^John",
-          "ORC|NW|ORD2",
-          "RXO|RX123^Amoxicillin"
+          // MSH|^~\&|PHM|FAC|EMR|RFAC|20241201120000||ORM^O01^ORM_O01|MSG2|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("PHM"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORM", "O01", "ORM_O01"),
+            f("MSG2"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // ORC|NW|ORD2
+          s("ORC", f("NW"), f("ORD2")),
+          // RXO|RX123^Amoxicillin
+          s("RXO", f("RX123", "Amoxicillin"))
         )
       );
 
@@ -249,13 +467,41 @@ describe("hl7v2TransformProfileGroups", () => {
     it("groups by the schema the event map names when MSH-9.3 is empty", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|ADT|FAC|EMR|RFAC|20241201120000||ADT^A04|MSG7|P|2.5",
-          "EVN|A04|20241201120000",
-          "PID|1||12345^^^MRN||Doe^John",
-          "PV1|1|O",
-          "IN1|1|PLAN1",
-          "IN2|1|SSN1",
-          "IN1|2|PLAN2"
+          // MSH|^~\&|ADT|FAC|EMR|RFAC|20241201120000||ADT^A04|MSG7|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("ADT"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ADT", "A04"),
+            f("MSG7"),
+            f("P"),
+            f("2.5")
+          ),
+          // EVN|A04|20241201120000
+          s("EVN", f("A04"), f("20241201120000")),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // PV1|1|O
+          s("PV1", f("1"), f("O")),
+          // IN1|1|PLAN1
+          s("IN1", f("1"), f("PLAN1")),
+          // IN2|1|SSN1
+          s("IN2", f("1"), f("SSN1")),
+          // IN1|2|PLAN2
+          s("IN1", f("2"), f("PLAN2"))
         )
       );
 
@@ -337,13 +583,41 @@ describe("hl7v2TransformProfileGroups", () => {
     it("addresses each order's results through its group", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG5|P|2.5",
-          "PID|1||12345^^^MRN||Doe^John",
-          "OBR|1|ORD1||CBC",
-          "OBX|1|NM|WBC||5.0",
-          "OBX|2|NM|RBC||4.1",
-          "OBR|2|ORD2||BMP",
-          "OBX|1|NM|NA||140"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG5|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG5"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // OBR|1|ORD1||CBC
+          s("OBR", f("1"), f("ORD1"), f(), f("CBC")),
+          // OBX|1|NM|WBC||5.0
+          s("OBX", f("1"), f("NM"), f("WBC"), f(), f("5.0")),
+          // OBX|2|NM|RBC||4.1
+          s("OBX", f("2"), f("NM"), f("RBC"), f(), f("4.1")),
+          // OBR|2|ORD2||BMP
+          s("OBR", f("2"), f("ORD2"), f(), f("BMP")),
+          // OBX|1|NM|NA||140
+          s("OBX", f("1"), f("NM"), f("NA"), f(), f("140"))
         )
       );
 
@@ -384,13 +658,41 @@ describe("hl7v2TransformProfileGroups", () => {
     it("places each Z-segment right after the segment before it, in that segment's group", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG11|P|2.5",
-          "PID|1||12345^^^MRN||Doe^John",
-          "ZPI|1|site patient",
-          "OBR|1|ORD1||CBC",
-          "ZDS|1|site order",
-          "OBX|1|NM|WBC||5.0",
-          "ZRS|1|site result"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG11|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG11"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // ZPI|1|site patient
+          s("ZPI", f("1"), f("site patient")),
+          // OBR|1|ORD1||CBC
+          s("OBR", f("1"), f("ORD1"), f(), f("CBC")),
+          // ZDS|1|site order
+          s("ZDS", f("1"), f("site order")),
+          // OBX|1|NM|WBC||5.0
+          s("OBX", f("1"), f("NM"), f("WBC"), f(), f("5.0")),
+          // ZRS|1|site result
+          s("ZRS", f("1"), f("site result"))
         )
       );
 
@@ -407,15 +709,45 @@ describe("hl7v2TransformProfileGroups", () => {
     it("keeps consecutive Z-segments together, in order", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|ADT|FAC|EMR|RFAC|20241201120000||ADT^A01^ADT_A01|MSG12|P|2.5",
-          "ZAA|1",
-          "ZAB|1",
-          "EVN|A01|20241201120000",
-          "PID|1||12345^^^MRN||Doe^John",
-          "PV1|1|I",
-          "IN1|1|PLAN1",
-          "ZIN|1",
-          "ZIO|1"
+          // MSH|^~\&|ADT|FAC|EMR|RFAC|20241201120000||ADT^A01^ADT_A01|MSG12|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("ADT"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ADT", "A01", "ADT_A01"),
+            f("MSG12"),
+            f("P"),
+            f("2.5")
+          ),
+          // ZAA|1
+          s("ZAA", f("1")),
+          // ZAB|1
+          s("ZAB", f("1")),
+          // EVN|A01|20241201120000
+          s("EVN", f("A01"), f("20241201120000")),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // PV1|1|I
+          s("PV1", f("1"), f("I")),
+          // IN1|1|PLAN1
+          s("IN1", f("1"), f("PLAN1")),
+          // ZIN|1
+          s("ZIN", f("1")),
+          // ZIO|1
+          s("ZIO", f("1"))
         )
       );
 
@@ -431,7 +763,13 @@ describe("hl7v2TransformProfileGroups", () => {
     });
 
     it("extends a group's position over the Z-segment it ends with", async () => {
-      const tree = await grouped(`${ORU}ZXY|1|site-specific`);
+      const tree = await grouped(
+        message(
+          ...ORU_SEGMENTS,
+          // ZXY|1|site-specific, with nothing after it
+          last(s("ZXY", f("1"), f("site-specific")))
+        )
+      );
       const zxy = (
         ((tree.children[1] as Group).children[1] as Group).children.at(
           -1
@@ -445,7 +783,11 @@ describe("hl7v2TransformProfileGroups", () => {
     });
 
     it("serializes to the same text as the flat tree", async () => {
-      const text = `${ORU}ZXY|1|site-specific`;
+      const text = message(
+        ...ORU_SEGMENTS,
+        // ZXY|1|site-specific, with nothing after it
+        last(s("ZXY", f("1"), f("site-specific")))
+      );
 
       expect(toHl7v2(await grouped(text))).toBe(toHl7v2(parseHL7v2(text)));
     });
@@ -491,20 +833,58 @@ describe("hl7v2TransformProfileGroups", () => {
       };
       const placed = parseHL7v2(
         message(
-          "MSH|^~\\&|APP|FAC|APP|FAC|20241201120000||ZAD^Z01^ZAD_Z01|MSG13|P|2.5",
-          "PID|1||12345^^^MRN",
-          "ZPV|1|site visit",
-          "PV1|1|I",
-          "ZXX|1|unknown"
+          // MSH|^~\&|APP|FAC|APP|FAC|20241201120000||ZAD^Z01^ZAD_Z01|MSG13|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("APP"),
+            f("FAC"),
+            f("APP"),
+            f("FAC"),
+            f("20241201120000"),
+            f(),
+            f("ZAD", "Z01", "ZAD_Z01"),
+            f("MSG13"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN
+          s("PID", f("1"), f(), f("12345", "", "", "MRN")),
+          // ZPV|1|site visit
+          s("ZPV", f("1"), f("site visit")),
+          // PV1|1|I
+          s("PV1", f("1"), f("I")),
+          // ZXX|1|unknown
+          s("ZXX", f("1"), f("unknown"))
         )
       );
       const misplaced = parseHL7v2(
         message(
-          "MSH|^~\\&|APP|FAC|APP|FAC|20241201120000||ZAD^Z01^ZAD_Z01|MSG14|P|2.5",
-          "PID|1||12345^^^MRN",
-          "PV1|1|I",
-          "ZPV|1|site visit",
-          "ZXX|1|unknown"
+          // MSH|^~\&|APP|FAC|APP|FAC|20241201120000||ZAD^Z01^ZAD_Z01|MSG14|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("APP"),
+            f("FAC"),
+            f("APP"),
+            f("FAC"),
+            f("20241201120000"),
+            f(),
+            f("ZAD", "Z01", "ZAD_Z01"),
+            f("MSG14"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN
+          s("PID", f("1"), f(), f("12345", "", "", "MRN")),
+          // PV1|1|I
+          s("PV1", f("1"), f("I")),
+          // ZPV|1|site visit
+          s("ZPV", f("1"), f("site visit")),
+          // ZXX|1|unknown
+          s("ZXX", f("1"), f("unknown"))
         )
       );
 
@@ -523,7 +903,14 @@ describe("hl7v2TransformProfileGroups", () => {
     });
 
     it("keeps Z-segments before the first segment the schema defines at the top level", async () => {
-      const tree = parseHL7v2(message("ZAA|1", "PID|1||12345^^^MRN"));
+      const tree = parseHL7v2(
+        message(
+          // ZAA|1
+          s("ZAA", f("1")),
+          // PID|1||12345^^^MRN
+          s("PID", f("1"), f(), f("12345", "", "", "MRN"))
+        )
+      );
       const definition: EventSchema = {
         elements: [
           {
@@ -553,7 +940,13 @@ describe("hl7v2TransformProfileGroups", () => {
     });
 
     it("leaves the tree flat for a Z-segment the schema does not name when allowZSegments is false", async () => {
-      const tree = parseHL7v2(`${ORU}ZXY|1|site-specific`);
+      const tree = parseHL7v2(
+        message(
+          ...ORU_SEGMENTS,
+          // ZXY|1|site-specific, with nothing after it
+          last(s("ZXY", f("1"), f("site-specific")))
+        )
+      );
 
       await unified()
         .use(hl7v2TransformProfileGroups, { allowZSegments: false })
@@ -589,9 +982,33 @@ describe("hl7v2TransformProfileGroups", () => {
     it("leaves the tree flat when a segment is out of order", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG3|P|2.5",
-          "PID|1||12345^^^MRN||Doe^John",
-          "OBX|1|NM|WBC||5.0"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG3|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG3"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // OBX|1|NM|WBC||5.0
+          s("OBX", f("1"), f("NM"), f("WBC"), f(), f("5.0"))
         )
       );
 
@@ -601,8 +1018,31 @@ describe("hl7v2TransformProfileGroups", () => {
     it("leaves the tree flat when a required segment is missing at the end", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG3|P|2.5",
-          "PID|1||12345^^^MRN||Doe^John"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG3|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG3"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          )
         )
       );
 
@@ -610,7 +1050,13 @@ describe("hl7v2TransformProfileGroups", () => {
     });
 
     it("leaves the tree flat when it holds a segment the schema does not define that is not a Z-segment", async () => {
-      const tree = await grouped(`${ORU}QXY|1|unknown`);
+      const tree = await grouped(
+        message(
+          ...ORU_SEGMENTS,
+          // QXY|1|unknown, with nothing after it
+          last(s("QXY", f("1"), f("unknown")))
+        )
+      );
 
       expect(outline(tree)).toEqual([
         "MSH",
@@ -627,10 +1073,35 @@ describe("hl7v2TransformProfileGroups", () => {
     it("leaves the tree flat when a segment is out of order beside a Z-segment", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG3|P|2.5",
-          "PID|1||12345^^^MRN||Doe^John",
-          "ZPI|1|site",
-          "OBX|1|NM|WBC||5.0"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG3|P|2.5
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG3"),
+            f("P"),
+            f("2.5")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          ),
+          // ZPI|1|site
+          s("ZPI", f("1"), f("site")),
+          // OBX|1|NM|WBC||5.0
+          s("OBX", f("1"), f("NM"), f("WBC"), f(), f("5.0"))
         )
       );
 
@@ -640,8 +1111,30 @@ describe("hl7v2TransformProfileGroups", () => {
     it("leaves the tree flat without MSH-12", async () => {
       const tree = await grouped(
         message(
-          "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P",
-          "PID|1||12345^^^MRN||Doe^John"
+          // MSH|^~\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P
+          s(
+            "MSH",
+            f("|"),
+            f("^~\\&"),
+            f("LAB"),
+            f("FAC"),
+            f("EMR"),
+            f("RFAC"),
+            f("20241201120000"),
+            f(),
+            f("ORU", "R01", "ORU_R01"),
+            f("MSG1"),
+            f("P")
+          ),
+          // PID|1||12345^^^MRN||Doe^John
+          s(
+            "PID",
+            f("1"),
+            f(),
+            f("12345", "", "", "MRN"),
+            f(),
+            f("Doe", "John")
+          )
         )
       );
 

@@ -1,6 +1,8 @@
-import { m, s } from "@glion/builder";
+import type { Segment } from "@glion/ast";
+import { f, m, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
 import type { EventSchema } from "@glion/profiles";
+import { toHl7v2 } from "@glion/to-hl7v2";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it, vi } from "vitest";
@@ -24,11 +26,11 @@ const MSH_PID: EventSchema = {
 };
 
 /** The findings for the message whose segments are `segments`. */
-const lintAgainst = async (...segments: string[]) => {
+const lintAgainst = async (...segments: Segment[]) => {
   const file = new VFile();
   await unified()
     .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
-    .run(parseHL7v2(segments.map((segment) => `${segment}\r`).join("")), file);
+    .run(parseHL7v2(toHl7v2(m(...segments))), file);
   return file.messages;
 };
 
@@ -37,7 +39,12 @@ const lintAgainst = async (...segments: string[]) => {
 describe("a message the rule cannot list the edits of", () => {
   // XXX stands where PID belongs.
   it("reports the first segment that does not fit", async () => {
-    const [message, ...rest] = await lintAgainst("MSH|^~\\&", "XXX|1");
+    const [message, ...rest] = await lintAgainst(
+      // MSH|^~\&
+      s("MSH", f("|"), f("^~\\&")),
+      // XXX|1
+      s("XXX", f("1"))
+    );
 
     expect(rest).toEqual([]);
     expect(message?.reason).toBe(
@@ -52,7 +59,10 @@ describe("a message the rule cannot list the edits of", () => {
 
   // The message ends after MSH, before the PID the schema requires.
   it("reports where a message that ends early ends", async () => {
-    const [message, ...rest] = await lintAgainst("MSH|^~\\&");
+    const [message, ...rest] = await lintAgainst(
+      // MSH|^~\&
+      s("MSH", f("|"), f("^~\\&"))
+    );
 
     expect(rest).toEqual([]);
     expect(message?.reason).toBe(
@@ -67,7 +77,12 @@ describe("a message the rule cannot list the edits of", () => {
   // `|1` has no characters before its first field separator, and stands where
   // PID belongs.
   it("reports a segment with an empty Segment ID that does not fit", async () => {
-    const [message, ...rest] = await lintAgainst("MSH|^~\\&", "|1");
+    const [message, ...rest] = await lintAgainst(
+      // MSH|^~\&
+      s("MSH", f("|"), f("^~\\&")),
+      // |1
+      s("", f("1"))
+    );
 
     expect(rest).toEqual([]);
     expect(message?.reason).toBe(
@@ -91,7 +106,17 @@ describe("a message the rule cannot list the edits of", () => {
           id: "TEST",
         },
       })
-      .run(parseHL7v2("MSH|^~\\&"), file);
+      .run(
+        parseHL7v2(
+          toHl7v2(
+            m(
+              // MSH|^~\&
+              s("MSH", f("|"), f("^~\\&"))
+            )
+          )
+        ),
+        file
+      );
 
     expect(file.messages.map((message) => message.reason)).toEqual([
       "The message ends before its event schema is complete; the event schema requires any segment next.",
@@ -117,7 +142,17 @@ describe("a message the rule cannot list the edits of", () => {
           id: "TEST",
         },
       })
-      .run(parseHL7v2("MSH|^~\\&"), file);
+      .run(
+        parseHL7v2(
+          toHl7v2(
+            m(
+              // MSH|^~\&
+              s("MSH", f("|"), f("^~\\&"))
+            )
+          )
+        ),
+        file
+      );
 
     expect(file.messages.map((message) => message.reason)).toEqual([
       "The message ends before its event schema is complete; the event schema requires any Z-segment next.",
@@ -144,7 +179,19 @@ describe("a message the rule cannot list the edits of", () => {
           id: "TEST",
         },
       })
-      .run(parseHL7v2(["MSH|^~\\&\r", "PID|1\r"].join("")), file);
+      .run(
+        parseHL7v2(
+          toHl7v2(
+            m(
+              // MSH|^~\&
+              s("MSH", f("|"), f("^~\\&")),
+              // PID|1
+              s("PID", f("1"))
+            )
+          )
+        ),
+        file
+      );
 
     expect(file.messages.map((message) => message.reason)).toEqual([
       "The segment is out of place; the event schema does not allow it at this point.",

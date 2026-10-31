@@ -3,6 +3,7 @@
  *
  * Isolates parsing performance from the rest of the pipeline.
  */
+import { c, f, r, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
 import { bench, describe } from "vitest";
 
@@ -17,22 +18,135 @@ import {
 // Fixtures — local: no other suite parses bare text at these shapes
 // ---------------------------------------------------------------------------
 
-const SIMPLE =
-  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01|MSG001|P|2.5\rPID|1||12345||Doe^John||19800101|M\r";
+const SIMPLE = hl7(
+  // MSH|^~\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01|MSG001|P|2.5
+  s(
+    "MSH",
+    f("|"),
+    f("^~\\&"),
+    f("SENDER"),
+    f("FAC"),
+    f("RECV"),
+    f("RFAC"),
+    f("20241201"),
+    f(),
+    f("ADT", "A01"),
+    f("MSG001"),
+    f("P"),
+    f("2.5")
+  ),
+  // PID|1||12345||Doe^John||19800101|M
+  s(
+    "PID",
+    f("1"),
+    f(),
+    f("12345"),
+    f(),
+    f("Doe", "John"),
+    f(),
+    f("19800101"),
+    f("M")
+  )
+);
 
 const COMPLEX_FIELDS = hl7(
-  "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ORU^R01|MSG001|P|2.5",
-  "PID|1||123~456~789||Doe^John^Q&Jr||19800101|M",
-  "OBX|1|CE|8302-2^Height^LN||185&cm^tall&yes~186&cm^tall&no|cm|150-200||||F"
+  // MSH|^~\&|SENDER|FAC|RECV|RFAC|20241201||ORU^R01|MSG001|P|2.5
+  s(
+    "MSH",
+    f("|"),
+    f("^~\\&"),
+    f("SENDER"),
+    f("FAC"),
+    f("RECV"),
+    f("RFAC"),
+    f("20241201"),
+    f(),
+    f("ORU", "R01"),
+    f("MSG001"),
+    f("P"),
+    f("2.5")
+  ),
+  // PID|1||123~456~789||Doe^John^Q&Jr||19800101|M
+  s(
+    "PID",
+    f("1"),
+    f(),
+    f(r("123"), r("456"), r("789")),
+    f(),
+    f("Doe", "John", c("Q", "Jr")),
+    f(),
+    f("19800101"),
+    f("M")
+  ),
+  // OBX|1|CE|8302-2^Height^LN||185&cm^tall&yes~186&cm^tall&no|cm|150-200||||F
+  s(
+    "OBX",
+    f("1"),
+    f("CE"),
+    f("8302-2", "Height", "LN"),
+    f(),
+    f(r(c("185", "cm"), c("tall", "yes")), r(c("186", "cm"), c("tall", "no"))),
+    f("cm"),
+    f("150-200"),
+    f(),
+    f(),
+    f(),
+    f("F")
+  )
 );
 
 function buildMessage(segmentCount: number): string {
   const segments = [
-    "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01|MSG001|P|2.5",
-    "PID|1||12345||Doe^John^Q||19800101|M|||123 Main St^^Springfield^IL^62701",
+    // MSH|^~\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01|MSG001|P|2.5
+    s(
+      "MSH",
+      f("|"),
+      f("^~\\&"),
+      f("SENDER"),
+      f("FAC"),
+      f("RECV"),
+      f("RFAC"),
+      f("20241201"),
+      f(),
+      f("ADT", "A01"),
+      f("MSG001"),
+      f("P"),
+      f("2.5")
+    ),
+    // PID|1||12345||Doe^John^Q||19800101|M|||123 Main St^^Springfield^IL^62701
+    s(
+      "PID",
+      f("1"),
+      f(),
+      f("12345"),
+      f(),
+      f("Doe", "John", "Q"),
+      f(),
+      f("19800101"),
+      f("M"),
+      f(),
+      f(),
+      f("123 Main St", "", "Springfield", "IL", "62701")
+    ),
   ];
   for (let i = 1; i <= segmentCount; i++) {
-    segments.push(`OBX|${i}|NM|8302-2^Height^LN||${170 + i}|cm|150-200||||F`);
+    segments.push(
+      // OBX|<i>|NM|8302-2^Height^LN||<170 + i>|cm|150-200||||F
+      s(
+        "OBX",
+        f(String(i)),
+        f("NM"),
+        f("8302-2", "Height", "LN"),
+        f(),
+        f(String(170 + i)),
+        f("cm"),
+        f("150-200"),
+        f(),
+        f(),
+        f(),
+        f("F")
+      )
+    );
   }
   return hl7(...segments);
 }

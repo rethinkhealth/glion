@@ -18,6 +18,7 @@
     "@glion/annotate-profile-fields": "workspace:*",
     "@glion/annotate-profile-fields-code-systems": "workspace:*",
     "@glion/annotate-profile-tables": "workspace:*",
+    "@glion/ast": "workspace:*",
     "@glion/builder": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/lint-profile-segment-order": "workspace:*",

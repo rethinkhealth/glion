@@ -1,8 +1,10 @@
 import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileDatatypes } from "@glion/annotate-profile-datatypes";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
-import type { Root } from "@glion/ast";
+import type { Root, Segment } from "@glion/ast";
+import { f, m, r, s } from "@glion/builder";
 import { hl7v2Parser } from "@glion/parser";
+import { toHl7v2 } from "@glion/to-hl7v2";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
@@ -16,22 +18,66 @@ const processor = unified()
   .use(hl7v2AnnotateProfileDatatypes)
   .use(hl7v2LintTimestamps);
 
-async function lint(...segments: string[]) {
-  const file = new VFile(segments.map((segment) => `${segment}\r`).join(""));
+// The message is written as HL7v2 text and parsed, so findings carry the
+// positions a sender's message would give them.
+async function lint(...segments: Segment[]) {
+  const file = new VFile(toHl7v2(m(...segments)));
   await processor.run(processor.parse(file), file);
   return file.messages.filter((message) => message.ruleId === "timestamps");
 }
 
+// MSH|^~\&|SENDER|FAC|RECV|RFAC|20260307143045||ADT^A01|MSG001|P|<version>
 const msh = (version: string) =>
-  `MSH|^~\\&|SENDER|FAC|RECV|RFAC|20260307143045||ADT^A01|MSG001|P|${version}`;
+  s(
+    "MSH",
+    f("|"),
+    f("^~\\&"),
+    f("SENDER"),
+    f("FAC"),
+    f("RECV"),
+    f("RFAC"),
+    f("20260307143045"),
+    f(),
+    f("ADT", "A01"),
+    f("MSG001"),
+    f("P"),
+    f(version)
+  );
 
 describe("hl7v2LintTimestamps", () => {
   it("reports nothing for valid dates and times", async () => {
     const messages = await lint(
       msh("2.5"),
-      "EVN|A01|20260307143045.1234-0500",
-      "PID|1||123||Doe^John||19800229",
-      "IN1|1|PLAN|123|||||||||20260101|20261231"
+      // EVN|A01|20260307143045.1234-0500
+      s("EVN", f("A01"), f("20260307143045.1234-0500")),
+      // PID|1||123||Doe^John||19800229
+      s(
+        "PID",
+        f("1"),
+        f(),
+        f("123"),
+        f(),
+        f("Doe", "John"),
+        f(),
+        f("19800229")
+      ),
+      // IN1|1|PLAN|123|||||||||20260101|20261231
+      s(
+        "IN1",
+        f("1"),
+        f("PLAN"),
+        f("123"),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f("20260101"),
+        f("20261231")
+      )
     );
     expect(messages).toEqual([]);
   });
@@ -39,7 +85,8 @@ describe("hl7v2LintTimestamps", () => {
   it("reports February 29 of a year that is not a leap year in TS.1 of a v2.5 TS", async () => {
     const [message, ...rest] = await lint(
       msh("2.5"),
-      "PID|1||123||Doe^John||20250229"
+      // PID|1||123||Doe^John||20250229
+      s("PID", f("1"), f(), f("123"), f(), f("Doe", "John"), f(), f("20250229"))
     );
     expect(rest).toEqual([]);
     expect(message?.reason).toBe(
@@ -49,21 +96,33 @@ describe("hl7v2LintTimestamps", () => {
   });
 
   it("reports February 29 of a century year not divisible by 400 in a v2.6 DTM field", async () => {
-    const [message] = await lint(msh("2.6"), "PID|1||123||Doe^John||19000229");
+    const [message] = await lint(
+      msh("2.6"),
+      // PID|1||123||Doe^John||19000229
+      s("PID", f("1"), f(), f("123"), f(), f("Doe", "John"), f(), f("19000229"))
+    );
     expect(message?.reason).toBe(
       "The day is past the end of its month; a date must name a day its month has."
     );
   });
 
   it("reports TS.1 in v2.3, where the standard types it ST", async () => {
-    const [message] = await lint(msh("2.3"), "PID|1||123||Doe^John||19801301");
+    const [message] = await lint(
+      msh("2.3"),
+      // PID|1||123||Doe^John||19801301
+      s("PID", f("1"), f(), f("123"), f(), f("Doe", "John"), f(), f("19801301"))
+    );
     expect(message?.reason).toBe(
       "The month is out of range; a month is `01` to `12`."
     );
   });
 
   it("reports a primitive TS in v2.1 as a DTM", async () => {
-    const [message] = await lint(msh("2.1"), "EVN|A01|2026-03-07");
+    const [message] = await lint(
+      msh("2.1"),
+      // EVN|A01|2026-03-07
+      s("EVN", f("A01"), f("2026-03-07"))
+    );
     expect(message?.reason).toBe(
       "The value is not a date and time; a DTM value has the form `YYYY[MM[DD[HH[MM[SS[.S[S[S[S]]]]]]]]][+/-ZZZZ]`."
     );
@@ -72,7 +131,22 @@ describe("hl7v2LintTimestamps", () => {
   it("reports a DT field in the DT format", async () => {
     const [message] = await lint(
       msh("2.5"),
-      "IN1|1|PLAN|123|||||||||2026-01-01"
+      // IN1|1|PLAN|123|||||||||2026-01-01
+      s(
+        "IN1",
+        f("1"),
+        f("PLAN"),
+        f("123"),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f("2026-01-01")
+      )
     );
     expect(message?.reason).toBe(
       "The value is not a date; a DT value has the form `YYYY[MM[DD]]`."
@@ -82,7 +156,22 @@ describe("hl7v2LintTimestamps", () => {
   it("reports a DT with a time, which DT does not allow", async () => {
     const [message] = await lint(
       msh("2.5"),
-      "IN1|1|PLAN|123|||||||||202601011200"
+      // IN1|1|PLAN|123|||||||||202601011200
+      s(
+        "IN1",
+        f("1"),
+        f("PLAN"),
+        f("123"),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(),
+        f("202601011200")
+      )
     );
     expect(message?.reason).toBe(
       "The value is not a date; a DT value has the form `YYYY[MM[DD]]`."
@@ -90,35 +179,55 @@ describe("hl7v2LintTimestamps", () => {
   });
 
   it("reports a TM field in the TM format", async () => {
-    const [message] = await lint(msh("2.5"), "TQ1|1|||14:30");
+    const [message] = await lint(
+      msh("2.5"),
+      // TQ1|1|||14:30
+      s("TQ1", f("1"), f(), f(), f("14:30"))
+    );
     expect(message?.reason).toBe(
       "The value is not a time; a TM value has the form `HH[MM[SS[.S[S[S[S]]]]]][+/-ZZZZ]`."
     );
   });
 
   it("reports hour 24", async () => {
-    const [message] = await lint(msh("2.5"), "TQ1|1|||2400");
+    const [message] = await lint(
+      msh("2.5"),
+      // TQ1|1|||2400
+      s("TQ1", f("1"), f(), f(), f("2400"))
+    );
     expect(message?.reason).toBe(
       "The hour is out of range; an hour is `00` to `23`."
     );
   });
 
   it("reports minute 60", async () => {
-    const [message] = await lint(msh("2.5"), "TQ1|1|||1460");
+    const [message] = await lint(
+      msh("2.5"),
+      // TQ1|1|||1460
+      s("TQ1", f("1"), f(), f(), f("1460"))
+    );
     expect(message?.reason).toBe(
       "The minute is out of range; a minute is `00` to `59`."
     );
   });
 
   it("reports second 60", async () => {
-    const [message] = await lint(msh("2.5"), "TQ1|1|||235960");
+    const [message] = await lint(
+      msh("2.5"),
+      // TQ1|1|||235960
+      s("TQ1", f("1"), f(), f(), f("235960"))
+    );
     expect(message?.reason).toBe(
       "The second is out of range; a second is `00` to `59`."
     );
   });
 
   it("reports an offset of more than 14 hours", async () => {
-    const [message] = await lint(msh("2.5"), "EVN|A01|20260307+1500");
+    const [message] = await lint(
+      msh("2.5"),
+      // EVN|A01|20260307+1500
+      s("EVN", f("A01"), f("20260307+1500"))
+    );
     expect(message?.reason).toBe(
       "The offset is out of range; an offset is at most 14 hours, with minutes `00` to `59`."
     );
@@ -127,7 +236,37 @@ describe("hl7v2LintTimestamps", () => {
   it("reports a TS.1 inside a component, as a subcomponent", async () => {
     const [message] = await lint(
       msh("2.5"),
-      "PV1|1|I|||||1234^Smith^John^^^^^^^^^^^^^^^^20251301"
+      // PV1|1|I|||||1234^Smith^John^^^^^^^^^^^^^^^^20251301
+      s(
+        "PV1",
+        f("1"),
+        f("I"),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(
+          "1234",
+          "Smith",
+          "John",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "20251301"
+        )
+      )
     );
     expect(message?.reason).toBe(
       "The month is out of range; a month is `01` to `12`."
@@ -135,24 +274,50 @@ describe("hl7v2LintTimestamps", () => {
   });
 
   it("reports each repetition on its own", async () => {
-    const messages = await lint(msh("2.5"), "TQ1|1|||2400~1200~2500");
+    const messages = await lint(
+      msh("2.5"),
+      // TQ1|1|||2400~1200~2500
+      s("TQ1", f("1"), f(), f(), f(r("2400"), r("1200"), r("2500")))
+    );
     expect(messages.map((message) => message.actual)).toEqual(["2400", "2500"]);
   });
 
   it("does not check the explicit null", async () => {
-    expect(await lint(msh("2.6"), 'PID|1||123||Doe^John||""')).toEqual([]);
+    expect(
+      await lint(
+        msh("2.6"),
+        // PID|1||123||Doe^John||""
+        s("PID", f("1"), f(), f("123"), f(), f("Doe", "John"), f(), f('""'))
+      )
+    ).toEqual([]);
   });
 
   it("does not check empty values", async () => {
-    expect(await lint(msh("2.6"), "PID|1||123||Doe^John||")).toEqual([]);
+    expect(
+      await lint(
+        msh("2.6"),
+        // PID|1||123||Doe^John||
+        s("PID", f("1"), f(), f("123"), f(), f("Doe", "John"), f(), f())
+      )
+    ).toEqual([]);
   });
 
   it("does not check fields of a segment the standard does not define", async () => {
-    expect(await lint(msh("2.6"), "ZPI|1|2025-02-29")).toEqual([]);
+    expect(
+      await lint(
+        msh("2.6"),
+        // ZPI|1|2025-02-29
+        s("ZPI", f("1"), f("2025-02-29"))
+      )
+    ).toEqual([]);
   });
 
   it("points a finding on a primitive field at its repetition", async () => {
-    const [message] = await lint(msh("2.6"), "PID|1||123||Doe^John||19000229");
+    const [message] = await lint(
+      msh("2.6"),
+      // PID|1||123||Doe^John||19000229
+      s("PID", f("1"), f(), f("123"), f(), f("Doe", "John"), f(), f("19000229"))
+    );
     expect(message?.place).toStrictEqual({
       end: { column: 31, line: 2, offset: 97 },
       start: { column: 23, line: 2, offset: 89 },
@@ -166,7 +331,11 @@ describe("hl7v2LintTimestamps", () => {
   });
 
   it("points a finding on TS.1 at its component", async () => {
-    const [message] = await lint(msh("2.5"), "PID|1||123||Doe^John||20250229");
+    const [message] = await lint(
+      msh("2.5"),
+      // PID|1||123||Doe^John||20250229
+      s("PID", f("1"), f(), f("123"), f(), f("Doe", "John"), f(), f("20250229"))
+    );
     expect(message?.place).toStrictEqual({
       end: { column: 31, line: 2, offset: 97 },
       start: { column: 23, line: 2, offset: 89 },
@@ -183,7 +352,37 @@ describe("hl7v2LintTimestamps", () => {
   it("points a finding on a subcomponent at the subcomponent", async () => {
     const [message] = await lint(
       msh("2.5"),
-      "PV1|1|I|||||1234^Smith^John^^^^^^^^^^^^^^^^20251301"
+      // PV1|1|I|||||1234^Smith^John^^^^^^^^^^^^^^^^20251301
+      s(
+        "PV1",
+        f("1"),
+        f("I"),
+        f(),
+        f(),
+        f(),
+        f(),
+        f(
+          "1234",
+          "Smith",
+          "John",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "20251301"
+        )
+      )
     );
     expect(message?.line).toBe(2);
     expect(message?.column).toBe(44);

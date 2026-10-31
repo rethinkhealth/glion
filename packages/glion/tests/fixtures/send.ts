@@ -5,28 +5,64 @@
  * @module
  */
 
+import { f, m, s } from "@glion/builder";
 import type { MllpSocket } from "@glion/mllp-client";
 import { frame } from "@glion/mllp-codec";
+import { toHl7v2 } from "@glion/to-hl7v2";
 
-/** An ADT^A01 with control ID `MSG00001`, CR-delimited. */
-export const ADT = [
-  "MSH|^~\\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5\r",
-  "EVN|A01|20260531120000\r",
-  "PID|1||12345^^^MRN||DOE^JOHN\r",
-].join("");
+/** An ADT^A01 with control ID `MSG00001`. */
+export const ADT = toHl7v2(
+  m(
+    // MSH|^~\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5
+    s(
+      "MSH",
+      f("|"),
+      f("^~\\&"),
+      f("SENDER"),
+      f("FAC"),
+      f("RECEIVER"),
+      f("FAC"),
+      f("20260531120000"),
+      f(),
+      f("ADT", "A01"),
+      f("MSG00001"),
+      f("P"),
+      f("2.5")
+    ),
+    // EVN|A01|20260531120000
+    s("EVN", f("A01"), f("20260531120000")),
+    // PID|1||12345^^^MRN||DOE^JOHN
+    s("PID", f("1"), f(), f("12345", "", "", "MRN"), f(), f("DOE", "JOHN"))
+  )
+);
 
 /** An MLLP-framed acknowledgment of {@link ADT} with MSA-1 `code`. */
 export function ackFrame(code: string, withErr = false): Uint8Array {
-  const segments = [
-    "MSH|^~\\&|RECEIVER|FAC|SENDER|FAC|20260531120001||ACK^A01|ACK00001|P|2.5",
-    `MSA|${code}|MSG00001|the peer says hi`,
-  ];
-  if (withErr) {
-    segments.push("ERR|||207^bad^HL70357|E");
-  }
-  return frame(
-    new TextEncoder().encode(segments.map((segment) => `${segment}\r`).join(""))
+  const ack = m(
+    // MSH|^~\&|RECEIVER|FAC|SENDER|FAC|20260531120001||ACK^A01|ACK00001|P|2.5
+    s(
+      "MSH",
+      f("|"),
+      f("^~\\&"),
+      f("RECEIVER"),
+      f("FAC"),
+      f("SENDER"),
+      f("FAC"),
+      f("20260531120001"),
+      f(),
+      f("ACK", "A01"),
+      f("ACK00001"),
+      f("P"),
+      f("2.5")
+    ),
+    // MSA|<code>|MSG00001|the peer says hi
+    s("MSA", f(code), f("MSG00001"), f("the peer says hi"))
   );
+  if (withErr) {
+    // ERR|||207^bad^HL70357|E
+    ack.children.push(s("ERR", f(), f(), f("207", "bad", "HL70357"), f("E")));
+  }
+  return frame(new TextEncoder().encode(toHl7v2(ack)));
 }
 
 /**

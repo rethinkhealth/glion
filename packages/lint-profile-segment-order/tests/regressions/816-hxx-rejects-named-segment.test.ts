@@ -13,25 +13,43 @@
  * once, so a segment is read both as itself and as `Hxx`.
  */
 
+import type { Segment } from "@glion/ast";
+import { f, m, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
+import { toHl7v2 } from "@glion/to-hl7v2";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { describe, expect, it } from "vitest";
 
 import hl7v2LintSegmentOrder from "../../src";
 
-const lint = async (...segments: string[]) => {
+const lint = async (...segments: Segment[]) => {
   const file = new VFile();
   await unified()
     .use(hl7v2LintSegmentOrder)
     .run(
       parseHL7v2(
-        [
-          "MSH|^~\\&|APP|FAC|APP|FAC|20241201120000||QBP^Q11^QBP_Q11|MSG1|P|2.8.1",
-          ...segments,
-        ]
-          .map((segment) => `${segment}\r`)
-          .join("")
+        toHl7v2(
+          m(
+            // MSH|^~\&|APP|FAC|APP|FAC|20241201120000||QBP^Q11^QBP_Q11|MSG1|P|2.8.1
+            s(
+              "MSH",
+              f("|"),
+              f("^~\\&"),
+              f("APP"),
+              f("FAC"),
+              f("APP"),
+              f("FAC"),
+              f("20241201120000"),
+              f(),
+              f("QBP", "Q11", "QBP_Q11"),
+              f("MSG1"),
+              f("P"),
+              f("2.8.1")
+            ),
+            ...segments
+          )
+        )
       ),
       file
     );
@@ -40,10 +58,28 @@ const lint = async (...segments: string[]) => {
 
 describe("QBP_Q11 Hxx position", () => {
   it("accepts a segment the schema names elsewhere in the Hxx position", async () => {
-    expect(await lint("QPD|Q11|Q1", "RCP|I", "RCP|I")).toEqual([]);
+    expect(
+      await lint(
+        // QPD|Q11|Q1
+        s("QPD", f("Q11"), f("Q1")),
+        // RCP|I
+        s("RCP", f("I")),
+        // RCP|I
+        s("RCP", f("I"))
+      )
+    ).toEqual([]);
   });
 
   it("accepts an unnamed segment in the Hxx position", async () => {
-    expect(await lint("QPD|Q11|Q1", "ZQP|1", "RCP|I")).toEqual([]);
+    expect(
+      await lint(
+        // QPD|Q11|Q1
+        s("QPD", f("Q11"), f("Q1")),
+        // ZQP|1
+        s("ZQP", f("1")),
+        // RCP|I
+        s("RCP", f("I"))
+      )
+    ).toEqual([]);
   });
 });
