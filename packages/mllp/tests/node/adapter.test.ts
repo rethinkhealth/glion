@@ -1,11 +1,12 @@
 // oxlint-disable typescript/no-non-null-assertion
 // oxlint-disable no-empty-function
+import { once } from "node:events";
 import type { Server } from "node:net";
 import { createServer } from "node:net";
 import { Readable } from "node:stream";
 import { createServer as createTlsServer } from "node:tls";
 
-import { nodeAdapter } from "../../src/node/adapter";
+import { listen } from "../../src/node/adapter";
 
 // oxlint-disable-next-line prefer-await-to-callbacks
 type CloseCallback = (err?: Error) => void;
@@ -27,7 +28,10 @@ function createMockSocket() {
     remoteAddress: "127.0.0.1",
     remotePort: 54_321,
     setTimeout: vi.fn(),
-    write: vi.fn(() => true),
+    write: vi.fn((_chunk: Uint8Array, written?: () => void) => {
+      written?.();
+      return true;
+    }),
   });
   return socket as Readable & {
     destroy: ReturnType<typeof vi.fn>;
@@ -109,6 +113,22 @@ const noop = () => {
   /* noop */
 };
 
+const setImmediatePromise = () =>
+  // oxlint-disable-next-line promise/avoid-new
+  new Promise<void>((resolve) => {
+    setImmediate(resolve);
+  });
+
+/** The socket `listen()` passes on for `socket`. */
+function acceptOne(socket: MockSocket) {
+  let accepted: Parameters<Parameters<typeof listen>[1]>[0] | undefined;
+  listen({ port: 2575 }, (s) => {
+    accepted = s;
+  });
+  connectionHandler?.(socket);
+  return accepted!;
+}
+
 beforeEach(() => {
   connectionHandler = undefined;
   mockServer.address.mockReturnValue({ port: 9999 });
@@ -129,18 +149,22 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("nodeAdapter", () => {
+describe("listen", () => {
   it("listens on plain TCP with keep-alive after 60 s and Nagle's algorithm off, and sets no timeout", () => {
     vi.mocked(createTlsServer).mockClear();
     const accepted: boolean[] = [];
-    const adapter = nodeAdapter();
-    adapter.listen({ port: 2575 }, (socket) => accepted.push(socket.secure));
+    listen({ port: 2575 }, (socket) => accepted.push(socket.secure));
 
     const socket = createMockSocket();
     connectionHandler?.(socket);
 
     expect(createServer).toHaveBeenLastCalledWith(
-      { keepAlive: true, keepAliveInitialDelay: 60_000, noDelay: true },
+      {
+        allowHalfOpen: true,
+        keepAlive: true,
+        keepAliveInitialDelay: 60_000,
+        noDelay: true,
+      },
       expect.any(Function)
     );
     expect(createTlsServer).not.toHaveBeenCalled();
@@ -151,26 +175,32 @@ describe("nodeAdapter", () => {
   it("passes tls to tls.createServer() with keep-alive and Nagle's algorithm off, and marks its sockets secure", () => {
     const tls = { ca: "ca", cert: "cert", key: "key", requestCert: true };
     const accepted: boolean[] = [];
-    const adapter = nodeAdapter({ tls });
-    adapter.listen({ port: 2575 }, (socket) => accepted.push(socket.secure));
+    listen({ port: 2575, tls }, (socket) => accepted.push(socket.secure));
 
     connectionHandler?.(createMockSocket());
 
     expect(createTlsServer).toHaveBeenLastCalledWith(
-      { keepAlive: true, keepAliveInitialDelay: 60_000, noDelay: true, ...tls },
+      {
+        allowHalfOpen: true,
+        keepAlive: true,
+        keepAliveInitialDelay: 60_000,
+        noDelay: true,
+        ...tls,
+      },
       expect.any(Function)
     );
     expect(accepted).toEqual([true]);
   });
 
   it("lets tls replace a socket option", () => {
-    nodeAdapter({ tls: { cert: "cert", key: "key", noDelay: false } }).listen(
-      { port: 2575 },
+    listen(
+      { port: 2575, tls: { cert: "cert", key: "key", noDelay: false } },
       noop
     );
 
     expect(createTlsServer).toHaveBeenLastCalledWith(
       {
+        allowHalfOpen: true,
         cert: "cert",
         keepAlive: true,
         keepAliveInitialDelay: 60_000,
@@ -181,9 +211,20 @@ describe("nodeAdapter", () => {
     );
   });
 
+  it("keeps the server's side open after the remote system closes its own, whatever tls says", () => {
+    listen(
+      { port: 2575, tls: { allowHalfOpen: false, cert: "cert", key: "key" } },
+      noop
+    );
+
+    expect(createTlsServer).toHaveBeenLastCalledWith(
+      expect.objectContaining({ allowHalfOpen: true }),
+      expect.any(Function)
+    );
+  });
+
   it("calls setTimeout when socketTimeout option is provided", () => {
-    const adapter = nodeAdapter({ socketTimeout: 30_000 });
-    adapter.listen({ port: 2575 }, noop);
+    listen({ port: 2575, socketTimeout: 30_000 }, noop);
 
     const socket = createMockSocket();
     connectionHandler?.(socket);
@@ -192,8 +233,7 @@ describe("nodeAdapter", () => {
   });
 
   it("destroys socket when timeout event fires", () => {
-    const adapter = nodeAdapter({ socketTimeout: 30_000 });
-    adapter.listen({ port: 2575 }, noop);
+    listen({ port: 2575, socketTimeout: 30_000 }, noop);
 
     const socket = createMockSocket();
     connectionHandler?.(socket);
@@ -206,8 +246,7 @@ describe("nodeAdapter", () => {
   it("handle.port returns correct port and handle.close() resolves", async () => {
     mockServer.address.mockReturnValue({ port: 4567 });
 
-    const adapter = nodeAdapter();
-    const handle = adapter.listen({ port: 2575 }, noop);
+    const handle = listen({ port: 2575 }, noop);
 
     expect(handle.port).toBe(4567);
     await expect(handle.close()).resolves.toBeUndefined();
@@ -218,41 +257,252 @@ describe("nodeAdapter", () => {
     // oxlint-disable-next-line typescript/no-explicit-any
     mockServer.address.mockReturnValue(null as any);
 
-    const adapter = nodeAdapter();
-    const handle = adapter.listen({ port: 2575 }, noop);
+    const handle = listen({ port: 2575 }, noop);
 
     expect(handle.port).toBe(2575);
   });
 
-  it("writable stream waits for drain when socket.write returns false", async () => {
+  it("resolves a write once the socket has written the chunk", async () => {
     const socket = createMockSocket();
-    // When write() returns false, writeToSocket awaits the "drain" event.
-    // Schedule the drain emission to fire after the once() listener is set up.
-    socket.write.mockImplementationOnce(() => {
-      setImmediate(() => socket.emit("drain"));
-      return false;
+    let written: (() => void) | undefined;
+    socket.write.mockImplementationOnce(
+      (_chunk: Uint8Array, done: () => void) => {
+        written = done;
+        return false;
+      }
+    );
+    const accepted = acceptOne(socket);
+
+    let settled = false;
+    const write = accepted.writable
+      .getWriter()
+      .write(new Uint8Array([0x01]))
+      .then(() => {
+        settled = true;
+      });
+    await setImmediatePromise();
+    expect(settled).toBe(false);
+
+    written?.();
+    await write;
+    expect(settled).toBe(true);
+  });
+
+  it("resolves a write to a socket that has been torn down", async () => {
+    const socket = createMockSocket();
+    socket.write.mockImplementationOnce(
+      (_chunk: Uint8Array, done: (error: Error) => void) => {
+        done(
+          Object.assign(new Error("destroyed"), {
+            code: "ERR_STREAM_DESTROYED",
+          })
+        );
+        return false;
+      }
+    );
+    const accepted = acceptOne(socket);
+
+    await expect(
+      accepted.writable.getWriter().write(new Uint8Array([0x01]))
+    ).resolves.toBeUndefined();
+  });
+
+  it("resolves a write still pending when the socket closes, as Bun never calls it back", async () => {
+    const socket = createMockSocket();
+    socket.write.mockImplementationOnce(() => false);
+    const accepted = acceptOne(socket);
+
+    const write = accepted.writable.getWriter().write(new Uint8Array([0x01]));
+    await setImmediatePromise();
+    socket.emit("close");
+
+    await expect(write).resolves.toBeUndefined();
+  });
+
+  it("rejects a write the socket fails for a reason other than its teardown", async () => {
+    const socket = createMockSocket();
+    const failure = new TypeError("not a chunk");
+    socket.write.mockImplementationOnce(
+      (_chunk: Uint8Array, done: (error: Error) => void) => {
+        done(failure);
+        return false;
+      }
+    );
+    const accepted = acceptOne(socket);
+
+    await expect(
+      accepted.writable.getWriter().write(new Uint8Array([0x01]))
+    ).rejects.toBe(failure);
+  });
+
+  it("ends the readable when the remote system closes its side", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit("end");
+
+    await expect(reader.read()).resolves.toEqual({
+      done: true,
+      value: undefined,
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when the socket is reset", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+    const reset = Object.assign(new Error("read ECONNRESET"), {
+      code: "ECONNRESET",
     });
 
-    let writable: WritableStream<Uint8Array> | undefined;
-    const adapter = nodeAdapter();
-    adapter.listen({ port: 2575 }, (s) => {
-      writable = s.writable;
+    socket.emit("error", reset);
+
+    await expect(reader.read()).rejects.toMatchObject({
+      cause: reset,
+      code: "CONNECTION_LOST",
     });
-    connectionHandler?.(socket);
-    expect(writable).toBeDefined();
+  });
 
-    const writer = writable!.getWriter();
-    await writer.write(new Uint8Array([0x01]));
+  it("errors the readable with CONNECTION_LOST when keep-alive finds the remote system gone", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
 
-    expect(socket.write).toHaveBeenCalled();
+    socket.emit(
+      "error",
+      Object.assign(new Error("read ETIMEDOUT"), { code: "ETIMEDOUT" })
+    );
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when the remote host is unreachable", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit(
+      "error",
+      Object.assign(new Error("read EHOSTUNREACH"), { code: "EHOSTUNREACH" })
+    );
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when the remote network is unreachable", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit(
+      "error",
+      Object.assign(new Error("read ENETUNREACH"), { code: "ENETUNREACH" })
+    );
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when Bun reports the socket closed", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit(
+      "error",
+      Object.assign(new Error("Socket is closed"), {
+        code: "ERR_SOCKET_CLOSED",
+      })
+    );
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("errors the readable with CONNECTION_LOST when the socket closes without an end, as the idle timeout destroys it", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+
+    socket.emit("close");
+
+    await expect(reader.read()).rejects.toMatchObject({
+      code: "CONNECTION_LOST",
+    });
+  });
+
+  it("resolves a write the idle timeout cancels", async () => {
+    const socket = createMockSocket();
+    socket.write.mockImplementationOnce(
+      (_chunk: Uint8Array, done: (error: Error) => void) => {
+        done(
+          Object.assign(new Error("write ECANCELED"), { code: "ECANCELED" })
+        );
+        return false;
+      }
+    );
+    const accepted = acceptOne(socket);
+
+    await expect(
+      accepted.writable.getWriter().write(new Uint8Array([0x01]))
+    ).resolves.toBeUndefined();
+  });
+
+  it("errors the readable with a socket error other than its teardown", async () => {
+    const socket = createMockSocket();
+    const reader = acceptOne(socket).readable.getReader();
+    const failure = Object.assign(new Error("bad record mac"), {
+      code: "ERR_SSL_DECRYPTION_FAILED_OR_BAD_RECORD_MAC",
+    });
+
+    socket.emit("error", failure);
+
+    await expect(reader.read()).rejects.toBe(failure);
+  });
+
+  it("keeps listening for errors after the first, as a TLS socket emits more than one", () => {
+    const socket = createMockSocket();
+    acceptOne(socket);
+    const failure = Object.assign(new Error("bad record mac"), {
+      code: "ERR_SSL_DECRYPTION_FAILED_OR_BAD_RECORD_MAC",
+    });
+
+    socket.emit("error", failure);
+
+    expect(() => socket.emit("error", new Error("write EPROTO"))).not.toThrow();
+  });
+
+  it("reads through to the remote system's FIN after close(), dropping the bytes nothing read", async () => {
+    const socket = createMockSocket();
+    const accepted = acceptOne(socket);
+    socket.push(new Uint8Array([0x01]));
+    socket.push(new Uint8Array([0x02]));
+    socket.push(new Uint8Array([0x03]));
+    await setImmediatePromise();
+
+    accepted.close();
+    socket.push(null);
+
+    await expect(once(socket, "end")).resolves.toEqual([]);
+  });
+
+  it("stops reading when the readable is cancelled, and keeps the socket open for a reply", async () => {
+    const socket = createMockSocket();
+    const accepted = acceptOne(socket);
+
+    await accepted.readable.cancel();
+    await accepted.writable.getWriter().write(new Uint8Array([0x01]));
+
+    expect(socket.isPaused()).toBe(true);
+    expect(socket.destroy).not.toHaveBeenCalled();
+    expect(socket.write).toHaveBeenCalledOnce();
   });
 
   it("writable stream close() calls socket.end()", async () => {
     const socket = createMockSocket();
 
     let writable: WritableStream<Uint8Array> | undefined;
-    const adapter = nodeAdapter();
-    adapter.listen({ port: 2575 }, (s) => {
+    listen({ port: 2575 }, (s) => {
       writable = s.writable;
     });
     connectionHandler?.(socket);
@@ -267,8 +517,7 @@ describe("nodeAdapter", () => {
     const socket = createMockSocket();
 
     let writable: WritableStream<Uint8Array> | undefined;
-    const adapter = nodeAdapter();
-    adapter.listen({ port: 2575 }, (s) => {
+    listen({ port: 2575 }, (s) => {
       writable = s.writable;
     });
     connectionHandler?.(socket);

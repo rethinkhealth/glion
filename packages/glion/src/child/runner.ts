@@ -48,9 +48,9 @@
 
 import { readFile } from "node:fs/promises";
 
-import type { ConnectionInfo, MessageInfo } from "@glion/mllp";
+import type { MessageInfo } from "@glion/mllp";
 import { serve } from "@glion/mllp/node";
-import type { Server } from "@glion/mllp/node";
+import type { ConnectionInfo, Server } from "@glion/mllp/node";
 
 import { GlionError } from "../errors";
 import { fatalEvent } from "../events";
@@ -155,7 +155,8 @@ async function main(): Promise<void> {
   // serve() creates a TCP server, binds it, and returns a Server
   // handle. Connection and error callbacks emit events for the
   // parent to display in the TUI or log as JSON lines.
-  const server: Server = serve(app, {
+  const server: Server = serve({
+    handle: app.handle,
     hostname: manifest.hostname,
     maxConnections: manifest.maxConnections,
     onConnect: (conn: ConnectionInfo) => {

@@ -15,6 +15,7 @@
 
 // oxlint-disable require-await, no-empty-function
 import type { Context } from "@glion/mllp";
+import type { NodeEnv } from "@glion/mllp/node";
 import { render } from "ink-testing-library";
 import { describe, expect, it, vi } from "vitest";
 
@@ -33,19 +34,21 @@ const RED = "\u001B[31m";
 async function msgEvent(raw: string): Promise<PartialEvent> {
   const events: PartialEvent[] = [];
   const ctx = {
-    connection: {
-      id: 1,
-      localPort: 2575,
-      remoteAddress: "127.0.0.1",
-      remotePort: 41_376,
-      secure: false,
-      state: new Map(),
-    },
     controlId: "MSG001",
+    env: {
+      connection: {
+        id: 1,
+        localPort: 2575,
+        remoteAddress: "127.0.0.1",
+        remotePort: 41_376,
+        secure: false,
+        state: new Map(),
+      },
+    },
     messageType: "ADT",
     res: undefined,
     triggerEvent: "A01",
-  } as Context;
+  } as Context<NodeEnv>;
   await createMsgTelemetry((event) => events.push(event))(ctx, async () => {
     ctx.res = { raw };
   });

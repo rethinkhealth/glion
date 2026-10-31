@@ -2,23 +2,18 @@ import type { Root } from "@glion/ast";
 import { value as queryValue } from "@glion/util-query";
 import { VFile } from "vfile";
 
-import type {
-  ConnectionInfo,
-  Context,
-  Hl7v2Processor,
-  Response,
-} from "./types";
+import type { Context, Hl7v2Processor, Response } from "./types";
 
 /**
  * Options for creating a Context instance.
  */
-export interface CreateContextOptions {
+export interface CreateContextOptions<E> {
   /** Raw HL7 message string */
   raw: string;
   /** Raw bytes from the MLLP frame payload */
   bytes: Uint8Array;
-  /** Connection metadata */
-  connection: ConnectionInfo;
+  /** What the runtime passed to `handle()`; becomes `ctx.env`. */
+  env: E;
   /** HL7v2 unified processor */
   processor: Hl7v2Processor;
 }
@@ -41,8 +36,8 @@ export interface CreateContextOptions {
  * If no handler matches or middleware short-circuits before accessing
  * the tree, the transform and compile steps never execute.
  */
-export function createContext(options: CreateContextOptions): Context {
-  const { raw, bytes, connection, processor } = options;
+export function createContext<E>(options: CreateContextOptions<E>): Context<E> {
+  const { raw, bytes, env, processor } = options;
   const variables = new Map<string, unknown>();
   let varSnapshot: Readonly<Record<string, unknown>> | undefined;
 
@@ -101,10 +96,10 @@ export function createContext(options: CreateContextOptions): Context {
   }
 
   // ── Build context ──────────────────────────────────────────────────
-  const ctx: Context = {
+  const ctx: Context<E> = {
     ast: parsed,
-    connection: Object.freeze(connection),
     controlId,
+    env,
     file,
     get<K extends string>(key: K): unknown {
       return variables.get(key);

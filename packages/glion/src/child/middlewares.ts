@@ -30,6 +30,7 @@ import { performance } from "node:perf_hooks";
 import { isAckCode } from "@glion/ack";
 import type { AckCode } from "@glion/ack";
 import type { Context, Middleware, Response } from "@glion/mllp";
+import type { NodeEnv } from "@glion/mllp/node";
 
 import type { PartialEvent } from "../events";
 
@@ -40,19 +41,20 @@ import type { PartialEvent } from "../events";
  */
 export function createMsgTelemetry(
   emit: (event: PartialEvent) => void
-): Middleware {
-  return async (ctx: Context, next: () => Promise<void>) => {
+): Middleware<NodeEnv> {
+  return async (ctx: Context<NodeEnv>, next: () => Promise<void>) => {
     const start = performance.now();
     await next();
     const ms = performance.now() - start;
     const response: Response | undefined = ctx.res;
+    const { connection } = ctx.env;
     emit({
       ack: parseAckCode(response?.raw),
-      conn: ctx.connection.id,
+      conn: connection.id,
       control: ctx.controlId ?? "?",
       ms: Math.round(ms * 1000) / 1000,
       pattern: null,
-      remote: `${ctx.connection.remoteAddress}:${ctx.connection.remotePort}`,
+      remote: `${connection.remoteAddress}:${connection.remotePort}`,
       t: "msg",
       trigger: `${ctx.messageType ?? "?"}^${ctx.triggerEvent ?? "?"}`,
     });
