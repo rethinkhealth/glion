@@ -10,6 +10,9 @@ import type { Position } from "unist";
 
 import type { Token } from "./types";
 
+/** A segment being built, positioned from the moment it opens. */
+type OpenSegment = Segment & { position: Position };
+
 function createSubcomponent(start: Position["start"]): Subcomponent {
   return {
     position: { end: start, start },
@@ -49,7 +52,7 @@ function createParserCore() {
     type: "root",
   };
 
-  let seg: Segment | null = null;
+  let seg: OpenSegment | null = null;
   let field: Field | null = null;
   let rep: FieldRepetition | null = null;
   let comp: Component | null = null;
@@ -67,8 +70,8 @@ function createParserCore() {
     expectingSegmentName = true;
   };
 
-  const openSegment = (name: string, position: Position): Segment => {
-    const opened: Segment = {
+  const openSegment = (name: string, position: Position): OpenSegment => {
+    const opened: OpenSegment = {
       children: [],
       name,
       position: { end: position.end, start: position.start },
@@ -90,7 +93,7 @@ function createParserCore() {
    * when none is open: a field delimiter or segment terminator before any
    * Segment ID opens one.
    */
-  const ensureSegment = (start: Position["start"]): Segment =>
+  const ensureSegment = (start: Position["start"]): OpenSegment =>
     seg ?? openSegment("", { end: start, start });
 
   const openField = (start: Position["start"]) => {
@@ -178,7 +181,8 @@ function createParserCore() {
     if (field?.position) {
       field.position.end = endPos;
     }
-    if (seg?.position) {
+    // Stryker disable next-line ConditionalExpression: every caller runs with a segment open; the guard narrows `seg` for TypeScript.
+    if (seg) {
       seg.position.end = endPos;
     }
   };
@@ -197,8 +201,7 @@ function createParserCore() {
         // An empty line is an empty segment: `MSH|^~\&\r\rPID|1` holds MSH,
         // a segment with an empty Segment ID and no fields, and PID.
         const segment = ensureSegment(tok.position.start);
-        const endPos = lastContentEnd || tok.position.start;
-        updatePositionsToEnd(endPos);
+        updatePositionsToEnd(lastContentEnd || tok.position.start);
         // A tokenizer that gives no characters ends the segment with no
         // terminator.
         segment.terminator = tok.value ?? "";

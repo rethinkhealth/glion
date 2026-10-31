@@ -62,15 +62,6 @@ describe("an empty line", () => {
       start: { column: 1, line: 2, offset: 9 },
     });
   });
-
-  it("counts as a line for the segments after it", () => {
-    const pid = parseHL7v2("MSH|^~\\&\r\rPID|1\r").children[2];
-
-    expect(pid?.position).toStrictEqual({
-      end: { column: 6, line: 3, offset: 15 },
-      start: { column: 1, line: 3, offset: 10 },
-    });
-  });
 });
 
 describe("an empty line before the message header", () => {
@@ -86,5 +77,21 @@ describe("an empty line before the message header", () => {
     expect(fieldValue(msh, 0)).toBe("|");
     expect(fieldValue(msh, 1)).toBe("^~\\&");
     expect(fieldValue(msh, 2)).toBe("APP");
+  });
+
+  it("declares the delimiters MSH-1 and MSH-2 hold, after it", () => {
+    const source = "\rMSH*%$#&*APP\rPID*1*DOE%JOHN\r";
+    const pid = parseHL7v2(source).children[2] as Segment;
+
+    expect(segments(source)).toStrictEqual([
+      ["", 0, "\r"],
+      ["MSH", 3, "\r"],
+      ["PID", 2, "\r"],
+    ]);
+    expect(
+      (pid.children[1] as Field).children[0]?.children.map(
+        (component) => component.children[0]?.value
+      )
+    ).toStrictEqual(["DOE", "JOHN"]);
   });
 });

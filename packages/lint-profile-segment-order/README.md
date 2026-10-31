@@ -187,7 +187,7 @@ Segment `EVN` is missing; the event schema requires it at this point.
 Segment `PV1` is missing; the event schema requires it at this point.
 ```
 
-A segment missing at the end of the message is reported at the end of the message.
+A segment missing at the end of the message is reported at the end of the message. An empty line after the last segment is a segment, so a segment missing there is reported next to that line, at its start or its end.
 
 ### Invalid — unexpected segment
 

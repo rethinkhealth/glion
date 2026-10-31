@@ -152,7 +152,7 @@ describe("preprocessor steps", () => {
       expect(result.delimiters.escape).toBe("\n");
     });
 
-    it("does not change delimiters when the first segment is not MSH", () => {
+    it("does not change delimiters when another segment comes before MSH", () => {
       const ctx: ParserContext = {
         delimiters: DEFAULT_DELIMITERS,
         input: "PID|123",

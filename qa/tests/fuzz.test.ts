@@ -7,7 +7,7 @@
  * boundary that protects every consumer application, and positions are what a
  * lint finding points at.
  */
-import type { Delimiters, Nodes } from "@glion/ast";
+import type { Delimiters, Nodes, Segment } from "@glion/ast";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
 import { delimiters } from "@glion/util-query";
@@ -98,7 +98,9 @@ describe("QR3: crash resilience", () => {
     // A segment ends at a carriage return, a line feed, or both, and every
     // node is positioned at its text in the message as it was read, whichever
     // line breaks it holds (#1139) and whatever empty lines come before or
-    // between its segments (#1158). The root covers the whole message.
+    // between its segments (#1158). Each segment, an empty one included,
+    // starts where the terminator before it ends. The root covers the whole
+    // message.
     //
     // Mutant: the line breaks are replaced with `\r` before the message is
     // tokenized. Fails on `"MSH|^~\\&|||\r\nAAA|\r\n"`.
@@ -106,6 +108,9 @@ describe("QR3: crash resilience", () => {
     // Mutant: the tokenizer emits the message header before the empty lines
     // that come before it. Fails on
     // `"\rMSH|^~\\&|||\r\rAAA|\r"`.
+    //
+    // Mutant: an empty line's segment is placed after its line break, at the
+    // start of the next line. Fails on `"\rMSH|^~\\&|||\r\rAAA|\r"`.
     it("positions every node at its text, whichever line breaks and empty lines end the segments", () => {
       const arbLineBreaks = arbHL7v2Segments.chain((segments) =>
         fc
@@ -124,9 +129,14 @@ describe("QR3: crash resilience", () => {
 
           expect(root.position?.start.offset).toBe(0);
           expect(root.position?.end.offset).toBe(source.length);
-          for (const segment of root.children) {
+          let next = 0;
+          for (const segment of root.children as Segment[]) {
+            expect(segment.position?.start.offset).toBe(next);
+            next =
+              (segment.position?.end.offset ?? 0) + segment.terminator.length;
             expectWrittenAt(source, segment, delimiters(root), true);
           }
+          expect(next).toBe(source.length);
         }),
         {
           examples: [

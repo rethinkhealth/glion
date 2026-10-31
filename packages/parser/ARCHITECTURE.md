@@ -76,7 +76,7 @@ The tokenizer emits the header as five tokens, read once in `reset()`, because i
 
 ### Tokenizing
 
-After the header, `next()` tries these rules at the current offset, in order. The first that applies reads the token:
+`next()` emits the header tokens once it reaches the offset where MSH starts, after any empty lines before it. Otherwise it tries these rules at the current offset, in order. The first that applies reads the token:
 
 1. **A segment terminator** ends the segment.
 2. **The field delimiter** opens a field.

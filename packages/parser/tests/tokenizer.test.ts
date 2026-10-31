@@ -39,7 +39,7 @@ describe("the message header is read only at the start of the message", () => {
     expect(out).toMatchSnapshot();
   });
 
-  it("does not read a message header when the first segment is not MSH", () => {
+  it("does not read a message header when another segment comes before MSH", () => {
     const out = toks("PID|1\rMSH|^~\\&|SENDER");
     // No special tokens up front—just TEXT('PID') then delimiters
     expect(out[0]).toMatchObject({ type: "TEXT", value: "PID" });

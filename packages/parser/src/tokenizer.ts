@@ -141,11 +141,8 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
 
   // oxlint-disable-next-line complexity/complexity -- tokenizer hot path: one branch per delimiter class, kept flat for speed
   next(): Token | null {
-    const headerToken =
-      this.offset >= this.headerStart
-        ? this.headerTokens[this.headerTokensEmitted]
-        : undefined;
-    if (headerToken) {
+    const headerToken = this.headerTokens[this.headerTokensEmitted];
+    if (headerToken && this.offset >= this.headerStart) {
       this.headerTokensEmitted += 1;
       return this.take(
         headerToken.type,
