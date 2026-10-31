@@ -1,39 +1,112 @@
-# Lesson 6: Changing the statement: escape sequences
+# Lesson 6: Escape sequences, from prose to a proved model
 
-Lesson 5 ended with a finding: glion decodes the escape sequences of HL7v2 §2.7, and the specification had none. glion followed the standard, so the statement was the side to change. This lesson reads that change: what was added, which rule was replaced, how the proof of `decode_encode` absorbed it, and how the harness then found the next disagreement.
+Lessons 1 to 5 read a specification that already existed. This lesson builds a part of it: §2.7 of HL7v2, "Use of escape sequences in fields", taken from the standard's prose to definitions, rules, a reviewed statement, a proof, and a comparison with glion. Each stage of the method has its own question:
 
-It is also the first time the statement itself changes. A proof can change freely; a statement is what people own and review. Step 5 shows what that review looks like.
+| Stage                     | Question                                                      | Sections |
+| ------------------------- | ------------------------------------------------------------- | -------- |
+| Read the standard         | What does the text say, and what kinds of thing does it name? | 1–2      |
+| Choose a representation   | What is a value, so that every meaning has exactly one?       | 3–4      |
+| Define                    | How does a sender write a value?                              | 5–8      |
+| State side conditions     | Which messages must be excluded, and why each one?            | 9        |
+| Review the statement      | What does the theorem mean now?                               | 10       |
+| Prove                     | Why is the encoding unambiguous?                              | 11–14    |
+| Compare an implementation | Where does glion differ, and why?                             | 15–17    |
 
-Part 2 (steps 8 to 13) goes through every other escape sequence in §2.7. It sorts them into kinds, models a value that holds markup as well as characters, proves that model reads back, and uses it to explain each place where glion writes a sequence differently from how it read it.
+You need lessons 1 to 4 (reading Lean, rules as decidable propositions, the structure of `decode_encode`) and lesson 5's harness.
 
-Create `Hl7v2/Lesson6.lean`, start it with these lines, and paste each example below them:
+Create `Hl7v2/Lesson6.lean`, start it with these lines, and paste each `lean` block below them, in order:
 
 ```lean
 import Hl7v2
 open Hl7v2.Spec Hl7v2.Thm
 ```
 
-## Step 1: What §2.7.1 says
+# Part I: The standard
+
+## 1. What §2.7 says
+
+§2.7.1 defines the form of every sequence:
 
 > An escape sequence consists of the escape character followed by an escape code ID of one character, zero (0) or more data characters, and another occurrence of the escape character.
 
-Five sequences stand for the delimiters themselves:
+It then lists six sequences any field may use, and four more for the text data types:
 
-| Sequence | Stands for                 |
-| -------- | -------------------------- |
-| `\F\`    | the field separator        |
-| `\S\`    | the component separator    |
-| `\T\`    | the subcomponent separator |
-| `\R\`    | the repetition separator   |
-| `\E\`    | the escape character       |
+> When a field, component or sub-component of type TX, FT, or CF is being encoded, additional escape character(s) may be used to signal certain special characteristics of portions of the text field.
 
-So a value may hold any delimiter: the sender writes it as its sequence, and the receiver reads it back. `SMITH&JONES` goes on the wire as `SMITH\T\JONES`.
+The later subsections add character sets (§2.7.3) and the formatting commands of formatted text (§2.7.7). One sentence of §2.7.1 constrains them all:
 
-The rest of §2.7 defines more sequences: truncation (`\P\`), highlighting (`\H\`, `\N\`), formatted text (`\.br\`, `\.sp\`, …), hexadecimal data (`\Xdd\`), locally defined sequences (`\Z…\`) and character sets. The specification models only the five above, and the README lists the rest under "Not yet covered". Part 2 of this lesson takes them one by one.
+> Escape sequences SHALL NOT contain nested escape sequences.
 
-## Step 2: `Spec/Escape.lean`
+The whole catalogue, with `\` as the escape character:
 
-The new file is about 40 lines, and two definitions:
+| Sequence                                                        | Section        | Data types | Stands for                          |
+| --------------------------------------------------------------- | -------------- | ---------- | ----------------------------------- |
+| `\F\` `\S\` `\T\` `\R\` `\E\`                                   | §2.7.1, §2.7.5 | all        | a delimiter                         |
+| `\P\`                                                           | §2.7.2         | all        | the truncation character            |
+| `\Cxxyy\` `\Mxxyyzz\`                                           | §2.7.3         | FT, ST, TX | a switch to another character set   |
+| `\H\` `\N\`                                                     | §2.7.4         | TX, FT, CF | start and end highlighting          |
+| `\Xdd…\`                                                        | §2.7.6         | TX, FT, CF | hexadecimal data, read by agreement |
+| `\.sp\` `\.br\` `\.fi\` `\.nf\` `\.in\` `\.ti\` `\.sk\` `\.ce\` | §2.7.7         | FT         | a formatting command                |
+| `\Z…\`                                                          | §2.7.8         | TX, FT, CF | locally defined, read by agreement  |
+
+## 2. Three kinds of sequence
+
+The table mixes three different jobs, and a model has to tell them apart.
+
+- **A character.** `\F\`, `\S\`, `\T\`, `\R\`, `\E\` and `\P\` each stand for one character of the value. They exist because that character would otherwise be read as structure. `SMITH\T\JONES` is the value `SMITH&JONES`.
+- **Markup.** `\H\`, `\N\` and the formatting commands are not characters. `\H\240*\N\` is the four characters `240*` with an instruction to make them stand out, and §2.7.4 leaves the how to the receiver: "reverse video, boldface, underlining, blink, an alternate color". `\.br\` belongs here too: §2.7.7 defines it as "Begin new output line", an instruction for display, not a carriage return in the value.
+- **By agreement.** `\X…\` and `\Z…\` mean what sender and receiver agree on, "beyond the scope of this Standard" (§2.7.6, §2.7.8). `\C…\` and `\M…\` change how the characters after them are read.
+
+The distinction that matters for a model: a sequence of the first kind is **how a value is written**; a sequence of the other two kinds is **part of what the value is**. `\F\` disappears when a receiver reads the value. `\H\` does not: it is information the sender meant to send.
+
+# Part II: Choosing a representation
+
+## 3. What makes a representation right
+
+Every formalization starts by deciding what its objects are. Here the object is a value, and `encode` maps values to text. Three properties judge a choice:
+
+1. **Expressive.** Every value the standard can send has a representation. A model that cannot hold `\H\` cannot describe a lab report that uses it.
+2. **No confusion.** Two different meanings never share a representation. If they do, no encoding can write both correctly.
+3. **No junk.** Two representations never share a meaning, or a rule excludes all but one. Otherwise `encode` sends two representations to one text, and `encode_injective` is false.
+
+The last two are a slogan of algebraic specification, "no junk, no confusion", from the work of Burstall and Goguen: a model should contain exactly the values the theory describes, each once.
+
+## 4. Four candidates
+
+| Representation of a value                  | Expressive                  | No confusion | No junk                      | Where                         |
+| ------------------------------------------ | --------------------------- | ------------ | ---------------------------- | ----------------------------- |
+| Characters; delimiters forbidden in data   | No: no delimiter, no markup | Yes          | Yes                          | This spec, lessons 1–4        |
+| Characters; the five delimiter sequences   | No markup                   | Yes          | Yes                          | This spec, before this lesson |
+| One string, markup kept as its text        | Yes                         | **No**       | Yes                          | glion's tree                  |
+| A list of pieces: characters and sequences | Yes                         | Yes          | Only with a rule (section 9) | This spec now                 |
+
+The third row is glion. Its tree holds a value as one string: decoded characters, and every sequence it does not decode left as its text. The data `\H\` (sent `\E\H\E\`) and the command `\H\` become the same string. Section 15 proves it.
+
+The fourth row is the choice this specification makes. A value is a list of pieces, each a character or a sequence. It is expressive, and it has no confusion by construction. It has junk: the piece `sequence F` and the character `|` both mean the field separator. Section 9 shows the rule that removes it.
+
+# Part III: The model
+
+## 5. Pieces
+
+`Spec/Escape.lean` defines the piece:
+
+```text
+inductive Piece where
+  | char (c : Char)
+  | sequence (code : List Char)
+```
+
+`code` holds the escape code ID and the data characters: `['H']` for `\H\`, `".sp 2".toList` for `\.sp 2\`. A subcomponent is now `List Piece` (`Spec/Message.lean`), and `data` builds a value of characters only:
+
+```lean
+def highlighted : List Piece := [.sequence ['H']] ++ data "240*" ++ [.sequence ['N']]
+```
+
+`highlighted` is `\H\240*\N\` from §2.7.4. Only the five delimiter sequences have no piece of their own: they are characters, and `escape` writes them.
+
+## 6. Writing a value
+
+Three definitions, each one level up:
 
 ```text
 def escapeChar (d : Delimiters) (c : Char) : List Char :=
@@ -44,247 +117,196 @@ def escapeChar (d : Delimiters) (c : Char) : List Char :=
   else if c = d.escape then [d.escape, 'E', d.escape]
   else [c]
 
-def escape (d : Delimiters) (value : List Char) : List Char :=
-  value.flatMap (escapeChar d)
+def escapePiece (d : Delimiters) : Piece → List Char
+  | .char c => escapeChar d c
+  | .sequence code => d.escape :: code ++ [d.escape]
+
+def escape (d : Delimiters) (value : List Piece) : List Char :=
+  value.flatMap (escapePiece d)
 ```
 
-`escapeChar` writes one character: a delimiter becomes three characters, anything else stays as it is. `escape` writes a whole value, one character at a time, and joins the results (`flatMap`, from lesson 1).
+A character that is a delimiter becomes its sequence; any other character stays. A sequence is written as its code between two escape characters. Run them:
 
 ```lean
-#eval String.ofList (escape Delimiters.suggested "SMITH&JONES".toList)   -- "SMITH\\T\\JONES"
-#eval String.ofList (escape Delimiters.suggested "a|b".toList)           -- "a\\F\\b"
-#eval String.ofList (escape Delimiters.suggested "\\".toList)            -- "\\E\\"
+#eval escapeChar Delimiters.suggested '&'                                -- ['\\', 'T', '\\']
+#eval String.ofList (escape Delimiters.suggested (data "SMITH&JONES"))  -- "SMITH\\T\\JONES"
+#eval String.ofList (escape Delimiters.suggested highlighted)           -- "\\H\\240*\\N\\"
+#eval String.ofList (escape Delimiters.suggested (data "\\H\\"))        -- "\\E\\H\\E\\"
 ```
 
-`#eval` prints a string with its backslashes doubled, so `"SMITH\\T\\JONES"` is the text `SMITH\T\JONES`.
+`#eval` prints a string with its backslashes doubled. The last two lines are the point of the representation: the command `\H\` and the data `\H\` are two values, written as two texts.
 
-One choice hides in the last line: **every escape character in data is data**. The specification writes it as `\E\`, so a value can never contain a formatting command:
+## 7. Which sequences exist
 
-```lean
-#eval String.ofList (escape Delimiters.suggested "\\H\\".toList)   -- "\\E\\H\\E\\"
-```
-
-The value is the three characters `\H\`, and the sender writes `\E\H\E\`. Step 6 shows why this line matters.
-
-`escapeCodes` lists the five code IDs, `['F', 'S', 'T', 'R', 'E']`, for a rule in step 4.
-
-## Step 3: One line in `Spec/Encoding.lean`
-
-`encodeField` joined subcomponents as they were. Now it writes each one through `escape` first:
+`isDefinedSequence` says which codes §2.7.2 to §2.7.8 define. Read it against the table of section 1, one line per row:
 
 ```text
--      [d.subcomponent].intercalate c
-+      [d.subcomponent].intercalate (c.map (escape d))
+def isDefinedSequence : List Char → Bool
+  | ['P'] | ['H'] | ['N'] => true
+  | 'C' :: ds => ds.length == 4 && ds.all isHexDigit
+  | 'M' :: ds => (ds.length == 4 || ds.length == 6) && ds.all isHexDigit
+  | 'X' :: ds => isHexPairs ds
+  | 'Z' :: _ => true
+  | '.' :: command => isFormattingCommand command
+  | _ => false
 ```
 
-Nothing else in the encoding changes. MSH-1 and MSH-2 are still written as they are; they are the delimiters, not data.
+`isFormattingCommand` accepts the eight commands of §2.7.7: `.sp` and `.sk` with an optional count, `.in` and `.ti` with a signed number, and `.br`, `.fi`, `.nf` and `.ce` with none, each argument after an optional space.
 
 ```lean
-def oneValue : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a|b".toList]]]]⟩]⟩
-def twoFields : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a".toList]]], [[["b".toList]]]]⟩]⟩
+#eval ["P", "H", "N", "C2D41", "M2442", "XC3A9", "Zab", ".br", ".sp", ".sp 2", ".in+4", ".ti-4", ".ce"].map (isDefinedSequence ·.toList)
+-- [true, true, true, true, true, true, true, true, true, true, true, true, true]
+#eval ["F", "Q", "X", "X0", "Xab", "C2D4", ".sp x", ".in", ".xx", ""].map (isDefinedSequence ·.toList)
+-- [false, false, false, false, false, false, false, false, false, false]
+```
+
+`F` is false on purpose: the five delimiter codes are characters, not sequences. `Xab` is false because §2.7.6 lists the hexadecimal digits as "0, 1, . . . , 9, A, . . . , F", in uppercase.
+
+A formalization must also say what it leaves out, and this one does (README, "Not yet covered"): which data types may use which sequence, because a message here has no data types; and where in a line `\.in\` and `\.ti\` may stand.
+
+## 8. Encoding a message
+
+One line of `Spec/Encoding.lean` uses `escape`: `encodeField` joins the subcomponents of a component, each written through it.
+
+```text
+[d.subcomponent].intercalate (c.map (escape d))
+```
+
+```lean
+def oneValue : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a|b"]]]]⟩]⟩
+def twoFields : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a"]]], [[[data "b"]]]]⟩]⟩
+def report : Message := ⟨Delimiters.suggested, [], [⟨"OBX".toList, [[[[highlighted, data "\\H\\"]]]]⟩]⟩
 
 #eval String.ofList (encode oneValue)      -- "MSH|^~\\&\x0dPID|a\\F\\b\x0d"
 #eval encode oneValue == encode twoFields  -- false
+#eval String.ofList (encode report)        -- "MSH|^~\\&\x0dOBX|\\H\\240*\\N\\&\\E\\H\\E\\\x0d"
+#eval report.failures                      -- []
 ```
 
-Before this change, these two messages shared the text `PID|a|b`, and a rule forbade the first. Now the `|` is written `\F\`, the texts differ, and the first message is well formed:
+`report` holds the highlighted `240*` and the data `\H\` in two subcomponents, and both survive into the text.
+
+# Part IV: Side conditions
+
+## 9. Where each rule comes from
+
+`encode` writes text for any message, but `encode_injective` holds only for well-formed ones. A side condition has one of two sources, and the difference matters when a reviewer asks whether it belongs:
+
+- **The standard says so.** The rule restates a sentence of §2.7.
+- **The theorem needs it.** Without the rule, a counterexample exists: either to `encode_injective` (two messages, one text) or to `decode_encode` (the receiver's reading, which splits first and decodes after, gets the message wrong).
+
+A counterexample is the stronger justification: it shows the rule is necessary. When only `decode_encode` fails, the rule is necessary for a receiver that reads as §2.6 describes, but perhaps not for injectivity itself. Exercise 7 asks which.
+
+The four rules about values, one at a time:
+
+**`well_formed_subcomponent_no_terminator`: no carriage return in data.** No sequence of §2.7 stands for one: `\.br\` is markup, and `\X0D\` is data by agreement. Without the rule, two messages share a text:
 
 ```lean
-#eval oneValue.failures   -- []
-example : oneValue.WF := by decide
+def oneSegment : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a\rPV1"]]]]⟩]⟩
+def twoSegments : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a"]]]]⟩, ⟨"PV1".toList, []⟩]⟩
+
+example : encode oneSegment = encode twoSegments ∧ oneSegment ≠ twoSegments := by decide
+#eval oneSegment.failures   -- ["well_formed_subcomponent_no_terminator"]
 ```
 
-## Step 4: Two rules change
+**`well_formed_escape_sequence_defined`: every sequence is one §2.7 defines.** The standard's list is closed ("The following escape sequences are defined"), and the theorem needs the rule: this is the junk of section 4.
 
-The old rule `well_formed_subcomponent_clean` said "a subcomponent contains no separator". Its job was to keep data from looking like structure. `escape` does that job now, for four of the five separators. Two rules take its place.
+```lean
+def pipeAsData : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[[.char '|']]]]]⟩]⟩
+def pipeAsSequence : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[[.sequence ['F']]]]]]⟩]⟩
 
-**`well_formed_subcomponent_no_terminator`: a subcomponent contains no segment terminator.** The fifth separator, `\r`, has no sequence among the five. HL7v2 writes a line break in data as `\.br\` in formatted text, or as `\X0D\`, and neither is modelled yet. So a value may not hold `\r`, and lesson 4's `oneSegment` still breaks a rule:
-
-```text
-PID with the value a␍PV1    →  MSH|^~\&␍PID|a␍PV1␍
-PID|a, then PV1             →  MSH|^~\&␍PID|a␍PV1␍
+example : encode pipeAsData = encode pipeAsSequence ∧ pipeAsData ≠ pipeAsSequence := by decide
+#eval pipeAsSequence.failures   -- ["well_formed_escape_sequence_defined"]
 ```
 
-**`well_formed_separators_not_escape_codes`: no separator is `F`, `S`, `T`, `R` or `E`.** The standard allows letters as delimiters. But a receiver splits a segment at its separators before it reads any escape sequence, and so does `decode`. With `S` as the field separator, the sequence `\S\` splits where it stands:
+Both are written `PID|\F\`. The rule keeps `pipeAsData` and excludes `pipeAsSequence`, so the field separator in data has one representation.
+
+**`well_formed_escape_sequence_no_delimiter`: no sequence holds a delimiter.** The standard's "SHALL NOT contain nested escape sequences" excludes the escape character. A separator inside a sequence would end the field before a receiver reaches the closing escape character:
+
+```lean
+def splitLocal : Message := ⟨Delimiters.suggested, [], [⟨"ZZZ".toList, [[[[[.sequence "Za|b".toList]]]]]⟩]⟩
+
+#eval String.ofList (encode splitLocal)         -- "MSH|^~\\&\x0dZZZ|\\Za|b\\\x0d"
+#eval decode (encode splitLocal) == splitLocal  -- false
+#eval splitLocal.failures                       -- ["well_formed_escape_sequence_no_delimiter"]
+```
+
+`decode` reads two fields, `\Za` and `b\`, each as data. This is a counterexample to `decode_encode`, not to `encode_injective`.
+
+**`well_formed_delimiters_not_escape_codes`: no delimiter is `F`, `S`, `T`, `R` or `E`.** The standard allows letters as delimiters, so this rule is the specification's decision, and the README records it. With `S` as the field separator, `\S\` splits where it stands:
 
 ```lean
 def sField : Delimiters := { Delimiters.suggested with field := 'S' }
-def caret : Message := ⟨sField, [], [⟨"PID".toList, [[[["^".toList]]]]⟩]⟩
+def caret : Message := ⟨sField, [], [⟨"PID".toList, [[[[data "^"]]]]⟩]⟩
 
 #eval String.ofList (encode caret)   -- "MSHS^~\\&\x0dPIDS\\S\\\x0d"
-#eval decode (encode caret) == caret                -- false
-#eval (decode (encode caret)).segments.map (·.fields)   -- [[[[[['\\']]]], [[[['\\']]]]]]
+#eval (decode (encode caret)).segments.map (·.fields)
+-- [[[[[[Hl7v2.Spec.Piece.char '\\']]]], [[[[Hl7v2.Spec.Piece.char '\\']]]]]]
+#eval caret.failures                 -- ["well_formed_delimiters_not_escape_codes"]
 ```
 
-One field holding `^` is read back as two fields, each holding a lone `\`. The rule rules this case out. It is a decision of the specification, and the README records it with the other one, distinct delimiters. glion makes a different choice here: it writes `\X5E\`, the hexadecimal escape, when a code letter is a delimiter (#1051).
+One field holding `^` is read back as two fields, each holding a lone `\`. The rule covers the escape character as well as the separators; section 14 shows how the proof found that case.
 
-The catalogue grows from seven rules to eight:
+The catalogue now has ten rules: these four, `delimiters_distinct`, the two segment ID rules, and the three rules that no level of a field is an empty list.
 
 ```lean
-#eval catalogue.length   -- 8
-#eval caret.failures     -- ["well_formed_separators_not_escape_codes"]
+#eval catalogue.length   -- 10
 ```
 
-## Step 5: What a reviewer sees
+# Part V: Reviewing the statement
 
-`Statements.lean` records each headline theorem's statement, its axioms, and the names of the rules. After this change, `lake build` failed on exactly one of them:
+## 10. What a reviewer sees
+
+`Statements.lean` records each headline theorem's statement, its axioms, and the rule names. After this change, two of its guards failed, and their diff is what a person reviews.
+
+The rule list:
 
 ```text
-- "well_formed_delimiters_distinct", "well_formed_segment_id_length", …,
--  "well_formed_subcomponent_clean"]
-+ "well_formed_delimiters_distinct", "well_formed_separators_not_escape_codes", "well_formed_segment_id_length", …,
-+  "well_formed_component_has_subcomponent", "well_formed_subcomponent_no_terminator"]
+- "well_formed_delimiters_distinct", "well_formed_separators_not_escape_codes", …,
+-  "well_formed_component_has_subcomponent", "well_formed_subcomponent_no_terminator"]
++ "well_formed_delimiters_distinct", "well_formed_delimiters_not_escape_codes", …,
++  "well_formed_component_has_subcomponent", "well_formed_subcomponent_no_terminator",
++  "well_formed_escape_sequence_defined", "well_formed_escape_sequence_no_delimiter"]
 ```
 
-The statements of `encode_injective`, `ambiguous_without_distinct_delimiters` and `wf_iff_failures_nil` did not change, and neither did their axioms. So the review is about two things: the definition of `encode`, and the rules in `Message.WF`. `encode_injective` reads the same, but it now says more. It covers every value holding `|`, `^`, `~`, `&` or `\`, which it excluded before, and it excludes letter separators, which it covered before.
-
-That is the review a person owns: what the words in the statement mean now. Whether the proof goes through is Lean's job.
-
-## Step 6: How the proof absorbed it
-
-`decode_encode` needs `decode` to undo `encode`. The new piece to undo is `escape`, so the proof gains a device in `Thm/Encoding/Escape.lean`: `unescape`, which reads a value back.
-
-```lean
-#eval String.ofList (unescape Delimiters.suggested "SMITH\\T\\JONES".toList)   -- "SMITH&JONES"
-```
-
-Three lemmas carry the change:
-
-| Lemma                        | Says                                                                         | Needs                                                           |
-| ---------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `unescape_escapeChar_append` | Reading back one written character, then the rest, gives the character first | Nothing: one case per branch of `escapeChar`                    |
-| `unescape_escape`            | `unescape d (escape d v) = v`                                                | Induction on `v`, with the lemma above                          |
-| `not_mem_escape`             | A separator never appears in a written value                                 | Distinct delimiters, no separator a code letter, no `\r` in `v` |
-
-`unescape_escape` needs no rule at all. `not_mem_escape` is where the two new rules are used, one each, and it replaces what `Clean` used to give the proof directly. `decodeField` reads each subcomponent through `unescape`, and each lemma about fields takes one more hypothesis, `hk`, the new rule. The structure of `decode_encode` from lesson 4's appendix is unchanged.
-
-`FieldWF` lost its delimiters argument along the way. It used `d` only for `Clean d s`, and its new last clause, `segmentTerminator ∉ s`, doesn't need it.
-
-## Step 7: The harness, again
-
-With data now allowed to hold every delimiter, the generator draws them: `DATA` plus the five delimiters of the message. The parser property passed. It now records a mutant: `decodeEscapes` in `@glion/utils` decoding `\S\` to the repetition separator fails it on a value holding `^`.
-
-The serializer property also passed, and lesson 5's step 7 repeated itself. A formatting command in data, the three characters `\H\`, came up in 19 of 5,000 generated messages and in none of the 200 a run uses. Once the generator drew whole sequences, the property failed within a few runs:
+And `ambiguous_without_distinct_delimiters`, whose values are now pieces:
 
 ```text
-spec:  MSH|*+!%|!E!H!E!*+␍
-glion: MSH|*+!%|!H!*+␍
+-   fields := [[[[['a']], [['b']]]]]
++   fields := [[[[[Piece.char 'a']], [[Piece.char 'b']]]]]
 ```
 
-`!` is the escape character. The specification writes the data `!H!` as `!E!H!E!`, as step 2 said. glion's parser reads that back as `!H!`, which is right. Its serializer then writes `!H!` as it is, because `@glion/to-hl7v2` copies formatting commands through unchanged, and the text now holds a highlighting command the sender never wrote. This is the open finding of lesson 5's step 6.
+`encode_injective` reads the same, and its axioms are still `propext` and `Quot.sound`. Its meaning changed in two directions: it now covers every message with markup, which the old model could not hold, and it no longer covers messages whose escape character is a code letter. The reviewer's questions are those of sections 3 and 9: does `escape` write what §2.7 says, and does each new rule exclude only what must be excluded? Whether the proof goes through is Lean's job.
 
-# Part 2: Every escape sequence
+# Part VI: The proof
 
-## Step 8: The whole of §2.7
+## 11. Strategy: a left inverse
 
-§2.7.1 lists six sequences that every field may use, and four more that only some data types may use:
+`encode_injective` is proved in one line from `decode_encode`:
 
-> When a field, component or sub-component of type TX, FT, or CF is being encoded, additional escape character(s) may be used to signal certain special characteristics of portions of the text field.
-
-§2.7.3 adds the character set sequences, and §2.7.7 the formatting commands of FT. One sentence of §2.7.1 applies to all of them:
-
-> Escape sequences SHALL NOT contain nested escape sequences.
-
-The table below has every sequence. The last two columns are glion today: what `decodeEscapes` in `@glion/utils` puts in the tree, and what `@glion/to-hl7v2` writes back. Each row was run through the parser and the serializer with the delimiters `|^~\&`.
-
-| Sequence                                                | Section       | Data types | Stands for                        | glion's tree holds    | glion writes back |
-| ------------------------------------------------------- | ------------- | ---------- | --------------------------------- | --------------------- | ----------------- |
-| `\F\` `\S\` `\T\` `\R\` `\E\`                           | §2.7.1, 2.7.5 | all        | a delimiter                       | the delimiter         | the same sequence |
-| `\P\`                                                   | §2.7.2        | all        | the truncation character          | the text `\P\`        | `\E\P\E\`         |
-| `\H\` `\N\`                                             | §2.7.4        | TX, FT, CF | start and end highlighting        | the text `\H\`, `\N\` | the same sequence |
-| `\Xdd…\`                                                | §2.7.6        | TX, FT, CF | bytes, read by agreement          | the UTF-8 characters  | the characters    |
-| `\XFF\` (not UTF-8)                                     | §2.7.6        | TX, FT, CF | bytes, read by agreement          | the text `\XFF\`      | `\E\XFF\E\`       |
-| `\Z…\`                                                  | §2.7.8        | TX, FT, CF | local, read by agreement          | the text              | the same sequence |
-| `\Cxxyy\` `\Mxxyyzz\`                                   | §2.7.3        | FT, ST, TX | a switch to another character set | the text              | the same sequence |
-| `\.br\`                                                 | §2.7.7        | FT         | begin a new output line           | a carriage return     | `\.br\`           |
-| `\.sp\` `\.fi\` `\.nf\` `\.in\` `\.ti\` `\.sk\` `\.ce\` | §2.7.7        | FT         | the other formatting commands     | the text              | the same sequence |
-| `\Q\` (no such code)                                    |               |            |                                   | the text `\Q\`        | `\E\Q\E\`         |
-
-Two more rows complete the picture:
-
-| Sequence    | glion's tree holds | glion writes back |
-| ----------- | ------------------ | ----------------- |
-| `\X0D\`     | a carriage return  | `\.br\`           |
-| `\E\H\E\`   | the text `\H\`     | `\H\`             |
-| `\E\.br\E\` | the text `\.br\`   | `\E\.br\E\`       |
-
-Each row where the last column differs from the first is a change glion makes to the text. Steps 9 to 13 explain them.
-
-## Step 9: Three kinds of sequence
-
-The sequences do three different jobs.
-
-- **A character.** `\F\`, `\S\`, `\T\`, `\R\`, `\E\` and `\P\` each stand for one character of the value. Reading the sequence gives back that character, and the value is the same text whatever system displays it.
-- **Markup.** `\H\`, `\N\` and the formatting commands of §2.7.7 are not characters. `\H\240*\N\` is the three characters `240*` with an instruction to make them stand out. §2.7.4 leaves how to the receiver: "reverse video, boldface, underlining, blink, an alternate color". `\.br\` is markup too: §2.7.7 says it begins a new output line, not that the value holds a carriage return.
-- **By agreement.** `\Xdd…\` and `\Z…\` mean whatever sender and receiver agree on, "beyond the scope of this Standard" (§2.7.6, §2.7.8). `\C…\` and `\M…\` change how the characters that follow are read.
-
-The specification of part 1 has only the first kind, without `\P\`, because its delimiters have no truncation character. A value is a `List Char`, so it has nowhere to put markup. glion's tree has the same shape: a subcomponent's value is a string. glion keeps markup by leaving the sequence in that string as text.
-
-## Step 10: A value that holds markup
-
-To model markup, a value has to hold two kinds of piece. Add this to `Lesson6.lean`:
-
-```lean
-inductive Piece where
-  | char (c : Char)
-  | mark (code : List Char)
-  deriving DecidableEq, Repr
-
-def writePiece (d : Delimiters) : Piece → List Char
-  | .char c => escapeChar d c
-  | .mark code => d.escape :: code ++ [d.escape]
-
-def writeValue (d : Delimiters) (v : List Piece) : List Char :=
-  v.flatMap (writePiece d)
+```text
+theorem encode_injective (h₁ : m₁.WF) (h₂ : m₂.WF) (h : encode m₁ = encode m₂) : m₁ = m₂ := by
+  rw [← decode_encode h₁, h, decode_encode h₂]
 ```
 
-A `char` is written through `escapeChar` from step 2. A `mark` is written as its code between two escape characters. `writeValue` has the same shape as `escape`. With it, the data `\H\` and the command `\H\` are two different values, and they are written as two different texts:
+If some `decode` undoes `encode` on well-formed messages, two messages with the same text are the same message. Proving a left inverse is easier than proving injectivity directly: it is a computation, and each level of the message is proved on its own. `decode` exists only to carry this proof; it is not part of the specification.
+
+For values, the left inverse is `unescape`, and the lemma to prove is `unescape_escape`:
 
 ```lean
-def dataH : List Piece := [.char '\\', .char 'H', .char '\\']
-def markH : List Piece := [.mark ['H']]
-
-#eval String.ofList (writeValue Delimiters.suggested dataH)   -- "\\E\\H\\E\\"
-#eval String.ofList (writeValue Delimiters.suggested markH)   -- "\\H\\"
+#check @unescape_escape
 ```
 
-Figure 2-3 of §2.7.7, shortened, is a list of pieces too:
-
-```lean
-def impression : List Piece :=
-  [.mark ".in+4".toList, .char '1', .char '.', .mark ".br".toList, .char '2', .char '.', .mark ".in-4".toList]
-
-#eval String.ofList (writeValue Delimiters.suggested impression)   -- "\\.in+4\\1.\\.br\\2.\\.in-4\\"
+```text
+unescape_escape : ∀ (d : Delimiters), ¬d.escape ∈ escapeCodes →
+  ∀ (v : List Piece), (∀ (p : Piece), p ∈ v → p.isDefined = true ∧ Piece.NoDelimiter d p) →
+    unescape d (escape d v) = v
 ```
 
-## Step 11: glion's value as a string
+## 12. The reader
 
-glion's tree flattens a list of pieces into one string: a character goes in as itself, and a mark goes in as its sequence. Model that, then compare the two values of step 10:
+The previous reader took the two characters after an escape character without looking at them, which worked because every code had one letter. A code is now any length, so the reader must find the closing escape character. It is a small state machine, in `Thm/Encoding/Escape.lean`:
 
-```lean
-def flatten (d : Delimiters) : Piece → List Char
-  | .char c => [c]
-  | .mark code => d.escape :: code ++ [d.escape]
-
-def glionValue (d : Delimiters) (v : List Piece) : List Char :=
-  v.flatMap (flatten d)
-
-theorem glionValue_collides :
-    dataH ≠ markH ∧ glionValue Delimiters.suggested dataH = glionValue Delimiters.suggested markH := by
-  decide
-```
-
-Two different values give one string. This is lesson 1's `ambiguous_without_distinct_delimiters` again, one level down. There, two messages shared a text because two delimiters were the same character. Here, two values share a tree because data and markup are written with the same characters. Whatever the serializer does with the string `\H\`, it is wrong for one of the two values. glion writes it as markup, so the data `\H\` is lost, which is the finding of step 7.
-
-## Step 12: Reading it back
-
-Part 1 proved `unescape_escape`: writing a value and reading it back gives the value. For pieces, the reader has to find where a sequence ends, because a mark's code can be any length. It reads from one escape character to the next:
-
-```lean
-def readCode (d : Delimiters) : List Char → Piece
-  | [c] => if c ∈ escapeCodes then .char (unescapeCode d c) else .mark [c]
-  | code => .mark code
-
+```text
 def readAux (d : Delimiters) : Option (List Char) → List Char → List Piece
   | none, [] => []
   | some code, [] => .char d.escape :: code.map .char
@@ -294,185 +316,213 @@ def readAux (d : Delimiters) : Option (List Char) → List Char → List Piece
     if c = d.escape then readCode d code :: readAux d none rest
     else readAux d (some (code ++ [c])) rest
 
-def readValue (d : Delimiters) (text : List Char) : List Piece := readAux d none text
-
-#eval readValue Delimiters.suggested "\\H\\240*\\N\\".toList
--- [Piece.mark ['H'], Piece.char '2', Piece.char '4', Piece.char '0', Piece.char '*', Piece.mark ['N']]
+def unescape (d : Delimiters) (text : List Char) : List Piece := readAux d none text
 ```
 
-`readAux` carries the code read so far: `none` outside a sequence, `some code` inside one. A code of one letter among `F`, `S`, `T`, `R`, `E` is a character; any other code is a mark. An escape character with no closing one is data.
-
-The round trip holds under two conditions:
+The state is `none` outside a sequence and `some code` inside one, holding the code read so far. At the closing escape character, `readCode` decides: a one-letter code among `F`, `S`, `T`, `R`, `E` is a character (`unescapeCode` gives the delimiter), and any other code is a sequence. An escape character with no closing one is data. Written this way, the reader is structurally recursive on the text, so Lean accepts it without a termination proof.
 
 ```lean
-def MarkOK (d : Delimiters) (code : List Char) : Prop :=
-  d.escape ∉ code ∧ ∀ c ∈ escapeCodes, code ≠ [c]
+#eval unescape Delimiters.suggested "\\H\\240*\\N\\".toList == highlighted   -- true
+#eval unescape Delimiters.suggested "a\\b".toList == data "a\\b"             -- true
 ```
+
+## 13. The lemmas, in dependency order
+
+| Lemma                              | Says                                                                            | Uses                                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `readAux_code`                     | Inside a sequence, the reader reads the code up to the closing escape character | The code holds no escape character                                                                      |
+| `isDefinedSequence_not_escapeCode` | A one-letter code among `F`, `S`, `T`, `R`, `E` is not a defined sequence       | `decide`, five cases                                                                                    |
+| `unescape_escapePiece_append`      | Reading one written piece followed by any text gives the piece first            | The two above, and the escape character is not a code letter                                            |
+| `unescape_escape`                  | `unescape d (escape d v) = v`                                                   | Induction on `v`, with the lemma above                                                                  |
+| `not_mem_escape`                   | No separator appears in a written value                                         | Distinct delimiters, no delimiter a code letter, no carriage return in data, no delimiter in a sequence |
+
+Two techniques carry the proof, and both recur in proofs about any parser.
+
+**Generalize the accumulator.** `readAux_code` is stated for any code already read, `acc`, not just the empty one. The induction step reads one more character into `acc`, so a hypothesis fixed at `[]` would not apply. This is the `induction code generalizing acc` line.
+
+**State it with a tail.** `unescape_escapePiece_append` says what the reader does with `escapePiece d p ++ t` for any `t`, not with `escapePiece d p` alone. The reader never sees a piece in isolation; it sees a piece followed by the rest of the value. With the tail in the statement, the induction in `unescape_escape` is one rewrite per piece.
+
+`not_mem_escape` connects values to fields. `decode` splits a field at its separators before it reads any value, as a receiver does, and splitting undoes joining only when no separator occurs inside a part (`map_splitOn_intercalate`, lesson 4's appendix). So the proof needs no written value to contain a separator, and that lemma is where `escape_sequence_no_delimiter` and the separator half of `delimiters_not_escape_codes` are used.
+
+## 14. A rule the proof found
+
+The first draft of the rules said only that no **separator** is a code letter, as the specification said before this lesson. The proof of `unescape_escapePiece_append` then stopped in the character case: to read `\F\` back, the reader must see `F` as the code and not as the closing escape character, which needs `'F' ≠ d.escape`. Nothing gave it. The counterexample is short:
+
+```lean
+def fEscape : Delimiters := { Delimiters.suggested with escape := 'F' }
+
+#eval String.ofList (escape fEscape (data "|"))     -- "FFF"
+#eval unescape fEscape (escape fEscape (data "|"))  -- [Hl7v2.Spec.Piece.sequence [], Hl7v2.Spec.Piece.char 'F']
+```
+
+`|` is written `FFF`. The reader opens a sequence at the first `F`, closes it at the second with an empty code, and reads the third as data. So the rule became "no **delimiter** is a code letter". The old reader never needed it, because it did not look for the end of a sequence.
+
+This is how side conditions are usually found: not by reading the standard more closely, but by a proof that cannot continue. The goal Lean cannot close names the missing fact, and a small counterexample confirms the fact is needed.
+
+# Part VII: glion against the model
+
+## 15. glion's representation, formally
+
+glion's tree flattens a value into one string: a character goes in as itself, and a sequence goes in as its text. Model that, and prove the confusion of section 4:
+
+```lean
+def glionPiece (d : Delimiters) : Piece → List Char
+  | .char c => [c]
+  | .sequence code => d.escape :: code ++ [d.escape]
+
+def glionValue (d : Delimiters) (v : List Piece) : List Char := v.flatMap (glionPiece d)
+
+theorem glionValue_collides :
+    data "\\H\\" ≠ [.sequence ['H']] ∧
+      glionValue Delimiters.suggested (data "\\H\\") = glionValue Delimiters.suggested [.sequence ['H']] := by
+  decide
+```
+
+Two different values, one string. Whatever `@glion/to-hl7v2` writes for the string `\H\`, it is wrong for one of them. This is lesson 1's `ambiguous_without_distinct_delimiters` one level down: there, two messages shared a text; here, two values share a tree.
+
+The same happens with `\.br\`, which glion decodes to a carriage return:
+
+```lean
+def brData : List Piece := data "a\rb"
+def brMark : List Piece := data "a" ++ [.sequence ".br".toList] ++ data "b"
+
+#eval String.ofList (escape Delimiters.suggested brMark)                                   -- "a\\.br\\b"
+#eval glionValue Delimiters.suggested brData == glionValue Delimiters.suggested brMark     -- false
+```
+
+In the model, `brMark` is markup, and `brData` breaks `well_formed_subcomponent_no_terminator`. glion's flattening keeps them apart (`false`), but its parser puts a carriage return in the tree for `\.br\`, so in glion's actual tree both are `a`, carriage return, `b`. Section 16 shows what that does.
+
+## 16. What glion does to each sequence
+
+Each row was run through `@glion/parser` and `@glion/to-hl7v2` with `|^~\&`:
+
+| Received                              | glion's tree holds        | Written back   | Same text                  |
+| ------------------------------------- | ------------------------- | -------------- | -------------------------- |
+| `a\F\b` (and `\S\` `\T\` `\R\` `\E\`) | the delimiter             | the same       | yes                        |
+| `\H\240*\N\`                          | the text `\H\240*\N\`     | the same       | yes                        |
+| `\.sp 2\`, `\.in+4\`, …               | the text                  | the same       | yes                        |
+| `\Zab\`, `\C2D41\`, `\M2442\`         | the text                  | the same       | yes                        |
+| `a\.br\b`                             | `a`, carriage return, `b` | `a\.br\b`      | yes                        |
+| `caf\XC3A9\`                          | `café`                    | `café`         | no, same value under UTF-8 |
+| `a\X0D\b`                             | `a`, carriage return, `b` | `a\.br\b`      | **no**                     |
+| `abcde\P\`                            | the text `abcde\P\`       | `abcde\E\P\E\` | **no**                     |
+| `\XFF\` (not UTF-8)                   | the text `\XFF\`          | `\E\XFF\E\`    | **no**                     |
+| `\Q\` (no such code)                  | the text `\Q\`            | `\E\Q\E\`      | **no**                     |
+| `\E\H\E\`                             | the text `\H\`            | `\H\`          | **no**                     |
+| `\E\.sp\E\`                           | the text `\.sp\`          | `\.sp\`        | **no**                     |
+
+Every **no** has one of three causes, and each is an issue:
+
+- **Data and markup share the string** (#1165). `\E\H\E\` and `\E\.sp\E\` come back as commands. This is `glionValue_collides`.
+- **A sequence glion does not know becomes data** (#1166). The decoder keeps `\P\`, `\XFF\` and `\Q\` as text; the encoder recognises markup by a fixed list (`VERBATIM_SEQUENCE` in `@glion/utils`), and none of the three is on it, so each is escaped as data. The receiver of `abcde\E\P\E\` reads eight characters, not a value the sender truncated. In the model, `unescape` reads every code that is not a character as a sequence, whatever its letters.
+- **`\.br\` and the carriage return trade places** (#1167). One piece of markup is read as a character, so a character that arrived as `\X0D\` goes back out as markup.
+
+`caf\XC3A9\` is not a defect: glion's agreement is that `\X…\` holds UTF-8 bytes (#659), under which the value is the same. The model carries `\X…\` uninterpreted, as §2.7.6 asks.
+
+The model also says what glion's tree needs: a sequence held apart from the characters around it, a parser that reads any code other than `F`, `S`, `T`, `R`, `E` as a sequence, and a serializer that writes a sequence back as its code. That is `unescape` and `escape`, and `unescape_escape` proves that the round trip is exact.
+
+## 17. The harness, as refinement
+
+Lesson 5's harness checks glion against the model through an **abstraction function** (Hoare, 1972, "Proof of correctness of data representations"): a map from the implementation's state to the model's, here from glion's tree to a `Message`. An implementation is correct when each of its operations, seen through the abstraction function, does what the model's operation does.
+
+For values, the abstraction function reads glion's string by glion's own convention (`differential/src/abstraction.ts`): a sequence glion kept is a sequence, and a carriage return was `\.br\`. With that reading, both properties fail on #1165:
 
 ```text
-theorem readValue_writeValue (d : Delimiters) (he : d.escape ∉ escapeCodes)
-    (v : List Piece) (hv : ∀ code, Piece.mark code ∈ v → MarkOK d code) :
-    readValue d (writeValue d v) = v
+{"delimiters":"!+&#%","header":[[[["#F#"]]]],"segments":[]}
 ```
 
-- **`MarkOK`:** a mark's code holds no escape character, which is §2.7.1's "SHALL NOT contain nested escape sequences", and is not one of the five code letters on its own, since `\F\` is the field separator and not a command.
-- **`he`:** the escape character is not a code letter. Part 1's `unescape` takes the two characters after an escape character without looking at them, so it never needed this. `readAux` looks for the closing escape character, so with `F` as the escape character it reads `\F\`, written `FFF`, as an empty code followed by an `F`. This is a new rule next to `well_formed_separators_not_escape_codes`: together they keep all five delimiters off the code letters.
+`#` is the escape character. The model sends the data `#F#` as `#E#F#E#`; glion reads it back as the string `#F#`; the abstraction function reads that as the sequence `F`. No abstraction function could do better: by `glionValue_collides`, the information is gone from the tree. That is the formal sense in which the defect lies in the tree, not in the parser or the serializer alone.
 
-<details><summary>The proof (about 60 lines)</summary>
+# What you can now say
 
-Two lemmas, then the theorem by induction, as `unescape_escape` was. `readAux_code` reads a mark's code up to its closing escape character. `readValue_writePiece` reads back one piece, with one case per branch of `escapeChar` and one for a mark.
+About escape sequences:
 
-```lean
-theorem readAux_code (d : Delimiters) (acc code t : List Char) (h : d.escape ∉ code) :
-    readAux d (some acc) (code ++ d.escape :: t) = readCode d (acc ++ code) :: readAux d none t := by
-  induction code generalizing acc with
-  | nil => simp [readAux]
-  | cons c cs ih =>
-    simp only [List.mem_cons, not_or] at h
-    simp only [List.cons_append, readAux, Ne.symm h.1, ite_false]
-    rw [ih _ h.2]
-    simp
+- §2.7's sequences stand for a character, for markup, or for something sender and receiver agree on. Only the first kind is encoding; the other two are content.
+- A value is a list of pieces. Four rules make its encoding unambiguous and readable: no carriage return in data, only defined sequences, no delimiter in a sequence, and no delimiter a code letter.
 
-theorem readValue_writePiece (d : Delimiters) (he : d.escape ∉ escapeCodes)
-    (p : Piece) (hp : ∀ code, p = .mark code → MarkOK d code) (t : List Char) :
-    readAux d none (writePiece d p ++ t) = p :: readAux d none t := by
-  have hF : 'F' ≠ d.escape := fun h => he (by rw [← h]; decide)
-  have hS : 'S' ≠ d.escape := fun h => he (by rw [← h]; decide)
-  have hT : 'T' ≠ d.escape := fun h => he (by rw [← h]; decide)
-  have hR : 'R' ≠ d.escape := fun h => he (by rw [← h]; decide)
-  have hE : 'E' ≠ d.escape := fun h => he (by rw [← h]; decide)
-  cases p with
-  | char c =>
-    simp only [writePiece, escapeChar]
-    split
-    · simp [readAux, readCode, unescapeCode, escapeCodes, *]
-    split
-    · simp [readAux, readCode, unescapeCode, escapeCodes, *]
-    split
-    · simp [readAux, readCode, unescapeCode, escapeCodes, *]
-    split
-    · simp [readAux, readCode, unescapeCode, escapeCodes, *]
-    split
-    · simp [readAux, readCode, unescapeCode, escapeCodes, *]
-    · simp [readAux, *]
-  | mark code =>
-    obtain ⟨hn, hc⟩ := hp code rfl
-    have : writePiece d (.mark code) ++ t = d.escape :: (code ++ d.escape :: t) := by
-      simp [writePiece]
-    rw [this]
-    simp only [readAux, ite_true]
-    rw [readAux_code d [] code t hn]
-    congr 1
-    simp only [List.nil_append, readCode]
-    split
-    · rename_i c
-      have : c ∉ escapeCodes := fun hm => hc c hm rfl
-      simp [this]
-    · rfl
+About formalization:
 
-theorem readValue_writeValue (d : Delimiters) (he : d.escape ∉ escapeCodes)
-    (v : List Piece) (hv : ∀ code, Piece.mark code ∈ v → MarkOK d code) :
-    readValue d (writeValue d v) = v := by
-  induction v with
-  | nil => rfl
-  | cons p ps ih =>
-    simp only [readValue, writeValue, List.flatMap_cons] at ih ⊢
-    rw [readValue_writePiece d he p (fun code h => hv code (by simp [h])),
-      ih (fun code h => hv code (List.mem_cons_of_mem _ h))]
+- **Choose the representation first,** and judge it by expressiveness, no confusion and no junk. A rule can remove junk; nothing can remove confusion.
+- **Give every side condition a source:** the standard's text, or a counterexample. A counterexample to the theorem is the strongest justification.
+- **Prove injectivity through a left inverse,** and prove a reader's lemmas with a generalized accumulator and an arbitrary tail.
+- **Let the proof find rules.** A goal that cannot be closed names a missing fact; a counterexample confirms it.
+- **Compare an implementation through an abstraction function.** When no abstraction function can work, the implementation's state has lost information.
 
-#print axioms readValue_writeValue   -- [propext]
-```
+# Exercises
 
-</details>
+They go from predicting to proving to designing. Try each before opening its answer.
 
-`readValue_writeValue` gives what `glionValue` cannot: two values with good marks never share a text, because `readValue` tells them apart. glion's string has no `readValue`, by `glionValue_collides`.
-
-## Step 13: glion's differences, by cause
-
-Each row of step 8 where glion writes back a different text has one of three causes.
-
-**Data and markup share the string.** `\E\H\E\` is written back as `\H\`, and `\E\.sp\E\` as `\.sp\`. In the model, the tree holds `glionValue dataH`, which is also `glionValue markH`, and the serializer picks `markH`. Step 11 is this cause.
-
-**A mark glion does not know becomes data.** `\P\`, `\XFF\` and `\Q\` are written back as `\E\P\E\`, `\E\XFF\E\` and `\E\Q\E\`. The decoder keeps each one as text, as it keeps `\H\`. The encoder recognises markup by a fixed list (`VERBATIM_SEQUENCE` in `escape-encoding.ts`), and none of the three is on it, so each is escaped as data. The receiver of `abcde\E\P\E\` reads the eight characters `abcde\P\`, not a value truncated by the sender. In the model, `readValue` turns every code that is not a character into a mark, whatever its letters, so nothing is lost on the way back. `\P\` is a mark there too, since the model's delimiters have no truncation character; either way it is not data.
-
-**A mark and a character trade places.** `\.br\` becomes a carriage return in the tree, and a carriage return is written as `\.br\`. So `\X0D\`, a byte of data under glion's UTF-8 agreement, comes back as a formatting command. In the model `\.br\` is a mark and the carriage return a character, and the two are different values:
-
-```lean
-def brData : List Piece := [.char 'a', .char '\r', .char 'b']
-def brMark : List Piece := [.char 'a', .mark ".br".toList, .char 'b']
-
-#eval String.ofList (writeValue Delimiters.suggested brData)   -- "a\x0db"
-#eval String.ofList (writeValue Delimiters.suggested brMark)   -- "a\\.br\\b"
-```
-
-`brData` breaks `well_formed_subcomponent_no_terminator`, as in part 1: `escapeChar` has no sequence for a carriage return. Writing it as `\X0D\` is a choice that relies on the agreement of §2.7.6, and the specification does not make that choice yet.
-
-One row is not a difference in value: `caf\XC3A9\` is written back as `café`. Under glion's agreement that `\X…\` holds UTF-8 bytes (#659), the value is the same, and only the text changes.
-
-**What this means for glion.** The model says what a tree needs for the serializer to write back what the parser read:
-
-- The tree holds a mark apart from the characters around it, so `\E\H\E\` and `\H\` are two different trees.
-- The parser reads every code that is not a character escape as a mark, whatever its letters, and the serializer writes a mark as its code between escape characters. No fixed list of known commands is needed to round-trip.
-- `\.br\` is a mark. Whether a carriage return in data is written `\X0D\` is a separate choice about §2.7.6.
-
-That is a change to `@glion/ast`, `@glion/parser` and `@glion/to-hl7v2`. The matching change to the specification turns a subcomponent from `List Char` into `List Piece`, adds `MarkOK` and the escape character rule to `Message.WF`, and proves `decode_encode` with `readValue_writeValue` in place of `unescape_escape`. The abstraction function would then map glion's marks to `.mark`, and the generator could draw marks of any letters.
-
-## What you can now say
-
-- **The model:** a delimiter in data is written as one of the five sequences of §2.7.1, and the escape character as `\E\`, so no value holds markup.
-- **The rules:** a value may hold any delimiter but `\r`, and no separator may be an escape code letter.
-- **The review:** the theorems' statements did not change, but what `encode` and `Message.WF` mean did, and that is what a person reviews.
-- **The proof:** one device (`unescape`) and three lemmas; the shape of `decode_encode` stayed the same.
-- **The kinds:** §2.7's sequences stand for a character (`\F\` … `\P\`), for markup (`\H\`, `\N\`, the formatting commands, `\.br\` included), or for something sender and receiver agree on (`\X\`, `\Z\`, `\C\`, `\M\`).
-- **The collision:** a value held as a string cannot tell data from markup (`glionValue_collides`); a value held as pieces can (`readValue_writeValue`), as long as no code nests an escape character and the escape character is not a code letter.
-- **glion:** each change glion makes to a text comes from one of three causes: data and markup share the string, an unknown mark becomes data, or `\.br\` and the carriage return trade places.
-
-## Exercises
-
-**1. Predict, then run.** What does `escape Delimiters.suggested "~&\\".toList` write? And `escape sField "S".toList`?
+**1. Predict.** What does `escape Delimiters.suggested (data "~&\\")` write? And `escape sField (data "S")`?
 
 <details><summary>Answer</summary>
 
-`\R\\T\\E\`: each of the three characters is a delimiter. `S` with `sField` is the field separator, so it is written `\F\`, though the message breaks `well_formed_separators_not_escape_codes`. `escape` writes text for any message, well formed or not, as `encode` does.
+`\R\\T\\E\`: each of the three characters is a delimiter. `S` is `sField`'s field separator, so it is written `\F\`. That message would break `well_formed_delimiters_not_escape_codes`, but `escape` writes text for any value, well formed or not, as `encode` does.
 
 </details>
 
-**2. Break the encoding.** In `Spec/Escape.lean`, make `escapeChar` write `'T'` for the component separator instead of `'S'`. Run `lake build`. Which lemma fails, and why does it fail there and not in `decode_encode`?
+**2. Classify.** Which rules does this message break, and which sequence breaks which?
+
+```lean
+def odd : Message :=
+  ⟨Delimiters.suggested, [], [⟨"OBX".toList,
+    [[[[[.sequence "Xab".toList]], [[.sequence ".in".toList]]], [[[.sequence "Za~b".toList]]]]]⟩]⟩
+```
 
 <details><summary>Answer</summary>
 
-`unescape_escapeChar_append` fails, in the component case: `unescapeCode d 'T'` is the subcomponent separator, not the component separator, so reading back `\T\` doesn't give `^`. `decode_encode` only uses the lemma, so the error appears where the fact is proved, not where it is used. (`not_mem_escape` also reports an error in that branch, because its `simp` call names `'S'`.)
+`["well_formed_escape_sequence_defined", "well_formed_escape_sequence_no_delimiter"]`. `Xab` has lowercase hexadecimal digits and `.in` has no number, so neither is defined; `Za~b` holds the repetition separator. `#eval odd.failures` confirms it.
 
 </details>
 
-**3. Is the rule needed?** `caret` shows that `decode` cannot read a message with `S` as the field separator. Does that mean two well-formed messages could share a text without `well_formed_separators_not_escape_codes`? Try to build two such messages before you answer.
+**3. Break the encoding.** In a copy of `spec/`, make `escapeChar` write `'T'` for the component separator instead of `'S'`, and run `lake build`. Which lemmas fail, and why does `decode_encode` report no error itself?
+
+<details><summary>Answer</summary>
+
+`unescape_escapePiece_append` fails in the component case: `readCode` reads `T` as the subcomponent separator, so reading back `\T\` does not give `^`. `not_mem_escape` also fails in that branch, because its `simp` call names `'S'`. `decode_encode` only uses these lemmas, so the error appears where the fact is proved, not where it is used. A proof is checked lemma by lemma, and that tells you exactly which fact a change broke.
+
+</details>
+
+**4. Prove it in general.** `glionValue_collides` uses the suggested delimiters. Prove that glion's representation has confusion for every choice of delimiters:
+
+```text
+theorem glionValue_not_injective (d : Delimiters) : ∃ v w, v ≠ w ∧ glionValue d v = glionValue d w
+```
+
+<details><summary>Answer</summary>
+
+Give the two values, then let `simp` check each half:
+
+```lean
+theorem glionValue_not_injective (d : Delimiters) :
+    ∃ v w, v ≠ w ∧ glionValue d v = glionValue d w :=
+  ⟨[.char d.escape, .char 'H', .char d.escape], [.sequence ['H']], by simp,
+    by simp [glionValue, glionPiece]⟩
+```
+
+`decide` cannot do it, because `d` is a variable. An existential is proved by its witness: here, the escape character, `H` and the escape character again as data, against the sequence `H`.
+
+</details>
+
+**5. Find the junk.** Section 4 claims a list of pieces has junk without a rule. Without looking at section 9, find two different values that `escape Delimiters.suggested` writes as the same text, and say which rule excludes one of them.
+
+<details><summary>Answer</summary>
+
+Any delimiter as a character against its code as a sequence: `[.char '|']` and `[.sequence ['F']]` are both written `\F\`, as are `[.char '\\']` and `[.sequence ['E']]`. `well_formed_escape_sequence_defined` excludes the sequence, because `isDefinedSequence ['F']` is false.
+
+</details>
+
+**6. Design.** §2.7.1 allows `\H\`, `\N\`, `\X\` and `\Z\` only in fields of type TX, FT and CF, and §2.7.7 allows formatting commands only in FT. The message here has no data types. What would you add to the specification to state this rule, and what would `encode_injective` say afterwards?
 
 <details><summary>Things to weigh</summary>
 
-`decode` failing is not the same as `encode` being ambiguous. `escape` writes every `\` in data as `\E\`, so a lone `\` on the wire always belongs to a sequence, and a smarter decoder could read escape sequences before splitting. The rule makes the proof's decoder, which splits first like a receiver, correct. Whether `encode_injective` holds without it is an open question; proving it would need a different decoder.
+The data type of a field is not in the text: it comes from the segment definitions of the version in MSH-12. A rule needs that information as an input, for example a function from a segment ID and a field position to a data type, and `Message.WF` would take it as a parameter. `encode_injective` would not change: a new rule only excludes messages, and the theorem already holds for all of them. This is a rule about conformance, not about unambiguity, and keeping the two apart keeps the encoding theorem small.
 
 </details>
 
-**4. Drop a condition.** Take `fEscape := { Delimiters.suggested with escape := 'F' }`. Predict `readValue fEscape (writeValue fEscape [.char '|'])`, then run it. Which hypothesis of `readValue_writeValue` does `fEscape` break?
+**7. Open question.** `splitLocal` and `caret` are counterexamples to `decode_encode`, not to `encode_injective`. Are `well_formed_escape_sequence_no_delimiter` and `well_formed_delimiters_not_escape_codes` needed for `encode_injective`? Try to build two messages, well formed except for one of these rules, with the same text before you answer.
 
-<details><summary>Answer</summary>
+<details><summary>Things to weigh</summary>
 
-`[Piece.mark [], Piece.char 'F']`. The `|` is written `FFF`. `readAux` opens a sequence at the first `F`, closes it at the second with an empty code, and reads the third as data. `fEscape` breaks `he`: its escape character `F` is a code letter.
-
-</details>
-
-**5. Break `MarkOK`.** Predict what `readValue Delimiters.suggested` gives back for `writeValue Delimiters.suggested [.mark ['F']]` and for `writeValue Delimiters.suggested [.mark ['a', '\\', 'b']]`. Which half of `MarkOK` does each break?
-
-<details><summary>Answer</summary>
-
-`[Piece.char '|']`: the mark `F` is written `\F\`, which is the field separator. It breaks the second half. `[Piece.mark ['a'], Piece.char 'b', Piece.char '\\']`: the code holds an escape character, so the sequence ends early at it, and the last escape character has no closing one, so it is data. It breaks the first half, §2.7.1's rule against nesting.
-
-</details>
-
-**6. Round-trip a figure.** Write the first line of Figure 2-3 in §2.7.7, `\.in+4\\.ti-4\ 1. The cardiomediastinal silhouette is now within normal limits.\.br\`, as a `List Piece`. Check with `#eval` that `readValue` gives it back. What would glion's tree hold for it, and what would change if the line contained the data `\.br\`?
-
-<details><summary>Answer</summary>
-
-Three marks (`.in+4`, `.ti-4`, `.br`) around the characters of the sentence, and comparing `readValue` of its text with the list prints `true`. glion's tree holds one string: the two indent commands as text, and a carriage return for `\.br\`. The data `\.br\` is written `\E\.br\E\`, and glion keeps it apart from the command, because the command became a carriage return and the data stayed text. That is the one formatting command for which `\E\…\E\` round-trips in glion today, as the last row of step 8 shows.
+`escape` writes every escape character in data as `\E\`, so an escape character on the wire always opens or closes a sequence. A decoder that reads sequences before it splits at separators could recover `splitLocal`, so `encode` may be injective without the rule. The rules make the proof's decoder correct, which splits first as a receiver does. Showing injectivity without them would need a different decoder and a different proof; showing they are needed would need a counterexample. Either is a result.
 
 </details>

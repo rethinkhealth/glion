@@ -104,7 +104,7 @@ Neither of these is a choice about HL7v2. They are choices about how two represe
 - **Delimiters** are the suggested `|^~\&` or five distinct characters drawn from a pool.
 - **Segment IDs** are three letters or digits.
 - **Every level of a field** has one to three elements, never zero, matching the rule about empty levels.
-- **Data** draws from letters, digits, a few marks, the five delimiters and whole escape sequences such as `\H\`, and never the segment terminator.
+- **Data** draws from letters, digits, a few marks and the five delimiters, and never the segment terminator. A value also holds escape sequences of every kind §2.7 defines, such as `\H\`, and data that only looks like one.
 
 "By construction" is a claim, and `differential/tests/generators.test.ts` tests it with the specification itself:
 
@@ -124,13 +124,14 @@ Of everything in the harness, the generator is perhaps the most important part, 
 
 The first property checks one side of the scope: the generator never draws a message _outside_ the domain. Nothing checks the other side, how much of the domain it _reaches_. And today it reaches only a small part of it. The domain is every message `Message.WF` accepts; the generator draws far fewer:
 
-| The specification allows                                                                                             | The generator draws                                                                                                                                            |
-| -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Any five distinct delimiters other than `\r`, letters included, though no separator may be `F`, `S`, `T`, `R` or `E` | The suggested `\|^~\&`, or five of `\| ^ ~ \ & # * ! % +`                                                                                                      |
-| Any character in data other than `\r`: unused pool characters, letters, `\n`, non-ASCII                              | 17 characters, `abcFSTREXYZ019 .-`, the five delimiters, and 11 escape sequences drawn whole (`\F\` … `\E\`, `\H\`, `\N\`, `\.br\`, `\.sp\`, `\X41\`, `\Zab\`) |
-| Data of any length                                                                                                   | At most 4 pieces, each a character or a whole sequence                                                                                                         |
-| Any number of repetitions, components, subcomponents, fields and segments                                            | At most 3 of each level, 4 fields, 4 MSH fields, 3 segments                                                                                                    |
-| Any 3-character segment ID without `\r`, a separator included                                                        | 3 characters from `A`–`Z` and `0`–`9`                                                                                                                          |
+| The specification allows                                                                                             | The generator draws                                                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Any five distinct delimiters other than `\r`, letters included, though no delimiter may be `F`, `S`, `T`, `R` or `E` | The suggested `\|^~\&`, or five of `\| ^ ~ \ & # * ! % +`                                                                                                                          |
+| Any character in data other than `\r`: unused pool characters, letters, `\n`, non-ASCII                              | 17 characters, `abcFSTREXYZ019 .-`, the five delimiters, and 10 look-alike sequences drawn whole as data (`\F\` … `\E\`, `\H\`, `\N\`, `\.br\`, `\.sp\`, `\Zab\`)                  |
+| Data of any length                                                                                                   | At most 4 pieces, each a character, a look-alike, or a sequence                                                                                                                    |
+| Any escape sequence §2.7 defines                                                                                     | 15 sequences (`\P\`, `\C2D41\`, `\M2442\`, `\H\`, `\N\`, `\Zab\` and nine formatting commands), none holding a delimiter; no `\X…\`, which glion decodes under its UTF-8 agreement |
+| Any number of repetitions, components, subcomponents, fields and segments                                            | At most 3 of each level, 4 fields, 4 MSH fields, 3 segments                                                                                                                        |
+| Any 3-character segment ID without `\r`, a separator included                                                        | 3 characters from `A`–`Z` and `0`–`9`                                                                                                                                              |
 
 The oracle confirms that each of these is well formed, and the generator can produce none of them:
 
@@ -190,7 +191,7 @@ glion: MSH#|&~^
 
 glion read `\R\` as an escape sequence (§2.7.1) and decoded it to `~`. The specification had no escape sequences: it wrote the escape character as ordinary data. Here glion followed the standard, so the specification changed: it now writes a delimiter in data as its escape sequence, and the escape character itself as `\E\`. That data reads `\E\R\E\` on the wire, and glion reads it back as `\R\`. Lesson 6 reads the change.
 
-**The finding still open: formatting commands.** The parser property now passes, and the serializer property fails:
+**The next finding: formatting commands.** The parser property passed, and the serializer property failed:
 
 ```text
 {"delimiters":"|*+!%","header":[[[["!H!"],[""]],[[""]]]],"segments":[]}
@@ -199,7 +200,7 @@ spec:  MSH|*+!%|!E!H!E!*+\r
 glion: MSH|*+!%|!H!*+\r
 ```
 
-`!` is the escape character. The data is the three characters `!H!`, and the specification writes them `!E!H!E!`. glion's parser reads that back as `!H!`, which is right. Its serializer then writes `!H!` as it is, because `@glion/to-hl7v2` copies a formatting command (`\H\`, `\N\`, `\.sp\`) or a locally defined sequence (`\Z…\`) through unchanged. The text it writes holds the highlighting command `\H\` (§2.7.4), which the sender never wrote. The tree cannot tell the two apart: `\H\` and `\E\H\E\` parse to the same value.
+`!` is the escape character. The data is the three characters `!H!`, and the specification writes them `!E!H!E!`. glion's parser reads that back as `!H!`, which is right. Its serializer then writes `!H!` as it is, because `@glion/to-hl7v2` copies a formatting command (`\H\`, `\N\`, `\.sp\`) or a locally defined sequence (`\Z…\`) through unchanged. The text it writes holds the highlighting command `\H\` (§2.7.4), which the sender never wrote. The tree cannot tell the two apart: `\H\` and `\E\H\E\` parse to the same value. Lesson 6 follows this finding to the end: the specification now models every sequence of §2.7, both properties fail on it, and it is #1165, with two more findings of the same family (#1166, #1167).
 
 None of these findings was a bug to fix on the spot. Each one is a decision about which side is right, and that decision is yours, the owner of the statement.
 
@@ -209,7 +210,7 @@ The parser property first passed 200 runs. The generator could put the escape ch
 
 Adding the escape letters to `DATA` made the property fail within a few runs. The line now carries a comment saying why the letters are there.
 
-It happened again after the specification learned escape sequences. Both properties passed 200 runs, but a formatting command such as `\H\` came up in 19 of 5,000 generated messages, and in none of the 200 a run uses: three characters in a row, each picked from 24. The generator now draws whole sequences, one piece in five, from a list of 11 (`SEQUENCES`), and the serializer property fails within a few runs.
+It happened again after the specification learned escape sequences. Both properties passed 200 runs, but a formatting command such as `\H\` came up in 19 of 5,000 generated messages, and in none of the 200 a run uses: three characters in a row, each picked from 24. Drawing whole sequences made the serializer property fail within a few runs. The generator now draws them twice over: as data that only looks like a sequence (`LOOKALIKES`), and as real sequences (`SEQUENCES`).
 
 This is the main lesson about generators: a property only checks the inputs its generator can reach. Before you trust a green property, ask what its generator never draws.
 
@@ -264,6 +265,6 @@ The properties never run, so no failure about glion is reported for a message ou
 
 - **The final `\r`, as it was decided.** Chapter 2 calls `\r` the segment terminator, which reads as one after every segment, the last included. Changing the specification would have meant stating that the last terminator is optional, and then `encode` writes one text and a receiver accepts two. glion changed instead: `@glion/to-hl7v2` writes each segment's terminator, and `@glion/lint-segment-terminator` reports a segment that ends without `\r`.
 - **Escape sequences, as they were decided.** glion follows §2.7.1. Narrowing the harness, so data never contained the escape character, would have kept the specification as it was and recorded the gap. Instead the specification modelled §2.7.1: `encode` writes `\F\` for a `|` in data, the rule `well_formed_subcomponent_clean` became `well_formed_subcomponent_no_terminator`, a rule keeps separators off the escape codes, and the proof of `decode_encode` reads values back through `unescape`. Lesson 6 reads it.
-- **Formatting commands, open.** HL7v2 defines `\H\` as markup in a formatted value, so a sender who means the characters `\H\` writes `\E\H\E\`. glion keeps markup in the value as written, so the tree holds `\H\` for both texts, and the serializer has to pick one. Changing glion means a tree that tells markup from data, in `@glion/parser` and `@glion/to-hl7v2`, both core packages. Changing the specification means modelling the formatting commands of §2.7.4 and §2.7.7, and saying which data types may hold them.
+- **Formatting commands, as they were decided.** HL7v2 defines `\H\` as markup, so a sender who means the characters `\H\` writes `\E\H\E\`. glion keeps markup in the value as written, so its tree holds `\H\` for both texts. The specification changed first: a value is now characters and escape sequences, every sequence of §2.7 is modelled, and lesson 6 proves that no tree holding a value as one string can tell the two apart. glion's side is #1165: a tree that holds a sequence apart from data.
 
 </details>
