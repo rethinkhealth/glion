@@ -32,7 +32,7 @@ import { toSpecSubcomponent } from "./oracle";
 
 // Candidate delimiters. No letters, digits or spaces, though the specification
 // allows them; no escape code ID (`F`, `S`, `T`, `R`, `E`), which it does not
-// allow as a delimiter (`well_formed_delimiters_not_escape_codes`).
+// allow as a delimiter (`well_formed_delimiters_not_code_characters`).
 const DELIMITER_POOL = ["|", "^", "~", "\\", "&", "#", "*", "!", "%", "+"];
 // Characters of data, besides the delimiters: letters, digits, marks, and
 // three control characters, which the specification writes as `\X0A\`,

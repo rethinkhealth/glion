@@ -11,6 +11,7 @@ Lessons 1 to 5 read a specification that already existed. This lesson builds a p
 | Review the statement      | What does the theorem mean now?                               | 10       |
 | Prove                     | Why is the encoding unambiguous?                              | 11–14    |
 | Compare an implementation | Where does glion differ, and why?                             | 15–17    |
+| Test the assumptions      | Where do real senders and receivers go wrong?                 | 18       |
 
 You need lessons 1 to 4 (reading Lean, rules as decidable propositions, the structure of `decode_encode`) and lesson 5's harness.
 
@@ -57,7 +58,9 @@ The table mixes three different jobs, and a model has to tell them apart.
 - **Markup.** `\H\`, `\N\` and the formatting commands are not characters. `\H\240*\N\` is the four characters `240*` with an instruction to make them stand out, and §2.7.4 leaves the how to the receiver: "reverse video, boldface, underlining, blink, an alternate color". `\.br\` belongs here too: §2.7.7 defines it as "Begin new output line", an instruction for display, not a carriage return in the value.
 - **By agreement.** `\X…\` and `\Z…\` mean what sender and receiver agree on, "beyond the scope of this Standard" (§2.7.6, §2.7.8). `\C…\` and `\M…\` change how the characters after them are read.
 
-An agreement can move a sequence from the third kind to the first. The specification adopts the one glion uses (#659): a message is UTF-8. Under it, `\X41\` is the byte 0x41, which is the character `A`, so hexadecimal data is a way of writing characters, like `\F\`. Section 7 shows what that does to the model.
+The specification adopts no agreement for `\X…\`: it carries hexadecimal data as written, like `\Z…\`, because that is what the standard does. A relay that read `\X41\` as `A` would change the text it forwards, and a sender on ISO 8859-1 means `é` by `\XE9\`, which UTF-8 cannot read.
+
+There is one exception, and it has a reason of its own. A control character (U+0000 to U+001F) other than the carriage return has no safe form in text: many receivers, glion's parser among them, end a segment at a line feed. So the specification writes a line feed as `\X0A\`, and reads `\X0A\` back as the line feed. For control characters alone, hexadecimal data is the first kind. A boundary like this one needs a reason in the standard or in safety; "hexadecimal data is characters" in general has neither, and an earlier draft of this lesson that said so was reversed.
 
 The distinction that matters for a model: a sequence of the first kind is **how a value is written**; a sequence of the other two kinds is **part of what the value is**. `\F\` disappears when a receiver reads the value. `\H\` does not: it is information the sender meant to send.
 
@@ -117,6 +120,7 @@ def escapeChar (d : Delimiters) (c : Char) : List Char :=
   else if c = d.subcomponent then [d.escape, 'T', d.escape]
   else if c = d.repetition then [d.escape, 'R', d.escape]
   else if c = d.escape then [d.escape, 'E', d.escape]
+  else if isControl c then d.escape :: controlCode c ++ [d.escape]
   else [c]
 
 def escapePiece (d : Delimiters) : Piece → List Char
@@ -127,13 +131,14 @@ def escape (d : Delimiters) (value : List Piece) : List Char :=
   value.flatMap (escapePiece d)
 ```
 
-A character that is a delimiter becomes its sequence; any other character stays. A sequence is written as its code between two escape characters. Run them:
+A character that is a delimiter becomes its sequence, a control character becomes `\Xdd\` (`controlCode` gives `X0A` for a line feed), and any other character stays. A sequence is written as its code between two escape characters. Run them:
 
 ```lean
 #eval escapeChar Delimiters.suggested '&'                                -- ['\\', 'T', '\\']
 #eval String.ofList (escape Delimiters.suggested (data "SMITH&JONES"))  -- "SMITH\\T\\JONES"
 #eval String.ofList (escape Delimiters.suggested highlighted)           -- "\\H\\240*\\N\\"
 #eval String.ofList (escape Delimiters.suggested (data "\\H\\"))        -- "\\E\\H\\E\\"
+#eval String.ofList (escape Delimiters.suggested (data "Line1\nLine2")) -- "Line1\\X0A\\Line2"
 ```
 
 `#eval` prints a string with its backslashes doubled. The last two lines are the point of the representation: the command `\H\` and the data `\H\` are two values, written as two texts.
@@ -147,6 +152,7 @@ def isDefinedSequence : List Char → Bool
   | ['P'] | ['H'] | ['N'] => true
   | 'C' :: ds => ds.length == 4 && ds.all isHexDigit
   | 'M' :: ds => (ds.length == 4 || ds.length == 6) && ds.all isHexDigit
+  | 'X' :: ds => isHexPairs ds && (controlChar? ('X' :: ds)).isNone
   | 'Z' :: _ => true
   | '.' :: command => isFormattingCommand command
   | _ => false
@@ -155,13 +161,13 @@ def isDefinedSequence : List Char → Bool
 `isFormattingCommand` accepts the eight commands of §2.7.7: `.sp` and `.sk` with an optional count, `.in` and `.ti` with a signed number, and `.br`, `.fi`, `.nf` and `.ce` with none, each argument after an optional space.
 
 ```lean
-#eval ["P", "H", "N", "C2D41", "M2442", "Zab", ".br", ".sp", ".sp 2", ".in+4", ".ti-4", ".ce"].map (isDefinedSequence ·.toList)
--- [true, true, true, true, true, true, true, true, true, true, true, true]
-#eval ["F", "X41", "Q", "C2D4", "C2d41", ".sp x", ".in", ".xx", "", "Z|"].map (isDefinedSequence ·.toList)
+#eval ["P", "H", "N", "C2D41", "M2442", "X41", "XC3A9", "X0D", "Zab", ".br", ".sp", ".sp 2", ".in+4", ".ti-4", ".ce"].map (isDefinedSequence ·.toList)
+-- [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]
+#eval ["F", "X0A", "Q", "C2D4", "C2d41", ".sp x", ".in", ".xx", "", "Z|"].map (isDefinedSequence ·.toList)
 -- [false, false, false, false, false, false, false, false, false, true]
 ```
 
-`F` is false on purpose: the five delimiter codes are characters, not sequences. `X41` is false for the same reason, by the agreement of section 2: hexadecimal data is characters, so a value holds `A` and never the piece `\X41\`. A sender writes `A`, and a receiver that reads `\X41\` reads `A`. §2.7.6 leaves this choice open, so the README records it with the specification's other decisions. `C2d41` is false because §2.7.6 lists the hexadecimal digits as "0, 1, . . . , 9, A, . . . , F", in uppercase. `Z|` is true here: whether a sequence may hold a delimiter is a separate rule (section 9).
+`F` is false on purpose: the five delimiter codes are characters, not sequences. `X0A` is false for the same reason: it is the line feed, a character (section 2). `X41` and `X0D` are true: the first is hexadecimal data the model carries, and the second too, because the model gives a carriage return in data no form at all. `C2d41` is false because §2.7.6 lists the hexadecimal digits as "0, 1, . . . , 9, A, . . . , F", in uppercase. `Z|` is true here: whether a sequence may hold a delimiter is a separate rule (section 9).
 
 A formalization must also say what it leaves out, and this one does (README, "Not yet covered"): which data types may use which sequence, because a message here has no data types; and where in a line `\.in\` and `\.ti\` may stand.
 
@@ -199,7 +205,7 @@ A counterexample is the stronger justification: it shows the rule is necessary. 
 
 The four rules about values, one at a time:
 
-**`well_formed_subcomponent_no_terminator`: no carriage return in data.** No sequence of §2.7 stands for one in the model: `\.br\` is markup, and `\X0D\` is, by the agreement of section 2, this very character, so the rule excludes it in either form. Without the rule, two messages share a text:
+**`well_formed_subcomponent_no_terminator`: no carriage return in data.** No sequence of §2.7 stands for one in the model: `\.br\` is markup, and `\X0D\` is hexadecimal data the model carries without reading. Without the rule, two messages share a text:
 
 ```lean
 def oneSegment : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a\rPV1"]]]]⟩]⟩
@@ -233,7 +239,7 @@ def splitLocal : Message := ⟨Delimiters.suggested, [], [⟨"ZZZ".toList, [[[[[
 
 `decode` reads two fields, `\Za` and `b\`, each as data. This is a counterexample to `decode_encode`, not to `encode_injective`.
 
-**`well_formed_delimiters_not_escape_codes`: no delimiter is `F`, `S`, `T`, `R` or `E`.** The standard allows letters as delimiters, so this rule is the specification's decision, and the README records it. With `S` as the field separator, `\S\` splits where it stands:
+**`well_formed_delimiters_not_code_characters`: no delimiter is `F`, `S`, `T`, `R`, `E`, `X` or a hexadecimal digit.** The standard allows letters as delimiters, so this rule is the specification's decision, and the README records it. With `S` as the field separator, `\S\` splits where it stands; with `0` as one, `\X0A\` would:
 
 ```lean
 def sField : Delimiters := { Delimiters.suggested with field := 'S' }
@@ -242,7 +248,7 @@ def caret : Message := ⟨sField, [], [⟨"PID".toList, [[[[data "^"]]]]⟩]⟩
 #eval String.ofList (encode caret)   -- "MSHS^~\\&\x0dPIDS\\S\\\x0d"
 #eval (decode (encode caret)).segments.map (·.fields)
 -- [[[[[[Hl7v2.Spec.Piece.char '\\']]]], [[[[Hl7v2.Spec.Piece.char '\\']]]]]]
-#eval caret.failures                 -- ["well_formed_delimiters_not_escape_codes"]
+#eval caret.failures                 -- ["well_formed_delimiters_not_code_characters"]
 ```
 
 One field holding `^` is read back as two fields, each holding a lone `\`. The rule covers the escape character as well as the separators; section 14 shows how the proof found that case.
@@ -264,7 +270,7 @@ The rule list:
 ```text
 - "well_formed_delimiters_distinct", "well_formed_separators_not_escape_codes", …,
 -  "well_formed_component_has_subcomponent", "well_formed_subcomponent_no_terminator"]
-+ "well_formed_delimiters_distinct", "well_formed_delimiters_not_escape_codes", …,
++ "well_formed_delimiters_distinct", "well_formed_delimiters_not_code_characters", …,
 +  "well_formed_component_has_subcomponent", "well_formed_subcomponent_no_terminator",
 +  "well_formed_escape_sequence_defined", "well_formed_escape_sequence_no_delimiter"]
 ```
@@ -298,7 +304,7 @@ For values, the left inverse is `unescape`, and the lemma to prove is `unescape_
 ```
 
 ```text
-unescape_escape : ∀ (d : Delimiters), ¬d.escape ∈ escapeCodes →
+unescape_escape : ∀ (d : Delimiters), ¬d.escape ∈ codeCharacters →
   ∀ (v : List Piece), (∀ (p : Piece), p ∈ v → p.isDefined = true ∧ Piece.NoDelimiter d p) →
     unescape d (escape d v) = v
 ```
@@ -320,7 +326,7 @@ def readAux (d : Delimiters) : Option (List Char) → List Char → List Piece
 def unescape (d : Delimiters) (text : List Char) : List Piece := readAux d none text
 ```
 
-The state is `none` outside a sequence and `some code` inside one, holding the code read so far. At the closing escape character, `readCode` decides: a one-letter code among `F`, `S`, `T`, `R`, `E` is a character (`unescapeCode` gives the delimiter), and any other code is a sequence. An escape character with no closing one is data. Written this way, the reader is structurally recursive on the text, so Lean accepts it without a termination proof.
+The state is `none` outside a sequence and `some code` inside one, holding the code read so far. At the closing escape character, `readCode` decides: a one-letter code among `F`, `S`, `T`, `R`, `E` is a character (`unescapeCode` gives the delimiter), `X` with two digits naming a control character is that character (`controlChar?`), and any other code is a sequence. An escape character with no closing one is data. Written this way, the reader is structurally recursive on the text, so Lean accepts it without a termination proof.
 
 ```lean
 #eval unescape Delimiters.suggested "\\H\\240*\\N\\".toList == highlighted   -- true
@@ -333,6 +339,8 @@ The state is `none` outside a sequence and `some code` inside one, holding the c
 | ---------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `readAux_code`                     | Inside a sequence, the reader reads the code up to the closing escape character | The code holds no escape character                                                                      |
 | `isDefinedSequence_not_escapeCode` | A one-letter code among `F`, `S`, `T`, `R`, `E` is not a defined sequence       | `decide`, five cases                                                                                    |
+| `controlChar?_controlCode`         | Reading the code a control character is written with gives the character        | `hexValue_hexDigit`, by `decide` over 16 digits                                                         |
+| `readCode_of_defined`              | A defined sequence is read back as itself                                       | `isDefinedSequence` excludes the five letters and the control codes                                     |
 | `unescape_escapePiece_append`      | Reading one written piece followed by any text gives the piece first            | The two above, and the escape character is not a code letter                                            |
 | `unescape_escape`                  | `unescape d (escape d v) = v`                                                   | Induction on `v`, with the lemma above                                                                  |
 | `not_mem_escape`                   | No separator appears in a written value                                         | Distinct delimiters, no delimiter a code letter, no carriage return in data, no delimiter in a sequence |
@@ -343,7 +351,7 @@ Two techniques carry the proof, and both recur in proofs about any parser.
 
 **State it with a tail.** `unescape_escapePiece_append` says what the reader does with `escapePiece d p ++ t` for any `t`, not with `escapePiece d p` alone. The reader never sees a piece in isolation; it sees a piece followed by the rest of the value. With the tail in the statement, the induction in `unescape_escape` is one rewrite per piece.
 
-`not_mem_escape` connects values to fields. `decode` splits a field at its separators before it reads any value, as a receiver does, and splitting undoes joining only when no separator occurs inside a part (`map_splitOn_intercalate`, lesson 4's appendix). So the proof needs no written value to contain a separator, and that lemma is where `escape_sequence_no_delimiter` and the separator half of `delimiters_not_escape_codes` are used.
+`not_mem_escape` connects values to fields. `decode` splits a field at its separators before it reads any value, as a receiver does, and splitting undoes joining only when no separator occurs inside a part (`map_splitOn_intercalate`, lesson 4's appendix). So the proof needs no written value to contain a separator, and that lemma is where `escape_sequence_no_delimiter` and the separator half of `delimiters_not_code_characters` are used.
 
 ## 14. A rule the proof found
 
@@ -356,7 +364,7 @@ def fEscape : Delimiters := { Delimiters.suggested with escape := 'F' }
 #eval unescape fEscape (escape fEscape (data "|"))  -- [Hl7v2.Spec.Piece.sequence [], Hl7v2.Spec.Piece.char 'F']
 ```
 
-`|` is written `FFF`. The reader opens a sequence at the first `F`, closes it at the second with an empty code, and reads the third as data. So the rule became "no **delimiter** is a code letter". The old reader never needed it, because it did not look for the end of a sequence.
+`|` is written `FFF`. The reader opens a sequence at the first `F`, closes it at the second with an empty code, and reads the third as data. So the rule became "no **delimiter** is a code letter". It widened once more when control characters were written as `\X0A\`: the proof of `not_mem_escape` needed no separator among `X` and the hexadecimal digits, and the rule took its present name, `well_formed_delimiters_not_code_characters`. The old reader never needed it, because it did not look for the end of a sequence.
 
 This is how side conditions are usually found: not by reading the standard more closely, but by a proof that cannot continue. The goal Lean cannot close names the missing fact, and a small counterexample confirms the fact is needed.
 
@@ -397,30 +405,30 @@ In the model, `brMark` is markup, and `brData` breaks `well_formed_subcomponent_
 
 Each row was run through `@glion/parser` and `@glion/to-hl7v2` with `|^~\&`:
 
-| Received                              | glion's tree holds        | Written back   | Same text                  |
-| ------------------------------------- | ------------------------- | -------------- | -------------------------- |
-| `a\F\b` (and `\S\` `\T\` `\R\` `\E\`) | the delimiter             | the same       | yes                        |
-| `\H\240*\N\`                          | the text `\H\240*\N\`     | the same       | yes                        |
-| `\.sp 2\`, `\.in+4\`, …               | the text                  | the same       | yes                        |
-| `\Zab\`, `\C2D41\`, `\M2442\`         | the text                  | the same       | yes                        |
-| `a\.br\b`                             | `a`, carriage return, `b` | `a\.br\b`      | yes                        |
-| `caf\XC3A9\`                          | `café`                    | `café`         | no, same value under UTF-8 |
-| `a\X0D\b`                             | `a`, carriage return, `b` | `a\.br\b`      | **no**                     |
-| `abcde\P\`                            | the text `abcde\P\`       | `abcde\E\P\E\` | **no**                     |
-| `\XFF\` (not UTF-8)                   | the text `\XFF\`          | `\E\XFF\E\`    | **no**                     |
-| `\Q\` (no such code)                  | the text `\Q\`            | `\E\Q\E\`      | **no**                     |
-| `\E\H\E\`                             | the text `\H\`            | `\H\`          | **no**                     |
-| `\E\.sp\E\`                           | the text `\.sp\`          | `\.sp\`        | **no**                     |
+| Received                              | glion's tree holds        | Written back   | Same text |
+| ------------------------------------- | ------------------------- | -------------- | --------- |
+| `a\F\b` (and `\S\` `\T\` `\R\` `\E\`) | the delimiter             | the same       | yes       |
+| `\H\240*\N\`                          | the text `\H\240*\N\`     | the same       | yes       |
+| `\.sp 2\`, `\.in+4\`, …               | the text                  | the same       | yes       |
+| `\Zab\`, `\C2D41\`, `\M2442\`         | the text                  | the same       | yes       |
+| `a\.br\b`                             | `a`, carriage return, `b` | `a\.br\b`      | yes       |
+| `caf\XC3A9\`                          | `café`                    | `café`         | **no**    |
+| `a\X0D\b`                             | `a`, carriage return, `b` | `a\.br\b`      | **no**    |
+| `abcde\P\`                            | the text `abcde\P\`       | `abcde\E\P\E\` | **no**    |
+| `\XFF\` (not UTF-8)                   | the text `\XFF\`          | `\E\XFF\E\`    | **no**    |
+| `Line1\X0A\Line2`                     | a line feed between       | the same       | yes       |
+| `\Q\` (no such code)                  | the text `\Q\`            | `\E\Q\E\`      | **no**    |
+| `\E\H\E\`                             | the text `\H\`            | `\H\`          | **no**    |
+| `\E\.sp\E\`                           | the text `\.sp\`          | `\.sp\`        | **no**    |
 
-Every **no** has one of three causes, and each is an issue:
+Every **no** has one of four causes, and each is an issue:
 
 - **Data and markup share the string** (#1165). `\E\H\E\` and `\E\.sp\E\` come back as commands. This is `glionValue_collides`.
 - **A sequence glion does not know becomes data** (#1166). The decoder keeps `\P\`, `\XFF\` and `\Q\` as text; the encoder recognises markup by a fixed list (`VERBATIM_SEQUENCE` in `@glion/utils`), and none of the three is on it, so each is escaped as data. The receiver of `abcde\E\P\E\` reads eight characters, not a value the sender truncated. In the model, `unescape` reads every code that is not a character as a sequence, whatever its letters.
 - **`\.br\` and the carriage return trade places** (#1167). One piece of markup is read as a character, so a character that arrived as `\X0D\` goes back out as markup.
+- **Hexadecimal data is read by default** (#1168). glion reads `\X41\` as `A` and `caf\XC3A9\` as `café` under its UTF-8 agreement (#659), and writes the characters back. The model carries both as written; reading them is an opt-in transform's job.
 
-`caf\XC3A9\` is not a defect: glion and the model share the agreement that a message is UTF-8 (#659), so the value is `café` either way. Only the text changes, and a sender writes `café`.
-
-The model also says what glion's tree needs: a sequence held apart from the characters around it, a parser that reads any code other than `F`, `S`, `T`, `R`, `E` as a sequence, and a serializer that writes a sequence back as its code. That is `unescape` and `escape`, and `unescape_escape` proves that the round trip is exact.
+The model also says what glion's tree needs: a sequence held apart from the characters around it, a parser that reads any code other than `F`, `S`, `T`, `R`, `E` and a control character's `\Xdd\` as a sequence, and a serializer that writes a sequence back as its code. That is `unescape` and `escape`, and `unescape_escape` proves that the round trip is exact.
 
 ## 17. The harness, as refinement
 
@@ -435,6 +443,26 @@ For values, the abstraction function reads glion's string by glion's own convent
 `#` is the escape character. The model sends the data `#F#` as `#E#F#E#`; glion reads it back as the string `#F#`; the abstraction function reads that as the sequence `F`. No abstraction function could do better: by `glionValue_collides`, the information is gone from the tree. That is the formal sense in which the defect lies in the tree, not in the parser or the serializer alone.
 
 The generator draws every kind of sequence the model defines, and data that only looks like one, and the properties are left to fail. The harness reports every difference between glion and the model; deciding which ones are defects is the owner's job, not the generator's. A generator narrowed until the properties pass would only record what the harness no longer looks at. Hexadecimal data is the one sequence it does not draw, and that is not a narrowing: in the model it is characters, so there is no `\X41\` value to draw.
+
+## 18. Sender and receiver: where things go wrong
+
+The model says what a text means. A real exchange has two programs, each with its own way of reading. Each case below was run through the oracle and through today's glion:
+
+| Case                                  | The sender writes                         | A receiver that reads it right                    | Where it goes wrong                                                                                                                                                                                    |
+| ------------------------------------- | ----------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A line feed in data                   | `PID\|Line1\X0A\Line2` (the model's text) | reads hexadecimal data: a line feed               | A receiver without hexadecimal data shows `\X0A\`. A sender that writes the line feed raw is worse: glion's parser reads `PID\|Line1␊Line2␍` as two segments, `PID` and one whose ID is `Line2`        |
+| A line break in a report              | `OBX\|1. Normal\.br\2. Stable`            | displays formatted text: two lines                | A consumer that extracts plain text shows `\.br\`, unless it uses the opt-in transform (#1168). glion today puts a carriage return in the value; written raw into another message, it ends the segment |
+| Latin-1 hexadecimal data              | `caf\XE9\`, with MSH-18 `8859/1`          | reads 0xE9 as Latin-1: `café`                     | 0xE9 alone is not UTF-8. glion keeps the text and writes back `caf\E\XE9\E\` (#1166), so the next receiver sees the characters `\XE9\`                                                                 |
+| UTF-8 hexadecimal data                | `caf\XC3A9\`                              | reads UTF-8: `café`                               | A Latin-1 receiver reads two bytes, `cafÃ©`. glion writes back `café` as raw UTF-8, which that receiver misreads the same way: decoding helped no one without the agreement                            |
+| A delimiter as hexadecimal data       | `PID\|\X7C\`                              | splits first, then reads the byte: the value `\|` | A receiver that decodes before it splits breaks the field in two. glion writes back `\F\`: the same value, a different text, so a relay that compares bytes or checks a signature fails                |
+| A carriage return as hexadecimal data | `PID\|a\X0D\b`                            | keeps the sequence, or shows a line break         | A receiver that decodes it and writes the value back raw ends the segment at it. glion writes back `a\.br\b`, turning data into a formatting command (#1167)                                           |
+| A carriage return in data             | `PID\|a␍b`                                | none: every receiver reads two segments           | The oracle names the rule it breaks, `well_formed_subcomponent_no_terminator`, and still writes the text, as `encode` writes text for any message                                                      |
+
+Three patterns account for every row.
+
+- **An agreement assumed but not shared.** Hexadecimal data means what MSH-18 and the two parties say. The model is safe here only because it does not read what it has not agreed on.
+- **Reading in the wrong order.** A receiver must split at separators before it decodes any sequence. `decode_encode` is a theorem about exactly that order, which is why `well_formed_escape_sequence_no_delimiter` and `well_formed_delimiters_not_code_characters` exist.
+- **Writing a decoded value back without escaping it.** Every raw carriage return and line feed above comes from a program that decoded a value and then wrote it out as it was. `escape` writes every character in a safe form, which is what `unescape_escape` relies on.
 
 # What you can now say
 
@@ -459,7 +487,7 @@ They go from predicting to proving to designing. Try each before opening its ans
 
 <details><summary>Answer</summary>
 
-`\R\\T\\E\`: each of the three characters is a delimiter. `S` is `sField`'s field separator, so it is written `\F\`. That message would break `well_formed_delimiters_not_escape_codes`, but `escape` writes text for any value, well formed or not, as `encode` does.
+`\R\\T\\E\`: each of the three characters is a delimiter. `S` is `sField`'s field separator, so it is written `\F\`. That message would break `well_formed_delimiters_not_code_characters`, but `escape` writes text for any value, well formed or not, as `encode` does.
 
 </details>
 
@@ -522,10 +550,23 @@ The data type of a field is not in the text: it comes from the segment definitio
 
 </details>
 
-**7. Open question.** `splitLocal` and `caret` are counterexamples to `decode_encode`, not to `encode_injective`. Are `well_formed_escape_sequence_no_delimiter` and `well_formed_delimiters_not_escape_codes` needed for `encode_injective`? Try to build two messages, well formed except for one of these rules, with the same text before you answer.
+**7. Open question.** `splitLocal` and `caret` are counterexamples to `decode_encode`, not to `encode_injective`. Are `well_formed_escape_sequence_no_delimiter` and `well_formed_delimiters_not_code_characters` needed for `encode_injective`? Try to build two messages, well formed except for one of these rules, with the same text before you answer.
 
 <details><summary>Things to weigh</summary>
 
 `escape` writes every escape character in data as `\E\`, so an escape character on the wire always opens or closes a sequence. A decoder that reads sequences before it splits at separators could recover `splitLocal`, so `encode` may be injective without the rule. The rules make the proof's decoder correct, which splits first as a receiver does. Showing injectivity without them would need a different decoder and a different proof; showing they are needed would need a counterexample. Either is a result.
+
+</details>
+
+**8. Which part of the model?** For each row of section 18's table, say which definition, rule or theorem of the model rules the problem out, or why none does.
+
+<details><summary>Answer</summary>
+
+- A raw line feed: `escapeChar` writes every control character as `\Xdd\`, so `encode` never writes one.
+- `\.br\` as plain text: nothing, on purpose. Markup is content, and a display decision is outside the model.
+- Latin-1 and UTF-8 hexadecimal data: nothing, on purpose. The model carries `\X…\` as written and makes no agreement.
+- A delimiter as hexadecimal data: `decode_encode`, which proves the split-first reading recovers the message; a decode-first receiver is outside it.
+- A carriage return as hexadecimal data: the model carries it as a sequence and never turns it into a character.
+- A carriage return in data: `well_formed_subcomponent_no_terminator`, with `oneSegment` as its counterexample.
 
 </details>
