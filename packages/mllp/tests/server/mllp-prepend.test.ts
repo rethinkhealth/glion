@@ -1,5 +1,4 @@
 // oxlint-disable require-await
-import { parseHL7v2 } from "@glion/hl7v2";
 
 import { Mllp } from "../../src/server/mllp";
 
@@ -14,7 +13,7 @@ function toBytes(msg: string): Uint8Array {
 }
 
 function createApp() {
-  return new Mllp().parser(parseHL7v2);
+  return new Mllp();
 }
 
 describe("Mllp.use({ prepend })", () => {

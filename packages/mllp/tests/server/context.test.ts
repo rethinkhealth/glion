@@ -1,9 +1,11 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 import { hl7v2Parser } from "@glion/parser";
+import { value } from "@glion/util-query";
 import { unified } from "unified";
 
 import { createContext } from "../../src/server/context";
+import { parseRequest } from "../../src/server/request";
 
 const SAMPLE_MESSAGE = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -13,87 +15,50 @@ const SAMPLE_MESSAGE = [
 
 const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
 
-function makeCtx(raw = SAMPLE_MESSAGE, bytes = SAMPLE_BYTES) {
+async function makeCtx(payload = SAMPLE_BYTES) {
   return createContext({
-    bytes,
     env: undefined,
-    processor: parseHL7v2,
-    raw,
+    request: await parseRequest(payload, parseHL7v2),
   });
 }
 
 describe("createContext", () => {
-  it("exposes req.raw and req.bytes", () => {
-    const ctx = makeCtx();
+  it("exposes req.raw", async () => {
+    const ctx = await makeCtx();
     expect(ctx.req.raw).toBe(SAMPLE_MESSAGE);
-    expect(ctx.req.bytes).toBe(SAMPLE_BYTES);
   });
 
-  it("exposes what the runtime passed to handle() as ctx.env", () => {
+  it("keeps the header as parsed when a handler changes ctx.req.tree", async () => {
+    const ctx = await makeCtx();
+    const controlId = value(ctx.req.tree, "MSH.10")?.node;
+    if (controlId?.type !== "subcomponent") {
+      throw new Error("The sample message has no MSH-10.");
+    }
+    controlId.value = "CHANGED";
+
+    expect(ctx.req.header.controlId).toBe("MSG001");
+  });
+
+  it("exposes what the runtime passed to handle() as ctx.env", async () => {
     const env = { region: "north" };
     const ctx = createContext({
-      bytes: SAMPLE_BYTES,
       env,
-      processor: parseHL7v2,
-      raw: SAMPLE_MESSAGE,
+      request: await parseRequest(SAMPLE_BYTES, parseHL7v2),
     });
     expect(ctx.env).toBe(env);
   });
 
-  it("extracts messageType from MSH-9.1", () => {
-    const ctx = makeCtx();
-    expect(ctx.messageType).toBe("ADT");
+  it("holds the request parseRequest() read as req", async () => {
+    const request = await parseRequest(SAMPLE_BYTES, parseHL7v2);
+    const ctx = createContext({
+      env: undefined,
+      request,
+    });
+    expect(ctx.req).toBe(request);
   });
 
-  it("extracts triggerEvent from MSH-9.2", () => {
-    const ctx = makeCtx();
-    expect(ctx.triggerEvent).toBe("A01");
-  });
-
-  it("extracts messageStructure from MSH-9.3", () => {
-    const ctx = makeCtx();
-    expect(ctx.messageStructure).toBe("ADT_A01");
-  });
-
-  it("extracts version from MSH-12", () => {
-    const ctx = makeCtx();
-    expect(ctx.version).toBe("2.5.1");
-  });
-
-  it("extracts controlId from MSH-10", () => {
-    const ctx = makeCtx();
-    expect(ctx.controlId).toBe("MSG001");
-  });
-
-  it("ast is the raw parsed tree (sync)", () => {
-    const ctx = makeCtx();
-    expect(ctx.ast).toBeDefined();
-    expect(ctx.ast.type).toBe("root");
-    expect(ctx.ast.children.length).toBeGreaterThan(0);
-  });
-
-  it("tree() returns the transformed tree (async, lazy)", async () => {
-    const ctx = makeCtx();
-    const tree = await ctx.tree();
-    expect(tree).toBeDefined();
-    expect(tree.type).toBe("root");
-    expect(tree.children.length).toBeGreaterThan(0);
-  });
-
-  it("populates file as VFile", () => {
-    const ctx = makeCtx();
-    expect(ctx.file).toBeDefined();
-  });
-
-  it("populates result from compiler", async () => {
-    // parseHL7v2 includes hl7v2Jsonify, so result should be defined
-    const ctx = makeCtx();
-    const result = await ctx.result();
-    expect(result).toBeDefined();
-  });
-
-  it("initializes res as undefined", () => {
-    const ctx = makeCtx();
+  it("initializes res as undefined", async () => {
+    const ctx = await makeCtx();
     expect(ctx.res).toBeUndefined();
   });
 
@@ -102,43 +67,39 @@ describe("createContext", () => {
       const parseOnly = unified().use(hl7v2Parser).freeze();
 
       const ctx = createContext({
-        bytes: SAMPLE_BYTES,
         env: undefined,
-        processor: parseOnly,
-        raw: SAMPLE_MESSAGE,
+        request: await parseRequest(SAMPLE_BYTES, parseOnly),
       });
 
       // Tree is parsed correctly
-      const tree = await ctx.tree();
+      const { tree } = ctx.req;
       expect(tree.type).toBe("root");
       expect(tree.children.length).toBeGreaterThan(0);
 
       // Routing fields extracted from tree
-      expect(ctx.messageType).toBe("ADT");
-      expect(ctx.triggerEvent).toBe("A01");
-      expect(ctx.controlId).toBe("MSG001");
+      expect(ctx.req.header.messageCode).toBe("ADT");
+      expect(ctx.req.header.triggerEvent).toBe("A01");
+      expect(ctx.req.header.controlId).toBe("MSG001");
 
       // VFile exists (always created)
-      expect(ctx.file).toBeDefined();
+      expect(ctx.req.file).toBeDefined();
 
       // No compiler → result is undefined
-      const result = await ctx.result();
+      const result = await ctx.req.result();
       expect(result).toBeUndefined();
     });
 
     it("works with full pipeline processor (parse + transform + compile)", async () => {
       const ctx = createContext({
-        bytes: SAMPLE_BYTES,
         env: undefined,
-        processor: parseHL7v2,
-        raw: SAMPLE_MESSAGE,
+        request: await parseRequest(SAMPLE_BYTES, parseHL7v2),
       });
 
       // Tree, file, and result all populated
-      const tree = await ctx.tree();
+      const { tree } = ctx.req;
       expect(tree.type).toBe("root");
-      expect(ctx.file).toBeDefined();
-      const result = await ctx.result();
+      expect(ctx.req.file).toBeDefined();
+      const result = await ctx.req.result();
       expect(result).toBeDefined();
 
       // Result is the compiled JSON from hl7v2Jsonify
@@ -146,83 +107,41 @@ describe("createContext", () => {
     });
   });
 
-  describe("lazy pipeline caching", () => {
-    it("tree() calls run() exactly once on repeated calls", async () => {
-      const spy = vi.spyOn(parseHL7v2, "run");
-      const ctx = makeCtx();
-      const a = await ctx.tree();
-      const b = await ctx.tree();
-      expect(a).toBe(b);
-      expect(spy).toHaveBeenCalledOnce();
-      spy.mockRestore();
-    });
-
-    it("concurrent tree() calls share one promise (run() called once)", async () => {
-      const spy = vi.spyOn(parseHL7v2, "run");
-      const ctx = makeCtx();
-      const [a, b] = await Promise.all([ctx.tree(), ctx.tree()]);
-      expect(a).toBe(b);
-      expect(spy).toHaveBeenCalledOnce();
-      spy.mockRestore();
-    });
-
-    it("result() internally triggers tree() — run() called once total", async () => {
-      const runSpy = vi.spyOn(parseHL7v2, "run");
-      const stringifySpy = vi.spyOn(parseHL7v2, "stringify");
-      const ctx = makeCtx();
-
-      // Only call result(), never call tree() directly
-      await ctx.result();
-
-      // result() must have called getTree() internally, which calls run()
-      expect(runSpy).toHaveBeenCalledOnce();
-      expect(stringifySpy).toHaveBeenCalledOnce();
-
-      // A subsequent tree() call should NOT trigger run() again
-      await ctx.tree();
-      expect(runSpy).toHaveBeenCalledOnce();
-
-      runSpy.mockRestore();
-      stringifySpy.mockRestore();
-    });
-
+  describe("compiled result", () => {
     it("result() calls stringify() exactly once on repeated calls", async () => {
       const spy = vi.spyOn(parseHL7v2, "stringify");
-      const ctx = makeCtx();
-      const a = await ctx.result();
-      const b = await ctx.result();
+      const ctx = await makeCtx();
+      const a = await ctx.req.result();
+      const b = await ctx.req.result();
       expect(a).toBe(b);
       expect(spy).toHaveBeenCalledOnce();
       spy.mockRestore();
     });
 
     it("concurrent result() calls share one promise (stringify() called once)", async () => {
-      const runSpy = vi.spyOn(parseHL7v2, "run");
-      const stringifySpy = vi.spyOn(parseHL7v2, "stringify");
-      const ctx = makeCtx();
-      const [a, b] = await Promise.all([ctx.result(), ctx.result()]);
+      const spy = vi.spyOn(parseHL7v2, "stringify");
+      const ctx = await makeCtx();
+      const [a, b] = await Promise.all([ctx.req.result(), ctx.req.result()]);
       expect(a).toBe(b);
-      expect(runSpy).toHaveBeenCalledOnce();
-      expect(stringifySpy).toHaveBeenCalledOnce();
-      runSpy.mockRestore();
-      stringifySpy.mockRestore();
+      expect(spy).toHaveBeenCalledOnce();
+      spy.mockRestore();
     });
   });
 
   describe("variable API", () => {
-    it("set and get variables", () => {
-      const ctx = makeCtx();
+    it("set and get variables", async () => {
+      const ctx = await makeCtx();
       ctx.set("foo", "bar");
       expect(ctx.get("foo")).toBe("bar");
     });
 
-    it("returns undefined for unset variables", () => {
-      const ctx = makeCtx();
+    it("returns undefined for unset variables", async () => {
+      const ctx = await makeCtx();
       expect(ctx.get("nonexistent")).toBeUndefined();
     });
 
-    it("exposes frozen var snapshot", () => {
-      const ctx = makeCtx();
+    it("exposes frozen var snapshot", async () => {
+      const ctx = await makeCtx();
       ctx.set("key1", "val1");
       ctx.set("key2", 42);
       const snapshot = ctx.var;
@@ -233,7 +152,7 @@ describe("createContext", () => {
   });
 
   // https://github.com/rethinkhealth/hl7v2/issues/489
-  it("extracts version from composite VID in MSH-12 (2.5.1^USA^ISO)", () => {
+  it("extracts version from composite VID in MSH-12 (2.5.1^USA^ISO)", async () => {
     const vidMessage = [
       "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1^USA^ISO",
       "EVN|A01|20240101120000",
@@ -241,8 +160,8 @@ describe("createContext", () => {
     ].join("\r");
     const vidBytes = new TextEncoder().encode(vidMessage);
 
-    const ctx = makeCtx(vidMessage, vidBytes);
+    const ctx = await makeCtx(vidBytes);
 
-    expect(ctx.version).toBe("2.5.1");
+    expect(ctx.req.header.version).toBe("2.5.1");
   });
 });

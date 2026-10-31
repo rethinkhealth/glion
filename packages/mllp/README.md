@@ -24,10 +24,8 @@ npm install @glion/mllp
 ```ts
 import { Mllp } from "@glion/mllp";
 import { serve } from "@glion/mllp/node";
-import { parseHL7v2 } from "@glion/hl7v2";
 
 const app = new Mllp()
-  .parser(parseHL7v2)
   .on("ADT^A01", async (ctx) => ({ raw: buildAckFor(ctx) }))
   .on("ORU^R01", async (ctx) => ({ raw: buildAckFor(ctx) }))
   .on("*", async (ctx) => ({
@@ -43,11 +41,21 @@ To run the app with live reload during development and a production start comman
 
 ### `Mllp`
 
-The app. `Mllp<E>` types `ctx.env` as `E`; it defaults to `unknown`. Built with a fluent chainable API:
+The app. `Mllp<E>` types `ctx.env` as `E`; it defaults to `unknown`.
+
+An app reads each message with `@glion/parser` and `@glion/lint-required-message-header` unless `.parser()` replaces them. An app that checks each message against its profile reads with `parseHL7v2` from `@glion/hl7v2`; `handle()` then rejects a message missing a segment or field the profile requires:
+
+```ts
+import { parseHL7v2 } from "@glion/hl7v2";
+
+const app = new Mllp().parser(parseHL7v2);
+```
+
+Built with a fluent chainable API:
 
 | Method                      | Description                                                                                                                                                                                                                    |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `.parser(processor)`        | Attach a `unified` processor (or `@glion/parser` alone) as the parse stage.                                                                                                                                                    |
+| `.parser(processor)`        | Replace the `unified` processor that reads each message; by default, `@glion/parser` and `@glion/lint-required-message-header` at `"error"`. It MUST report a fatal message for a message that does not start with an MSH.     |
 | `.use(middleware)`          | Register global middleware that runs for every message.                                                                                                                                                                        |
 | `.use(pattern, middleware)` | Register scoped middleware that runs only for matching message types.                                                                                                                                                          |
 | `.on(pattern, handler)`     | Register a terminal route handler for a message type or trigger event.                                                                                                                                                         |
@@ -119,7 +127,9 @@ MLLP framing lives in [`@glion/mllp-codec`](https://github.com/rethinkhealth/gli
 
 | Type                      | Description                                                                                                                                                                                 |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Context`                 | Request context with message data and routing fields.                                                                                                                                       |
+| `Context`                 | The context of one message: the request (`req`), the response (`res`), and what the app adds.                                                                                               |
+| `MllpRequest`             | The message that arrived: `raw`, `tree`, `file`, `header` and `result()`.                                                                                                                   |
+| `MessageHeader`           | The MSH fields that control processing, as `ctx.req.header` holds them.                                                                                                                     |
 | `Response`                | Response object `{ raw: string }`.                                                                                                                                                          |
 | `Hl7v2Processor`          | Unified `Processor` type for HL7v2 (`Processor<Root, Root \| undefined, Root \| undefined>` — head/tail admit `undefined` so the bare `unified().use(hl7v2Parser).freeze()` is assignable). |
 | `Middleware`              | Middleware function `(ctx, next) => ...`.                                                                                                                                                   |
@@ -141,8 +151,6 @@ Server-side failures are raised (or passed to `onError`) as `MllpServerError` �
 | Code                   | Meaning                                                                                                                                                                                       |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `CONNECTION_LOST`      | The connection was torn down (a reset, a broken pipe, a timeout). A socket's `readable` errors with it, and `handleConnection()` then resolves.                                               |
-| `NO_PARSER`            | `app.handle()` ran before a parser was registered via `app.parser()`.                                                                                                                         |
-| `INCOMPATIBLE_CHARSET` | `app.handle()` was given a message it could not decode as UTF-8 (the `CharsetError` is on `cause`).                                                                                           |
 | `INVALID_OPTION`       | `serve()` was given an app as its options, no `handle` function, or a `port` that is not an integer from 0 to 65535. The error's `option` names which: `options`, `handle` or `port`.         |
 | `PROTOCOL_VIOLATION`   | The MLLP byte stream was violated and the connection closed (the `MllpCodecError` is on `cause`). Raised by `handleConnection()`.                                                             |
 | `UNFRAMEABLE_RESPONSE` | A response given to the connection contains a VT or FS byte, which MLLP reserves for framing, and the connection closed (the `MllpCodecError` is on `cause`). Raised by `handleConnection()`. |
@@ -181,7 +189,7 @@ app.use("ADT^*", async (ctx, next) => {
 
 // Short-circuit: return a response without calling next().
 app.use(async (ctx) => {
-  if (!isAuthorized(ctx.ast)) {
+  if (!isAuthorized(ctx.req.tree)) {
     return { raw: buildNakFor(ctx, "Unauthorized") };
   }
 });
@@ -189,108 +197,46 @@ app.use(async (ctx) => {
 
 ## Context
 
-Available in every middleware and handler. The pipeline is lazy: only the parse step runs eagerly; transforms and compilation are deferred until accessed.
+Available in every middleware and handler. `ctx.req` is the message that arrived, `ctx.res` the response going back, and the rest is the app's.
 
-### Sync properties
+### Request
 
-| Property               | Description                                                                                                |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `ctx.req.raw`          | Original HL7v2 message string.                                                                             |
-| `ctx.req.bytes`        | Raw bytes from the MLLP frame.                                                                             |
-| `ctx.env`              | What the runtime passed to `handle()`: a `NodeEnv` under `serve()`, a Workers environment, or `undefined`. |
-| `ctx.messageType`      | MSH-9.1 (e.g. `"ADT"`).                                                                                    |
-| `ctx.triggerEvent`     | MSH-9.2 (e.g. `"A01"`).                                                                                    |
-| `ctx.messageStructure` | MSH-9.3 (e.g. `"ADT_A01"`).                                                                                |
-| `ctx.version`          | MSH-12 (e.g. `"2.5.1"`).                                                                                   |
-| `ctx.controlId`        | MSH-10 message control ID.                                                                                 |
-| `ctx.ast`              | Raw parsed AST — pre-transform, straight from the wire.                                                    |
-| `ctx.file`             | VFile (diagnostics accumulate after `tree()`).                                                             |
-| `ctx.set(key, value)`  | Store a variable.                                                                                          |
-| `ctx.get(key)`         | Retrieve a variable.                                                                                       |
-| `ctx.var`              | Read-only snapshot of all variables.                                                                       |
+Before routing, the processor has parsed the message and run its transformers, lint rules among them. A payload that is not UTF-8, that the processor throws on, or that the processor reports a fatal message for runs no middleware and no route: `handle()` rejects with the `CharsetError` of `@glion/util-charset`, the processor's error, or the first fatal message. The default processor reports a fatal message for a payload that does not start with an MSH, such as an empty frame. `parseHL7v2` from `@glion/hl7v2` also reports one for each finding of a rule it sets to `"error"`, such as a segment the event schema requires.
 
-### Async methods
-
-| Method               | Triggers                | Description                                      |
-| -------------------- | ----------------------- | ------------------------------------------------ |
-| `await ctx.tree()`   | `run()` (transform)     | Transformed AST — annotations, lint, grouping.   |
-| `await ctx.result()` | `run()` + `stringify()` | Compiled output (e.g. JSON from `hl7v2Jsonify`). |
-
-Both are cached — subsequent calls return the same value instantly.
-
-### `ctx.ast` vs `await ctx.tree()`
-
-Use `ctx.ast` when the parsed message is enough — reading MSH fields, building ACK/NAK responses, route filter functions, or middleware that doesn't need annotations. The parser has already decoded escape sequences, so every value is content:
+| Property                 | Description                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ctx.req.raw`            | The payload decoded as UTF-8.                                                                                                                                                                                                                                                                                                                                         |
+| `ctx.req.tree`           | The tree the processor parsed and ran its transformers on.                                                                                                                                                                                                                                                                                                            |
+| `ctx.req.file`           | VFile holding the processor's messages; none is fatal.                                                                                                                                                                                                                                                                                                                |
+| `ctx.req.header`         | The MSH fields that control processing, read before routing: `messageCode` (MSH-9.1), `triggerEvent` (MSH-9.2), `messageStructure` (MSH-9.3), `controlId` (MSH-10), `processingId` (MSH-11.1), `version` (MSH-12.1), `acceptAckType` (MSH-15) and `applicationAckType` (MSH-16). An absent field is an empty string; a change to `ctx.req.tree` does not change them. |
+| `await ctx.req.result()` | Compiled output (e.g. JSON from `hl7v2Jsonify`), or `undefined` when the processor has no compiler, as the default has none. Runs `stringify()` once; later calls resolve to the same value.                                                                                                                                                                          |
 
 ```ts
-// Fast — no pipeline cost.
-app.use((ctx, next) => {
-  console.log(`Received ${ctx.messageType}^${ctx.triggerEvent}`);
-  return next();
-});
-```
+import { value } from "@glion/util-query";
 
-Use `await ctx.tree()` when you need the fully processed tree — handlers that inspect annotations, lint findings, or resolved message structures:
-
-```ts
-// Triggers transform pipeline on first call.
-app.on("ADT^A01", async (ctx) => {
-  const tree = await ctx.tree();
-  // tree has annotations, message structure resolved, etc.
-  return { raw: "..." };
-});
-```
-
-Use `await ctx.result()` when you need the compiled output:
-
-```ts
 app.on("ORU^R01", async (ctx) => {
-  const json = await ctx.result(); // triggers transform + compile
-  await saveToDatabase(json);
-  return { raw: "..." };
+  // Any other field: read the tree with @glion/util-query.
+  const mrn = value(ctx.req.tree, "PID.3.1")?.value;
+  await saveToDatabase(mrn, await ctx.req.result());
+  return { raw: buildAckFor(ctx) };
 });
 ```
 
-### Writing middleware — prefer `ctx.ast`
+### Response and app
 
-Most middleware only needs routing fields or raw MSH data — both available synchronously from `ctx.ast`. Reach for `await ctx.tree()` only when you genuinely need the transformed tree.
-
-```ts
-// Good — sync, fast, no pipeline cost.
-function authMiddleware(): Middleware {
-  return (ctx, next) => {
-    if (!isAuthorized(ctx.ast)) {
-      return { raw: buildNak(ctx.ast, "Unauthorized") };
-    }
-    return next();
-  };
-}
-
-// Good — ACK middleware reads MSH fields from the pre-transform tree.
-function ackMiddleware(): Middleware {
-  return async (ctx, next) => {
-    await next();
-    ctx.res = { raw: toHl7v2(acknowledge(ctx.ast)) };
-  };
-}
-
-// Only when needed — triggers transform pipeline.
-function validationMiddleware(): Middleware {
-  return async (ctx, next) => {
-    const tree = await ctx.tree();
-    if (!isValid(tree)) {
-      return { raw: buildNak(ctx.ast, "Invalid") };
-    }
-    return next();
-  };
-}
-```
+| Property              | Description                                                                                                |
+| --------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `ctx.env`             | What the runtime passed to `handle()`: a `NodeEnv` under `serve()`, a Workers environment, or `undefined`. |
+| `ctx.set(key, value)` | Store a variable.                                                                                          |
+| `ctx.get(key)`        | Retrieve a variable.                                                                                       |
+| `ctx.var`             | Read-only snapshot of all variables.                                                                       |
+| `ctx.res`             | Response to send back. Set by middleware or handler.                                                       |
 
 ## Error handling
 
 ```ts
 app.onError(async (err, ctx) => {
-  console.error(`Error processing ${ctx.controlId}:`, err.message);
+  console.error(`Error processing ${ctx.req.header.controlId}:`, err.message);
   return { raw: buildNakFor(ctx, err.message) };
 });
 ```
@@ -316,10 +262,9 @@ Every connection has TCP keep-alive, with the first probe after 60 s idle, and N
 ```ts
 import fs from "node:fs";
 import { Mllp } from "@glion/mllp";
-import { parseHL7v2 } from "@glion/hl7v2";
 import { serve } from "@glion/mllp/node";
 
-const app = new Mllp().parser(parseHL7v2);
+const app = new Mllp();
 
 const server = serve({
   handle: app.handle,
@@ -359,10 +304,9 @@ const server = serve({
 A Worker passes its bindings as `env`, typed by `Mllp<Env>`:
 
 ```ts
-import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
 
-const app = new Mllp<Env>().parser(parseHL7v2).on("ADT^A01", async (ctx) => {
+const app = new Mllp<Env>().on("ADT^A01", async (ctx) => {
   await ctx.env.ADMISSIONS.send(ctx.req.raw);
   return { raw: buildAckFor(ctx) };
 });
@@ -392,7 +336,7 @@ Instead, the `Mllp` engine is middleware-first:
 - **Custom error responses** — use `app.onError()` for application-specific handling.
 
 ```ts
-const app = new Mllp().parser(parseHL7v2);
+const app = new Mllp();
 
 app.use(logger()); // observability — provided by middleware
 

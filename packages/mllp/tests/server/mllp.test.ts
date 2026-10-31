@@ -1,11 +1,21 @@
 // oxlint-disable require-await
+import type { Root } from "@glion/ast";
 import { parseHL7v2 } from "@glion/hl7v2";
 import { hl7v2Parser } from "@glion/parser";
 import { CharsetError } from "@glion/util-charset";
 import { unified } from "unified";
+import type { Plugin } from "unified";
 
-import { MllpServerError } from "../../src/errors";
 import { Mllp } from "../../src/server/mllp";
+
+/** A unified parser plugin whose parse step throws `error`. */
+function throwingParser(error: Error): Plugin<[], string, Root> {
+  return function parser() {
+    this.parser = () => {
+      throw error;
+    };
+  };
+}
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -37,7 +47,7 @@ const text = (reply: Uint8Array | undefined) =>
   reply ? new TextDecoder().decode(reply) : undefined;
 
 function createApp() {
-  return new Mllp().parser(parseHL7v2);
+  return new Mllp();
 }
 
 describe("Mllp", () => {
@@ -57,42 +67,29 @@ describe("Mllp", () => {
   });
 
   describe("parser() lifecycle stage", () => {
-    it("throws MllpServerError when handle() called without parser", async () => {
-      const app = new Mllp();
-      app.on("*", async () => RESPONSE_OK);
+    it("reads a message with @glion/parser when no processor is given", async () => {
+      const app = new Mllp().on("*", () => RESPONSE_OK);
 
-      await expect(app.handle(toBytes(SAMPLE_ADT))).rejects.toThrow(
-        MllpServerError
-      );
-
-      await expect(app.handle(toBytes(SAMPLE_ADT))).rejects.toThrow(
-        "No parser is registered"
-      );
+      const response = await app.handle(toBytes(SAMPLE_ADT));
+      expect(text(response)).toBe(RESPONSE_OK.raw);
     });
 
-    it("missing-parser error has NO_PARSER code", async () => {
-      const app = new Mllp();
-      try {
-        await app.handle(toBytes(SAMPLE_ADT));
-        expect.unreachable("should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(MllpServerError);
-        expect((error as MllpServerError).code).toBe("NO_PARSER");
-      }
-    });
+    it("rejects a message that does not start with an MSH, running no middleware, when no processor is given", async () => {
+      const ran: string[] = [];
+      const app = new Mllp()
+        .use(async (_ctx, next) => {
+          ran.push("middleware");
+          await next();
+        })
+        .on("*", () => {
+          ran.push("handler");
+          return RESPONSE_OK;
+        });
 
-    it("missing-parser error is NOT routed to onError", async () => {
-      const app = new Mllp();
-      const errorHandlerCalled = { value: false };
-      app.onError(() => {
-        errorHandlerCalled.value = true;
-        return { raw: "error" };
-      });
-
-      await expect(app.handle(toBytes(SAMPLE_ADT))).rejects.toThrow(
-        MllpServerError
+      await expect(app.handle(toBytes("PID|1||12345"))).rejects.toThrow(
+        "The first segment is not the message header segment; a message must start with the message header segment (`MSH`)."
       );
-      expect(errorHandlerCalled.value).toBe(false);
+      expect(ran).toEqual([]);
     });
 
     it("last-write-wins when parser() called multiple times", async () => {
@@ -112,14 +109,14 @@ describe("Mllp", () => {
       secondSpy.mockRestore();
     });
 
-    it("ctx.ast is always available synchronously", async () => {
+    it("ctx.req.tree is the tree the processor read", async () => {
       const app = createApp();
       let astType = "";
       let childrenCount = 0;
 
       app.on("ADT^A01", (ctx) => {
-        astType = ctx.ast.type;
-        childrenCount = ctx.ast.children.length;
+        astType = ctx.req.tree.type;
+        childrenCount = ctx.req.tree.children.length;
         return RESPONSE_OK;
       });
 
@@ -128,26 +125,12 @@ describe("Mllp", () => {
       expect(childrenCount).toBeGreaterThan(0);
     });
 
-    it("ctx.tree() returns the transformed tree lazily", async () => {
-      const app = createApp();
-      let treeType = "";
-
-      app.on("ADT^A01", async (ctx) => {
-        const tree = await ctx.tree();
-        treeType = tree.type;
-        return RESPONSE_OK;
-      });
-
-      await app.handle(toBytes(SAMPLE_ADT));
-      expect(treeType).toBe("root");
-    });
-
-    it("populates ctx.file with VFile", async () => {
+    it("populates ctx.req.file with VFile", async () => {
       const app = createApp();
       let fileExists = false;
 
       app.on("ADT^A01", async (ctx) => {
-        fileExists = ctx.file !== undefined;
+        fileExists = ctx.req.file !== undefined;
         return RESPONSE_OK;
       });
 
@@ -155,17 +138,55 @@ describe("Mllp", () => {
       expect(fileExists).toBe(true);
     });
 
-    it("populates ctx.result when processor has a compiler", async () => {
-      const app = createApp(); // parseHL7v2 includes hl7v2Jsonify
+    it("populates ctx.req.result() when processor has a compiler", async () => {
+      const app = new Mllp().parser(parseHL7v2); // includes hl7v2Jsonify
       let resultExists = false;
 
       app.on("ADT^A01", async (ctx) => {
-        resultExists = (await ctx.result()) !== undefined;
+        resultExists = (await ctx.req.result()) !== undefined;
         return RESPONSE_OK;
       });
 
-      await app.handle(toBytes(SAMPLE_ADT));
+      await app.handle(toBytes(`${SAMPLE_ADT}\rPV1|1|I`));
       expect(resultExists).toBe(true);
+    });
+
+    it("rejects with the first fatal message, running no middleware, a message the processor reports one for", async () => {
+      const ran: string[] = [];
+      const app = new Mllp()
+        .parser(parseHL7v2)
+        .use(async (_ctx, next) => {
+          ran.push("middleware");
+          await next();
+        })
+        .on("*", () => {
+          ran.push("handler");
+          return RESPONSE_OK;
+        });
+
+      // An ADT^A01 with no PV1, which the event schema requires.
+      await expect(app.handle(toBytes(SAMPLE_ADT))).rejects.toThrow(
+        "Segment `PV1` is missing; the event schema requires it at this point."
+      );
+      expect(ran).toEqual([]);
+    });
+
+    it("rejects with what the parser throws, running no middleware and no route", async () => {
+      const ran: string[] = [];
+      const failure = new Error("parser failure");
+      const app = new Mllp()
+        .parser(unified().use(throwingParser(failure)).freeze())
+        .use(async (_ctx, next) => {
+          ran.push("middleware");
+          await next();
+        })
+        .on("*", () => {
+          ran.push("handler");
+          return RESPONSE_OK;
+        });
+
+      await expect(app.handle(toBytes(SAMPLE_ADT))).rejects.toBe(failure);
+      expect(ran).toEqual([]);
     });
   });
 
@@ -300,7 +321,7 @@ describe("Mllp", () => {
     it("routes with filter on messageType", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.messageType === "ADT",
+        (ctx) => ctx.req.header.messageCode === "ADT",
         async () => RESPONSE_OK
       );
 
@@ -311,7 +332,7 @@ describe("Mllp", () => {
     it("filter rejects non-matching messages", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.messageType === "ADT",
+        (ctx) => ctx.req.header.messageCode === "ADT",
         async () => RESPONSE_OK
       );
 
@@ -322,7 +343,9 @@ describe("Mllp", () => {
     it("filter can inspect triggerEvent", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.messageType === "ADT" && ctx.triggerEvent === "A01",
+        (ctx) =>
+          ctx.req.header.messageCode === "ADT" &&
+          ctx.req.header.triggerEvent === "A01",
         async () => RESPONSE_OK
       );
 
@@ -333,7 +356,7 @@ describe("Mllp", () => {
     it("filter can inspect version", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.version === "2.3",
+        (ctx) => ctx.req.header.version === "2.3",
         async () => RESPONSE_OK
       );
 
@@ -347,7 +370,7 @@ describe("Mllp", () => {
     it("filter can inspect controlId", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.controlId === "MSG001",
+        (ctx) => ctx.req.header.controlId === "MSG001",
         async () => RESPONSE_OK
       );
 
@@ -359,7 +382,7 @@ describe("Mllp", () => {
     });
 
     it("filter can inspect ctx.env", async () => {
-      const app = new Mllp<{ region: string }>().parser(parseHL7v2);
+      const app = new Mllp<{ region: string }>();
       app.on(
         (ctx) => ctx.env.region === "north",
         async () => RESPONSE_OK
@@ -375,7 +398,7 @@ describe("Mllp", () => {
       const app = createApp();
       app.on("ADT^A01", async () => RESPONSE_OK);
       app.on(
-        (ctx) => ctx.messageType === "ADT",
+        (ctx) => ctx.req.header.messageCode === "ADT",
         async () => RESPONSE_REJECT
       );
 
@@ -386,7 +409,7 @@ describe("Mllp", () => {
     it("filter wins over string pattern when registered first", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.messageType === "ADT",
+        (ctx) => ctx.req.header.messageCode === "ADT",
         async () => RESPONSE_OK
       );
       app.on("ADT^A01", async () => RESPONSE_REJECT);
@@ -400,7 +423,7 @@ describe("Mllp", () => {
       const middlewareRan = { value: false };
 
       app.use(
-        (ctx) => ctx.version === "2.3",
+        (ctx) => ctx.req.header.version === "2.3",
         async (_ctx, next) => {
           middlewareRan.value = true;
           await next();
@@ -419,7 +442,7 @@ describe("Mllp", () => {
     it("filter with ast inspection", async () => {
       const app = createApp();
       app.on(
-        (ctx) => ctx.ast.children.length > 2,
+        (ctx) => ctx.req.tree.children.length > 2,
         async () => RESPONSE_OK
       );
 
@@ -444,7 +467,7 @@ describe("handle() env", () => {
   it("passes the env it is given to ctx.env unchanged", async () => {
     const env = { region: "north" };
     let seen: unknown;
-    const app = new Mllp<typeof env>().parser(parseHL7v2).on("*", (ctx) => {
+    const app = new Mllp<typeof env>().on("*", (ctx) => {
       seen = ctx.env;
       return RESPONSE_OK;
     });
@@ -473,26 +496,19 @@ describe("handle() env", () => {
 });
 
 describe("handle() payload", () => {
-  it("gives ctx.req the payload and its UTF-8 text", async () => {
-    let req: unknown;
-    const payload = toBytes(SAMPLE_ADT);
-    const app = createApp().on("*", (ctx) => {
-      req = ctx.req;
-      return RESPONSE_OK;
-    });
+  it("rejects with the CharsetError of a payload that is not UTF-8, running no middleware and no route", async () => {
+    const ran: string[] = [];
+    const app = createApp()
+      .use(async (_ctx, next) => {
+        ran.push("middleware");
+        await next();
+      })
+      .on("*", () => {
+        ran.push("handler");
+        return RESPONSE_OK;
+      });
 
-    await app.handle(payload);
-    expect(req).toEqual({ bytes: payload, raw: SAMPLE_ADT });
-  });
-
-  it("rejects with INCOMPATIBLE_CHARSET, the CharsetError on cause, for a payload that is not UTF-8", async () => {
-    const app = createApp().on("*", () => RESPONSE_OK);
-
-    const rejected = expect(app.handle(LATIN1_ADT)).rejects;
-    await rejected.toBeInstanceOf(MllpServerError);
-    await rejected.toMatchObject({
-      cause: expect.any(CharsetError),
-      code: "INCOMPATIBLE_CHARSET",
-    });
+    await expect(app.handle(LATIN1_ADT)).rejects.toThrow(CharsetError);
+    expect(ran).toEqual([]);
   });
 });

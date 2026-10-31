@@ -16,7 +16,6 @@ import { once } from "node:events";
 import net from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
 
-import { parseHL7v2 } from "@glion/hl7v2";
 import { frame } from "@glion/mllp-codec";
 import { encodeBytes } from "@glion/util-charset";
 import { afterEach, describe, expect, it } from "vitest";
@@ -39,10 +38,10 @@ describe("a remote system that closes its side after sending", () => {
   });
 
   it("gets a reply to every message it sent", async () => {
-    const app = new Mllp().parser(parseHL7v2).on("*", async (ctx) => {
+    const app = new Mllp().on("*", async (ctx) => {
       await delay(20);
       return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
       };
     });
     server = serve({ handle: app.handle, port: 0 });

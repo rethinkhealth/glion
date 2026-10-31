@@ -1,5 +1,4 @@
-import type { Root } from "@glion/ast";
-import type { VFile } from "vfile";
+import type { MllpRequest } from "./request";
 
 /**
  * The `env` argument of `handle()`: optional when `E` admits `undefined`,
@@ -19,22 +18,12 @@ export interface Response {
 }
 
 /**
- * The MLLP context object.
- *
- * Routing fields (messageType, triggerEvent, etc.) are extracted from
- * the **pre-transform** parsed tree and are always available synchronously.
- *
- * The transformed tree, VFile, and compiled result are lazy — they
- * trigger pipeline stages on first access. See ADR-0013.
+ * The MLLP context of one message: the request that arrived, the response
+ * going back, and what the app adds.
  */
 export interface Context<E = unknown> {
-  /** Incoming message data */
-  readonly req: {
-    /** Original HL7 message string (without MLLP framing) */
-    readonly raw: string;
-    /** Raw bytes from MLLP frame payload */
-    readonly bytes: Uint8Array;
-  };
+  /** The message that arrived, as the app's processor read it. */
+  readonly req: MllpRequest;
 
   /**
    * What the runtime passed to `handle()` with this message, such as a
@@ -43,52 +32,8 @@ export interface Context<E = unknown> {
    */
   readonly env: E;
 
-  /**
-   * Parsed AST — always available synchronously. Use this for reading
-   * MSH fields, building ACKs, routing, or any operation that doesn't
-   * need to wait for transforms to complete.
-   *
-   * Note: this is the same object reference as the tree returned by
-   * `tree()`. After `tree()` resolves, transformers may have enriched
-   * it in-place (e.g., resolved message structure). The routing fields
-   * (messageType, triggerEvent, etc.) are cached as separate string
-   * properties and keep the values as parsed regardless of transforms.
-   */
-  readonly ast: Root;
-
-  /**
-   * Transformed AST. Triggers `run()` (transformers) on first call.
-   * Cached after first access — subsequent calls return the same tree.
-   */
-  tree(): Promise<Root>;
-
-  /**
-   * VFile with diagnostics and lint messages. Created during context
-   * creation. Diagnostics accumulate after `tree()` triggers transformers.
-   */
-  file: VFile;
-
-  /**
-   * Compiled result from the processor's compiler (e.g., JSON from
-   * hl7v2Jsonify). Triggers both `run()` and `stringify()` on first call.
-   * Undefined when the processor has no compiler.
-   * Cached after first access.
-   */
-  result(): Promise<unknown | undefined>;
-
   /** Response to send back. Set by middleware or handler. */
   res: Response | undefined;
-
-  /** MSH-9.1 message type (e.g., "ADT") — from pre-transform parse */
-  messageType: string;
-  /** MSH-9.2 trigger event (e.g., "A01") — from pre-transform parse */
-  triggerEvent: string;
-  /** MSH-9.3 message structure (e.g., "ADT_A01") — from pre-transform parse */
-  messageStructure: string;
-  /** MSH-12 version (e.g., "2.5.1") — from pre-transform parse */
-  version: string;
-  /** MSH-10 message control ID — from pre-transform parse */
-  controlId: string;
 
   /** Store a variable */
   set<K extends string>(key: K, value: unknown): void;
@@ -148,8 +93,8 @@ export type RouteFilter<E = unknown> = (ctx: Context<E>) => boolean;
 export interface RoutePattern {
   /** Original pattern string (e.g., "ADT^A01") */
   readonly source: string;
-  /** Message type to match, or "*" for wildcard */
-  readonly messageType: string;
+  /** MSH-9.1 message code to match, or "*" for wildcard */
+  readonly messageCode: string;
   /** Trigger event to match, or "*" for wildcard */
   readonly triggerEvent: string;
 }
@@ -160,31 +105,32 @@ export interface RoutePattern {
  */
 export function parsePattern(pattern: string): RoutePattern {
   if (pattern === "*") {
-    return { messageType: "*", source: pattern, triggerEvent: "*" };
+    return { messageCode: "*", source: pattern, triggerEvent: "*" };
   }
 
   const caretIndex = pattern.indexOf("^");
   if (caretIndex === -1) {
-    return { messageType: pattern, source: pattern, triggerEvent: "*" };
+    return { messageCode: pattern, source: pattern, triggerEvent: "*" };
   }
 
   return {
-    messageType: pattern.slice(0, caretIndex) || "*",
+    messageCode: pattern.slice(0, caretIndex) || "*",
     source: pattern,
     triggerEvent: pattern.slice(caretIndex + 1) || "*",
   };
 }
 
 /**
- * Test whether a route pattern matches a given message type and trigger event.
+ * Test whether a route pattern matches a given message code (MSH-9.1) and
+ * trigger event (MSH-9.2).
  */
 export function matchPattern(
   pattern: RoutePattern,
-  messageType: string,
+  messageCode: string,
   triggerEvent: string
 ): boolean {
   const typeMatch =
-    pattern.messageType === "*" || pattern.messageType === messageType;
+    pattern.messageCode === "*" || pattern.messageCode === messageCode;
   const eventMatch =
     pattern.triggerEvent === "*" || pattern.triggerEvent === triggerEvent;
   return typeMatch && eventMatch;

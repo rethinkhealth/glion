@@ -55,18 +55,6 @@ describe("MllpServerError", () => {
     );
   });
 
-  it("states that the inbound message is not UTF-8", () => {
-    expect(
-      new MllpServerError(MllpServerErrorCode.INCOMPATIBLE_CHARSET).message
-    ).toBe("The inbound message is not valid UTF-8; only UTF-8 is supported.");
-  });
-
-  it("states that no parser is registered", () => {
-    expect(new MllpServerError(MllpServerErrorCode.NO_PARSER).message).toBe(
-      "No parser is registered; `app.handle()` reads each message with the processor `app.parser()` is given."
-    );
-  });
-
   it("states that the byte stream is not framed as MLLP requires", () => {
     expect(
       new MllpServerError(MllpServerErrorCode.PROTOCOL_VIOLATION).message
