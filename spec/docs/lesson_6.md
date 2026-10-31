@@ -57,6 +57,8 @@ The table mixes three different jobs, and a model has to tell them apart.
 - **Markup.** `\H\`, `\N\` and the formatting commands are not characters. `\H\240*\N\` is the four characters `240*` with an instruction to make them stand out, and §2.7.4 leaves the how to the receiver: "reverse video, boldface, underlining, blink, an alternate color". `\.br\` belongs here too: §2.7.7 defines it as "Begin new output line", an instruction for display, not a carriage return in the value.
 - **By agreement.** `\X…\` and `\Z…\` mean what sender and receiver agree on, "beyond the scope of this Standard" (§2.7.6, §2.7.8). `\C…\` and `\M…\` change how the characters after them are read.
 
+An agreement can move a sequence from the third kind to the first. The specification adopts the one glion uses (#659): a message is UTF-8. Under it, `\X41\` is the byte 0x41, which is the character `A`, so hexadecimal data is a way of writing characters, like `\F\`. Section 7 shows what that does to the model.
+
 The distinction that matters for a model: a sequence of the first kind is **how a value is written**; a sequence of the other two kinds is **part of what the value is**. `\F\` disappears when a receiver reads the value. `\H\` does not: it is information the sender meant to send.
 
 # Part II: Choosing a representation
@@ -145,7 +147,6 @@ def isDefinedSequence : List Char → Bool
   | ['P'] | ['H'] | ['N'] => true
   | 'C' :: ds => ds.length == 4 && ds.all isHexDigit
   | 'M' :: ds => (ds.length == 4 || ds.length == 6) && ds.all isHexDigit
-  | 'X' :: ds => isHexPairs ds
   | 'Z' :: _ => true
   | '.' :: command => isFormattingCommand command
   | _ => false
@@ -154,13 +155,13 @@ def isDefinedSequence : List Char → Bool
 `isFormattingCommand` accepts the eight commands of §2.7.7: `.sp` and `.sk` with an optional count, `.in` and `.ti` with a signed number, and `.br`, `.fi`, `.nf` and `.ce` with none, each argument after an optional space.
 
 ```lean
-#eval ["P", "H", "N", "C2D41", "M2442", "XC3A9", "Zab", ".br", ".sp", ".sp 2", ".in+4", ".ti-4", ".ce"].map (isDefinedSequence ·.toList)
--- [true, true, true, true, true, true, true, true, true, true, true, true, true]
-#eval ["F", "Q", "X", "X0", "Xab", "C2D4", ".sp x", ".in", ".xx", ""].map (isDefinedSequence ·.toList)
--- [false, false, false, false, false, false, false, false, false, false]
+#eval ["P", "H", "N", "C2D41", "M2442", "Zab", ".br", ".sp", ".sp 2", ".in+4", ".ti-4", ".ce"].map (isDefinedSequence ·.toList)
+-- [true, true, true, true, true, true, true, true, true, true, true, true]
+#eval ["F", "X41", "Q", "C2D4", "C2d41", ".sp x", ".in", ".xx", "", "Z|"].map (isDefinedSequence ·.toList)
+-- [false, false, false, false, false, false, false, false, false, true]
 ```
 
-`F` is false on purpose: the five delimiter codes are characters, not sequences. `Xab` is false because §2.7.6 lists the hexadecimal digits as "0, 1, . . . , 9, A, . . . , F", in uppercase.
+`F` is false on purpose: the five delimiter codes are characters, not sequences. `X41` is false for the same reason, by the agreement of section 2: hexadecimal data is characters, so a value holds `A` and never the piece `\X41\`. A sender writes `A`, and a receiver that reads `\X41\` reads `A`. §2.7.6 leaves this choice open, so the README records it with the specification's other decisions. `C2d41` is false because §2.7.6 lists the hexadecimal digits as "0, 1, . . . , 9, A, . . . , F", in uppercase. `Z|` is true here: whether a sequence may hold a delimiter is a separate rule (section 9).
 
 A formalization must also say what it leaves out, and this one does (README, "Not yet covered"): which data types may use which sequence, because a message here has no data types; and where in a line `\.in\` and `\.ti\` may stand.
 
@@ -198,7 +199,7 @@ A counterexample is the stronger justification: it shows the rule is necessary. 
 
 The four rules about values, one at a time:
 
-**`well_formed_subcomponent_no_terminator`: no carriage return in data.** No sequence of §2.7 stands for one: `\.br\` is markup, and `\X0D\` is data by agreement. Without the rule, two messages share a text:
+**`well_formed_subcomponent_no_terminator`: no carriage return in data.** No sequence of §2.7 stands for one in the model: `\.br\` is markup, and `\X0D\` is, by the agreement of section 2, this very character, so the rule excludes it in either form. Without the rule, two messages share a text:
 
 ```lean
 def oneSegment : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a\rPV1"]]]]⟩]⟩
@@ -417,7 +418,7 @@ Every **no** has one of three causes, and each is an issue:
 - **A sequence glion does not know becomes data** (#1166). The decoder keeps `\P\`, `\XFF\` and `\Q\` as text; the encoder recognises markup by a fixed list (`VERBATIM_SEQUENCE` in `@glion/utils`), and none of the three is on it, so each is escaped as data. The receiver of `abcde\E\P\E\` reads eight characters, not a value the sender truncated. In the model, `unescape` reads every code that is not a character as a sequence, whatever its letters.
 - **`\.br\` and the carriage return trade places** (#1167). One piece of markup is read as a character, so a character that arrived as `\X0D\` goes back out as markup.
 
-`caf\XC3A9\` is not a defect: glion's agreement is that `\X…\` holds UTF-8 bytes (#659), under which the value is the same. The model carries `\X…\` uninterpreted, as §2.7.6 asks.
+`caf\XC3A9\` is not a defect: glion and the model share the agreement that a message is UTF-8 (#659), so the value is `café` either way. Only the text changes, and a sender writes `café`.
 
 The model also says what glion's tree needs: a sequence held apart from the characters around it, a parser that reads any code other than `F`, `S`, `T`, `R`, `E` as a sequence, and a serializer that writes a sequence back as its code. That is `unescape` and `escape`, and `unescape_escape` proves that the round trip is exact.
 
@@ -433,7 +434,7 @@ For values, the abstraction function reads glion's string by glion's own convent
 
 `#` is the escape character. The model sends the data `#F#` as `#E#F#E#`; glion reads it back as the string `#F#`; the abstraction function reads that as the sequence `F`. No abstraction function could do better: by `glionValue_collides`, the information is gone from the tree. That is the formal sense in which the defect lies in the tree, not in the parser or the serializer alone.
 
-The generator draws every kind of sequence the model defines, `\X…\` included, so the properties also fail on glion's UTF-8 agreement: glion reads `\X41\` as `A` and writes `A` back, where the model carries the sequence. That failure is kept on purpose. The harness reports every difference between glion and the model, and deciding which ones are defects is the owner's job, not the generator's. A generator narrowed until the properties pass would only record what the harness no longer looks at.
+The generator draws every kind of sequence the model defines, and data that only looks like one, and the properties are left to fail. The harness reports every difference between glion and the model; deciding which ones are defects is the owner's job, not the generator's. A generator narrowed until the properties pass would only record what the harness no longer looks at. Hexadecimal data is the one sequence it does not draw, and that is not a narrowing: in the model it is characters, so there is no `\X41\` value to draw.
 
 # What you can now say
 
@@ -467,12 +468,12 @@ They go from predicting to proving to designing. Try each before opening its ans
 ```lean
 def odd : Message :=
   ⟨Delimiters.suggested, [], [⟨"OBX".toList,
-    [[[[[.sequence "Xab".toList]], [[.sequence ".in".toList]]], [[[.sequence "Za~b".toList]]]]]⟩]⟩
+    [[[[[.sequence "C2d41".toList]], [[.sequence ".in".toList]]], [[[.sequence "Za~b".toList]]]]]⟩]⟩
 ```
 
 <details><summary>Answer</summary>
 
-`["well_formed_escape_sequence_defined", "well_formed_escape_sequence_no_delimiter"]`. `Xab` has lowercase hexadecimal digits and `.in` has no number, so neither is defined; `Za~b` holds the repetition separator. `#eval odd.failures` confirms it.
+`["well_formed_escape_sequence_defined", "well_formed_escape_sequence_no_delimiter"]`. `C2d41` has a lowercase hexadecimal digit and `.in` has no number, so neither is defined; `Za~b` holds the repetition separator. `#eval odd.failures` confirms it.
 
 </details>
 

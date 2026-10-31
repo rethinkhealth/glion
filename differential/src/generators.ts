@@ -38,8 +38,10 @@ const DELIMITER_POOL = ["|", "^", "~", "\\", "&", "#", "*", "!", "%", "+"];
 // (`well_formed_subcomponent_no_terminator`), and nothing below U+0020.
 const DATA = [..."abcFSTREXYZ019 .-"];
 // Escape sequences of §2.7, by escape code ID and data characters: truncation,
-// a character set, highlighting, hexadecimal, local, and the formatting
-// commands of formatted text. A sequence that holds one of the message's
+// a character set, highlighting, local, and the formatting commands of
+// formatted text. Hexadecimal data (`\X41\`) is not among them: the
+// specification reads it as UTF-8 characters, so a value holds `A`, never
+// `\X41\`. A sequence that holds one of the message's
 // delimiters is not drawn (`well_formed_escape_sequence_no_delimiter`).
 const SEQUENCES = [
   "P",
@@ -47,9 +49,6 @@ const SEQUENCES = [
   "M2442",
   "H",
   "N",
-  "X41",
-  "XC3A9",
-  "X0D",
   "Zab",
   ".br",
   ".sp",
