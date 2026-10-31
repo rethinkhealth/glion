@@ -1,3 +1,4 @@
+import Hl7v2.Spec.Escape
 import Hl7v2.Spec.Message
 
 /-!
@@ -9,12 +10,13 @@ How a sender writes a message as text. Source: HL7 Version 2.8.1, Chapter 2 (Con
 namespace Hl7v2.Spec
 
 /-! The sender's construction: each segment ID, then each field preceded by the field
-separator, then the segment terminator. -/
+separator, then the segment terminator. Each value is written with its delimiters
+as escape sequences (§2.7.1). -/
 
 def encodeField (d : Delimiters) (f : Field) : List Char :=
   [d.repetition].intercalate <| f.map fun r =>
     [d.component].intercalate <| r.map fun c =>
-      [d.subcomponent].intercalate c
+      [d.subcomponent].intercalate (c.map (escape d))
 
 /-- "insert field separator" before each field. -/
 def encodeFields (d : Delimiters) (fields : List Field) : List Char :=

@@ -45,9 +45,9 @@ encode twoComponents = encode twoFields ∧ twoComponents ≠ twoFields
 #print axioms wf_iff_failures_nil
 
 /--
-info: ["well_formed_delimiters_distinct", "well_formed_segment_id_length", "well_formed_segment_id_no_terminator",
- "well_formed_field_has_repetition", "well_formed_repetition_has_component", "well_formed_component_has_subcomponent",
- "well_formed_subcomponent_clean"]
+info: ["well_formed_delimiters_distinct", "well_formed_separators_not_escape_codes", "well_formed_segment_id_length",
+ "well_formed_segment_id_no_terminator", "well_formed_field_has_repetition", "well_formed_repetition_has_component",
+ "well_formed_component_has_subcomponent", "well_formed_subcomponent_no_terminator"]
 -/
 #guard_msgs in
 #eval catalogue.map (·.name)

@@ -1,3 +1,4 @@
+import Hl7v2.Spec.Escape
 import Hl7v2.Spec.Message
 
 /-!
@@ -14,12 +15,6 @@ list; the three `…_has_…` rules say so.
 
 namespace Hl7v2.Spec
 
-/-- Text that contains no separator of the message. -/
-def Clean (d : Delimiters) (text : List Char) : Prop := ∀ c ∈ text, c ∉ d.separators
-
-instance (d : Delimiters) (text : List Char) : Decidable (Clean d text) :=
-  inferInstanceAs (Decidable (∀ c ∈ text, c ∉ d.separators))
-
 instance (d : Delimiters) : Decidable d.Distinct :=
   inferInstanceAs (Decidable d.all.Nodup)
 
@@ -30,6 +25,8 @@ def Message.fields (m : Message) : List Field :=
 structure Message.WF (m : Message) : Prop where
   /-- The delimiters are different characters. -/
   delimiters_distinct : m.delimiters.Distinct
+  /-- No separator is an escape code ID, so no escape sequence holds a separator. -/
+  separators_not_escape_codes : ∀ c ∈ escapeCodes, c ∉ m.delimiters.separators
   /-- A segment ID is three characters (§2.5.2). -/
   segment_id_length : ∀ s ∈ m.segments, s.id.length = 3
   /-- A segment ID does not contain the segment terminator. -/
@@ -40,8 +37,8 @@ structure Message.WF (m : Message) : Prop where
   repetition_has_component : ∀ f ∈ m.fields, ∀ r ∈ f, r ≠ []
   /-- A component holds at least one subcomponent. -/
   component_has_subcomponent : ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, c ≠ []
-  /-- A subcomponent contains no separator. -/
-  subcomponent_clean : ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, Clean m.delimiters s
+  /-- A subcomponent contains no segment terminator. -/
+  subcomponent_no_terminator : ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, segmentTerminator ∉ s
 
 /-- A named rule of `Message.WF`. The name is `well_formed_` and the field name. -/
 structure Rule where
@@ -51,6 +48,8 @@ structure Rule where
 /-- Every rule of `Message.WF`, in field order. -/
 def catalogue : List Rule :=
   [ ⟨"well_formed_delimiters_distinct", fun m => decide m.delimiters.Distinct⟩,
+    ⟨"well_formed_separators_not_escape_codes",
+      fun m => decide (∀ c ∈ escapeCodes, c ∉ m.delimiters.separators)⟩,
     ⟨"well_formed_segment_id_length", fun m => decide (∀ s ∈ m.segments, s.id.length = 3)⟩,
     ⟨"well_formed_segment_id_no_terminator",
       fun m => decide (∀ s ∈ m.segments, segmentTerminator ∉ s.id)⟩,
@@ -59,8 +58,8 @@ def catalogue : List Rule :=
       fun m => decide (∀ f ∈ m.fields, ∀ r ∈ f, r ≠ [])⟩,
     ⟨"well_formed_component_has_subcomponent",
       fun m => decide (∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, c ≠ [])⟩,
-    ⟨"well_formed_subcomponent_clean",
-      fun m => decide (∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, Clean m.delimiters s)⟩ ]
+    ⟨"well_formed_subcomponent_no_terminator",
+      fun m => decide (∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, segmentTerminator ∉ s)⟩ ]
 
 /-- The names of the rules the message breaks. -/
 def Message.failures (m : Message) : List String :=
