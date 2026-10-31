@@ -63,17 +63,6 @@ const DelimitersSchema = z
       .describe("Repetition separator character"),
 
     /**
-     * Segment terminator character.
-     *
-     * @default "\\r"
-     */
-    segment: z
-      .string()
-      .length(1)
-      .optional()
-      .default(DEFAULT_DELIMITERS.segment)
-      .describe("Segment terminator character"),
-    /**
      * Subcomponent separator character.
      *
      * @default "&"

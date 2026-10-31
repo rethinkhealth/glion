@@ -20,7 +20,6 @@ export interface Delimiters {
   subcomponent: string;
   repetition: string;
   escape: string;
-  segment: string;
 }
 
 // ## Abstract nodes

@@ -26,7 +26,6 @@ describe("a value written with a delimiter that is an escape code", () => {
       escape: "<",
       field: "^",
       repetition: "\\",
-      segment: "\r",
       subcomponent: "$",
     };
     const wire = encodeEscapes("a<b", d);
@@ -41,7 +40,6 @@ describe("a value written with a delimiter that is an escape code", () => {
       escape: "<",
       field: "^",
       repetition: "\\",
-      segment: "\r",
       subcomponent: "E",
     };
     const wire = encodeEscapes("a<b", d);
@@ -56,7 +54,6 @@ describe("a value written with a delimiter that is an escape code", () => {
       escape: "~",
       field: "E",
       repetition: "^",
-      segment: "\r",
       subcomponent: "\\",
     };
     const wire = encodeEscapes("a~b", d);
@@ -71,7 +68,6 @@ describe("a value written with a delimiter that is an escape code", () => {
       escape: "E",
       field: ">",
       repetition: "+",
-      segment: "\r",
       subcomponent: "`",
     };
 

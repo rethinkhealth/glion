@@ -10,7 +10,11 @@ import type {
   Subcomponent,
 } from "@glion/ast";
 import { delimiters as queryDelimiters } from "@glion/util-query";
-import { DEFAULT_DELIMITERS, encodeEscapes } from "@glion/utils";
+import {
+  DEFAULT_DELIMITERS,
+  encodeEscapes,
+  SEGMENT_TERMINATOR,
+} from "@glion/utils";
 import type { Plugin } from "unified";
 import type { Node } from "unist";
 import type { VFile } from "vfile";
@@ -114,7 +118,9 @@ export function toHl7v2(
   switch (node.type) {
     case "root":
     case "group": {
-      return lines(node.children as (Segment | Group)[]).join(d.segment);
+      return lines(node.children as (Segment | Group)[]).join(
+        SEGMENT_TERMINATOR
+      );
     }
     case "segment": {
       return line(node);

@@ -11,7 +11,6 @@ const CUSTOM_DELIMITERS: Delimiters = {
   escape: "#",
   field: "*",
   repetition: "%",
-  segment: "\n",
   subcomponent: "@",
 };
 
@@ -33,22 +32,17 @@ const PUNCTUATION = [..."!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"];
 const ESCAPE_CODE_CHARACTERS = [..."EFRST.brX0123456789ABCDEFabcdefHNZCM"];
 
 // A delimiter set: five distinct characters from `arbCharacter`, assigned to
-// the field, component, repetition, escape, and subcomponent roles, with `\r`
-// or `\n` as the segment delimiter.
+// the field, component, repetition, escape, and subcomponent roles.
 const arbDelimiters = (
   arbCharacter: fc.Arbitrary<string>
 ): fc.Arbitrary<Delimiters> =>
   fc
-    .tuple(
-      fc.uniqueArray(arbCharacter, { maxLength: 5, minLength: 5 }),
-      fc.constantFrom("\r", "\n")
-    )
-    .map(([[field, component, repetition, escape, subcomponent], segment]) => ({
+    .uniqueArray(arbCharacter, { maxLength: 5, minLength: 5 })
+    .map(([field, component, repetition, escape, subcomponent]) => ({
       component: component as string,
       escape: escape as string,
       field: field as string,
       repetition: repetition as string,
-      segment,
       subcomponent: subcomponent as string,
     }));
 
@@ -64,7 +58,6 @@ const arbValue = (d: Delimiters): fc.Arbitrary<string> =>
         d.repetition,
         d.escape,
         d.subcomponent,
-        d.segment,
         "\r",
         "\n"
       ),
@@ -78,11 +71,12 @@ const arbValue = (d: Delimiters): fc.Arbitrary<string> =>
     ),
   });
 
-// The delimiters of `d` that appear in the encoded value `wire`. An encoded
-// value must hold none: the parser splits at a delimiter before it decodes
-// escape sequences, so a delimiter inside `wire` would split the value.
+// The delimiters of `d`, and the segment terminators, that appear in the
+// encoded value `wire`. An encoded value must hold none: the parser splits at
+// a delimiter or a segment terminator before it decodes escape sequences, so
+// one inside `wire` would split the value.
 const heldDelimiters = (wire: string, d: Delimiters): string[] =>
-  [d.field, d.component, d.repetition, d.subcomponent, d.segment].filter(
+  [d.field, d.component, d.repetition, d.subcomponent, "\r", "\n"].filter(
     (delimiter) => wire.includes(delimiter)
   );
 
@@ -97,7 +91,7 @@ const escapeCodesFor = (ch: string, d: Delimiters): string[] => {
     [d.repetition, "R"],
     [d.subcomponent, "T"],
     [d.escape, "E"],
-    [d.segment, ".br"],
+    ["\r", ".br"],
   ]
     .filter(([delimiter]) => delimiter === ch)
     .map(([, code]) => code as string);
@@ -121,7 +115,7 @@ describe(encodeEscapes, () => {
   });
 
   it("encodes custom delimiters", () => {
-    expect(encodeEscapes("a*b$c%d@e#f\ng", CUSTOM_DELIMITERS)).toBe(
+    expect(encodeEscapes("a*b$c%d@e#f\rg", CUSTOM_DELIMITERS)).toBe(
       "a#F#b#S#c#R#d#T#e#E#f#.br#g"
     );
   });
@@ -233,9 +227,9 @@ describe(encodeEscapes, () => {
     ).toBe("a~X7e~b");
   });
 
-  it("writes the segment delimiter as a hex escape when a delimiter is in .br", () => {
-    expect(encodeEscapes("a\nb", { ...CUSTOM_DELIMITERS, field: "." })).toBe(
-      "a#X0A#b"
+  it("writes the segment terminator as a hex escape when a delimiter is in .br", () => {
+    expect(encodeEscapes("a\rb", { ...CUSTOM_DELIMITERS, field: "." })).toBe(
+      "a#X0D#b"
     );
   });
 
@@ -266,7 +260,6 @@ describe(encodeEscapes, () => {
       escape: "\\",
       field: "S",
       repetition: "C",
-      segment: "\r",
       subcomponent: "a",
     };
     const wire = encodeEscapes("é", d);

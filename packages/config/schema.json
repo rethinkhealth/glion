@@ -47,13 +47,6 @@
                   "default": "~",
                   "description": "Repetition separator character"
                 },
-                "segment": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 1,
-                  "default": "\r",
-                  "description": "Segment terminator character"
-                },
                 "subcomponent": {
                   "type": "string",
                   "minLength": 1,
@@ -68,7 +61,6 @@
                 "escape": "\\",
                 "field": "|",
                 "repetition": "~",
-                "segment": "\r",
                 "subcomponent": "&"
               }
             }

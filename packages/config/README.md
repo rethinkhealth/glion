@@ -26,8 +26,7 @@ Create a `.hl7v2rc.json` file in your project:
       "component": "^",
       "subcomponent": "&",
       "repetition": "~",
-      "escape": "\\",
-      "segment": "\r"
+      "escape": "\\"
     }
   }
 }

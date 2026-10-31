@@ -27,7 +27,7 @@ const file = await processor.process(
 
 // file.data.delimiters === {
 //   field: "|", component: "^", repetition: "~",
-//   escape: "\\", subcomponent: "&", segment: "\r"
+//   escape: "\\", subcomponent: "&"
 // }
 ```
 

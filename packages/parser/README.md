@@ -38,7 +38,7 @@ Register the parser as the reader for a `unified` processor. The parser reads fr
 | `decodeEscapes` | `boolean`             | Whether a subcomponent value holds the characters its escape sequences stand for (`true`, the default) or the escape sequences as written. The encoding characters in MSH-2 are never decoded. |
 | `delimiters`    | `Partial<Delimiters>` | Override one or more delimiters. The parser merges with MSH-derived values and defaults.                                                                                                       |
 
-The default delimiters are `|` (field), `^` (component), `~` (repetition), `&` (subcomponent), `\` (escape), and `\r` (segment).
+The default delimiters are `|` (field), `^` (component), `~` (repetition), `&` (subcomponent), and `\` (escape). A segment ends with a carriage return, `\r`, which HL7v2 fixes and no setting changes.
 
 ### Custom delimiters
 
@@ -46,15 +46,9 @@ The default delimiters are `|` (field), `^` (component), `~` (repetition), `&` (
 import { unified } from "unified";
 import { hl7v2Parser } from "@glion/parser";
 
-// Override only the segment delimiter
-const tree = unified()
-  .use(hl7v2Parser, { delimiters: { segment: "\n" } })
-  .parse(message);
-
-// Override multiple delimiters
 const customTree = unified()
   .use(hl7v2Parser, {
-    delimiters: { field: "$", component: "%", segment: "\n" },
+    delimiters: { field: "$", component: "%" },
   })
   .parse(customMessage);
 ```
@@ -63,7 +57,7 @@ Options accept a partial `Delimiters` object, so only the characters you want to
 
 ### Escape sequences
 
-A value's escape sequences are decoded while the message is tokenized. `\F\`, `\S\`, `\R\`, `\T\`, and `\E\` become the field, component, repetition, subcomponent, and escape delimiters the message declares, `\.br\` becomes the segment delimiter, and `\Xdd\` becomes the characters its bytes, named by pairs of hexadecimal digits, encode in UTF-8. A formatting command such as `\H\`, `\N\`, or `\.sp 2\`, a locally defined sequence (`\Z…\`), a character set switch (`\Cxxyy\`, `\Mxxyyzz\`), and any other sequence stay as written. A Segment ID runs to the first field delimiter of its line and holds no escape sequences or other delimiters: `Z\R\Z|A` opens with the Segment ID `Z\R\Z`, and `^A|B` with `^A`.
+A value's escape sequences are decoded while the message is tokenized. `\F\`, `\S\`, `\R\`, `\T\`, and `\E\` become the field, component, repetition, subcomponent, and escape delimiters the message declares, `\.br\` becomes the segment terminator, `\r`, and `\Xdd\` becomes the characters its bytes, named by pairs of hexadecimal digits, encode in UTF-8. A formatting command such as `\H\`, `\N\`, or `\.sp 2\`, a locally defined sequence (`\Z…\`), a character set switch (`\Cxxyy\`, `\Mxxyyzz\`), and any other sequence stay as written. A Segment ID runs to the first field delimiter of its line and holds no escape sequences or other delimiters: `Z\R\Z|A` opens with the Segment ID `Z\R\Z`, and `^A|B` with `^A`.
 
 ```ts
 import { unified } from "unified";

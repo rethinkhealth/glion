@@ -13,8 +13,6 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
       "escape": "\\",
       "field": "|",
       "repetition": "~",
-      "segment": "
-",
       "subcomponent": "&",
     },
     "profile": {

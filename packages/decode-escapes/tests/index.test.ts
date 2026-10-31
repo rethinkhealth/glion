@@ -23,7 +23,6 @@ describe("hl7v2DecodeEscapes plugin", () => {
       escape: "\\",
       field: "*",
       repetition: "%",
-      segment: "\n",
       subcomponent: "@",
     } satisfies Delimiters;
 
@@ -40,7 +39,7 @@ describe("hl7v2DecodeEscapes plugin", () => {
     ).toBe("Value*More$Stuff%Again@Sub\\Escaped");
   });
 
-  it("decodes .br into the default segment delimiter", async () => {
+  it("decodes .br into the segment terminator, a carriage return", async () => {
     const tree = m(s("MSH", f("Line1\\.br\\Line2")));
 
     const results = await unified().use(hl7v2DecodeEscapes).run(tree);

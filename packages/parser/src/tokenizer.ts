@@ -1,6 +1,6 @@
 // src/tokenizer.ts
 import type { Delimiters } from "@glion/ast";
-import { decodeEscapes } from "@glion/utils";
+import { decodeEscapes, SEGMENT_TERMINATOR } from "@glion/utils";
 import type { Position } from "unist";
 
 import type { ParserContext, Token, Tokenizer, TokenType } from "./types";
@@ -126,7 +126,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
     const ch = s.charAt(this.i);
 
-    if (ch === this.delims.segment) {
+    if (ch === SEGMENT_TERMINATOR) {
       this._advance(1, true);
       return this._tok("SEGMENT_END", undefined, start);
     }
@@ -137,11 +137,11 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     // A Segment ID runs to the first field delimiter and holds no other
     // delimiters or escape sequences (HL7v2 §2.5.2, §2.7): a line `^A|B` opens
     // with the Segment ID `^A`, and `Z\R\Z|B` with `Z\R\Z`.
-    if (this.i === 0 || s.charAt(this.i - 1) === this.delims.segment) {
+    if (this.i === 0 || s.charAt(this.i - 1) === SEGMENT_TERMINATOR) {
       // The first character is neither delimiter: both were checked above.
       let j = this.i + 1;
       let c = s.charAt(j);
-      while (c !== "" && c !== this.delims.segment && c !== this.delims.field) {
+      while (c !== "" && c !== SEGMENT_TERMINATOR && c !== this.delims.field) {
         j += 1;
         c = s.charAt(j);
       }
@@ -168,13 +168,18 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
       esc = this.delims.escape,
       fld = this.delims.field,
       rep = this.delims.repetition,
-      seg = this.delims.segment,
       sub = this.delims.subcomponent;
     let escaped = false;
 
     while (j < s.length) {
       const c = s.charAt(j);
-      if (c === seg || c === fld || c === rep || c === cmp || c === sub) {
+      if (
+        c === SEGMENT_TERMINATOR ||
+        c === fld ||
+        c === rep ||
+        c === cmp ||
+        c === sub
+      ) {
         break;
       }
       // Stryker disable next-line ConditionalExpression, EqualityOperator: the flag only skips decoding a run without the escape character, which decodes to itself
@@ -211,7 +216,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   }
 
   private _fastAdvance(chunk: string) {
-    const parts = chunk.split(this.delims.segment);
+    const parts = chunk.split(SEGMENT_TERMINATOR);
     if (parts.length > 1) {
       this.line += parts.length - 1;
       this.col = (parts.at(-1)?.length ?? 0) + 1;
