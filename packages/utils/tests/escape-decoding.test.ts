@@ -12,44 +12,73 @@ const CUSTOM_DELIMITERS: Delimiters = {
 };
 
 describe(decodeEscapes, () => {
-  it("decodes the delimiter escapes to the default delimiters", () => {
+  it("decodes the separator escapes to the default separators", () => {
     expect(
       decodeEscapes(
-        "Value\\F\\More\\S\\Stuff\\R\\Again\\T\\Sub\\E\\Escaped",
+        "Value\\F\\More\\S\\Stuff\\R\\Again\\T\\Sub",
         DEFAULT_DELIMITERS
       )
-    ).toBe("Value|More^Stuff~Again&Sub\\Escaped");
+    ).toBe("Value|More^Stuff~Again&Sub");
   });
 
-  it("decodes the delimiter escapes to custom delimiters", () => {
+  it("decodes the separator escapes to custom separators", () => {
     expect(
-      decodeEscapes(
-        "Value#F#More#S#Stuff#R#Again#T#Sub#E#Escaped",
-        CUSTOM_DELIMITERS
-      )
-    ).toBe("Value*More$Stuff%Again@Sub#Escaped");
+      decodeEscapes("Value#F#More#S#Stuff#R#Again#T#Sub", CUSTOM_DELIMITERS)
+    ).toBe("Value*More$Stuff%Again@Sub");
   });
 
-  it("decodes .br to the segment terminator, a carriage return", () => {
+  it("keeps the escape character escape as it is, since a decoded escape character would read as the start of a sequence", () => {
+    expect(decodeEscapes("Smith\\E\\Jones", DEFAULT_DELIMITERS)).toBe(
+      "Smith\\E\\Jones"
+    );
+  });
+
+  it("keeps the truncation character escape as it is", () => {
+    expect(decodeEscapes("abcde\\P\\", DEFAULT_DELIMITERS)).toBe("abcde\\P\\");
+  });
+
+  it("keeps .br as it is, since it is a formatting command and not a character", () => {
     expect(decodeEscapes("Line1\\.br\\Line2", DEFAULT_DELIMITERS)).toBe(
-      "Line1\rLine2"
+      "Line1\\.br\\Line2"
     );
   });
 
-  it("decodes a hex escape to the character it names", () => {
+  it("decodes the hex escape of a control character to that character", () => {
     expect(
-      decodeEscapes("Hello\\X0A\\World\\X0D\\Done", DEFAULT_DELIMITERS)
-    ).toBe("Hello\nWorld\rDone");
+      decodeEscapes("Hello\\X0A\\World\\X0D\\Done\\X09\\", DEFAULT_DELIMITERS)
+    ).toBe("Hello\nWorld\rDone\t");
   });
 
-  it("decodes each pair of hex digits as one character", () => {
-    expect(decodeEscapes("\\X414243\\", DEFAULT_DELIMITERS)).toBe("ABC");
+  it("keeps a hex escape of a control character with lowercase digits as it is, since the table writes uppercase", () => {
+    expect(decodeEscapes("a\\X0d\\b", DEFAULT_DELIMITERS)).toBe("a\\X0d\\b");
   });
 
-  it("decodes the bytes of a hex escape as UTF-8", () => {
-    expect(decodeEscapes("caf\\XC3A9\\ \\XE282AC\\", DEFAULT_DELIMITERS)).toBe(
-      "café €"
+  it("keeps a hex escape of more than one byte as it is", () => {
+    expect(decodeEscapes("a\\X0D0A\\b\\X414243\\", DEFAULT_DELIMITERS)).toBe(
+      "a\\X0D0A\\b\\X414243\\"
     );
+  });
+
+  it("keeps a hex escape of a character outside the table as it is, since that character has a second form on the wire", () => {
+    expect(
+      decodeEscapes("caf\\XC3A9\\ \\X41\\ \\X7C\\", DEFAULT_DELIMITERS)
+    ).toBe("caf\\XC3A9\\ \\X41\\ \\X7C\\");
+  });
+
+  it("decodes the hex escape of a separator whose named code holds a delimiter", () => {
+    const d = { ...CUSTOM_DELIMITERS, component: "F" };
+
+    expect(decodeEscapes("a#X2A#b", d)).toBe("a*b");
+  });
+
+  it("keeps the hex escape of the escape character as it is", () => {
+    expect(
+      decodeEscapes("a<X3C<b", {
+        ...CUSTOM_DELIMITERS,
+        component: "E",
+        escape: "<",
+      })
+    ).toBe("a<X3C<b");
   });
 
   it("leaves a hex escape with an odd number of digits untouched", () => {
@@ -84,6 +113,12 @@ describe(decodeEscapes, () => {
     expect(
       decodeEscapes("\\H\\Important\\N\\ value\\F\\pipe", DEFAULT_DELIMITERS)
     ).toBe("\\H\\Important\\N\\ value|pipe");
+  });
+
+  it("keeps a sequence whose content is the escape of a separator, as two sequences around it", () => {
+    expect(decodeEscapes("\\E\\F\\E\\", DEFAULT_DELIMITERS)).toBe(
+      "\\E\\F\\E\\"
+    );
   });
 
   it("keeps a formatting command as it is", () => {

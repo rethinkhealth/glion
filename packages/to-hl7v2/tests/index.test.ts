@@ -541,10 +541,16 @@ describe("toHl7v2 escape sequences", () => {
     expect(() => toHl7v2(tree)).toThrow(EscapeSequenceError);
   });
 
-  it("writes the escape character, the segment delimiter, and control characters as escape sequences", () => {
+  it("writes an escape character without a closing one, a carriage return, and a line feed as escape sequences", () => {
     const tree = m(s("PID", f("a\\b\rc\nd")));
 
-    expect(toHl7v2(tree)).toBe("PID|a\\E\\b\\.br\\c\\X0A\\d\r");
+    expect(toHl7v2(tree)).toBe("PID|a\\E\\b\\X0D\\c\\X0A\\d\r");
+  });
+
+  it("writes every escape sequence in a value as it is, whatever its code", () => {
+    const tree = m(s("PID", f("a\\E\\b\\.br\\c\\P\\d\\Q\\e\\XC3A9\\")));
+
+    expect(toHl7v2(tree)).toBe("PID|a\\E\\b\\.br\\c\\P\\d\\Q\\e\\XC3A9\\\r");
   });
 
   it("writes a formatting command, a locally defined sequence, and a character set switch as they are", () => {

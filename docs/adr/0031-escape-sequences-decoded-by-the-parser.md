@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed (2026-10-16)
+Superseded by [ADR 0036](./0036-escape-sequences-decode-only-what-the-structure-requires.md) (2026-10-31)
 
 Answers #1000.
 

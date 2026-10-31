@@ -41,10 +41,10 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(subValue(results)).toBe("before\\E\\after");
   });
 
-  it("encodes the segment terminator, a carriage return, as .br", async () => {
+  it("encodes the segment terminator, a carriage return, as \\X0D\\", async () => {
     const tree = m(s("PID", f("line1\rline2")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(results)).toBe("line1\\.br\\line2");
+    expect(subValue(results)).toBe("line1\\X0D\\line2");
   });
 
   it("encodes multiple special characters in one value", async () => {
@@ -108,15 +108,25 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(subValue(decoded)).toBe(original);
   });
 
-  it("round-trips with decode: all delimiter types", async () => {
-    const original = "a|b^c~d&e\\f\rg";
+  it("round-trips with decode: every separator and a carriage return", async () => {
+    const original = "a|b^c~d&e\rf";
     const tree = m(s("PID", f(original)));
 
     const encoded = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(encoded)).toBe("a\\F\\b\\S\\c\\R\\d\\T\\e\\E\\f\\.br\\g");
+    expect(subValue(encoded)).toBe("a\\F\\b\\S\\c\\R\\d\\T\\e\\X0D\\f");
 
     const decoded = await unified().use(hl7v2DecodeEscapes).run(encoded);
     expect(subValue(decoded)).toBe(original);
+  });
+
+  it("encodes an escape character without a closing one as \\E\\, which decodes as written", async () => {
+    const tree = m(s("PID", f("a\\b")));
+
+    const encoded = await unified().use(hl7v2EncodeEscapes).run(tree);
+    expect(subValue(encoded)).toBe("a\\E\\b");
+
+    const decoded = await unified().use(hl7v2DecodeEscapes).run(encoded);
+    expect(subValue(decoded)).toBe("a\\E\\b");
   });
 
   it("options.delimiters override MSH-derived delimiters", async () => {

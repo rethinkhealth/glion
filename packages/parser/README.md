@@ -58,7 +58,7 @@ Options accept a partial `Delimiters` object, so only the characters you want to
 
 ### Escape sequences
 
-A value's escape sequences are decoded while the message is tokenized. `\F\`, `\S\`, `\R\`, `\T\`, and `\E\` become the field, component, repetition, subcomponent, and escape delimiters the message declares, `\.br\` becomes the segment terminator, `\r`, and `\Xdd\` becomes the characters its bytes, named by pairs of hexadecimal digits, encode in UTF-8. A formatting command such as `\H\`, `\N\`, or `\.sp 2\`, a locally defined sequence (`\Z…\`), a character set switch (`\Cxxyy\`, `\Mxxyyzz\`), and any other sequence stay as written. A Segment ID runs to the first field delimiter of its line and holds no escape sequences or other delimiters: `Z\R\Z|A` opens with the Segment ID `Z\R\Z`, and `^A|B` with `^A`.
+A value's escape sequences are decoded while the message is tokenized, and only those that stand for a separator or a control character. `\F\`, `\S\`, `\R\`, and `\T\` become the field, component, repetition, and subcomponent delimiters the message declares, and `\Xdd\` naming a character below U+0020, such as `\X0D\`, becomes that character. Every other sequence stays in the value as written: `\E\`, `\P\`, a formatting command such as `\H\`, `\.br\`, or `\.sp 2\`, any other `\X…\`, a locally defined sequence (`\Z…\`), a character set switch (`\Cxxyy\`, `\Mxxyyzz\`), and a code HL7v2 does not define. A Segment ID runs to the first field delimiter of its line and holds no escape sequences or other delimiters: `Z\R\Z|A` opens with the Segment ID `Z\R\Z`, and `^A|B` with `^A`.
 
 ```ts
 import { unified } from "unified";
@@ -66,6 +66,9 @@ import { hl7v2Parser } from "@glion/parser";
 
 unified().use(hl7v2Parser).parse("PID|1||DOE\\T\\SMITH");
 // PID-3 subcomponent value: "DOE&SMITH"
+
+unified().use(hl7v2Parser).parse("PID|1||DOE\\E\\SMITH");
+// PID-3 subcomponent value: "DOE\\E\\SMITH"
 
 unified()
   .use(hl7v2Parser, { decodeEscapes: false })

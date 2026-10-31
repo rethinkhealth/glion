@@ -1,53 +1,45 @@
 import type { Delimiters } from "@glion/ast";
 
-import { SEGMENT_TERMINATOR } from "./constants";
 import { EscapeSequenceError } from "./errors";
+import { escapeCode, isTableCharacter } from "./escape-table";
 
-const HEX_RADIX = 16;
-const HEX_PAIR_LENGTH = 2;
-// A formatting command (`\H\`, `\N\`, `\.sp 2\`, but not `\.br\`), a locally
-// defined sequence (`\Z…\`), or a character set switch (`\Cxxyy\`,
-// `\Mxxyyzz\`): HL7v2 §2.7 sequences that are kept as they are written.
-const VERBATIM_SEQUENCE =
-  /^(?:H|N|\.(?!br)[a-z]{2} ?[+-]?\d*|Z\P{Cc}*|C[0-9A-Fa-f]{4}|M[0-9A-Fa-f]{4}(?:[0-9A-Fa-f]{2})?)$/u;
-const SPACE = " ";
-const UTF8_ENCODER = new TextEncoder();
-
-// encodeEscapes writes the reverse of decodeEscapes. For each character it
-// asks escapeSequence, which tries namedEscapeCode and then hexEscapeCode and
-// keeps the first form holdsDelimiter accepts. The output never holds a
-// delimiter, because the parser splits a field at its delimiters before it
-// decodes escape sequences:
+// encodeEscapes writes the reverse of decodeEscapes. Each separator and
+// control character is written as its code from the table. An escape
+// character and the next one enclose a sequence that is copied as written,
+// unless the text between them holds a character of the table; then both are
+// data, written as `\E\`, as is an escape character without a closing one.
+// With the usual delimiters `|^~\&`:
 //
-//   SMITH&JONES  →  SMITH\T\JONES    with `|^~\&`
-//   a<b          →  a<X3C<b          with `E` as the component separator and
-//                                    `<` as the escape character: `<E<`
-//                                    would hold `E`
+//   SMITH&JONES   →  SMITH\T\JONES
+//   1\.br\2       →  1\.br\2           a sequence, copied
+//   a\b|c         →  a\E\b\F\c         no closing escape character
+//   \Zfoo|bar\    →  \E\Zfoo\F\bar\E\  `|` inside: neither is a sequence
 
 /**
- * The value `value` takes on the wire, with every character that cannot
- * appear in a value written as an HL7v2 escape sequence.
+ * The value `value` takes on the wire.
  *
- * Writes the field, component, repetition, subcomponent, and escape
- * delimiters as `\F\`, `\S\`, `\R\`, `\T\`, and `\E\`, the segment terminator
- * as `\.br\`, and any other character below U+0020 as `\Xdd\`. A character
- * whose escape code holds a delimiter, such as `\E\` when `E` is the
- * component separator, is written as `\Xdd\`, the hexadecimal escape of its
- * UTF-8 bytes, with a digit `A`–`F` in lowercase when its uppercase form is a
- * delimiter. A
- * formatting command (`\H\`, `\N\`, `\.sp 2\`, `\.in+4\`, …), a locally
- * defined sequence (`\Z…\`), and a character set switch (`\Cxxyy\`,
- * `\Mxxyyzz\`) are written as they are.
+ * Writes the field, component, repetition, and subcomponent separators as
+ * `\F\`, `\S\`, `\R\`, and `\T\`, and any other character below U+0020 as
+ * `\Xdd\`. A character whose escape code holds a delimiter, such as `|` when
+ * `F` is the component separator, is written as `\Xdd\`, the hexadecimal
+ * escape of its UTF-8 bytes, with a digit `A`–`F` in lowercase when its
+ * uppercase form is a delimiter. Two escape characters in a row and the text
+ * between them are written as they are, as an escape sequence, when that text
+ * holds no separator and no character below U+0020; otherwise both are data.
+ * An escape character that is data, or that has no closing one, is written
+ * as `\E\`, or as its hexadecimal escape when `E` is a delimiter.
  *
  * The encoded value holds no field, component, repetition, or subcomponent
- * delimiter, and no segment terminator, and `decodeEscapes(encodeEscapes(value,
- * d), d)` is `value`.
+ * separator, no character below U+0020, and no escape character outside a
+ * closed escape sequence. Idempotent. For every value `w` on the wire that
+ * holds no character below U+0020 and in which each escape character has a
+ * closing one, `encodeEscapes(decodeEscapes(w, d), d)` is `w`.
  *
  * @param value - The value to write.
  * @param d - The delimiters of the message.
  * @returns The encoded value.
  * @throws {EscapeSequenceError} When a character must be escaped and every
- *   escape sequence that writes it holds a delimiter.
+ *   escape code that writes it holds a delimiter.
  */
 export function encodeEscapes(value: string, d: Delimiters): string {
   if (!needsEncoding(value, d)) {
@@ -60,42 +52,56 @@ export function encodeEscapes(value: string, d: Delimiters): string {
   let encoded = "";
   let copied = 0;
 
+  // The escape character that closes a pair holding a character of the table:
+  // data, like the one that opened the pair.
+  let closingData = -1;
+
   for (let i = 0; i < value.length; i += 1) {
     const ch = value.charAt(i);
 
-    // A formatting command, `\Z…\`, or character set switch already in the
-    // value is markup, not data: jump past it so it is copied as written.
-    const verbatimEnd = ch === d.escape ? verbatimSequenceEnd(value, i, d) : -1;
-    if (verbatimEnd !== -1) {
-      i = verbatimEnd;
+    if (ch === d.escape && i !== closingData) {
+      const end = value.indexOf(d.escape, i + 1);
+      if (end !== -1 && !holdsTableCharacter(value, i + 1, end, d)) {
+        i = end;
+        continue;
+      }
+      closingData = end;
+    } else if (ch !== d.escape && !isTableCharacter(ch, d)) {
       continue;
     }
 
-    const sequence = escapeSequence(ch, d);
-    if (sequence !== undefined) {
-      encoded += value.slice(copied, i) + sequence;
-      copied = i + 1;
-    }
+    encoded += value.slice(copied, i) + escapeSequence(ch, d);
+    copied = i + 1;
   }
 
   return encoded + value.slice(copied);
 }
 
 /**
- * Whether `value` holds a delimiter, the escape character, or a character below
- * U+0020.
+ * Free text `text` as a value: each escape character written as `\E\`, or as
+ * its hexadecimal escape when `E` is a delimiter, so that
+ * {@link encodeEscapes} writes it as data.
+ *
+ * @param text - The text to hold in a value.
+ * @param d - The delimiters of the message.
+ * @returns The value.
+ * @throws {EscapeSequenceError} When `text` holds the escape character and
+ *   every escape code that writes it holds a delimiter.
+ */
+export function escapeText(text: string, d: Delimiters): string {
+  if (!text.includes(d.escape)) {
+    return text;
+  }
+  return text.replaceAll(d.escape, escapeSequence(d.escape, d));
+}
+
+/**
+ * Whether `value` holds the escape character or a character of the table.
  */
 function needsEncoding(value: string, d: Delimiters): boolean {
   for (let i = 0; i < value.length; i += 1) {
     const ch = value.charAt(i);
-    if (
-      ch === d.field ||
-      ch === d.component ||
-      ch === d.repetition ||
-      ch === d.subcomponent ||
-      ch === d.escape ||
-      ch < SPACE
-    ) {
+    if (ch === d.escape || isTableCharacter(ch, d)) {
       return true;
     }
   }
@@ -103,128 +109,34 @@ function needsEncoding(value: string, d: Delimiters): boolean {
 }
 
 /**
- * The index of the escape character that closes the formatting command,
- * locally defined sequence, or character set switch starting at `index`, or
- * `-1` when none starts there.
+ * Whether `value` holds a character of the table from `from` up to `to`.
  */
-function verbatimSequenceEnd(
+function holdsTableCharacter(
   value: string,
-  index: number,
+  from: number,
+  to: number,
   d: Delimiters
-): number {
-  const end = value.indexOf(d.escape, index + 1);
-  if (end === -1) {
-    return -1;
+): boolean {
+  for (let i = from; i < to; i += 1) {
+    if (isTableCharacter(value.charAt(i), d)) {
+      return true;
+    }
   }
-  // Kept only when the text between the escape characters is a sequence HL7v2
-  // defines and holds no delimiter. In `\Zfoo|bar\`, the `|` is data, so the
-  // whole run is escaped character by character instead.
-  const code = value.slice(index + 1, end);
-  return VERBATIM_SEQUENCE.test(code) && !holdsDelimiter(code, d) ? end : -1;
+  return false;
 }
 
 /**
- * The escape sequence that writes `ch`, or `undefined` when `ch` is written as
- * it is.
+ * The escape sequence that writes `ch`.
  *
- * Writes the escape code HL7v2 names for `ch` when it holds no delimiter, and
- * otherwise the hexadecimal escape of `ch`.
- *
- * @throws {EscapeSequenceError} When both hold a delimiter.
+ * @throws {EscapeSequenceError} When every escape code for `ch` holds a
+ *   delimiter.
  */
-function escapeSequence(ch: string, d: Delimiters): string | undefined {
-  // 1. Not a delimiter, the escape character, or a control character: it is
-  //    written as it is.
-  const named = namedEscapeCode(ch, d);
-  if (named === undefined && ch >= SPACE) {
-    return undefined;
+function escapeSequence(ch: string, d: Delimiters): string {
+  const code = escapeCode(ch, d);
+  if (code === undefined) {
+    // With `X` and `S` both delimiters, `S` cannot be written: `\S\` holds
+    // `S`, and every `\X53\` holds `X`.
+    throw new EscapeSequenceError(ch, d);
   }
-
-  // 2. The named code, when it holds no delimiter: `&` → `\T\`.
-  if (named !== undefined && !holdsDelimiter(named, d)) {
-    return d.escape + named + d.escape;
-  }
-
-  // 3. The hexadecimal escape: `<` → `<X3C<` when `E` is a delimiter, and a
-  //    control character, which has no named code: a line feed → `\X0A\`.
-  const hex = hexEscapeCode(ch, d);
-  if (hex !== undefined) {
-    return d.escape + hex + d.escape;
-  }
-
-  // 4. Neither works. With `X` and `S` both delimiters, `S` cannot be
-  //    written: `\S\` holds `S`, and every `\X53\` holds `X`.
-  throw new EscapeSequenceError(ch, d);
-}
-
-/**
- * The escape code HL7v2 names for `ch` when it is a delimiter or the escape
- * character, or `undefined`.
- */
-function namedEscapeCode(ch: string, d: Delimiters): string | undefined {
-  switch (ch) {
-    case d.escape: {
-      return "E";
-    }
-    case d.field: {
-      return "F";
-    }
-    case d.component: {
-      return "S";
-    }
-    case d.repetition: {
-      return "R";
-    }
-    case d.subcomponent: {
-      return "T";
-    }
-    case SEGMENT_TERMINATOR: {
-      return ".br";
-    }
-    default: {
-      return undefined;
-    }
-  }
-}
-
-/**
- * The hexadecimal escape code (`Xdd…`) of the UTF-8 bytes of `ch` that holds
- * no delimiter, or `undefined` when there is none.
- *
- * Writes each digit `A`–`F` in uppercase, or in lowercase when its uppercase
- * form is a delimiter. A lone surrogate has no UTF-8 bytes, so it has none.
- */
-function hexEscapeCode(ch: string, d: Delimiters): string | undefined {
-  if (!ch.isWellFormed()) {
-    return undefined;
-  }
-
-  // `~` is the byte 0x7E: `X7E`, or `X7e` when `E` is a delimiter.
-  let code = "X";
-  for (const byte of UTF8_ENCODER.encode(ch)) {
-    const pair = byte
-      .toString(HEX_RADIX)
-      .toUpperCase()
-      .padStart(HEX_PAIR_LENGTH, "0");
-    for (const digit of pair) {
-      code += holdsDelimiter(digit, d) ? digit.toLowerCase() : digit;
-    }
-  }
-
-  // A digit `0`–`9` or the `X` itself has no other form to fall back on.
-  return holdsDelimiter(code, d) ? undefined : code;
-}
-
-/**
- * Whether `code` holds a delimiter or the escape character, which the parser
- * would read as the end of the escape sequence or of the value.
- */
-function holdsDelimiter(code: string, d: Delimiters): boolean {
-  return (
-    code.includes(d.field) ||
-    code.includes(d.component) ||
-    code.includes(d.repetition) ||
-    code.includes(d.subcomponent) ||
-    code.includes(d.escape)
-  );
+  return d.escape + code + d.escape;
 }

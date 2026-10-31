@@ -1,8 +1,9 @@
 import type { Delimiters } from "@glion/ast";
 
 /**
- * A character {@link encodeEscapes} cannot write: it must be written as an
- * escape sequence, and every escape sequence that writes it holds a delimiter.
+ * A character {@link encodeEscapes} or {@link escapeText} cannot write: it must
+ * be written as an escape sequence, and every escape sequence that writes it
+ * holds a delimiter.
  */
 export class EscapeSequenceError extends Error {
   override readonly name = "EscapeSequenceError";

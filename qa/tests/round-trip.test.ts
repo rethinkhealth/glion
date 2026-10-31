@@ -13,7 +13,11 @@ import { f as field, m as message, s as segment } from "@glion/builder";
 import { hl7v2Parser } from "@glion/parser";
 import { hl7v2ToHl7v2, toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
-import { EscapeSequenceError } from "@glion/utils";
+import {
+  DEFAULT_DELIMITERS,
+  EscapeSequenceError,
+  escapeText,
+} from "@glion/utils";
 import fc from "fast-check";
 import { unified } from "unified";
 
@@ -375,12 +379,12 @@ describe("QR4: content round-trips through serialize and parse", () => {
       )
     );
 
-  it("keeps a locally defined sequence that holds a delimiter as content", () => {
+  it("writes a locally defined sequence that holds a delimiter as data", () => {
     const content = "a\\Zfoo|bar\\b";
     const wire = write(content);
 
     expect(wire).toBe("MSH|^~\\&\rPID|1||a\\E\\Zfoo\\F\\bar\\E\\b\r");
-    expect(read(wire)).toBe(content);
+    expect(read(wire)).toBe("a\\E\\Zfoo|bar\\E\\b");
   });
 
   it("keeps a locally defined sequence and a character set switch as they are", () => {
@@ -390,19 +394,23 @@ describe("QR4: content round-trips through serialize and parse", () => {
     expect(read(write(content))).toBe(content);
   });
 
+  // Free text held in a value through escapeText is read back as that value.
+  //
   // Mutant: `to-hl7v2` writes each value without escaping it. Fails on `"&"`.
-  it("reads back any content a value was given", () => {
+  it("reads back any free text a value was given", () => {
     fc.assert(
       fc.property(fc.string({ unit: "grapheme" }), (content) => {
-        expect(read(write(content))).toBe(content);
+        const text = escapeText(content, DEFAULT_DELIMITERS);
+
+        expect(read(write(text))).toBe(text);
       }),
-      { examples: [["&"]] }
+      { examples: [["&"], ["C:\\temp\\H\\x"]] }
     );
   });
 
   // Mutant: `to-hl7v2` writes each value without escaping it. Fails on the
   // delimiters `S q $ K -` and the content `"S"`.
-  it("reads back any content a value was given, with any delimiters", () => {
+  it("reads back any free text a value was given, with any delimiters", () => {
     fc.assert(
       fc.property(
         // Five distinct delimiters, in MSH order: field separator, then the
@@ -438,18 +446,29 @@ describe("QR4: content round-trips through serialize and parse", () => {
           ),
         ([[fieldSeparator, ...encodingCharacters], content]) => {
           // Write a message whose MSH declares the drawn delimiters and whose
-          // MSH-3 holds the content. A character of the content that no escape
-          // sequence can write with these delimiters is refused with
-          // EscapeSequenceError, and any other error fails the property.
+          // MSH-3 holds the content, held as a value through escapeText. A
+          // character of the content that no escape sequence can write with
+          // these delimiters is refused with EscapeSequenceError, and any
+          // other error fails the property.
+          const [component, repetition, escape, subcomponent] =
+            encodingCharacters as [string, string, string, string];
+          let text: string;
           let wire: string;
           try {
+            text = escapeText(content, {
+              component,
+              escape,
+              field: fieldSeparator as string,
+              repetition,
+              subcomponent,
+            });
             wire = toHl7v2(
               message(
                 segment(
                   "MSH",
                   field(fieldSeparator as string),
                   field(encodingCharacters.join("")),
-                  field(content)
+                  field(text)
                 )
               )
             );
@@ -463,7 +482,7 @@ describe("QR4: content round-trips through serialize and parse", () => {
           // differently.
           const tree = unified().use(hl7v2Parser).parse(wire);
 
-          expect(value(tree, "MSH.3")?.value ?? "").toBe(content);
+          expect(value(tree, "MSH.3")?.value ?? "").toBe(text);
         }
       ),
       { examples: [[[["S", "q", "$", "K", "-"], "S"]]] }

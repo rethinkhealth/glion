@@ -4,7 +4,7 @@ import fc from "fast-check";
 import { DEFAULT_DELIMITERS } from "../src/constants";
 import { EscapeSequenceError } from "../src/errors";
 import { decodeEscapes } from "../src/escape-decoding";
-import { encodeEscapes } from "../src/escape-encoding";
+import { encodeEscapes, escapeText } from "../src/escape-encoding";
 
 const CUSTOM_DELIMITERS: Delimiters = {
   component: "$",
@@ -80,10 +80,10 @@ const heldDelimiters = (wire: string, d: Delimiters): string[] =>
     (delimiter) => wire.includes(delimiter)
   );
 
-// Every escape code `decodeEscapes` reads back as the ASCII character `ch`:
-// its named code, when `ch` is a delimiter or the escape character, and its
-// hexadecimal escape with each digit `A`–`F` in either case. An encoder may
-// refuse `ch` only when every one of them holds a delimiter.
+// Every escape code that writes the character `ch`: its named code, when
+// `ch` is a separator or the escape character, and its hexadecimal escape
+// with each digit `A`–`F` in either case. An encoder may refuse `ch` only when
+// every one of them holds a delimiter.
 const escapeCodesFor = (ch: string, d: Delimiters): string[] => {
   const named = [
     [d.field, "F"],
@@ -91,7 +91,6 @@ const escapeCodesFor = (ch: string, d: Delimiters): string[] => {
     [d.repetition, "R"],
     [d.subcomponent, "T"],
     [d.escape, "E"],
-    ["\r", ".br"],
   ]
     .filter(([delimiter]) => delimiter === ch)
     .map(([, code]) => code as string);
@@ -107,16 +106,70 @@ const escapeCodesFor = (ch: string, d: Delimiters): string[] => {
   return [...named, ...hex];
 };
 
+// Whether `text` holds a delimiter of `d`, the escape character, or a
+// character below U+0020.
+const holdsSyntax = (text: string, d: Delimiters): boolean =>
+  [...text].some(
+    (ch) =>
+      [d.field, d.component, d.repetition, d.subcomponent, d.escape].includes(
+        ch
+      ) || ch < " "
+  );
+
+// Escape codes a sender writes: the ones the table decodes, and ones that
+// stay in the value as written, such as `\E\`, `\.br\`, and `\X41\`.
+const WIRE_CODES = [
+  "F",
+  "S",
+  "R",
+  "T",
+  "E",
+  "P",
+  "H",
+  "N",
+  ".br",
+  ".sp 2",
+  "Zsite",
+  "C2842",
+  "Q",
+  "",
+  "X41",
+  "XC3A9",
+  "X7C",
+  "X0D",
+  "X0d",
+  "X0A",
+  "X09",
+  "X0D0A",
+];
+
+// A value as a sender writes it on the wire with the delimiter set `d`: plain
+// characters, none a delimiter, the escape character, or a control
+// character, and escape sequences from WIRE_CODES that hold no delimiter.
+const arbWire = (d: Delimiters): fc.Arbitrary<string> => {
+  const sequences = WIRE_CODES.filter((code) => !holdsSyntax(code, d)).map(
+    (code) => `${d.escape}${code}${d.escape}`
+  );
+  return fc.string({
+    unit: fc.oneof(
+      fc
+        .string({ maxLength: 1, minLength: 1, unit: "grapheme" })
+        .filter((ch) => !holdsSyntax(ch, d)),
+      fc.constantFrom(...sequences)
+    ),
+  });
+};
+
 describe(encodeEscapes, () => {
-  it("encodes every delimiter and the escape character", () => {
+  it("encodes every separator, an escape character without a closing one, and a carriage return", () => {
     expect(encodeEscapes("a|b^c~d&e\\f\rg", DEFAULT_DELIMITERS)).toBe(
-      "a\\F\\b\\S\\c\\R\\d\\T\\e\\E\\f\\.br\\g"
+      "a\\F\\b\\S\\c\\R\\d\\T\\e\\E\\f\\X0D\\g"
     );
   });
 
   it("encodes custom delimiters", () => {
     expect(encodeEscapes("a*b$c%d@e#f\rg", CUSTOM_DELIMITERS)).toBe(
-      "a#F#b#S#c#R#d#T#e#E#f#.br#g"
+      "a#F#b#S#c#R#d#T#e#E#f#X0D#g"
     );
   });
 
@@ -148,7 +201,7 @@ describe(encodeEscapes, () => {
     expect(
       encodeEscapes("a\\Zfoo|bar\\b\\Zx^y~z&w\\c\\Zq\rr\\d", DEFAULT_DELIMITERS)
     ).toBe(
-      "a\\E\\Zfoo\\F\\bar\\E\\b\\E\\Zx\\S\\y\\R\\z\\T\\w\\E\\c\\E\\Zq\\.br\\r\\E\\d"
+      "a\\E\\Zfoo\\F\\bar\\E\\b\\E\\Zx\\S\\y\\R\\z\\T\\w\\E\\c\\E\\Zq\\X0D\\r\\E\\d"
     );
   });
 
@@ -158,24 +211,20 @@ describe(encodeEscapes, () => {
     );
   });
 
-  it("encodes a sequence whose case is not the one HL7v2 defines", () => {
+  it("writes a sequence as it is whatever its code, since every escape character in a value starts one", () => {
     expect(
-      encodeEscapes("\\h\\a\\n\\b\\.BR\\c\\z1\\d\\c2842\\e", DEFAULT_DELIMITERS)
-    ).toBe(
-      "\\E\\h\\E\\a\\E\\n\\E\\b\\E\\.BR\\E\\c\\E\\z1\\E\\d\\E\\c2842\\E\\e"
-    );
-  });
-
-  it("encodes a literal .br so it reads back as text", () => {
-    expect(encodeEscapes("a\\.br\\b", DEFAULT_DELIMITERS)).toBe(
-      "a\\E\\.br\\E\\b"
-    );
-    expect(
-      decodeEscapes(
-        encodeEscapes("a\\.br\\b", DEFAULT_DELIMITERS),
+      encodeEscapes(
+        "\\h\\a\\Q\\b\\.BR\\c\\P\\d\\E\\e\\X41\\f\\.br\\g",
         DEFAULT_DELIMITERS
       )
-    ).toBe("a\\.br\\b");
+    ).toBe("\\h\\a\\Q\\b\\.BR\\c\\P\\d\\E\\e\\X41\\f\\.br\\g");
+  });
+
+  it("writes the escape of a separator in a value as it is, as the separator it stands for", () => {
+    const wire = encodeEscapes("a\\F\\b", DEFAULT_DELIMITERS);
+
+    expect(wire).toBe("a\\F\\b");
+    expect(decodeEscapes(wire, DEFAULT_DELIMITERS)).toBe("a|b");
   });
 
   it("writes a character set switch with the escape character MSH-2 declares", () => {
@@ -184,18 +233,9 @@ describe(encodeEscapes, () => {
     );
   });
 
-  it("encodes a character set switch whose content is not hexadecimal pairs", () => {
-    expect(
-      encodeEscapes(
-        "a\\C284\\b\\C28G2\\c\\M24\\d\\M2442843\\e",
-        DEFAULT_DELIMITERS
-      )
-    ).toBe("a\\E\\C284\\E\\b\\E\\C28G2\\E\\c\\E\\M24\\E\\d\\E\\M2442843\\E\\e");
-  });
-
-  it("encodes an escape character that does not start a sequence written as it is", () => {
+  it("encodes both escape characters of a pair whose text holds a separator, and one without a closing one", () => {
     expect(encodeEscapes("a\\Q\\b\\.sp|2\\c\\", DEFAULT_DELIMITERS)).toBe(
-      "a\\E\\Q\\E\\b\\E\\.sp\\F\\2\\E\\c\\E\\"
+      "a\\Q\\b\\E\\.sp\\F\\2\\E\\c\\E\\"
     );
   });
 
@@ -227,9 +267,9 @@ describe(encodeEscapes, () => {
     ).toBe("a~X7e~b");
   });
 
-  it("writes the segment terminator as a hex escape when a delimiter is in .br", () => {
-    expect(encodeEscapes("a\rb", { ...CUSTOM_DELIMITERS, field: "." })).toBe(
-      "a#X0D#b"
+  it("writes a carriage return and a line feed as hex escapes with any delimiters", () => {
+    expect(encodeEscapes("a\rb\nc", { ...CUSTOM_DELIMITERS, field: "." })).toBe(
+      "a#X0D#b#X0A#c"
     );
   });
 
@@ -279,39 +319,57 @@ describe(encodeEscapes, () => {
     const wire = encodeEscapes("\\H\\", d);
 
     expect(wire).toBe("\\E\\\\S\\\\E\\");
-    expect(decodeEscapes(wire, d)).toBe("\\H\\");
+    expect(decodeEscapes(wire, d)).toBe("\\E\\H\\E\\");
   });
 
-  // With delimiters that are not letters or digits, every value is written,
-  // holds no delimiter, and decodes to itself.
+  // HL7v2 §2.7.1: a sender escapes every delimiter in a value. A value read
+  // from the wire and written again is the value that arrived: each code of
+  // the table is read as its character and written as that code, and every
+  // other escape sequence stays as written. Reading it a second time changes
+  // nothing. The domain is every value a sender writes with any five
+  // delimiters, in which each escape character has a closing one.
   //
-  // Mutant: `namedEscapeCode` names the subcomponent delimiter `S` instead of
-  // `T`. Fails on `&` with `|^~\&`.
-  it("writes any value with delimiters that are not letters or digits", () => {
+  // Mutant: `tableCharacter` drops its `escapeCode(ch, d) === code` check.
+  // Fails on `\X7C\`, read as `|` and written as `\F\`.
+  it("writes a value read from the wire back as it was read", () => {
     fc.assert(
       fc.property(
-        arbDelimiters(fc.constantFrom(...PUNCTUATION)).chain((d) =>
-          fc.tuple(fc.constant(d), arbValue(d))
-        ),
-        ([d, value]) => {
-          const wire = encodeEscapes(value, d);
+        arbDelimiters(
+          fc.oneof(
+            fc.constantFrom(...PUNCTUATION),
+            fc.constantFrom(...ESCAPE_CODE_CHARACTERS)
+          )
+        ).chain((d) => fc.tuple(fc.constant(d), arbWire(d))),
+        ([d, wire]) => {
+          const value = decodeEscapes(wire, d);
 
-          expect(heldDelimiters(wire, d)).toEqual([]);
-          expect(decodeEscapes(wire, d)).toBe(value);
+          expect(decodeEscapes(value, d)).toBe(value);
+          expect(encodeEscapes(value, d)).toBe(wire);
         }
       ),
-      { examples: [[[DEFAULT_DELIMITERS, "&"]]] }
+      {
+        examples: [
+          [
+            [
+              DEFAULT_DELIMITERS,
+              "a\\X7C\\b\\F\\c\\E\\d\\.br\\e\\X0D\\f\\X0D0A\\g\\E\\F\\E\\",
+            ],
+          ],
+        ],
+      }
     );
   });
 
-  // With any delimiters, a value is written as above, or refused with
-  // EscapeSequenceError naming a character of the value that every escape code
-  // for it would write with a delimiter.
+  // Any value is written with no separator, no control character, and no
+  // escape character outside a closed sequence, so the parser splits the
+  // message where its delimiters are. The written value is written the same
+  // way again, and read and written back unchanged. With delimiters that are
+  // letters or digits, a value may hold a character that no escape code
+  // writes; EscapeSequenceError names it, and that outcome is correct.
   //
-  // Mutant: `hexEscapeCode` keeps a digit `A`–`F` in uppercase when it is a
-  // delimiter. Fails on the escape character `\` with `E` and `C` as
-  // delimiters, which only `\X5c\` writes.
-  it("writes any value with any delimiters, or throws EscapeSequenceError for a character none can write", () => {
+  // Mutant: `holdsTableCharacter` returns `false`. Fails on `\|\`, written
+  // with a raw `|`.
+  it("writes any value as a value the parser splits correctly, or throws EscapeSequenceError for a character none can write", () => {
     fc.assert(
       fc.property(
         arbDelimiters(
@@ -336,14 +394,63 @@ describe(encodeEscapes, () => {
           }
 
           expect(heldDelimiters(wire, d)).toEqual([]);
-          expect(decodeEscapes(wire, d)).toBe(value);
+          expect(encodeEscapes(wire, d)).toBe(wire);
+          expect(encodeEscapes(decodeEscapes(wire, d), d)).toBe(wire);
         }
       ),
       {
         examples: [
+          [[DEFAULT_DELIMITERS, "\\|\\"]],
           [[{ ...DEFAULT_DELIMITERS, component: "E", repetition: "C" }, "\\"]],
         ],
       }
+    );
+  });
+
+  // Free text held through escapeText is written and read back as the same
+  // value, with delimiters that are not letters or digits.
+  //
+  // Mutant: the table names the subcomponent separator `S` instead of `T`.
+  // Fails on `&`, read back as `^`.
+  it("reads back any free text held through escapeText", () => {
+    fc.assert(
+      fc.property(
+        arbDelimiters(fc.constantFrom(...PUNCTUATION)).chain((d) =>
+          fc.tuple(fc.constant(d), arbValue(d))
+        ),
+        ([d, text]) => {
+          const value = escapeText(text, d);
+
+          expect(decodeEscapes(encodeEscapes(value, d), d)).toBe(value);
+        }
+      ),
+      { examples: [[[DEFAULT_DELIMITERS, "&"]]] }
+    );
+  });
+});
+
+describe(escapeText, () => {
+  it("writes each escape character as `\\E\\`", () => {
+    expect(escapeText("C:\\temp\\H\\file", DEFAULT_DELIMITERS)).toBe(
+      "C:\\E\\temp\\E\\H\\E\\file"
+    );
+  });
+
+  it("leaves text without the escape character as it is", () => {
+    expect(escapeText("a|b", DEFAULT_DELIMITERS)).toBe("a|b");
+  });
+
+  it("writes the escape character as a hex escape when `E` is a delimiter", () => {
+    expect(
+      escapeText("a<b", { ...CUSTOM_DELIMITERS, component: "E", escape: "<" })
+    ).toBe("a<X3C<b");
+  });
+
+  it("is written as data, not as a sequence", () => {
+    const value = escapeText("C:\\temp\\H\\file", DEFAULT_DELIMITERS);
+
+    expect(encodeEscapes(value, DEFAULT_DELIMITERS)).toBe(
+      "C:\\E\\temp\\E\\H\\E\\file"
     );
   });
 });

@@ -4,7 +4,7 @@ Unified plugin to encode special characters as HL7v2 escape sequences in literal
 
 ## What it does
 
-Walks an HL7v2 AST and encodes delimiter and control characters found in `subcomponent` node values as HL7v2 escape sequences. It is the inverse of [`@glion/decode-escapes`](https://github.com/rethinkhealth/glion/tree/main/packages/decode-escapes): encode then decode round-trips to the original values.
+Walks an HL7v2 AST and encodes delimiter and control characters found in `subcomponent` node values as HL7v2 escape sequences. It is the inverse of [`@glion/decode-escapes`](https://github.com/rethinkhealth/glion/tree/main/packages/decode-escapes) for the separators and control characters: a value without the escape character is encoded and decoded back to itself.
 
 `@glion/to-hl7v2` encodes escape sequences while serializing, so this plugin is for a tree written with `encodeEscapes: false`.
 
@@ -42,7 +42,7 @@ After this plugin runs:
 ```json
 {
   "type": "subcomponent",
-  "value": "Patient allergic to \\F\\Peanuts\\F\\ and \\.br\\Severe reaction"
+  "value": "Patient allergic to \\F\\Peanuts\\F\\ and \\X0D\\Severe reaction"
 }
 ```
 
@@ -62,19 +62,18 @@ Nothing (`undefined`). Mutates the AST in-place.
 
 ## Behavior
 
-The plugin visits every `subcomponent` node and rewrites `node.value`, substituting delimiter and control characters with their HL7v2 escape sequences. A formatting command such as `\H\`, `\N\`, or `\.sp 2\`, a locally defined sequence (`\Z…\`), and a character set switch (`\Cxxyy\`, `\Mxxyyzz\`) are written as they are.
+The plugin visits every `subcomponent` node and rewrites `node.value`, substituting separators and control characters with their HL7v2 escape sequences. An escape sequence already in a value, such as `\E\`, `\H\`, `\.br\`, or `\XC3A9\`, is written as it is. An escape character that starts no sequence, or whose sequence would hold a separator, is written as `\E\`: `a\b|c` becomes `a\E\b\F\c`.
 
-| Input                         | Output                         |
-| ----------------------------- | ------------------------------ |
-| `\|`                          | `\F\` (field separator)        |
-| `^`                           | `\S\` (component separator)    |
-| `~`                           | `\R\` (repetition separator)   |
-| `&`                           | `\T\` (subcomponent separator) |
-| `\`                           | `\E\` (escape character)       |
-| `\r`                          | `\.br\` (line break directive) |
-| other characters below U+0020 | `\Xdd\` (hexadecimal escape)   |
+| Input                       | Output                         |
+| --------------------------- | ------------------------------ |
+| `\|`                        | `\F\` (field separator)        |
+| `^`                         | `\S\` (component separator)    |
+| `~`                         | `\R\` (repetition separator)   |
+| `&`                         | `\T\` (subcomponent separator) |
+| `\` that starts no sequence | `\E\` (escape character)       |
+| characters below U+0020     | `\Xdd\` (hexadecimal escape)   |
 
-A character whose escape code holds a delimiter, such as `\E\` when `E` is the component separator, is written as `\Xdd\`, the hexadecimal escape of its UTF-8 bytes. A value holding a character that no escape sequence can write with the delimiters makes the plugin throw `EscapeSequenceError`, exported by `@glion/utils`.
+A character whose escape code holds a delimiter, such as `|` when `F` is the component separator, is written as `\Xdd\`, the hexadecimal escape of its UTF-8 bytes. A value holding a character that no escape sequence can write with the delimiters makes the plugin throw `EscapeSequenceError`, exported by `@glion/utils`.
 
 Delimiter resolution order: `options.delimiters` → `file.data.delimiters` (set by `@glion/annotate-delimiters`) → HL7 defaults.
 
@@ -87,7 +86,7 @@ import { hl7v2EncodeEscapes } from "@glion/encode-escapes";
 // encode → decode round-trip
 const encoded = await unified().use(hl7v2EncodeEscapes).run(tree);
 const decoded = await unified().use(hl7v2DecodeEscapes).run(encoded);
-// decoded values === original values
+// decoded values === original values, for values without the escape character
 ```
 
 The plugin only transforms AST nodes and does not execute code.

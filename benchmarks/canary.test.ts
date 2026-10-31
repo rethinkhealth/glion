@@ -73,7 +73,7 @@ describe("canary — suites measure real work", () => {
     );
     expect(tree.children).toHaveLength(205);
     expect(value(tree, "OBX.5")?.value).toBe(
-      "Result 1 holds | and ^ and ~ and & and \\ chars"
+      "Result 1 holds | and ^ and ~ and & and \\E\\ chars"
     );
   });
 

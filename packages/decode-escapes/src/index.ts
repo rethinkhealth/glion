@@ -10,8 +10,9 @@ export interface HL7v2DecodeOptions {
 
 /**
  * Unified plugin to decode HL7v2 escape sequences in subcomponent literals,
- * for a tree parsed with `decodeEscapes: false`. `@glion/parser` decodes them
- * by default, and a decoded value MUST NOT be decoded again.
+ * for a tree parsed with `decodeEscapes: false`, as `decodeEscapes` from
+ * `@glion/utils` decodes them. Idempotent: a tree `@glion/parser` decoded is
+ * left as it is.
  *
  * Delimiter resolution order:
  *

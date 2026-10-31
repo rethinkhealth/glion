@@ -88,7 +88,7 @@ The order matters. The segment terminator comes first, so a line break is never 
 
 ### Escape sequences
 
-A text token whose characters include the escape delimiter is decoded with `decodeEscapes` from `@glion/utils`, unless `decodeEscapes: false` is given. Two kinds of text are never decoded:
+A text token whose characters include the escape delimiter is decoded with `decodeEscapes` from `@glion/utils`, unless `decodeEscapes: false` is given. It decodes the separator escapes and the hexadecimal escapes of control characters, and keeps every other sequence as written: `PID|a\T\b\E\c` gives the value `a&b\E\c`. Two kinds of text are never decoded:
 
 - a Segment ID, which rule 3 reads without decoding;
 - MSH-2, which holds the encoding characters as written. The tokenizer decodes text only from the offset MSH-2 ends at, so the tail of a long MSH-2, `\F\` in `MSH|^~\&\F\|a`, is not decoded either.

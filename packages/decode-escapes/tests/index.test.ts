@@ -14,7 +14,7 @@ describe("hl7v2DecodeEscapes plugin", () => {
     expect(
       (results.children[0] as Segment)?.children[0]?.children[0]?.children[0]
         ?.children[0]?.value
-    ).toBe("Value|More^Stuff~Again&Sub\\Escaped");
+    ).toBe("Value|More^Stuff~Again&Sub\\E\\Escaped");
   });
 
   it("decodes using custom delimiters from options", async () => {
@@ -36,10 +36,10 @@ describe("hl7v2DecodeEscapes plugin", () => {
     expect(
       (results.children[0] as Segment)?.children[0]?.children[0]?.children[0]
         ?.children[0]?.value
-    ).toBe("Value*More$Stuff%Again@Sub\\Escaped");
+    ).toBe("Value*More$Stuff%Again@Sub\\E\\Escaped");
   });
 
-  it("decodes .br into the segment terminator, a carriage return", async () => {
+  it("keeps .br as written", async () => {
     const tree = m(s("MSH", f("Line1\\.br\\Line2")));
 
     const results = await unified().use(hl7v2DecodeEscapes).run(tree);
@@ -47,18 +47,18 @@ describe("hl7v2DecodeEscapes plugin", () => {
     expect(
       (results.children[0] as Segment)?.children[0]?.children[0]?.children[0]
         ?.children[0]?.value
-    ).toBe("Line1\rLine2");
+    ).toBe("Line1\\.br\\Line2");
   });
 
-  it("decodes hex escapes", async () => {
-    const tree = m(s("MSH", f("Hello\\X0A\\World\\X0D\\Done")));
+  it("decodes the hex escapes of control characters", async () => {
+    const tree = m(s("MSH", f("Hello\\X0A\\World\\X0D\\Done\\X41\\")));
 
     const results = await unified().use(hl7v2DecodeEscapes).run(tree);
 
     expect(
       (results.children[0] as Segment)?.children[0]?.children[0]?.children[0]
         ?.children[0]?.value
-    ).toBe("Hello\nWorld\rDone");
+    ).toBe("Hello\nWorld\rDone\\X41\\");
   });
 
   it("leaves unknown escapes untouched", async () => {
