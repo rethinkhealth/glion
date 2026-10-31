@@ -10,8 +10,8 @@ afterAll(oracle.close);
 // The generator stays inside the specification's domain: the specification
 // itself confirms each message breaks no rule.
 //
-// Mutant: `data` keeps separators (drop its filter, add `|` to DATA). Fails on
-// `{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[["|"]]]],"id":"AAA"}]}`.
+// Mutant: DATA holds the segment terminator (add `\r`). Fails on
+// `{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[["\r"]]]],"id":"AAA"}]}`.
 it("draws only well-formed messages", async () => {
   await fc.assert(
     fc.asyncProperty(arbSpecMessage, async (message) => {
@@ -57,6 +57,19 @@ describe("arbSpecMessage", () => {
     ).toBe(true);
   });
 
+  it.each([
+    ["field separator", 0],
+    ["component separator", 1],
+    ["repetition separator", 2],
+    ["subcomponent separator", 4],
+  ])("draws the %s in data", (_, index) => {
+    expect(
+      sample.some((m) =>
+        valuesOf(m).some((value) => value.includes(m.delimiters[index] ?? ""))
+      )
+    ).toBe(true);
+  });
+
   it("draws an escape sequence of §2.7 in data", () => {
     const sequences = (escape: string) =>
       [..."FSTRE"].map((letter) => `${escape}${letter}${escape}`);
@@ -68,6 +81,17 @@ describe("arbSpecMessage", () => {
             value.includes(sequence)
           )
         )
+      )
+    ).toBe(true);
+  });
+
+  it("draws a formatting command of §2.7 in data", () => {
+    expect(
+      sample.some((m) =>
+        valuesOf(m).some((value) => {
+          const escape = m.delimiters[3] ?? "";
+          return value.includes(`${escape}H${escape}`);
+        })
       )
     ).toBe(true);
   });

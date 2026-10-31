@@ -14,16 +14,29 @@ describe("startOracle", () => {
     ).toEqual({ failures: [], text: "MSH|^~\\&\rPID|1|Smith^John\r" });
   });
 
+  it("writes a delimiter in data as its escape sequence", async () => {
+    expect(
+      await oracle.ask({
+        delimiters: "|^~\\&",
+        header: [],
+        segments: [{ fields: [[[["Smith&Jones|\\"]]]], id: "PID" }],
+      })
+    ).toEqual({
+      failures: [],
+      text: "MSH|^~\\&\rPID|Smith\\T\\Jones\\F\\\\E\\\r",
+    });
+  });
+
   it("names the rule a message breaks, and still writes its text", async () => {
     expect(
       await oracle.ask({
         delimiters: "|^~\\&",
         header: [],
-        segments: [{ fields: [[[["a|b"]]]], id: "PID" }],
+        segments: [{ fields: [[[["a\rb"]]]], id: "PID" }],
       })
     ).toEqual({
-      failures: ["well_formed_subcomponent_clean"],
-      text: "MSH|^~\\&\rPID|a|b\r",
+      failures: ["well_formed_subcomponent_no_terminator"],
+      text: "MSH|^~\\&\rPID|a\rb\r",
     });
   });
 

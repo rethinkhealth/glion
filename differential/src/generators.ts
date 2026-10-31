@@ -16,23 +16,46 @@ import type { SpecMessage } from "./oracle";
 //      └─ segments: array 0–3 of record { id: 3 × SEGMENT_ID, fields: array 0–4 of field }
 //
 //   field = array 1–3 of repetition = array 1–3 of component = array 1–3 of data
-//   data  = array 0–4 of one character from DATA or the escape character, joined
+//   data  = array 0–4 of piece, joined
+//   piece = oneof( 4 × one character from DATA or the five delimiters ,
+//                  1 × escape character, one of SEQUENCES, escape character )
 //
-// One draw (seed 42):
-//   {"delimiters":"~&#+%","header":[[[["-F"]]]],
-//    "segments":[{"id":"BUQ","fields":[[[["+"],["E X","b "],[""]], …]]}, …]}
-// `~` separates fields and `+` is the escape character, here in data as "+".
+// One draw (seed 42), shortened:
+//   {"delimiters":"|^~\&",
+//    "header":[[[["X","ZZ\T\","aTR"],["",""]],[["\R\E9","\.br\"]]]],
+//    "segments":[{"id":"39G","fields":[[[["F","a-\", …],["","","F^1~"], …]]]}]}
+// `ZZ\T\` is data holding the sequence `\T\`, which the specification writes
+// `ZZ\E\T\E\`; `F^1~` holds two separators, written `F\S\1\R\`.
 //
 // Every number and list below is a limit on the scope of the properties: a
 // message the generator cannot draw is never checked.
 
 // Candidate delimiters. No letters, digits or spaces, though the specification
-// allows them.
+// allows them; no escape code ID (`F`, `S`, `T`, `R`, `E`), which it does not
+// allow as a separator (`well_formed_separators_not_escape_codes`).
 const DELIMITER_POOL = ["|", "^", "~", "\\", "&", "#", "*", "!", "%", "+"];
-// Characters of data. Includes the letters of the escape sequences of §2.7
-// (`\F\`, `\S\`, `\T\`, `\R\`, `\E\`), so an escape character in data can form
-// one. None is in DELIMITER_POOL, so data never holds a separator.
+// Characters of data, besides the delimiters. No segment terminator
+// (`well_formed_subcomponent_no_terminator`), and nothing below U+0020.
 const DATA = [..."abcFSTREXYZ019 .-"];
+// What a receiver reads between two escape characters (§2.7): the five
+// delimiter codes, the formatting commands `\H\`, `\N\`, `\.br\` and `\.sp\`, a
+// hexadecimal `\X41\`, and a locally defined `\Zab\`. In data they are
+// characters like any other, which the specification writes with `\E\`:
+// `\H\` → `\E\H\E\`. Drawn whole, since one character at a time forms one
+// about 1 in 2,000 positions.
+const SEQUENCES = [
+  "F",
+  "S",
+  "T",
+  "R",
+  "E",
+  "H",
+  "N",
+  ".br",
+  ".sp",
+  "X41",
+  "Zab",
+];
 const SEGMENT_ID = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"];
 
 // Five delimiters, as MSH-1 then MSH-2: field, component, repetition, escape,
@@ -53,24 +76,31 @@ const arbDelimiters = fc.oneof(
 // fast-check shrinks the delimiters, everything built from them is drawn again.
 
 /**
- * A well-formed message, by construction: distinct delimiters, three-character
- * segment IDs, at least one element at every level of a field, and no
- * separator inside a subcomponent. The escape character may appear in data;
- * the specification allows it (`Delimiters.separators`).
+ * A well-formed message, by construction: distinct delimiters, none an escape
+ * code ID, three-character segment IDs, at least one element at every level of
+ * a field, and no segment terminator inside a subcomponent. Data may hold
+ * every delimiter; the specification writes each as an escape sequence.
  */
 export const arbSpecMessage: fc.Arbitrary<SpecMessage> = arbDelimiters.chain(
   (delimiters) => {
-    // Every delimiter but index 3, the escape character, which data may hold.
-    const separators = new Set([...delimiters].filter((_, i) => i !== 3));
-    // One subcomponent value: 0 to 4 characters, each picked uniformly from 18
-    // (DATA and the escape character), then joined. 0 characters is the empty
-    // value. fast-check leans toward short arrays, so "" comes up often.
-    // `\`, an escape letter, `\` is about 1 in 1,200 per position; `\X0D\` is
-    // 5 characters and never appears. The filter is a safety net: with DATA
-    // as it is, it removes nothing.
+    // One subcomponent value: 0 to 4 pieces, joined. 4 times in 5 a piece is
+    // one character, picked uniformly from 22 (DATA and the five
+    // delimiters); otherwise a whole sequence, `\H\` with `\` the escape
+    // character drawn above. 0 pieces is the empty value. fast-check leans
+    // toward short arrays, so "" comes up often.
+    const escape = delimiters[3] ?? "\\";
+    const piece = fc.oneof(
+      { arbitrary: fc.constantFrom(...DATA, ...delimiters), weight: 4 },
+      {
+        arbitrary: fc
+          .constantFrom(...SEQUENCES)
+          .map((code) => `${escape}${code}${escape}`),
+        weight: 1,
+      }
+    );
     const data = fc
-      .array(fc.constantFrom(...DATA, delimiters[3] ?? "\\"), { maxLength: 4 })
-      .map((chars) => chars.filter((c) => !separators.has(c)).join(""));
+      .array(piece, { maxLength: 4 })
+      .map((pieces) => pieces.join(""));
     // A field, read inside out: a component is 1–3 values, a repetition 1–3
     // components, a field 1–3 repetitions. `minLength: 1` at each level is
     // `well_formed_field_has_repetition` and the two rules after it; an empty

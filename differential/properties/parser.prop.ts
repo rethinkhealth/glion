@@ -5,9 +5,9 @@
 // the parser must find the same one. Scope: every message `arbSpecMessage`
 // draws; see `src/generators.ts` for what it leaves out.
 //
-// Fails today on a finding: glion decodes the escape sequences of §2.7 and the
-// specification has none, so `\S\` in data is read as `^`. No mutant is
-// recorded until the finding is settled.
+// Mutant: `decodeEscapes` in `@glion/utils` decodes `\S\` to the repetition
+// separator. Fails on
+// `{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[["^",""]],[[""]]]],"id":"AAA"}]}`.
 import { hl7v2Parser } from "@glion/parser";
 import fc from "fast-check";
 import { unified } from "unified";
