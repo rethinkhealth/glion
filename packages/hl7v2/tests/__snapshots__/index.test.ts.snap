@@ -6719,7 +6719,7 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
     [1:46-1:53: Component \`MSH-9.3\` (Message Structure) is not present; it is required.],
     [2:49-2:50: The value is not a date and time; a DTM value has the form \`YYYY[MM[DD[HH[MM[SS[.S[S[S[S]]]]]]]]][+/-ZZZZ]\`.],
     [2:1: Segment \`EVN\` is missing; the event schema requires it at this point.],
-    [2:50: Segment \`PV1\` is missing; the event schema requires it at this point.],
+    [3:1: Segment \`PV1\` is missing; the event schema requires it at this point.],
   ],
   "result": [
     {
@@ -6768,19 +6768,22 @@ exports[`apply > parses MSH + PID and decodes escapes, then stringifies to JSON 
     },
   ],
   "value": "MSH|^~\\&|SENDER|FAC|RCVR|FAC|20250101010101||ADT^A01|MSG00001|P|2.5
-PID|1||12345^^^HOSP^MR||DOE\\S\\JOHN^A&J|19700101|M",
+PID|1||12345^^^HOSP^MR||DOE\\S\\JOHN^A&J|19700101|M
+",
 }
 `;
 
 exports[`apply > parses multiple segments with MSH as the first segment 1`] = `
 "MSH|^~\\&|SENDER|FAC|RCVR|FAC|20250101010101||ADT^A01|MSG00001|P|2.5
 PID|||PATID1234^5^M11^ADT1^MR^UNIVERSITY HOSPITAL~123_456_789^^^USSSA^SS||EVERYMAN^ADAM^A^III||19_610_615|M||C|1200 N ELM STREET^^GREENSBORO^NC^27_401-1020|GL|(919)379-1212|(919)271-3434||S||PATID12345001^2^M10^ADT1^AN^A|123_456_789|9-87_654^NC
-OBR|1|845439^GHH OE|1045813^GHH LAB|1554-5^GLUCOSE^LN|||200202150730|||||||||DOCT^KILDARE^JAMES^A|||||||200202150930||F|||^^^^^R"
+OBR|1|845439^GHH OE|1045813^GHH LAB|1554-5^GLUCOSE^LN|||200202150730|||||||||DOCT^KILDARE^JAMES^A|||||||200202150930||F|||^^^^^R
+"
 `;
 
 exports[`apply > parses multiple segments without MSH as the first segment 1`] = `
 "PID|||PATID1234^5^M11^ADT1^MR^UNIVERSITY HOSPITAL~123_456_789^^^USSSA^SS||EVERYMAN^ADAM^A^III||19_610_615|M||C|1200 N ELM STREET^^GREENSBORO^NC^27_401-1020|GL|(919)379-1212|(919)271-3434||S||PATID12345001^2^M10^ADT1^AN^A|123_456_789|9-87_654^NC
-OBR|1|845439^GHH OE|1045813^GHH LAB|1554-5^GLUCOSE^LN|||200202150730|||||||||DOCT^KILDARE^JAMES^A|||||||200202150930||F|||^^^^^R"
+OBR|1|845439^GHH OE|1045813^GHH LAB|1554-5^GLUCOSE^LN|||200202150730|||||||||DOCT^KILDARE^JAMES^A|||||||200202150930||F|||^^^^^R
+"
 `;
 
 exports[`apply > parses multiple segments without MSH as the first segment 2`] = `

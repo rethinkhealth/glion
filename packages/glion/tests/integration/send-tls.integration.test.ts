@@ -18,9 +18,9 @@ import { ADT, capture } from "../fixtures/send";
 const FS_BYTE = 0x1c;
 
 const ACK = [
-  "MSH|^~\\&|RECEIVER|FAC|SENDER|FAC|20260531120001||ACK^A01|ACK00001|P|2.5",
-  "MSA|AA|MSG00001",
-].join("\r");
+  "MSH|^~\\&|RECEIVER|FAC|SENDER|FAC|20260531120001||ACK^A01|ACK00001|P|2.5\r",
+  "MSA|AA|MSG00001\r",
+].join("");
 
 /** Closes a server and waits for it to stop listening. */
 function closeServer(server: Server): Promise<void> {

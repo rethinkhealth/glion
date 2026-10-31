@@ -28,7 +28,7 @@ const lintAgainst = async (...segments: string[]) => {
   const file = new VFile();
   await unified()
     .use(hl7v2LintSegmentOrder, { definition: MSH_PID })
-    .run(parseHL7v2(segments.join("\r")), file);
+    .run(parseHL7v2(segments.map((segment) => `${segment}\r`).join("")), file);
   return file.messages;
 };
 
@@ -144,7 +144,7 @@ describe("a message the rule cannot list the edits of", () => {
           id: "TEST",
         },
       })
-      .run(parseHL7v2(["MSH|^~\\&", "PID|1"].join("\r")), file);
+      .run(parseHL7v2(["MSH|^~\\&\r", "PID|1\r"].join("")), file);
 
     expect(file.messages.map((message) => message.reason)).toEqual([
       "The segment is out of place; the event schema does not allow it at this point.",

@@ -22,7 +22,7 @@ describe("hl7v2-lint:max-message-size", () => {
       s("OBR", f("1234567890"))
     );
     const file = new VFile(
-      "MSH|Welcome|Test\rPID|1234567890\rOBX|1234567890\rOBR|1234567890"
+      "MSH|Welcome|Test\rPID|1234567890\rOBX|1234567890\rOBR|1234567890\r"
     );
 
     await unified()
@@ -31,9 +31,9 @@ describe("hl7v2-lint:max-message-size", () => {
 
     expect(file.messages).toHaveLength(1);
     expect(file.messages[0].message).toBe(
-      "The message is 61 bytes; the configured limit is 1 byte. Shorten the message or raise `maxBytes`."
+      "The message is 62 bytes; the configured limit is 1 byte. Shorten the message or raise `maxBytes`."
     );
-    expect(file.messages[0].actual).toBe("61");
+    expect(file.messages[0].actual).toBe("62");
   });
 
   it("warns when message has too many segments", async () => {
@@ -84,7 +84,9 @@ describe("hl7v2-lint:max-message-size", () => {
       s("PID", f("1234567890")),
       s("OBX", f("1234567890"))
     );
-    const file = new VFile("MSH|Welcome|Test\rPID|1234567890\rOBX|1234567890");
+    const file = new VFile(
+      "MSH|Welcome|Test\rPID|1234567890\rOBX|1234567890\r"
+    );
 
     await unified()
       .use(hl7v2LintMaxMessageSize, { maxBytes: 1, maxSegments: 1 })
@@ -92,9 +94,9 @@ describe("hl7v2-lint:max-message-size", () => {
 
     expect(file.messages).toHaveLength(2);
     expect(file.messages[0].message).toBe(
-      "The message is 46 bytes; the configured limit is 1 byte. Shorten the message or raise `maxBytes`."
+      "The message is 47 bytes; the configured limit is 1 byte. Shorten the message or raise `maxBytes`."
     );
-    expect(file.messages[0].actual).toBe("46");
+    expect(file.messages[0].actual).toBe("47");
     expect(file.messages[1].message).toBe(
       "The message has 3 segments; the configured limit is 1 segment. Remove segments or raise `maxSegments`."
     );

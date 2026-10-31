@@ -46,7 +46,7 @@ describe("toHl7v2 with segment groups", () => {
 
   it("serializes a group on its own as its segments", () => {
     expect(toHl7v2(g("OBSERVATION", obx("1"), obx("2")))).toBe(
-      "OBX|1|NM\rOBX|2|NM"
+      "OBX|1|NM\rOBX|2|NM\r"
     );
   });
 });

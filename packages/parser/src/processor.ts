@@ -56,9 +56,7 @@ function createParserCore() {
   let currentSub: Subcomponent | null = null;
   let segmentHasContent = false;
   let lastContentEnd: Position["end"] | null = null;
-  let documentEnd: Position["end"] | null = null; // Track document-level end position
   let expectingSegmentName = true; // Start expecting a segment name
-  let rootStartSet = false; // Track if we've set the root start position
 
   const resetState = () => {
     seg = null;
@@ -193,11 +191,13 @@ function createParserCore() {
   };
 
   const processToken = (tok: Token) => {
-    // The root starts at the first token of any kind: `|` holds no TEXT token,
-    // and its root is 0–1.
-    if (!rootStartSet) {
-      root.position = { end: tok.position.start, start: tok.position.start };
-      rootStartSet = true;
+    // The root covers every token, from the first of any kind to the last,
+    // the segment terminators included: `|` holds no TEXT token, and its root
+    // is 0–1.
+    if (root.position) {
+      root.position.end = tok.position.end;
+    } else {
+      root.position = { end: tok.position.end, start: tok.position.start };
     }
     switch (tok.type) {
       case "SEGMENT_END": {
@@ -208,7 +208,6 @@ function createParserCore() {
       }
       case "FIELD_DELIM": {
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         // A line that starts with a field delimiter has an empty Segment ID
         ensureSegment(tok.position.start);
         openField(tok.position.end);
@@ -216,21 +215,18 @@ function createParserCore() {
       }
       case "REPETITION_DELIM": {
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         openRepetition(tok.position.start, tok.position.end);
         updatePositionsToEnd(tok.position.end);
         return;
       }
       case "COMPONENT_DELIM": {
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         openComponent(tok.position.start, tok.position.end);
         updatePositionsToEnd(tok.position.end);
         return;
       }
       case "SUBCOMP_DELIM": {
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         ensureComponent(tok.position.start);
         // If comp has no children yet, add empty first subcomponent
         if (comp!.children.length === 0) {
@@ -250,7 +246,6 @@ function createParserCore() {
         if (expectingSegmentName) {
           openSegment(val, tok.position);
           lastContentEnd = tok.position.end;
-          documentEnd = tok.position.end;
           return;
         }
 
@@ -261,7 +256,6 @@ function createParserCore() {
         }
         updatePositionsToEnd(tok.position.end);
         lastContentEnd = tok.position.end;
-        documentEnd = tok.position.end;
         segmentHasContent = true;
         return;
       }
@@ -289,10 +283,8 @@ function createParserCore() {
       root.children.pop();
     }
 
-    // Set root end position once at finalization using document-level end
-    if (root.position && documentEnd) {
-      root.position.end = documentEnd;
-    } else if (!root.position) {
+    // A message with no tokens is empty, and its root covers 0–0.
+    if (!root.position) {
       root.position = {
         end: { column: 1, line: 1, offset: 0 },
         start: { column: 1, line: 1, offset: 0 },

@@ -24,9 +24,9 @@ function makeCtx(raw: string): Context {
 }
 
 const ADT_A01 = [
-  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
-  "PID|1||12345",
-].join("\r");
+  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1\r",
+  "PID|1||12345\r",
+].join("");
 
 describe("Router addMiddleware prepend", () => {
   it("appends by default (prepend=false)", () => {

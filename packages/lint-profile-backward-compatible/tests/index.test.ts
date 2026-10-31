@@ -10,6 +10,10 @@ import { describe, expect, it } from "vitest";
 
 import hl7v2LintBackwardCompatible from "../src";
 
+/** The HL7v2 message `segments` make, each followed by the segment terminator. */
+const hl7 = (...segments: string[]) =>
+  segments.map((segment) => `${segment}\r`).join("");
+
 /**
  * An MSH segment declaring `version` in MSH-12; the rule checks the message
  * against that version.
@@ -22,7 +26,7 @@ const msh = (version: string) =>
  * text, after the annotators it needs have put each element's optionality on
  * the tree.
  */
-const lint = (...segments: string[]) => run(parseHL7v2(segments.join("\r")));
+const lint = (...segments: string[]) => run(parseHL7v2(hl7(...segments)));
 
 /**
  * The findings of the rule on `tree`, after the annotators it needs have put
@@ -210,7 +214,7 @@ describe("hl7v2LintBackwardCompatible", () => {
   // One report per backward-compatible element: the components of a
   // reported element are not reported again.
   it("reports a backward-compatible field once when one of its components is backward compatible too", async () => {
-    const tree = parseHL7v2([msh("2.5.1"), "ZPD|1|A^B"].join("\r"));
+    const tree = parseHL7v2(hl7(msh("2.5.1"), "ZPD|1|A^B"));
     const field = select(tree, "ZPD.2");
     const component = select(tree, "ZPD.2.2");
     if (field && component) {
@@ -226,7 +230,7 @@ describe("hl7v2LintBackwardCompatible", () => {
   });
 
   it("reports nothing in a backward-compatible field that holds the explicit null, even in a backward-compatible component", async () => {
-    const tree = parseHL7v2([msh("2.5.1"), 'ZPD|1|""'].join("\r"));
+    const tree = parseHL7v2(hl7(msh("2.5.1"), 'ZPD|1|""'));
     const field = select(tree, "ZPD.2");
     const component = select(tree, "ZPD.2.1");
     if (field && component) {
@@ -242,7 +246,7 @@ describe("hl7v2LintBackwardCompatible", () => {
   });
 
   it("reports a backward-compatible component once when one of its subcomponents is backward compatible too", async () => {
-    const tree = parseHL7v2([msh("2.5.1"), "ZPD|1|A&B"].join("\r"));
+    const tree = parseHL7v2(hl7(msh("2.5.1"), "ZPD|1|A&B"));
     const component = select(tree, "ZPD.2.1");
     const subcomponent = select(tree, "ZPD.2.1.2");
     if (component && subcomponent) {
@@ -268,9 +272,7 @@ describe("hl7v2LintBackwardCompatible", () => {
   // The finding names the version, so the rule reads it from the profile
   // context that `@glion/annotate-profile-context` puts on the file.
   it("reports nothing on a file without a profile version", async () => {
-    const tree = parseHL7v2(
-      [msh("2.5.1"), "DG1|1|I9|250.00|DIABETES"].join("\r")
-    );
+    const tree = parseHL7v2(hl7(msh("2.5.1"), "DG1|1|I9|250.00|DIABETES"));
     await unified()
       .use(hl7v2AnnotateProfileContext)
       .use(hl7v2AnnotateProfileFields)

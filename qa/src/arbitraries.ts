@@ -18,7 +18,7 @@
  * HL7v2 messages have a nested delimiter structure. We build arbitraries
  * bottom-up, mirroring the HL7v2 hierarchy:
  *
- *     Message      = MSH segment + 0..n additional segments, joined by \r
+ *     Message      = MSH segment + 0..n additional segments, each followed by \r
  *     Segment      = NAME | field | field | ...     (segments can repeat in groups)
  *     Field        = repetition [~ repetition ...]  (~ = repetition delimiter; may be empty or single)
  *     Repetition   = component [^ component ...]    (^ = component delimiter; may be single)
@@ -334,6 +334,33 @@ function buildMsh(
 // ---------------------------------------------------------------------------
 
 /**
+ * The message `segments` make, each followed by `terminator`, the last one
+ * included.
+ */
+export const message = (
+  segments: readonly string[],
+  terminator = DEFAULT_ENCODING_CHARS.segment
+): string => segments.map((segment) => `${segment}${terminator}`).join("");
+
+/**
+ * The segments of a structurally valid HL7v2 message with default delimiters
+ * (`|^~\&`), in order, without their segment terminators: an MSH segment with
+ * 3–10 fields after the encoding characters, then 0–5 segments with random
+ * Segment IDs.
+ */
+export const arbHL7v2Segments: fc.Arbitrary<string[]> = fc
+  .tuple(
+    // MSH extra fields (fields 3+): sending app, facility, receiving app, etc.
+    fc.array(arbField(DEFAULT_ENCODING_CHARS), { maxLength: 10, minLength: 3 }),
+    // Additional segments after MSH
+    fc.array(arbSegment(DEFAULT_ENCODING_CHARS), { maxLength: 5, minLength: 0 })
+  )
+  .map(([mshFields, segments]) => [
+    buildMsh(DEFAULT_ENCODING_CHARS, mshFields),
+    ...segments,
+  ]);
+
+/**
  * Generate a structurally valid HL7v2 message with default delimiters
  * (`|^~\&`).
  *
@@ -342,7 +369,7 @@ function buildMsh(
  * - Starts with a properly formed MSH segment
  * - Has 3–10 fields in the MSH segment (after the encoding characters)
  * - Has 0–5 additional segments (PID, OBX, etc. with random names)
- * - Uses `\r` as the segment terminator
+ * - Ends every segment with `\r`, the last one included
  *
  * This arbitrary is the foundation for:
  *
@@ -351,19 +378,11 @@ function buildMsh(
  *
  * @example
  *   // Might generate:
- *   // "MSH|^~\\&|SENDER|FAC|RECV\rPID|1|12345|DOE^JOHN\rOBX|1|NM|WBC||7.5"
+ *   // "MSH|^~\\&|SENDER|FAC|RECV\rPID|1|12345|DOE^JOHN\rOBX|1|NM|WBC||7.5\r"
  */
-export const arbHL7v2Message: fc.Arbitrary<string> = fc
-  .tuple(
-    // MSH extra fields (fields 3+): sending app, facility, receiving app, etc.
-    fc.array(arbField(DEFAULT_ENCODING_CHARS), { maxLength: 10, minLength: 3 }),
-    // Additional segments after MSH
-    fc.array(arbSegment(DEFAULT_ENCODING_CHARS), { maxLength: 5, minLength: 0 })
-  )
-  .map(([mshFields, segments]) => {
-    const msh = buildMsh(DEFAULT_ENCODING_CHARS, mshFields);
-    return [msh, ...segments].join(DEFAULT_ENCODING_CHARS.segment);
-  });
+export const arbHL7v2Message: fc.Arbitrary<string> = arbHL7v2Segments.map(
+  (segments) => message(segments)
+);
 
 /**
  * Generate a structurally valid HL7v2 message with **randomized** delimiters.
@@ -378,7 +397,7 @@ export const arbHL7v2Message: fc.Arbitrary<string> = fc
  *
  * @example
  *   // Might generate (with delimiters #!@%*):
- *   // "MSH#!@%*#SENDER#FAC\rPID#1#12345#DOE!JOHN"
+ *   // "MSH#!@%*#SENDER#FAC\rPID#1#12345#DOE!JOHN\r"
  */
 export const arbHL7v2MessageCustomDelimiters: fc.Arbitrary<string> =
   arbEncodingChars.chain((delimiters) =>
@@ -389,7 +408,7 @@ export const arbHL7v2MessageCustomDelimiters: fc.Arbitrary<string> =
       )
       .map(([mshFields, segments]) => {
         const msh = buildMsh(delimiters, mshFields);
-        return [msh, ...segments].join(delimiters.segment);
+        return message([msh, ...segments], delimiters.segment);
       })
   );
 
@@ -546,18 +565,26 @@ const arbSequenceSegmentIds = (
   fc.tuple(...elements.map(arbElementSegmentIds)).map((parts) => parts.flat());
 
 /**
- * An HL7v2 message of `version` whose segments fit `schema`.
+ * The segments of an HL7v2 message of `version` that fit `schema`, in order,
+ * without their segment terminators.
  *
  * MSH-9 names the schema and MSH-12 the version. Every other segment holds
  * only its Set ID, `1`.
  */
-export const arbEventSchemaMessage = (
+export const arbEventSchemaSegments = (
   schema: EventSchema,
   version: string
-): fc.Arbitrary<string> => {
+): fc.Arbitrary<string[]> => {
   const [code = "", event = ""] = schema.id.split("_");
   const header = `MSH|^~\\&|APP|FAC|APP|FAC|20240101120000||${code}^${event}^${schema.id}|1|P|${version}`;
   return arbSequenceSegmentIds(schema.elements).map((ids) =>
-    ids.map((id) => (id === "MSH" ? header : `${id}|1`)).join("\r")
+    ids.map((id) => (id === "MSH" ? header : `${id}|1`))
   );
 };
+
+/** An HL7v2 message of `version` whose segments fit `schema`. */
+export const arbEventSchemaMessage = (
+  schema: EventSchema,
+  version: string
+): fc.Arbitrary<string> =>
+  arbEventSchemaSegments(schema, version).map((segments) => message(segments));

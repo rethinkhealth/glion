@@ -43,7 +43,7 @@ describe("compose", () => {
 
   it("captures response from middleware return value on ctx.res", async () => {
     const mw: Middleware = async () => ({
-      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1",
+      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1\r",
     });
 
     const ctx = makeCtx();
@@ -56,7 +56,7 @@ describe("compose", () => {
     const order: number[] = [];
     const mw1: Middleware = async () => {
       order.push(1);
-      return { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|CTL1|Blocked" };
+      return { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AR|CTL1|Blocked\r" };
     };
     const mw2: Middleware = async (_ctx, next) => {
       order.push(2);
@@ -102,7 +102,7 @@ describe("compose", () => {
     };
     const handler: Middleware = async (ctx) => {
       expect(ctx.get("before")).toBe(true);
-      return { raw: `MSH|^~\\&||||||||||2.5.1\rMSA|AA|${ctx.controlId}` };
+      return { raw: `MSH|^~\\&||||||||||2.5.1\rMSA|AA|${ctx.controlId}\r` };
     };
 
     const ctx = makeCtx();
@@ -114,7 +114,7 @@ describe("compose", () => {
   it("allows middleware to set ctx.res directly", async () => {
     const mw: Middleware = async (ctx, next) => {
       await next();
-      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1|Direct" };
+      ctx.res = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|CTL1|Direct\r" };
     };
 
     const ctx = makeCtx();

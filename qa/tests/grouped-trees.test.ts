@@ -27,7 +27,11 @@ import fc from "fast-check";
 import { unified } from "unified";
 import { VFile } from "vfile";
 
-import { arbEventSchemaMessage } from "../src/arbitraries";
+import {
+  arbEventSchemaMessage,
+  arbEventSchemaSegments,
+  message,
+} from "../src/arbitraries";
 import { discoverFixtures, readFixture } from "../src/fixtures";
 
 const VERSION = "2.5";
@@ -130,7 +134,7 @@ const BAR_P02 = schemas.find(
   (schema) => schema.id === "BAR_P02"
 ) as EventSchema;
 const BAR_P02_MESSAGE =
-  "MSH|^~\\&|APP|FAC|APP|FAC|20240101120000||BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1";
+  "MSH|^~\\&|APP|FAC|APP|FAC|20240101120000||BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1\r";
 
 const fixtures = discoverFixtures(() => true);
 const groupedFixtures: string[] = [];
@@ -278,7 +282,7 @@ describe("QR6: grouped trees", () => {
     // when the schema's reading of it opens a group.
     //
     // Mutant: `@glion/transform-profile-groups` never replaces the root's children.
-    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1"`.
+    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1\r"`.
     it("fit the schema they were generated from, and are grouped by it", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ([schema, text]) => {
@@ -300,7 +304,7 @@ describe("QR6: grouped trees", () => {
     // grouped tree as on the flat one.
     //
     // Mutant: `@glion/lint-profile-required-fields` reads no segment inside a group.
-    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1"`.
+    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1\r"`.
     it("report the same diagnostics grouped as flat", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ([, text]) => {
@@ -316,7 +320,7 @@ describe("QR6: grouped trees", () => {
     // tree as on the flat one.
     //
     // Mutant: `@glion/annotate-profile-fields` reads no segment inside a group.
-    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1"`.
+    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1\r"`.
     it("set the same annotations grouped as flat", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ([, text]) => {
@@ -331,7 +335,7 @@ describe("QR6: grouped trees", () => {
     // The serializer writes the grouped tree as the message it was read from.
     //
     // Mutant: `@glion/to-hl7v2` writes no segment inside a group.
-    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1"`.
+    // Fails on BAR_P02 and `"MSH|…|BAR^P02^BAR_P02|1|P|2.5\rEVN|1\rPID|1\r"`.
     it("serialize to the same text grouped as flat", async () => {
       await fc.assert(
         fc.asyncProperty(arbMessage, async ([, text]) => {
@@ -351,21 +355,24 @@ describe("QR6: grouped trees", () => {
         ...schemas.filter((schema) => !holdsAnySegment(schema.elements))
       )
       .chain((schema) =>
-        arbEventSchemaMessage(schema, VERSION).chain((base) => {
-          const lines = base.split("\r");
-          return fc
-            .array(fc.integer({ max: lines.length, min: 1 }), {
+        arbEventSchemaSegments(schema, VERSION).chain((segments) =>
+          fc
+            .array(fc.integer({ max: segments.length, min: 1 }), {
               maxLength: 3,
               minLength: 1,
             })
             .map((positions) => {
-              const withZ = [...lines];
+              const withZ = [...segments];
               for (const position of positions.toSorted((a, b) => b - a)) {
                 withZ.splice(position, 0, `ZXX|${position}`);
               }
-              return { base, schema, text: withZ.join("\r") };
-            });
-        })
+              return {
+                base: message(segments),
+                schema,
+                text: message(withZ),
+              };
+            })
+        )
       );
 
     // A Z-segment the schema does not name changes nothing about whether the
@@ -391,7 +398,7 @@ describe("QR6: grouped trees", () => {
               {
                 base: BAR_P02_MESSAGE,
                 schema: BAR_P02,
-                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+                text: `${BAR_P02_MESSAGE}ZXX|3\r`,
               },
             ],
           ],
@@ -424,7 +431,7 @@ describe("QR6: grouped trees", () => {
               {
                 base: BAR_P02_MESSAGE,
                 schema: BAR_P02,
-                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+                text: `${BAR_P02_MESSAGE}ZXX|3\r`,
               },
             ],
           ],
@@ -457,7 +464,7 @@ describe("QR6: grouped trees", () => {
               {
                 base: BAR_P02_MESSAGE,
                 schema: BAR_P02,
-                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+                text: `${BAR_P02_MESSAGE}ZXX|3\r`,
               },
             ],
           ],
@@ -483,7 +490,7 @@ describe("QR6: grouped trees", () => {
               {
                 base: BAR_P02_MESSAGE,
                 schema: BAR_P02,
-                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+                text: `${BAR_P02_MESSAGE}ZXX|3\r`,
               },
             ],
           ],
@@ -509,7 +516,7 @@ describe("QR6: grouped trees", () => {
               {
                 base: BAR_P02_MESSAGE,
                 schema: BAR_P02,
-                text: `${BAR_P02_MESSAGE}\rZXX|3`,
+                text: `${BAR_P02_MESSAGE}ZXX|3\r`,
               },
             ],
           ],

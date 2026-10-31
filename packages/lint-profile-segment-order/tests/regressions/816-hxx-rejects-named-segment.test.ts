@@ -29,7 +29,9 @@ const lint = async (...segments: string[]) => {
         [
           "MSH|^~\\&|APP|FAC|APP|FAC|20241201120000||QBP^Q11^QBP_Q11|MSG1|P|2.8.1",
           ...segments,
-        ].join("\r")
+        ]
+          .map((segment) => `${segment}\r`)
+          .join("")
       ),
       file
     );

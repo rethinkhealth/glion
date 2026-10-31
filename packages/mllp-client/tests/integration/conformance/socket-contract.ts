@@ -209,7 +209,7 @@ export function describeMllpSocketContract(
 
       it("round-trips a 1 MiB message", async () => {
         const { reader, socket, writer } = await opened(remotes.echoing);
-        const text = `${adtA01().text}\rOBX|1|TX|||${"x".repeat(ONE_MIB)}`;
+        const text = `${adtA01().text}OBX|1|TX|||${"x".repeat(ONE_MIB)}\r`;
         const sent = frame(encodeBytes(text));
 
         const writing = writer.write(sent);

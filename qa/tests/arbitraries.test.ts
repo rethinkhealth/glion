@@ -4,7 +4,6 @@ import {
   arbHL7v2Message,
   arbHL7v2MessageCustomDelimiters,
 } from "../src/arbitraries";
-import { normalize } from "../src/fixtures";
 
 // The round-trip and fuzz properties draw from these generators, and read a
 // message with the delimiters its MSH declares. A message written with other
@@ -14,16 +13,20 @@ import { normalize } from "../src/fixtures";
 const SEGMENT_ID = /^[A-Z]{3}$/;
 
 describe("HL7v2 message arbitraries", () => {
-  // A valid message declares `|^~\&` in its MSH, and every other line is a
-  // Segment ID of three letters other than MSH, then the field separator.
+  // A valid message declares `|^~\&` in its MSH, every other segment is a
+  // Segment ID of three letters other than MSH, then the field separator, and
+  // every segment ends with `\r`, the last one included.
   //
   // Mutant: `arbSegment` joins the Segment ID to its fields with the component
-  // separator. Fails on `"MSH|^~\\&|||\rAAA^"`.
+  // separator. Fails on `"MSH|^~\\&|||\rAAA^\r"`.
+  //
+  // Mutant: `message` joins the segments with `\r`. Fails on `"MSH|^~\\&|||"`.
   it("writes a valid message with the delimiters its MSH declares", () => {
     fc.assert(
       fc.property(arbHL7v2Message, (msg) => {
         const [msh = "", ...segments] = msg.split("\r");
 
+        expect(segments.pop()).toBe("");
         expect(msh.startsWith("MSH|^~\\&|")).toBe(true);
         for (const segment of segments) {
           const [id = ""] = segment.split("|", 1);
@@ -37,15 +40,18 @@ describe("HL7v2 message arbitraries", () => {
   });
 
   // A custom delimiter message declares five distinct characters in MSH-1 and
-  // MSH-2, and every other line is a Segment ID of three letters, then the
-  // field separator MSH-1 declares.
+  // MSH-2, every other segment is a Segment ID of three letters, then the
+  // field separator MSH-1 declares, and every segment ends with `\r`, the
+  // last one included.
   //
   // Mutant: `arbSegment` joins the Segment ID to its fields with `|` whatever
-  // the delimiters. Fails on `"MSH+&@*!+++\rAAA|"`.
+  // the delimiters. Fails on `"MSH+&@*!+++\rAAA|\r"`.
   it("writes a custom delimiter message with the delimiters its MSH declares", () => {
     fc.assert(
       fc.property(arbHL7v2MessageCustomDelimiters, (msg) => {
         const [msh = "", ...segments] = msg.split("\r");
+
+        expect(segments.pop()).toBe("");
         const field = msh.charAt(3);
         const encodingCharacters = msh.slice(4, 8);
 
@@ -59,31 +65,5 @@ describe("HL7v2 message arbitraries", () => {
       }),
       { numRuns: 300 }
     );
-  });
-});
-
-describe("normalize()", () => {
-  it("converts LF to CR", () => {
-    expect(normalize("MSH|a\nPID|b")).toBe("MSH|a\rPID|b");
-  });
-
-  it("converts CRLF to CR", () => {
-    expect(normalize("MSH|a\r\nPID|b")).toBe("MSH|a\rPID|b");
-  });
-
-  it("trims trailing CR", () => {
-    expect(normalize("MSH|a\rPID|b\r")).toBe("MSH|a\rPID|b");
-  });
-
-  it("trims multiple trailing CRs", () => {
-    expect(normalize("MSH|a\r\r\r")).toBe("MSH|a");
-  });
-
-  it("handles mixed line endings", () => {
-    expect(normalize("MSH|a\r\nPID|b\nPV1|c\r")).toBe("MSH|a\rPID|b\rPV1|c");
-  });
-
-  it("returns empty string unchanged", () => {
-    expect(normalize("")).toBe("");
   });
 });

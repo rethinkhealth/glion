@@ -20,13 +20,13 @@ import { describe, expect, it } from "vitest";
 import hl7v2LintSegmentOrder from "../../src";
 
 const ORU = [
-  "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5",
-  "PID|1||12345^^^MRN||Doe^John",
-  "OBR|1|ORD1||CBC",
-  "OBX|1|NM|WBC||5.0",
-  "DSC|1",
-  "PID|2||67890^^^MRN||Doe^Jane",
-].join("\r");
+  "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5\r",
+  "PID|1||12345^^^MRN||Doe^John\r",
+  "OBR|1|ORD1||CBC\r",
+  "OBX|1|NM|WBC||5.0\r",
+  "DSC|1\r",
+  "PID|2||67890^^^MRN||Doe^Jane\r",
+].join("");
 
 describe("a segment after the end of an ORU_R01", () => {
   it("is reported as unexpected, with no expected segments", async () => {

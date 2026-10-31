@@ -18,7 +18,7 @@ const msh = (version: string) =>
  * context plugin loaded its profile and this plugin annotated its fields.
  */
 const annotate = async (...segments: string[]) => {
-  const tree = parseHL7v2(segments.join("\r"));
+  const tree = parseHL7v2(segments.map((segment) => `${segment}\r`).join(""));
   await unified()
     .use(hl7v2AnnotateProfileContext)
     .use(hl7v2AnnotateProfileFields)

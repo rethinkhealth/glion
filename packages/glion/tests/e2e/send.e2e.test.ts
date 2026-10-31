@@ -27,15 +27,15 @@ const binPath = resolvePath(
 );
 
 const ADT = [
-  "MSH|^~\\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5",
-  "EVN|A01|20260531120000",
-  "PID|1||12345^^^MRN||DOE^JOHN",
-].join("\r");
+  "MSH|^~\\&|SENDER|FAC|RECEIVER|FAC|20260531120000||ADT^A01|MSG00001|P|2.5\r",
+  "EVN|A01|20260531120000\r",
+  "PID|1||12345^^^MRN||DOE^JOHN\r",
+].join("");
 
 const ACK = [
-  "MSH|^~\\&|RECEIVER|FAC|SENDER|FAC|20260531120001||ACK^A01|ACK00001|P|2.5",
-  "MSA|AA|MSG00001",
-].join("\r");
+  "MSH|^~\\&|RECEIVER|FAC|SENDER|FAC|20260531120001||ACK^A01|ACK00001|P|2.5\r",
+  "MSA|AA|MSG00001\r",
+].join("");
 
 /** MLLP end-of-block byte (FS) — the frame terminator the server waits for. */
 const FS_BYTE = 0x1c;

@@ -57,6 +57,7 @@
     "@stryker-mutator/vitest-runner": "10.0.0",
     "@types/node": "26.6.5",
     "@vitest/coverage-v8": "4.1.12",
+    "fast-check": "^3.23.2",
     "publint": "0.3.18",
     "tsdown": "0.21.10",
     "typescript": "6.0.3",

@@ -6,10 +6,10 @@ import { unified } from "unified";
 import { createContext } from "../../src/server/context";
 
 const SAMPLE_MESSAGE = [
-  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
-  "EVN|A01|20240101120000",
-  "PID|1||12345^^^MRN||Doe^John",
-].join("\r");
+  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1\r",
+  "EVN|A01|20240101120000\r",
+  "PID|1||12345^^^MRN||Doe^John\r",
+].join("");
 
 const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
 
@@ -253,10 +253,10 @@ describe("createContext", () => {
   // https://github.com/rethinkhealth/hl7v2/issues/489
   it("extracts version from composite VID in MSH-12 (2.5.1^USA^ISO)", () => {
     const vidMessage = [
-      "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1^USA^ISO",
-      "EVN|A01|20240101120000",
-      "PID|1||12345^^^MRN||Doe^John",
-    ].join("\r");
+      "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1^USA^ISO\r",
+      "EVN|A01|20240101120000\r",
+      "PID|1||12345^^^MRN||Doe^John\r",
+    ].join("");
     const vidBytes = new TextEncoder().encode(vidMessage);
 
     const ctx = makeCtx(vidMessage, vidBytes);

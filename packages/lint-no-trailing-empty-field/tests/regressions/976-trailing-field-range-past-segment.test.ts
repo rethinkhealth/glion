@@ -25,7 +25,7 @@ import hl7v2LintNoTrailingEmptyField from "../../src";
 
 describe("a segment that ends with an empty composite field", () => {
   it("is reported from the empty field to the end of the segment", async () => {
-    const file = new VFile("MSH|^~\\&|A\rPID|1|^\rPV1|1");
+    const file = new VFile("MSH|^~\\&|A\rPID|1|^\rPV1|1\r");
     const processor = unified()
       .use(hl7v2Parser)
       .use(hl7v2LintNoTrailingEmptyField, { strict: true });

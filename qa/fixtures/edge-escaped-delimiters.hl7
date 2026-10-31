@@ -1,3 +1,1 @@
-MSH|^~\&|SENDER|FAC|RECV|FAC|20260101120000||ADT^A01^ADT_A01|MSG001|P|2.5
-PID|1||12345^^^MRN||DOE\T\SMITH^JOHN\S\JANE||19800101|M
-OBX|1|ST|NOTE||Result contains pipe \F\ and ampersand \T\ and caret \S\ and tilde \R\ and backslash \E\ chars||||||F
+MSH|^~\&|SENDER|FAC|RECV|FAC|20260101120000||ADT^A01^ADT_A01|MSG001|P|2.5PID|1||12345^^^MRN||DOE\T\SMITH^JOHN\S\JANE||19800101|MOBX|1|ST|NOTE||Result contains pipe \F\ and ampersand \T\ and caret \S\ and tilde \R\ and backslash \E\ chars||||||F

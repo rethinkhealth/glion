@@ -15,16 +15,16 @@ import type { Server } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
 
 const SAMPLE_ADT = [
-  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
-  "EVN|A01|20240101120000",
-  "PID|1||12345^^^MRN||Doe^John",
-].join("\r");
+  "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1\r",
+  "EVN|A01|20240101120000\r",
+  "PID|1||12345^^^MRN||Doe^John\r",
+].join("");
 
 const SAMPLE_ORU = [
-  "MSH|^~\\&|Lab|Fac|App|Fac|20240101||ORU^R01|MSG002|P|2.5.1",
-  "PID|1||99999",
-  "OBR|1||LAB123|CBC",
-].join("\r");
+  "MSH|^~\\&|Lab|Fac|App|Fac|20240101||ORU^R01|MSG002|P|2.5.1\r",
+  "PID|1||99999\r",
+  "OBR|1||LAB123|CBC\r",
+].join("");
 
 /**
  * Extract the HL7v2 message from MLLP-framed response buffers.
@@ -193,7 +193,7 @@ describe("serve() integration", () => {
   it("receives a message and sends a response", async () => {
     const app = createApp();
     app.on("ADT^A01", (ctx) => ({
-      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}\r`,
     }));
 
     server = serve(app, { port: 0 });
@@ -207,7 +207,7 @@ describe("serve() integration", () => {
   it("handles multiple messages on one connection", async () => {
     const app = createApp();
     app.on("*", (ctx) => ({
-      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}\r`,
     }));
 
     server = serve(app, { port: 0 });
@@ -257,7 +257,7 @@ describe("serve() integration", () => {
     let callCount = 0;
     const app = createApp();
     app.onError((_err, ctx) => ({
-      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.controlId}`,
+      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.controlId}\r`,
     }));
     app.on("*", (ctx) => {
       callCount++;
@@ -265,7 +265,7 @@ describe("serve() integration", () => {
         throw new Error("intentional test error");
       }
       return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}\r`,
       };
     });
 
@@ -293,7 +293,7 @@ describe("serve() integration", () => {
         throw new Error("unhandled test error");
       }
       return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}\r`,
       };
     });
 
@@ -385,7 +385,7 @@ describe("serve() integration", () => {
     it("onError fires with PROTOCOL_VIOLATION when the inbound byte stream violates MLLP framing", async () => {
       const app = createApp();
       app.on("*", (ctx) => ({
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}\r`,
       }));
 
       const errors: { code?: string; causeName?: string }[] = [];
@@ -427,7 +427,7 @@ describe("serve() integration", () => {
       const app = createApp();
       // The response carries a VT (0x0B): it cannot be framed for the wire.
       app.on("*", () => ({
-        raw: "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|\u000Bbad",
+        raw: "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|\u000Bbad\r",
       }));
 
       const errors: { code?: string }[] = [];
@@ -496,7 +496,7 @@ describe("serve() integration", () => {
     it("onError does NOT fire when app-level error handler handles the error", async () => {
       const app = createApp();
       app.onError((_err, ctx) => ({
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.controlId}\r`,
       }));
       app.on("*", () => {
         throw new Error("handled error");
@@ -571,7 +571,7 @@ describe("serve() integration", () => {
       app.on("*", (ctx) => {
         const count = ctx.connection.state.get("count") as number;
         return {
-          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`,
+          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}\r`,
         };
       });
 
@@ -599,7 +599,7 @@ describe("serve() integration", () => {
       app.on("*", (ctx) => {
         const count = ctx.connection.state.get("count") as number;
         return {
-          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}`,
+          raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}|count=${count}\r`,
         };
       });
 
@@ -691,7 +691,7 @@ describe("serve() integration", () => {
 
     it("no callbacks = no errors (optional, zero-cost)", async () => {
       const app = createApp().on("*", (ctx) => ({
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}\r`,
       }));
 
       // No onConnect/onDisconnect/onError
@@ -703,7 +703,7 @@ describe("serve() integration", () => {
   });
 
   describe("maxConnections", () => {
-    const ACK = "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|MSG001";
+    const ACK = "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|MSG001\r";
 
     it("closes a connection past the limit before reading from it, and keeps the open one", async () => {
       const app = createApp().on("ADT^A01", () => ({ raw: ACK }));

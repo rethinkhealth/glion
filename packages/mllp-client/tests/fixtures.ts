@@ -19,10 +19,10 @@ export function adtA01(options: { readonly controlId?: string } = {}): {
 } {
   const { controlId = crypto.randomUUID() } = options;
   const text = [
-    `MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|${controlId}|P|2.5`,
-    "EVN|A01|20241201120000",
-    "PID|1||12345^^^MRN||Doe^John||19800101|M",
-  ].join("\r");
+    `MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201120000||ADT^A01^ADT_A01|${controlId}|P|2.5\r`,
+    "EVN|A01|20241201120000\r",
+    "PID|1||12345^^^MRN||Doe^John||19800101|M\r",
+  ].join("");
 
   return { controlId, text, tree: parseHL7v2(text) };
 }
@@ -50,9 +50,9 @@ export function ack(
     controlId,
     id,
     text: [
-      `MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|${id}|P|2.5`,
-      `MSA|${code}|${controlId}${msa3 === "" ? "" : `|${msa3}`}`,
-    ].join("\r"),
+      `MSH|^~\\&|RECV|RFAC|SENDER|FAC|20241201120001||ACK^A01^ACK|${id}|P|2.5\r`,
+      `MSA|${code}|${controlId}${msa3 === "" ? "" : `|${msa3}`}\r`,
+    ].join(""),
   };
 }
 

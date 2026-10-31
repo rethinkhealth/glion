@@ -22,14 +22,14 @@ import { VFile } from "vfile";
 
 const tree = parseHL7v2(
   [
-    "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5",
-    "PID|1||12345^^^MRN||Doe^John",
-    "PV1|1|I",
-    "ORC|RE|ORD1",
-    "OBR|1|ORD1||CBC",
-    "OBX|1|NM|WBC||5.0",
-    "OBX|2|NM|RBC||4.1",
-  ].join("\r")
+    "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5\r",
+    "PID|1||12345^^^MRN||Doe^John\r",
+    "PV1|1|I\r",
+    "ORC|RE|ORD1\r",
+    "OBR|1|ORD1||CBC\r",
+    "OBX|1|NM|WBC||5.0\r",
+    "OBX|2|NM|RBC||4.1\r",
+  ].join("")
 );
 
 await unified().use(hl7v2TransformProfileGroups).run(tree, new VFile());

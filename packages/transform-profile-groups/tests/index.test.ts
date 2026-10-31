@@ -29,7 +29,8 @@ const nodeOutline = (node: Group | Segment): Outline => {
 const outline = (tree: Root): Outline[] =>
   (tree.children as (Group | Segment)[]).map(nodeOutline);
 
-const message = (...lines: string[]) => lines.join("\r");
+const message = (...segments: string[]) =>
+  segments.map((segment) => `${segment}\r`).join("");
 
 const ORU = message(
   "MSH|^~\\&|LAB|FAC|EMR|RFAC|20241201120000||ORU^R01^ORU_R01|MSG1|P|2.5",
@@ -430,7 +431,7 @@ describe("hl7v2TransformProfileGroups", () => {
     });
 
     it("extends a group's position over the Z-segment it ends with", async () => {
-      const tree = await grouped(`${ORU}\rZXY|1|site-specific`);
+      const tree = await grouped(`${ORU}ZXY|1|site-specific`);
       const zxy = (
         ((tree.children[1] as Group).children[1] as Group).children.at(
           -1
@@ -444,7 +445,7 @@ describe("hl7v2TransformProfileGroups", () => {
     });
 
     it("serializes to the same text as the flat tree", async () => {
-      const text = `${ORU}\rZXY|1|site-specific`;
+      const text = `${ORU}ZXY|1|site-specific`;
 
       expect(toHl7v2(await grouped(text))).toBe(toHl7v2(parseHL7v2(text)));
     });
@@ -552,7 +553,7 @@ describe("hl7v2TransformProfileGroups", () => {
     });
 
     it("leaves the tree flat for a Z-segment the schema does not name when allowZSegments is false", async () => {
-      const tree = parseHL7v2(`${ORU}\rZXY|1|site-specific`);
+      const tree = parseHL7v2(`${ORU}ZXY|1|site-specific`);
 
       await unified()
         .use(hl7v2TransformProfileGroups, { allowZSegments: false })
@@ -609,7 +610,7 @@ describe("hl7v2TransformProfileGroups", () => {
     });
 
     it("leaves the tree flat when it holds a segment the schema does not define that is not a Z-segment", async () => {
-      const tree = await grouped(`${ORU}\rQXY|1|unknown`);
+      const tree = await grouped(`${ORU}QXY|1|unknown`);
 
       expect(outline(tree)).toEqual([
         "MSH",

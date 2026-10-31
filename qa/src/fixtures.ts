@@ -21,16 +21,3 @@ export function discoverFixtures(
     .filter((f) => f.endsWith(".hl7") && filter(f))
     .toSorted();
 }
-
-/**
- * Normalize a message for comparison: normalize line endings to \r
- * and trim trailing segment terminators.
- *
- * The parser accepts both \r and \n but the serializer always outputs \r.
- */
-export function normalize(msg: string): string {
-  return msg
-    .replaceAll("\r\n", "\r") // CRLF → CR
-    .replaceAll("\n", "\r") // LF → CR
-    .replace(/\r+$/, ""); // trim trailing segment terminators
-}

@@ -130,7 +130,9 @@ describe("canary — suites measure real work", () => {
     const processor = unified()
       .use(hl7v2AnnotateProfileContext)
       .use(hl7v2AnnotateProfileFields);
-    const tree = parseHL7v2(hl7(hl7File("adt-a01-coded"), obxCodedLine(1)));
+    const tree = parseHL7v2(
+      `${hl7File("adt-a01-coded")}${hl7(obxCodedLine(1))}`
+    );
     await processor.run(tree, new VFile());
     const annotated = tree.children.some(
       (segment) =>
@@ -148,7 +150,9 @@ describe("canary — suites measure real work", () => {
       .use(hl7v2AnnotateProfileFields)
       .use(hl7v2AnnotateProfileDatatypes)
       .use(hl7v2AnnotateProfileTables);
-    const tree = parseHL7v2(hl7(hl7File("adt-a01-coded"), obxCodedLine(1)));
+    const tree = parseHL7v2(
+      `${hl7File("adt-a01-coded")}${hl7(obxCodedLine(1))}`
+    );
     await processor.run(tree, new VFile());
     expect(JSON.stringify(tree)).toContain('"tableValue"');
   });

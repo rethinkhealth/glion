@@ -11,6 +11,10 @@ import { describe, expect, it } from "vitest";
 
 import hl7v2LintWithdrawn from "../src";
 
+/** The HL7v2 message `segments` make, each followed by the segment terminator. */
+const hl7 = (...segments: string[]) =>
+  segments.map((segment) => `${segment}\r`).join("");
+
 /**
  * An MSH segment declaring `version` in MSH-12; the rule checks the message
  * against that version.
@@ -34,7 +38,7 @@ const run = async (tree: Root) => {
 };
 
 /** The findings of the rule on a message whose segments are given as HL7v2 text. */
-const lint = (...segments: string[]) => run(parseHL7v2(segments.join("\r")));
+const lint = (...segments: string[]) => run(parseHL7v2(hl7(...segments)));
 
 // HL7v2 marks an element `W` once it is withdrawn: it keeps its position,
 // so later elements keep their numbers, but it must be left empty. The
@@ -207,7 +211,7 @@ describe("hl7v2LintWithdrawn", () => {
   // annotates ZPD-2.1.2 by hand, as a site's own annotator would.
   describe("withdrawn subcomponents", () => {
     it("reports a withdrawn subcomponent that has a value", async () => {
-      const tree = parseHL7v2([msh("2.7"), "ZPD|1|A&B"].join("\r"));
+      const tree = parseHL7v2(hl7(msh("2.7"), "ZPD|1|A&B"));
       const subcomponent = select(tree, "ZPD.2.1.2");
       if (subcomponent) {
         subcomponent.node.data = {
@@ -242,7 +246,7 @@ describe("hl7v2LintWithdrawn", () => {
   // One report per withdrawn element: the components of a reported element,
   // withdrawn or not, are not reported again.
   it("reports a withdrawn field once when one of its components is withdrawn too", async () => {
-    const tree = parseHL7v2([msh("2.7"), "ZPD|1|A^B"].join("\r"));
+    const tree = parseHL7v2(hl7(msh("2.7"), "ZPD|1|A^B"));
     const field = select(tree, "ZPD.2");
     const component = select(tree, "ZPD.2.2");
     if (field && component) {
@@ -258,7 +262,7 @@ describe("hl7v2LintWithdrawn", () => {
   });
 
   it("reports nothing in a withdrawn field that holds the explicit null, even in a withdrawn component", async () => {
-    const tree = parseHL7v2([msh("2.7"), 'ZPD|1|""'].join("\r"));
+    const tree = parseHL7v2(hl7(msh("2.7"), 'ZPD|1|""'));
     const field = select(tree, "ZPD.2");
     const component = select(tree, "ZPD.2.1");
     if (field && component) {
@@ -274,7 +278,7 @@ describe("hl7v2LintWithdrawn", () => {
   });
 
   it("reports a withdrawn component once when one of its subcomponents is withdrawn too", async () => {
-    const tree = parseHL7v2([msh("2.7"), "ZPD|1|A&B"].join("\r"));
+    const tree = parseHL7v2(hl7(msh("2.7"), "ZPD|1|A&B"));
     const component = select(tree, "ZPD.2.1");
     const subcomponent = select(tree, "ZPD.2.1.2");
     if (component && subcomponent) {
@@ -302,9 +306,9 @@ describe("hl7v2LintWithdrawn", () => {
   it("reports nothing on an element annotated as withdrawn when the message has no version", async () => {
     const tree = parseHL7v2(
       [
-        "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01^ADT_A01|MSG001|P|",
-        "ZPD|1|X",
-      ].join("\r")
+        "MSH|^~\\&|SENDER|FAC|RECV|RFAC|20241201||ADT^A01^ADT_A01|MSG001|P|\r",
+        "ZPD|1|X\r",
+      ].join("")
     );
     const field = select(tree, "ZPD.2");
     expect(field?.node.type).toBe("field");

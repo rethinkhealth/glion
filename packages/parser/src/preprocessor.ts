@@ -1,61 +1,63 @@
-import { DEFAULT_DELIMITERS, SEGMENT_TERMINATOR } from "@glion/utils";
+import { DEFAULT_DELIMITERS } from "@glion/utils";
 
+import { readEncodingCharacters, readMessageHeader } from "./message-header";
 import type { ParserContext, PreprocessorStep } from "./types";
 
-// PreprocessorStep is declared in `types.ts` to avoid circular imports
+const BYTE_ORDER_MARK = "\uFEFF";
 
 /**
- * Step: strip UTF-8 BOM.
+ * Removes a byte order mark from the start of the input. A byte order mark is
+ * not part of the message, so every position counts from the character after
+ * it.
  */
 export const stripBOM: PreprocessorStep = (ctx) => {
-  if (ctx.input.codePointAt(0) === 0xfe_ff) {
-    ctx.input = ctx.input.slice(1);
+  if (ctx.input.startsWith(BYTE_ORDER_MARK)) {
+    ctx.input = ctx.input.slice(BYTE_ORDER_MARK.length);
   }
   return ctx;
 };
 
 /**
- * Step: normalize newlines to the segment terminator.
- */
-export const normalizeNewlines: PreprocessorStep = (ctx) => {
-  ctx.input = ctx.input.replaceAll(/\r?\n/g, SEGMENT_TERMINATOR);
-  return ctx;
-};
-
-/**
- * Step: auto-detect delimiters from MSH.
+ * Sets the delimiters the message header declares.
+ *
+ * MSH-1 sets the field delimiter, and MSH-2's encoding characters set the
+ * component, repetition, escape, and subcomponent delimiters, in that order.
+ * A delimiter MSH-2 is too short to declare is the default. A message that
+ * does not open with a message header segment keeps the delimiters it was
+ * given.
  */
 export const detectDelimiters: PreprocessorStep = (ctx) => {
-  if (ctx.input.startsWith("MSH")) {
-    const field = ctx.input.charAt(3) || DEFAULT_DELIMITERS.field;
-    const enc = ctx.input.slice(4, 8);
-    const component = enc.charAt(0) || DEFAULT_DELIMITERS.component;
-    const repetition = enc.charAt(1) || DEFAULT_DELIMITERS.repetition;
-    const _escape = enc.charAt(2) || DEFAULT_DELIMITERS.escape;
-    const subcomponent = enc.charAt(3) || DEFAULT_DELIMITERS.subcomponent;
-
-    ctx.delimiters = {
-      component,
-      escape: _escape,
-      field,
-      repetition,
-      subcomponent,
-    };
+  const header = readMessageHeader(ctx.input);
+  if (!header) {
+    return ctx;
   }
+  // MSH-2 ends at the field delimiter MSH-1 declares: `MSH|^~\|APP` and
+  // `MSH|^~\` then `\r` both declare `^~\`.
+  const encodingCharacters = readEncodingCharacters(
+    ctx.input,
+    header,
+    header.fieldSeparator
+  );
+  ctx.delimiters = {
+    component: encodingCharacters.charAt(0) || DEFAULT_DELIMITERS.component,
+    escape: encodingCharacters.charAt(2) || DEFAULT_DELIMITERS.escape,
+    field: header.fieldSeparator || DEFAULT_DELIMITERS.field,
+    repetition: encodingCharacters.charAt(1) || DEFAULT_DELIMITERS.repetition,
+    subcomponent:
+      encodingCharacters.charAt(3) || DEFAULT_DELIMITERS.subcomponent,
+  };
   return ctx;
 };
 
-/**
- * Default preprocessing pipeline.
- */
+/** The preprocessing steps `parseHL7v2` runs when `preprocess` is not given. */
 export const defaultPreprocessors: PreprocessorStep[] = [
   stripBOM,
-  normalizeNewlines,
   detectDelimiters,
 ];
 
 /**
- * Run the pipeline to initialize ParserContext.
+ * Runs `steps` in order, each on the context the step before returned, and
+ * returns the context the last one returned.
  */
 export function runPreprocessors(
   ctx: ParserContext,

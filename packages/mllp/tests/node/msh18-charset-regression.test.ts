@@ -105,7 +105,7 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     app.on("*", (ctx) => {
       handlerRan = true;
       return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}`,
+        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.controlId}\r`,
       };
     });
 
@@ -121,9 +121,9 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     // UTF-8), and MSH-18 declaring 8859/1 — which we do not yet honour (see
     // https://github.com/rethinkhealth/glion/issues/662).
     const message = [
-      "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1||||||8859/1",
-      "PID|1||12345^^^MRN||José^John",
-    ].join("\r");
+      "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1||||||8859/1\r",
+      "PID|1||12345^^^MRN||José^John\r",
+    ].join("");
     // String iteration never yields an empty string, so codePointAt(0) is
     // always defined — and every character here is Latin-1, so the code
     // point IS the wire byte.

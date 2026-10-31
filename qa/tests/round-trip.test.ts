@@ -24,7 +24,7 @@ import {
   arbMutatedCustomDelimiterMessage,
   arbMutatedMessage,
 } from "../src/arbitraries";
-import { discoverFixtures, normalize, readFixture } from "../src/fixtures";
+import { discoverFixtures, readFixture } from "../src/fixtures";
 
 /**
  * Minimal pipeline for round-trip testing: parse → annotate delimiters →
@@ -59,39 +59,53 @@ describe("QR4: round-trip data fidelity", () => {
         const result = await roundTripProcessor.process(source);
         const serialized = String(result);
 
-        expect(normalize(serialized)).toBe(normalize(source));
+        expect(serialized).toBe(source);
       }
     );
   });
 
   describe("edge cases", () => {
-    it("CRLF line endings round-trip after normalization", async () => {
+    it("CRLF line endings are written as the segment terminator", async () => {
       const source = readFixture("edge-crlf-line-endings.hl7");
       const result = await roundTripProcessor.process(source);
 
-      expect(normalize(String(result))).toBe(normalize(source));
+      expect(String(result)).toBe(source.replaceAll("\r\n", "\r"));
     });
 
     it("custom delimiters round-trip correctly", async () => {
       const source = readFixture("edge-custom-delimiters.hl7");
       const result = await roundTripProcessor.process(source);
 
-      expect(normalize(String(result))).toBe(normalize(source));
+      expect(String(result)).toBe(source);
     });
 
     it("escaped delimiters round-trip correctly", async () => {
       const source = readFixture("edge-escaped-delimiters.hl7");
       const result = await roundTripProcessor.process(source);
 
-      expect(normalize(String(result))).toBe(normalize(source));
+      expect(String(result)).toBe(source);
     });
 
     it("trailing empty fields round-trip as written", async () => {
       const source = readFixture("edge-empty-segments.hl7");
       const result = await roundTripProcessor.process(source);
 
-      expect(normalize(String(result))).toBe(normalize(source));
+      expect(String(result)).toBe(source);
     });
+
+    it.each([
+      ["no terminator", "MSH|^~\\&\rPID|1"],
+      ["one terminator", "MSH|^~\\&\rPID|1\r"],
+      ["two terminators", "MSH|^~\\&\rPID|1\r\r"],
+      ["CRLF line endings", "MSH|^~\\&\r\nPID|1\r\n"],
+    ])(
+      "a last segment received with %s is written with one segment terminator",
+      async (_, source) => {
+        const result = await roundTripProcessor.process(source);
+
+        expect(String(result)).toBe("MSH|^~\\&\rPID|1\r");
+      }
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -100,22 +114,30 @@ describe("QR4: round-trip data fidelity", () => {
 
   describe("fuzz: valid messages", () => {
     // A valid message is written back as it was read, every field separator
-    // included (ADR 0033).
+    // included (ADR 0033), and every segment terminator: HL7v2 ends every
+    // segment with a carriage return, the last one included.
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
-    // `"MSH|^~\\&|||\rAAA|^"`.
+    // `"MSH|^~\\&|||\rAAA|^\r"`.
     //
     // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
-    // `"MSH|^~\\&|||\rAAA|\\E\\ &"`.
+    // `"MSH|^~\\&|||\rAAA|\\E\\ &\r"`.
+    //
+    // Mutant: `to-hl7v2` writes the segment terminator between segments only
+    // (#1137). Fails on `"MSH|^~\\&|||\r"`.
     it("round-trips exactly", async () => {
       await fc.assert(
         fc.asyncProperty(arbHL7v2Message, async (msg) => {
           const serialized = String(await roundTripProcessor.process(msg));
 
-          expect(normalize(serialized)).toBe(normalize(msg));
+          expect(serialized).toBe(msg);
         }),
         {
-          examples: [["MSH|^~\\&|||\rAAA|^"], ["MSH|^~\\&|||\rAAA|\\E\\ &"]],
+          examples: [
+            ["MSH|^~\\&|||\r"],
+            ["MSH|^~\\&|||\rAAA|^\r"],
+            ["MSH|^~\\&|||\rAAA|\\E\\ &\r"],
+          ],
           numRuns: 300,
         }
       );
@@ -146,10 +168,10 @@ describe("QR4: round-trip data fidelity", () => {
             ),
           }),
           async (segmentId) => {
-            const source = `MSH|^~\\&|a\r${segmentId}|b`;
+            const source = `MSH|^~\\&|a\r${segmentId}|b\r`;
             const serialized = String(await roundTripProcessor.process(source));
 
-            expect(normalize(serialized)).toBe(source);
+            expect(serialized).toBe(source);
           }
         ),
         { examples: [["\\"]], numRuns: 300 }
@@ -159,22 +181,25 @@ describe("QR4: round-trip data fidelity", () => {
 
   describe("fuzz: custom delimiter messages", () => {
     // A valid message is written back as it was read, whatever delimiters MSH
-    // declares.
+    // declares, every segment terminator included.
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
-    // `"MSH;+'?-;;;\rAAA; "`.
+    // `"MSH;+'?-;;;\rAAA; \r"`.
     //
     // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
-    // `"MSH{(]%#{{{\rAAA{%F%#("`.
+    // `"MSH{(]%#{{{\rAAA{%F%#(\r"`.
+    //
+    // Mutant: `to-hl7v2` writes the segment terminator between segments only
+    // (#1137). Fails on `"MSH;+'?-;;;\rAAA; \r"`.
     it("round-trips exactly", async () => {
       await fc.assert(
         fc.asyncProperty(arbHL7v2MessageCustomDelimiters, async (msg) => {
           const serialized = String(await roundTripProcessor.process(msg));
 
-          expect(normalize(serialized)).toBe(normalize(msg));
+          expect(serialized).toBe(msg);
         }),
         {
-          examples: [["MSH;+'?-;;;\rAAA; "], ["MSH{(]%#{{{\rAAA{%F%#("]],
+          examples: [["MSH;+'?-;;;\rAAA; \r"], ["MSH{(]%#{{{\rAAA{%F%#(\r"]],
           numRuns: 300,
         }
       );
@@ -199,7 +224,7 @@ describe("QR4: round-trip data fidelity", () => {
             await roundTripProcessor.process(firstPass)
           );
 
-          expect(normalize(secondPass)).toBe(normalize(firstPass));
+          expect(secondPass).toBe(firstPass);
         }),
         {
           examples: [["MSH #.+$@@@\rAAA@ @$ "], ["MSH-`!>;---\rAAA->E>R>H>-"]],
@@ -230,7 +255,7 @@ describe("QR4: round-trip data fidelity", () => {
             await roundTripProcessor.process(firstPass)
           );
 
-          expect(normalize(secondPass)).toBe(normalize(firstPass));
+          expect(secondPass).toBe(firstPass);
         }),
         {
           examples: [
@@ -259,7 +284,7 @@ describe("QR4: round-trip data fidelity", () => {
             await roundTripProcessor.process(firstPass)
           );
 
-          expect(normalize(secondPass)).toBe(normalize(firstPass));
+          expect(secondPass).toBe(firstPass);
         }),
         { examples: [["| |"]], numRuns: 300 }
       );
@@ -299,14 +324,14 @@ describe("QR4: content round-trips through serialize and parse", () => {
     const content = "a\\Zfoo|bar\\b";
     const wire = write(content);
 
-    expect(wire).toBe("MSH|^~\\&\rPID|1||a\\E\\Zfoo\\F\\bar\\E\\b");
+    expect(wire).toBe("MSH|^~\\&\rPID|1||a\\E\\Zfoo\\F\\bar\\E\\b\r");
     expect(read(wire)).toBe(content);
   });
 
   it("keeps a locally defined sequence and a character set switch as they are", () => {
     const content = "\\Zsite 7\\a\\C2842\\b\\M2442\\c";
 
-    expect(write(content)).toBe(`MSH|^~\\&\rPID|1||${content}`);
+    expect(write(content)).toBe(`MSH|^~\\&\rPID|1||${content}\r`);
     expect(read(write(content))).toBe(content);
   });
 

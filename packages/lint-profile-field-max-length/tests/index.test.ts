@@ -26,7 +26,7 @@ const lint = async (...segments: string[]) => {
     .use(hl7v2AnnotateProfileContext)
     .use(hl7v2AnnotateProfileFields)
     .use(hl7v2LintFieldMaxLength)
-    .run(parseHL7v2(segments.join("\r")), file);
+    .run(parseHL7v2(segments.map((segment) => `${segment}\r`).join("")), file);
   return file.messages;
 };
 

@@ -23,6 +23,19 @@ import { parseHL7v2 } from "../src/parser";
  */
 
 describe("parser", () => {
+  describe("input", () => {
+    it("reads a message from a string only, and throws a TypeError for the bytes of a file read without an encoding", () => {
+      const bytes = Buffer.from("MSH|^~\\&\rPID|1") as unknown as string;
+
+      expect(() => parseHL7v2(bytes)).toThrow(TypeError);
+      expect(() => parseHL7v2(bytes)).toThrow(
+        new TypeError(
+          "`input` is not a string; `parseHL7v2` reads a message from a string."
+        )
+      );
+    });
+  });
+
   describe("basic Structure Creation", () => {
     it("creates root with correct type and metadata", () => {
       const input = "MSH|^~\\&|SENDER";
@@ -794,5 +807,47 @@ describe("parser escape sequences", () => {
     const root = parseHL7v2("PID|1|a\\F\\b", { decodeEscapes: false });
 
     expect(first(root, 0, 1)).toBe("a\\F\\b");
+  });
+});
+
+describe("root position", () => {
+  const span = (source: string) => {
+    const { position } = parseHL7v2(source);
+    return [position?.start.offset, position?.end.offset];
+  };
+
+  it("covers the message, the segment terminator after the last segment included", () => {
+    expect(span("MSH|^~\\&\rPID|1\r")).toStrictEqual([0, 15]);
+  });
+
+  it("ends at the last segment when no segment terminator follows it", () => {
+    expect(span("MSH|^~\\&\rPID|1")).toStrictEqual([0, 14]);
+  });
+
+  it("covers every line break after the last segment", () => {
+    expect(span("MSH|^~\\&\rPID|1\r\n\r\n")).toStrictEqual([0, 18]);
+  });
+
+  it("counts from the character after a byte order mark, which is not part of the message", () => {
+    expect(span("\uFEFFMSH|^~\\&\r")).toStrictEqual([0, 9]);
+  });
+
+  it("covers nothing in an empty message", () => {
+    expect(parseHL7v2("").position).toStrictEqual({
+      end: { column: 1, line: 1, offset: 0 },
+      start: { column: 1, line: 1, offset: 0 },
+    });
+  });
+
+  it("covers a message that holds only line breaks", () => {
+    expect(span("\r\n\r")).toStrictEqual([0, 3]);
+  });
+
+  it("ends each segment at its last character, before its segment terminator", () => {
+    const [msh, pid] = parseHL7v2("MSH|^~\\&\r\nPID|1\r\n").children;
+
+    expect(msh?.position?.end.offset).toBe(8);
+    expect(pid?.position?.start.offset).toBe(10);
+    expect(pid?.position?.end.offset).toBe(15);
   });
 });

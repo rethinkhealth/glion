@@ -55,6 +55,10 @@ export const hl7v2ToHl7v2: Plugin<[Hl7v2ToHl7v2Options?], Root, string> =
  * even a lone Field. Delimiters default to the standard set unless
  * overridden or derivable from an MSH segment in the tree.
  *
+ * A Root or Group is written with the segment terminator after every segment,
+ * the last one included, as HL7v2 Chapter 2 requires. A Segment on its own
+ * is written without one.
+ *
  * @throws {EscapeSequenceError} When `encodeEscapes` is on and a value holds a
  *   character that no escape sequence can write with the delimiters.
  */
@@ -94,7 +98,12 @@ export function toHl7v2(
 
   // MSH-1 is the field separator itself — skip it and emit structurally.
   // MSH-2 holds the encoding characters, which are never escape sequences.
+  // An MSH with no fields, read from `MSH` and a segment terminator, is its
+  // Segment ID alone.
   const msh = (seg: Segment): string => {
+    if (seg.children.length === 0) {
+      return seg.name;
+    }
     const [, encodingCharacters, ...rest] = seg.children;
     const parts = rest.map(field);
     if (encodingCharacters) {
@@ -108,19 +117,23 @@ export function toHl7v2(
   const line = (seg: Segment): string =>
     seg.name === "MSH" ? msh(seg) : segment(seg);
 
-  const lines = (nodes: readonly (Segment | Group)[]): string[] =>
-    nodes.flatMap((child) =>
-      child.type === "group" ? lines(child.children) : [line(child)]
-    );
+  const written = (child: Segment | Group): string => {
+    switch (child.type) {
+      case "group": {
+        return child.children.map(written).join("");
+      }
+      case "segment": {
+        return `${line(child)}${SEGMENT_TERMINATOR}`;
+      }
+    }
+  };
 
   // -- dispatch ----------------------------------------------------------
 
   switch (node.type) {
     case "root":
     case "group": {
-      return lines(node.children as (Segment | Group)[]).join(
-        SEGMENT_TERMINATOR
-      );
+      return (node.children as (Segment | Group)[]).map(written).join("");
     }
     case "segment": {
       return line(node);
