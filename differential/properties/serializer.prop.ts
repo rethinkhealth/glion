@@ -4,9 +4,9 @@
 // for a message is the text the specification writes. Scope: every message
 // `arbSpecMessage` draws; see `src/generators.ts` for what it leaves out.
 //
-// Fails today on a finding: `@glion/to-hl7v2` writes no segment terminator
-// after the last segment, and the specification writes one after every
-// segment. No mutant is recorded until the finding is settled.
+// Fails today on a finding: glion decodes the escape sequences of §2.7 and
+// encodes them again, and the specification has none, so a `\` in data is
+// written back as `\E\`. No mutant is recorded until the finding is settled.
 import { hl7v2AnnotateDelimiters } from "@glion/annotate-delimiters";
 import { hl7v2Parser } from "@glion/parser";
 import { hl7v2ToHl7v2 } from "@glion/to-hl7v2";

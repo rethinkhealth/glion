@@ -9,11 +9,11 @@ import type { SpecField, SpecMessage } from "./oracle";
 //
 // `MSH|^~\&|a\rPID|1^^2||x~\r`, as glion parses it (node types shortened):
 //
-//   segment MSH
+//   segment MSH                             terminator "\r"
 //     field [rep [comp [sub "|"]]]          MSH-1
 //     field [rep [comp [sub "^~\&"]]]       MSH-2
 //     field [rep [comp [sub "a"]]]          MSH-3
-//   segment PID
+//   segment PID                             terminator "\r"
 //     field [rep [comp [sub "1"]], comp [], comp [sub "2"]]   1^^2
 //     field []                                                (empty)
 //     field [rep [comp [sub "x"]], rep []]                    x~
@@ -27,7 +27,7 @@ import type { SpecField, SpecMessage } from "./oracle";
 //                             [[[""]]],
 //                             [[["x"]], [[""]]] ] } ] }
 //
-// Two differences, handled below:
+// Three differences, handled below:
 //
 // 1. MSH-1 and MSH-2 are fields in glion's tree; in the specification they are
 //    the delimiters, and `header` starts at MSH-3.
@@ -35,6 +35,8 @@ import type { SpecField, SpecMessage } from "./oracle";
 //    the specification writes it as one empty element of the level below,
 //    because its rules forbid an empty list at any level
 //    (`well_formed_field_has_repetition` and the two after it).
+// 3. glion records what ended each segment; the specification ends every
+//    segment with `\r`, so `terminator` is checked and dropped.
 //
 // The mapping is one to one. The parser gives a node children only when the
 // text forces them (README of `@glion/parser`, "Empty-field representation"),
@@ -94,6 +96,16 @@ export const toSpecMessage = (tree: Root): SpecMessage => {
   // own delimiters.
   const value = (node: Field | undefined) =>
     node?.children[0]?.children[0]?.children[0]?.value ?? "";
+
+  // A segment the text ended with `\n`, `\r\n` or nothing is another text,
+  // which the specification never writes.
+  for (const segment of tree.children) {
+    if (segment.type === "segment" && segment.terminator !== "\r") {
+      throw new Error(
+        "The tree holds a segment that does not end with a carriage return; the specification ends every segment with one."
+      );
+    }
+  }
 
   return {
     // "|" + "^~\&" → "|^~\&": field separator, then the encoding characters in

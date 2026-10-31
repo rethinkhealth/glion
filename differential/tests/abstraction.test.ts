@@ -140,6 +140,24 @@ describe("toSpecMessage", () => {
     );
   });
 
+  it("throws on a last segment with no segment terminator", () => {
+    expect(() => toSpecMessage(parser.parse("MSH|^~\\&\rPID|1"))).toThrow(
+      "The tree holds a segment that does not end with a carriage return; the specification ends every segment with one."
+    );
+  });
+
+  it("throws on a segment that ends with a line feed", () => {
+    expect(() => toSpecMessage(parser.parse("MSH|^~\\&\nPID|1\r"))).toThrow(
+      "The tree holds a segment that does not end with a carriage return; the specification ends every segment with one."
+    );
+  });
+
+  it("throws on a segment that ends with a carriage return and a line feed", () => {
+    expect(() => toSpecMessage(parser.parse("MSH|^~\\&\rPID|1\r\n"))).toThrow(
+      "The tree holds a segment that does not end with a carriage return; the specification ends every segment with one."
+    );
+  });
+
   it("throws on a tree with no segment", () => {
     const tree: Root = { children: [], type: "root" };
 
