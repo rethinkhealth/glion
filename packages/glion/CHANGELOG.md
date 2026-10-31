@@ -1,5 +1,28 @@
 # @glion/cli
 
+## 0.32.0
+
+### Patch Changes
+
+- [#1159](https://github.com/rethinkhealth/glion/pull/1159) [`d697238`](https://github.com/rethinkhealth/glion/commit/d697238293eb59554cbe79695c1af882fc4fb9db) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** an empty line is read as a segment with an empty Segment ID, no fields, and the terminator that ended it, so a message is written back with its empty lines. Before, an empty line was dropped without a trace ([#1158](https://github.com/rethinkhealth/glion/issues/1158)). `@glion/lint-segment-header-length` reports each one at `error`, `@glion/lint-required-message-header` reports one before `MSH`, and `@glion/lint-profile-segment-order` reports each one the event schema has no place for: an `Hxx` segment of the event schema can take it. The message header is read after the empty lines before it: an empty line before `MSH` no longer stops MSH-1 and MSH-2 being read, which lost MSH-2 on output. An empty line after the last segment is a segment, so `@glion/lint-profile-segment-order` reports a segment missing at the end of the message next to that line, at its start or its end, rather than at the end of the message.
+
+  `glion send` sends each empty line of a message file as an empty segment, a carriage return alone, and counts it among the segments it reports.
+
+- [#1148](https://github.com/rethinkhealth/glion/pull/1148) [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** `MllpClient.send()` writes the message with `toHl7v2`, each segment followed by its `terminator`, and changes nothing about it: a message read with `\n` or `\r\n` line breaks is sent with them. Apply `@glion/transform-segment-terminator` before sending to end every segment with `\r`.
+
+  `glion send` reads a message with `@glion/parser` and `@glion/transform-segment-terminator`, so each segment is sent ending with `\r`, whatever line breaks the file holds.
+
+- [#1138](https://github.com/rethinkhealth/glion/pull/1138) [`dcefdc9`](https://github.com/rethinkhealth/glion/commit/dcefdc9ff2af60dc18898f655405c42aae04cfd9) Thanks [@meleksomai](https://github.com/meleksomai)! - A message is sent with the segment terminator after its last segment, as HL7v2 Chapter 2 requires: the MLLP payload is `MSH|^~\&|…\rPID|1\r`, then the `<FS><CR>` trailer.
+- Updated dependencies [[`d697238`](https://github.com/rethinkhealth/glion/commit/d697238293eb59554cbe79695c1af882fc4fb9db), [`dcefdc9`](https://github.com/rethinkhealth/glion/commit/dcefdc9ff2af60dc18898f655405c42aae04cfd9), [`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00), [`dcefdc9`](https://github.com/rethinkhealth/glion/commit/dcefdc9ff2af60dc18898f655405c42aae04cfd9), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00)]:
+  - @glion/parser@0.32.0
+  - @glion/ast@0.32.0
+  - @glion/to-hl7v2@0.32.0
+  - @glion/mllp-client@0.32.0
+  - @glion/transform-segment-terminator@0.32.0
+  - @glion/mllp@0.32.0
+  - @glion/util-query@0.32.0
+  - @glion/ack@0.32.0
+
 ## 0.31.0
 
 ### Minor Changes

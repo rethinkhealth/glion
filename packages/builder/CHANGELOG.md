@@ -1,5 +1,20 @@
 # @rethinkhealth/hl7v2-builder
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1148](https://github.com/rethinkhealth/glion/pull/1148) [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00) Thanks [@meleksomai](https://github.com/meleksomai)! - A segment records the characters that end it in `Segment.terminator` (ADR 0035). `@glion/parser` sets it to what ended the segment in the text it was read from (`\r`, `\n`, or `\r\n`), and to `""` for a last segment with nothing after it. `s()` in `@glion/builder` sets it to `\r`, so a built segment carries the key.
+
+  **Breaking:** `Segment.terminator` is required, so a segment made as an object literal states it.
+
+  `@glion/parser` takes a `lineBreaks` option: `true`, the default, reads a line feed and a carriage return and a line feed as segment ends, as before; `false` ends a segment only at a carriage return, as HL7v2 Chapter 2 requires, and reads a line feed as data. A `SEGMENT_END` token's `value` holds the characters it covers.
+
+### Patch Changes
+
+- Updated dependencies [[`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00)]:
+  - @glion/ast@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes

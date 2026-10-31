@@ -1,5 +1,11 @@
 # @rethinkhealth/hl7v2-utils
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1156](https://github.com/rethinkhealth/glion/pull/1156) [`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** the segment terminator is a carriage return, `\r`, and no setting changes it, as HL7v2 Chapter 2 requires: "The segment terminator is always a carriage return." `Delimiters` and `DEFAULT_DELIMITERS` no longer have a `segment` key, and a configuration that sets `settings.delimiters.segment` is rejected. `@glion/utils` exports `SEGMENT_TERMINATOR`, `"\r"`. The parser ends a segment at `\r`, `@glion/to-hl7v2` writes `\r` after each segment, `\.br\` decodes to `\r`, and `\r` in a value is written as `\.br\`; a line feed in a value is written as `\X0A\`, like any other control character.
+
 ## 0.31.0
 
 No changes in this release.

@@ -1,5 +1,14 @@
 # @rethinkhealth/hl7v2-encode-escapes
 
+## 0.32.0
+
+### Patch Changes
+
+- Updated dependencies [[`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7)]:
+  - @glion/utils@0.32.0
+  - @glion/util-query@0.32.0
+  - @glion/util-visit@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes
