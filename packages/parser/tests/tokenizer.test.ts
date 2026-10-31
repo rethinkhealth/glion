@@ -9,10 +9,11 @@ import type { Token } from "../src/types";
 function toks(
   input: string,
   options?: TokenizerOptions,
-  delimiters = DEFAULT_DELIMITERS
+  delimiters = DEFAULT_DELIMITERS,
+  lineBreaks?: boolean
 ): Token[] {
   const t = new HL7v2Tokenizer(options);
-  t.reset({ delimiters, input });
+  t.reset({ delimiters, input, lineBreaks });
   const out: Token[] = [];
   for (let k = t.next(); k; k = t.next()) {
     out.push(k);
@@ -209,7 +210,7 @@ describe("line breaks", () => {
       toks("MSH\rPID|1").map(({ type, value }) => [type, value])
     ).toStrictEqual([
       ["TEXT", "MSH"],
-      ["SEGMENT_END", undefined],
+      ["SEGMENT_END", "\r"],
       ["TEXT", "PID"],
       ["FIELD_DELIM", undefined],
       ["TEXT", "1"],
@@ -265,7 +266,8 @@ describe("any text", () => {
   // Each token starts where the one before it ended, the first at line 1,
   // column 1, offset 0, and the last ends at the end of the input. A segment
   // terminator ends its line, so the next token starts at column 1 of the
-  // next line; any other token stays on its line.
+  // next line; any other token stays on its line, a line feed read as data
+  // with `lineBreaks: false` included.
   //
   // Mutant: a segment terminator does not reset the column. Fails on
   // `"MSH\r"`.
@@ -275,12 +277,14 @@ describe("any text", () => {
         arbText,
         arbDelimiters,
         fc.boolean(),
-        (input, delimiters, decodeEscapes) => {
+        fc.boolean(),
+        (input, delimiters, decodeEscapes, lineBreaks) => {
           let point = { column: 1, line: 1, offset: 0 };
           for (const { position, type } of toks(
             input,
             { decodeEscapes },
-            delimiters
+            delimiters,
+            lineBreaks
           )) {
             // A token without an end offset reads as 0 here, and fails the
             // comparison below.
@@ -301,15 +305,19 @@ describe("any text", () => {
         }
       ),
       {
-        examples: [["MSH|^~\\&\r\nPID|1\nOBX", DEFAULT_DELIMITERS, true]],
+        examples: [
+          ["MSH|^~\\&\r\nPID|1\nOBX", DEFAULT_DELIMITERS, true, true],
+          ["MSH|^~\\&\r\nPID|1\nOBX", DEFAULT_DELIMITERS, true, false],
+        ],
         numRuns: 1000,
       }
     );
   });
 
-  // A carriage return always ends a segment, whatever the delimiters (HL7v2
-  // Chapter 2: "The segment terminator is always a carriage return"): no
-  // token but a segment terminator spans one.
+  // A carriage return always ends a segment, whatever the delimiters and
+  // whether line breaks end segments (HL7v2 Chapter 2: "The segment
+  // terminator is always a carriage return"): no token but a segment
+  // terminator spans one.
   //
   // Mutant: a carriage return ends a segment only when a line feed follows
   // it. Fails on `"\r"`.
@@ -319,8 +327,9 @@ describe("any text", () => {
         arbText,
         arbDelimiters,
         fc.boolean(),
-        (input, delimiters, decodeEscapes) => {
-          const read = toks(input, { decodeEscapes }, delimiters)
+        fc.boolean(),
+        (input, delimiters, decodeEscapes, lineBreaks) => {
+          const read = toks(input, { decodeEscapes }, delimiters, lineBreaks)
             .filter(({ type }) => type !== "SEGMENT_END")
             .map(({ position }) =>
               input.slice(position.start.offset, position.end.offset)
@@ -330,7 +339,10 @@ describe("any text", () => {
         }
       ),
       {
-        examples: [["PID|1\rOBX|2\r\nNTE", DEFAULT_DELIMITERS, true]],
+        examples: [
+          ["PID|1\rOBX|2\r\nNTE", DEFAULT_DELIMITERS, true, true],
+          ["PID|1\rOBX|2\r\nNTE", DEFAULT_DELIMITERS, true, false],
+        ],
         numRuns: 1000,
       }
     );

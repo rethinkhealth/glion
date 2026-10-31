@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 
+import { frame } from "@glion/mllp-codec";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { runSend } from "../../src/commands/send";
@@ -163,6 +164,22 @@ describe("runSend (integration, fake socket)", () => {
 
     expect(code).toBe(0);
     expect(JSON.parse(state.out).code).toBe("AA");
+  });
+
+  it("sends each segment of a message read with line feeds ending with a carriage return", async () => {
+    const file = await writeMessageFile(ADT.replaceAll("\r", "\n"));
+    const written: Uint8Array[] = [];
+    const { stdout, stderr } = capture();
+    await runSend({
+      argv: [file, "--host", "h", "--port", "1"],
+      socket: fakeSocket(ackFrame("AA"), written),
+      stderr,
+      stdout,
+    });
+
+    expect(Buffer.concat(written)).toStrictEqual(
+      Buffer.from(frame(new TextEncoder().encode(ADT)))
+    );
   });
 
   it("reports an invalid outcome when the delimiters cannot write a value", async () => {

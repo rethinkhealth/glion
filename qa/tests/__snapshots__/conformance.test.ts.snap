@@ -1019,14 +1019,68 @@ exports[`QR1: message conformance > dft-p03-charge.hl7 — pipeline output match
 exports[`QR1: message conformance > edge-crlf-line-endings.hl7 — pipeline output matches snapshot 1`] = `
 "edge-crlf-line-endings.hl7
   segments: MSH(12) PID(8) PV1(3)
-  diagnostics: 1
+  diagnostics: 4
+    - [segment-terminator] MSH: The segment ends with a carriage return and a line feed.
+    - [segment-terminator] PID: The segment ends with a carriage return and a line feed.
+    - [segment-terminator] PV1: The segment ends with a carriage return and a line feed.
     - [segment-order] (message): Segment \`EVN\` is missing; the event schema requires it at this point."
 `;
 
 exports[`QR1: message conformance > edge-crlf-line-endings.hl7 — pipeline output matches snapshot 2`] = `
 {
-  "diagnosticCount": 1,
+  "diagnosticCount": 4,
   "diagnostics": [
+    {
+      "message": "The segment ends with a carriage return and a line feed.",
+      "place": {
+        "end": {
+          "column": 1,
+          "line": 2,
+          "offset": 75,
+        },
+        "start": {
+          "column": 74,
+          "line": 1,
+          "offset": 73,
+        },
+      },
+      "ruleId": "segment-terminator",
+      "source": "hl7v2-lint",
+    },
+    {
+      "message": "The segment ends with a carriage return and a line feed.",
+      "place": {
+        "end": {
+          "column": 1,
+          "line": 3,
+          "offset": 117,
+        },
+        "start": {
+          "column": 41,
+          "line": 2,
+          "offset": 115,
+        },
+      },
+      "ruleId": "segment-terminator",
+      "source": "hl7v2-lint",
+    },
+    {
+      "message": "The segment ends with a carriage return and a line feed.",
+      "place": {
+        "end": {
+          "column": 1,
+          "line": 4,
+          "offset": 136,
+        },
+        "start": {
+          "column": 18,
+          "line": 3,
+          "offset": 134,
+        },
+      },
+      "ruleId": "segment-terminator",
+      "source": "hl7v2-lint",
+    },
     {
       "message": "Segment \`EVN\` is missing; the event schema requires it at this point.",
       "place": {

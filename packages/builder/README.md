@@ -18,12 +18,9 @@ npm install @glion/builder
 import { c, f, m, s } from "@glion/builder";
 
 const tree = m(
+  s("MSH", f("|"), f("^~\\&")),
   s(
-    f("MSH"), // include the segment header explicitly
-    f("^~\\&")
-  ),
-  s(
-    f("PID"),
+    "PID",
     f(), // empty field
     f([
       c(["123456", "DOE", "JOHN"]), // arrays and individual args are interchangeable
@@ -44,13 +41,13 @@ Build a `Root` (message) node.
 - Pass any number of `RootContent` nodes (segments, fragments); they are appended in order.
 - Arguments are used as-is. Pass concrete AST nodes rather than nested arrays.
 
-### `s(...fields: Field[]): Segment`
+### `s(name: string, ...fields: Field[]): Segment`
 
-Build a `Segment` node.
+Build a `Segment` node with the Segment ID `name`.
 
-- No arguments → empty segment.
-- Include the header field yourself, typically `f('PID')`, as the first argument.
+- No fields → a segment with no fields.
 - Fields are appended in the order provided; the helper does not auto-flatten.
+- The segment's `terminator` is `\r`, the segment terminator HL7v2 requires. Set `terminator` on the returned node to give it another one.
 
 ### `f(...values: Array<string | Component | FieldRepetition | Array<string | Component | FieldRepetition>>): Field`
 

@@ -10,16 +10,15 @@ import type {
   Subcomponent,
 } from "@glion/ast";
 import { delimiters as queryDelimiters } from "@glion/util-query";
-import {
-  DEFAULT_DELIMITERS,
-  encodeEscapes,
-  SEGMENT_TERMINATOR,
-} from "@glion/utils";
+import { DEFAULT_DELIMITERS, encodeEscapes } from "@glion/utils";
 import type { Plugin } from "unified";
 import type { Node } from "unist";
 import type { VFile } from "vfile";
 
+import { SegmentTerminatorError } from "./errors";
+
 export { EscapeSequenceError } from "@glion/utils";
+export { SegmentTerminatorError } from "./errors";
 
 export interface Hl7v2ToHl7v2Options {
   /**
@@ -55,12 +54,15 @@ export const hl7v2ToHl7v2: Plugin<[Hl7v2ToHl7v2Options?], Root, string> =
  * even a lone Field. Delimiters default to the standard set unless
  * overridden or derivable from an MSH segment in the tree.
  *
- * A Root or Group is written with the segment terminator after every segment,
- * the last one included, as HL7v2 Chapter 2 requires. A Segment on its own
- * is written without one.
+ * A Root or Group writes each segment followed by its `terminator`, so a parsed
+ * message is written back as it was read. A Segment on its own is written
+ * without one.
  *
  * @throws {EscapeSequenceError} When `encodeEscapes` is on and a value holds a
  *   character that no escape sequence can write with the delimiters.
+ * @throws {SegmentTerminatorError} When a segment with an empty `terminator`
+ *   is followed by another segment.
+ * @throws {TypeError} When a segment of a Root or Group has no `terminator`.
  */
 export function toHl7v2(
   node: Nodes,
@@ -117,15 +119,37 @@ export function toHl7v2(
   const line = (seg: Segment): string =>
     seg.name === "MSH" ? msh(seg) : segment(seg);
 
-  const written = (child: Segment | Group): string => {
+  // The segments of a Root or Group, groups included, in the order they are
+  // written.
+  const segmentsOf = (child: Segment | Group): Segment[] => {
     switch (child.type) {
       case "group": {
-        return child.children.map(written).join("");
+        return child.children.flatMap(segmentsOf);
       }
       case "segment": {
-        return `${line(child)}${SEGMENT_TERMINATOR}`;
+        return [child];
       }
     }
+  };
+
+  // Each segment, then its terminator. An empty terminator before another
+  // segment would join the two: `PID|1` then `ZPI|x` is `PID|1ZPI|x`.
+  const segments = (children: readonly (Segment | Group)[]): string => {
+    const written = children.flatMap(segmentsOf);
+    const last = written.length - 1;
+    return written
+      .map((seg, index) => {
+        if (typeof seg.terminator !== "string") {
+          throw new TypeError(
+            "The segment has no `terminator`; every segment has one, an empty string when nothing ends the segment."
+          );
+        }
+        if (seg.terminator === "" && index < last) {
+          throw new SegmentTerminatorError(seg);
+        }
+        return `${line(seg)}${seg.terminator}`;
+      })
+      .join("");
   };
 
   // -- dispatch ----------------------------------------------------------
@@ -133,7 +157,7 @@ export function toHl7v2(
   switch (node.type) {
     case "root":
     case "group": {
-      return (node.children as (Segment | Group)[]).map(written).join("");
+      return segments(node.children as (Segment | Group)[]);
     }
     case "segment": {
       return line(node);

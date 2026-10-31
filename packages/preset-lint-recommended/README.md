@@ -4,7 +4,7 @@ Preset bundling the core (version-independent) HL7v2 lint rules.
 
 ## What it does
 
-This preset wires the core HL7v2 lint rules into a single `unified` plugin. One `.use(...)` call enables structural checks that apply to every HL7v2 message regardless of version or profile: segment header shape, message header presence, version range, and trailing field hygiene.
+This preset wires the core HL7v2 lint rules into a single `unified` plugin. One `.use(...)` call enables structural checks that apply to every HL7v2 message regardless of version or profile: segment header shape, message header presence, version range, trailing field hygiene, and segment terminators.
 
 ## Install
 
@@ -38,7 +38,7 @@ Default export is a `Preset` (unified's `{ plugins: [...] }` shape). No options 
 
 ## What's bundled
 
-The preset applies these rules in order. Three are configured at `error` severity; `no-trailing-empty-field` uses its default severity.
+The preset applies these rules in order. Three are configured at `error` severity; `no-trailing-empty-field` and `segment-terminator` use their default severity, `warning`.
 
 | Plugin                                                                   | Purpose                                                      |
 | ------------------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -46,6 +46,7 @@ The preset applies these rules in order. Three are configured at `error` severit
 | [`@glion/lint-required-message-header`](../lint-required-message-header) | Flags messages whose first segment is not `MSH`.             |
 | [`@glion/lint-message-version`](../lint-message-version)                 | Flags `MSH-12` values outside the configured semver range.   |
 | [`@glion/lint-no-trailing-empty-field`](../lint-no-trailing-empty-field) | Flags segments that end with two or more empty fields.       |
+| [`@glion/lint-segment-terminator`](../lint-segment-terminator)           | Flags segments that do not end with a carriage return.       |
 
 The companion `@glion/preset-lint-profile-recommended` covers profile-driven, version-specific lint rules; use both together for comprehensive validation.
 

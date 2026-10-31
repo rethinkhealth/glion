@@ -33,11 +33,14 @@ export interface MessageHeader {
  * opens with another segment, or with `MSH` and then a segment terminator,
  * which holds no fields.
  */
-export const readMessageHeader = (input: string): MessageHeader | undefined => {
+export const readMessageHeader = (
+  input: string,
+  lineBreaks: boolean
+): MessageHeader | undefined => {
   const fieldSeparatorAt = MESSAGE_HEADER.length;
   const opensWithMessageHeader =
     input.startsWith(MESSAGE_HEADER) &&
-    segmentTerminatorAt(input, fieldSeparatorAt) === undefined;
+    segmentTerminatorAt(input, fieldSeparatorAt, lineBreaks) === undefined;
   if (!opensWithMessageHeader) {
     return undefined;
   }
@@ -55,7 +58,8 @@ export const readMessageHeader = (input: string): MessageHeader | undefined => {
 export const readEncodingCharacters = (
   input: string,
   header: MessageHeader,
-  field: string
+  field: string,
+  lineBreaks: boolean
 ): string => {
   const from = header.encodingCharactersStart;
   const limit = Math.min(from + MAX_ENCODING_CHARACTERS, input.length);
@@ -63,7 +67,7 @@ export const readEncodingCharacters = (
   while (
     end < limit &&
     input.charAt(end) !== field &&
-    segmentTerminatorAt(input, end) === undefined
+    segmentTerminatorAt(input, end, lineBreaks) === undefined
   ) {
     end += 1;
   }

@@ -29,8 +29,14 @@ export function ackFrame(code: string, withErr = false): Uint8Array {
   );
 }
 
-/** A socket that answers every write with `ack`. */
-export function fakeSocket(ack: Uint8Array): MllpSocket {
+/**
+ * A socket that answers every write with `ack`, and keeps each write in
+ * `written`.
+ */
+export function fakeSocket(
+  ack: Uint8Array,
+  written: Uint8Array[] = []
+): MllpSocket {
   return {
     close: () => Promise.resolve(),
     connect: () => {
@@ -41,7 +47,8 @@ export function fakeSocket(ack: Uint8Array): MllpSocket {
         },
       });
       const writable = new WritableStream<Uint8Array>({
-        write() {
+        write(chunk) {
+          written.push(chunk);
           controller?.enqueue(ack);
         },
       });

@@ -59,8 +59,10 @@
     "@glion/mllp-client": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/to-hl7v2": "workspace:*",
+    "@glion/transform-segment-terminator": "workspace:*",
     "@glion/util-query": "workspace:*",
     "rolldown": "1.0.0-rc.17",
+    "unified": "11.0.5",
     "zod": "3.25.76"
   },
   "devDependencies": {

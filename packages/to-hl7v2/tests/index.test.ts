@@ -3,13 +3,18 @@ import type {
   Field,
   FieldRepetition,
   Nodes,
+  Segment,
   Subcomponent,
 } from "@glion/ast";
 import { c, f, g, m, r, s } from "@glion/builder";
 import { unified } from "unified";
-import { VFile } from "vfile";
 
-import { EscapeSequenceError, hl7v2ToHl7v2, toHl7v2 } from "../src";
+import {
+  EscapeSequenceError,
+  hl7v2ToHl7v2,
+  SegmentTerminatorError,
+  toHl7v2,
+} from "../src";
 
 describe(toHl7v2, () => {
   it("converts a simple MSH segment back to HL7v2 format", () => {
@@ -307,20 +312,56 @@ describe("segment terminator", () => {
     expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1\rPV1|1\r");
   });
 
-  it("writes a carriage return after each segment, whatever the delimiters", () => {
-    const tree = m(s("MSH", f("*"), f("%$#&")), s("PID", f("1")));
-    const file = new VFile();
-    file.data.delimiters = {
-      component: "%",
-      escape: "#",
-      field: "*",
-      repetition: "$",
-      subcomponent: "&",
-    };
+  it("writes each segment as it ended in the text it was read from", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")), s("PV1"));
+    const [msh, pid, pv1] = tree.children as Segment[];
+    (msh as Segment).terminator = "\r\n";
+    (pid as Segment).terminator = "\n";
+    (pv1 as Segment).terminator = "";
 
-    expect(unified().use(hl7v2ToHl7v2).stringify(tree, file)).toBe(
-      "MSH*%$#&\rPID*1\r"
+    expect(toHl7v2(tree)).toBe("MSH|^~\\&\r\nPID|1\nPV1");
+  });
+
+  it("throws a SegmentTerminatorError for a segment with no terminator that another segment follows", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+    const pid = tree.children[1] as Segment;
+    pid.terminator = "";
+    tree.children.push(s("ZPI", f("x")));
+
+    expect(() => toHl7v2(tree)).toThrow(
+      expect.objectContaining({
+        message:
+          "A segment that another segment follows has no segment terminator; HL7v2 ends every segment with a carriage return. Set the segment's `terminator`, or apply `@glion/transform-segment-terminator`.",
+        name: "SegmentTerminatorError",
+        segment: pid,
+      })
     );
+  });
+
+  it("throws a SegmentTerminatorError for a segment with no terminator that a segment in a later group follows", () => {
+    const pid = s("PID", f("1"));
+    pid.terminator = "";
+    const tree = m(g("PATIENT", pid), g("VISIT", s("PV1", f("1"))));
+
+    expect(() => toHl7v2(tree)).toThrow(SegmentTerminatorError);
+  });
+
+  it("throws a TypeError for a segment without a terminator", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+    Reflect.deleteProperty(tree.children[1] as Segment, "terminator");
+
+    expect(() => toHl7v2(tree)).toThrow(
+      new TypeError(
+        "The segment has no `terminator`; every segment has one, an empty string when nothing ends the segment."
+      )
+    );
+  });
+
+  it("writes nothing after a last segment with no terminator", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+    (tree.children[1] as Segment).terminator = "";
+
+    expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1");
   });
 
   it("writes a segment on its own without a segment terminator", () => {

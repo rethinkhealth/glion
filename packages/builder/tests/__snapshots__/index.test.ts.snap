@@ -79,6 +79,8 @@ exports[`builder > complex scenarios > should build a segment with an array of f
         },
       ],
       "name": "MSH",
+      "terminator": "
+",
       "type": "segment",
     },
     {
@@ -132,6 +134,8 @@ exports[`builder > complex scenarios > should build a segment with an array of f
         },
       ],
       "name": "PID",
+      "terminator": "
+",
       "type": "segment",
     },
   ],

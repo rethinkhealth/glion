@@ -21,6 +21,7 @@ import {
   arbAdversarialInput,
   arbHL7v2Message,
   arbHL7v2MessageCustomDelimiters,
+  arbHL7v2Segments,
   arbMutatedCustomDelimiterMessage,
   arbMutatedMessage,
 } from "../src/arbitraries";
@@ -65,11 +66,11 @@ describe("QR4: round-trip data fidelity", () => {
   });
 
   describe("edge cases", () => {
-    it("CRLF line endings are written as the segment terminator", async () => {
+    it("CRLF line endings are written back as they were read", async () => {
       const source = readFixture("edge-crlf-line-endings.hl7");
       const result = await roundTripProcessor.process(source);
 
-      expect(String(result)).toBe(source.replaceAll("\r\n", "\r"));
+      expect(String(result)).toBe(source);
     });
 
     it("custom delimiters round-trip correctly", async () => {
@@ -94,16 +95,16 @@ describe("QR4: round-trip data fidelity", () => {
     });
 
     it.each([
-      ["no terminator", "MSH|^~\\&\rPID|1"],
-      ["one terminator", "MSH|^~\\&\rPID|1\r"],
-      ["two terminators", "MSH|^~\\&\rPID|1\r\r"],
-      ["CRLF line endings", "MSH|^~\\&\r\nPID|1\r\n"],
+      ["no terminator", "MSH|^~\\&\rPID|1", "MSH|^~\\&\rPID|1"],
+      ["one terminator", "MSH|^~\\&\rPID|1\r", "MSH|^~\\&\rPID|1\r"],
+      ["two terminators", "MSH|^~\\&\rPID|1\r\r", "MSH|^~\\&\rPID|1\r"],
+      ["CRLF line endings", "MSH|^~\\&\r\nPID|1\r\n", "MSH|^~\\&\r\nPID|1\r\n"],
     ])(
-      "a last segment received with %s is written with one segment terminator",
-      async (_, source) => {
+      "a last segment received with %s is written with the terminator it was read with",
+      async (_, source, written) => {
         const result = await roundTripProcessor.process(source);
 
-        expect(String(result)).toBe("MSH|^~\\&\rPID|1\r");
+        expect(String(result)).toBe(written);
       }
     );
   });
@@ -138,6 +139,52 @@ describe("QR4: round-trip data fidelity", () => {
             ["MSH|^~\\&|||\rAAA|^\r"],
             ["MSH|^~\\&|||\rAAA|\\E\\ &\r"],
           ],
+          numRuns: 300,
+        }
+      );
+    });
+  });
+
+  describe("fuzz: line breaks", () => {
+    // Each segment records the line break it ended with, and a message is
+    // written back with the line breaks it was read with, a last segment with
+    // nothing after it included.
+    //
+    // Mutant: `to-hl7v2` writes the segment delimiter after every segment.
+    // Fails on `"MSH|^~\\&|||\nAAA|\r"`.
+    //
+    // Mutant: the parser records no terminator on a segment still open at the
+    // end of the text. Fails on `"MSH|^~\\&|||\r\nAAA|"`.
+    it("a message is written back with the line breaks it was read with", async () => {
+      const arbLineBreaks = arbHL7v2Segments.chain((segments) =>
+        fc
+          .array(fc.constantFrom("\r", "\n", "\r\n"), {
+            maxLength: segments.length,
+            minLength: segments.length,
+          })
+          .chain((breaks) =>
+            fc
+              .boolean()
+              .map((terminated) =>
+                segments
+                  .map((line, index) =>
+                    terminated || index < segments.length - 1
+                      ? `${line}${breaks[index]}`
+                      : line
+                  )
+                  .join("")
+              )
+          )
+      );
+
+      await fc.assert(
+        fc.asyncProperty(arbLineBreaks, async (source) => {
+          const serialized = String(await roundTripProcessor.process(source));
+
+          expect(serialized).toBe(source);
+        }),
+        {
+          examples: [["MSH|^~\\&|||\nAAA|\r"], ["MSH|^~\\&|||\r\nAAA|"]],
           numRuns: 300,
         }
       );

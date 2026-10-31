@@ -116,6 +116,21 @@ describe("processor (semantics-agnostic)", () => {
     expect(subs[1].value).toBe("B");
   });
 
+  it("records the characters a SEGMENT_END token holds as the segment's terminator", () => {
+    const root = parseHL7v2FromIterator([
+      text("PID"),
+      { ...segEnd(3), value: "\r\n" },
+    ]);
+
+    expect((root.children[0] as Segment).terminator).toBe("\r\n");
+  });
+
+  it("records an empty terminator for a SEGMENT_END token without characters", () => {
+    const root = parseHL7v2FromIterator([text("PID"), segEnd(3), text("OBX")]);
+
+    expect((root.children[0] as Segment).terminator).toBe("");
+  });
+
   it("finalizes last segment without trailing SEGMENT_END (sync tokens)", () => {
     const tokens: Token[] = [text("PID"), tok("FIELD_DELIM"), text("1")];
     const root = parseHL7v2FromIterator(tokens);

@@ -15,10 +15,10 @@ This document is for contributors and reviewers. It follows one message through 
 
 Two modules hold rules that steps 2 and 3 share, so that both read the message the same way:
 
-| Module                   | Owns                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------ |
-| `segment-terminators.ts` | What ends a segment: a carriage return, a carriage return and a line feed, or a line feed. |
-| `message-header.ts`      | The start of a message: `MSH`, MSH-1, and the encoding characters MSH-2 holds.             |
+| Module                   | Owns                                                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `segment-terminators.ts` | What ends a segment: a carriage return, and by default a carriage return and a line feed, or a line feed. |
+| `message-header.ts`      | The start of a message: `MSH`, MSH-1, and the encoding characters MSH-2 holds.                            |
 
 ## One message, step by step
 
@@ -39,25 +39,26 @@ The message `MSH|^~\&|A^B` + CR LF + `PID|1` + CR, 20 characters long.
 | `TEXT`            | `A`    | 9–10    | 5. text                                    |
 | `COMPONENT_DELIM` |        | 10–11   | 4. the component delimiter                 |
 | `TEXT`            | `B`    | 11–12   | 5. text                                    |
-| `SEGMENT_END`     |        | 12–14   | 1. a segment terminator: CR LF, read whole |
+| `SEGMENT_END`     | CR LF  | 12–14   | 1. a segment terminator: CR LF, read whole |
 | `TEXT`            | `PID`  | 14–17   | 3. a Segment ID, on line 2                 |
 | `FIELD_DELIM`     |        | 17–18   | 2. the field delimiter                     |
 | `TEXT`            | `1`    | 18–19   | 5. text                                    |
-| `SEGMENT_END`     |        | 19–20   | 1. a segment terminator                    |
+| `SEGMENT_END`     | CR     | 19–20   | 1. a segment terminator                    |
 
-**Building the tree.** The processor opens the segment MSH at its Segment ID. Each field delimiter opens a field, so MSH holds MSH-1 `|`, MSH-2 `^~\&`, and MSH-3 with the components `A` and `B`. The segment terminator closes MSH, which ends at offset 12, its last character. PID holds one field, `1`, and covers 14–19. The root covers 0–20, both segment terminators included.
+**Building the tree.** The processor opens the segment MSH at its Segment ID. Each field delimiter opens a field, so MSH holds MSH-1 `|`, MSH-2 `^~\&`, and MSH-3 with the components `A` and `B`. The segment terminator closes MSH, which ends at offset 12, its last character, and records CR LF as MSH's `terminator`. PID holds one field, `1`, covers 14–19, and records CR. The root covers 0–20, both segment terminators included.
 
 ## Rules
 
 ### What ends a segment
 
-`segmentTerminatorAt(input, at)` in `segment-terminators.ts` is the one place that decides it. At `at` it reads:
+`segmentTerminatorAt(input, at, lineBreaks)` in `segment-terminators.ts` is the one place that decides it. `lineBreaks` is the parser option, `true` unless it is given `false`.
 
-1. a carriage return and a line feed, read whole as one terminator;
-2. a carriage return;
-3. a line feed.
+| `lineBreaks`        | Segment terminators                                                           |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `true`, the default | a carriage return and a line feed, read whole; a carriage return; a line feed |
+| `false`             | a carriage return                                                             |
 
-HL7v2 ends every segment with a carriage return: "The segment terminator is always a carriage return." A message saved to a file often ends its segments with the file's line endings instead, so the parser reads those too.
+HL7v2 ends every segment with a carriage return: "The segment terminator is always a carriage return." A message saved to a file often ends its segments with the file's line endings instead, so the parser reads those by default. With `lineBreaks: false` the parser reads what Chapter 2 states: a line feed is data, so a line feed in a TX value stays in the value, and in CR LF the CR ends the segment and the LF starts the next segment's Segment ID.
 
 Every rule that stops at the end of a segment calls this function: the tokenizer's segment terminator, Segment ID, and text rules, and both readings of the message header.
 
@@ -109,7 +110,7 @@ A token's span covers the text as written, so a decoded value can be shorter tha
 - A Segment ID opens a segment. A delimiter that arrives before any Segment ID opens a segment with an empty Segment ID.
 - Each delimiter opens the next sibling at its level: a field delimiter opens a field, a repetition delimiter a field repetition, and so on. A sibling it skips is added empty, so `PID|~` holds a field with two empty field repetitions.
 - A field, field repetition, or component with no value has `children: []`. `PID|1||` holds three fields, the last two empty.
-- A segment terminator closes the segment.
+- A segment terminator closes the segment, and is recorded as its `terminator`. A segment that the input ends inside has the `terminator` `""`.
 
 ## Tests
 

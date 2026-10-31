@@ -29,9 +29,14 @@ export function g(
 // TODO: Add support for string[]
 // export function s(name: string, ...fields: string[]): Segment;
 // export function s(name: string, ...fields: string[] | Field[]): Segment {
+/**
+ * A segment named `name` holding `fields`, ended by the segment terminator
+ * `\r`.
+ */
 export function s(name: string, ...fields: Field[]): Segment {
   const segment = u("segment", fields) as Segment;
   segment.name = name;
+  segment.terminator = "\r";
   return segment;
 }
 

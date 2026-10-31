@@ -1,4 +1,5 @@
 import { c, f, m, s } from "@glion/builder";
+import { parseHL7v2 } from "@glion/parser";
 import { unified } from "unified";
 import { VFile } from "vfile";
 
@@ -207,6 +208,21 @@ describe("hl7v2-preset-lint-recommended", () => {
       "The segment has 2 trailing field separators."
     );
     expect(file.messages[0].fatal).toBeFalsy(); // This is a warning, not an error
+  });
+
+  it("warns when a segment does not end with a carriage return", async () => {
+    const tree = parseHL7v2(
+      "MSH|^~\\&|SENDER|FAC|RCVR|FAC|20250101010101||ADT^A01^ADT_A01|MSG00001|P|2.5\r\nPID|1\r"
+    );
+    const file = new VFile();
+
+    await unified().use(hl7v2PresetLintRecommended).run(tree, file);
+
+    expect(file.messages).toHaveLength(1);
+    expect(file.messages[0].message).toBe(
+      "The segment ends with a carriage return and a line feed."
+    );
+    expect(file.messages[0].fatal).toBeFalsy();
   });
 
   it("reports multiple errors from different rules", async () => {

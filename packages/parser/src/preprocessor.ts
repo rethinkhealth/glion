@@ -27,7 +27,8 @@ export const stripBOM: PreprocessorStep = (ctx) => {
  * given.
  */
 export const detectDelimiters: PreprocessorStep = (ctx) => {
-  const header = readMessageHeader(ctx.input);
+  const lineBreaks = ctx.lineBreaks ?? true;
+  const header = readMessageHeader(ctx.input, lineBreaks);
   if (!header) {
     return ctx;
   }
@@ -36,7 +37,8 @@ export const detectDelimiters: PreprocessorStep = (ctx) => {
   const encodingCharacters = readEncodingCharacters(
     ctx.input,
     header,
-    header.fieldSeparator
+    header.fieldSeparator,
+    lineBreaks
   );
   ctx.delimiters = {
     component: encodingCharacters.charAt(0) || DEFAULT_DELIMITERS.component,

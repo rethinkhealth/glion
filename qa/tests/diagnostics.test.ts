@@ -62,7 +62,9 @@ describe("QR2: diagnostic precision", () => {
         "EVN||20260301120000",
         "PID|1||12345^^^MRN||DOE^JOHN||19800101|M",
         "PV1|1|I|ICU^101^A",
-      ].join("\n");
+      ]
+        .map((segment) => `${segment}\r`)
+        .join("");
 
       const file = await parseHL7v2.process(source);
 

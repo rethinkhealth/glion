@@ -12,7 +12,7 @@
 //   TEXT "A"          9–10
 //   COMPONENT_DELIM   10–11
 //   TEXT "B"          11–12
-//   SEGMENT_END       12–13
+//   SEGMENT_END "\r"  12–13  the segment terminator, as written
 //   TEXT "PID"        13–16  the Segment ID of the next segment
 //   FIELD_DELIM       16–17
 //   TEXT "1"          17–18
@@ -73,6 +73,8 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   // The message being read. `reset()` sets every field below.
   private input = "";
   private delimiters: Delimiters = DEFAULT_DELIMITERS;
+  // Stryker disable next-line BooleanLiteral: `next()` reads it only at an offset inside the input, and the empty message has none
+  private lineBreaks = true;
 
   // Where the next token starts.
   private offset = 0;
@@ -100,6 +102,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   reset(ctx: ParserContext) {
     this.input = ctx.input;
     this.delimiters = ctx.delimiters;
+    this.lineBreaks = ctx.lineBreaks ?? true;
     this.offset = 0;
     this.line = 1;
     this.column = 1;
@@ -108,14 +111,15 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     this.headerTokensEmitted = 0;
     this.decodeFrom = 0;
 
-    const header = readMessageHeader(this.input);
+    const header = readMessageHeader(this.input, this.lineBreaks);
     if (header) {
       // MSH-2 ends where `next()` ends every field: at the field delimiter the
       // context gives, which `detectDelimiters` sets to MSH-1.
       const encodingCharacters = readEncodingCharacters(
         this.input,
         header,
-        this.delimiters.field
+        this.delimiters.field,
+        this.lineBreaks
       );
       this.headerTokens = [
         { type: "TEXT", value: MESSAGE_HEADER },
@@ -148,7 +152,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
 
     // 1. A segment terminator.
-    const terminator = segmentTerminatorAt(input, offset);
+    const terminator = segmentTerminatorAt(input, offset, this.lineBreaks);
     if (terminator !== undefined) {
       return this.takeSegmentTerminator(terminator);
     }
@@ -180,6 +184,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
 
     // 5. Text up to the next delimiter or segment terminator.
+    const { lineBreaks } = this;
     let end = offset;
     // Stryker disable next-line EqualityOperator: at the end of the input, `charAt` reads "", which is no delimiter, so one more step changes nothing
     while (end < input.length) {
@@ -189,7 +194,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
         c === repetition ||
         c === component ||
         c === subcomponent ||
-        segmentTerminatorAt(input, end) !== undefined
+        segmentTerminatorAt(input, end, lineBreaks) !== undefined
       ) {
         break;
       }
@@ -214,14 +219,14 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
   // The offset of the first field delimiter or segment terminator at or after
   // `from`, or the end of the input.
   private fieldEnd(from: number): number {
-    const { input } = this;
+    const { input, lineBreaks } = this;
     const { field } = this.delimiters;
     let end = from;
     while (
       // Stryker disable next-line EqualityOperator: at the end of the input, `charAt` reads "", which is no delimiter, so one more step changes nothing
       end < input.length &&
       input.charAt(end) !== field &&
-      segmentTerminatorAt(input, end) === undefined
+      segmentTerminatorAt(input, end, lineBreaks) === undefined
     ) {
       end += 1;
     }
@@ -238,7 +243,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     return this.token(type, value, start);
   }
 
-  // The SEGMENT_END token over `terminator`. Moves past it, to the start of
+  // The SEGMENT_END token over `terminator`, which is its value. Moves past it, to the start of
   // the next line and the next segment.
   private takeSegmentTerminator(terminator: string): Token {
     const start = this.point();
@@ -246,7 +251,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     this.line += 1;
     this.column = 1;
     this.atSegmentStart = true;
-    return this.token("SEGMENT_END", undefined, start);
+    return this.token("SEGMENT_END", terminator, start);
   }
 
   private point(): Position["start"] {

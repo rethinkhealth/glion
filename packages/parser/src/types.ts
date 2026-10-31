@@ -30,6 +30,13 @@ export interface ParseOptions {
    */
   decodeEscapes?: boolean;
   /**
+   * Whether a line feed, or a carriage return and a line feed, also ends a
+   * segment (`true`, the default), or only a carriage return and the segment
+   * delimiter do (`false`), as HL7v2 Chapter 2 requires. With `false`, a line
+   * feed is data.
+   */
+  lineBreaks?: boolean;
+  /**
    * The preprocessing steps to run in place of `defaultPreprocessors`. A step
    * that rewrites `input` moves every position into the rewritten text.
    */
@@ -42,6 +49,11 @@ export interface ParserContext {
   input: string;
   /** The delimiters the tokenizer splits `input` at. */
   delimiters: Delimiters;
+  /**
+   * Whether a line feed, or a carriage return and a line feed, also ends a
+   * segment. Absent means `true`.
+   */
+  lineBreaks?: boolean | undefined;
   metadata?: Record<string, unknown>;
 }
 
@@ -50,8 +62,8 @@ export interface Token {
   type: TokenType;
   /**
    * A TEXT token's text: a Segment ID, MSH-1, the encoding characters, or a
-   * value, its escape sequences decoded unless they are kept. Absent on every
-   * other token.
+   * value, its escape sequences decoded unless they are kept. A SEGMENT_END
+   * token's segment terminator, as written. Absent on every other token.
    */
   value?: string;
   /**

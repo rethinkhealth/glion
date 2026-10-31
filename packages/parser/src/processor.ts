@@ -74,6 +74,7 @@ function createParserCore() {
       children: [],
       name,
       position: { end: position.end, start: position.start },
+      terminator: "",
       type: "segment",
     };
     root.children.push(seg);
@@ -203,6 +204,11 @@ function createParserCore() {
       case "SEGMENT_END": {
         const endPos = lastContentEnd || tok.position.start;
         updatePositionsToEnd(endPos);
+        // A tokenizer that gives no characters ends the segment with no
+        // terminator.
+        if (seg) {
+          seg.terminator = tok.value ?? "";
+        }
         resetState();
         return;
       }
