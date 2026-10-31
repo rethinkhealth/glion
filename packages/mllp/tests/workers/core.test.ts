@@ -13,9 +13,7 @@ const ADT =
 
 const app = new Mllp<{ region: string }>().on("ADT^A01", (ctx) => {
   ctx.set("region", ctx.env.region);
-  return {
-    raw: `MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240101120000||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-  };
+  return ctx.ack();
 });
 
 describe("@glion/mllp in workerd", () => {

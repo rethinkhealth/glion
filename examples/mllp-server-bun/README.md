@@ -27,7 +27,7 @@ Both scripts use `bun --bun glion …` to force Bun's runtime through the script
 - `src/app.ts` — the `Mllp` instance, exported as the default. The CLI picks it up via the config.
 - `samples/` — sample HL7v2 messages for `glion send` (`adt-a01` accepts, `oru-r01` is rejected).
 
-The app routes `ADT^A01`, `ORM^O01`, and `ORU^R01`, plus a catch-all, and uses `ackMiddleware()` to translate handler return values and throws into ACK/NAK responses. The code is identical to [`mllp-server`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server) — only the runtime differs.
+The app routes `ADT^A01`, `ORM^O01`, and `ORU^R01`; a handler's return value or throw becomes its ACK or NAK, and every other message type is rejected with `AR`. The code is identical to [`mllp-server`](https://github.com/rethinkhealth/glion/tree/main/examples/mllp-server) — only the runtime differs.
 
 ## Send a test message
 

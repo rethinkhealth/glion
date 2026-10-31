@@ -32,9 +32,7 @@ describe("a connection torn down while its message is being handled", () => {
     // runs, so the response is written to a destroyed socket.
     const app = new Mllp().on("*", async (ctx) => {
       await delay(150);
-      return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-      };
+      return ctx.ack();
     });
     const disconnected = Promise.withResolvers<ConnectionInfo>();
     const server = serve({

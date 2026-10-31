@@ -40,9 +40,7 @@ describe("a remote system that closes its side after sending", () => {
   it("gets a reply to every message it sent", async () => {
     const app = new Mllp().on("*", async (ctx) => {
       await delay(20);
-      return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-      };
+      return ctx.ack();
     });
     server = serve({ handle: app.handle, port: 0 });
     await server.listening;

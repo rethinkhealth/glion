@@ -1,15 +1,21 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
+import { toHl7v2 } from "@glion/to-hl7v2";
 
 import { createContext } from "../../src/server/context";
 import { parseRequest } from "../../src/server/request";
+import { toResponse } from "../../src/server/response";
 import { Router } from "../../src/server/router";
 import type { Context, Middleware } from "../../src/server/types";
 
-const RESPONSE_OK = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
+const RESPONSE_OK = toResponse(
+  parseHL7v2.parse("MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001"),
+  toHl7v2
+);
 
 async function makeCtx(raw: string): Promise<Context> {
   return createContext({
+    app: { serializer: toHl7v2 },
     env: undefined,
     request: await parseRequest(new TextEncoder().encode(raw), parseHL7v2),
   });
@@ -138,6 +144,7 @@ describe("Router", () => {
       router.add((ctx) => ctx.env.region === "north", handler);
 
       const ctx = createContext({
+        app: { serializer: toHl7v2 },
         env: { region: "north" },
         request: await parseRequest(
           new TextEncoder().encode(ADT_A01),

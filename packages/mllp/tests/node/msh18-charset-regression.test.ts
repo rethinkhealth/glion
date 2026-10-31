@@ -1,6 +1,7 @@
 // oxlint-disable promise/avoid-new
 import net from "node:net";
 
+import { parseHL7v2 } from "@glion/hl7v2";
 import { CR, frame, FS } from "@glion/mllp-codec";
 import { CharsetError } from "@glion/util-charset";
 
@@ -104,9 +105,11 @@ describe("non-UTF-8 feed is rejected loudly, not silently corrupted (regression 
     });
     app.on("*", (ctx) => {
       handlerRan = true;
-      return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-      };
+      return ctx.reply(
+        parseHL7v2.parse(
+          `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`
+        )
+      );
     });
 
     server = serve({ handle: app.handle, port: 0 });

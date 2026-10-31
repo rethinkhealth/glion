@@ -7,6 +7,7 @@
  * (real-socket timing is outside what CodSpeed's instruction counting
  * can measure).
  */
+import { parseHL7v2 } from "@glion/hl7v2";
 import { Mllp } from "@glion/mllp";
 import type { Middleware } from "@glion/mllp";
 import { bench, describe } from "vitest";
@@ -17,7 +18,7 @@ import { ORU_R01_LARGE, ADT_A01_MINIMAL } from "../fixtures/messages";
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const RESPONSE_OK = { raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001" };
+const RESPONSE_OK = parseHL7v2.parse("MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001");
 
 const textEncoder = new TextEncoder();
 const smallBytes = textEncoder.encode(ADT_A01_MINIMAL);
@@ -31,7 +32,7 @@ function withMiddleware(count: number): Mllp {
   for (let i = 0; i < count; i++) {
     app.use(noop);
   }
-  app.on("ADT^A01", () => RESPONSE_OK);
+  app.on("ADT^A01", (ctx) => ctx.reply(RESPONSE_OK));
   return app;
 }
 
@@ -41,8 +42,8 @@ function withMiddleware(count: number): Mllp {
 
 describe("mllp", () => {
   const app = new Mllp();
-  app.on("ADT^A01", () => RESPONSE_OK);
-  app.on("ORU^R01", () => RESPONSE_OK);
+  app.on("ADT^A01", (ctx) => ctx.reply(RESPONSE_OK));
+  app.on("ORU^R01", (ctx) => ctx.reply(RESPONSE_OK));
 
   bench("mllp: handle small message (3 segments)", async () => {
     await app.handle(smallBytes);
@@ -52,15 +53,22 @@ describe("mllp", () => {
     await app.handle(largeBytes);
   });
 
+  const appAck = new Mllp();
+  appAck.on("ADT^A01", (ctx) => ctx.ack());
+
+  bench("mllp: handle with ctx.ack() reply (AA)", async () => {
+    await appAck.handle(smallBytes);
+  });
+
   const appMulti = new Mllp();
-  appMulti.on("ORU^R01", () => RESPONSE_OK);
-  appMulti.on("ORM^O01", () => RESPONSE_OK);
-  appMulti.on("SIU^S12", () => RESPONSE_OK);
-  appMulti.on("MDM^T02", () => RESPONSE_OK);
-  appMulti.on("ADT^A01", () => RESPONSE_OK);
-  appMulti.on("ADT^A08", () => RESPONSE_OK);
-  appMulti.on("ADT^A04", () => RESPONSE_OK);
-  appMulti.on("*", () => RESPONSE_OK);
+  appMulti.on("ORU^R01", (ctx) => ctx.reply(RESPONSE_OK));
+  appMulti.on("ORM^O01", (ctx) => ctx.reply(RESPONSE_OK));
+  appMulti.on("SIU^S12", (ctx) => ctx.reply(RESPONSE_OK));
+  appMulti.on("MDM^T02", (ctx) => ctx.reply(RESPONSE_OK));
+  appMulti.on("ADT^A01", (ctx) => ctx.reply(RESPONSE_OK));
+  appMulti.on("ADT^A08", (ctx) => ctx.reply(RESPONSE_OK));
+  appMulti.on("ADT^A04", (ctx) => ctx.reply(RESPONSE_OK));
+  appMulti.on("*", (ctx) => ctx.reply(RESPONSE_OK));
 
   bench("mllp: handle 8 routes (match 5th)", async () => {
     await appMulti.handle(smallBytes);
@@ -78,7 +86,7 @@ describe("mllp", () => {
   });
 
   const appNoMatch = new Mllp();
-  appNoMatch.on("ORM^O01", () => RESPONSE_OK);
+  appNoMatch.on("ORM^O01", (ctx) => ctx.reply(RESPONSE_OK));
 
   bench("mllp: handle no matching route (AR reply)", async () => {
     await appNoMatch.handle(smallBytes);

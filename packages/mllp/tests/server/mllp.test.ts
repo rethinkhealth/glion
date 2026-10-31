@@ -17,9 +17,10 @@ import { value } from "@glion/util-query";
 import { unified } from "unified";
 import type { Plugin } from "unified";
 
-import type { MllpServerError } from "../../src/errors";
+import { MllpServerError } from "../../src/errors";
 import { Mllp } from "../../src/server/mllp";
-import type { Middleware, Response } from "../../src/server/types";
+import type { MllpResponse } from "../../src/server/response";
+import type { AckOptions, Middleware } from "../../src/server/types";
 
 /** A unified parser plugin whose parse step throws `error`. */
 function throwingParser(error: Error): Plugin<[], string, Root> {
@@ -47,30 +48,24 @@ const SAMPLE_ADT_V23 = [
   "PID|1||67890",
 ].join("\r");
 
-const RESPONSE_OK: Response = {
-  raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001",
-};
-const RESPONSE_OTHER: Response = {
-  raw: "MSH|^~\\&||||||||||2.5.1\rMSA|CA|MSG002",
-};
+const hl7 = (message: string): Root => parseHL7v2.parse(message);
 
-/** The AA of SAMPLE_ADT, as a route handler writes it. */
-const AA_ADT: Response = {
-  raw: "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240101120000||ACK^A01^ACK|ACK002|P|2.5.1\rMSA|AA|MSG001",
-};
-/** The CA of SAMPLE_ADT, as a route handler writes it. */
-const CA_ADT: Response = {
-  raw: "MSH|^~\\&|RecvApp|RecvFac|SendApp|SendFac|20240101120000||ACK^A01^ACK|ACK003|P|2.5.1\rMSA|CA|MSG001",
-};
+const RESPONSE_OK = hl7("MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001");
+const RESPONSE_OTHER = hl7("MSH|^~\\&||||||||||2.5.1\rMSA|CA|MSG002");
 
-/** A response as HL7v2 text: `handle()`'s bytes, or the `Response` on `ctx.res`. */
-function text(reply: Uint8Array | Response | undefined): string | undefined {
+/**
+ * A response as HL7v2 text: `handle()`'s bytes, or the `MllpResponse` on
+ * `ctx.res`.
+ */
+function text(
+  reply: Uint8Array | MllpResponse | undefined
+): string | undefined {
   if (reply === undefined) {
     return undefined;
   }
-  return reply instanceof Uint8Array
-    ? new TextDecoder().decode(reply)
-    : reply.raw;
+  return new TextDecoder().decode(
+    reply instanceof Uint8Array ? reply : reply.bytes
+  );
 }
 
 function toBytes(msg: string): Uint8Array {
@@ -92,13 +87,13 @@ describe("Mllp", () => {
     const result = app
       .parser(parseHL7v2)
       .use(async (_ctx, next) => next())
-      .on("*", async () => RESPONSE_OK);
+      .on("*", async (ctx) => ctx.reply(RESPONSE_OK));
     expect(result).toBe(app);
   });
 
   describe("parser() lifecycle stage", () => {
     it("reads a message with @glion/parser when no processor is given", async () => {
-      const app = new Mllp().on("*", () => AA_ADT);
+      const app = new Mllp().on("*", (ctx) => ctx.ack());
 
       const response = await app.handle(toBytes(SAMPLE_ADT));
       expect(text(response)?.split("\r")[1]).toBe("MSA|AA|MSG001");
@@ -115,9 +110,9 @@ describe("Mllp", () => {
           ran.push("middleware");
           await next();
         })
-        .on("*", () => {
+        .on("*", (ctx) => {
           ran.push("handler");
-          return RESPONSE_OK;
+          return ctx.reply(RESPONSE_OK);
         });
 
       const response = await app.handle(toBytes("PID|1||12345"));
@@ -135,7 +130,7 @@ describe("Mllp", () => {
       const secondSpy = vi.spyOn(second, "parse");
 
       const app = new Mllp().parser(parseHL7v2).parser(second);
-      app.on("*", async () => RESPONSE_OK);
+      app.on("*", async (ctx) => ctx.reply(RESPONSE_OK));
 
       await app.handle(toBytes(SAMPLE_ADT));
       expect(firstSpy).not.toHaveBeenCalled();
@@ -153,7 +148,7 @@ describe("Mllp", () => {
       app.on("ADT^A01", (ctx) => {
         astType = ctx.req.tree.type;
         childrenCount = ctx.req.tree.children.length;
-        return RESPONSE_OK;
+        return ctx.reply(RESPONSE_OK);
       });
 
       await app.handle(toBytes(SAMPLE_ADT));
@@ -167,7 +162,7 @@ describe("Mllp", () => {
 
       app.on("ADT^A01", async (ctx) => {
         fileExists = ctx.req.file !== undefined;
-        return RESPONSE_OK;
+        return ctx.reply(RESPONSE_OK);
       });
 
       await app.handle(toBytes(SAMPLE_ADT));
@@ -180,7 +175,7 @@ describe("Mllp", () => {
 
       app.on("ADT^A01", async (ctx) => {
         resultExists = (await ctx.req.result()) !== undefined;
-        return RESPONSE_OK;
+        return ctx.reply(RESPONSE_OK);
       });
 
       await app.handle(toBytes(`${SAMPLE_ADT}\rPV1|1|I`));
@@ -199,9 +194,9 @@ describe("Mllp", () => {
           ran.push("middleware");
           await next();
         })
-        .on("*", () => {
+        .on("*", (ctx) => {
           ran.push("handler");
-          return RESPONSE_OK;
+          return ctx.reply(RESPONSE_OK);
         });
 
       // An ADT^A01 with no PV1, which the event schema requires.
@@ -216,20 +211,20 @@ describe("Mllp", () => {
 
   it("routes ADT^A01 to correct handler", async () => {
     const app = createApp();
-    app.on("ADT^A01", async () => RESPONSE_OK);
-    app.on("*", async () => RESPONSE_OTHER);
+    app.on("ADT^A01", async (ctx) => ctx.reply(RESPONSE_OK));
+    app.on("*", async (ctx) => ctx.reply(RESPONSE_OTHER));
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
-    expect(text(response)).toBe(RESPONSE_OK.raw);
+    expect(text(response)).toBe(toHl7v2(RESPONSE_OK));
   });
 
   it("routes to catch-all when no specific match", async () => {
     const app = createApp();
-    app.on("ADT^A01", async () => RESPONSE_OK);
-    app.on("*", async () => RESPONSE_OTHER);
+    app.on("ADT^A01", async (ctx) => ctx.reply(RESPONSE_OK));
+    app.on("*", async (ctx) => ctx.reply(RESPONSE_OTHER));
 
     const response = await app.handle(toBytes(SAMPLE_ORU));
-    expect(text(response)).toBe(RESPONSE_OTHER.raw);
+    expect(text(response)).toBe(toHl7v2(RESPONSE_OTHER));
   });
 
   it("replies AR when no handler matches - no router", async () => {
@@ -241,7 +236,7 @@ describe("Mllp", () => {
   it("replies AR when no handler matches - with a non-matching route", async () => {
     const app = createApp();
 
-    app.on("ORU^O12", async () => RESPONSE_OK);
+    app.on("ORU^O12", async (ctx) => ctx.reply(RESPONSE_OK));
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
     expect(text(response)).toContain("\rMSA|AR|");
@@ -259,7 +254,7 @@ describe("Mllp", () => {
     });
     app.on("ADT^A01", async (ctx) => {
       handlerSawEnriched = ctx.get("enriched") === true;
-      return RESPONSE_OK;
+      return ctx.reply(RESPONSE_OK);
     });
 
     await app.handle(toBytes(SAMPLE_ADT));
@@ -275,7 +270,7 @@ describe("Mllp", () => {
       adtMiddlewareRan.value = true;
       await next();
     });
-    app.on("*", async () => RESPONSE_OK);
+    app.on("*", async (ctx) => ctx.reply(RESPONSE_OK));
 
     await app.handle(toBytes(SAMPLE_ORU));
     expect(adtMiddlewareRan.value).toBe(false);
@@ -292,12 +287,14 @@ describe("Mllp", () => {
     const app = createApp();
     const handlerRan = { value: false };
 
-    app.use(async () => ({
-      raw: "MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001|Answered by middleware",
-    }));
-    app.on("*", async () => {
+    app.use(async (ctx) =>
+      ctx.reply(
+        hl7("MSH|^~\\&||||||||||2.5.1\rMSA|AA|MSG001|Answered by middleware")
+      )
+    );
+    app.on("*", async (ctx) => {
       handlerRan.value = true;
-      return RESPONSE_OK;
+      return ctx.reply(RESPONSE_OK);
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -310,7 +307,7 @@ describe("Mllp", () => {
       const app = createApp();
       app.on(
         (ctx) => ctx.req.header.messageCode === "ADT",
-        async () => RESPONSE_OK
+        async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
       const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -321,7 +318,7 @@ describe("Mllp", () => {
       const app = createApp();
       app.on(
         (ctx) => ctx.req.header.messageCode === "ADT",
-        async () => RESPONSE_OK
+        async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
       const response = await app.handle(toBytes(SAMPLE_ORU));
@@ -334,7 +331,7 @@ describe("Mllp", () => {
         (ctx) =>
           ctx.req.header.messageCode === "ADT" &&
           ctx.req.header.triggerEvent === "A01",
-        async () => RESPONSE_OK
+        async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
       const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -345,7 +342,7 @@ describe("Mllp", () => {
       const app = createApp();
       app.on(
         (ctx) => ctx.req.header.version === "2.3",
-        async () => RESPONSE_OK
+        async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
       const v23Response = await app.handle(toBytes(SAMPLE_ADT_V23));
@@ -359,7 +356,7 @@ describe("Mllp", () => {
       const app = createApp();
       app.on(
         (ctx) => ctx.req.header.controlId === "MSG001",
-        async () => RESPONSE_OK
+        async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
       const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -373,7 +370,7 @@ describe("Mllp", () => {
       const app = new Mllp<{ region: string }>();
       app.on(
         (ctx) => ctx.env.region === "north",
-        async () => RESPONSE_OK
+        async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
       const response = await app.handle(toBytes(SAMPLE_ADT), {
@@ -384,10 +381,10 @@ describe("Mllp", () => {
 
     it("string pattern wins over filter when registered first", async () => {
       const app = createApp();
-      app.on("ADT^A01", async () => RESPONSE_OK);
+      app.on("ADT^A01", async (ctx) => ctx.reply(RESPONSE_OK));
       app.on(
         (ctx) => ctx.req.header.messageCode === "ADT",
-        async () => RESPONSE_OTHER
+        async (ctx) => ctx.reply(RESPONSE_OTHER)
       );
 
       const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -398,9 +395,9 @@ describe("Mllp", () => {
       const app = createApp();
       app.on(
         (ctx) => ctx.req.header.messageCode === "ADT",
-        async () => RESPONSE_OK
+        async (ctx) => ctx.reply(RESPONSE_OK)
       );
-      app.on("ADT^A01", async () => RESPONSE_OTHER);
+      app.on("ADT^A01", async (ctx) => ctx.reply(RESPONSE_OTHER));
 
       const response = await app.handle(toBytes(SAMPLE_ADT));
       expect(text(response)).toContain("MSA|AA");
@@ -417,7 +414,7 @@ describe("Mllp", () => {
           await next();
         }
       );
-      app.on("*", async () => RESPONSE_OK);
+      app.on("*", async (ctx) => ctx.reply(RESPONSE_OK));
 
       await app.handle(toBytes(SAMPLE_ADT_V23));
       expect(middlewareRan.value).toBe(true);
@@ -431,7 +428,7 @@ describe("Mllp", () => {
       const app = createApp();
       app.on(
         (ctx) => ctx.req.tree.children.length > 2,
-        async () => RESPONSE_OK
+        async (ctx) => ctx.reply(RESPONSE_OK)
       );
 
       // SAMPLE_ADT has 3 segments (MSH, EVN, PID)
@@ -469,7 +466,7 @@ describe("handle() env", () => {
     let seen: unknown;
     const app = new Mllp<typeof env>().on("*", (ctx) => {
       seen = ctx.env;
-      return AA_ADT;
+      return ctx.ack();
     });
 
     await app.handle(toBytes(SAMPLE_ADT), env);
@@ -480,7 +477,7 @@ describe("handle() env", () => {
     let seen: unknown = "unset";
     const app = createApp().on("*", (ctx) => {
       seen = ctx.env;
-      return AA_ADT;
+      return ctx.ack();
     });
 
     await app.handle(toBytes(SAMPLE_ADT));
@@ -488,7 +485,7 @@ describe("handle() env", () => {
   });
 
   it("replies when called detached from the app", async () => {
-    const { handle } = createApp().on("*", () => AA_ADT);
+    const { handle } = createApp().on("*", (ctx) => ctx.ack());
 
     const response = await handle(toBytes(SAMPLE_ADT));
     expect(text(response)).toContain("\rMSA|AA|MSG001");
@@ -496,9 +493,21 @@ describe("handle() env", () => {
 });
 
 describe("acknowledgment defaults", () => {
+  it("replies AA to the sender, from the receiver, when the route handler returns ctx.ack()", async () => {
+    const app = createApp();
+    app.on("ADT^A01", (ctx) => ctx.ack());
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    const [msh, msa] = text(response)?.split("\r") ?? [];
+    expect(msh).toMatch(
+      /^MSH\|\^~\\&\|RecvApp\|RecvFac\|SendApp\|SendFac\|\d{14}[+-]\d{4}\|\|ACK\^A01\^ACK\|/
+    );
+    expect(msa).toBe("MSA|AA|MSG001");
+  });
+
   it("dates the AR of a message no route matches in the time zone the app is given", async () => {
     const app = new Mllp({ timeZone: "Asia/Kathmandu" });
-    app.on("ORU^R01", () => AA_ADT);
+    app.on("ORU^R01", (ctx) => ctx.ack());
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
     const [msh, msa] = text(response)?.split("\r") ?? [];
@@ -523,6 +532,19 @@ describe("acknowledgment defaults", () => {
       /^MSH#\^~\\&#RecvApp#RecvFac#SendApp#SendFac#\d{14}\+0545##ACK\^A01\^ACK#/
     );
     expect(msa).toBe("MSA#AE#MSG001");
+  });
+
+  it("writes ctx.ack() with the delimiters and in the time zone the app is given", async () => {
+    const app = new Mllp({
+      delimiters: { field: "#" },
+      timeZone: "Asia/Kathmandu",
+    });
+    app.on("ADT^A01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    const [msh, msa] = text(response)?.split("\r") ?? [];
+    expect(msh).toMatch(/^MSH#\^~\\&#.*#\d{14}\+0545##ACK\^A01\^ACK#/);
+    expect(msa).toBe("MSA#CA#MSG001");
   });
 
   it("throws a RangeError when the app is given a time zone that is not an IANA time zone name", () => {
@@ -552,16 +574,24 @@ describe("acknowledgment defaults", () => {
     expect(text(response)).toBe("MSA-1 is AE");
   });
 
+  it("writes ctx.ack() with the serializer the app is given", async () => {
+    const app = new Mllp({
+      serializer: (tree) => `MSA-1 is ${value(tree, "MSA.1")?.value}`,
+    });
+    app.on("ADT^A01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)).toBe("MSA-1 is CA");
+  });
+
   it("echoes an escape sequence as received when the app parses and serializes without escape handling", async () => {
     const app = new Mllp({
       serializer: (tree) => toHl7v2(tree, undefined, { encodeEscapes: false }),
     }).parser(unified().use(hl7v2Parser, { decodeEscapes: false }).freeze());
-    app.on("ADT^A01", () => {
-      throw new Error("Lookup failed");
-    });
+    app.on("ADT^A01", (ctx) => ctx.ack());
 
     // MSH-3, the sending application, is `R&D` written as `R\T\D`; the
-    // NAK's MSH-5 echoes it.
+    // acknowledgment's MSH-5 echoes it.
     const response = await app.handle(
       toBytes(SAMPLE_ADT.replace("|SendApp|", "|R\\T\\D|"))
     );
@@ -570,13 +600,29 @@ describe("acknowledgment defaults", () => {
     );
   });
 
+  it("replies with ctx.ack() and the code it is given", async () => {
+    const app = createApp();
+    app.on("ADT^A01", (ctx) => ctx.ack({ code: AckCode.CommitAccept }));
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|CA|MSG001");
+  });
+
+  it("replies with the HL7v2 message the route handler returns", async () => {
+    const app = createApp();
+    app.on("ADT^A01", (ctx) => ctx.reply(RESPONSE_OTHER));
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)).toBe(toHl7v2(RESPONSE_OTHER));
+  });
+
   it("replaces a response a middleware set before next() with the route handler's", async () => {
     const app = createApp();
     app.use(async (ctx, next) => {
-      ctx.res = RESPONSE_OTHER;
+      ctx.res = ctx.reply(RESPONSE_OTHER);
       await next();
     });
-    app.on("ADT^A01", () => AA_ADT);
+    app.on("ADT^A01", (ctx) => ctx.ack());
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
     expect(text(response)?.split("\r")[1]).toBe("MSA|AA|MSG001");
@@ -625,9 +671,9 @@ describe("acknowledgment defaults", () => {
     app.use(() => {
       throw new Error("unauthorized");
     });
-    app.on("ADT^A01", () => {
+    app.on("ADT^A01", (ctx) => {
       ran.push("handler");
-      return AA_ADT;
+      return ctx.ack();
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -640,7 +686,7 @@ describe("acknowledgment defaults", () => {
     app.use(async (ctx, next) => {
       await next();
       if (ctx.error) {
-        ctx.res = AA_ADT;
+        ctx.res = ctx.ack();
       }
     });
     app.on("ADT^A01", () => {
@@ -660,7 +706,7 @@ describe("acknowledgment defaults", () => {
       await next();
       throw thrown;
     });
-    app.on("ADT^A01", () => AA_ADT);
+    app.on("ADT^A01", (ctx) => ctx.ack());
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
     expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
@@ -675,9 +721,9 @@ describe("acknowledgment defaults", () => {
     });
     app.use(async (ctx, next) => {
       await next();
-      ctx.res = CA_ADT;
+      ctx.res = ctx.ack({ code: AckCode.CommitAccept });
     });
-    app.on("ADT^A01", () => AA_ADT);
+    app.on("ADT^A01", (ctx) => ctx.ack());
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
     expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
@@ -720,7 +766,7 @@ describe("acknowledgment defaults", () => {
     });
     app.on("ADT^A01", (ctx) => {
       saved.push(ctx.req.header.controlId);
-      return AA_ADT;
+      return ctx.ack();
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -732,15 +778,15 @@ describe("acknowledgment defaults", () => {
     const app = createApp();
     const ran: string[] = [];
     app.use(async (ctx, next) => {
-      ctx.res = AA_ADT;
+      ctx.res = ctx.ack();
       await next();
     });
     app.use(() => {
       throw new AckApplicationReject("Rejected", {});
     });
-    app.on("ADT^A01", () => {
+    app.on("ADT^A01", (ctx) => {
       ran.push("handler");
-      return AA_ADT;
+      return ctx.ack();
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -748,12 +794,28 @@ describe("acknowledgment defaults", () => {
     expect(ran).toEqual([]);
   });
 
+  it("replies with the NAK of an error a middleware throws after the route handler returned null", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    const thrown = new Error("audit write failed");
+    app.use(observe(seen));
+    app.use(async (_ctx, next) => {
+      await next();
+      throw thrown;
+    });
+    app.on("ADT^A01", () => null);
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect(seen.error).toBe(thrown);
+  });
+
   it("sends no response when a middleware returns without calling next()", async () => {
     const app = createApp();
     app.use(() => {
       // dropped
     });
-    app.on("ADT^A01", () => RESPONSE_OK);
+    app.on("ADT^A01", (ctx) => ctx.reply(RESPONSE_OK));
 
     expect(await app.handle(toBytes(SAMPLE_ADT))).toBeUndefined();
   });
@@ -762,7 +824,7 @@ describe("acknowledgment defaults", () => {
     const app = createApp();
     const seen: { error?: Error; msa?: string } = {};
     app.use(observe(seen));
-    app.on("ORU^R01", () => RESPONSE_OK);
+    app.on("ORU^R01", (ctx) => ctx.reply(RESPONSE_OK));
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
     expect(text(response)?.split("\r")[1]).toBe("MSA|AR|MSG001");
@@ -778,6 +840,13 @@ describe("acknowledgment defaults", () => {
     expect(await app.handle(toBytes(SAMPLE_ACK))).toBeUndefined();
   });
 
+  it("sends no response to an ACK whose route handler returns null", async () => {
+    const app = createApp();
+    app.on("*", () => null);
+
+    expect(await app.handle(toBytes(SAMPLE_ACK))).toBeUndefined();
+  });
+
   it("sends no response to an ACK whose route handler throws", async () => {
     const app = createApp();
     app.on("*", () => {
@@ -789,9 +858,11 @@ describe("acknowledgment defaults", () => {
 
   it("replies to an ACK with the response its route handler returns", async () => {
     const app = createApp();
-    app.on("ACK", () => RESPONSE_OK);
+    app.on("ACK", (ctx) => ctx.reply(RESPONSE_OK));
 
-    expect(text(await app.handle(toBytes(SAMPLE_ACK)))).toBe(RESPONSE_OK.raw);
+    expect(text(await app.handle(toBytes(SAMPLE_ACK)))).toBe(
+      toHl7v2(RESPONSE_OK)
+    );
   });
 
   it("replies AE and runs only the global middleware when a route filter throws", async () => {
@@ -808,7 +879,7 @@ describe("acknowledgment defaults", () => {
       () => {
         throw thrown;
       },
-      () => RESPONSE_OK
+      (ctx) => ctx.reply(RESPONSE_OK)
     );
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -824,9 +895,9 @@ describe("acknowledgment defaults", () => {
       ran.push("global");
       await next();
     });
-    app.on("*", () => {
+    app.on("*", (ctx) => {
       ran.push("handler");
-      return RESPONSE_OK;
+      return ctx.reply(RESPONSE_OK);
     });
 
     const response = await app.handle(LATIN1_ADT);
@@ -918,7 +989,7 @@ describe("acknowledgment defaults", () => {
 
   it("sends no response to an ACK that is not UTF-8", async () => {
     const app = createApp();
-    app.on("*", () => RESPONSE_OK);
+    app.on("*", (ctx) => ctx.reply(RESPONSE_OK));
     const ack = Uint8Array.from(
       `${SAMPLE_ACK}|Caf\u00E9`,
       (ch) => ch.codePointAt(0) as number
@@ -927,9 +998,60 @@ describe("acknowledgment defaults", () => {
     expect(await app.handle(ack)).toBeUndefined();
   });
 
+  it("replies AE with INVALID_RESPONSE when the route handler returns a value that is not an MllpResponse", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.on("ADT^A01", () => ({ insertedId: 42 }) as unknown as MllpResponse);
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect((seen.error as MllpServerError).code).toBe("INVALID_RESPONSE");
+    expect(seen.error?.message).toBe(
+      "The value given as the response is not an `MllpResponse`; a response is built by `ctx.ack()` or `ctx.reply()`."
+    );
+  });
+
+  it("replies AE with INVALID_RESPONSE when the route handler returns a tree instead of an MllpResponse", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.on("ADT^A01", () => RESPONSE_OK as unknown as MllpResponse);
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect((seen.error as MllpServerError).code).toBe("INVALID_RESPONSE");
+  });
+
+  it("replies AE with INVALID_RESPONSE when a middleware writes to ctx.res a value that is not an MllpResponse", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.use(async (ctx, next) => {
+      await next();
+      ctx.res = { raw: "MSH|^~\\&" } as unknown as MllpResponse;
+    });
+    app.on("ADT^A01", (ctx) => ctx.ack());
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect((seen.error as MllpServerError).code).toBe("INVALID_RESPONSE");
+  });
+
+  it("replies AE with INVALID_RESPONSE when a middleware returns a value that is not an MllpResponse", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.use(() => ({ raw: "MSH|^~\\&" }) as unknown as MllpResponse);
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect((seen.error as MllpServerError).code).toBe("INVALID_RESPONSE");
+  });
+
   it("sends no response to a payload with no segments, or one that does not start with an MSH", async () => {
     const app = createApp();
-    app.on("ADT^A01", () => AA_ADT);
+    app.on("ADT^A01", (ctx) => ctx.ack());
 
     for (const payload of ["", "\r", "\n", " ", "PID|1||12345"]) {
       expect(await app.handle(toBytes(payload))).toBeUndefined();
@@ -961,11 +1083,46 @@ describe("acknowledgment defaults", () => {
     expect(text(response)?.split("\r")[1]).toBe("MSA|CR|MSG001");
   });
 
-  it("escapes a VT or FS byte in a value of the NAK", async () => {
+  it("replies AE with INVALID_RESPONSE when the route handler returns nothing", async () => {
     const app = createApp();
-    app.on("ADT^A01", () => {
-      throw new Error("Lookup failed");
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.on("ADT^A01", (() => {
+      // forgot to return the response
+    }) as unknown as () => MllpResponse);
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect(seen.error).toBeInstanceOf(MllpServerError);
+    expect(seen.error?.message).toBe(
+      "The value given as the response is not an `MllpResponse`; a response is built by `ctx.ack()` or `ctx.reply()`."
+    );
+  });
+
+  it("sends no response when the route handler returns null", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.on("ADT^A01", () => null);
+
+    expect(await app.handle(toBytes(SAMPLE_ADT))).toBeUndefined();
+    expect(seen).toEqual({ error: undefined, msa: undefined });
+  });
+
+  it("drops a response a middleware set before next() when the route handler returns null", async () => {
+    const app = createApp();
+    app.use(async (ctx, next) => {
+      ctx.res = ctx.reply(RESPONSE_OTHER);
+      await next();
     });
+    app.on("ADT^A01", () => null);
+
+    expect(await app.handle(toBytes(SAMPLE_ADT))).toBeUndefined();
+  });
+
+  it("escapes a VT or FS byte in a value of the response", async () => {
+    const app = createApp();
+    app.on("ADT^A01", (ctx) => ctx.ack());
 
     const response = await app.handle(
       toBytes(SAMPLE_ADT.replace("RecvApp", "Recv\u000BApp\u001C"))
@@ -973,14 +1130,70 @@ describe("acknowledgment defaults", () => {
     expect(text(response)?.split("\r")[0]).toContain("|Recv\\X0B\\App\\X1C\\|");
   });
 
+  it("replies AE with RESPONSE_IS_NAK when ctx.ack() is given a NAK code", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.on("ADT^A01", (ctx) =>
+      ctx.ack({ code: AckCode.ApplicationReject } as unknown as AckOptions)
+    );
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect((seen.error as MllpServerError).code).toBe("RESPONSE_IS_NAK");
+    expect(seen.error?.message).toBe(
+      "The response's acknowledgment code (MSA-1) is a NAK code; a response accepts the message, and a NAK is the response to a thrown error."
+    );
+  });
+
+  it("replies AE with RESPONSE_IS_NAK when ctx.reply() is given a message whose MSA-1 is a NAK code", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.on("ADT^A01", (ctx) =>
+      ctx.reply(hl7("MSH|^~\\&||||||||||2.5.1\rMSA|AR|MSG001"))
+    );
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect((seen.error as MllpServerError).code).toBe("RESPONSE_IS_NAK");
+  });
+
+  it("replies AE with RESPONSE_WITHOUT_MSH when ctx.reply() is given a message that does not start with an MSH", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.on("ADT^A01", (ctx) => ctx.reply(hl7("MSA|AA|MSG001")));
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect((seen.error as MllpServerError).code).toBe("RESPONSE_WITHOUT_MSH");
+    expect(seen.error?.message).toBe(
+      "The response does not start with the message header segment (`MSH`); an HL7v2 message starts with one."
+    );
+  });
+
+  it("replies AE with RESPONSE_WITHOUT_MSH when ctx.reply() is given a message with no segments", async () => {
+    const app = createApp();
+    const seen: { error?: Error; msa?: string } = {};
+    app.use(observe(seen));
+    app.on("ADT^A01", (ctx) => ctx.reply({ children: [], type: "root" }));
+
+    const response = await app.handle(toBytes(SAMPLE_ADT));
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
+    expect((seen.error as MllpServerError).code).toBe("RESPONSE_WITHOUT_MSH");
+  });
+
   it("keeps a response a middleware wrote before next() for an ACK no route matches", async () => {
     const app = createApp();
     app.use(async (ctx, next) => {
-      ctx.res = RESPONSE_OK;
+      ctx.res = ctx.reply(RESPONSE_OK);
       await next();
     });
 
-    expect(text(await app.handle(toBytes(SAMPLE_ACK)))).toBe(RESPONSE_OK.raw);
+    expect(text(await app.handle(toBytes(SAMPLE_ACK)))).toBe(
+      toHl7v2(RESPONSE_OK)
+    );
   });
 
   it("replaces a middleware's reply given without next() with the NAK of a middleware outside it that throws", async () => {
@@ -991,23 +1204,23 @@ describe("acknowledgment defaults", () => {
       await next();
       throw new Error("metrics backend unavailable");
     });
-    app.use(() => AA_ADT);
+    app.use((ctx) => ctx.ack());
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
     expect(text(response)?.split("\r")[1]).toBe("MSA|AE|MSG001");
     expect(seen.error?.message).toBe("metrics backend unavailable");
   });
 
-  it("echoes the MSH-10 a route handler writes to the tree before the NAK", async () => {
+  it("echoes the MSH-10 a route handler writes to the tree before the acknowledgment", async () => {
     const app = createApp();
     app.on("ADT^A01", async (ctx) => {
       const msh10 = value(ctx.req.tree, "MSH.10")?.node as { value: string };
       msh10.value = "ENGINE-0001";
-      throw new Error("Lookup failed");
+      return ctx.ack();
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
-    expect(text(response)?.split("\r")[1]).toBe("MSA|AE|ENGINE-0001");
+    expect(text(response)?.split("\r")[1]).toBe("MSA|AA|ENGINE-0001");
   });
 
   it("answers the MSH the app's parser read, after its own preprocessing", async () => {
@@ -1020,14 +1233,12 @@ describe("acknowledgment defaults", () => {
         preprocess: [stripNul, ...defaultPreprocessors],
       })
     );
-    app.on("ADT^A01", () => {
-      throw new Error("Lookup failed");
-    });
+    app.on("ADT^A01", (ctx) => ctx.ack());
 
     const response = await app.handle(toBytes(`\0\0${SAMPLE_ADT}`));
     const [msh, msa] = text(response)?.split("\r") ?? [];
     expect(msh).toMatch(/^MSH\|\^~\\&\|RecvApp\|RecvFac\|SendApp\|SendFac\|/);
-    expect(msa).toBe("MSA|AE|MSG001");
+    expect(msa).toBe("MSA|AA|MSG001");
   });
 
   it("replies AE and records NEXT_CALLED_TWICE when a middleware calls next() a second time", async () => {
@@ -1043,7 +1254,7 @@ describe("acknowledgment defaults", () => {
     });
     app.on("ADT^A01", (ctx) => {
       saved.push(ctx.req.header.controlId);
-      return AA_ADT;
+      return ctx.ack();
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT));
@@ -1058,9 +1269,11 @@ describe("acknowledgment defaults", () => {
       (ctx as { error?: Error }).error = new Error("PID-3 flagged");
       await next();
     });
-    app.on("ADT^A01", () => RESPONSE_OK);
+    app.on("ADT^A01", (ctx) => ctx.reply(RESPONSE_OK));
 
-    expect(text(await app.handle(toBytes(SAMPLE_ADT)))).toBe(RESPONSE_OK.raw);
+    expect(text(await app.handle(toBytes(SAMPLE_ADT)))).toBe(
+      toHl7v2(RESPONSE_OK)
+    );
   });
 
   it("leaves ctx.error unset for an ACK no route matches", async () => {
@@ -1085,9 +1298,9 @@ describe("acknowledgment defaults", () => {
       ran.push("global");
       await next();
     });
-    app.on("*", () => {
+    app.on("*", (ctx) => {
       ran.push("handler");
-      return RESPONSE_OK;
+      return ctx.reply(RESPONSE_OK);
     });
 
     const response = await app.handle(toBytes(SAMPLE_ADT));

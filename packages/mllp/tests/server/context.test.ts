@@ -1,11 +1,14 @@
 // oxlint-disable require-await
 import { parseHL7v2 } from "@glion/hl7v2";
 import { hl7v2Parser } from "@glion/parser";
+import { toHl7v2 } from "@glion/to-hl7v2";
 import { value } from "@glion/util-query";
 import { unified } from "unified";
 
 import { createContext } from "../../src/server/context";
 import { parseRequest } from "../../src/server/request";
+import type { MllpResponse } from "../../src/server/response";
+import type { AckOptions } from "../../src/server/types";
 
 const SAMPLE_MESSAGE = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -15,8 +18,11 @@ const SAMPLE_MESSAGE = [
 
 const SAMPLE_BYTES = new TextEncoder().encode(SAMPLE_MESSAGE);
 
+const decode = (reply: MllpResponse) => new TextDecoder().decode(reply.bytes);
+
 async function makeCtx(payload = SAMPLE_BYTES) {
   return createContext({
+    app: { serializer: toHl7v2 },
     env: undefined,
     request: await parseRequest(payload, parseHL7v2),
   });
@@ -33,7 +39,7 @@ describe("createContext", () => {
     expect(ctx.error).toBeUndefined();
   });
 
-  it("keeps the header as parsed when a handler changes ctx.req.tree", async () => {
+  it("keeps the header as parsed, and acknowledges the MSH as it is, when a handler changes ctx.req.tree", async () => {
     const ctx = await makeCtx();
     const controlId = value(ctx.req.tree, "MSH.10")?.node;
     if (controlId?.type !== "subcomponent") {
@@ -42,11 +48,15 @@ describe("createContext", () => {
     controlId.value = "CHANGED";
 
     expect(ctx.req.header.controlId).toBe("MSG001");
+    expect(new TextDecoder().decode(ctx.ack().bytes).split("\r")[1]).toBe(
+      "MSA|AA|CHANGED"
+    );
   });
 
   it("exposes what the runtime passed to handle() as ctx.env", async () => {
     const env = { region: "north" };
     const ctx = createContext({
+      app: { serializer: toHl7v2 },
       env,
       request: await parseRequest(SAMPLE_BYTES, parseHL7v2),
     });
@@ -56,6 +66,7 @@ describe("createContext", () => {
   it("holds the request parseRequest() read as req", async () => {
     const request = await parseRequest(SAMPLE_BYTES, parseHL7v2);
     const ctx = createContext({
+      app: { serializer: toHl7v2 },
       env: undefined,
       request,
     });
@@ -72,6 +83,7 @@ describe("createContext", () => {
       const parseOnly = unified().use(hl7v2Parser).freeze();
 
       const ctx = createContext({
+        app: { serializer: toHl7v2 },
         env: undefined,
         request: await parseRequest(SAMPLE_BYTES, parseOnly),
       });
@@ -96,6 +108,7 @@ describe("createContext", () => {
 
     it("works with full pipeline processor (parse + transform + compile)", async () => {
       const ctx = createContext({
+        app: { serializer: toHl7v2 },
         env: undefined,
         request: await parseRequest(SAMPLE_BYTES, parseHL7v2),
       });
@@ -153,6 +166,110 @@ describe("createContext", () => {
       expect(snapshot.key1).toBe("val1");
       expect(snapshot.key2).toBe(42);
       expect(Object.isFrozen(snapshot)).toBe(true);
+    });
+  });
+
+  describe("ctx.ack()", () => {
+    it("is the acknowledgment as an MllpResponse, AA by default", async () => {
+      const ctx = await makeCtx();
+      const reply = ctx.ack();
+
+      expect(reply.code).toBe("AA");
+      expect(decode(reply).split("\r")[1]).toBe("MSA|AA|MSG001");
+    });
+
+    it("writes the accept code it is given", async () => {
+      const ctx = await makeCtx();
+      const reply = ctx.ack({ code: "CA" });
+
+      expect(reply.code).toBe("CA");
+      expect(decode(reply).split("\r")[1]).toBe("MSA|CA|MSG001");
+    });
+
+    it("throws RESPONSE_IS_NAK for a NAK code", async () => {
+      const ctx = await makeCtx();
+
+      expect(() => ctx.ack({ code: "AE" } as unknown as AckOptions)).toThrow(
+        expect.objectContaining({
+          code: "RESPONSE_IS_NAK",
+          message:
+            "The response's acknowledgment code (MSA-1) is a NAK code; a response accepts the message, and a NAK is the response to a thrown error.",
+        })
+      );
+    });
+  });
+
+  describe("ctx.reply()", () => {
+    it("serializes the message when called, with its MSA-1 as the code", async () => {
+      const tree = parseHL7v2.parse(
+        "MSH|^~\\&|RecvApp|RecvFac|||||RSP^K22^RSP_K21|R1|P|2.5.1\rMSA|AA|MSG001\rQAK|Q1|OK"
+      );
+      const ctx = await makeCtx();
+      const reply = ctx.reply(tree);
+      tree.children.pop();
+
+      expect(reply.code).toBe("AA");
+      expect(decode(reply)).toBe(
+        "MSH|^~\\&|RecvApp|RecvFac|||||RSP^K22^RSP_K21|R1|P|2.5.1\rMSA|AA|MSG001\rQAK|Q1|OK"
+      );
+    });
+
+    it("gives a message with no acknowledgment code in MSA-1 no code", async () => {
+      const ctx = await makeCtx();
+      const reply = ctx.reply(
+        parseHL7v2.parse("MSH|^~\\&|||||||ADT^A08|R2|P|2.5.1\rPID|1||12345")
+      );
+
+      expect(reply.code).toBeUndefined();
+    });
+
+    it("throws RESPONSE_IS_NAK for a message whose MSA-1 is a NAK code", async () => {
+      const ctx = await makeCtx();
+      const nak = parseHL7v2.parse("MSH|^~\\&||||||||||2.5.1\rMSA|CR|MSG001");
+
+      expect(() => ctx.reply(nak)).toThrow(
+        expect.objectContaining({ code: "RESPONSE_IS_NAK" })
+      );
+    });
+
+    it("throws RESPONSE_WITHOUT_MSH for a message that does not start with an MSH", async () => {
+      const ctx = await makeCtx();
+
+      expect(() => ctx.reply(parseHL7v2.parse("MSA|AA|MSG001"))).toThrow(
+        expect.objectContaining({
+          code: "RESPONSE_WITHOUT_MSH",
+          message:
+            "The response does not start with the message header segment (`MSH`); an HL7v2 message starts with one.",
+        })
+      );
+      expect(() => ctx.reply({ children: [], type: "root" })).toThrow(
+        expect.objectContaining({ code: "RESPONSE_WITHOUT_MSH" })
+      );
+    });
+  });
+
+  describe("ctx.res", () => {
+    it("starts as no response, and holds the MllpResponse written to it", async () => {
+      const ctx = await makeCtx();
+      expect(ctx.res).toBeUndefined();
+
+      const reply = ctx.ack();
+      ctx.res = reply;
+      expect(ctx.res).toBe(reply);
+
+      ctx.res = undefined;
+      expect(ctx.res).toBeUndefined();
+    });
+
+    it("throws INVALID_RESPONSE for a value that is not an MllpResponse, and keeps the response it held", async () => {
+      const ctx = await makeCtx();
+      const reply = ctx.ack();
+      ctx.res = reply;
+
+      expect(() => {
+        ctx.res = parseHL7v2.parse(SAMPLE_MESSAGE) as unknown as MllpResponse;
+      }).toThrow(expect.objectContaining({ code: "INVALID_RESPONSE" }));
+      expect(ctx.res).toBe(reply);
     });
   });
 
