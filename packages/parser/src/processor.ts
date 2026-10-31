@@ -74,6 +74,7 @@ function createParserCore() {
       children: [],
       name,
       position: { end: position.end, start: position.start },
+      terminator: "",
       type: "segment",
     };
     root.children.push(seg);
@@ -275,10 +276,6 @@ function createParserCore() {
   const finalize = () => {
     if (lastContentEnd && seg) {
       updatePositionsToEnd(lastContentEnd);
-    }
-    // A segment still open at the end of the text has no terminator.
-    if (seg) {
-      seg.terminator = "";
     }
     if (seg && !segmentHasContent && !seg.name) {
       // Drop trailing empty segment only when it was lazily opened by

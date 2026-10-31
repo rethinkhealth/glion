@@ -16,16 +16,17 @@ ADR 0034 has the parser read `\r`, `\n`, and `\r\n` as segment ends without rewr
 ## Decision
 
 1. **A segment records its terminator.** `Segment.terminator` holds the characters that ended the segment in the text it was read from: `\r`, `\n`, or `\r\n`. A last segment with nothing after it has `""`. An empty line after a segment is not recorded.
-2. **Absent is the same as `""`.** A segment without a `terminator` has no segment terminator. No reader takes an absent `terminator` for `\r`: the serializer writes nothing after it when it is the last segment, and the lint rule reports it.
+2. **Every segment states its terminator.** `Segment.terminator` is required, so no reader has to guess what an absent one means, and none takes it for `\r`.
 3. **The builder ends a segment with `\r`.** `s()` sets `terminator` to `\r` and takes no argument for it. A caller sets the property on the returned node for another terminator.
-4. **The serializer writes the tree.** `@glion/to-hl7v2` writes each segment followed by its `terminator`, so a parsed message is written back with the line breaks it was read with, a missing final terminator included. An empty or absent `terminator` is written only after the last segment: after any other, `\r` is written, so a segment added after a parsed last segment does not join it.
+4. **The serializer writes the tree.** `@glion/to-hl7v2` writes each segment followed by its `terminator`, so a parsed message is written back with the line breaks it was read with, a missing final terminator included. It adds nothing of its own. An empty `terminator` before another segment throws `SegmentTerminatorError`: written as it is, the two segments would be one, and HL7v2 has no way to write that tree.
 5. **One transform repairs it.** `@glion/transform-segment-terminator` returns a copy of the tree in which every segment ends with `\r`. `@glion/mllp-client` applies it before sending, so a message goes out over MLLP with the segment terminator HL7v2 requires, whatever it was read with.
 6. **The parser reads `\n` and `\r\n` by default, and can be told not to.** `lineBreaks: false` ends a segment only at a carriage return, the segment terminator Chapter 2 requires, and a line feed is data.
-7. **A lint rule reports the deviations from the tree.** `@glion/lint-segment-terminator` reads `segment.terminator`: `""`, an absent `terminator`, `\n`, `\r\n`, and any other character than `\r` are reported. It is in `@glion/preset-lint-recommended` at its default severity, `warning`, so a message read from a file with `\n` or `\r\n` line breaks is reported and still accepted.
+7. **A lint rule reports the deviations from the tree.** `@glion/lint-segment-terminator` reads `segment.terminator`: `""`, `\n`, `\r\n`, and any other character than `\r` are reported. It is in `@glion/preset-lint-recommended` at its default severity, `warning`, so a message read from a file with `\n` or `\r\n` line breaks is reported and still accepted.
 
 ## Consequences
 
 - A parsed tree carries a `terminator` on every segment, and a built tree carries `\r` on every segment, so trees compared or snapshotted in tests gain the key.
 - A message read without a final terminator, or with `\r\n` or `\n` line breaks, is written back as it was read. A pipeline that writes HL7v2 for a receiver applies `@glion/transform-segment-terminator` first; `@glion/mllp-client` and `glion send` do.
 - `toHl7v2(tree, { segment })` sets only the delimiter written between a segment with no terminator and the next one.
-- A segment made as an object literal, without `terminator`, has no segment terminator: `\r` is written after it only when another segment follows.
+- A segment made as an object literal states its `terminator`; TypeScript rejects one without it.
+- A segment appended after a last segment read with nothing after it makes `toHl7v2` throw, until that segment's `terminator` is set or `@glion/transform-segment-terminator` is applied.

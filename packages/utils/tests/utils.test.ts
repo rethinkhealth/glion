@@ -68,7 +68,7 @@ function field(...reps: (FieldRepetition | Component | string)[]): Field {
 
 /** Create a Segment */
 function seg(name: string, ...fields: Field[]): Segment {
-  return { children: fields, name, type: "segment" };
+  return { children: fields, name, terminator: "\r", type: "segment" };
 }
 
 // ---------------------------------------------------------------------------

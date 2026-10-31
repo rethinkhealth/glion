@@ -126,35 +126,6 @@ describe("hl7v2-lint:segment-terminator", () => {
   });
 
   describe("a segment that was not read from text", () => {
-    it("is reported as having no segment terminator when it has no terminator", async () => {
-      const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
-      for (const segment of tree.children as Segment[]) {
-        segment.terminator = undefined;
-      }
-      const file = new VFile();
-
-      await unified().use(hl7v2LintSegmentTerminator).run(tree, file);
-
-      expect(
-        file.messages.map(({ actual, expected, message }) => ({
-          actual,
-          expected,
-          message,
-        }))
-      ).toStrictEqual([
-        {
-          actual: undefined,
-          expected: ["\r"],
-          message: "The segment has no segment terminator.",
-        },
-        {
-          actual: undefined,
-          expected: ["\r"],
-          message: "The segment has no segment terminator.",
-        },
-      ]);
-    });
-
     it("is not reported when the builder made it", async () => {
       const file = new VFile();
 

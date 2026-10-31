@@ -10,16 +10,15 @@ import type {
   Subcomponent,
 } from "@glion/ast";
 import { delimiters as queryDelimiters } from "@glion/util-query";
-import {
-  DEFAULT_DELIMITERS,
-  encodeEscapes,
-  SEGMENT_TERMINATOR,
-} from "@glion/utils";
+import { DEFAULT_DELIMITERS, encodeEscapes } from "@glion/utils";
 import type { Plugin } from "unified";
 import type { Node } from "unist";
 import type { VFile } from "vfile";
 
+import { SegmentTerminatorError } from "./errors";
+
 export { EscapeSequenceError } from "@glion/utils";
+export { SegmentTerminatorError } from "./errors";
 
 export interface Hl7v2ToHl7v2Options {
   /**
@@ -56,13 +55,13 @@ export const hl7v2ToHl7v2: Plugin<[Hl7v2ToHl7v2Options?], Root, string> =
  * overridden or derivable from an MSH segment in the tree.
  *
  * A Root or Group writes each segment followed by its `terminator`, so a parsed
- * message is written back as it was read. A segment with an empty or absent
- * `terminator` has no segment terminator: nothing is written after it when it
- * is the last segment written, and `\r` after any other. A Segment on its own
- * is written without one.
+ * message is written back as it was read. A Segment on its own is written
+ * without one.
  *
  * @throws {EscapeSequenceError} When `encodeEscapes` is on and a value holds a
  *   character that no escape sequence can write with the delimiters.
+ * @throws {SegmentTerminatorError} When a segment with an empty `terminator`
+ *   is followed by another segment.
  */
 export function toHl7v2(
   node: Nodes,
@@ -132,18 +131,17 @@ export function toHl7v2(
     }
   };
 
-  // Each segment, then its terminator. No terminator, read from a last
-  // segment with nothing after it, stays empty only after the last segment
-  // written: after `PID|1` with `ZPI|x` appended, it would make them one
-  // segment, `PID|1ZPI|x`.
+  // Each segment, then its terminator. An empty terminator before another
+  // segment would join the two: `PID|1` then `ZPI|x` is `PID|1ZPI|x`.
   const segments = (children: readonly (Segment | Group)[]): string => {
     const written = children.flatMap(segmentsOf);
     const last = written.length - 1;
     return written
       .map((seg, index) => {
-        const terminator = seg.terminator ?? "";
-        const joinsTheNext = terminator === "" && index < last;
-        return `${line(seg)}${joinsTheNext ? SEGMENT_TERMINATOR : terminator}`;
+        if (seg.terminator === "" && index < last) {
+          throw new SegmentTerminatorError(seg);
+        }
+        return `${line(seg)}${seg.terminator}`;
       })
       .join("");
   };

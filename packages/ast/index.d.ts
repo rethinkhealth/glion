@@ -186,11 +186,10 @@ export interface Segment extends Parent {
   /**
    * The characters that end the segment: `\r`, the segment terminator HL7v2
    * requires, or what ended it in the text it was read from (`\n` or
-   * `\r\n`). An empty string when
-   * nothing ends the segment, as after the last segment of a text with nothing
-   * after it. Absent is the same as an empty string: no segment terminator.
+   * `\r\n`). An empty string when nothing ends the segment, as after the
+   * last segment of a text with nothing after it.
    */
-  terminator?: string | undefined;
+  terminator: string;
   /**
    * Data associated with the segment.
    */

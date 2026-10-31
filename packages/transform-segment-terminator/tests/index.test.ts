@@ -36,15 +36,6 @@ describe(terminateSegments, () => {
     ).toStrictEqual(["\r", ["\r", ["\r"]]]);
   });
 
-  it("ends a segment without a terminator with a carriage return", () => {
-    const pid = s("PID", f("1"));
-    pid.terminator = undefined;
-
-    expect(
-      terminators(terminateSegments(m(pid)).children as Segment[])
-    ).toStrictEqual(["\r"]);
-  });
-
   it("does not change the tree it is given", () => {
     const tree = parseHL7v2("MSH|^~\\&\r\nPID|1");
 

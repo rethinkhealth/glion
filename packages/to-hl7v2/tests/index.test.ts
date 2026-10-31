@@ -9,7 +9,12 @@ import type {
 import { c, f, g, m, r, s } from "@glion/builder";
 import { unified } from "unified";
 
-import { EscapeSequenceError, hl7v2ToHl7v2, toHl7v2 } from "../src";
+import {
+  EscapeSequenceError,
+  hl7v2ToHl7v2,
+  SegmentTerminatorError,
+  toHl7v2,
+} from "../src";
 
 describe(toHl7v2, () => {
   it("converts a simple MSH segment back to HL7v2 format", () => {
@@ -317,29 +322,33 @@ describe("segment terminator", () => {
     expect(toHl7v2(tree)).toBe("MSH|^~\\&\r\nPID|1\nPV1");
   });
 
-  // A segment read last with nothing after it has the terminator `""`. Once
-  // another segment follows it, writing `""` would join the two.
-  it("writes a carriage return after an empty terminator on a segment that is no longer the last", () => {
+  it("throws a SegmentTerminatorError for a segment with no terminator that another segment follows", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
-    (tree.children[1] as Segment).terminator = "";
+    const pid = tree.children[1] as Segment;
+    pid.terminator = "";
     tree.children.push(s("ZPI", f("x")));
 
-    expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1\rZPI|x\r");
+    expect(() => toHl7v2(tree)).toThrow(
+      expect.objectContaining({
+        message:
+          "A segment that another segment follows has no segment terminator; HL7v2 ends every segment with a carriage return. Set the segment's `terminator`, or apply `@glion/transform-segment-terminator`.",
+        name: "SegmentTerminatorError",
+        segment: pid,
+      })
+    );
   });
 
-  it("writes a carriage return after an empty terminator on a segment followed by one in a later group", () => {
+  it("throws a SegmentTerminatorError for a segment with no terminator that a segment in a later group follows", () => {
     const pid = s("PID", f("1"));
     pid.terminator = "";
     const tree = m(g("PATIENT", pid), g("VISIT", s("PV1", f("1"))));
 
-    expect(toHl7v2(tree)).toBe("PID|1\rPV1|1\r");
+    expect(() => toHl7v2(tree)).toThrow(SegmentTerminatorError);
   });
 
-  it("writes a segment with no terminator as one with an empty terminator: a carriage return before the next segment, and nothing after the last", () => {
+  it("writes nothing after a last segment with no terminator", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
-    for (const segment of tree.children as Segment[]) {
-      segment.terminator = undefined;
-    }
+    (tree.children[1] as Segment).terminator = "";
 
     expect(toHl7v2(tree)).toBe("MSH|^~\\&\rPID|1");
   });
