@@ -19,11 +19,13 @@ import { unified } from "unified";
 
 import {
   arbAdversarialInput,
+  arbEmptyLines,
   arbHL7v2Message,
   arbHL7v2MessageCustomDelimiters,
   arbHL7v2Segments,
   arbMutatedCustomDelimiterMessage,
   arbMutatedMessage,
+  arbSegmentEnd,
 } from "../src/arbitraries";
 import { discoverFixtures, readFixture } from "../src/fixtures";
 
@@ -97,10 +99,14 @@ describe("QR4: round-trip data fidelity", () => {
     it.each([
       ["no terminator", "MSH|^~\\&\rPID|1", "MSH|^~\\&\rPID|1"],
       ["one terminator", "MSH|^~\\&\rPID|1\r", "MSH|^~\\&\rPID|1\r"],
-      ["two terminators", "MSH|^~\\&\rPID|1\r\r", "MSH|^~\\&\rPID|1\r"],
+      [
+        "a terminator and an empty line",
+        "MSH|^~\\&\rPID|1\r\r",
+        "MSH|^~\\&\rPID|1\r\r",
+      ],
       ["CRLF line endings", "MSH|^~\\&\r\nPID|1\r\n", "MSH|^~\\&\r\nPID|1\r\n"],
     ])(
-      "a last segment received with %s is written with the terminator it was read with",
+      "a last segment received with %s is written as it was read",
       async (_, source, written) => {
         const result = await roundTripProcessor.process(source);
 
@@ -146,35 +152,32 @@ describe("QR4: round-trip data fidelity", () => {
   });
 
   describe("fuzz: line breaks", () => {
-    // Each segment records the line break it ended with, and a message is
-    // written back with the line breaks it was read with, a last segment with
-    // nothing after it included.
+    // Each segment records the line break it ended with, an empty line is an
+    // empty segment, and a message is written back with the line breaks and
+    // the empty lines it was read with, a last segment with nothing after it
+    // included (#1158).
     //
     // Mutant: `to-hl7v2` writes the segment delimiter after every segment.
     // Fails on `"MSH|^~\\&|||\nAAA|\r"`.
     //
     // Mutant: the parser records no terminator on a segment still open at the
     // end of the text. Fails on `"MSH|^~\\&|||\r\nAAA|"`.
-    it("a message is written back with the line breaks it was read with", async () => {
+    //
+    // Mutant: the processor skips a segment terminator that no segment is
+    // open for, so an empty line is dropped. Fails on `"MSH|^~\\&|||\r\r"`.
+    it("a message is written back with the line breaks and empty lines it was read with", async () => {
       const arbLineBreaks = arbHL7v2Segments.chain((segments) =>
         fc
-          .array(fc.constantFrom("\r", "\n", "\r\n"), {
-            maxLength: segments.length,
-            minLength: segments.length,
-          })
-          .chain((breaks) =>
-            fc
-              .boolean()
-              .map((terminated) =>
-                segments
-                  .map((line, index) =>
-                    terminated || index < segments.length - 1
-                      ? `${line}${breaks[index]}`
-                      : line
-                  )
-                  .join("")
-              )
+          .tuple(
+            arbEmptyLines,
+            ...segments.map((line, index) =>
+              (index === segments.length - 1
+                ? fc.oneof(fc.constant(""), arbSegmentEnd)
+                : arbSegmentEnd
+              ).map((end) => `${line}${end}`)
+            )
           )
+          .map((lines) => lines.join(""))
       );
 
       await fc.assert(
@@ -184,7 +187,12 @@ describe("QR4: round-trip data fidelity", () => {
           expect(serialized).toBe(source);
         }),
         {
-          examples: [["MSH|^~\\&|||\nAAA|\r"], ["MSH|^~\\&|||\r\nAAA|"]],
+          examples: [
+            ["MSH|^~\\&|||\nAAA|\r"],
+            ["MSH|^~\\&|||\r\nAAA|"],
+            ["MSH|^~\\&|||\r\r"],
+            ["\r\nMSH|^~\\&|||\r\n\r\nAAA|\r"],
+          ],
           numRuns: 300,
         }
       );

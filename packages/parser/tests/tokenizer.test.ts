@@ -21,7 +21,7 @@ function toks(
   return out;
 }
 
-describe("mSH bootstrap only at file start", () => {
+describe("the message header is read only at the start of the message", () => {
   it("emits MSH as TEXT, then a synthetic FIELD_DELIM, then MSH.2 as TEXT for first segment only", () => {
     const out = toks("MSH|^~\\&|SENDER\rPID|1\rMSH|^~\\&|AGAIN"); // later MSH should NOT be bootstrapped
 
@@ -39,7 +39,7 @@ describe("mSH bootstrap only at file start", () => {
     expect(out).toMatchSnapshot();
   });
 
-  it("does not bootstrap when file does not start with MSH", () => {
+  it("does not read a message header when another segment comes before MSH", () => {
     const out = toks("PID|1\rMSH|^~\\&|SENDER");
     // No special tokens up front—just TEXT('PID') then delimiters
     expect(out[0]).toMatchObject({ type: "TEXT", value: "PID" });

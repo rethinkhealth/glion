@@ -90,7 +90,7 @@ Sends a single HL7v2 message over MLLP, prints the acknowledgment, and exits. It
 glion send [<file>] [flags]
 ```
 
-The message is read from `<file>`, or from stdin when `<file>` is omitted or is `-`. It is parsed, and each segment is sent ending with a carriage return, whatever line breaks the file holds. A value the message's own delimiters cannot write is refused before dialing rather than sent mangled: when every escape sequence for one of its characters would hold a delimiter, there is no way to put the value on the wire — delimiters that are ASCII punctuation can write every character. Whether the message is valid is the receiver's call — it answers with a NAK — so `glion send` does not pre-validate.
+The message is read from `<file>`, or from stdin when `<file>` is omitted or is `-`. It is parsed, and each segment is sent ending with a carriage return, whatever line breaks the file holds. An empty line is sent as an empty segment, a carriage return alone. A value the message's own delimiters cannot write is refused before dialing rather than sent mangled: when every escape sequence for one of its characters would hold a delimiter, there is no way to put the value on the wire — delimiters that are ASCII punctuation can write every character. Whether the message is valid is the receiver's call — it answers with a NAK — so `glion send` does not pre-validate.
 
 | Flag             | Description                                                                                         |
 | ---------------- | --------------------------------------------------------------------------------------------------- |

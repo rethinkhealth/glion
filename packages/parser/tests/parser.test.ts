@@ -851,6 +851,21 @@ describe("root position", () => {
     expect(pid?.position?.start.offset).toBe(10);
     expect(pid?.position?.end.offset).toBe(15);
   });
+
+  it("counts an empty line as a line for the segments after it", () => {
+    const pid = parseHL7v2("MSH|^~\\&\r\rPID|1\r").children[2];
+
+    expect(pid?.position).toStrictEqual({
+      end: { column: 6, line: 3, offset: 15 },
+      start: { column: 1, line: 3, offset: 10 },
+    });
+  });
+
+  it("ends a segment at its last character when that is a field delimiter", () => {
+    const [pid] = parseHL7v2("PID|\rOBX|1").children;
+
+    expect(pid?.position?.end.offset).toBe(4);
+  });
 });
 
 describe("segment terminator", () => {
@@ -872,10 +887,12 @@ describe("segment terminator", () => {
     expect(terminators("MSH|^~\\&\rPID|1")).toStrictEqual(["\r", ""]);
   });
 
-  it("records only the first line break after a segment", () => {
+  it("records each line break, an empty line as an empty segment", () => {
     expect(terminators("MSH|^~\\&\r\rPID|1\r\n\r")).toStrictEqual([
       "\r",
+      "\r",
       "\r\n",
+      "\r",
     ]);
   });
 });

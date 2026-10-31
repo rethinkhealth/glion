@@ -139,21 +139,15 @@ describe("processor (semantics-agnostic)", () => {
     expect(seg.children).toHaveLength(1);
   });
 
-  it("handles empty line (segment with no fields) by dropping the empty trailing segment", () => {
-    const root = parseHL7v2FromIterator([segEnd()]);
-    expect(root.children).toHaveLength(0);
+  it("reads an empty line as a segment with an empty Segment ID and no fields", () => {
+    const root = parseHL7v2FromIterator([{ ...segEnd(), value: "\r" }]);
+
+    expect(root.children).toMatchObject([
+      { children: [], name: "", terminator: "\r", type: "segment" },
+    ]);
   });
 
   it("keeps a trailing named-but-fieldless segment (round-trip idempotency)", () => {
-    // Regression test for a fuzz-found round-trip break: the parser
-    // used to drop any trailing segment with `!segmentHasContent`,
-    // which silently discarded segments whose payload (after the
-    // segment name) contained no recognised delimiters under the
-    // current delimiter set. Once dropped, the segment immediately
-    // before it shifted into the trailing position and got dropped on
-    // the next parse — cascading data loss across round-trips. Keep
-    // named-only segments so the serialized form re-parses to the
-    // same tree.
     const tokens: Token[] = [
       text("PID"),
       tok("FIELD_DELIM"),

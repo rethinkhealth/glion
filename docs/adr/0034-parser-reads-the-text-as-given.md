@@ -32,7 +32,7 @@ Recording how each segment ended, a parser option to read `\r` alone, and a lint
 ## Consequences
 
 - A message's positions change when it holds `\r\n`: they now point into its text.
-- The root's position ends after the line breaks that follow the last segment. A finding placed at the end of the message, such as a segment missing at the end in `@glion/lint-profile-segment-order`, moves to the end of those line breaks: with one segment terminator after the last segment, the start of the next line, where the missing segment would go, and with none, the end of the last segment.
+- The root's position ends after the line breaks that follow the last segment. A finding placed at the end of the message, such as a segment missing at the end in `@glion/lint-profile-segment-order`, moves to the end of those line breaks: with one segment terminator after the last segment, the start of the next line, where the missing segment would go, and with none, the end of the last segment. An empty line after the last segment is a segment (ADR 0035), so a segment missing at the end is placed next to that line, at its start or its end.
 - A caller that passed `normalizeNewlines` in `preprocess` removes it; the parser reads line breaks without rewriting.
 - A message written by `@glion/to-hl7v2` always ends with `\r`, so a message read without one and written back is one character longer.
 - A raw line feed in a TX or FT value still ends the segment, as it did before.

@@ -66,7 +66,7 @@ Every rule that stops at the end of a segment calls this function: the tokenizer
 
 `message-header.ts` reads the start of the message:
 
-- The message opens with a message header segment when it starts with `MSH` followed by a character that is not a segment terminator. `MSH` followed by a segment terminator is a segment with no fields.
+- The message opens with a message header segment when its first segment, after any empty lines, starts with `MSH` followed by a character that is not a segment terminator. `MSH` followed by a segment terminator is a segment with no fields. In CR + `MSH|^~\&`, MSH-1 and MSH-2 are read, and an empty segment comes before MSH.
 - MSH-1 is the character after `MSH`. No delimiter opens it: the field separator is its value.
 - MSH-2 holds up to four encoding characters, and ends at the next field delimiter or segment terminator. `MSH|^~\|APP` and `MSH|^~\` + CR both declare `^~\`.
 
@@ -76,7 +76,7 @@ The tokenizer emits the header as five tokens, read once in `reset()`, because i
 
 ### Tokenizing
 
-After the header, `next()` tries these rules at the current offset, in order. The first that applies reads the token:
+`next()` emits the header tokens once it reaches the offset where MSH starts, after any empty lines before it. Otherwise it tries these rules at the current offset, in order. The first that applies reads the token:
 
 1. **A segment terminator** ends the segment.
 2. **The field delimiter** opens a field.
@@ -111,6 +111,7 @@ A token's span covers the text as written, so a decoded value can be shorter tha
 - Each delimiter opens the next sibling at its level: a field delimiter opens a field, a repetition delimiter a field repetition, and so on. A sibling it skips is added empty, so `PID|~` holds a field with two empty field repetitions.
 - A field, field repetition, or component with no value has `children: []`. `PID|1||` holds three fields, the last two empty.
 - A segment terminator closes the segment, and is recorded as its `terminator`. A segment that the input ends inside has the `terminator` `""`.
+- A segment terminator with no segment open is an empty line, and closes an empty segment: an empty Segment ID, no fields, and no width, at the start of its line. `MSH|^~\&` + CR + CR + `PID|1` holds MSH, an empty segment, and PID.
 
 ## Tests
 

@@ -4,7 +4,7 @@
 "@glion/parser": minor
 ---
 
-A segment records the characters that end it in `Segment.terminator` (ADR 0035). `@glion/parser` sets it to what ended the segment in the text it was read from (`\r`, `\n`, or `\r\n`), and to `""` for a last segment with nothing after it; an empty line after a segment is not recorded. `s()` in `@glion/builder` sets it to `\r`, so a built segment carries the key.
+A segment records the characters that end it in `Segment.terminator` (ADR 0035). `@glion/parser` sets it to what ended the segment in the text it was read from (`\r`, `\n`, or `\r\n`), and to `""` for a last segment with nothing after it. `s()` in `@glion/builder` sets it to `\r`, so a built segment carries the key.
 
 **Breaking:** `Segment.terminator` is required, so a segment made as an object literal states it.
 

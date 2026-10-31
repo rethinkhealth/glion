@@ -360,6 +360,24 @@ export const arbHL7v2Segments: fc.Arbitrary<string[]> = fc
     ...segments,
   ]);
 
+const arbLineBreak = fc.constantFrom("\r", "\n", "\r\n");
+
+/**
+ * Up to two empty lines, each ended by `\r`, `\n`, or `\r\n`. A line feed
+ * after a carriage return is read as one line break, `\r\n`, so `\r` then
+ * `\n` is one empty line, not two.
+ */
+export const arbEmptyLines: fc.Arbitrary<string> = fc
+  .array(arbLineBreak, { maxLength: 2 })
+  .map((breaks) => breaks.join(""));
+
+/**
+ * The end of a segment: `\r`, `\n`, or `\r\n`, then up to two empty lines.
+ */
+export const arbSegmentEnd: fc.Arbitrary<string> = fc
+  .tuple(arbLineBreak, arbEmptyLines)
+  .map(([lineBreak, emptyLines]) => `${lineBreak}${emptyLines}`);
+
 /**
  * Generate a structurally valid HL7v2 message with default delimiters
  * (`|^~\&`).
