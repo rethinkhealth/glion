@@ -1,236 +1,127 @@
-# ADR 0019: Acknowledgment Translation
+# ADR 0019: Acknowledgments Built Into the App
 
 ## Status
 
-Proposed
+Proposed (revised 2026-10-24)
+
+Built by the stack #1141 ← #1142 ← #1143 ← #1144 ← #1145. This revision replaces the 2026-10 proposal of the same number, which put the response rules behind `app.onError()`, a `MessageOutcome` envelope, and a version table inside the server; none of those were built.
 
 ## Context
 
-> `@glion/mllp-ack`, and the `ackMiddleware` this section describes, were removed by PR 1 of §9 (`.changeset/remove-mllp-ack.md`). Its file references are historical. The client half now lives in `packages/mllp-client/src/messages.ts` and `packages/mllp-client/src/errors/nak-exception.ts`, which already falls back to ERR-8 for `text`; ERR-2 → `location` remains open.
+An MLLP receiver answers every message with an acknowledgment, and the answer decides what the sender does next. `AA` means "processed, do not send again". `AE` means "it failed here, you may resend". `AR` means "rejected, do not resend". A wrong answer is not cosmetic. An `AA` for a message nothing processed loses it, and an `AE` for a message already saved makes the sender resend it, so it is saved twice.
 
-The MLLP server translates application outcomes into HL7v2 acknowledgments through `ackMiddleware` (`packages/mllp-ack/src/ack.ts:46-83`): an optional middleware that wraps `next()` in its own try/catch, normalises every throw into an `AckException`, builds MSH+MSA via `acknowledge()` (`packages/mllp-ack/src/acknowledge.ts`), and appends an ERR segment only when the application supplies an `errSegment` callback.
-
-Review of that design — every claim reproduced against this worktree, not hypothesised — found five defects with one root cause:
-
-1. **An unrouted message is acknowledged `MSA|AA`.** `Mllp.handle()` runs the chain with no terminal when no route matches (`packages/mllp/src/server/mllp.ts`), `next()` resolves cleanly, and the middleware cannot tell "handler ran" from "nothing ran" (`ack.ts:65-74`) — so the sender purges a message nothing processed. Every shipped example hand-rolls `app.on("*", () => { throw new UnsupportedMessageTypeReject(...) })` to dodge it (`examples/starter/src/app.ts`, `examples/mllp-server/src/app.ts`).
-2. **Translation is registration-order dependent.** A typed `AckException` thrown from middleware registered before `ackMiddleware` escapes to `#handleError` and, with no `onError`, is rethrown to `serve()` — the peer gets silence. The CLI grew `use(mw, { prepend: true })` purely so telemetry could sit outside the middleware (`packages/glion/src/child/middlewares.ts:9-16`, `runner.ts:127-133`).
-3. **Unknown errors leak `error.message` to the wire.** `new ApplicationInternalError(error.message, error)` (`ack.ts:57-60`) flows into MSA-3 (`acknowledge.ts:124`), so `connect ECONNREFUSED 10.0.0.5:5432 (user=…)` or an ORM message — potentially carrying PHI — reaches the trading partner, while this repo refuses payloads on exceptions for exactly that reason (`packages/ack/src/exception.ts:17-23`, ADR 0018 §6). The wire is currently more permissive than the logs.
-4. **The operator never sees the error.** The middleware absorbs every throw before `app.onError` and `serve()`'s `onError` can fire — the peer gets the diagnostic, the operator gets nothing.
-5. **The one version-dependent job is pushed onto every application.** `errSegment?: (error: AckException) => Segment` (`ack.ts:30`) never receives `ctx.version`, even though MSH-12.1 sits synchronously on every context (`packages/mllp/src/server/context.ts`). No consumer in the repo supplies it, so no NAK on the wire today carries the coded error the `@glion/ack` vocabulary exists to express — the glion→glion round trip is lossy in both halves (`packages/mllp-client/src/errors/nak-exception.ts` reads ERR-3/ERR-4, MSA-3 and, as a fallback, ERR-8 — but not ERR-2 — so even a correct server-side ERR would round-trip without its location, and a ≥2.7 ACK, where MSA-3 is withdrawn, would arrive with `text: undefined`).
-
-Root cause: the error-to-protocol translation lives at a movable position inside the middleware onion instead of at the fixed boundary the framework owns.
-
-Prior art was verified from source (WebFetch), not memory. **Hono**: middleware are pure throwers (`bearer-auth` does `throw new HTTPException(status, { res })`); `compose()` catches at the throwing level and calls the single registered `errorHandler(err, c)`, setting `c.error` and writing the Response so outer middleware _observe_ the error rather than catch it; unmatched routes go to a separate `notFound` slot; there is no error-translating middleware anywhere in Hono. **HAPI HL7v2**: `ApplicationRouterImpl` is the single catch around parse→route→handle; `generateACK(code, ex)` builds the envelope and `AbstractHL7Exception.populateResponse()` branches once on `V25.isGreaterThan(versionOf(response.getVersion()))` — the version-keyed ERR table is library-owned, keyed on the ACK's own version copied from inbound MSH-12, and the application never assembles ERR; unrouted messages are answered by a substituted `DefaultApplication` (AR) — a notFound default, not an exception. **Koa / Express / Fastify / NestJS** converge on the same skeleton: a data-carrying exception, one framework-owned terminal handler, an `expose`-style asymmetry deciding whose text reaches the wire, and a protocol-correct default for both "no route" and "unknown error" — never silence. **HL7 ch.2 §2.9** itself splits the work the same way: the protocol software owns the envelope, the mode decision, and the segment layout; the application owns only the verdict and the error data.
-
-One Hono mechanism deliberately does not transfer. `HTTPException.getResponse()` can be context-free because HTTP status→Response is version- and peer-independent ("getResponse is not aware of Context", per Hono's own docs). An HL7v2 NAK needs the origin MSH (field swap, MSA-2 echo), the version, and app policy — so the exception stays data-only and rendering hangs on the framework handler that has `ctx`. That preserves the bidirectionality of ADR 0018 §3: the client throws the same classes from inbound NAKs (`packages/mllp-client/src/errors/nak-exception.ts`).
-
-This branch (PR #674) established `@glion/ack` as version-agnostic vocabulary and moved `acknowledge()` to `@glion/mllp-ack`, with the stance that **no package ever emits ERR**. This ADR re-opens and reverses that stance: the ERR layout is a closed, normative table keyed on MSH-12 — precisely what a library should own. It also supersedes the middleware-first philosophy in `packages/mllp/README.md` ("Why no default error response?") and restores ADR 0011's default-NAK decision (line 201) while superseding its "and the error message" text policy (§5 below) — and it subsumes open PR #666 (never silent; core NAK floor), whose synthetic re-enter-the-chain step becomes unnecessary once the boundary lives in the core.
+Until this stack, `@glion/mllp` sent whatever response the application built by hand, and nothing otherwise. Each application wrote its own `MSH|…\rMSA|…` strings. A message no route matched got no response, and an error's `message`, which can carry PHI, could reach MSA-3. The server should answer the way an HTTP framework does: a handler returns its response, and the framework answers what the handler did not.
 
 ## Decision
 
-Acknowledgment translation moves into `@glion/mllp` itself, at a fixed framework-owned boundary. `ackMiddleware` and the `@glion/mllp-ack` package are deleted. `AckException` stays data-only in `@glion/ack`.
+### 1. The app is the core, and `handle()` is its one entry point
 
-### 1. Translation lives at the framework's error boundary — not in a middleware, not on the exception
+`app.handle(payload, env?)` takes one message as bytes without MLLP framing and resolves to the response as bytes, or `undefined` for none. It knows HL7v2 and nothing about sockets. `env` becomes `ctx.env`, typed by `Mllp<E>`, the way Hono passes a Workers environment.
 
-`compose()` (`packages/mllp/src/server/compose.ts`, today no try/catch) gains a per-level catch, transplanting Hono's verified mechanism: on a throw, set `ctx.error`, invoke the app's single error pipeline, and write the returned Response — so `await next()` never throws, every outer middleware observes `ctx.error` and the final `ctx.res` at its normal position, and the CLI's `{ prepend: true }` ordering coupling stops being a correctness requirement (the overload survives as an ordering preference — see §7). `ctx.error` is the same field PR #666 introduces for decode/parse failures: one field, set wherever the failure occurs, read after `await next()`.
+Runtimes drive it through adapters:
 
-The error pipeline is: user `app.onError(err, ctx)` first — return a Response to take over, return `undefined` to **fall through** to the default renderer (the Fastify `reply.send(error)` / Nest `super.catch()` contract; today `undefined` means silence) — then the built-in renderer: `isAckException(err)` renders the thrown exception; anything else is wrapped as an internal error with a fixed generic wire text (§5).
+- **`handleConnection(handle, socket, { signal })`** runs MLLP framing over any `MllpSocket` (Web Streams `readable` and `writable`, plus `close()`), one message at a time. It has no runtime dependency, so it ships in `@glion/mllp`.
+- **`serve({ handle, port, tls, … })`** in `@glion/mllp/node` owns ports, TLS, connection hooks and shutdown, and passes `NodeEnv { connection }`. A Workers inbound-TCP adapter will hand its sockets to the same `handleConnection()`.
+- **Tests, and later HTTP or Lambda,** call `handle()` directly.
 
-The pipeline runs **at most once per message** (a once-latch). If it throws — a user `onError` bug, or a renderer defect — `handle()`'s outermost catch answers with a minimal string-built floor (`MSH` + `MSA|AE|<salvaged MSH-10>`), so the peer is never silent for a decodable message. This is HAPI's single-router-catch shape and PR #666's floor, unified into one renderer with one set of defaults.
+The response rules below therefore live in `handle()`, the runtime-independent core, and never in a runtime adapter.
 
-`handle()` returns a `MessageOutcome { response, error, info }` envelope. `serve()` writes `response` when present and reports `error` through its existing `onError` callback when present — **independently**: a NAK is both. This is what keeps "respond" from ever suppressing "report" (today, with `ackMiddleware` installed, `serve.onError` never fires for handler errors at all), and it retires the `errorMessageInfo` WeakMap side-channel in `mllp.ts` along with the public `getMessageInfo` export (`packages/mllp/src/index.ts`).
+### 2. A response is an `MllpResponse`, built by `ctx.ack()` or `ctx.reply()`
 
-### 2. The version table is framework-owned and keyed on the ACK's MSH-12
+A route handler returns its response as an `MllpResponse`, or `null` for no response. `ctx.ack(options?)` builds the acknowledgment of the message with an accept code, `AA` or `CA`. `ctx.reply(message)` takes any other HL7v2 message as a tree, such as a query response. Both write the message with the app's `serializer` when they are called, so a tree that cannot be serialized fails in the handler that built it, and `handle()` resolves to the response's bytes. An `MllpResponse` is branded, and its fields are read-only: only those two methods make one, and TypeScript rejects a handler that returns a tree, a string or nothing. Its `code` is its MSA-1.
 
-The renderer lives in one module — `packages/mllp/src/server/acknowledgment/render.ts` — and is a deterministic function of the ACK's own MSH-12, which defaults to echoing the inbound `ctx.version` (MSH-12.1, cached synchronously at context creation). This is HAPI's rule exactly: `populateResponse` branches on the response's version, which `fillResponseHeader` copied from inbound MSH-12. The thrower never sees the version; the application never re-derives the table.
+Any other value a route handler returns, `undefined` included, is answered `AE` with `MllpServerError` `INVALID_RESPONSE`, and so is a value that is not an `MllpResponse` that a middleware returns or writes to `ctx.res`. A handler must say what it replies.
 
-| ACK's MSH-12 (default: echo inbound) | MSH-9                                                                                              | MSA-3                      | ERR                                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2.1 – 2.4                            | `ACK^<trigger>` (two components ≤ 2.3); `ACK^<trigger>^ACK` from 2.3.1 (MSH-9.3 exists from 2.3.1) | populated, truncated to 80 | one ERR; ERR-1 = repeating ELD-shaped `segment^sequence^field^code&text&HL70357` (multiple errors = `~` repetitions — the pre-2.5 ACK allows a single ERR; 2.1/2.2 bind table 0060, so the HL70357 coding-system name is best-effort there; HAPI's `populateResponseBefore25` renders every < 2.5 version identically) |
-| 2.5 – 2.6                            | `ACK^<trigger>^ACK`                                                                                | populated, ≤ 80 (usage B)  | one ERR **per** error; ERR-1 empty; ERR-2 = ERL from `location`; ERR-3 = `code^label^HL70357`; ERR-4 = severity (default `E`); ERR-8 = wire text, ≤ 250                                                                                                                                                                |
-| ≥ 2.7                                | `ACK^<trigger>^ACK`                                                                                | omitted (withdrawn)        | as 2.5 – 2.6                                                                                                                                                                                                                                                                                                           |
-| blank / unparseable                  | `ACK^<trigger>^ACK`                                                                                | populated, ≤ 80            | modern (≥ 2.5) layout                                                                                                                                                                                                                                                                                                  |
+### 3. A NAK is the response to a throw
 
-Rules the table implies, stated explicitly:
+A failure is thrown, and its NAK is the response (§4). A response only accepts: `ctx.ack()` throws `RESPONSE_IS_NAK` for a NAK code, and `ctx.reply()` throws it for a message whose MSA-1 is a NAK code, and `RESPONSE_WITHOUT_MSH` for one that does not start with an MSH. With one way to fail, `ctx.error` holds every failure, so a middleware that checks it before writing a response after `next()` sees them all.
 
-- **Owner:** the framework. The logic is two ERR layouts selected by a single `gte(version, "2.5")`, plus two envelope predicates (`gte(version, "2.3.1")` for MSH-9.3, `gte(version, "2.7")` for MSA-3 withdrawal) — three breakpoints, one file, on `@glion/util-semver`, hard-coded — deliberately not `@glion/profiles`-driven (the profiles cannot express the B backward-compat usage of ERR-1/MSA-3 in 2.5–2.6, and the table is closed and normative).
-- **Guard:** every comparison is preceded by `valid(version)` — `compare()` throws `VersionParseError` on garbage MSH-12, and the error path must never throw; invalid input falls back to the modern layout (HAPI's blank-version-renders-modern precedent: an empty-ERR-1 modern ERR is at worst ignored by an old reader, whereas ELD sent to a ≥ 2.7 reader targets a withdrawn field).
-- **ERR-3 is never empty:** `errorCode` is optional on the exception, so the rendered code is `error.errorCode ?? "207"` (ERR-3 is required from 2.5).
-- **Example wire output**, `AckApplicationError` with `errorCode: "204"`, `location: { segment: "PID", sequence: 1, field: 3 }`, `text: "Patient not on file"`: a 2.3.1 sender receives `MSA|AE|<id>|Patient not on file` + `ERR|PID^1^3^204&Patient not on file&HL70357`; a 2.5.1 sender receives `MSA|AE|<id>|Patient not on file` + `ERR||PID^1^3|204^Unknown key identifier^HL70357|E||||Patient not on file`.
+### 4. The default responses
 
-### 3. End-user choice is one options object plus two replaceable slots
+| What happened                                     | Response                                         |
+| ------------------------------------------------- | ------------------------------------------------ |
+| The route handler returns an `MllpResponse`       | that response                                    |
+| It returns `null`                                 | none                                             |
+| It returns anything else                          | `AE` · `INVALID_RESPONSE`                        |
+| It throws an `AckException`                       | its `code` in MSA-1                              |
+| It throws anything else                           | `AE`                                             |
+| No route matches                                  | `AR`                                             |
+| A route filter throws                             | as a throw, after the global middleware only     |
+| The payload is not UTF-8, or the processor throws | its NAK, with no middleware run                  |
+| The processor reports a fatal message             | the NAK of the first one, with no middleware run |
+| The message is an `ACK`                           | none, unless a handler or middleware gives one   |
 
-All policy is configured once — `new Mllp({ acknowledgment })` — plus per-throw data on the exception. No per-exception-type registries, no filter chains (Hono proves one function with branching suffices; CLAUDE.md §1/§5 point the same way).
+No response carries text: an error's `message` and an `AckException`'s `text` are never sent (§8). `isAckException()` in `@glion/ack` recognizes an exception made by any installed copy of the package, so a second copy never turns an `AR` into an `AE`.
 
-- **`mode: "original" | "enhanced"`** — the §2.9 family the _framework_ speaks (domain name per CLAUDE.md §7, replacing the Table-0008-leaking `successCode`). `"original"` (default): success AA, unknown AE, unrouted AR. `"enhanced"`: success CA, unknown wrapped as `CommitInternalError` → CE, unrouted → CR — and a thrown application-family exception is **remapped for the immediate reply** (AE→CE, AR→CR), because Table 0008 makes AA/AE/AR illegal as the immediate enhanced-mode response. Honesty note: §2.9.3's commit ack acknowledges safe storage _before_ application processing; in v1, `"enhanced"` selects the commit-family letters for the same post-processing reply (Mirth's `successfulACKCode` shape) — not commit-before-processing semantics; true §2.9.3 sequencing arrives with the deferred application-ACK exchange. A remapped AE→CE also tells the sender "transient, retry" for what may be a permanent failure — which is why the tier mismatch is surfaced to the operator (open question 2). MSH-15/16 are deliberately **not read** in v1 — HAPI's server never reads them either, always-answer is universal MLLP practice, and honouring NE/ER/SU plus the deferred application ACK requires receiver-initiated outbound sending no layer offers; `"auto"` is a reserved future value.
-- **`sending`** — MSH-3/4 of every ACK; default: swap of inbound MSH-5/6.
-- **`id: () => string`** — MSH-10 generator; default `uid()` from `@glion/util-uid`. One name, one type: `acknowledge()`'s option is also `id?: () => string` (resolved internally), retiring the old `generateId`-vs-`id` inconsistency between the two exports of `@glion/mllp-ack`.
-- **`err: "auto" | "none"`** — `"auto"` (default) renders the §2 table; `"none"` emits MSH+MSA only, for legacy partners that choke on ERR (HAPI's only equivalent is all-or-nothing `DO_NOT_RESPOND`; this is strictly better).
-- **`text`** — the wire-text policy hook, `(error, ctx) => string | undefined`; returning `undefined` omits MSA-3/ERR-8 entirely (fully conformant — both are optional in every version). Default: §5.
-- **`app.notFound(handler)`** — replaces the unrouted default (§4).
-- **`app.onError(handler)`** — full override with fall-through (§1).
-- **`acknowledgment: false`** — the explicit bare-engine escape: no accept default, no NAK, no notFound; `MessageOutcome` still carries `ctx.error` and `serve()` still reports it. Compose semantics do not change with this flag — the per-level catch is unconditional, so the middleware-facing contract is one thing.
-- **Per message** — a handler returning its own Response (or `Root`; see §6/§7) suppresses every default; that is the escape hatch for query responses and exotic replies (Hono's `HTTPException({ res })` / HAPI's `setResponseMessage` shape). A matched handler returning void gets the accept ACK — unlike HTTP, an HL7 accept is fully determined by MSH + policy, so void→accept is the right domain default; the defaulting is attached to the terminal step, where "a handler actually ran" is known.
-- **Known limitation, stated deliberately:** a route that must _process and not reply_ (MSH-15=NE partners, broadcast sinks) has no per-route expression in v1 — only the app-wide `acknowledgment: false`; today `onError`-returns-undefined is a sanctioned no-reply, and this design removes that expressiveness. A typed no-reply sentinel is deferred (open question 5).
+The processor runs whole before routing, its lint rules included: what a message must be is the processor's to say, and the server reads only its fatal messages. The default processor, `@glion/parser` with `@glion/lint-required-message-header` at `"error"`, says a message starts with an MSH; one an app gives in its place MUST say so too. A payload that did not decode, that the processor throws on, or that it reports a fatal message for was never accepted, so no middleware or route runs on it, and no context is made for it. The server answers it with the NAK of the error, or of the first fatal message, `AE` unless the processor threw an `AckException`, the way an HTTP framework answers a body it cannot parse with a 400 or 415 before routing. The NAK answers the MSH read by `@glion/parser` from the bytes before the first CR, decoded strictly; a payload whose MSH is not UTF-8 gets no response, since nothing can be echoed as the sender wrote it. The server does not acknowledge an `ACK` by itself, so two receivers cannot answer each other's acknowledgments forever. A catch-all route matches an `ACK` too; an app leaves it unanswered with a route for `ACK` that returns `null`. A payload with no MSH, such as an empty keep-alive frame, has no MSH-10 to acknowledge, so it gets no response.
 
-### 4. Unrouted messages are rejected — never accepted, never silent
+### 5. Errors are caught where they are thrown; `next()` never throws
 
-When no route matches, `handle()` installs the notFound handler as the terminal step (Hono's dispatch shape; HAPI's `DefaultApplication` substitution). The default throws `UnsupportedMessageTypeReject` through the normal pipeline → AR (CR under enhanced mode) + ERR-3 `200`. This deletes the hand-rolled `app.on("*")` catch-alls from all three examples and fixes HAPI's own wart (its DefaultApplication rejects with 207 because `HL7Exception(String)` never sets a code). The 200-vs-201 refinement (`201` Unsupported event code when the router knows other routes handle this MSH-9.1) is **deferred**: `Router.match` discards pattern strings today (`router.ts` keeps only filter closures), so it would force the router to retain pattern metadata for a distinction no surveyed framework makes and — honest calibration per CLAUDE.md §11 — no known partner branches on; probability a partner distinguishes 200 from 201: effectively zero.
+`compose()` catches at every level of the middleware onion, the route handler's included. The error goes to one place, which records it in `ctx.error` and builds its NAK, and the level around it resumes after `await next()`. A middleware reacts to an error by reading `ctx.error` after `next()`, never with a `try`/`catch` around it. A second call to `next()` throws `NEXT_CALLED_TWICE` to its caller and is answered as a middleware throw.
 
-**Garbage payloads:** the lenient parser never throws, so a non-HL7 frame yields a tree with empty MSH-9/10/12. A payload with no readable MSH-9 (`ctx.messageType === ""`) is rejected `AR` + ERR-3 `207` via `new AckApplicationReject(msg, { errorCode: Hl7ErrorCode.ApplicationInternalError, severity: Severity.Error })` — empty MSA-2, modern layout per the blank-version row — rather than a misleading "Unsupported message type". Once #666 lands, decode/parse failures reach the same boundary via `ctx.error` and take over this branch.
+There is no `app.notFound()`. `app.onError()` observes every error a message raises, when it is raised, as Hono's sees every error; unlike Hono's, it does not choose the response, which stays the NAK of `ctx.error`. A middleware that reads `ctx.error` after `next()` answers an error with another NAK by throwing. Each handler `app.onError()` registers runs, as with Fastify's `onError` hook and Koa's `error` event, so the CLI's telemetry and an application's own handler both see every error.
 
-**Lint findings:** a lint rule never throws. `unified-lint-rule` catches `file.fail` inside a rule, records it as a message, and sets `fatal` from the rule's configured severity, so the only failure signal lint produces is a message with `fatal: true`. A message fails validation when `file.messages` holds at least one `fatal: true` message; the boundary answers it `AE`, one ERR per fatal message with ERR-4 `E`. Warnings (`fatal: false`) leave the success reply in place. There is no third level: a missing or unreadable header is answered `AR` by the garbage-payload branch above, from MSH-9 as `handle()` reads it, not from the `segment-required-message-header` report. Lint runs inside `ctx.tree()`, so the boundary sees findings only for a message whose tree was built.
+### 6. The latest outcome decides the response
 
-**Loop guard:** an inbound message whose MSH-9.1 is `ACK` and matches no route gets **no reply** — an ACK is never itself acknowledged, so two glion nodes cannot NAK each other's ACKs indefinitely.
+- **A middleware replaces the response** by returning an `MllpResponse`, or `null` for none, or by writing `ctx.res`, before or after `next()`. One that returns nothing leaves it as it is.
+- **An error replaces the response with its NAK,** whatever replied before it, and `ctx.error` holds the latest error. A middleware changes the NAK's code by throwing an `AckException` with the error it answers as its `cause`.
 
-### 5. Unknown errors: a generic NAK on the wire, the real error to the operator
+This is Hono's rule, and it has a cost in MLLP. When a handler has saved a message and returned `AA`, an audit middleware that fails after it turns the `AA` into an `AE`, and the sender resends a message that was already saved. A middleware whose own failure must not change the response catches that failure and reports it itself.
 
-Wire text follows Koa/http-errors' `expose` asymmetry — the default in three of the four surveyed HTTP frameworks, and Mirth's default:
+### 7. The acknowledgment answers the MSH as the app's parser read it
 
-- A deliberately thrown `AckException` is the 4xx analogue: its author chose its words. The wire gets `error.text ?? labelFor(error.errorCode) ?? Hl7ErrorLabel["207"]`, where `labelFor(code: string | undefined): string | undefined` is a widened Table 0357 lookup exported beside the map (`errorCode` is typed `string | undefined` for inbound tolerance, so a direct index into `Record<Hl7ErrorCode, string>` neither type-checks nor handles peer-supplied non-standard codes) — never `error.message`. One rule, both directions: `text` is the wire-facing field (it is what the client already parses out of a remote MSA-3, `packages/mllp-client/src/errors/nak-exception.ts`), `message` is the operator log line per ADR 0018 §6 and is **never serialized**. This fixes the current asymmetry where the server writes `message` to MSA-3 while the client fills `text` from it — and it makes a gateway that rethrows an upstream NAK forward the upstream's actual wire text.
-- Anything else — including non-Error throws, normalized at the boundary — is the 5xx analogue: the wire gets the fixed sentence `"Application internal error"` + ERR-3 `207` + ERR-4 `E`, and nothing more. `error.message`, `String(error)`, stacks, and `cause` never reach the peer; the original error (not the wrapper) rides `ctx.error` and `MessageOutcome.error` to `serve()`'s `onError` — responding never suppresses reporting.
+`acknowledge(origin, options?)` builds an MSH and an MSA. It swaps MSH-3/4 with MSH-5/6, copying each field whole, writes MSH-9 as `ACK^<trigger>^ACK` (`ACK^<trigger>` before v2.3.1), echoes MSH-11 and MSH-12.1, and echoes MSH-10 in MSA-2. `ctx.ack()` passes it the tree the app's parser read, as it is when the acknowledgment is built, so an app with its own `preprocess` is acknowledged correctly. A transform or a handler that changes the MSH before then changes the acknowledgment too; `ctx.req.header` keeps the values as parsed. The NAK of a payload that did not decode or parse answers the MSH read from its bytes before the first CR (§4).
 
-All emitted text passes the encode-escapes serializer exactly once; MSA-3 is truncated to 80 (escape-aware) and ERR-8 to 250. An application that writes PHI into an `AckException.text` has authored a leak the library cannot detect — the JSDoc says so loudly ("this text goes to the trading partner").
+### 8. The acknowledgment is the same in every version, for now
 
-### 6. Wire-safety rules where we deliberately deviate from Hono
+`acknowledge()` writes only what every version from v2.1 to v2.8.2 accepts: MSH-1 to MSH-12, MSA-1 and MSA-2. A NAK states its reason in MSA-1 alone. The fields that carry a reason have no form every version accepts:
 
-- **A committed success response is never replaced by a default NAK.** Hono's `isError`-overwrites-finalized rule is wrong for MLLP: when the terminal handler has committed the message and the AA exists, a later throw from an outer middleware (audit write, telemetry EPIPE) must not turn it into an AE — the sender would retransmit and the message would be processed twice, the exact failure the ACK protocol exists to prevent. The commit is a provenance flag set by the terminal step (never raw `ctx.res` truthiness — a pre-`next()` write by a middleware does not count); the late error still sets `ctx.error` and reaches `MessageOutcome.error`, and only an explicit Response returned from `app.onError` may replace a committed reply.
-- **The pipeline is once-latched with a floor behind it** (§1) — a throwing `onError` fires once, not once per onion layer, and can never produce silence.
-- **`ctx.res` has one shape.** Handlers, middleware, and `onError` may return a `Root` (the project's actual currency — a new `HandlerResponse = Response | Root` type, §7), and `ctx.res` becomes an accessor that normalizes any `Root` to `{ raw }` at write time — one serialization, covering direct `ctx.res = tree` assignments too — so every observer (the CLI's MSA regex included) always reads `{ raw }`. Compose's `"raw" in result` duck-check widens accordingly.
-- **Origin MSH fields are snapshotted still-encoded at `createContext`** as `ctx.origin: OriginSnapshot` (alongside the existing `controlId`/`version` caching) and decoded exactly once by the renderer. Reading `ctx.ast` at render time is nondeterministic — `ctx.tree()` decodes that tree in place — which is how `Barnes\T\Jewish` in MSH-4/6 becomes `\E\T\E\` today on every ACK for partners with `&` in facility names. The snapshot makes the ACK byte-identical whether or not a handler called `ctx.tree()`; the `\T\`-facility tests are load-bearing. `acknowledge()` takes the snapshot — not a `Root` — so custom `onError` handlers and gateways get the same deterministic input the default renderer uses instead of re-opening the trap.
+| Field                           | v2.1 – v2.4 | v2.5 – v2.6 | v2.7 – v2.8.2 |
+| ------------------------------- | ----------- | ----------- | ------------- |
+| MSA-3 (Text Message)            | `O`         | `B`         | `W`           |
+| ERR-1 (Error Code and Location) | `R`         | `B`         | `W`           |
+| ERR-3, ERR-4                    | not defined | `R`         | `R`           |
 
-### 7. Public API
+Leaving out MSA-3, which no version requires, is valid in all of them. Any ERR segment needs fields chosen by version. #1084 adds the reason back: producers write MSA-3 and an ERR segment, and one profile-driven transform conforms them to MSH-12, so what each version allows stays in the profile data instead of in every producer.
 
-```ts
-// ── @glion/ack — additions only; the exception family stays data-only ──
-export interface ErrorLocation {
-  segment: string;
-  sequence?: number;
-  field?: number;
-  repetition?: number;
-  component?: number;
-  subcomponent?: number;
-}
-export interface AckExceptionOptions extends ErrorOptions {
-  errorCode?: string; // Table 0357
-  severity?: string; // Table 0516
-  /** Wire-facing text, BOTH directions: outbound → MSA-3 (≤2.6) + ERR-8 (2.5+);
-   *  inbound ← the remote MSA-3, or ERR-8 when MSA-3 is absent (≥2.7).
-   *  `message` is operator-only, never serialized. */
-  text?: string;
-  controlId?: string;
-  location?: ErrorLocation; // NEW → ERR-2 (ERL) in 2.5+, the ELD prefix in ERR-1 before 2.5
-}
-/** Table 0357 display labels ("207" → "Application internal error"), derived from Hl7ErrorCode. */
-export const Hl7ErrorLabel: Readonly<Record<Hl7ErrorCode, string>>;
-/** Widened lookup for peer-supplied / absent codes; used by the renderer as
- *  `text ?? labelFor(errorCode) ?? Hl7ErrorLabel["207"]`. */
-export function labelFor(code: string | undefined): string | undefined;
-/** Symbol.for("glion.ack.exception") brand set in the AckException constructor — survives
- *  duplicated package copies where instanceof degrades silently to AE/207. */
-export function isAckException(error: unknown): error is AckException;
+MSH-9 is the one exception. No form is valid in every version: v2.1 has no components, MSH-9.3 exists from v2.3.1, and it is required from v2.5, so `acknowledge()` reads MSH-12 to choose. That check is temporary and tracked in #1112; the same transform replaces it.
 
-// ── @glion/mllp ──
-export interface AcknowledgmentOptions {
-  mode?: "original" | "enhanced"; // §2.9 family; "auto" reserved
-  sending?: { application: string; facility: string }; // MSH-3/4; default: swap inbound MSH-5/6
-  id?: () => string; // MSH-10 generator; default uid(). Same name+type on AcknowledgeOptions.
-  err?: "auto" | "none"; // "none": MSH+MSA only
-  text?: (error: AckException, ctx: Context) => string | undefined;
-}
-/** Still-encoded origin MSH values captured at createContext (MSH-3/4/5/6/9/10/11/12). */
-export interface OriginSnapshot {
-  /* readonly wire-encoded fields */
-}
-export interface MessageOutcome {
-  readonly response: Response | undefined;
-  readonly error: Error | undefined; // reported by serve() via its onError
-  readonly info: MessageInfo;
-}
-/** A handler/middleware/onError may return a Response or a Root; a Root is
- *  serialized once when written to ctx.res. */
-export type HandlerResponse = Response | Root;
-export class Mllp {
-  constructor(options?: { acknowledgment?: AcknowledgmentOptions | false });
-  parser(processor: Hl7v2Processor): this;
-  use(middleware: Middleware, options?: { prepend?: boolean }): this; // prepend: ordering preference, never correctness
-  use(patternOrFilter: string | RouteFilter, middleware: Middleware): this;
-  on(patternOrFilter: string | RouteFilter, handler: Handler): this;
-  notFound(handler: Handler): this; // NEW — default: AR/CR + ERR-3 200 (207 when MSH-9 unreadable)
-  onError(handler: ErrorHandler): this; // undefined return = fall through to default
-  // NOTE: shown pre-#666; after rebasing on #666 the signature is
-  // handle(payload: Uint8Array, connection: ConnectionInfo): Promise<MessageOutcome> —
-  // the envelope, not the parameter list, is what this ADR fixes.
-  handle(
-    raw: string,
-    bytes: Uint8Array,
-    connection: ConnectionInfo
-  ): Promise<MessageOutcome>;
-}
-// Handler / Middleware / ErrorHandler return types widen to HandlerResponse | undefined | void.
-export interface Context {
-  /* …all existing fields unchanged… */
-  /** Set at the throwing layer; read after `await next()`, which no longer throws.
-   *  The same field #666 sets for decode/parse failures. */
-  error: Error | undefined;
-  /** Deterministic renderer input; see §6. */
-  readonly origin: OriginSnapshot;
-  /** Becomes an accessor: assigning a Root serializes it once to { raw }. */
-  res: Response | undefined; // set res(value: Root | Response | undefined)
-}
-/** Moved from @glion/mllp-ack; used by the defaults, exported for custom onError handlers,
- *  gateways, and tests. Takes the snapshot, not a Root, for determinism (§6). */
-export function acknowledge(
-  origin: OriginSnapshot,
-  options?: AcknowledgeOptions
-): Root;
-```
+### 9. The application's logger reports errors; the library never logs
 
-Removed from the public surface: `getMessageInfo` (the WeakMap side-channel it fronted is retired by `MessageOutcome`) — a break for out-of-repo transports independent of `handle()`'s return type, called out in its own changeset line.
-
-### 8. `@glion/mllp-ack` is deleted; `@glion/ack` stays vocabulary-only
-
-`@glion/mllp-ack` does not survive: its only structural role is occupying a middleware slot, and that slot is the source of every ordering bug. `acknowledge()` (whose MSH swap / MSA mapping is the spec-correct part worth preserving verbatim, per the conformance review — pinned by its 349-line `acknowledge.test.ts`) returns inside `packages/mllp/src/server/acknowledgment/` beside the new renderer and floor, with those test pins ported onto it. The mllp README's decoupling argument is already half-false — the core imports `@glion/util-query`/`@glion/ast` to _read_ HL7v2 for routing — and the new deps (`@glion/ack`, `@glion/builder`, `@glion/to-hl7v2`, `@glion/encode-escapes`, `@glion/util-uid`, `@glion/util-timestamp`, `@glion/util-semver`) are small, profile-free, and already transitive in every real deployment. Hono ships `HTTPException` and its default `errorHandler` inside core for the same reason: an error boundary that can be absent or mispositioned is not a boundary. `@glion/ack` keeps its ADR 0018 role — version-agnostic, bidirectional, data-only — gaining exactly the words in §7 and dropping its unused `@glion/ast` dependency.
-
-### 9. Build it now — a stacked series with removal as the baseline, this ADR landing with the baseline
-
-The maintainer asked: remove now and write the ADR, or is the design straightforward enough to build now? **Build now, stacked, with removal first.** The design is straightforward in the CLAUDE.md §12 sense: five verified research lenses converge on one architecture, and every input exists in the repo. Remove-and-_stop_ would be strictly worse than the status quo — it makes silence the default for forgotten wiring and unrouted messages, contradicting ADR 0011's recorded default-NAK decision and PR #666's floor — so the removal is acceptable only as the first PR of this stack, merged together with its replacements.
-
-Landing plan, stacked on PR #674:
-
-- **PR 1 — the baseline (this ADR's PR): delete `@glion/mllp-ack`.** The package, its pending changeset, and every workspace reference to it are removed; `@glion/ack` is untouched. No replacement is introduced — the baseline is the smallest coherent state to build on. Examples still compile against the published npm package and migrate in the final PR, where their replacement pattern exists.
-- **PR 2 — the renderer and the vocabulary (non-breaking).** `@glion/ack` gains `location`, `Hl7ErrorLabel`/`labelFor`, and `isAckException`; `@glion/mllp` gains `packages/mllp/src/server/acknowledgment/` — `OriginSnapshot`, `acknowledge()` (restored from mllp-ack with its spec pins ported), and the version-keyed renderer — exported but not yet wired, with the exact-wire-string test matrix ({2.1, 2.3.1, 2.4, 2.5.1, 2.6, 2.7, blank/garbage MSH-12} × {accept, `AckException` with code+location, unknown Error}).
-- **PR 3 — the boundary (breaking, pre-1.0 with loud changesets).** Compose catch + `ctx.error`, `Mllp` acknowledgment options / `notFound` / `MessageOutcome`, the client-side ERR-2/ERR-8 reads that close the round trip, the core's own compose/mllp/prepend test rewrites, examples, CLI, and the `@glion/mllp` README rewrite.
-
-Across the stack: roughly 30–35 files, ~+900/−1,300 LOC, three to four focused days including the conformance matrix and the client round-trip tests.
+A message's errors reach the application through `ctx.error`. `serve({ onError })` reports what no message owns: a throwing `onConnect` or `onDisconnect`, a `handle()` rejection, such as a `serializer` that throws, broken MLLP framing (`PROTOCOL_VIOLATION`), and a socket fault other than a reset, a broken pipe or a timeout. The connection closes after the last three. Without `onError`, those errors are not reported; `serve()` writes nothing to the console.
 
 ## Consequences
 
-- **One error path, two audiences.** Every throw — middleware, handler, and (post-#666) decode/parse — reaches one boundary; the peer gets a version-correct NAK, the operator gets the real error via `MessageOutcome.error` → `serve.onError`. Neither can starve the other again.
-- **Wire-visible behaviour flips** (corrections, but partners will observe them; loud changesets required): unrouted AA → AR + ERR 200 (207 for unreadable MSH-9); unknown-error silence-or-leak → generic AE/207 NAK; NAKs now carry ERR by default; MSH-9.3 `ACK` appears from 2.3.1; MSA-3 disappears at ≥ 2.7.
-- **`next()` never throws.** Existing try/catch-around-`next()` observers (the documented idiom in `examples/mllp-server/src/app.ts`) silently stop seeing exceptions until migrated to read `ctx.error` — the one silent-migration hazard; it gets a dedicated changeset callout, and all in-repo consumers migrate in PR B.
-- **`handle()` returns `MessageOutcome`, and `getMessageInfo` is removed** — both breaking for any out-of-repo custom transport; acceptable pre-1.0, each named in the changeset, and together they retire the `errorMessageInfo` WeakMap.
-- **The `prepend` coupling dies as a correctness requirement.** The `use(mw, { prepend })` overload survives as an ordering preference; `packages/glion/src/child/middlewares.ts`'s MUST-be-prepended block is deleted because its reason is deleted, `runner.ts` keeps prepend for timing only with its comment rewritten; telemetry reads `ctx.error`/`ctx.res` at any position and its `msg` event gains the error name; `parseAckCode` widens to all six Table 0008 codes.
-- **The glion→glion round trip closes — both halves.** Server-side, `errorCode`/`severity`/`location` now render into ERR-3/ERR-4/ERR-2; client-side, `packages/mllp-client/src/errors/nak-exception.ts` already falls back to ERR-8 for `text` when MSA-3 is absent (≥ 2.7) and learns to read ERR-2 into `location` — without the client half, the ADR 0018 §3 promise would still be broken.
-- **Recorded reversals.** This ADR reverses PR #674's "no package ever emits ERR" (the framework renderer emits it; applications still never hand-assemble it), retires `packages/mllp/README.md`'s "no response … is valid MLLP behaviour" and "Why no default error response?" sections, amends ADR 0018 §3 (the `toErrSegment()` reference is stale; `text` semantics unified), and supersedes ADR 0011's middleware-first sketch while restoring its default-NAK decision — minus that decision's "and the error message" clause, which §5 supersedes.
-- **Deferred, all additive on this shape:** `mode: "auto"` from MSH-15/16 and the deferred application-ACK exchange (needs receiver-initiated outbound sending); MSH-15=NE reply suppression and a typed per-route no-reply sentinel (§3's stated v1 limitation); the 200-vs-201 unrouted refinement (needs router pattern metadata); ERR-5 application code and ERR-7 diagnostic fields on the vocabulary; per-partner scoped policies; removal of `serve.ts`'s `console.error` fallback (a standing §8 blemish this ADR shrinks but does not fix).
+- **Wire behaviour changes, and partners will see it.** An unrouted message is answered `AR` instead of nothing. A handler's throw is answered with a NAK instead of nothing. No response carries MSA-3, so an error's `message` no longer reaches the partner. An empty frame still gets no response.
+- **Every route handler returns its response.** `return ctx.ack()` replaces returning nothing; TypeScript rejects a handler that returns nothing, and an untyped one is answered `AE` with `INVALID_RESPONSE`. A NAK is thrown, never returned.
+- **An error after a saved message makes the sender resend it** (§6), unless the middleware that fails catches its own failure.
+- **Code after `await next()` now runs when the route handler fails.** A middleware that writes a response there replaces the NAK, so it checks `ctx.error` first. A `try`/`catch` around `next()` no longer sees errors.
+- **The examples and the CLI drop their hand-written ACKs** and their `app.on("*")` catch-alls. The CLI's telemetry middleware reads the response's `code`.
+- **Until #1084 lands,** a NAK states no reason beyond MSA-1, in every version, and MSH-9 is chosen by a version check (#1112).
+- **Deferred:** the ERR segment and its conformance (#1084); reading MSH-15/16 for enhanced-mode acknowledgment; the `201` (Unsupported event code) refinement of an unrouted reject; ERR-2 locations on `AckException`; `app.fetch()` for HL7v2 over HTTP.
 
 ## Alternatives considered
 
-- **Keep `ackMiddleware` and patch it.** Rejected: the defects are positional, not parametric. A middleware boundary is optional and movable by construction — no option fixes registration-order dependence, the unrouted-AA conflation, or the operator starvation, and no surveyed framework (Hono, Koa, Fastify, Nest, HAPI) puts error translation in an ordinary middleware while also having a global handler.
-- **Self-rendering exception (`AckException.getResponse()`, the literal Hono transplant).** Rejected: rendering needs the origin MSH, `ctx.version`, and app policy — none of which a bidirectional, version-agnostic exception may carry (ADR 0018 §3). HAPI hangs `populateResponse` on the exception but still keys it on the _response's_ version; the honest equivalent here is a framework renderer receiving `(error, ctx, options)`.
-- **The `errSegment` application callback (status quo escape hatch).** Rejected: it pushes a closed normative table onto every application while withholding the one input the job needs (`ctx.version`), and zero consumers supply it — the observable result is that no NAK carries a coded error at all.
-- **Remove now, deliberate later (the minimalist option the maintainer floated).** Rejected _as an end state_ — though its subtraction is adopted as the stack's PR 1 baseline (§9). Stopping there ships the one state no surveyed framework ships: a slot with no default behind it. A forgotten `onError` means wire silence for every error; void-returning success handlers (the documented pattern in all three examples) regress to silence; the PHI policy moves into copy-pasted app code where one cargo-culted line re-opens the leak; and it contradicts ADR 0011's recorded AE-NAK default. Every week of open-ended deliberation would ship today's defects — which is why the replacement PRs land as a stack, not a promise.
-- **Keep `@glion/mllp-ack` as a renderer-only package with the dependency flipped (core depends on it).** Rejected: workable, but the boundary no longer pays — same transitive weight, one more seam, and the starter would import policy types from one package and configure them on another. `acknowledge()` and the renderer stay exported from `@glion/mllp` for standalone use, which was the residual value of the package.
-- **Drive the renderer from `@glion/profiles`.** Rejected: the profiles cannot express the B backward-compat usage of ERR-1/MSA-3 in 2.5–2.6, and three `gte` breakpoints need no dependency for a closed table.
-- **Per-exception-type registries, filter chains, or scoped per-route policy objects.** Rejected/deferred: one `(err, ctx)` function with branching plus one options object is what Hono and the survey prove sufficient (CLAUDE.md §1/§5); scoped policies return if a mixed-partner consumer materialises.
-- **Reading MSH-15/16 for per-message mode in v1.** Deferred, not rejected: correct enhanced mode requires the deferred application-ACK exchange, which needs receiver-initiated outbound sending no layer offers; HAPI never reads MSH-15/16 either. `"auto"` is reserved so the future change is additive.
+- **An acknowledgment middleware the app installs** (the former `ackMiddleware`). Rejected: its position in the onion is movable and optional. Registered late, it missed errors thrown before it; an unrouted message looked like a successful one; and its catch hid every error from the operator.
+- **`app.onError()` and `app.notFound()` beside middleware.** Rejected by the maintainer: a middleware that reads `ctx.error` after `next()` already does both, and one mechanism is simpler than two. `app.onError()` came back as an observer of every error, which chooses no reply.
+- **Running the global middleware on an unread payload.** Built, then removed: the middleware saw a tree read with U+FFFD for each byte that was not UTF-8, or an empty one, so the app could act on a message it never read. The NAK is forced, and `app.onError()` observes.
+- **`app.onError()` observing only the payloads no middleware runs on.** Built, then widened: an application that logs its errors in `app.onError()`, as with Hono, would miss every handler failure.
+- **Lint only when a handler builds the tree** (ADR 0013). Built, then replaced: a handler that never asked for the tree accepted a message the processor would have rejected, and the server needed a check of its own to know whether a message started with an MSH.
+- **`handle()` returning `{ response, error, info }`, with `serve()` reporting the error.** Rejected: it puts message decisions in the runtime adapter, and every new runtime would repeat them.
+- **Returning nothing means `AA`.** Rejected: a forgotten `return` would accept a message silently, and an explicit response reads the same in every handler.
+- **The first error decides the response.** Built, then reversed: one rule, the same as Hono's, and a middleware maps an error to another NAK by throwing it. The cost is the duplicate in §6.
+- **Returning a NAK.** Built, then removed: a returned NAK left `ctx.error` unset, so a middleware that checked it before writing a response after `next()` turned the NAK into an accept, and `ctx.ack(error)` told an error from options with `instanceof`, which accepted a thrown string.
+- **A tree as the response.** Built, then replaced by `MllpResponse`: a tree a handler returned was shared and edited in place, so a response reused across messages leaked between them, and a tree that could not be serialized was found only after every middleware had taken it as the response.
+- **`ctx.error` as an `AggregateError` of every error.** Rejected: `ctx.error instanceof DatabaseUnavailable` would stop matching whenever a second error happened, and chaining errors through `cause` is the thrower's choice.
+- **A version table inside `acknowledge()`.** Rejected: conformance spread across producers drifts; it belongs to one profile-driven step (§8). MSH-9's check is the one stopgap (#1112).
+- **Writing MSA-3 in every version.** Built, then removed: it is withdrawn from v2.7, and the starting point writes only what every version accepts (§8).
+- **Re-parsing the MSH from the payload text.** Built, then replaced: once the processor has parsed the message, the tree is the message, and a second parse ignored the app's own preprocessing.
 
 ## Related
 
-- [ADR 0011: MLLP Transport & Server](./0011-mllp-transport-server.md) — middleware-first NAK sections superseded; its default-NAK decision restored, its "and the error message" text policy superseded by §5
-- [ADR 0013: MLLP Lazy Pipeline Execution](./0013-mllp-lazy-pipeline-execution.md)
-- [ADR 0018: Errors, Exceptions, and Acknowledgments in the HL7v2 Ecosystem](./0018-error-and-acknowledgment-model.md) — §3 amended by this ADR
-- PR #674 (`feat/ack-language`) — the vocabulary/response split this ADR builds on
-- PR #666 (`feat/mllp-pipeline-errors`) — the never-silent direction this ADR subsumes; its decode/parse failures route to the same boundary with no synthetic chain step, and its `handle(payload, connection)` signature and `ctx.error` field carry forward
-- PR #664 (`lint-charset` + server `charsetMiddleware`) — orthogonal: `charsetMiddleware` is an ordinary middleware and composes with the new boundary unchanged
+- [ADR 0011: MLLP Transport Server](./0011-mllp-transport-server.md): its middleware-first error handling is superseded; its default-NAK decision is kept, without sending the error's message.
+- [ADR 0013: MLLP Lazy Pipeline Execution](./0013-mllp-lazy-pipeline-execution.md): superseded in part; the processor runs before routing, and only compilation waits for `ctx.req.result()`.
+- [ADR 0018: Errors, Exceptions, and Acknowledgments in the HL7v2 Ecosystem](./0018-error-and-acknowledgment-model.md): `AckException` stays data-only and bidirectional; the server sends its `text` once #1084 lands.
+- [ADR 0031: Escape Sequences Are Decoded by the Parser and Encoded by the Serializer](./0031-escape-sequences-decoded-by-the-parser.md)
+- #1084: version conformance of outbound messages
+- #1112: the temporary MSH-9 version check in `acknowledge()`

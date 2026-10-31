@@ -52,11 +52,17 @@
     "publint": "publint --strict"
   },
   "dependencies": {
+    "@glion/ack": "workspace:*",
     "@glion/ast": "workspace:*",
+    "@glion/builder": "workspace:*",
     "@glion/mllp-codec": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/util-charset": "workspace:*",
     "@glion/util-query": "workspace:*",
+    "@glion/util-semver": "workspace:*",
+    "@glion/util-timestamp": "workspace:*",
+    "@glion/util-uid": "workspace:*",
+    "@glion/utils": "workspace:*",
     "unified": "11.0.5",
     "vfile": "6.0.3"
   },
@@ -65,6 +71,7 @@
     "@glion/check-readme": "workspace:*",
     "@glion/hl7v2": "workspace:*",
     "@glion/testing": "workspace:*",
+    "@glion/to-hl7v2": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "@types/node": "26.6.5",
     "@vitest/coverage-v8": "4.1.12",
