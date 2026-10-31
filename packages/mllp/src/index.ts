@@ -12,8 +12,7 @@ export { acknowledge } from "./server/acknowledge";
 export type { AcknowledgeOptions } from "./server/acknowledge";
 export { handleConnection } from "./server/connection";
 export type { HandleConnectionOptions, MllpSocket } from "./server/connection";
-export { getMessageInfo, Mllp } from "./server/mllp";
-export type { MessageInfo } from "./server/mllp";
+export { Mllp } from "./server/mllp";
 export type { MessageHeader, MllpRequest } from "./server/request";
 export type {
   Context,
@@ -23,6 +22,7 @@ export type {
   Hl7v2Processor,
   Middleware,
   MiddlewareReturn,
+  MllpOptions,
   Response,
   RouteFilter,
   RoutePattern,

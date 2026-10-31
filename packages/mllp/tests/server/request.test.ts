@@ -1,4 +1,5 @@
 import type { Root } from "@glion/ast";
+import { m } from "@glion/builder";
 import { parseHL7v2 } from "@glion/hl7v2";
 import hl7v2LintRequiredMessageHeader from "@glion/lint-required-message-header";
 import { hl7v2Parser } from "@glion/parser";
@@ -7,7 +8,7 @@ import { CharsetError } from "@glion/util-charset";
 import { unified } from "unified";
 import type { Plugin } from "unified";
 
-import { parseRequest } from "../../src/server/request";
+import { parseRequest, salvageHeader } from "../../src/server/request";
 
 /** A unified parser plugin whose parse step throws `thrown`. */
 function throwingParser(thrown: unknown): Plugin<[], string, Root> {
@@ -120,5 +121,36 @@ describe("parseRequest", () => {
     msh.children.splice(9, 1);
 
     expect(request.header.controlId).toBe("MSG001");
+  });
+});
+
+describe("salvageHeader", () => {
+  it("reads the MSH alone", () => {
+    expect(toHl7v2(salvageHeader(BYTES) ?? m())).toBe(MSH);
+  });
+
+  it("reads the MSH of a payload whose later segments are not UTF-8", () => {
+    const header = salvageHeader(withInvalidByte(MESSAGE, MESSAGE.length - 1));
+
+    expect(toHl7v2(header ?? m())).toBe(MSH);
+  });
+
+  it("reads a payload with no CR whole", () => {
+    expect(toHl7v2(salvageHeader(new TextEncoder().encode(MSH)) ?? m())).toBe(
+      MSH
+    );
+  });
+
+  it("reads no MSH when the MSH is not UTF-8", () => {
+    expect(
+      salvageHeader(withInvalidByte(MESSAGE, MSH.indexOf("SendFac")))
+    ).toBeUndefined();
+  });
+
+  it("reads no MSH from a payload that does not start with one", () => {
+    expect(salvageHeader(new Uint8Array())).toBeUndefined();
+    expect(
+      salvageHeader(new TextEncoder().encode("PID|1\rMSH|^~\\&"))
+    ).toBeUndefined();
   });
 });

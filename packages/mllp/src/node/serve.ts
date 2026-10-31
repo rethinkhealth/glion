@@ -12,8 +12,7 @@ import type { TlsOptions } from "node:tls";
 
 import { MllpServerError, MllpServerErrorCode } from "../errors";
 import { handleConnection } from "../server/connection";
-import { getMessageInfo, Mllp } from "../server/mllp";
-import type { MessageInfo } from "../server/mllp";
+import { Mllp } from "../server/mllp";
 import { listen } from "./adapter";
 import type { NodeSocket } from "./adapter";
 
@@ -51,20 +50,18 @@ export type ConnectionCallback = (
 ) => void | Promise<void>;
 
 /**
- * Error callback invoked with an error on a connection: a throwing `onConnect`
- * or `onDisconnect`, an error `handle` rejects with, a broken MLLP byte stream
- * (`PROTOCOL_VIOLATION`), a response that carries a VT or FS byte
- * (`UNFRAMEABLE_RESPONSE`), or a socket error other than a reset, a broken pipe
- * or a timeout. The connection closes after any of the last three; it stays
- * open after an error `handle` rejects with, and that message gets no reply.
- *
- * `messageInfo` holds the routing fields of the message whose `handle`
- * rejected, when `handle` is an app's; `undefined` for any other error.
+ * Error callback invoked with an error on a connection: a throwing
+ * `onConnect` or `onDisconnect`, an error `handle` rejects with (the error
+ * of a `serializer` that cannot write the reply, for example), a broken MLLP
+ * byte stream (`PROTOCOL_VIOLATION`), a response that carries a VT or FS byte
+ * (`UNFRAMEABLE_RESPONSE`), or a socket error other than a reset, a broken
+ * pipe or a timeout. The connection closes after any of the last four. Any
+ * other error a message raises is answered by the app and never reaches this
+ * callback.
  */
 export type ErrorCallback = (
   error: Error,
-  connection: ConnectionInfo,
-  messageInfo: MessageInfo | undefined
+  connection: ConnectionInfo
 ) => void | Promise<void>;
 
 /**
@@ -113,10 +110,7 @@ export interface ServeOptions {
 
   /**
    * Called with an error on a connection; see {@link ErrorCallback}.
-   *
-   * Without it, or when it throws, `console.error` logs only `error.message`
-   * and the connection ID, to avoid leaking PHI. Production deployments should
-   * always provide this callback.
+   * Without it, those errors are not reported. MUST NOT throw.
    */
   onError?: ErrorCallback;
 
@@ -165,13 +159,13 @@ export interface Server {
  *
  * @example
  *   ```typescript
- *   import { parseHL7v2 } from "@glion/hl7v2";
  *   import { Mllp } from "@glion/mllp";
  *   import { serve } from "@glion/mllp/node";
  *
- *   const app = new Mllp()
- *     .parser(parseHL7v2)
- *     .on("ADT^A01", async (ctx) => ({ raw: "..." }));
+ *   const app = new Mllp().on("ADT^A01", async (ctx) => {
+ *     await save(ctx.req.tree);
+ *     return { raw: "..." };
+ *   });
  *
  *   const server = serve({ handle: app.handle, port: 2575 });
  *   await server.listening;
@@ -225,16 +219,6 @@ export function serve(options: ServeOptions): Server {
       state: new Map(),
     });
     const env: NodeEnv = { connection };
-    const report = (error: unknown, messageInfo?: MessageInfo) =>
-      reportError(onError, toError(error), connection, messageInfo);
-    /** The reply to one message; none once `report` has the error. */
-    const reply = async (payload: Uint8Array) => {
-      try {
-        return await handle(payload, env);
-      } catch (error) {
-        await report(error, getMessageInfo(error));
-      }
-    };
     // close() ends a connection still in onConnect now, as it does an idle
     // one; no message is then read from it.
     const end = () => socket.close();
@@ -245,16 +229,18 @@ export function serve(options: ServeOptions): Server {
       } finally {
         shutdown.signal.removeEventListener("abort", end);
       }
-      await handleConnection(reply, socket, { signal: shutdown.signal });
+      await handleConnection((payload) => handle(payload, env), socket, {
+        signal: shutdown.signal,
+      });
     } catch (error) {
-      await report(error);
+      await onError?.(toError(error), connection);
     } finally {
       // Ends the socket when onConnect threw; idempotent otherwise.
       socket.close();
       try {
         await onDisconnect?.(connection);
       } catch (disconnectError) {
-        await report(disconnectError);
+        await onError?.(toError(disconnectError), connection);
       }
     }
   };
@@ -294,32 +280,4 @@ export function serve(options: ServeOptions): Server {
 
 function toError(value: unknown): Error {
   return value instanceof Error ? value : new Error(String(value));
-}
-
-/**
- * Route an error to the `onError` callback, falling back to a safe
- * `console.error` that logs only the error message and connection ID
- * to avoid leaking PHI from HL7v2 message content.
- */
-async function reportError(
-  onError: ErrorCallback | undefined,
-  error: Error,
-  connection: ConnectionInfo,
-  messageInfo: MessageInfo | undefined
-): Promise<void> {
-  try {
-    if (onError) {
-      await onError(error, connection, messageInfo);
-    } else {
-      // Safe fallback: only message + connection ID, no PHI
-      console.error(
-        `[mllp] Unhandled error on connection ${connection.id}: ${error.message}`
-      );
-    }
-  } catch {
-    // onError itself threw — last resort
-    console.error(
-      `[mllp] Unhandled error on connection ${connection.id}: ${error.message}`
-    );
-  }
 }

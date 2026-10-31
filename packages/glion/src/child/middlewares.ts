@@ -8,11 +8,10 @@
  *
  * ## Middleware positioning
  *
- * This middleware must be PREPENDED via `app.use(mw, { prepend: true })` so it
- * sits at the outermost position in the middleware chain. Its `await next()`
- * then completes after all user middleware (including any acknowledgment
- * middleware) have run, ensuring `ctx.res` is populated with the ACK response
- * before telemetry reads it. `performance.now()` measures the full middleware +
+ * This middleware MUST be PREPENDED via `app.use(mw, { prepend: true })`, so
+ * it sits at the outermost position in the middleware chain: its `await
+ * next()` completes after every user middleware has run, so `ctx.res` is the
+ * reply that is sent, and `performance.now()` measures the full middleware +
  * handler time.
  *
  * ## ACK parsing
@@ -29,7 +28,7 @@ import { performance } from "node:perf_hooks";
 
 import { isAckCode } from "@glion/ack";
 import type { AckCode } from "@glion/ack";
-import type { Context, Middleware, Response } from "@glion/mllp";
+import type { Context, ErrorHandler, Middleware, Response } from "@glion/mllp";
 import type { NodeEnv } from "@glion/mllp/node";
 
 import type { PartialEvent } from "../events";
@@ -57,6 +56,23 @@ export function createMsgTelemetry(
       remote: `${connection.remoteAddress}:${connection.remotePort}`,
       t: "msg",
       trigger: `${ctx.req.header.messageCode ?? "?"}^${ctx.req.header.triggerEvent ?? "?"}`,
+    });
+  };
+}
+
+/**
+ * Creates the `app.onError()` handler that emits an "error" event for each
+ * error a message raises.
+ */
+export function createErrorTelemetry(
+  emit: (event: PartialEvent) => void
+): ErrorHandler<NodeEnv> {
+  return (error, { connection }) => {
+    emit({
+      conn: connection.id,
+      message: error.message,
+      stack: error.stack,
+      t: "error",
     });
   };
 }

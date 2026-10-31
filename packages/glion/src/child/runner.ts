@@ -29,7 +29,7 @@
  *
  *     1. Read manifest JSON from argv[2]
  *     2. Import the pre-built entry module → Mllp instance
- *     3. Install the msg event middleware (telemetry)
+ *     3. Install the msg event middleware and the error handler (telemetry)
  *     4. Start the MLLP server (TCP bind)
  *     5. Emit "ready" event with the actual bound port
  *     6. Install SIGTERM/SIGINT shutdown handlers
@@ -48,7 +48,6 @@
 
 import { readFile } from "node:fs/promises";
 
-import type { MessageInfo } from "@glion/mllp";
 import { serve } from "@glion/mllp/node";
 import type { ConnectionInfo, Server } from "@glion/mllp/node";
 
@@ -60,7 +59,7 @@ import { installConsoleCapture } from "./console";
 import { installCrashHandlers } from "./crash-handlers";
 import { createEmitter } from "./emitter";
 import { loadEntry } from "./load-entry";
-import { createMsgTelemetry } from "./middlewares";
+import { createErrorTelemetry, createMsgTelemetry } from "./middlewares";
 import { installShutdownHandlers } from "./shutdown-handlers";
 
 // ── Emitter ──────────────────────────────────────────────────────
@@ -131,10 +130,10 @@ async function main(): Promise<void> {
   // Step 3: Install the telemetry middleware.
   // This wraps every MLLP message handler to emit a "msg" event
   // with timing, trigger, control ID, and ACK code. Prepended so it
-  // sits outermost — its `await next()` completes after all user
-  // middleware (including any acknowledgment middleware) have run, ensuring any
-  // other middleware is injected before.
+  // sits outermost and its timing covers all user middleware.
   app.use(createMsgTelemetry(emit), { prepend: true });
+  // Every error a message raises reaches the telemetry through onError().
+  app.onError(createErrorTelemetry(emit));
 
   // Step 4: Read TLS certificates (if configured).
   // Paths are absolute (resolved by the parent's config loader).
@@ -169,17 +168,12 @@ async function main(): Promise<void> {
     onDisconnect: (conn: ConnectionInfo) => {
       emit({ id: conn.id, t: "conn.close" });
     },
-    onError: (
-      err: Error,
-      conn: ConnectionInfo,
-      info: MessageInfo | undefined
-    ) => {
+    onError: (err: Error, conn: ConnectionInfo) => {
       emit({
         conn: conn.id,
         message: err.message,
         stack: err.stack,
         t: "error",
-        trigger: info ? `${info.messageType}^${info.triggerEvent}` : undefined,
       });
     },
     port: manifest.port,

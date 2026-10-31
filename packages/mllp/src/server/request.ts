@@ -1,6 +1,9 @@
-import type { Root } from "@glion/ast";
-import { decodeBytes } from "@glion/util-charset";
+import type { Root, Segment } from "@glion/ast";
+import { m } from "@glion/builder";
+import { parseHL7v2 } from "@glion/parser";
+import { CharsetError, decodeBytes } from "@glion/util-charset";
 import { value } from "@glion/util-query";
+import { DEFAULT_DELIMITERS } from "@glion/utils";
 import { VFile } from "vfile";
 
 import type { Hl7v2Processor } from "./types";
@@ -86,4 +89,37 @@ export async function parseRequest(
     return Promise.resolve(compiled.value);
   };
   return { file, header, raw, result, tree };
+}
+
+/**
+ * The MSH `payload` starts with, salvaged alone in a tree by `@glion/parser`
+ * from the bytes before the first `delimiter`, the segment terminator;
+ * `undefined` when those bytes are not UTF-8 or are not an MSH. Best effort:
+ * the rest of `payload` is not read.
+ */
+export function salvageHeader(
+  payload: Uint8Array,
+  delimiter = DEFAULT_DELIMITERS.segment
+): Root | undefined {
+  const end = payload.findIndex(
+    (byte) => String.fromCodePoint(byte) === delimiter
+  );
+  let text: string;
+  try {
+    text = decodeBytes(end === -1 ? payload : payload.subarray(0, end));
+  } catch (error) {
+    // An MSH that is not UTF-8 cannot be echoed as the sender wrote it.
+    if (error instanceof CharsetError) {
+      return undefined;
+    }
+    throw error;
+  }
+  const header = messageHeader(parseHL7v2(text));
+  return header && m(header);
+}
+
+/** The MSH segment `tree` starts with, or `undefined` when it starts with none. */
+export function messageHeader(tree: Root): Segment | undefined {
+  const [first] = tree.children;
+  return first?.type === "segment" && first.name === "MSH" ? first : undefined;
 }

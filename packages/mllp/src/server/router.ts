@@ -121,6 +121,11 @@ export class Router<E = unknown> {
     }
   }
 
+  /** The global middleware, in registration order. */
+  globalMiddleware(): Middleware<E>[] {
+    return [...this.#globalMiddleware];
+  }
+
   /**
    * Match a context against registered routes and middleware.
    * Returns the first matching handler and all applicable middleware.

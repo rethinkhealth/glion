@@ -30,6 +30,9 @@ export interface AckExceptionOptions extends ErrorOptions {
   controlId?: string;
 }
 
+/** Marks an `AckException` made by any copy of this package. */
+const ACK_EXCEPTION: unique symbol = Symbol.for("@glion/ack/AckException");
+
 /**
  * Abstract base class for all HL7v2 acknowledgment exceptions.
  *
@@ -40,9 +43,11 @@ export interface AckExceptionOptions extends ErrorOptions {
  * before v2.5, ERR-3/ERR-4 after), so a version-agnostic package carries
  * the data instead of rendering the segment.
  *
- * Use `instanceof AckException` to detect any ACK-level error in middleware.
+ * {@link isAckException} detects one made by any installed copy of this
+ * package; `instanceof AckException` detects only this copy's.
  */
 export abstract class AckException extends Error {
+  readonly [ACK_EXCEPTION] = true;
   abstract readonly code: AckNakCode;
   readonly errorCode: string | undefined;
   readonly severity: string | undefined;
@@ -61,6 +66,14 @@ export abstract class AckException extends Error {
     this.text = options.text;
     this.controlId = options.controlId;
   }
+}
+
+/**
+ * Whether `value` is an {@link AckException}, made by this or any other
+ * installed copy of `@glion/ack`.
+ */
+export function isAckException(value: unknown): value is AckException {
+  return typeof value === "object" && value !== null && ACK_EXCEPTION in value;
 }
 
 /**

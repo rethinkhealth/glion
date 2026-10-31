@@ -14,6 +14,7 @@ import { MllpServerErrorCode } from "../../src/errors";
 import { serve } from "../../src/node/serve";
 import type { ConnectionInfo, NodeEnv, Server } from "../../src/node/serve";
 import { Mllp } from "../../src/server/mllp";
+import type { Context, Response } from "../../src/server/types";
 
 const SAMPLE_ADT = [
   "MSH|^~\\&|SendApp|SendFac|RecvApp|RecvFac|20240101120000||ADT^A01^ADT_A01|MSG001|P|2.5.1",
@@ -169,7 +170,14 @@ function waitForReady(port: number): Promise<void> {
 const DNS_NAME = 2;
 
 function createApp() {
-  return new Mllp<NodeEnv>();
+  return new Mllp();
+}
+
+/** An ACK of the message in `ctx`, echoing its MSH-10. */
+function ack(ctx: Context): Response {
+  return {
+    raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
+  };
 }
 
 describe("serve() integration", () => {
@@ -230,7 +238,6 @@ describe("serve() integration", () => {
 
   it("sends no response when handler returns undefined", async () => {
     const app = createApp();
-    // No ack middleware, handler returns undefined explicitly
     // oxlint-disable-next-line unicorn/no-useless-undefined
     app.on("ADT^A01", () => undefined);
 
@@ -241,53 +248,22 @@ describe("serve() integration", () => {
     expect(response).toBeUndefined();
   });
 
-  it("sends no response when no handler matches", async () => {
+  it("replies AR when no handler matches", async () => {
     const app = createApp();
     // Only register handler for ORM^O01
-    app.on("ORM^O01", async () => ({ raw: "should not reach" }));
+    app.on("ORM^O01", async (ctx) => ack(ctx));
 
     server = serve({ handle: app.handle, port: 0 });
     await waitForReady(server.port);
 
     // Send ADT^A01 which has no matching handler
-    const response = await sendMessage(server.port, SAMPLE_ADT, 500);
-    expect(response).toBeUndefined();
+    const response = await sendMessage(server.port, SAMPLE_ADT);
+    expect(response).toContain("\rMSA|AR|MSG001");
   });
 
-  it("onError handler returns response when handler throws", async () => {
+  it("answers AE when a handler throws, connection stays alive", async () => {
     let callCount = 0;
     const app = createApp();
-    app.onError((_err, ctx) => ({
-      raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.req.header.controlId}`,
-    }));
-    app.on("*", (ctx) => {
-      callCount++;
-      if (callCount === 1) {
-        throw new Error("intentional test error");
-      }
-      return {
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|${ctx.req.header.controlId}`,
-      };
-    });
-
-    server = serve({ handle: app.handle, port: 0 });
-    await waitForReady(server.port);
-
-    // First message — handler throws, error handler sends AR
-    const resp1 = await sendMessage(server.port, SAMPLE_ADT);
-    expect(resp1).toBeDefined();
-    expect(resp1).toContain("MSA|AR|MSG001");
-
-    // Second message on a NEW connection — should still work
-    const resp2 = await sendMessage(server.port, SAMPLE_ORU);
-    expect(resp2).toBeDefined();
-    expect(resp2).toContain("MSA|AA|MSG002");
-  });
-
-  it("unhandled error sends no response, connection stays alive", async () => {
-    let callCount = 0;
-    const app = createApp();
-    // No onError — unhandled errors produce no response (sender retries)
     app.on("*", (ctx) => {
       callCount++;
       if (callCount === 1) {
@@ -303,9 +279,8 @@ describe("serve() integration", () => {
 
     const client = createPersistentClient(server.port);
     try {
-      // First message — no onError, no response sent
-      const resp1 = await client.send(SAMPLE_ADT, 500);
-      expect(resp1).toBeUndefined();
+      const resp1 = await client.send(SAMPLE_ADT);
+      expect(resp1).toContain("MSA|AE|MSG001");
 
       // Second message on SAME connection — still works
       const resp2 = await client.send(SAMPLE_ORU);
@@ -436,7 +411,7 @@ describe("serve() integration", () => {
 
   describe("lifecycle callbacks", () => {
     it("onConnect fires with a valid connection ID", async () => {
-      const app = createApp().on("*", () => ({ raw: "ACK" }));
+      const app = createApp().on("*", (ctx) => ack(ctx));
       const connections: number[] = [];
 
       server = serve({
@@ -457,7 +432,7 @@ describe("serve() integration", () => {
     });
 
     it("onDisconnect fires when client disconnects", async () => {
-      const app = createApp().on("*", () => ({ raw: "ACK" }));
+      const app = createApp().on("*", (ctx) => ack(ctx));
       let disconnectedId: number | undefined;
 
       server = serve({
@@ -479,27 +454,50 @@ describe("serve() integration", () => {
       expect(disconnectedId).toBeTypeOf("number");
     });
 
-    it("onError fires when handler throws without app-level error handler", async () => {
+    it("onError does not fire for an error a message raised", async () => {
       const app = createApp();
       app.on("*", () => {
         throw new Error("handler boom");
       });
 
-      const errors: { message: string; connId: number }[] = [];
+      const errors: string[] = [];
 
       server = serve({
         handle: app.handle,
-        onError: (err, conn) => {
-          errors.push({ connId: conn.id, message: err.message });
+        onError: (err) => {
+          errors.push(err.message);
         },
         port: 0,
       });
 
-      // No response expected (handler threw, no error handler to produce one)
+      const resp = await sendMessage(server.port, SAMPLE_ADT);
+      expect(resp).toContain("MSA|AE|MSG001");
+      expect(errors).toEqual([]);
+    });
+
+    it("onError fires with the error app.handle() rejects with", async () => {
+      const unwritable = new Error("cannot write the reply");
+      const app = new Mllp({
+        serializer: () => {
+          throw unwritable;
+        },
+      }).on("*", () => {
+        throw new Error("rejected");
+      });
+
+      const errors: unknown[] = [];
+
+      server = serve({
+        handle: app.handle,
+        onError: (err) => {
+          errors.push(err);
+        },
+        port: 0,
+      });
+
       await sendMessage(server.port, SAMPLE_ADT, 500);
 
-      expect(errors).toHaveLength(1);
-      expect(errors[0]?.message).toBe("handler boom");
+      expect(errors).toEqual([unwritable]);
     });
 
     it("onError fires with PROTOCOL_VIOLATION when the inbound byte stream violates MLLP framing", async () => {
@@ -544,16 +542,14 @@ describe("serve() integration", () => {
       expect(errors[0]?.causeName).toBe("MllpCodecError");
     });
 
-    it("onError fires with UNFRAMEABLE_RESPONSE when a handler response contains a reserved byte", async () => {
-      const app = createApp();
-      // The response carries a VT (0x0B): it cannot be framed for the wire.
-      app.on("*", () => ({
-        raw: "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|\u000Bbad",
-      }));
-
+    it("onError fires with UNFRAMEABLE_RESPONSE when a response contains a reserved byte", async () => {
       const errors: { code?: string }[] = [];
       server = serve({
-        handle: app.handle,
+        // The response carries a VT (0x0B): it cannot be framed for the wire.
+        handle: async () =>
+          new TextEncoder().encode(
+            "MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AA|\u000Bbad"
+          ),
         onError: (err) => {
           errors.push({ code: (err as Error & { code?: string }).code });
         },
@@ -566,108 +562,8 @@ describe("serve() integration", () => {
       expect(errors[0]?.code).toBe("UNFRAMEABLE_RESPONSE");
     });
 
-    it("onError receives messageInfo with routing fields for handler errors", async () => {
-      const app = createApp();
-      app.on("ADT^A01", () => {
-        throw new Error("handler failed");
-      });
-
-      let capturedInfo: unknown;
-
-      server = serve({
-        handle: app.handle,
-        onError: (_err, _conn, messageInfo) => {
-          capturedInfo = messageInfo;
-        },
-        port: 0,
-      });
-
-      await sendMessage(server.port, SAMPLE_ADT, 500);
-
-      expect(capturedInfo).toBeDefined();
-      const info = capturedInfo as {
-        messageType: string;
-        triggerEvent: string;
-        controlId: string;
-        version: string;
-      };
-      expect(info.messageType).toBe("ADT");
-      expect(info.triggerEvent).toBe("A01");
-      expect(info.controlId).toBe("MSG001");
-      expect(info.version).toBe("2.5.1");
-    });
-
-    it("onError receives undefined messageInfo for lifecycle callback errors", async () => {
-      const app = createApp().on("*", () => ({ raw: "ACK" }));
-      let capturedInfo: unknown = "sentinel";
-
-      server = serve({
-        handle: app.handle,
-        onConnect: () => {
-          throw new Error("connect failed");
-        },
-        onError: (_err, _conn, messageInfo) => {
-          capturedInfo = messageInfo;
-        },
-        port: 0,
-      });
-
-      await sendMessage(server.port, SAMPLE_ADT, 500);
-
-      expect(capturedInfo).toBeUndefined();
-    });
-
-    it("onError does NOT fire when app-level error handler handles the error", async () => {
-      const app = createApp();
-      app.onError((_err, ctx) => ({
-        raw: `MSH|^~\\&|||||||ACK|ACK001|P|2.5.1\rMSA|AR|${ctx.req.header.controlId}`,
-      }));
-      app.on("*", () => {
-        throw new Error("handled error");
-      });
-
-      const errors: string[] = [];
-
-      server = serve({
-        handle: app.handle,
-        onError: (err) => {
-          errors.push(err.message);
-        },
-        port: 0,
-      });
-
-      const resp = await sendMessage(server.port, SAMPLE_ADT);
-      expect(resp).toContain("MSA|AR|MSG001");
-      expect(errors).toHaveLength(0);
-    });
-
-    it("onError fires when app-level error handler itself throws", async () => {
-      const app = createApp();
-      app.onError(() => {
-        throw new Error("error handler exploded");
-      });
-      app.on("*", () => {
-        throw new Error("original error");
-      });
-
-      const errors: string[] = [];
-
-      server = serve({
-        handle: app.handle,
-        onError: (err) => {
-          errors.push(err.message);
-        },
-        port: 0,
-      });
-
-      await sendMessage(server.port, SAMPLE_ADT, 500);
-
-      expect(errors).toHaveLength(1);
-      expect(errors[0]).toBe("error handler exploded");
-    });
-
     it("connection IDs are unique across connections", async () => {
-      const app = createApp().on("*", () => ({ raw: "ACK" }));
+      const app = createApp().on("*", (ctx) => ack(ctx));
       const ids: number[] = [];
 
       server = serve({
@@ -689,7 +585,7 @@ describe("serve() integration", () => {
     });
 
     it("connection state persists across messages on the same socket", async () => {
-      const app = createApp();
+      const app = new Mllp<NodeEnv>();
       app.use((ctx, next) => {
         const count = (ctx.env.connection.state.get("count") as number) ?? 0;
         ctx.env.connection.state.set("count", count + 1);
@@ -717,7 +613,7 @@ describe("serve() integration", () => {
     });
 
     it("multiple connections get separate state Maps", async () => {
-      const app = createApp();
+      const app = new Mllp<NodeEnv>();
       app.use((ctx, next) => {
         const count = (ctx.env.connection.state.get("count") as number) ?? 0;
         ctx.env.connection.state.set("count", count + 1);
@@ -741,7 +637,7 @@ describe("serve() integration", () => {
     });
 
     it("onConnect throwing tears down connection, onDisconnect still fires", async () => {
-      const app = createApp().on("*", () => ({ raw: "ACK" }));
+      const app = createApp().on("*", (ctx) => ack(ctx));
       let disconnectCount = 0;
       const errors: string[] = [];
 
@@ -772,7 +668,7 @@ describe("serve() integration", () => {
     });
 
     it("onDisconnect throwing is caught and routed to onError", async () => {
-      const app = createApp().on("*", () => ({ raw: "ACK" }));
+      const app = createApp().on("*", (ctx) => ack(ctx));
       const errors: string[] = [];
 
       server = serve({
@@ -795,24 +691,26 @@ describe("serve() integration", () => {
       expect(errors[0]).toBe("onDisconnect failed");
     });
 
-    it("console.error fallback when no onError is provided", async () => {
-      const app = createApp();
-      app.on("*", () => {
-        throw new Error("unhandled boom");
-      });
-
+    it("closes the connection and writes nothing to the console when an error has no onError", async () => {
+      const app = createApp().on("*", (ctx) => ack(ctx));
+      const disconnected = Promise.withResolvers<ConnectionInfo>();
       const consoleSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
       try {
-        server = serve({ handle: app.handle, port: 0 });
+        server = serve({
+          handle: app.handle,
+          onConnect: () => {
+            throw new Error("unhandled boom");
+          },
+          onDisconnect: disconnected.resolve,
+          port: 0,
+        });
 
         await sendMessage(server.port, SAMPLE_ADT, 500);
+        await disconnected.promise;
 
-        expect(consoleSpy).toHaveBeenCalledOnce();
-        const msg = consoleSpy.mock.calls[0]?.[0] as string;
-        expect(msg).toContain("unhandled boom");
-        expect(msg).toContain("[mllp]");
+        expect(consoleSpy).not.toHaveBeenCalled();
       } finally {
         consoleSpy.mockRestore();
       }

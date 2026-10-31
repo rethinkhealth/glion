@@ -3,7 +3,10 @@ import type { Context, MessageHeader, Middleware } from "@glion/mllp";
 import type { NodeEnv } from "@glion/mllp/node";
 import { describe, expect, it } from "vitest";
 
-import { createMsgTelemetry } from "../../src/child/middlewares";
+import {
+  createErrorTelemetry,
+  createMsgTelemetry,
+} from "../../src/child/middlewares";
 import type { PartialEvent } from "../../src/events";
 
 /**
@@ -141,6 +144,16 @@ describe("createMsgTelemetry", () => {
     expect(event.trigger).toBe("?^?");
   });
 
+  it("emits only the msg event of a message that raised an error, which onError() reports", async () => {
+    const events: PartialEvent[] = [];
+    const mw = createMsgTelemetry((e) => events.push(e));
+    const error = new TypeError("Cannot read properties of undefined");
+
+    await mw(makeCtx({ error }), async () => {});
+
+    expect(events.map(({ t }) => t)).toEqual(["msg"]);
+  });
+
   describe("middleware ordering interaction", () => {
     /**
      * This test reproduces the bug where telemetry middleware installed
@@ -240,5 +253,24 @@ describe("createMsgTelemetry", () => {
       const event = events[0] as Record<string, unknown>;
       expect(event.ack).toBe("AE");
     });
+  });
+});
+
+describe("createErrorTelemetry", () => {
+  it("emits an error event with the error and the connection it came on", () => {
+    const events: PartialEvent[] = [];
+    const handler = createErrorTelemetry((e) => events.push(e));
+    const raised = new Error("The inbound message is not valid UTF-8.");
+
+    handler(raised, makeCtx().env);
+
+    expect(events).toEqual([
+      {
+        conn: 1,
+        message: raised.message,
+        stack: raised.stack,
+        t: "error",
+      },
+    ]);
   });
 });

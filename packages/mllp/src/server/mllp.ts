@@ -1,51 +1,34 @@
+import {
+  AckCode,
+  isAckException,
+  UnsupportedMessageTypeReject,
+} from "@glion/ack";
+import type { AckNakCode } from "@glion/ack";
 import hl7v2LintRequiredMessageHeader from "@glion/lint-required-message-header";
 import { hl7v2Parser } from "@glion/parser";
+import { toHl7v2 } from "@glion/to-hl7v2";
 import { encodeBytes } from "@glion/util-charset";
+import { value as queryValue } from "@glion/util-query";
+import { nowDTM } from "@glion/util-timestamp";
 import { unified } from "unified";
 
+import { acknowledge } from "./acknowledge";
 import { compose } from "./compose";
 import { createContext } from "./context";
-import { parseRequest } from "./request";
+import type { MessageContext } from "./context";
+import { parseRequest, salvageHeader } from "./request";
+import type { MllpRequest } from "./request";
 import { Router } from "./router";
 import type {
-  Context,
   EnvArgs,
   ErrorHandler,
   Handler,
   Hl7v2Processor,
   Middleware,
+  MllpOptions,
   Response,
   RouteFilter,
 } from "./types";
-
-/**
- * Routing fields from the message that caused an error.
- * Attached to errors `Mllp.handle()` rejects with, so that callers
- * (e.g., `serve()`) can include message context in error callbacks.
- */
-export interface MessageInfo {
-  readonly messageType: string;
-  readonly triggerEvent: string;
-  readonly messageStructure: string;
-  readonly version: string;
-  readonly controlId: string;
-}
-
-/**
- * Internal store for associating message routing info with errors.
- * Uses a WeakMap so error objects can be garbage-collected normally.
- */
-const errorMessageInfo = new WeakMap<Error, MessageInfo>();
-
-/**
- * Retrieve the {@link MessageInfo} associated with an error thrown
- * by `Mllp.handle()`. Returns `undefined` for errors that did not
- * originate from message processing (e.g., lifecycle callback errors).
- */
-export function getMessageInfo(error: unknown): MessageInfo | undefined {
-  // A WeakMap lookup; a non-error key simply misses and yields undefined.
-  return errorMessageInfo.get(error as Error);
-}
 
 /**
  * The processor of an app given none: `@glion/parser`, and
@@ -65,18 +48,37 @@ const defaultProcessor: Hl7v2Processor = unified()
  *
  * @example
  *   ```typescript
+ *   import { AckApplicationError } from "@glion/ack";
  *   import { Mllp } from "@glion/mllp";
  *
  *   const app = new Mllp().on("ADT^A01", async (ctx) => {
- *     await save(ctx.req.tree);
+ *     if (!(await save(ctx.req.tree))) {
+ *       throw new AckApplicationError("Not saved", {}); // replies AE
+ *     }
  *     return { raw: "..." };
  *   });
  *   ```;
  */
 export class Mllp<E = unknown> {
   readonly #router = new Router<E>();
+  readonly #errorHandlers: ErrorHandler<E>[] = [];
+  readonly #options: MllpOptions & Required<Pick<MllpOptions, "serializer">>;
   #processor: Hl7v2Processor = defaultProcessor;
-  #errorHandler: ErrorHandler<E> | undefined;
+
+  /**
+   * @throws {RangeError} When `options.timeZone` is not an IANA time zone
+   * name.
+   */
+  constructor(options: MllpOptions = {}) {
+    // Reads the clock in the zone once, so an unknown zone throws here rather
+    // than on every message.
+    nowDTM({ timeZone: options.timeZone });
+    this.#options = {
+      delimiters: options.delimiters,
+      serializer: options.serializer ?? toHl7v2,
+      timeZone: options.timeZone,
+    };
+  }
 
   /**
    * Replace the HL7v2 processor that reads each message: a unified
@@ -87,7 +89,7 @@ export class Mllp<E = unknown> {
    *
    * The processor MUST report a fatal message for a message that does not
    * start with an MSH, as `@glion/lint-required-message-header` does at
-   * `"error"`: the app routes only a message that starts with one.
+   * `"error"`: the app answers only a message that starts with one.
    */
   parser(processor: Hl7v2Processor): this {
     this.#processor = processor;
@@ -153,16 +155,15 @@ export class Mllp<E = unknown> {
   }
 
   /**
-   * Register a global error handler.
-   *
-   * Called when middleware or a handler throws. Without an error handler,
-   * the error is re-thrown to the caller (e.g. `serve()`).
-   *
-   * If the error handler returns a response, it is used as the reply.
-   * If the error handler itself throws, the new error is re-thrown.
+   * Register a handler for every error a message raises: a payload that is
+   * not UTF-8 (`CharsetError`), a processor throw, the processor's first
+   * fatal message, and the error of a route filter, middleware or handler.
+   * The handler observes the error; it does not change the response. Each
+   * handler registered runs, in the order registered, when the error is
+   * raised, and `handle()` waits for it.
    */
   onError(handler: ErrorHandler<E>): this {
-    this.#errorHandler = handler;
+    this.#errorHandlers.push(handler);
     return this;
   }
 
@@ -178,10 +179,32 @@ export class Mllp<E = unknown> {
    * 3. Middleware, then the route handler.
    * 4. Compile — only when a handler calls `ctx.req.result()`.
    *
+   * The response is what the route handler's outcome describes:
+   *
+   * - It returns a `Response`, or sets `ctx.res`: that response.
+   * - It returns nothing: no response.
+   * - It throws an `AckException`: its `code` in MSA-1.
+   * - It throws anything else: `AE`.
+   * - No route matches: `AR`.
+   *
+   * No NAK carries MSA-3: an error's `message` and an `AckException`'s
+   * `text` are never sent.
+   *
+   * A middleware throw is answered the same way. A middleware replaces the
+   * response by returning a `Response` or writing `ctx.res`, and an error
+   * raised after it replaces it with the error's NAK. A route filter that
+   * throws runs only the global middleware and is answered as a throw. An
+   * `ACK` gets no response unless a handler or middleware gives one.
+   *
    * A payload that is not UTF-8, that the processor throws on, or that the
-   * processor reports a fatal message for runs no middleware and no route:
-   * `handle()` rejects with the `CharsetError`, the processor's error, or the
-   * first fatal message.
+   * processor reports a fatal message for runs no middleware: the response is
+   * the NAK of the error, or of the first fatal message, `AE` unless the
+   * processor threw an `AckException`. The NAK answers the MSH read from the
+   * bytes before the first CR; a payload whose MSH is not UTF-8, an `ACK`,
+   * and one with no MSH get no response.
+   *
+   * `ctx.error` holds the latest error the message raised, and the response
+   * answers it. The handlers `onError()` registered observe every error.
    */
   readonly handle = async (
     payload: Uint8Array,
@@ -189,81 +212,110 @@ export class Mllp<E = unknown> {
   ): Promise<Uint8Array | undefined> => {
     // EnvArgs<E> leaves `env` out only when E admits undefined.
     const env = given as E;
-    const request = await parseRequest(payload, this.#processor);
+    let request: MllpRequest;
+    try {
+      request = await parseRequest(payload, this.#processor);
+    } catch (error) {
+      return this.#reject(
+        payload,
+        error instanceof Error ? error : new Error(String(error)),
+        env
+      );
+    }
     const fatal = request.file.messages.find((message) => message.fatal);
     if (fatal) {
-      throw fatal;
+      return this.#reject(payload, fatal, env);
     }
     const ctx = createContext({ env, request });
 
-    // oxlint-disable-next-line typescript/no-invalid-void-type
-    let response: Response | undefined | void;
+    // The server does not answer an ACK, so two receivers never acknowledge
+    // each other's acknowledgments.
+    const answerable = request.header.messageCode !== "ACK";
+    const { serializer, ...defaults } = this.#options;
+    const nakOf = (error: Error): Response | undefined =>
+      answerable
+        ? {
+            raw: serializer(
+              acknowledge(request.tree, {
+                ...defaults,
+                code: nakCode(error),
+              })
+            ),
+          }
+        : undefined;
+
+    let terminal: Middleware<E>;
+    let middlewares: Middleware<E>[];
     try {
-      // Match route and collect middleware
-      const match = this.#router.match(ctx);
-      const middlewares = [...match.middlewares];
-
-      // Add the handler as the terminal middleware
-      if (match.handler) {
-        const handler = match.handler;
-        middlewares.push((handlerCtx: Context<E>) => handler(handlerCtx));
-      }
-
-      // Compose and execute
-      await compose(middlewares)(ctx);
-
-      response = ctx.res;
+      const matched = this.#router.match(ctx);
+      middlewares = matched.middlewares;
+      terminal = () => route(ctx, matched.handler, answerable);
     } catch (error) {
-      response = await this.#handleError(
-        error instanceof Error ? error : new Error(String(error)),
-        ctx
-      );
+      middlewares = this.#router.globalMiddleware();
+      terminal = () => {
+        throw error;
+      };
     }
-    return response ? encodeBytes(response.raw) : undefined;
-  };
 
-  /**
-   * Handle an error during message processing.
-   *
-   * If a custom error handler is registered, delegates to it.
-   * If the error handler itself throws, re-throws the error handler's error.
-   * If no error handler is registered, re-throws the original error.
-   *
-   * In both re-throw cases, message routing fields are attached to the
-   * error via {@link getMessageInfo} so callers can include message
-   * context in error reporting.
-   *
-   * Callers (e.g. `serve()`) are responsible for catching these errors
-   * and deciding how to handle them at the transport level.
-   */
-  async #handleError(
-    err: Error,
-    ctx: Context<E>
-    // oxlint-disable-next-line typescript/no-invalid-void-type
-  ): Promise<Response | undefined | void> {
-    const { header } = ctx.req;
-    const info: MessageInfo = {
-      controlId: header.controlId,
-      messageStructure: header.messageStructure,
-      messageType: header.messageCode,
-      triggerEvent: header.triggerEvent,
-      version: header.version,
+    const answer = async (error: Error): Promise<Response | undefined> => {
+      ctx.error = error;
+      await this.#observe(error, env);
+      return nakOf(error);
     };
 
-    if (this.#errorHandler) {
-      try {
-        return await this.#errorHandler(err, ctx);
-      } catch (handlerError) {
-        const e =
-          handlerError instanceof Error
-            ? handlerError
-            : new Error(String(handlerError));
-        errorMessageInfo.set(e, info);
-        throw e;
-      }
-    }
+    await compose([...middlewares, terminal], answer)(ctx);
+    return ctx.res ? encodeBytes(ctx.res.raw) : undefined;
+  };
 
-    errorMessageInfo.set(err, info);
-    throw err;
+  /** Runs each handler `onError()` registered on `error`, in order. */
+  async #observe(error: Error, env: E): Promise<void> {
+    for (const handler of this.#errorHandlers) {
+      await handler(error, env);
+    }
   }
+
+  /**
+   * The NAK of `error` for a payload no middleware ran on, encoded as UTF-8,
+   * once the handlers `onError()` registered have observed it.
+   */
+  async #reject(
+    payload: Uint8Array,
+    error: Error,
+    env: E
+  ): Promise<Uint8Array | undefined> {
+    await this.#observe(error, env);
+    const header = salvageHeader(payload);
+    if (!header || queryValue(header, "MSH.9.1")?.value === "ACK") {
+      return undefined;
+    }
+    const { serializer, ...defaults } = this.#options;
+    return encodeBytes(
+      serializer(acknowledge(header, { ...defaults, code: nakCode(error) }))
+    );
+  }
+}
+
+/**
+ * Run the route handler, or reject a message no route matches. A message no
+ * route matches that is not `answerable` leaves the response as it is.
+ */
+function route<E>(
+  ctx: MessageContext<E>,
+  handler: Handler<E> | undefined,
+  answerable: boolean
+): ReturnType<Handler<E>> {
+  if (!handler) {
+    if (!answerable) {
+      return undefined;
+    }
+    throw new UnsupportedMessageTypeReject(
+      "No route matches the message's type and trigger event (MSH-9)."
+    );
+  }
+  return handler(ctx);
+}
+
+/** MSA-1 of the NAK `error` gets: an `AckException`'s code, else `AE`. */
+function nakCode(error: Error): AckNakCode {
+  return isAckException(error) ? error.code : AckCode.ApplicationError;
 }

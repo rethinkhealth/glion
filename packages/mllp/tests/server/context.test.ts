@@ -28,6 +28,11 @@ describe("createContext", () => {
     expect(ctx.req.raw).toBe(SAMPLE_MESSAGE);
   });
 
+  it("starts with no error", async () => {
+    const ctx = await makeCtx();
+    expect(ctx.error).toBeUndefined();
+  });
+
   it("keeps the header as parsed when a handler changes ctx.req.tree", async () => {
     const ctx = await makeCtx();
     const controlId = value(ctx.req.tree, "MSH.10")?.node;
