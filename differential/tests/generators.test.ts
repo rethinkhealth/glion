@@ -1,7 +1,7 @@
 import fc from "fast-check";
 
 import { arbSpecMessage } from "../src/generators";
-import type { SpecMessage } from "../src/oracle";
+import type { SpecMessage, SpecSubcomponent } from "../src/oracle";
 import { startOracle } from "../src/oracle";
 
 const oracle = startOracle();
@@ -32,8 +32,25 @@ describe("arbSpecMessage", () => {
     ...message.header,
     ...message.segments.flatMap((segment) => segment.fields),
   ];
-  const valuesOf = (message: SpecMessage) =>
-    fieldsOf(message).flat(3 /* repetition, component, subcomponent */);
+  const valuesOf = (message: SpecMessage): SpecSubcomponent[] =>
+    fieldsOf(message)
+      .flat(2 /* repetition, component */)
+      .flat(/* subcomponent */);
+  // The runs of data characters in a value, and its escape sequences.
+  const runsOf = (message: SpecMessage) =>
+    valuesOf(message).flatMap((value) =>
+      typeof value === "string"
+        ? [value]
+        : value.filter((piece) => typeof piece === "string")
+    );
+  const sequencesOf = (message: SpecMessage) =>
+    valuesOf(message).flatMap((value) =>
+      typeof value === "string"
+        ? []
+        : value.flatMap((piece) =>
+            typeof piece === "string" ? [] : [piece.sequence]
+          )
+    );
 
   it("draws the suggested delimiters", () => {
     expect(sample.some((m) => m.delimiters === "|^~\\&")).toBe(true);
@@ -52,7 +69,7 @@ describe("arbSpecMessage", () => {
   it("draws the escape character in data", () => {
     expect(
       sample.some((m) =>
-        valuesOf(m).some((value) => value.includes(m.delimiters[3] ?? ""))
+        runsOf(m).some((run) => run.includes(m.delimiters[3] ?? ""))
       )
     ).toBe(true);
   });
@@ -65,33 +82,60 @@ describe("arbSpecMessage", () => {
   ])("draws the %s in data", (_, index) => {
     expect(
       sample.some((m) =>
-        valuesOf(m).some((value) => value.includes(m.delimiters[index] ?? ""))
+        runsOf(m).some((run) => run.includes(m.delimiters[index] ?? ""))
       )
     ).toBe(true);
   });
 
-  it("draws an escape sequence of §2.7 in data", () => {
+  it("draws data that looks like a delimiter's escape sequence", () => {
     const sequences = (escape: string) =>
       [..."FSTRE"].map((letter) => `${escape}${letter}${escape}`);
 
     expect(
       sample.some((m) =>
-        valuesOf(m).some((value) =>
+        runsOf(m).some((run) =>
           sequences(m.delimiters[3] ?? "").some((sequence) =>
-            value.includes(sequence)
+            run.includes(sequence)
           )
         )
       )
     ).toBe(true);
   });
 
-  it("draws a formatting command of §2.7 in data", () => {
+  it("draws data that looks like a formatting command", () => {
     expect(
       sample.some((m) =>
-        valuesOf(m).some((value) => {
+        runsOf(m).some((run) => {
           const escape = m.delimiters[3] ?? "";
-          return value.includes(`${escape}H${escape}`);
+          return run.includes(`${escape}H${escape}`);
         })
+      )
+    ).toBe(true);
+  });
+
+  it.each([
+    ["truncation character (§2.7.2)", "P"],
+    ["character set (§2.7.3)", "C"],
+    ["highlighting (§2.7.4)", "H"],
+    ["locally defined (§2.7.8)", "Z"],
+    ["formatting command (§2.7.7)", "."],
+  ])("draws a %s escape sequence", (_, code) => {
+    expect(
+      sample.some((m) =>
+        sequencesOf(m).some((sequence) => sequence.startsWith(code))
+      )
+    ).toBe(true);
+  });
+
+  it("draws a value with data characters and an escape sequence", () => {
+    expect(
+      sample.some((m) =>
+        valuesOf(m).some(
+          (value) =>
+            typeof value !== "string" &&
+            value.some((piece) => typeof piece === "string") &&
+            value.some((piece) => typeof piece !== "string")
+        )
       )
     ).toBe(true);
   });

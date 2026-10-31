@@ -1,6 +1,7 @@
 import fc from "fast-check";
 
-import type { SpecMessage } from "./oracle";
+import type { SpecMessage, SpecPiece } from "./oracle";
+import { toSpecSubcomponent } from "./oracle";
 
 // The generator: random well-formed messages, in the specification's shape.
 //
@@ -15,47 +16,56 @@ import type { SpecMessage } from "./oracle";
 //      ├─ header:   array 0–4 of field
 //      └─ segments: array 0–3 of record { id: 3 × SEGMENT_ID, fields: array 0–4 of field }
 //
-//   field = array 1–3 of repetition = array 1–3 of component = array 1–3 of data
-//   data  = array 0–4 of piece, joined
+//   field = array 1–3 of repetition = array 1–3 of component = array 1–3 of value
+//   value = array 0–4 of piece, in canonical form (`toSpecSubcomponent`)
 //   piece = oneof( 4 × one character from DATA or the five delimiters ,
-//                  1 × escape character, one of SEQUENCES, escape character )
+//                  1 × a sequence from SEQUENCES ,
+//                  1 × data that looks like one: escape character, a code
+//                      from LOOKALIKES, escape character )
 //
-// One draw (seed 42), shortened:
-//   {"delimiters":"|^~\&",
-//    "header":[[[["X","ZZ\T\","aTR"],["",""]],[["\R\E9","\.br\"]]]],
-//    "segments":[{"id":"39G","fields":[[[["F","a-\", …],["","","F^1~"], …]]]}]}
-// `ZZ\T\` is data holding the sequence `\T\`, which the specification writes
-// `ZZ\E\T\E\`; `F^1~` holds two separators, written `F\S\1\R\`.
+// Two values it draws, with `|^~\&`:
+//   [{"sequence":"H"},"a",{"sequence":"N"}]   written `\H\a\N\`
+//   "ZZ\T\"                                  data, written `ZZ\E\T\E\`
 //
 // Every number and list below is a limit on the scope of the properties: a
 // message the generator cannot draw is never checked.
 
 // Candidate delimiters. No letters, digits or spaces, though the specification
 // allows them; no escape code ID (`F`, `S`, `T`, `R`, `E`), which it does not
-// allow as a separator (`well_formed_separators_not_escape_codes`).
+// allow as a delimiter (`well_formed_delimiters_not_escape_codes`).
 const DELIMITER_POOL = ["|", "^", "~", "\\", "&", "#", "*", "!", "%", "+"];
 // Characters of data, besides the delimiters. No segment terminator
 // (`well_formed_subcomponent_no_terminator`), and nothing below U+0020.
 const DATA = [..."abcFSTREXYZ019 .-"];
-// What a receiver reads between two escape characters (§2.7): the five
-// delimiter codes, the formatting commands `\H\`, `\N\`, `\.br\` and `\.sp\`, a
-// hexadecimal `\X41\`, and a locally defined `\Zab\`. In data they are
-// characters like any other, which the specification writes with `\E\`:
-// `\H\` → `\E\H\E\`. Drawn whole, since one character at a time forms one
-// about 1 in 2,000 positions.
+// Escape sequences of §2.7, by escape code ID and data characters: truncation,
+// a character set, highlighting, local, and the formatting commands of
+// formatted text. No `\X…\`: glion decodes it to characters under its UTF-8
+// agreement (#659), which §2.7.6 leaves to sender and receiver, so every
+// drawn `\X41\` would report that agreement, not a defect. A sequence that
+// holds one of the message's delimiters is not drawn
+// (`well_formed_escape_sequence_no_delimiter`).
 const SEQUENCES = [
-  "F",
-  "S",
-  "T",
-  "R",
-  "E",
+  "P",
+  "C2D41",
+  "M2442",
   "H",
   "N",
+  "Zab",
   ".br",
   ".sp",
-  "X41",
-  "Zab",
+  ".sp 2",
+  ".fi",
+  ".nf",
+  ".in+4",
+  ".ti-4",
+  ".sk 3",
+  ".ce",
 ];
+// Codes that, between two escape characters, would be a sequence, drawn as
+// data characters: the specification writes `\H\` in data as `\E\H\E\`.
+// Drawn whole, since one character at a time forms one about 1 in 2,000
+// positions.
+const LOOKALIKES = ["F", "S", "T", "R", "E", "H", "N", ".br", ".sp", "Zab"];
 const SEGMENT_ID = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"];
 
 // Five delimiters, as MSH-1 then MSH-2: field, component, repetition, escape,
@@ -78,29 +88,37 @@ const arbDelimiters = fc.oneof(
 /**
  * A well-formed message, by construction: distinct delimiters, none an escape
  * code ID, three-character segment IDs, at least one element at every level of
- * a field, and no segment terminator inside a subcomponent. Data may hold
- * every delimiter; the specification writes each as an escape sequence.
+ * a field, no segment terminator inside a subcomponent, and only escape
+ * sequences §2.7 defines, none holding a delimiter. Data may hold every
+ * delimiter; the specification writes each as an escape sequence.
  */
 export const arbSpecMessage: fc.Arbitrary<SpecMessage> = arbDelimiters.chain(
   (delimiters) => {
-    // One subcomponent value: 0 to 4 pieces, joined. 4 times in 5 a piece is
-    // one character, picked uniformly from 22 (DATA and the five
-    // delimiters); otherwise a whole sequence, `\H\` with `\` the escape
-    // character drawn above. 0 pieces is the empty value. fast-check leans
-    // toward short arrays, so "" comes up often.
+    // One subcomponent value: 0 to 4 pieces. 4 times in 6 a piece is one
+    // character, picked uniformly from 22 (DATA and the five delimiters);
+    // once a sequence; once data that looks like a sequence, `\H\` with `\`
+    // the escape character drawn above. 0 pieces is the empty value.
+    // fast-check leans toward short arrays, so "" comes up often.
     const escape = delimiters[3] ?? "\\";
-    const piece = fc.oneof(
+    const sequences = SEQUENCES.filter(
+      (code) => ![...code].some((c) => delimiters.includes(c))
+    );
+    const piece: fc.Arbitrary<SpecPiece> = fc.oneof(
       { arbitrary: fc.constantFrom(...DATA, ...delimiters), weight: 4 },
       {
         arbitrary: fc
-          .constantFrom(...SEQUENCES)
+          .constantFrom(...sequences)
+          .map((code) => ({ sequence: code })),
+        weight: 1,
+      },
+      {
+        arbitrary: fc
+          .constantFrom(...LOOKALIKES)
           .map((code) => `${escape}${code}${escape}`),
         weight: 1,
       }
     );
-    const data = fc
-      .array(piece, { maxLength: 4 })
-      .map((pieces) => pieces.join(""));
+    const data = fc.array(piece, { maxLength: 4 }).map(toSpecSubcomponent);
     // A field, read inside out: a component is 1–3 values, a repetition 1–3
     // components, a field 1–3 repetitions. `minLength: 1` at each level is
     // `well_formed_field_has_repetition` and the two rules after it; an empty

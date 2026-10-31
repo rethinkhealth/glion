@@ -5,6 +5,12 @@
 // the parser must find the same one. Scope: every message `arbSpecMessage`
 // draws; see `src/generators.ts` for what it leaves out.
 //
+// Fails today on a finding (#1165): glion holds a value as one string, so
+// data that looks like an escape sequence and the sequence itself are the same
+// string. With `#` as the escape character, the data `#F#` is sent as
+// `#E#F#E#`, and glion reads it back as the sequence `#F#`:
+// `{"delimiters":"!+&#%","header":[[[["#F#"]]]],"segments":[]}`.
+//
 // Mutant: `decodeEscapes` in `@glion/utils` decodes `\S\` to the repetition
 // separator. Fails on
 // `{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[["^",""]],[[""]]]],"id":"AAA"}]}`.

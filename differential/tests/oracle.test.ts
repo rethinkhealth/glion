@@ -1,4 +1,4 @@
-import { startOracle } from "../src/oracle";
+import { startOracle, toSpecSubcomponent } from "../src/oracle";
 
 const oracle = startOracle();
 afterAll(oracle.close);
@@ -27,6 +27,47 @@ describe("startOracle", () => {
     });
   });
 
+  it("writes an escape sequence between two escape characters", async () => {
+    expect(
+      await oracle.ask({
+        delimiters: "|^~\\&",
+        header: [],
+        segments: [
+          {
+            fields: [
+              [[[[{ sequence: "H" }, "240*", { sequence: "N" }], "\\H\\"]]],
+            ],
+            id: "OBX",
+          },
+        ],
+      })
+    ).toEqual({
+      failures: [],
+      text: "MSH|^~\\&\rOBX|\\H\\240*\\N\\&\\E\\H\\E\\\r",
+    });
+  });
+
+  it("names the escape sequence rules a message breaks", async () => {
+    expect(
+      await oracle.ask({
+        delimiters: "|^~\\&",
+        header: [],
+        segments: [
+          {
+            fields: [[[[[{ sequence: "Q" }], [{ sequence: "Za|b" }]]]]],
+            id: "OBX",
+          },
+        ],
+      })
+    ).toEqual({
+      failures: [
+        "well_formed_escape_sequence_defined",
+        "well_formed_escape_sequence_no_delimiter",
+      ],
+      text: "MSH|^~\\&\rOBX|\\Q\\&\\Za|b\\\r",
+    });
+  });
+
   it("names the rule a message breaks, and still writes its text", async () => {
     expect(
       await oracle.ask({
@@ -49,5 +90,22 @@ describe("startOracle", () => {
     expect(
       await oracle.ask({ delimiters: "|^~\\&", header: [], segments: [] })
     ).toEqual({ failures: [], text: "MSH|^~\\&\r" });
+  });
+});
+
+describe("toSpecSubcomponent", () => {
+  it("joins runs side by side and drops empty ones", () => {
+    expect(toSpecSubcomponent(["a", "b", { sequence: "H" }, ""])).toEqual([
+      "ab",
+      { sequence: "H" },
+    ]);
+  });
+
+  it("writes a value of data characters as one string", () => {
+    expect(toSpecSubcomponent(["a", "", "b"])).toBe("ab");
+  });
+
+  it("writes no pieces as the empty value", () => {
+    expect(toSpecSubcomponent([])).toBe("");
   });
 });

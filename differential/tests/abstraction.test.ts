@@ -72,6 +72,35 @@ describe("toSpecMessage", () => {
     ).toEqual([{ fields: [[[["a", "", "b"]]]], id: "PID" }]);
   });
 
+  it("reads a sequence glion kept in a value as an escape sequence", () => {
+    expect(
+      toSpecMessage(parser.parse("MSH|^~\\&\rOBX|\\H\\240*\\N\\\r")).segments
+    ).toEqual([
+      {
+        fields: [[[[[{ sequence: "H" }, "240*", { sequence: "N" }]]]]],
+        id: "OBX",
+      },
+    ]);
+  });
+
+  it("reads the carriage return glion decodes from \\.br\\ as that sequence", () => {
+    expect(
+      toSpecMessage(parser.parse("MSH|^~\\&\rOBX|a\\.br\\b\r")).segments
+    ).toEqual([{ fields: [[[[["a", { sequence: ".br" }, "b"]]]]], id: "OBX" }]);
+  });
+
+  it("reads a delimiter glion decoded as data", () => {
+    expect(
+      toSpecMessage(parser.parse("MSH|^~\\&\rOBX|a\\T\\b\r")).segments
+    ).toEqual([{ fields: [[[["a&b"]]]], id: "OBX" }]);
+  });
+
+  it("reads an escape character with no closing one as data", () => {
+    expect(
+      toSpecMessage(parser.parse("MSH|^~\\&\rOBX|a\\E\\b\r")).segments
+    ).toEqual([{ fields: [[[["a\\b"]]]], id: "OBX" }]);
+  });
+
   // Each tree below is written as the same text as the parser's empty node,
   // and would map to the same message.
   it("throws on a field whose only repetition is empty", () => {
