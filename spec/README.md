@@ -34,18 +34,18 @@ All three use only Lean's standard axioms (`propext`, `Quot.sound`).
 
 `Message.WF` is a list of named rules. Each is decidable, so the same rule is checked by `decide` inside a proof and by `Message.failures` on a message, which returns the names of the rules it breaks.
 
-| Rule                                       | Says                                                 |
-| ------------------------------------------ | ---------------------------------------------------- |
-| `well_formed_delimiters_distinct`          | The delimiters are different characters              |
-| `well_formed_delimiters_not_escape_codes`  | No delimiter is `F`, `S`, `T`, `R` or `E`            |
-| `well_formed_segment_id_length`            | A segment ID is three characters (§2.5.2)            |
-| `well_formed_segment_id_no_terminator`     | A segment ID does not contain the segment terminator |
-| `well_formed_field_has_repetition`         | A field holds at least one repetition                |
-| `well_formed_repetition_has_component`     | A repetition holds at least one component            |
-| `well_formed_component_has_subcomponent`   | A component holds at least one subcomponent          |
-| `well_formed_subcomponent_no_terminator`   | A subcomponent contains no segment terminator        |
-| `well_formed_escape_sequence_defined`      | Every escape sequence is one §2.7 defines            |
-| `well_formed_escape_sequence_no_delimiter` | No escape sequence holds a delimiter (§2.7.1)        |
+| Rule                                         | Says                                                                |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| `well_formed_delimiters_distinct`            | The delimiters are different characters                             |
+| `well_formed_delimiters_not_code_characters` | No delimiter is `F`, `S`, `T`, `R`, `E`, `X` or a hexadecimal digit |
+| `well_formed_segment_id_length`              | A segment ID is three characters (§2.5.2)                           |
+| `well_formed_segment_id_no_terminator`       | A segment ID does not contain the segment terminator                |
+| `well_formed_field_has_repetition`           | A field holds at least one repetition                               |
+| `well_formed_repetition_has_component`       | A repetition holds at least one component                           |
+| `well_formed_component_has_subcomponent`     | A component holds at least one subcomponent                         |
+| `well_formed_subcomponent_no_terminator`     | A subcomponent contains no segment terminator                       |
+| `well_formed_escape_sequence_defined`        | Every escape sequence is one §2.7 defines                           |
+| `well_formed_escape_sequence_no_delimiter`   | No escape sequence holds a delimiter (§2.7.1)                       |
 
 An empty field is written as nothing; the message records it as one repetition of one component of one empty subcomponent, which is why no level is an empty list.
 
@@ -54,10 +54,10 @@ An empty field is written as nothing; the message records it as one repetition o
 The standard's text leaves some things open. Where the proofs need a rule, the specification states it and says why.
 
 - **Distinct delimiters.** The standard suggests `|^~\&` but never says the delimiters must differ. The specification requires it: `ambiguous_without_distinct_delimiters` shows the encoding is ambiguous otherwise.
-- **Delimiters are not escape codes.** A delimiter in data is written as an escape sequence such as `\F\` (§2.7.1). With `F` as a separator, `\F\` would split where it stands; with `F` as the escape character, a reader cannot find where `\F\` ends. So no delimiter is one of the five escape code IDs.
+- **Delimiters are not code characters.** A delimiter in data is written as an escape sequence such as `\F\` (§2.7.1), and a control character as `\X0A\`. With `F` as a separator, `\F\` would split where it stands; with `F` as the escape character, a reader cannot find where `\F\` ends. So no delimiter is `F`, `S`, `T`, `R`, `E`, `X` or a hexadecimal digit.
 - **A value holds characters and escape sequences apart.** A subcomponent is a list of pieces: a character of data, or one of the sequences §2.7.2 to §2.7.8 define (truncation, character sets, highlighting, formatted text, local). The escape character in data is written `\E\`, so the data `\H\` (`\E\H\E\`) and the highlighting command `\H\` are two values with two texts.
-- **Hexadecimal data is characters, read as UTF-8.** §2.7.6 leaves the meaning of `\Xdd…\` to an agreement between sender and receiver. The specification's agreement is UTF-8, so `\X41\` is the character `A`, and a sender writes `A`: a value never holds a hexadecimal sequence. `\X0D\` is a carriage return, which data may not hold (`well_formed_subcomponent_no_terminator`), and bytes that are not UTF-8, such as `\XFF\`, are no characters at all: neither has a value in the model.
-- **The specification carries the other sequences; it does not interpret them.** `\Z…\` means what sender and receiver agree (§2.7.8), and a formatting command is an instruction for display. The message holds each as written.
+- **Hexadecimal data is carried, not read, except for control characters.** §2.7.6 leaves the meaning of `\Xdd…\` to an agreement between sender and receiver, so the specification keeps `\X41\` and `\XC3A9\` as sequences. A control character other than the segment terminator (U+0000 to U+001F) is the one character that has no other way to be written safely, since many receivers end a segment at a line feed: it is written `\X0A\`, and `\X0A\` is that character, not a sequence. A carriage return is still not allowed in data, in any form.
+- **The specification carries the other sequences; it does not interpret them.** `\X…\` and `\Z…\` mean what sender and receiver agree (§2.7.6, §2.7.8), and a formatting command is an instruction for display. The message holds each as written.
 
 ## Not yet covered
 

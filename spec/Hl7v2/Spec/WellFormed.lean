@@ -42,9 +42,10 @@ def Message.fields (m : Message) : List Field :=
 structure Message.WF (m : Message) : Prop where
   /-- The delimiters are different characters. -/
   delimiters_distinct : m.delimiters.Distinct
-  /-- No delimiter is an escape code ID, so no escape sequence for a delimiter
+  /-- No delimiter is a character of an escape code the specification writes for a
+  character (`F`, `S`, `T`, `R`, `E`, `X`, a hexadecimal digit), so no such sequence
   holds a delimiter. -/
-  delimiters_not_escape_codes : ∀ c ∈ escapeCodes, c ∉ m.delimiters.all
+  delimiters_not_code_characters : ∀ c ∈ codeCharacters, c ∉ m.delimiters.all
   /-- A segment ID is three characters (§2.5.2). -/
   segment_id_length : ∀ s ∈ m.segments, s.id.length = 3
   /-- A segment ID does not contain the segment terminator. -/
@@ -73,8 +74,8 @@ structure Rule where
 /-- Every rule of `Message.WF`, in field order. -/
 def catalogue : List Rule :=
   [ ⟨"well_formed_delimiters_distinct", fun m => decide m.delimiters.Distinct⟩,
-    ⟨"well_formed_delimiters_not_escape_codes",
-      fun m => decide (∀ c ∈ escapeCodes, c ∉ m.delimiters.all)⟩,
+    ⟨"well_formed_delimiters_not_code_characters",
+      fun m => decide (∀ c ∈ codeCharacters, c ∉ m.delimiters.all)⟩,
     ⟨"well_formed_segment_id_length", fun m => decide (∀ s ∈ m.segments, s.id.length = 3)⟩,
     ⟨"well_formed_segment_id_no_terminator",
       fun m => decide (∀ s ∈ m.segments, segmentTerminator ∉ s.id)⟩,
