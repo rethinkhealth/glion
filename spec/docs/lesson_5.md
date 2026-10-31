@@ -90,7 +90,7 @@ a^^b   glion:          [["a"], [], ["b"]]
 
 The same holds one level up for a repetition (`[[""]]`) and a field (`[[[""]]]`). Both describe the same text; the abstraction function picks the specification's form.
 
-The mapping must also be **one to one**. A field holding one empty repetition, `field [rep []]`, is written as the same text as an empty field, `field []`, and a lenient mapping would turn both into `[[[""]]]`. Then a parser that started writing the first shape, against its own README, would pass every property. So the abstraction function throws on a lone empty child at any level: the parser gives a node children only when the text forces them, and the abstraction function holds it to that.
+The mapping must also be **one to one**. A field holding one empty repetition, `field [rep []]`, is written as the same text as an empty field, `field []`, and a lenient mapping would turn both into `[[[""]]]`. Then a parser that started writing the first shape, against its own README, would pass every property. So the abstraction function throws on a lone empty child at any level: the parser gives a node children only when the text forces them, and the abstraction function holds it to that. The segment terminator is checked the same way: glion records what ended each segment in `terminator`, and a segment that ended with `\n`, `\r\n` or nothing is another text, so the abstraction function throws on any `terminator` other than `\r`.
 
 Neither of these is a choice about HL7v2. They are choices about how two representations line up, and the abstraction function is where you check them.
 
@@ -168,26 +168,26 @@ pnpm --filter @glion/differential test:spec
 
 The script builds the oracle, runs `tests/`, and runs `properties/` only when `tests/` passes. The root `pnpm test` does not run it, so a machine without Lean can still run every other test.
 
-When a property fails, fast-check **shrinks** the input: it tries smaller and smaller messages until it finds one that still fails, and prints that one. Both properties fail today, and the shrunk inputs are short enough to read.
+When a property fails, fast-check **shrinks** the input: it tries smaller and smaller messages until it finds one that still fails, and prints that one. The shrunk inputs are short enough to read.
 
-**The serializer: no `\r` after the last segment.** The smallest failing message has no segments at all, and delimiters `#|&~^`:
+**A finding that was settled: no `\r` after the last segment.** The first run of the serializer property failed on a message with no segments at all, and delimiters `#|&~^`:
 
 ```text
 spec:  MSH#|&~^\r
 glion: MSH#|&~^
 ```
 
-`@glion/to-hl7v2` joins segments with `\r`, so nothing follows the last one. The specification writes `\r` after every segment, following Chapter 2's segment terminator.
+`@glion/to-hl7v2` joined segments with `\r`, so nothing followed the last one. The specification writes `\r` after every segment, following Chapter 2's segment terminator, and every version from v2.3 to v2.9 says the same. glion changed, not the specification: issue #1137, then #1138 and #1148. Each segment node now records what ended it in `terminator`, and the serializer writes it back. The abstraction function checks that every segment's `terminator` is `\r`, because the specification writes no other.
 
-**The parser: escape sequences.** The smallest failing message has one subcomponent whose value is the three characters `\S\`:
+**The finding still open: escape sequences.** Both properties fail on it today. The smallest failing message for the parser has one subcomponent whose value is the three characters `\R\`:
 
 ```text
-{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[["\\S\\"],[""]],[[""]]]],"id":"AAA"}]}
+{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[["\\R\\",""],[""]]]],"id":"AAA"}]}
 ```
 
-glion reads `\S\` as an escape sequence (§2.7) and decodes it to `^`. The specification has no escape sequences: its escape character is ordinary data. Here glion follows the standard, and the specification is the one with a gap.
+glion reads `\R\` as an escape sequence (§2.7) and decodes it to `~`. The serializer fails the same way in the other direction: a lone `\` in data is written back as `\E\`. The specification has no escape sequences: its escape character is ordinary data. Here glion follows the standard, and the specification is the one with a gap. On 5,000 generated messages, every failure has the escape character in its data.
 
-Neither finding is a bug to fix on the spot. Each one is a decision about which side is right, and that decision is yours, the owner of the statement.
+Neither finding was a bug to fix on the spot. Each one is a decision about which side is right, and that decision is yours, the owner of the statement.
 
 ## Step 7: What the generator does not draw, the property does not check
 
@@ -242,11 +242,11 @@ Here `|` is the repetition separator. The properties never run, so no failure ab
 
 </details>
 
-**3. Your decision.** For each finding in step 6, write one sentence: which side should change, glion or the specification, and why? Look at Chapter 2's text on the segment terminator and on escape sequences before you answer.
+**3. Your decision.** For the open finding in step 6, write one sentence: which side should change, glion or the specification, and why? Look at Chapter 2's text on the segment terminator and on escape sequences before you answer.
 
 <details><summary>Things to weigh</summary>
 
-- **The final `\r`.** Chapter 2 calls `\r` the segment terminator, which reads as one after every segment, the last included. Changing glion means changing `@glion/to-hl7v2`, a core package. Changing the specification means stating that the last terminator is optional, and then `encode` writes one text and a receiver accepts two.
+- **The final `\r`, as it was decided.** Chapter 2 calls `\r` the segment terminator, which reads as one after every segment, the last included. Changing the specification would have meant stating that the last terminator is optional, and then `encode` writes one text and a receiver accepts two. glion changed instead: `@glion/to-hl7v2` writes each segment's terminator, and `@glion/lint-segment-terminator` reports a segment that ends without `\r`.
 - **Escape sequences.** glion follows §2.7. Narrowing the harness, so data never contains the escape character, keeps the specification as it is and records the gap. Modelling §2.7 makes `encode` write `\F\` for a `|` in data, changes the rule `well_formed_subcomponent_clean`, and changes the proof of `decode_encode`. That is the larger path, and a lesson of its own.
 
 </details>
