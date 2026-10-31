@@ -10,7 +10,7 @@ The layout follows [cedar-spec](https://github.com/cedar-policy/cedar-spec/tree/
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `Hl7v2.Spec.Delimiters` | The segment terminator and the delimiters declared in MSH-1 and MSH-2 (§2.5.4)                                         |
 | `Hl7v2.Spec.Message`    | Segments, fields, repetitions, components, subcomponents (§2.5)                                                        |
-| `Hl7v2.Spec.Escape`     | How a sender writes a delimiter that is data, as an escape sequence (§2.7.1)                                           |
+| `Hl7v2.Spec.Escape`     | A value as characters and escape sequences, the sequences §2.7 defines, and how a sender writes a value (§2.7)         |
 | `Hl7v2.Spec.Encoding`   | How a sender writes a message as text (§2.6.1)                                                                         |
 | `Hl7v2.Spec.WellFormed` | The conditions under which a message has exactly one encoding, one named rule each, and the catalogue that checks them |
 | `Hl7v2.Spec.Presence`   | Fields that are not present (§2.6.2)                                                                                   |
@@ -34,16 +34,18 @@ All three use only Lean's standard axioms (`propext`, `Quot.sound`).
 
 `Message.WF` is a list of named rules. Each is decidable, so the same rule is checked by `decide` inside a proof and by `Message.failures` on a message, which returns the names of the rules it breaks.
 
-| Rule                                      | Says                                                 |
-| ----------------------------------------- | ---------------------------------------------------- |
-| `well_formed_delimiters_distinct`         | The delimiters are different characters              |
-| `well_formed_separators_not_escape_codes` | No separator is `F`, `S`, `T`, `R` or `E`            |
-| `well_formed_segment_id_length`           | A segment ID is three characters (§2.5.2)            |
-| `well_formed_segment_id_no_terminator`    | A segment ID does not contain the segment terminator |
-| `well_formed_field_has_repetition`        | A field holds at least one repetition                |
-| `well_formed_repetition_has_component`    | A repetition holds at least one component            |
-| `well_formed_component_has_subcomponent`  | A component holds at least one subcomponent          |
-| `well_formed_subcomponent_no_terminator`  | A subcomponent contains no segment terminator        |
+| Rule                                       | Says                                                 |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `well_formed_delimiters_distinct`          | The delimiters are different characters              |
+| `well_formed_delimiters_not_escape_codes`  | No delimiter is `F`, `S`, `T`, `R` or `E`            |
+| `well_formed_segment_id_length`            | A segment ID is three characters (§2.5.2)            |
+| `well_formed_segment_id_no_terminator`     | A segment ID does not contain the segment terminator |
+| `well_formed_field_has_repetition`         | A field holds at least one repetition                |
+| `well_formed_repetition_has_component`     | A repetition holds at least one component            |
+| `well_formed_component_has_subcomponent`   | A component holds at least one subcomponent          |
+| `well_formed_subcomponent_no_terminator`   | A subcomponent contains no segment terminator        |
+| `well_formed_escape_sequence_defined`      | Every escape sequence is one §2.7 defines            |
+| `well_formed_escape_sequence_no_delimiter` | No escape sequence holds a delimiter (§2.7.1)        |
 
 An empty field is written as nothing; the message records it as one repetition of one component of one empty subcomponent, which is why no level is an empty list.
 
@@ -52,12 +54,14 @@ An empty field is written as nothing; the message records it as one repetition o
 The standard's text leaves some things open. Where the proofs need a rule, the specification states it and says why.
 
 - **Distinct delimiters.** The standard suggests `|^~\&` but never says the delimiters must differ. The specification requires it: `ambiguous_without_distinct_delimiters` shows the encoding is ambiguous otherwise.
-- **Separators are not escape codes.** A delimiter in data is written as an escape sequence such as `\F\` (§2.7.1). With `F` as a separator, `\F\` would split where it stands, so the specification requires that no separator is one of the five escape code IDs.
-- **Every escape character in data is data.** A value holding the escape character is written with `\E\`, so `\H\` in data is written `\E\H\E\`. The value is never a formatting command.
+- **Delimiters are not escape codes.** A delimiter in data is written as an escape sequence such as `\F\` (§2.7.1). With `F` as a separator, `\F\` would split where it stands; with `F` as the escape character, a reader cannot find where `\F\` ends. So no delimiter is one of the five escape code IDs.
+- **A value holds characters and escape sequences apart.** A subcomponent is a list of pieces: a character of data, or one of the sequences §2.7.2 to §2.7.8 define (truncation, character sets, highlighting, hexadecimal, formatted text, local). The escape character in data is written `\E\`, so the data `\H\` (`\E\H\E\`) and the highlighting command `\H\` are two values with two texts.
+- **The specification carries a sequence; it does not interpret it.** `\X…\` and `\Z…\` mean what sender and receiver agree (§2.7.6, §2.7.8), and a formatting command is an instruction for display. The message holds each as written.
 
 ## Not yet covered
 
-- Escape sequences other than the five of §2.7.1: highlighting (`\H\`, `\N\`, §2.7.4), formatted text (`\.br\`, §2.7.7), hexadecimal data (`\Xdd\`, §2.7.6), locally defined sequences (`\Z…\`, §2.7.8), character sets (§2.7.3) and the truncation character (`\P\`, §2.7.2). A segment terminator in data is not allowed until they are.
+- Which data types may use which escape sequence (§2.7.1: TX, FT and CF for `\H\`, `\N\`, `\X\`, `\Z\`; FT for formatting commands): the message has no data types. The rules for where `\.in\` and `\.ti\` may stand in a line (§2.7.7).
+- A segment terminator in data: no sequence §2.7 defines stands for one, so it is not allowed.
 - What senders may omit and receivers must accept (§2.6.1, §2.6.2), and null values (§2.5.3).
 - The truncation character in MSH-2 (§2.5.4, v2.7 and later), batches (§2.10), character sets.
 - Message structure: segment order and groups.

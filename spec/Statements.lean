@@ -24,9 +24,11 @@ info: ambiguous_without_distinct_delimiters : have d :=
   { field := __src.field, component := '|', repetition := __src.repetition, escape := __src.escape,
     subcomponent := __src.subcomponent };
 have twoComponents :=
-  { delimiters := d, header := [], segments := [{ id := ['P', 'I', 'D'], fields := [[[[['a']], [['b']]]]] }] };
+  { delimiters := d, header := [],
+    segments := [{ id := ['P', 'I', 'D'], fields := [[[[[Piece.char 'a']], [[Piece.char 'b']]]]] }] };
 have twoFields :=
-  { delimiters := d, header := [], segments := [{ id := ['P', 'I', 'D'], fields := [[[[['a']]]], [[[['b']]]]] }] };
+  { delimiters := d, header := [],
+    segments := [{ id := ['P', 'I', 'D'], fields := [[[[[Piece.char 'a']]]], [[[[Piece.char 'b']]]]] }] };
 encode twoComponents = encode twoFields ∧ twoComponents ≠ twoFields
 -/
 #guard_msgs in
@@ -45,9 +47,10 @@ encode twoComponents = encode twoFields ∧ twoComponents ≠ twoFields
 #print axioms wf_iff_failures_nil
 
 /--
-info: ["well_formed_delimiters_distinct", "well_formed_separators_not_escape_codes", "well_formed_segment_id_length",
+info: ["well_formed_delimiters_distinct", "well_formed_delimiters_not_escape_codes", "well_formed_segment_id_length",
  "well_formed_segment_id_no_terminator", "well_formed_field_has_repetition", "well_formed_repetition_has_component",
- "well_formed_component_has_subcomponent", "well_formed_subcomponent_no_terminator"]
+ "well_formed_component_has_subcomponent", "well_formed_subcomponent_no_terminator",
+ "well_formed_escape_sequence_defined", "well_formed_escape_sequence_no_delimiter"]
 -/
 #guard_msgs in
 #eval catalogue.map (·.name)

@@ -25,8 +25,8 @@ field separator, a field of two components and two fields of one component
 share one encoding: `MSH|||~\&␍PID|a|b␍`. -/
 theorem ambiguous_without_distinct_delimiters :
     let d : Delimiters := { Delimiters.suggested with component := '|' }
-    let twoComponents : Message := ⟨d, [], [⟨['P', 'I', 'D'], [[[[['a']], [['b']]]]]⟩]⟩
-    let twoFields : Message := ⟨d, [], [⟨['P', 'I', 'D'], [[[[['a']]]], [[[['b']]]]]⟩]⟩
+    let twoComponents : Message := ⟨d, [], [⟨['P', 'I', 'D'], [[[[[.char 'a']], [[.char 'b']]]]]⟩]⟩
+    let twoFields : Message := ⟨d, [], [⟨['P', 'I', 'D'], [[[[[.char 'a']]]], [[[[.char 'b']]]]]⟩]⟩
     encode twoComponents = encode twoFields ∧ twoComponents ≠ twoFields := by
   decide
 

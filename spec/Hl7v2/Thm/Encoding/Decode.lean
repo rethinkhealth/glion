@@ -17,9 +17,9 @@ open Hl7v2.Spec
 
 /-- A separator other than the three inside a field never appears in its encoding. -/
 theorem not_mem_encodeField {d : Delimiters} (hd : d.Distinct)
-    (hk : ∀ c ∈ escapeCodes, c ∉ d.separators) {x : Char} (hsep : x ∈ d.separators)
+    (hk : ∀ c ∈ escapeCodes, c ∉ d.all) {x : Char} (hsep : x ∈ d.separators)
     (hr : x ≠ d.repetition) (hc : x ≠ d.component) (hs : x ≠ d.subcomponent)
-    {f : Field} (hf : FieldWF f) : x ∉ encodeField d f := by
+    {f : Field} (hf : FieldWF d f) : x ∉ encodeField d f := by
   unfold encodeField
   refine not_mem_intercalate hr fun l hl => ?_
   obtain ⟨r, hrf, rfl⟩ := List.mem_map.1 hl
@@ -37,8 +37,8 @@ def decodeField (d : Delimiters) (s : List Char) : Field :=
     (c.splitOn d.subcomponent).map (unescape d)
 
 theorem decodeField_encodeField {d : Delimiters} (hd : d.Distinct)
-    (hk : ∀ c ∈ escapeCodes, c ∉ d.separators) {f : Field}
-    (hf : FieldWF f) : decodeField d (encodeField d f) = f := by
+    (hk : ∀ c ∈ escapeCodes, c ∉ d.all) {f : Field}
+    (hf : FieldWF d f) : decodeField d (encodeField d f) = f := by
   have h := hd.unfold
   have sep : ∀ x, x ∈ [segmentTerminator, d.field, d.component, d.repetition, d.subcomponent] →
       x ∈ d.separators := fun _ hx => by simpa [Delimiters.separators] using hx
@@ -61,7 +61,7 @@ theorem decodeField_encodeField {d : Delimiters} (hd : d.Distinct)
     · obtain ⟨hc0, hc'⟩ := hr' c hc
       exact map_splitOn_intercalate _ _ _ _ hc0
         (fun v hv => not_mem_escape hd hk (sep _ (by simp)) (hc' v hv))
-        (fun v _ => unescape_escape d v)
+        (fun v hv => unescape_escape d (fun h => hk _ h (escape_mem_all d)) v (hc' v hv).2)
 
 /-- Proof device: read the fields of a segment back from the text after its ID. -/
 def decodeFields (d : Delimiters) : List Char → List Field
@@ -69,8 +69,8 @@ def decodeFields (d : Delimiters) : List Char → List Field
   | _ :: rest => (rest.splitOn d.field).map (decodeField d)
 
 theorem decodeFields_encodeFields {d : Delimiters} (hd : d.Distinct)
-    (hk : ∀ c ∈ escapeCodes, c ∉ d.separators) {fields : List Field}
-    (hf : ∀ f ∈ fields, FieldWF f) : decodeFields d (encodeFields d fields) = fields := by
+    (hk : ∀ c ∈ escapeCodes, c ∉ d.all) {fields : List Field}
+    (hf : ∀ f ∈ fields, FieldWF d f) : decodeFields d (encodeFields d fields) = fields := by
   have h := hd.unfold
   cases fields with
   | nil => rfl
@@ -83,8 +83,8 @@ theorem decodeFields_encodeFields {d : Delimiters} (hd : d.Distinct)
       (fun g hg => decodeField_encodeField hd hk (hf g hg))
 
 theorem not_mem_encodeFields {d : Delimiters} (hd : d.Distinct)
-    (hk : ∀ c ∈ escapeCodes, c ∉ d.separators) {fields : List Field}
-    (hf : ∀ f ∈ fields, FieldWF f) : segmentTerminator ∉ encodeFields d fields := by
+    (hk : ∀ c ∈ escapeCodes, c ∉ d.all) {fields : List Field}
+    (hf : ∀ f ∈ fields, FieldWF d f) : segmentTerminator ∉ encodeFields d fields := by
   have h := hd.unfold
   simp only [encodeFields, List.mem_flatMap, List.mem_cons, not_exists, not_and, not_or]
   exact fun f hfm => ⟨h.tf, not_mem_encodeField hd hk (by simp [Delimiters.separators]) h.tr h.tc
@@ -106,7 +106,7 @@ def decode (text : List Char) : Message :=
 
 theorem decode_encode {m : Message} (hm : m.WF) : decode (encode m) = m := by
   have hd := hm.delimiters_distinct
-  have hk := hm.separators_not_escape_codes
+  have hk := hm.delimiters_not_escape_codes
   have hh := hm.header
   have hs := hm.segment
   obtain ⟨d, header, segments⟩ := m

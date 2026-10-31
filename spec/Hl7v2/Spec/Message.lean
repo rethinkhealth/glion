@@ -1,4 +1,4 @@
-import Hl7v2.Spec.Delimiters
+import Hl7v2.Spec.Escape
 
 /-!
 # Message structure (§2.5)
@@ -10,11 +10,11 @@ Source: HL7 Version 2.8.1, Chapter 2 (Control).
 namespace Hl7v2.Spec
 
 /-! Fields hold repetitions, repetitions hold components, components hold
-subcomponents, and a subcomponent is text. Every level holds at least one
-element: a field that is present but empty is one repetition of one component of
-one empty subcomponent. -/
+subcomponents, and a subcomponent is a value: characters and escape sequences
+(§2.7). Every level holds at least one element: a field that is present but empty
+is one repetition of one component of one empty subcomponent. -/
 
-abbrev Subcomponent := List Char
+abbrev Subcomponent := List Piece
 abbrev Component := List Subcomponent
 abbrev Repetition := List Component
 abbrev Field := List Repetition

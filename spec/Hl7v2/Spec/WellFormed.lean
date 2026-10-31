@@ -18,6 +18,23 @@ namespace Hl7v2.Spec
 instance (d : Delimiters) : Decidable d.Distinct :=
   inferInstanceAs (Decidable d.all.Nodup)
 
+/-- A character, or an escape sequence §2.7 defines. -/
+def Piece.isDefined : Piece → Bool
+  | .char _ => true
+  | .sequence code => isDefinedSequence code
+
+/-- The escape code ID and data characters of an escape sequence; none for a character. -/
+def Piece.code : Piece → List Char
+  | .char _ => []
+  | .sequence code => code
+
+/-- No character of the escape code ID or data is a delimiter or the segment
+terminator. -/
+def Piece.NoDelimiter (d : Delimiters) (p : Piece) : Prop := ∀ x ∈ d.all, x ∉ p.code
+
+instance (d : Delimiters) (p : Piece) : Decidable (p.NoDelimiter d) :=
+  inferInstanceAs (Decidable (∀ x ∈ d.all, x ∉ p.code))
+
 /-- Every field of the message: MSH-3 onward, then the fields of each later segment. -/
 def Message.fields (m : Message) : List Field :=
   m.header ++ m.segments.flatMap (·.fields)
@@ -25,8 +42,9 @@ def Message.fields (m : Message) : List Field :=
 structure Message.WF (m : Message) : Prop where
   /-- The delimiters are different characters. -/
   delimiters_distinct : m.delimiters.Distinct
-  /-- No separator is an escape code ID, so no escape sequence holds a separator. -/
-  separators_not_escape_codes : ∀ c ∈ escapeCodes, c ∉ m.delimiters.separators
+  /-- No delimiter is an escape code ID, so no escape sequence for a delimiter
+  holds a delimiter. -/
+  delimiters_not_escape_codes : ∀ c ∈ escapeCodes, c ∉ m.delimiters.all
   /-- A segment ID is three characters (§2.5.2). -/
   segment_id_length : ∀ s ∈ m.segments, s.id.length = 3
   /-- A segment ID does not contain the segment terminator. -/
@@ -38,7 +56,14 @@ structure Message.WF (m : Message) : Prop where
   /-- A component holds at least one subcomponent. -/
   component_has_subcomponent : ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, c ≠ []
   /-- A subcomponent contains no segment terminator. -/
-  subcomponent_no_terminator : ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, segmentTerminator ∉ s
+  subcomponent_no_terminator :
+    ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, Piece.char segmentTerminator ∉ s
+  /-- Every escape sequence is one §2.7 defines. -/
+  escape_sequence_defined : ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, ∀ p ∈ s, p.isDefined
+  /-- No escape sequence holds a delimiter: "Escape sequences SHALL NOT contain
+  nested escape sequences" (§2.7.1), and a separator would end the value. -/
+  escape_sequence_no_delimiter :
+    ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, ∀ p ∈ s, p.NoDelimiter m.delimiters
 
 /-- A named rule of `Message.WF`. The name is `well_formed_` and the field name. -/
 structure Rule where
@@ -48,8 +73,8 @@ structure Rule where
 /-- Every rule of `Message.WF`, in field order. -/
 def catalogue : List Rule :=
   [ ⟨"well_formed_delimiters_distinct", fun m => decide m.delimiters.Distinct⟩,
-    ⟨"well_formed_separators_not_escape_codes",
-      fun m => decide (∀ c ∈ escapeCodes, c ∉ m.delimiters.separators)⟩,
+    ⟨"well_formed_delimiters_not_escape_codes",
+      fun m => decide (∀ c ∈ escapeCodes, c ∉ m.delimiters.all)⟩,
     ⟨"well_formed_segment_id_length", fun m => decide (∀ s ∈ m.segments, s.id.length = 3)⟩,
     ⟨"well_formed_segment_id_no_terminator",
       fun m => decide (∀ s ∈ m.segments, segmentTerminator ∉ s.id)⟩,
@@ -59,7 +84,11 @@ def catalogue : List Rule :=
     ⟨"well_formed_component_has_subcomponent",
       fun m => decide (∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, c ≠ [])⟩,
     ⟨"well_formed_subcomponent_no_terminator",
-      fun m => decide (∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, segmentTerminator ∉ s)⟩ ]
+      fun m => decide (∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, Piece.char segmentTerminator ∉ s)⟩,
+    ⟨"well_formed_escape_sequence_defined",
+      fun m => decide (∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, ∀ p ∈ s, p.isDefined)⟩,
+    ⟨"well_formed_escape_sequence_no_delimiter",
+      fun m => decide (∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, ∀ p ∈ s, p.NoDelimiter m.delimiters)⟩ ]
 
 /-- The names of the rules the message breaks. -/
 def Message.failures (m : Message) : List String :=

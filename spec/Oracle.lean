@@ -10,7 +10,9 @@ specification says about it: its encoding (`encode`) and the rules it breaks
 
 Input: `{"delimiters": "|^~\\&", "header": [field, …], "segments": [{"id": "PID", "fields": [field, …]}, …]}`,
 where a field is a list of repetitions, a repetition a list of components, and a
-component a list of subcomponent strings.
+component a list of subcomponents. A subcomponent is a string of characters, or a
+list whose items are strings of characters and escape sequences: `"Smith"`, or
+`[{"sequence": "H"}, "240*", {"sequence": "N"}]` for `\H\240*\N\`.
 
 Output: `{"text": "MSH|^~\\&\r…", "failures": ["well_formed_…", …]}`.
 -/
@@ -21,8 +23,18 @@ def chars (j : Json) : Except String (List Char) := return (← j.getStr?).toLis
 
 def list (j : Json) : Except String (List Json) := return (← j.getArr?).toList
 
+def piece (j : Json) : Except String (List Piece) :=
+  match j.getObjVal? "sequence" with
+  | .ok code => return [.sequence (← chars code)]
+  | .error _ => return (← chars j).map .char
+
+def subcomponent (j : Json) : Except String Subcomponent :=
+  match j.getStr? with
+  | .ok s => return s.toList.map .char
+  | .error _ => return (← list j >>= List.mapM piece).flatten
+
 def field (j : Json) : Except String Field :=
-  list j >>= List.mapM fun r => list r >>= List.mapM fun c => list c >>= List.mapM chars
+  list j >>= List.mapM fun r => list r >>= List.mapM fun c => list c >>= List.mapM subcomponent
 
 def delimiters (j : Json) : Except String Delimiters := do
   match ← chars j with
