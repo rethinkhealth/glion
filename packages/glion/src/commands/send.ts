@@ -18,10 +18,11 @@ import {
 } from "@glion/mllp-client";
 import type { MllpClientOptions, MllpSocket } from "@glion/mllp-client";
 import { nodeSocket } from "@glion/mllp-client/node";
-import { parseHL7v2 } from "@glion/parser";
+import { hl7v2Parser } from "@glion/parser";
 import { EscapeSequenceError, toHl7v2 } from "@glion/to-hl7v2";
-import { terminateSegments } from "@glion/transform-segment-terminator";
+import { hl7v2TransformSegmentTerminator } from "@glion/transform-segment-terminator";
 import { value } from "@glion/util-query";
+import { unified } from "unified";
 
 import { MAX_PORT } from "../constants";
 import { causeMessage } from "../errors";
@@ -274,6 +275,13 @@ export function parseSendArgs(argv: readonly string[]): ParseSendResult {
 
 const ENCODER = new TextEncoder();
 
+// A message read from a file or stdin ends its segments with the editor's
+// line breaks; each segment is sent ending with `\r`.
+const reader = unified()
+  .use(hl7v2Parser)
+  .use(hl7v2TransformSegmentTerminator)
+  .freeze();
+
 const SEND_HELP_TEXT = `glion send — send one HL7v2 message over MLLP and print the ACK
 
 Usage:
@@ -513,11 +521,9 @@ export async function runSend(opts: RunSendOptions): Promise<number> {
     });
   }
 
-  // Parse to a tree, then re-serialize to canonical, CR-delimited form. The
-  // parser is lenient — it never rejects — so this only normalizes the wire
-  // bytes (line endings in particular); whether the message is a *valid* HL7v2
-  // message is the receiver's call, surfaced as a NAK. We do not pre-validate.
-  const tree = parseHL7v2(read.text);
+  // Whether the message is a valid HL7v2 message is the receiver's call,
+  // surfaced as a NAK. We do not pre-validate.
+  const tree = reader.runSync(reader.parse(read.text));
   const prepared = prepareRequest(tree);
   if (!prepared.ok) {
     return emit({ kind: "invalid", message: prepared.reason, target });
@@ -569,11 +575,11 @@ type RequestResult =
  */
 function prepareRequest(tree: Root): RequestResult {
   try {
-    const canonical = toHl7v2(terminateSegments(tree));
+    const written = toHl7v2(tree);
     return {
       ok: true,
       request: {
-        byteCount: ENCODER.encode(canonical).length,
+        byteCount: ENCODER.encode(written).length,
         controlId: value(tree, "MSH.10.1")?.value ?? "",
         segmentCount: tree.children.length,
       },

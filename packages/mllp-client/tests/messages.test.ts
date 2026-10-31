@@ -11,7 +11,7 @@ import {
   AckException,
 } from "@glion/ack";
 import { parseHL7v2 } from "@glion/parser";
-import { toHl7v2 } from "@glion/to-hl7v2";
+import { SegmentTerminatorError, toHl7v2 } from "@glion/to-hl7v2";
 import { CharsetError, decodeBytes, encodeBytes } from "@glion/util-charset";
 import { describe, expect, it } from "vitest";
 
@@ -38,20 +38,11 @@ describe("encode()", () => {
       expect(decodeBytes(encode(tree).bytes)).toBe(text);
     });
 
-    it("ends every segment with a carriage return, whatever line break it was read with", () => {
+    it("writes each segment followed by the terminator it was read with", () => {
       const { text } = adtA01();
-      const tree = parseHL7v2(text.replaceAll("\r", "\r\n").slice(0, -2));
+      const read = text.replaceAll("\r", "\n").slice(0, -1);
 
-      expect(decodeBytes(encode(tree).bytes)).toBe(text);
-    });
-
-    it("leaves the tree's segment terminators as they were read", () => {
-      const { text } = adtA01();
-      const tree = parseHL7v2(text.replaceAll("\r", "\n"));
-
-      encode(tree);
-
-      expect(toHl7v2(tree)).toBe(text.replaceAll("\r", "\n"));
+      expect(decodeBytes(encode(parseHL7v2(read)).bytes)).toBe(read);
     });
 
     it("encodes the bytes as UTF-8", () => {
@@ -77,6 +68,17 @@ describe("encode()", () => {
         expect.objectContaining({
           cause: expect.stringContaining("no MSH-10 control ID"),
         })
+      );
+    });
+
+    it("throws when a segment with no segment terminator is followed by another", () => {
+      const { text } = adtA01();
+      const tree = parseHL7v2(text.slice(0, -1));
+      tree.children.push(...parseHL7v2("ZPI|x\r").children);
+
+      expect(() => encode(tree)).toThrow(MllpInvalidMessageError);
+      expect(() => encode(tree)).toThrow(
+        expect.objectContaining({ cause: expect.any(SegmentTerminatorError) })
       );
     });
   });

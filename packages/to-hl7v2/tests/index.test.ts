@@ -346,6 +346,17 @@ describe("segment terminator", () => {
     expect(() => toHl7v2(tree)).toThrow(SegmentTerminatorError);
   });
 
+  it("throws a TypeError for a segment without a terminator", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+    Reflect.deleteProperty(tree.children[1] as Segment, "terminator");
+
+    expect(() => toHl7v2(tree)).toThrow(
+      new TypeError(
+        "The segment has no `terminator`; every segment has one, an empty string when nothing ends the segment."
+      )
+    );
+  });
+
   it("writes nothing after a last segment with no terminator", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
     (tree.children[1] as Segment).terminator = "";

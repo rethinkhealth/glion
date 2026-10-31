@@ -62,6 +62,7 @@ export const hl7v2ToHl7v2: Plugin<[Hl7v2ToHl7v2Options?], Root, string> =
  *   character that no escape sequence can write with the delimiters.
  * @throws {SegmentTerminatorError} When a segment with an empty `terminator`
  *   is followed by another segment.
+ * @throws {TypeError} When a segment of a Root or Group has no `terminator`.
  */
 export function toHl7v2(
   node: Nodes,
@@ -138,6 +139,11 @@ export function toHl7v2(
     const last = written.length - 1;
     return written
       .map((seg, index) => {
+        if (typeof seg.terminator !== "string") {
+          throw new TypeError(
+            "The segment has no `terminator`; every segment has one, an empty string when nothing ends the segment."
+          );
+        }
         if (seg.terminator === "" && index < last) {
           throw new SegmentTerminatorError(seg);
         }

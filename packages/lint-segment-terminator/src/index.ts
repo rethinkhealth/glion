@@ -25,6 +25,8 @@ const notes = {
  *
  * Reads each segment's `terminator`, as `@glion/parser` records it. A segment
  * with an empty `terminator` is reported as having no segment terminator.
+ *
+ * @throws {TypeError} When a segment has no `terminator`.
  */
 const hl7v2LintSegmentTerminator = lintRule<Root>(
   {
@@ -34,6 +36,11 @@ const hl7v2LintSegmentTerminator = lintRule<Root>(
   (tree, file) => {
     visit(tree, "segment", (segment, ancestors) => {
       const { terminator } = segment;
+      if (typeof terminator !== "string") {
+        throw new TypeError(
+          "The segment has no `terminator`; every segment has one, an empty string when nothing ends the segment."
+        );
+      }
       let reason: string;
       switch (terminator) {
         case CARRIAGE_RETURN: {

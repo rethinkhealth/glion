@@ -9,7 +9,6 @@ import { isAckNakCode, isAckSuccessCode } from "@glion/ack";
 import type { Root } from "@glion/ast";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
-import { terminateSegments } from "@glion/transform-segment-terminator";
 import { decodeBytes, encodeBytes } from "@glion/util-charset";
 
 import {
@@ -24,13 +23,16 @@ import { read } from "./utils";
 export interface EncodingResponse {
   /** MSH-10, which the acknowledgment echoes in MSA-2. */
   readonly controlId: string;
-  /** The message in canonical HL7v2, encoded. Framing belongs to the connection. */
+  /**
+   * The message as `toHl7v2` writes it, encoded. Framing belongs to the
+   * connection.
+   */
   readonly bytes: Uint8Array;
 }
 
 /**
- * `tree` as the message to send, in canonical HL7v2: every segment ends with
- * a carriage return, whatever line break it was read with.
+ * `tree` as the message to send, written as `toHl7v2` writes it: each segment
+ * followed by its `terminator`.
  *
  * @throws {MllpInvalidMessageError} The message has no MSH-10, or it could not
  *   be serialized or encoded.
@@ -45,7 +47,7 @@ export function encode(tree: Root): EncodingResponse {
 
   try {
     return {
-      bytes: encodeBytes(toHl7v2(terminateSegments(tree))),
+      bytes: encodeBytes(toHl7v2(tree)),
       controlId,
     };
   } catch (error) {

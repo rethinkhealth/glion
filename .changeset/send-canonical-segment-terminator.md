@@ -1,6 +1,8 @@
 ---
-"@glion/mllp-client": patch
+"@glion/mllp-client": minor
 "@glion/cli": patch
 ---
 
-A message is sent with a carriage return after every segment, whatever line breaks it was read with: `encode()` applies `@glion/transform-segment-terminator` before writing the message, and `glion send` counts the bytes of that message.
+**Breaking:** `MllpClient.send()` writes the message with `toHl7v2`, each segment followed by its `terminator`, and changes nothing about it: a message read with `\n` or `\r\n` line breaks is sent with them. Apply `@glion/transform-segment-terminator` before sending to end every segment with `\r`.
+
+`glion send` reads a message with `@glion/parser` and `@glion/transform-segment-terminator`, so each segment is sent ending with `\r`, whatever line breaks the file holds.

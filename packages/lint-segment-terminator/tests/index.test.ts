@@ -126,6 +126,18 @@ describe("hl7v2-lint:segment-terminator", () => {
   });
 
   describe("a segment that was not read from text", () => {
+    it("stops, and records why, when it has no terminator", async () => {
+      const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("1")));
+      Reflect.deleteProperty(tree.children[1] as Segment, "terminator");
+      const file = new VFile();
+
+      await unified().use(hl7v2LintSegmentTerminator).run(tree, file);
+
+      expect(file.messages.map(({ reason }) => reason)).toStrictEqual([
+        "The segment has no `terminator`; every segment has one, an empty string when nothing ends the segment.",
+      ]);
+    });
+
     it("is not reported when the builder made it", async () => {
       const file = new VFile();
 

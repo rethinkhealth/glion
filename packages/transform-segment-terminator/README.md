@@ -36,7 +36,7 @@ console.log(JSON.stringify(String(file)));
 
 A `unified` transform plugin. Also the package's default export.
 
-Replaces the tree with the copy `terminateSegments` returns.
+Sets the `terminator` of every segment, segments inside groups included, to `\r`. The tree is changed in place.
 
 ```ts
 import type { Plugin } from "unified";
@@ -44,25 +44,6 @@ import type { Root } from "@glion/ast";
 
 declare const hl7v2TransformSegmentTerminator: Plugin<[], Root>;
 export default hl7v2TransformSegmentTerminator;
-```
-
-### `terminateSegments(tree)`
-
-Returns a copy of `tree` in which every segment, segments inside groups included, has the `terminator` `\r`. `tree` is not changed. The copy holds the same field nodes as `tree`.
-
-```ts
-import type { Root } from "@glion/ast";
-
-declare function terminateSegments(tree: Root): Root;
-```
-
-```ts
-import { parseHL7v2 } from "@glion/parser";
-import { toHl7v2 } from "@glion/to-hl7v2";
-import { terminateSegments } from "@glion/transform-segment-terminator";
-
-toHl7v2(terminateSegments(parseHL7v2("MSH|^~\\&\r\nPID|1")));
-// "MSH|^~\\&\rPID|1\r"
 ```
 
 ## Part of Glion

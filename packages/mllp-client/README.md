@@ -147,7 +147,7 @@ const client = new MllpClient({
 send(message: Root, options?: { timeoutMs?: number }): Promise<MllpClientResponse>
 ```
 
-Sends one message and resolves with the acknowledgment that answers it. Connects first if the client is not connected.
+Sends one message and resolves with the acknowledgment that answers it. Connects first if the client is not connected. The message is written with `toHl7v2` from `@glion/to-hl7v2`: each segment followed by its `terminator`, as the tree holds it. A message read with `\n` or `\r\n` line breaks is sent with them; apply `@glion/transform-segment-terminator` to end every segment with `\r`.
 
 | Parameter           | Type     | Description                                              |
 | ------------------- | -------- | -------------------------------------------------------- |
