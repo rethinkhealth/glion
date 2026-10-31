@@ -86,8 +86,9 @@ function createParserCore() {
   };
 
   /**
-   * Ensure there is an active segment. If delimiter tokens arrive before
-   * any segment name, lazily open a segment with an empty name.
+   * The open segment, or a new segment with an empty Segment ID at `start`
+   * when none is open: a field delimiter or segment terminator before any
+   * Segment ID opens one.
    */
   const ensureSegment = (start: Position["start"]): Segment =>
     seg ?? openSegment("", { end: start, start });
@@ -260,8 +261,6 @@ function createParserCore() {
       }
     }
   };
-
-  // Do not pre-open a segment; lazily open upon first non-SEGMENT_END token.
 
   const finalize = () => {
     if (lastContentEnd && seg) {

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`mSH bootstrap only at file start > emits MSH as TEXT, then a synthetic FIELD_DELIM, then MSH.2 as TEXT for first segment only 1`] = `
+exports[`the message header is read only at the start of the message > emits MSH as TEXT, then a synthetic FIELD_DELIM, then MSH.2 as TEXT for first segment only 1`] = `
 [
   {
     "position": {

@@ -19,11 +19,13 @@ import { unified } from "unified";
 
 import {
   arbAdversarialInput,
+  arbEmptyLines,
   arbHL7v2Message,
   arbHL7v2MessageCustomDelimiters,
   arbHL7v2Segments,
   arbMutatedCustomDelimiterMessage,
   arbMutatedMessage,
+  arbSegmentEnd,
 } from "../src/arbitraries";
 import { discoverFixtures, readFixture } from "../src/fixtures";
 
@@ -164,31 +166,18 @@ describe("QR4: round-trip data fidelity", () => {
     // Mutant: the processor skips a segment terminator that no segment is
     // open for, so an empty line is dropped. Fails on `"MSH|^~\\&|||\r\r"`.
     it("a message is written back with the line breaks and empty lines it was read with", async () => {
-      const arbLineBreak = fc.constantFrom("\r", "\n", "\r\n");
-      // Up to two empty lines, each ended by any line break.
-      const arbEmptyLines = fc
-        .array(arbLineBreak, { maxLength: 2 })
-        .map((breaks) => breaks.join(""));
       const arbLineBreaks = arbHL7v2Segments.chain((segments) =>
         fc
           .tuple(
             arbEmptyLines,
-            fc.array(fc.tuple(arbLineBreak, arbEmptyLines), {
-              maxLength: segments.length,
-              minLength: segments.length,
-            }),
-            fc.boolean()
+            ...segments.map((line, index) =>
+              (index === segments.length - 1
+                ? fc.oneof(fc.constant(""), arbSegmentEnd)
+                : arbSegmentEnd
+              ).map((end) => `${line}${end}`)
+            )
           )
-          .map(([before, after, terminated]) => {
-            const lines = segments.map((line, index) => {
-              const [lineBreak, emptyLines] = after[index] ?? ["\r", ""];
-              const last = index === segments.length - 1;
-              return last && !terminated
-                ? line
-                : `${line}${lineBreak}${emptyLines}`;
-            });
-            return `${before}${lines.join("")}`;
-          })
+          .map((lines) => lines.join(""))
       );
 
       await fc.assert(

@@ -66,7 +66,7 @@ Every rule that stops at the end of a segment calls this function: the tokenizer
 
 `message-header.ts` reads the start of the message:
 
-- The message opens with a message header segment when it starts with `MSH` followed by a character that is not a segment terminator. `MSH` followed by a segment terminator is a segment with no fields.
+- The message opens with a message header segment when its first segment, after any empty lines, starts with `MSH` followed by a character that is not a segment terminator. `MSH` followed by a segment terminator is a segment with no fields. In CR + `MSH|^~\&`, MSH-1 and MSH-2 are read, and an empty segment comes before MSH.
 - MSH-1 is the character after `MSH`. No delimiter opens it: the field separator is its value.
 - MSH-2 holds up to four encoding characters, and ends at the next field delimiter or segment terminator. `MSH|^~\|APP` and `MSH|^~\` + CR both declare `^~\`.
 
@@ -112,7 +112,6 @@ A token's span covers the text as written, so a decoded value can be shorter tha
 - A field, field repetition, or component with no value has `children: []`. `PID|1||` holds three fields, the last two empty.
 - A segment terminator closes the segment, and is recorded as its `terminator`. A segment that the input ends inside has the `terminator` `""`.
 - A segment terminator with no segment open is an empty line, and closes an empty segment: an empty Segment ID, no fields, and no width, at the start of its line. `MSH|^~\&` + CR + CR + `PID|1` holds MSH, an empty segment, and PID.
-- The message header is read after any empty lines before it, so in CR + `MSH|^~\&`, MSH-1 and MSH-2 are read and the empty segment comes first.
 
 ## Tests
 

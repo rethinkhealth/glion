@@ -62,18 +62,27 @@ describe("an empty line", () => {
       start: { column: 1, line: 2, offset: 9 },
     });
   });
+
+  it("counts as a line for the segments after it", () => {
+    const pid = parseHL7v2("MSH|^~\\&\r\rPID|1\r").children[2];
+
+    expect(pid?.position).toStrictEqual({
+      end: { column: 6, line: 3, offset: 15 },
+      start: { column: 1, line: 3, offset: 10 },
+    });
+  });
 });
 
 describe("an empty line before the message header", () => {
   it("is read as an empty segment, and MSH-1 and MSH-2 are read after it", () => {
-    const tree = parseHL7v2("\rMSH|^~\\&|APP\rPID|1");
-    const [empty, msh] = tree.children as Segment[];
+    const source = "\rMSH|^~\\&|APP\rPID|1";
+    const msh = parseHL7v2(source).children[1] as Segment;
 
-    expect([
-      empty?.name,
-      empty?.children.length,
-      empty?.terminator,
-    ]).toStrictEqual(["", 0, "\r"]);
+    expect(segments(source)).toStrictEqual([
+      ["", 0, "\r"],
+      ["MSH", 3, "\r"],
+      ["PID", 1, ""],
+    ]);
     expect(fieldValue(msh, 0)).toBe("|");
     expect(fieldValue(msh, 1)).toBe("^~\\&");
     expect(fieldValue(msh, 2)).toBe("APP");

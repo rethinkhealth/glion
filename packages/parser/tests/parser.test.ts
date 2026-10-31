@@ -851,6 +851,12 @@ describe("root position", () => {
     expect(pid?.position?.start.offset).toBe(10);
     expect(pid?.position?.end.offset).toBe(15);
   });
+
+  it("ends a segment at its last character when that is a field delimiter", () => {
+    const [pid] = parseHL7v2("PID|\rOBX|1").children;
+
+    expect(pid?.position?.end.offset).toBe(4);
+  });
 });
 
 describe("segment terminator", () => {

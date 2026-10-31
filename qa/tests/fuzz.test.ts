@@ -15,11 +15,13 @@ import fc from "fast-check";
 
 import {
   arbAdversarialInput,
+  arbEmptyLines,
   arbHL7v2Message,
   arbHL7v2MessageCustomDelimiters,
   arbHL7v2Segments,
   arbMutatedCustomDelimiterMessage,
   arbMutatedMessage,
+  arbSegmentEnd,
 } from "../src/arbitraries";
 
 const NUM_RUNS = 300;
@@ -95,22 +97,25 @@ describe("QR3: crash resilience", () => {
 
     // A segment ends at a carriage return, a line feed, or both, and every
     // node is positioned at its text in the message as it was read, whichever
-    // line breaks it holds (#1139). The root covers the whole message.
+    // line breaks it holds (#1139) and whatever empty lines come before or
+    // between its segments (#1158). The root covers the whole message.
     //
     // Mutant: the line breaks are replaced with `\r` before the message is
     // tokenized. Fails on `"MSH|^~\\&|||\r\nAAA|\r\n"`.
-    it("positions every node at its text, whichever line breaks end the segments", () => {
+    //
+    // Mutant: the tokenizer emits the message header before the empty lines
+    // that come before it. Fails on
+    // `"\rMSH|^~\\&|||\r\rAAA|\r"`.
+    it("positions every node at its text, whichever line breaks and empty lines end the segments", () => {
       const arbLineBreaks = arbHL7v2Segments.chain((segments) =>
         fc
-          .array(fc.constantFrom("\r", "\n", "\r\n"), {
-            maxLength: segments.length,
-            minLength: segments.length,
-          })
-          .map((breaks) =>
-            segments
-              .map((segment, index) => `${segment}${breaks[index]}`)
-              .join("")
+          .tuple(
+            arbEmptyLines,
+            ...segments.map((segment) =>
+              arbSegmentEnd.map((end) => `${segment}${end}`)
+            )
           )
+          .map((lines) => lines.join(""))
       );
 
       fc.assert(
@@ -124,7 +129,11 @@ describe("QR3: crash resilience", () => {
           }
         }),
         {
-          examples: [["MSH|^~\\&|||\r\nAAA|\r\n"], ["MSH|^~\\&|||\nAAA|\r"]],
+          examples: [
+            ["MSH|^~\\&|||\r\nAAA|\r\n"],
+            ["MSH|^~\\&|||\nAAA|\r"],
+            ["\rMSH|^~\\&|||\r\rAAA|\r"],
+          ],
           numRuns: NUM_RUNS,
         }
       );
