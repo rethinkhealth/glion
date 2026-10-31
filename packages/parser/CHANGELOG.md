@@ -1,5 +1,36 @@
 # @rethinkhealth/hl7v2
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1159](https://github.com/rethinkhealth/glion/pull/1159) [`d697238`](https://github.com/rethinkhealth/glion/commit/d697238293eb59554cbe79695c1af882fc4fb9db) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** an empty line is read as a segment with an empty Segment ID, no fields, and the terminator that ended it, so a message is written back with its empty lines. Before, an empty line was dropped without a trace ([#1158](https://github.com/rethinkhealth/glion/issues/1158)). `@glion/lint-segment-header-length` reports each one at `error`, `@glion/lint-required-message-header` reports one before `MSH`, and `@glion/lint-profile-segment-order` reports each one the event schema has no place for: an `Hxx` segment of the event schema can take it. The message header is read after the empty lines before it: an empty line before `MSH` no longer stops MSH-1 and MSH-2 being read, which lost MSH-2 on output. An empty line after the last segment is a segment, so `@glion/lint-profile-segment-order` reports a segment missing at the end of the message next to that line, at its start or its end, rather than at the end of the message.
+
+  `glion send` sends each empty line of a message file as an empty segment, a carriage return alone, and counts it among the segments it reports.
+
+- [#1138](https://github.com/rethinkhealth/glion/pull/1138) [`dcefdc9`](https://github.com/rethinkhealth/glion/commit/dcefdc9ff2af60dc18898f655405c42aae04cfd9) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** the parser reads the text it is given and never rewrites it, so every `position` is a span of that text (ADR 0034). A segment ends at `\r`, `\n`, or `\r\n`. Before, the default preprocessing steps replaced each `\r\n` with `\r`, so every position after a `\r\n` pointed one character early ([#1139](https://github.com/rethinkhealth/glion/issues/1139)). A byte order mark is still removed by `stripBOM`, and positions count from the character after it.
+
+  **Breaking:** the root's `position` covers the message from its first character to its last, the line breaks after its last segment included: `MSH|^~\&\rPID|1\r` gives a root at 0–15, not 0–14. A segment still ends at its last character, before its line break. A finding placed at the end of the message, such as a segment missing at the end in `@glion/lint-profile-segment-order`, is now after those line breaks: with one segment terminator, at the start of the next line.
+
+  **Breaking:** the `normalizeNewlines` preprocessing step is removed, and `defaultPreprocessors` holds `stripBOM` and `detectDelimiters`.
+
+  An MSH-2 shorter than four characters ends at the first field delimiter or line break, and so do the encoding characters `detectDelimiters` reads: `MSH|^~\` followed by `\r` no longer swallows the next segment into MSH-2, and `MSH|^~\|APP` no longer swallows MSH-3 ([#1140](https://github.com/rethinkhealth/glion/issues/1140)). `MSH` followed by a line break is read as a segment with no fields. `HL7v2Tokenizer.next()` before `reset()` returns `null`. `parseHL7v2` throws a `TypeError` when its input is not a string, such as the `Buffer` a file read without an encoding gives, instead of failing inside a preprocessing step.
+
+- [#1156](https://github.com/rethinkhealth/glion/pull/1156) [`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** the segment terminator is a carriage return, `\r`, and no setting changes it, as HL7v2 Chapter 2 requires: "The segment terminator is always a carriage return." `Delimiters` and `DEFAULT_DELIMITERS` no longer have a `segment` key, and a configuration that sets `settings.delimiters.segment` is rejected. `@glion/utils` exports `SEGMENT_TERMINATOR`, `"\r"`. The parser ends a segment at `\r`, `@glion/to-hl7v2` writes `\r` after each segment, `\.br\` decodes to `\r`, and `\r` in a value is written as `\.br\`; a line feed in a value is written as `\X0A\`, like any other control character.
+
+- [#1148](https://github.com/rethinkhealth/glion/pull/1148) [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00) Thanks [@meleksomai](https://github.com/meleksomai)! - A segment records the characters that end it in `Segment.terminator` (ADR 0035). `@glion/parser` sets it to what ended the segment in the text it was read from (`\r`, `\n`, or `\r\n`), and to `""` for a last segment with nothing after it. `s()` in `@glion/builder` sets it to `\r`, so a built segment carries the key.
+
+  **Breaking:** `Segment.terminator` is required, so a segment made as an object literal states it.
+
+  `@glion/parser` takes a `lineBreaks` option: `true`, the default, reads a line feed and a carriage return and a line feed as segment ends, as before; `false` ends a segment only at a carriage return, as HL7v2 Chapter 2 requires, and reads a line feed as data. A `SEGMENT_END` token's `value` holds the characters it covers.
+
+### Patch Changes
+
+- Updated dependencies [[`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00)]:
+  - @glion/ast@0.32.0
+  - @glion/utils@0.32.0
+  - @glion/config@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes

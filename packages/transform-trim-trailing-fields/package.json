@@ -1,6 +1,6 @@
 {
   "name": "@glion/transform-trim-trailing-fields",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "description": "Unified plugin to remove the empty fields at the end of each HL7v2 segment",
   "keywords": [
     "field",

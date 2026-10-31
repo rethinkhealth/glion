@@ -1,5 +1,25 @@
 # @glion/mllp-client
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1148](https://github.com/rethinkhealth/glion/pull/1148) [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** `MllpClient.send()` writes the message with `toHl7v2`, each segment followed by its `terminator`, and changes nothing about it: a message read with `\n` or `\r\n` line breaks is sent with them. Apply `@glion/transform-segment-terminator` before sending to end every segment with `\r`.
+
+  `glion send` reads a message with `@glion/parser` and `@glion/transform-segment-terminator`, so each segment is sent ending with `\r`, whatever line breaks the file holds.
+
+### Patch Changes
+
+- [#1138](https://github.com/rethinkhealth/glion/pull/1138) [`dcefdc9`](https://github.com/rethinkhealth/glion/commit/dcefdc9ff2af60dc18898f655405c42aae04cfd9) Thanks [@meleksomai](https://github.com/meleksomai)! - A message is sent with the segment terminator after its last segment, as HL7v2 Chapter 2 requires: the MLLP payload is `MSH|^~\&|…\rPID|1\r`, then the `<FS><CR>` trailer.
+- Updated dependencies [[`d697238`](https://github.com/rethinkhealth/glion/commit/d697238293eb59554cbe79695c1af882fc4fb9db), [`dcefdc9`](https://github.com/rethinkhealth/glion/commit/dcefdc9ff2af60dc18898f655405c42aae04cfd9), [`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00)]:
+  - @glion/parser@0.32.0
+  - @glion/ast@0.32.0
+  - @glion/to-hl7v2@0.32.0
+  - @glion/util-query@0.32.0
+  - @glion/ack@0.32.0
+  - @glion/mllp-codec@0.32.0
+  - @glion/util-charset@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes

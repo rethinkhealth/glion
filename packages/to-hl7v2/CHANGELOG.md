@@ -1,5 +1,18 @@
 # @rethinkhealth/hl7v2-to-hl7v2
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1156](https://github.com/rethinkhealth/glion/pull/1156) [`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** the segment terminator is a carriage return, `\r`, and no setting changes it, as HL7v2 Chapter 2 requires: "The segment terminator is always a carriage return." `Delimiters` and `DEFAULT_DELIMITERS` no longer have a `segment` key, and a configuration that sets `settings.delimiters.segment` is rejected. `@glion/utils` exports `SEGMENT_TERMINATOR`, `"\r"`. The parser ends a segment at `\r`, `@glion/to-hl7v2` writes `\r` after each segment, `\.br\` decodes to `\r`, and `\r` in a value is written as `\.br\`; a line feed in a value is written as `\X0A\`, like any other control character.
+
+- [#1148](https://github.com/rethinkhealth/glion/pull/1148) [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** `toHl7v2()` and the `hl7v2ToHl7v2` compiler write each segment of a `Root` or `Group` followed by its `terminator`, so a parsed message is written back with the line breaks it was read with, a last segment with nothing after it included. A last segment with an empty `terminator` is written with nothing after it; any other throws `SegmentTerminatorError`, because it would join the next segment. A segment with no `terminator` throws a `TypeError`. A segment made with `@glion/builder` ends with `\r`. Apply `@glion/transform-segment-terminator` to write every segment with `\r`.
+
+### Patch Changes
+
+- Updated dependencies [[`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7)]:
+  - @glion/utils@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes

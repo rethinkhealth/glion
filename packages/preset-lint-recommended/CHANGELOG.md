@@ -1,5 +1,20 @@
 # @rethinkhealth/hl7v2-preset-lint-recommended
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1148](https://github.com/rethinkhealth/glion/pull/1148) [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00) Thanks [@meleksomai](https://github.com/meleksomai)! - `@glion/preset-lint-recommended` runs `@glion/lint-segment-terminator`, at its default severity, `warning`: a segment that ends with `\n` or `\r\n`, or a last segment with no segment terminator, is reported. A message is still accepted; the warning is not fatal.
+
+### Patch Changes
+
+- Updated dependencies [[`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00)]:
+  - @glion/lint-segment-terminator@0.32.0
+  - @glion/lint-no-trailing-empty-field@0.32.0
+  - @glion/lint-message-version@0.32.0
+  - @glion/lint-required-message-header@0.32.0
+  - @glion/lint-segment-header-length@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes
