@@ -11,5 +11,6 @@ Lessons for reading the Lean specification in `spec/`, in order. Each lesson bui
 | [4. One text, one meaning](lesson_4.md)                        | `encode_injective` in `Thm/Encoding.lean`                         | The decoder trick and `rw`                                                                                                                 |
 | [4, appendix: designing `decode_encode`](lesson_4_appendix.md) | `Thm/Encoding/Decode.lean`                                        | How a proof is designed: hypotheses as a to-do list, rules from counterexamples, lemmas from repetition                                    |
 | [5. Checking glion against the specification](lesson_5.md)     | `Oracle.lean`, `differential/`                                    | The specification as an oracle, the abstraction function as trusted code, generators that stay in the domain, and reading a shrunk failure |
+| [6. Changing the statement: escape sequences](lesson_6.md)     | `Spec/Escape.lean`, `Thm/Encoding/Escape.lean`                    | Modelling §2.7.1, replacing a rule, reviewing a statement change, and what the harness found next                                          |
 
 Each lesson asks you to create a practice file such as `Hl7v2/Lesson1.lean`. The library does not import it, so `lake build` ignores it; VS Code checks it when you open it.

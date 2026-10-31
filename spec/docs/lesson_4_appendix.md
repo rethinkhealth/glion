@@ -28,6 +28,7 @@ Recall the shape of a field (`Spec/Message.lean`): a subcomponent is a list of c
 `encodeField` (`Spec/Encoding.lean`) writes a field by **joining** at each level, inside out:
 
 ```text
+each subcomponent escaped      →  its text, with a delimiter in data as \F\, \S\, …
 subcomponents joined with &    →  a component's text
 components joined with ^       →  a repetition's text
 repetitions joined with ~      →  the field's text
@@ -37,7 +38,7 @@ Then `|` goes in front of each field, the segment ID in front of the fields, and
 
 `decode` does the opposite: it **splits** at each level, outside in. So the paper proof is short:
 
-> Splitting on a separator undoes joining with it. Apply that at each level, from `\r` down to `&`.
+> Splitting on a separator undoes joining with it. Apply that at each level, from `\r` down to `&`, then read each subcomponent back from its escape sequences.
 
 Everything in `Decode.lean` is this sentence, made precise. When you design a proof, start here: if you cannot say the proof in two sentences on paper, Lean will not find it for you.
 
@@ -116,13 +117,14 @@ Suppose you are designing the specification and you reach that leftover goal `�
 
 So the claim is false without a rule, and the specification gets one: `component_has_subcomponent`. Every rule of `Message.WF` was found this way. Each one is a hypothesis of `List.splitOn_intercalate`, or of a later step, that could not be proved from the message alone:
 
-| Leftover goal                                                | Counterexample                                                  | Rule                       |
-| ------------------------------------------------------------ | --------------------------------------------------------------- | -------------------------- |
-| A value contains no separator                                | `Sm^ith` splits into two                                        | `subcomponent_clean`       |
-| `^` is not inside a subcomponent's text, given it is not `&` | Component separator `&`, the same as the subcomponent separator | `delimiters_distinct`      |
-| A field, repetition or component is not empty                | Zero pieces decode as one                                       | the three `…_has_…` rules  |
-| A segment ID has no `\r`                                     | `P\rD` splits a segment in two                                  | `segment_id_no_terminator` |
-| `take 3` of the segment's text is its ID                     | ID `PI`: `take 3` of `PI\|a` is `PI\|`                          | `segment_id_length`        |
+| Leftover goal                                                | Counterexample                                                  | Rule                          |
+| ------------------------------------------------------------ | --------------------------------------------------------------- | ----------------------------- |
+| A written value contains no `\r`                             | The value `a\rPV1` splits a segment in two                      | `subcomponent_no_terminator`  |
+| An escape sequence contains no separator                     | With `S` as the field separator, `\S\` splits a field           | `separators_not_escape_codes` |
+| `^` is not inside a subcomponent's text, given it is not `&` | Component separator `&`, the same as the subcomponent separator | `delimiters_distinct`         |
+| A field, repetition or component is not empty                | Zero pieces decode as one                                       | the three `…_has_…` rules     |
+| A segment ID has no `\r`                                     | `P\rD` splits a segment in two                                  | `segment_id_no_terminator`    |
+| `take 3` of the segment's text is its ID                     | ID `PI`: `take 3` of `PI\|a` is `PI\|`                          | `segment_id_length`           |
 
 That is the design loop: claim, proof attempt, stuck goal, counterexample, rule. The rules were not invented up front; the proof asked for them.
 
@@ -161,15 +163,17 @@ Read `u` as "encode one level down" and `p` as "decode one level down". The lemm
 
 ## A6. Step 7: assemble top-down with `refine … ?_`
 
-Now read `decodeField_encodeField` (`Decode.lean` lines 34–52). It is three levels of A5's lemma, assembled from the outside in. `refine` applies a lemma and turns each `?_` into a new goal; the `·` bullets then prove those goals in order.
+Now read `decodeField_encodeField` (`Decode.lean` lines 39–64). It is three levels of A5's lemma, assembled from the outside in. `refine` applies a lemma and turns each `?_` into a new goal; the `·` bullets then prove those goals in order.
 
-| Lines | Goal                                                   | How                                                                                                                               |
-| ----- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| 40    | `decodeField (encodeField f) = f`, split on `~`        | `map_splitOn_intercalate` with hypothesis 1 from `hf.1` (field has a repetition), leaving two `?_`                                |
-| 41–46 | `~` is not inside an encoded repetition                | `not_mem_intercalate` twice (through `^`, then through `&`), with `h.cr` and `h.rs`; at the bottom, `hc'` is `subcomponent_clean` |
-| 47–48 | decoding a repetition undoes encoding it, split on `^` | `map_splitOn_intercalate` again, with `hr0` (repetition has a component), leaving two `?_`                                        |
-| 49–50 | `^` is not inside an encoded component                 | `not_mem_intercalate` with `h.cs`, then `subcomponent_clean`                                                                      |
-| 51–52 | decoding a component undoes encoding it, split on `&`  | `List.splitOn_intercalate` directly: the bottom level, as in A3                                                                   |
+| Lines | Goal                                                   | How                                                                                                                                                   |
+| ----- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 46    | `decodeField (encodeField f) = f`, split on `~`        | `map_splitOn_intercalate` with hypothesis 1 from `hf.1` (field has a repetition), leaving two `?_`                                                    |
+| 47–54 | `~` is not inside an encoded repetition                | `not_mem_intercalate` twice (through `^`, then through `&`), with `h.cr` and `h.rs`; at the bottom, `not_mem_escape`, with `hc'` (no `\r` in a value) |
+| 55–56 | decoding a repetition undoes encoding it, split on `^` | `map_splitOn_intercalate` again, with `hr0` (repetition has a component), leaving two `?_`                                                            |
+| 57–60 | `^` is not inside an encoded component                 | `not_mem_intercalate` with `h.cs`, then `not_mem_escape`                                                                                              |
+| 61–64 | decoding a component undoes encoding it, split on `&`  | `map_splitOn_intercalate` a third time, with `escape` and `unescape` one level down: `not_mem_escape` and `unescape_escape`                           |
+
+`not_mem_escape` and `unescape_escape` are in `Thm/Encoding/Escape.lean`. The first says an escaped value holds no separator: each character is written as itself, which is not a separator unless it is `\r`, or as the escape character and an escape code ID, neither of which is a separator (`delimiters_distinct`, `separators_not_escape_codes`). The second says `unescape` reads every escaped value back, one character at a time.
 
 Two idioms appear on almost every line.
 
@@ -186,7 +190,7 @@ At the field level, the code is not a join. `encodeFields` writes `|` in front o
 #eval String.ofList ('|' :: ['|'].intercalate ["a".toList, "b".toList])            -- "|a|b"
 ```
 
-Same text, two shapes. `map_splitOn_intercalate` only knows the second one. So the file proves the two are equal, `flatMap_cons_eq_intercalate` in `Thm/Data/List.lean`, and rewrites with it (line 66). After that, `decodeFields` drops the first `|` (`| _ :: rest =>`, line 57) and the field level is A5 again.
+Same text, two shapes. `map_splitOn_intercalate` only knows the second one. So the file proves the two are equal, `flatMap_cons_eq_intercalate` in `Thm/Data/List.lean`, and rewrites with it (line 79). After that, `decodeFields` drops the first `|` (`| _ :: rest =>`, line 69) and the field level is A5 again.
 
 The segment level has the same problem at the end: `encode` writes `\r` **after** each segment, so the text ends in `\r`, and splitting gives an extra empty piece:
 
@@ -194,7 +198,7 @@ The segment level has the same problem at the end: `encode` writes `\r` **after*
 #eval ("PID|a\r".toList.splitOn '\r').map String.ofList   -- ["PID|a", ""]
 ```
 
-`decode` drops the last character first (`text.dropLast`, line 86), and `dropLast_flatMap_append` proves that "each line followed by `\r`, minus the last character" is a join with `\r` (line 113).
+`decode` drops the last character first (`text.dropLast`, line 101), and `dropLast_flatMap_append` proves that "each line followed by `\r`, minus the last character" is a join with `\r` (line 129).
 
 This is a common pattern when designing proofs: the code is written the natural way for the sender, the lemma is stated the natural way for lists, and a small reshaping lemma connects the two. When the goal does not match any lemma, ask "which equal expression would?" and prove that equality.
 
@@ -213,22 +217,22 @@ example (id rest : List Char) (h : id.length = 3) : (id ++ rest).drop 3 = rest :
     List.nil_append]
 ```
 
-These are lines 124–127 of `Decode.lean`, with `hw.id_length` in place of `h`. Each `(by simp [h])` proves a small side condition such as `3 ≤ id.length`, using the length rule. This is where `segment_id_length` is used, and the only place.
+These are lines 140–143 of `Decode.lean`, with `hw.id_length` in place of `h`. Each `(by simp [h])` proves a small side condition such as `3 ≤ id.length`, using the length rule. This is where `segment_id_length` is used, and the only place.
 
 ## A9. The top: `decode_encode`, read as a plan
 
-With A1 to A8 in hand, `decode_encode` (lines 92–128) reads as a plan in four parts.
+With A1 to A8 in hand, `decode_encode` (lines 107–144) reads as a plan in four parts.
 
 | Lines   | Part                           | What it does                                                                                                                                                                                                              |
 | ------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 93–97   | Gather facts                   | `hm.delimiters_distinct`, `hm.header`, `hm.segment` from `Thm/WellFormed.lean`, then open up `m` into `d`, `header`, `segments`                                                                                           |
-| 98–108  | Hypothesis 1 at the `\r` level | `lines_ok`: no line contains `\r`. For the MSH line, `M`, `S`, `H` by `decide`, the delimiters by `h.tf`, `h.tc`, …, the fields by `not_mem_encodeFields`. For other lines, `id_no_terminator` and `not_mem_encodeFields` |
-| 109–110 | The delimiters come back       | `delims`: `delimitersOf` reads `d` from positions 4 to 8; `simp` computes it                                                                                                                                              |
-| 111–128 | The chain                      | Unfold `decode`, drop the last `\r` (A7), split on `\r` (A2 with `lines_ok`), then prove header and segments separately                                                                                                   |
+| 108–113 | Gather facts                   | `hm.delimiters_distinct`, `hm.separators_not_escape_codes`, `hm.header`, `hm.segment` from `Thm/WellFormed.lean`, then open up `m` into `d`, `header`, `segments`                                                         |
+| 114–124 | Hypothesis 1 at the `\r` level | `lines_ok`: no line contains `\r`. For the MSH line, `M`, `S`, `H` by `decide`, the delimiters by `h.tf`, `h.tc`, …, the fields by `not_mem_encodeFields`. For other lines, `id_no_terminator` and `not_mem_encodeFields` |
+| 125–126 | The delimiters come back       | `delims`: `delimitersOf` reads `d` from positions 4 to 8; `simp` computes it                                                                                                                                              |
+| 127–144 | The chain                      | Unfold `decode`, drop the last `\r` (A7), split on `\r` (A2 with `lines_ok`), then prove header and segments separately                                                                                                   |
 
-Line 115, `Message.mk.injEq`, says two messages are equal when their delimiters, header and segments are equal. The delimiters part is already `d = d`, which `true_and` removes, so `constructor` leaves two goals: header (lines 117–118, `decodeFields_encodeFields` after dropping `MSH|^~\&`), and segments (lines 119–128, one segment at a time, A8 then `decodeFields_encodeFields`).
+Line 131, `Message.mk.injEq`, says two messages are equal when their delimiters, header and segments are equal. The delimiters part is already `d = d`, which `true_and` removes, so `constructor` leaves two goals: header (lines 133–134, `decodeFields_encodeFields` after dropping `MSH|^~\&`), and segments (lines 135–144, one segment at a time, A8 then `decodeFields_encodeFields`).
 
-Lines 119–121 deserve one note. The goal is "mapping decode-after-encode over `segments` gives `segments`". `conv => rhs; rw [← List.map_id segments]` rewrites the right side as "mapping the identity over `segments`", so both sides are maps, and `List.map_congr_left` reduces the goal to one segment at a time. It is the same move `map_splitOn_intercalate` makes inside its own proof.
+Lines 135–137 deserve one note. The goal is "mapping decode-after-encode over `segments` gives `segments`". `conv => rhs; rw [← List.map_id segments]` rewrites the right side as "mapping the identity over `segments`", so both sides are maps, and `List.map_congr_left` reduces the goal to one segment at a time. It is the same move `map_splitOn_intercalate` makes inside its own proof.
 
 **Why the file reads bottom-up.** Lean needs a lemma before it is used, so the file starts with the smallest facts and ends with `decode_encode`. The design went the other way: the top was written first, with `?_` holes, and each hole became a lemma higher up the file. Read the file from the bottom when you want the plan, and from the top when you want the details.
 
@@ -273,7 +277,7 @@ theorem decodeF_encodeF (f : List (List (List Char))) (hf : f ≠ [])
 #print axioms decodeF_encodeF   -- [propext, Quot.sound]
 ```
 
-Compare it with `decodeField_encodeField`: it is lines 40, 49–50 and 51–52 with one level fewer, and with fixed characters in place of `d.repetition` and `d.component`.
+Compare it with `decodeField_encodeField`: it is lines 46, 57–60 and 61–64 with one level fewer, with fixed characters in place of `d.repetition` and `d.component`, and with no escape sequences, so the bottom level is `List.splitOn_intercalate` rather than `map_splitOn_intercalate` with `unescape`.
 
 </details>
 

@@ -268,9 +268,15 @@ With `^`, one pair of brackets groups all three letters together. With `~`, each
 **`encodeField`** works from the inside out:
 
 ```text
-[d.repetition].intercalate <| f.map fun r =>      -- 3. join repetitions with ~
-  [d.component].intercalate <| r.map fun c =>     -- 2. join components with ^
-    [d.subcomponent].intercalate c                -- 1. join subcomponents with &
+[d.repetition].intercalate <| f.map fun r =>          -- 3. join repetitions with ~
+  [d.component].intercalate <| r.map fun c =>         -- 2. join components with ^
+    [d.subcomponent].intercalate (c.map (escape d))   -- 1. write each subcomponent, join with &
+```
+
+`escape`, from `Hl7v2/Spec/Escape.lean`, writes a delimiter that is part of the data as its escape sequence (§2.7.1), so a value can hold any delimiter and still be read back. Lesson 6 reads it.
+
+```lean
+#eval String.ofList (encodeField Delimiters.suggested [[["a|b".toList]]])   -- "a\\F\\b"
 ```
 
 **`encodeFields`** writes the field separator _before_ each field, not between fields:
@@ -322,6 +328,6 @@ The last line shows that trailing empty fields are kept. In the spec, an empty f
 
 - **Delimiters:** five characters declared in MSH-1 and MSH-2, plus `\r`. The standard suggests `|^~\&` but never says they must differ; the spec adds that rule.
 - **Messages:** delimiters, the MSH fields from MSH-3 on, and the other segments. A field is four levels of nested lists.
-- **Encoding:** join at each level, a field separator before each field, `\r` after each segment.
+- **Encoding:** a delimiter in data as its escape sequence, join at each level, a field separator before each field, `\r` after each segment.
 
 [Lesson 2](lesson_2.md) adds the rules: what makes a message well formed, and what `decide` can prove about it.

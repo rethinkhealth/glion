@@ -17,8 +17,9 @@ import Hl7v2
 open Hl7v2.Spec Hl7v2.Thm
 
 def good : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["1".toList]]], [[["Smith".toList], ["John".toList]]]]⟩]⟩
-def oneField : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a|b".toList]]]]⟩]⟩
-def twoFields : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a".toList]]], [[["b".toList]]]]⟩]⟩
+def oneSegment : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a\rPV1".toList]]]]⟩]⟩
+def twoSegments : Message :=
+  ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a".toList]]]]⟩, ⟨"PV1".toList, []⟩]⟩
 ```
 
 Every example in this lesson builds without errors.
@@ -44,11 +45,11 @@ From the length alone, you cannot tell which ID it was. `encode_injective` says 
 You saw this in lesson 2: without the rules, two messages share a text.
 
 ```lean
-#eval encode oneField == encode twoFields   -- true: both are PID|a|b
-#eval oneField.failures                     -- ["well_formed_subcomponent_clean"]
+#eval encode oneSegment == encode twoSegments   -- true: both are MSH|^~\&␍PID|a␍PV1␍
+#eval oneSegment.failures                       -- ["well_formed_subcomponent_no_terminator"]
 ```
 
-`oneField` breaks a rule (a `|` inside a value), so the theorem says nothing about it. That is why the statement asks for `h₁ : m₁.WF` and `h₂ : m₂.WF`: the claim holds only for messages that follow the rules.
+`oneSegment` breaks a rule (a segment terminator inside a value), so the theorem says nothing about it. That is why the statement asks for `h₁ : m₁.WF` and `h₂ : m₂.WF`: the claim holds only for messages that follow the rules.
 
 ## Step 3: The decoder trick
 
@@ -124,7 +125,7 @@ example (a b : Nat) (h : triple a = triple b) : a = b := by
 
 ## Step 5: The decoder for messages
 
-The specification does the same thing with `encode`. In `Hl7v2/Thm/Encoding/Decode.lean` there is a function `decode` that reads a message back from its text: it takes the delimiters from characters 4 to 8, splits the text into segments on `\r`, then splits each segment into fields, repetitions, components and subcomponents.
+The specification does the same thing with `encode`. In `Hl7v2/Thm/Encoding/Decode.lean` there is a function `decode` that reads a message back from its text: it takes the delimiters from characters 4 to 8, splits the text into segments on `\r`, then splits each segment into fields, repetitions, components and subcomponents, and reads each subcomponent back from its escape sequences (`unescape`, in `Escape.lean` beside it).
 
 ```lean
 #eval decode (encode good) == good   -- true: decoding undoes encoding
@@ -139,16 +140,16 @@ The lemma that plays the role of `half_double` is:
 -- decode_encode : m.WF → decode (encode m) = m
 ```
 
-"For a well-formed message, decoding its encoding gives the message back." Note the `m.WF`: decoding cannot undo encoding for `oneField`, because its text is the same as `twoFields`'s, and `decode` has to pick one:
+"For a well-formed message, decoding its encoding gives the message back." Note the `m.WF`: decoding cannot undo encoding for `oneSegment`, because its text is the same as `twoSegments`'s, and `decode` has to pick one:
 
 ```lean
-#eval decode (encode oneField) == oneField    -- false
-#eval decode (encode oneField) == twoFields   -- true
+#eval decode (encode oneSegment) == oneSegment    -- false
+#eval decode (encode oneSegment) == twoSegments   -- true
 ```
 
-`decode` is a **proof device**. Its file says so: it "exists only to carry the proof of `encode_injective`: it is not part of the specification". The specification describes how a sender writes a message; it does not define a parser. `decode` lives under `Thm/`, not `Spec/`, for that reason, and nothing claims glion's parser behaves like it.
+`decode` and `unescape` are **proof devices**. Their files say so: it "exists only to carry the proof of `encode_injective`: it is not part of the specification". The specification describes how a sender writes a message; it does not define a parser. They live under `Thm/`, not `Spec/`, for that reason, and nothing claims glion's parser behaves like it.
 
-Proving `decode_encode` is the hard part: about 130 lines in `Decode.lean`, mostly facts about splitting a joined list. It is a lemma, so it only has to build; you do not need to read it for this lesson. Once you have finished the lesson, [the lesson 4 appendix](lesson_4_appendix.md) opens it and shows how such a proof is designed.
+Proving `decode_encode` is the hard part: about 140 lines in `Decode.lean`, mostly facts about splitting a joined list, and 80 in `Escape.lean` for the escape sequences. It is a lemma, so it only has to build; you do not need to read it for this lesson. Once you have finished the lesson, [the lesson 4 appendix](lesson_4_appendix.md) opens it and shows how such a proof is designed.
 
 ## Step 6: The real proof
 
@@ -197,6 +198,6 @@ def twoFields' : Message := ⟨d, [], [⟨['P', 'I', 'D'], [[[[['a']]]], [[[['b'
 
 <details><summary>Answer</summary>
 
-The last rewrite, `decode_encode h₂`, fails because `h₂` no longer exists. Without a proof that `m₂` is well formed, nothing says that decoding `encode m₂` gives back `m₂`, and the theorem would be false: `twoFields` and `oneField` share a text, but only one of them is well formed.
+The last rewrite, `decode_encode h₂`, fails because `h₂` no longer exists. Without a proof that `m₂` is well formed, nothing says that decoding `encode m₂` gives back `m₂`, and the theorem would be false: `twoSegments` and `oneSegment` share a text, but only one of them is well formed.
 
 </details>

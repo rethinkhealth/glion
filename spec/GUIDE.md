@@ -74,7 +74,7 @@ def m : Message := ⟨Delimiters.suggested, [], [⟨['P', 'I'], [[[[['a']]]]]⟩
 example : ¬ m.WF := by decide -- a proof, found by running the check
 ```
 
-Then build a message that breaks only `well_formed_subcomponent_clean`, and one that breaks only `well_formed_repetition_has_component`.
+Then build a message that breaks only `well_formed_subcomponent_no_terminator`, and one that breaks only `well_formed_repetition_has_component`.
 
 **You have it when** you can make a message fail exactly the rule you choose.
 
