@@ -55,8 +55,9 @@ The standard's text leaves some things open. Where the proofs need a rule, the s
 
 - **Distinct delimiters.** The standard suggests `|^~\&` but never says the delimiters must differ. The specification requires it: `ambiguous_without_distinct_delimiters` shows the encoding is ambiguous otherwise.
 - **Delimiters are not escape codes.** A delimiter in data is written as an escape sequence such as `\F\` (§2.7.1). With `F` as a separator, `\F\` would split where it stands; with `F` as the escape character, a reader cannot find where `\F\` ends. So no delimiter is one of the five escape code IDs.
-- **A value holds characters and escape sequences apart.** A subcomponent is a list of pieces: a character of data, or one of the sequences §2.7.2 to §2.7.8 define (truncation, character sets, highlighting, hexadecimal, formatted text, local). The escape character in data is written `\E\`, so the data `\H\` (`\E\H\E\`) and the highlighting command `\H\` are two values with two texts.
-- **The specification carries a sequence; it does not interpret it.** `\X…\` and `\Z…\` mean what sender and receiver agree (§2.7.6, §2.7.8), and a formatting command is an instruction for display. The message holds each as written.
+- **A value holds characters and escape sequences apart.** A subcomponent is a list of pieces: a character of data, or one of the sequences §2.7.2 to §2.7.8 define (truncation, character sets, highlighting, formatted text, local). The escape character in data is written `\E\`, so the data `\H\` (`\E\H\E\`) and the highlighting command `\H\` are two values with two texts.
+- **Hexadecimal data is characters, read as UTF-8.** §2.7.6 leaves the meaning of `\Xdd…\` to an agreement between sender and receiver. The specification's agreement is UTF-8, so `\X41\` is the character `A`, and a sender writes `A`: a value never holds a hexadecimal sequence. `\X0D\` is a carriage return, which data may not hold (`well_formed_subcomponent_no_terminator`), and bytes that are not UTF-8, such as `\XFF\`, are no characters at all: neither has a value in the model.
+- **The specification carries the other sequences; it does not interpret them.** `\Z…\` means what sender and receiver agree (§2.7.8), and a formatting command is an instruction for display. The message holds each as written.
 
 ## Not yet covered
 
