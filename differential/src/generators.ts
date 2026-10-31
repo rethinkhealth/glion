@@ -34,14 +34,15 @@ import { toSpecSubcomponent } from "./oracle";
 // allows them; no escape code ID (`F`, `S`, `T`, `R`, `E`), which it does not
 // allow as a delimiter (`well_formed_delimiters_not_escape_codes`).
 const DELIMITER_POOL = ["|", "^", "~", "\\", "&", "#", "*", "!", "%", "+"];
-// Characters of data, besides the delimiters. No segment terminator
-// (`well_formed_subcomponent_no_terminator`), and nothing below U+0020.
-const DATA = [..."abcFSTREXYZ019 .-"];
+// Characters of data, besides the delimiters: letters, digits, marks, and
+// three control characters, which the specification writes as `\X0A\`,
+// `\X09\` and `\X01\`. No segment terminator
+// (`well_formed_subcomponent_no_terminator`).
+const DATA = [..."abcFSTREXYZ019 .-\n\t\u0001"];
 // Escape sequences of §2.7, by escape code ID and data characters: truncation,
-// a character set, highlighting, local, and the formatting commands of
-// formatted text. Hexadecimal data (`\X41\`) is not among them: the
-// specification reads it as UTF-8 characters, so a value holds `A`, never
-// `\X41\`. A sequence that holds one of the message's
+// a character set, highlighting, hexadecimal data, local, and the formatting
+// commands of formatted text. `\X0D\` is a sequence: the specification writes
+// no carriage return in data. A sequence that holds one of the message's
 // delimiters is not drawn (`well_formed_escape_sequence_no_delimiter`).
 const SEQUENCES = [
   "P",
@@ -49,6 +50,10 @@ const SEQUENCES = [
   "M2442",
   "H",
   "N",
+  "X41",
+  "XC3A9",
+  "XFF",
+  "X0D",
   "Zab",
   ".br",
   ".sp",

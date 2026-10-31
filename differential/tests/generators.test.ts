@@ -117,6 +117,7 @@ describe("arbSpecMessage", () => {
     ["truncation character (§2.7.2)", "P"],
     ["character set (§2.7.3)", "C"],
     ["highlighting (§2.7.4)", "H"],
+    ["hexadecimal (§2.7.6)", "X"],
     ["locally defined (§2.7.8)", "Z"],
     ["formatting command (§2.7.7)", "."],
   ])("draws a %s escape sequence", (_, code) => {
@@ -137,6 +138,12 @@ describe("arbSpecMessage", () => {
             value.some((piece) => typeof piece !== "string")
         )
       )
+    ).toBe(true);
+  });
+
+  it("draws a control character in data", () => {
+    expect(
+      sample.some((m) => runsOf(m).some((run) => run.includes("\n")))
     ).toBe(true);
   });
 
