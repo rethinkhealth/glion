@@ -41,7 +41,7 @@ Open `Hl7v2/Thm/Encoding.lean`. Put the cursor inside a proof: the **infoview** 
 
 **Read.** `Hl7v2/Spec/Delimiters.lean`, then `Hl7v2/Spec/Message.lean`, then `Hl7v2/Spec/Encoding.lean`. Every definition there is executable.
 
-**The trap.** A `Field` is a list of repetitions, a repetition a list of components, a component a list of subcomponents, a subcomponent a list of characters. So a field holding `a` is `[[[['a']]]]` (four brackets), and a segment's field list holding that one field is `[[[[['a']]]]]` (five). Getting the depth wrong is the most common error when writing an example, and Lean reports it as a type mismatch on a character. It happened while writing this guide.
+**The trap.** A `Field` is a list of repetitions, a repetition a list of components, a component a list of subcomponents, a subcomponent a list of pieces: characters (`Piece.char`) and escape sequences (`Piece.sequence`). `data "a"` is the value holding the one character `a`. So a field holding `a` is `[[[data "a"]]]` (three brackets), and a segment's field list holding that one field is `[[[[data "a"]]]]` (four). Getting the depth wrong is the most common error when writing an example, and Lean reports it as a type mismatch. It happened while writing this guide.
 
 **Exercise.** Make a scratch file outside the repo (or use `lake env lean --stdin`) and run:
 
@@ -49,7 +49,7 @@ Open `Hl7v2/Thm/Encoding.lean`. Put the cursor inside a proof: the **infoview** 
 import Hl7v2
 open Hl7v2.Spec
 
-#eval String.ofList (encode ⟨Delimiters.suggested, [], [⟨['P', 'I', 'D'], [[[[['a']]]]]⟩]⟩)
+#eval String.ofList (encode ⟨Delimiters.suggested, [], [⟨['P', 'I', 'D'], [[[[data "a"]]]]⟩]⟩)
 -- "MSH|^~\\&\rPID|a\r"
 ```
 
@@ -69,7 +69,7 @@ Change it to give PID a second field with two components, `PID|a|b^c`, and check
 import Hl7v2
 open Hl7v2.Spec Hl7v2.Thm
 
-def m : Message := ⟨Delimiters.suggested, [], [⟨['P', 'I'], [[[[['a']]]]]⟩]⟩
+def m : Message := ⟨Delimiters.suggested, [], [⟨['P', 'I'], [[[[data "a"]]]]⟩]⟩
 #eval m.failures              -- which rule does a two-letter ID break?
 example : ¬ m.WF := by decide -- a proof, found by running the check
 ```

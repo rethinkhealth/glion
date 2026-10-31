@@ -1,6 +1,6 @@
 # Lesson 2: The rules
 
-This lesson reads `Hl7v2/Spec/WellFormed.lean`, about 70 lines: the rules a message must follow so that its text has exactly one meaning. It also writes your first proofs, with `decide`.
+This lesson reads `Hl7v2/Spec/WellFormed.lean`, about 100 lines: the rules a message must follow so that its text has exactly one meaning. It also writes your first proofs, with `decide`.
 
 Create `Hl7v2/Lesson2.lean`, start it with these lines, and paste each example below them:
 
@@ -8,10 +8,10 @@ Create `Hl7v2/Lesson2.lean`, start it with these lines, and paste each example b
 import Hl7v2
 open Hl7v2.Spec Hl7v2.Thm
 
-def good : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["1".toList]]]]⟩]⟩
-def oneSegment : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a\rPV1".toList]]]]⟩]⟩
+def good : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "1"]]]]⟩]⟩
+def oneSegment : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a\rPV1"]]]]⟩]⟩
 def twoSegments : Message :=
-  ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a".toList]]]]⟩, ⟨"PV1".toList, []⟩]⟩
+  ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a"]]]]⟩, ⟨"PV1".toList, []⟩]⟩
 ```
 
 Every example in this lesson builds without errors, except the ones marked as showing an error.
@@ -26,12 +26,13 @@ These are two different messages that produce the same text, `MSH|^~\&␍PID|a�
 
 ## Step 2: Read the file in three parts
 
-**1. An instance and a helper.**
+**1. Instances and helpers.**
 
-- The `instance … Decidable` line tells Lean how to check `Distinct`. Step 4 explains it.
+- The first `instance … Decidable` line tells Lean how to check `Distinct`. Step 4 explains it.
+- `Piece.isDefined`, `Piece.code` and `Piece.NoDelimiter` read one piece of a value, for the two rules about escape sequences. `NoDelimiter` gets an instance of its own, of the same shape as the one for `Distinct`. Lesson 6 reads them.
 - `Message.fields` lists every field in the message: the MSH fields from MSH-3 on, then the fields of every other segment.
 
-**2. `Message.WF`.** WF stands for "well formed". It's a `structure` whose type is `Prop`, so each of its fields is a statement, not a value. A message is well formed only when all eight statements hold. Read each `∀ … ∈ …` as "for every … in …":
+**2. `Message.WF`.** WF stands for "well formed". It's a `structure` whose type is `Prop`, so each of its fields is a statement, not a value. A message is well formed only when all ten statements hold. Read each `∀ … ∈ …` as "for every … in …":
 
 ```text
 field_has_repetition : ∀ f ∈ m.fields, f ≠ []    -- every field holds at least one repetition
@@ -75,8 +76,8 @@ The name `fields` means two different things on this one line. `m.fields` is thi
 On the message `MSH|^~\&|APP␍PID|1|Smith␍PV1|I␍`:
 
 ```lean
-def threeSegments : Message := ⟨Delimiters.suggested, [[[["APP".toList]]]],
-  [⟨"PID".toList, [[[["1".toList]]], [[["Smith".toList]]]]⟩, ⟨"PV1".toList, [[[["I".toList]]]]⟩]⟩
+def threeSegments : Message := ⟨Delimiters.suggested, [[[[data "APP"]]]],
+  [⟨"PID".toList, [[[[data "1"]]], [[[data "Smith"]]]]⟩, ⟨"PV1".toList, [[[[data "I"]]]]⟩]⟩
 
 #eval threeSegments.segments.map (·.fields.length)   -- [2, 1]   PID has 2 fields, PV1 has 1
 #eval threeSegments.fields.map fun f => String.ofList (encodeField Delimiters.suggested f)
@@ -172,7 +173,7 @@ d.Distinct                instDecidableDistinct  the instance above: decide d.al
 #eval decide ({ Delimiters.suggested with component := '|' }.Distinct)      -- false
 ```
 
-The rule `well_formed_delimiters_distinct` runs this check on the message's delimiters. The other seven rules need no instance of their own: each is built from `∀ … ∈ …`, `=`, `≠` and `∉` over lists and characters, which Lean already knows how to decide.
+The rule `well_formed_delimiters_distinct` runs this check on the message's delimiters, and `well_formed_escape_sequence_no_delimiter` uses the instance for `Piece.NoDelimiter`, built the same way. The other eight rules need no instance of their own: each is built from `∀ … ∈ …`, `=`, `≠`, `∉` and `Bool` checks over lists, characters and pieces, which Lean already knows how to decide.
 
 **Why instances matter for the spec.** Every rule in `Message.WF` is a statement. Statements are what proofs are about, but Lean can't run them. A `Decidable` instance for a rule is a program that settles it, which gives the rule two uses: in a proof, `by decide` settles it for one concrete message; on real messages, the catalogue calls `decide` on each rule. Not every statement can have an instance. "This message breaks no rule" can be decided, because a message is finite. "Every well-formed message has exactly one encoding" can't, because there are infinitely many messages. That one needs a written proof.
 
@@ -218,7 +219,7 @@ These two examples show errors, on purpose.
 **The claim is false.**
 
 ```lean
-def shortId : Message := ⟨Delimiters.suggested, [], [⟨"PI".toList, [[[["1".toList]]]]⟩]⟩
+def shortId : Message := ⟨Delimiters.suggested, [], [⟨"PI".toList, [[[[data "1"]]]]⟩]⟩
 
 example : ∀ s ∈ shortId.segments, s.id.length = 3 := by decide
 -- error: Tactic `decide` proved that the proposition … is false
@@ -251,15 +252,16 @@ In plain words: **it is not true that every segment ID in `shortId` is three cha
 
 So `#eval` is for looking at a value, and `example … by decide` is a check that fails the build.
 
-## Step 6: `m.WF`, a bundle of eight proofs
+## Step 6: `m.WF`, a bundle of ten proofs
 
 `m.WF` is the statement "message `m` is well formed". It's shorthand for `Message.WF m`: writing a dot after a value calls the function of that name in its type's namespace, as with `m.fields`.
 
-Because `Message.WF` is a `structure` of type `Prop`, each field is a **proof of one rule**, and a value of type `m.WF` is a bundle of eight proofs. You build it as you would build any structure, with `⟨…⟩` and one proof per field:
+Because `Message.WF` is a `structure` of type `Prop`, each field is a **proof of one rule**, and a value of type `m.WF` is a bundle of ten proofs. You build it as you would build any structure, with `⟨…⟩` and one proof per field:
 
 ```lean
 example : good.WF :=
-  ⟨by decide, by decide, by decide, by decide, by decide, by decide, by decide, by decide⟩
+  ⟨by decide, by decide, by decide, by decide, by decide, by decide, by decide, by decide,
+    by decide, by decide⟩
 
 example : good.WF := by decide
 ```
@@ -295,11 +297,11 @@ def emptyRepetition : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, 
 
 -- 3. The component separator is also the field separator.
 def sameDelimiters : Message :=
-  ⟨{ Delimiters.suggested with component := '|' }, [], [⟨"PID".toList, [[[["1".toList]]]]⟩]⟩
+  ⟨{ Delimiters.suggested with component := '|' }, [], [⟨"PID".toList, [[[[data "1"]]]]⟩]⟩
 #eval sameDelimiters.failures   -- ["well_formed_delimiters_distinct"]
 
 -- 4. Two rules at once: a two-character ID, and a segment terminator inside a value.
-def twoRules : Message := ⟨Delimiters.suggested, [], [⟨"PI".toList, [[[["a\rb".toList]]]]⟩]⟩
+def twoRules : Message := ⟨Delimiters.suggested, [], [⟨"PI".toList, [[[[data "a\rb"]]]]⟩]⟩
 #eval twoRules.failures   -- ["well_formed_segment_id_length", "well_formed_subcomponent_no_terminator"]
 
 -- 5. A proof, by running the check: `emptyRepetition` breaks its rule.
@@ -310,7 +312,7 @@ example : ¬ (∀ f ∈ emptyRepetition.fields, ∀ r ∈ f, r ≠ []) := by dec
 
 ## What you can now say
 
-- **The rules:** eight statements in `Message.WF`, each ruling out one way for a text to have two meanings.
+- **The rules:** ten statements in `Message.WF`, each ruling out one way for a text to have two meanings.
 - **Two copies:** the same rules as `Bool` checks in `catalogue`, so `failures` can name the rule a message breaks.
 - **Instances:** a `Decidable` instance is a program that settles a statement, and `decide` runs it.
 - **Proofs about one message:** `by decide`. Proofs about every message need more, which is lesson 3.

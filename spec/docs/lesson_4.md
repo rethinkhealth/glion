@@ -16,10 +16,10 @@ Create `Hl7v2/Lesson4.lean`, start it with these lines, and paste each example b
 import Hl7v2
 open Hl7v2.Spec Hl7v2.Thm
 
-def good : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["1".toList]]], [[["Smith".toList], ["John".toList]]]]⟩]⟩
-def oneSegment : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a\rPV1".toList]]]]⟩]⟩
+def good : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "1"]]], [[[data "Smith"], [data "John"]]]]⟩]⟩
+def oneSegment : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a\rPV1"]]]]⟩]⟩
 def twoSegments : Message :=
-  ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["a".toList]]]]⟩, ⟨"PV1".toList, []⟩]⟩
+  ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "a"]]]]⟩, ⟨"PV1".toList, []⟩]⟩
 ```
 
 Every example in this lesson builds without errors.
@@ -149,7 +149,7 @@ The lemma that plays the role of `half_double` is:
 
 `decode` and `unescape` are **proof devices**. Their files say so: it "exists only to carry the proof of `encode_injective`: it is not part of the specification". The specification describes how a sender writes a message; it does not define a parser. They live under `Thm/`, not `Spec/`, for that reason, and nothing claims glion's parser behaves like it.
 
-Proving `decode_encode` is the hard part: about 140 lines in `Decode.lean`, mostly facts about splitting a joined list, and 80 in `Escape.lean` for the escape sequences. It is a lemma, so it only has to build; you do not need to read it for this lesson. Once you have finished the lesson, [the lesson 4 appendix](lesson_4_appendix.md) opens it and shows how such a proof is designed.
+Proving `decode_encode` is the hard part: about 150 lines in `Decode.lean`, mostly facts about splitting a joined list, and 160 in `Escape.lean` for the escape sequences. It is a lemma, so it only has to build; you do not need to read it for this lesson. Once you have finished the lesson, [the lesson 4 appendix](lesson_4_appendix.md) opens it and shows how such a proof is designed.
 
 ## Step 6: The real proof
 
@@ -178,14 +178,14 @@ The same file has a second theorem, `ambiguous_without_distinct_delimiters`. It 
 
 ```lean
 def d : Delimiters := { Delimiters.suggested with component := '|' }
-def twoComponents : Message := ⟨d, [], [⟨['P', 'I', 'D'], [[[[['a']], [['b']]]]]⟩]⟩
-def twoFields' : Message := ⟨d, [], [⟨['P', 'I', 'D'], [[[[['a']]]], [[[['b']]]]]⟩]⟩
+def twoComponents : Message := ⟨d, [], [⟨['P', 'I', 'D'], [[[[data "a"], [data "b"]]]]⟩]⟩
+def twoFields' : Message := ⟨d, [], [⟨['P', 'I', 'D'], [[[[data "a"]]], [[[data "b"]]]]⟩]⟩
 
 #eval String.ofList (encode twoComponents)   -- "MSH||~\\&\x0dPID|a|b\x0d"
 #eval encode twoComponents == encode twoFields'   -- true
 ```
 
-`PID|a|b` could be one field with two components, or two fields. So `encode_injective` would be false without the rule `well_formed_delimiters_distinct`, and this theorem is the evidence that the rule is needed. HL7v2 suggests `|^~\&` but never says the delimiters must differ; the specification adds the rule and proves why.
+The theorem writes each value as `[Piece.char 'a']`, which is what `data "a"` builds. `PID|a|b` could be one field with two components, or two fields. So `encode_injective` would be false without the rule `well_formed_delimiters_distinct`, and this theorem is the evidence that the rule is needed. HL7v2 suggests `|^~\&` but never says the delimiters must differ; the specification adds the rule and proves why.
 
 ## What you can now say
 

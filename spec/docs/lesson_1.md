@@ -98,31 +98,33 @@ The last line asks: if the component separator were also `|`, would all the deli
 ### The four nested types
 
 ```lean
-#print Subcomponent   -- List Char
+#print Subcomponent   -- List Piece
 #print Field          -- List Repetition
 ```
 
 In the file:
 
 ```text
-abbrev Subcomponent := List Char
+abbrev Subcomponent := List Piece
 abbrev Component := List Subcomponent
 abbrev Repetition := List Component
 abbrev Field := List Repetition
 ```
 
-`abbrev` gives an existing type a new name; it doesn't create a new type. So `Field` is just another name for `List (List (List (List Char)))`. The names are there for you to read; Lean treats them all as nested lists.
+`abbrev` gives an existing type a new name; it doesn't create a new type. So `Field` is just another name for `List (List (List (List Piece)))`. The names are there for you to read; Lean treats them all as nested lists.
+
+A subcomponent is a value, and a value is a list of pieces. A `Piece` is either a character of data, `Piece.char 'a'`, or an escape sequence such as the highlighting command `\H\`, `Piece.sequence ['H']`; lesson 6 reads the sequences. Most values are characters only, and `data "Smith"` builds one: it is `"Smith".toList.map .char`, the list of five `Piece.char`.
 
 Each level adds one pair of brackets:
 
-| HL7v2 text | Level                                                 | Lean value                        |
-| ---------- | ----------------------------------------------------- | --------------------------------- |
-| `a`        | Subcomponent                                          | `['a']`                           |
-| `a`        | Component                                             | `[['a']]`                         |
-| `a`        | Repetition                                            | `[[['a']]]`                       |
-| `a`        | Field                                                 | `[[[['a']]]]`                     |
-| `a&b`      | Field: one component of two subcomponents             | `[[[['a'], ['b']]]]`              |
-| `a^b~c`    | Field: two repetitions, the first with two components | `[[[['a']], [['b']]], [[['c']]]]` |
+| HL7v2 text | Level                                                 | Lean value                                 |
+| ---------- | ----------------------------------------------------- | ------------------------------------------ |
+| `a`        | Subcomponent                                          | `data "a"`                                 |
+| `a`        | Component                                             | `[data "a"]`                               |
+| `a`        | Repetition                                            | `[[data "a"]]`                             |
+| `a`        | Field                                                 | `[[[data "a"]]]`                           |
+| `a&b`      | Field: one component of two subcomponents             | `[[[data "a", data "b"]]]`                 |
+| `a^b~c`    | Field: two repetitions, the first with two components | `[[[data "a"], [data "b"]], [[data "c"]]]` |
 
 ### The two records
 
@@ -158,7 +160,7 @@ delimiters header  segments
 ```
 
 ```lean
-#eval String.ofList (encode ⟨Delimiters.suggested, [[[[['A','P','P']]]], [[[['F','A','C']]]]], [⟨['P','I','D'], [[[[['1']]]]]⟩]⟩)
+#eval String.ofList (encode ⟨Delimiters.suggested, [[[[data "APP"]]], [[[data "FAC"]]]], [⟨['P','I','D'], [[[[data "1"]]]]⟩]⟩)
 -- "MSH|^~\\&|APP|FAC\x0dPID|1\x0d"
 
 #eval String.ofList (encode ⟨Delimiters.suggested, [], []⟩)
@@ -169,26 +171,26 @@ The second line shows that an empty `header` and an empty `segments` still give 
 
 ### The bracket trap
 
-`header` has four brackets per field (`[[[['A','P','P']]]]`) while each segment's fields are written with five (`[[[[['1']]]]]`). The outer bracket in the segment line is the list of fields: a `List Field` holding one field is five brackets deep.
+Each header field is written with three brackets (`[[[data "APP"]]]`), while the segment's fields are written with four (`[[[[data "1"]]]]`). The outer bracket in the segment line is the list of fields: a `List Field` holding one field is four brackets around the value. The header is a `List Field` too, and its outer bracket holds both fields.
 
 Getting the depth wrong is the most common error when writing an example. Lean reports it like this:
 
 ```text
-Application type mismatch: The argument 'a' has type Char
-but is expected to have type Subcomponent
+Application type mismatch: The argument data "a" has type List Piece
+but is expected to have type Component
 ```
 
-Read that as "one bracket missing around `'a'`".
+Read that as "one bracket missing around `data "a"`".
 
 Three more things trip people up:
 
-- **`'Smith'` is not a character.** Single quotes hold exactly one character, a `Char`. Double quotes make a `String`. A subcomponent is a `List Char`, so write `['S','m','i','t','h']` or `"Smith".toList`.
+- **`'Smith'` is not a character.** Single quotes hold exactly one character, a `Char`. Double quotes make a `String`. A subcomponent is a `List Piece`, so write `data "Smith"`. A segment ID is a `List Char`, so write `"PID".toList` there.
 - **Use `⟨ … ⟩` to build a structure, not `( … , … )`.** `(a, b)` builds a pair, a different type. In VS Code, type `\<` and `\>` to get the angle brackets.
 - **Name the pieces to find the error.** Give each field a type, so an error points at one line:
 
 ```lean
-def f1 : Field := [[["1".toList]]]
-def f2 : Field := [[["Smith".toList], ["John".toList]]]
+def f1 : Field := [[[data "1"]]]
+def f2 : Field := [[[data "Smith"], [data "John"]]]
 #eval String.ofList (encodeSegment Delimiters.suggested ⟨"PID".toList, [f1, f2]⟩)   -- "PID|1|Smith^John"
 ```
 
@@ -197,8 +199,8 @@ def f2 : Field := [[["Smith".toList], ["John".toList]]]
 `encodeField` comes from part C, but you can use it now to check your brackets:
 
 ```lean
-#eval String.ofList (encodeField Delimiters.suggested [[[['a'], ['b']]]])               -- "a&b"
-#eval String.ofList (encodeField Delimiters.suggested [[[['a']], [['b']]], [[['c']]]])  -- "a^b~c"
+#eval String.ofList (encodeField Delimiters.suggested [[[data "a", data "b"]]])               -- "a&b"
+#eval String.ofList (encodeField Delimiters.suggested [[[data "a"], [data "b"]], [[data "c"]]])  -- "a^b~c"
 ```
 
 ### A puzzle
@@ -225,18 +227,18 @@ The spec always records an empty field as `[[[[]]]]`. A field written as `[]` is
 <details><summary>Answers</summary>
 
 ```lean
-#eval String.ofList (encodeField Delimiters.suggested [[[['1']], [['2']], [['3']]]])    -- "1^2^3"
-#eval String.ofList (encodeField Delimiters.suggested [[[['x']]], [[['y']]], [[['z']]]])  -- "x~y~z"
+#eval String.ofList (encodeField Delimiters.suggested [[[data "1"], [data "2"], [data "3"]]])    -- "1^2^3"
+#eval String.ofList (encodeField Delimiters.suggested [[[data "x"]], [[data "y"]], [[data "z"]]])  -- "x~y~z"
 
 #eval String.ofList (encodeSegment Delimiters.suggested
-  ⟨"PID".toList, [[[["1".toList]]], [[["Smith".toList], ["John".toList]]]]⟩)   -- "PID|1|Smith^John"
+  ⟨"PID".toList, [[[[data "1"]]], [[[data "Smith"], [data "John"]]]]⟩)   -- "PID|1|Smith^John"
 ```
 
 Compare the two shapes of the first exercise:
 
 ```text
-x^y^z   [ [ [['x']], [['y']], [['z']] ] ]      one repetition, three components
-x~y~z   [ [[['x']]], [[['y']]], [[['z']]] ]    three repetitions, one component each
+x^y^z   [ [ [data "x"], [data "y"], [data "z"] ] ]      one repetition, three components
+x~y~z   [ [[data "x"]], [[data "y"]], [[data "z"]] ]    three repetitions, one component each
 ```
 
 With `^`, one pair of brackets groups all three letters together. With `~`, each letter sits in its own group. In HL7v2 terms, `~` is how a sender writes a field more than once, for example a patient with three identifiers in PID-3. `^` splits one value into parts, for example a family name and a given name.
@@ -276,7 +278,7 @@ With `^`, one pair of brackets groups all three letters together. With `~`, each
 `escape`, from `Hl7v2/Spec/Escape.lean`, writes a delimiter that is part of the data as its escape sequence (§2.7.1), so a value can hold any delimiter and still be read back. Lesson 6 reads it.
 
 ```lean
-#eval String.ofList (encodeField Delimiters.suggested [[["a|b".toList]]])   -- "a\\F\\b"
+#eval String.ofList (encodeField Delimiters.suggested [[[data "a|b"]]])   -- "a\\F\\b"
 ```
 
 **`encodeFields`** writes the field separator _before_ each field, not between fields:
@@ -290,7 +292,7 @@ That one choice is why a segment with no fields is just its ID, and why an empty
 ```lean
 #eval String.ofList (encodeSegment Delimiters.suggested ⟨"PID".toList, []⟩)        -- "PID"   no fields
 #eval String.ofList (encodeSegment Delimiters.suggested ⟨"PID".toList, [[[[[]]]]]⟩)  -- "PID|"  one empty field
-#eval String.ofList (encodeFields Delimiters.suggested [[[["a".toList]]], [[[[]]]], [[[[]]]]])  -- "|a||"
+#eval String.ofList (encodeFields Delimiters.suggested [[[[data "a"]]], [[[[]]]], [[[[]]]]])  -- "|a||"
 ```
 
 The last line shows that trailing empty fields are kept. In the spec, an empty field at the end is still a field, and it's written as a field separator. That's the same rule glion's parser follows (ADR 0033).
@@ -306,7 +308,7 @@ The last line shows that trailing empty fields are kept. In the spec, an empty f
 1. **Predict, then run.** Write down what this prints before you run it. The delimiters fill the fields in order: `field`, `component`, `repetition`, `escape`, `subcomponent`.
 
    ```lean
-   #eval String.ofList (encodeHeader ⟨'#', '*', '!', '%', '+'⟩ [[[["A".toList]]]])
+   #eval String.ofList (encodeHeader ⟨'#', '*', '!', '%', '+'⟩ [[[[data "A"]]]])
    ```
 
 2. **Build a whole message** that `encode` writes as `MSH|^~\&|APP␍PID|1|Smith^John␍`. In the output, `␍` shows as `\x0d`.
@@ -316,8 +318,8 @@ The last line shows that trailing empty fields are kept. In the spec, an empty f
 
 1. `"MSH#*!%+#A"`: `MSH`, the field separator `#`, the four encoding characters `*!%+`, then `#` before the one header field.
 2. ```lean
-   #eval String.ofList (encode ⟨Delimiters.suggested, [[[["APP".toList]]]],
-     [⟨"PID".toList, [[[["1".toList]]], [[["Smith".toList], ["John".toList]]]]⟩]⟩)
+   #eval String.ofList (encode ⟨Delimiters.suggested, [[[[data "APP"]]]],
+     [⟨"PID".toList, [[[[data "1"]]], [[[data "Smith"], [data "John"]]]]⟩]⟩)
    -- "MSH|^~\\&|APP\x0dPID|1|Smith^John\x0d"
    ```
 3. Read as "separator after each field", `PID|a|` is the ID `PID` followed by an empty field (ending at the first `|`) and the field `a`. Read the spec's way, "separator before each field", it is the field `a` followed by an empty field. The two readings give the fields in a different order and disagree about where the empty field is, so sender and receiver must agree on one; the spec follows Chapter 2, "insert field separator" before each field.

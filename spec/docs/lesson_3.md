@@ -8,7 +8,7 @@ Create a new file `Hl7v2/Lesson3.lean`, start it with these lines, and paste eac
 import Hl7v2
 open Hl7v2.Spec Hl7v2.Thm
 
-def good : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[["1".toList]]]]⟩]⟩
+def good : Message := ⟨Delimiters.suggested, [], [⟨"PID".toList, [[[[data "1"]]]]⟩]⟩
 ```
 
 Every example in this lesson builds without errors.
@@ -149,14 +149,14 @@ example (m : Message) :
 
 Read it with steps 2 to 5: split the `↔`; going right, take the two fields out of `h` and pair them; going left, unpack the pair and build the structure from the halves.
 
-**Look back at the real proof now.** The last four lines of `wf_iff_failures_nil` are this same proof, with eight rules instead of two:
+**Look back at the real proof now.** The last four lines of `wf_iff_failures_nil` are this same proof, with ten rules instead of two:
 
 ```text
   constructor
   · intro hm
-    exact ⟨hm.1, hm.2, hm.3, hm.4, hm.5, hm.6, hm.7, hm.8⟩
-  · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩
-    exact ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩
+    exact ⟨hm.1, hm.2, hm.3, hm.4, hm.5, hm.6, hm.7, hm.8, hm.9, hm.10⟩
+  · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩
+    exact ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩
 ```
 
 ## Step 7: `simp only`, unfolding definitions
@@ -199,10 +199,10 @@ Each name in the brackets does one rewrite:
 
 After these four rewrites, both sides say the same thing, so `simp only` closes the goal by itself.
 
-The real proof lists more names. `catalogue` unfolds the list into its eight checks, and the others turn "every check in this eight-item list is `true`" into the eight rules joined by `∧`. When it finishes, the goal is:
+The real proof lists more names. `catalogue` unfolds the list into its ten checks, and the others turn "every check in this ten-item list is `true`" into the ten rules joined by `∧`. When it finishes, the goal is:
 
 ```
-⊢ m.WF ↔ rule1 ∧ rule2 ∧ rule3 ∧ rule4 ∧ rule5 ∧ rule6 ∧ rule7 ∧ rule8
+⊢ m.WF ↔ rule1 ∧ rule2 ∧ rule3 ∧ rule4 ∧ rule5 ∧ rule6 ∧ rule7 ∧ rule8 ∧ rule9 ∧ rule10
 ```
 
 That is exactly step 6.
@@ -213,12 +213,12 @@ You can now read every line of the proof:
 
 ```text
 theorem wf_iff_failures_nil {m : Message} : m.WF ↔ m.failures = [] := by
-  simp only [Message.failures, …]           -- step 7: the catalogue becomes eight rules joined by ∧
+  simp only [Message.failures, …]           -- step 7: the catalogue becomes ten rules joined by ∧
   constructor                                -- step 4: split into two directions
   · intro hm                                 -- step 3: assume m.WF
-    exact ⟨hm.1, hm.2, hm.3, hm.4, hm.5, hm.6, hm.7, hm.8⟩   -- steps 2 and 6: take its fields, pair them
-  · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩      -- step 5: assume the eight rules, unpacked
-    exact ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩       -- step 6: build m.WF from them
+    exact ⟨hm.1, hm.2, hm.3, hm.4, hm.5, hm.6, hm.7, hm.8, hm.9, hm.10⟩   -- steps 2 and 6: take its fields, pair them
+  · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩      -- step 5: assume the ten rules, unpacked
+    exact ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩       -- step 6: build m.WF from them
 ```
 
 **Final exercise.** Open `Hl7v2/Thm/WellFormed.lean`, put your cursor after `simp only […]`, and compare the goal with the table in step 7. Then place it after `constructor` and find the two goals `mp` and `mpr`.

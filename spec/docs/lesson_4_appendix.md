@@ -117,14 +117,17 @@ Suppose you are designing the specification and you reach that leftover goal `�
 
 So the claim is false without a rule, and the specification gets one: `component_has_subcomponent`. Every rule of `Message.WF` was found this way. Each one is a hypothesis of `List.splitOn_intercalate`, or of a later step, that could not be proved from the message alone:
 
-| Leftover goal                                                | Counterexample                                                  | Rule                          |
-| ------------------------------------------------------------ | --------------------------------------------------------------- | ----------------------------- |
-| A written value contains no `\r`                             | The value `a\rPV1` splits a segment in two                      | `subcomponent_no_terminator`  |
-| An escape sequence contains no separator                     | With `S` as the field separator, `\S\` splits a field           | `separators_not_escape_codes` |
-| `^` is not inside a subcomponent's text, given it is not `&` | Component separator `&`, the same as the subcomponent separator | `delimiters_distinct`         |
-| A field, repetition or component is not empty                | Zero pieces decode as one                                       | the three `…_has_…` rules     |
-| A segment ID has no `\r`                                     | `P\rD` splits a segment in two                                  | `segment_id_no_terminator`    |
-| `take 3` of the segment's text is its ID                     | ID `PI`: `take 3` of `PI\|a` is `PI\|`                          | `segment_id_length`           |
+| Leftover goal                                                | Counterexample                                                   | Rule                           |
+| ------------------------------------------------------------ | ---------------------------------------------------------------- | ------------------------------ |
+| A written value contains no `\r`                             | The value `a\rPV1` splits a segment in two                       | `subcomponent_no_terminator`   |
+| An escape sequence contains no separator                     | With `S` as the field separator, `\S\` splits a field            | `delimiters_not_escape_codes`  |
+| The reader finds where `\F\` ends                            | With `F` as the escape character, `\F\` is written `FFF`         | `delimiters_not_escape_codes`  |
+| A sequence's code contains no delimiter                      | The sequence `\Z\|x\` splits a field at its `\|`                 | `escape_sequence_no_delimiter` |
+| A sequence is not read back as a character                   | The sequence with code `F` is written `\F\`, which reads as `\|` | `escape_sequence_defined`      |
+| `^` is not inside a subcomponent's text, given it is not `&` | Component separator `&`, the same as the subcomponent separator  | `delimiters_distinct`          |
+| A field, repetition or component is not empty                | Zero pieces decode as one                                        | the three `…_has_…` rules      |
+| A segment ID has no `\r`                                     | `P\rD` splits a segment in two                                   | `segment_id_no_terminator`     |
+| `take 3` of the segment's text is its ID                     | ID `PI`: `take 3` of `PI\|a` is `PI\|`                           | `segment_id_length`            |
 
 That is the design loop: claim, proof attempt, stuck goal, counterexample, rule. The rules were not invented up front; the proof asked for them.
 
@@ -165,15 +168,15 @@ Read `u` as "encode one level down" and `p` as "decode one level down". The lemm
 
 Now read `decodeField_encodeField` (`Decode.lean` lines 39–64). It is three levels of A5's lemma, assembled from the outside in. `refine` applies a lemma and turns each `?_` into a new goal; the `·` bullets then prove those goals in order.
 
-| Lines | Goal                                                   | How                                                                                                                                                   |
-| ----- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 46    | `decodeField (encodeField f) = f`, split on `~`        | `map_splitOn_intercalate` with hypothesis 1 from `hf.1` (field has a repetition), leaving two `?_`                                                    |
-| 47–54 | `~` is not inside an encoded repetition                | `not_mem_intercalate` twice (through `^`, then through `&`), with `h.cr` and `h.rs`; at the bottom, `not_mem_escape`, with `hc'` (no `\r` in a value) |
-| 55–56 | decoding a repetition undoes encoding it, split on `^` | `map_splitOn_intercalate` again, with `hr0` (repetition has a component), leaving two `?_`                                                            |
-| 57–60 | `^` is not inside an encoded component                 | `not_mem_intercalate` with `h.cs`, then `not_mem_escape`                                                                                              |
-| 61–64 | decoding a component undoes encoding it, split on `&`  | `map_splitOn_intercalate` a third time, with `escape` and `unescape` one level down: `not_mem_escape` and `unescape_escape`                           |
+| Lines | Goal                                                   | How                                                                                                                                                                    |
+| ----- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 46    | `decodeField (encodeField f) = f`, split on `~`        | `map_splitOn_intercalate` with hypothesis 1 from `hf.1` (field has a repetition), leaving two `?_`                                                                     |
+| 47–54 | `~` is not inside an encoded repetition                | `not_mem_intercalate` twice (through `^`, then through `&`), with `h.cr` and `h.rs`; at the bottom, `not_mem_escape`, with `hc'` (the value is well formed, `ValueWF`) |
+| 55–56 | decoding a repetition undoes encoding it, split on `^` | `map_splitOn_intercalate` again, with `hr0` (repetition has a component), leaving two `?_`                                                                             |
+| 57–60 | `^` is not inside an encoded component                 | `not_mem_intercalate` with `h.cs`, then `not_mem_escape`                                                                                                               |
+| 61–64 | decoding a component undoes encoding it, split on `&`  | `map_splitOn_intercalate` a third time, with `escape` and `unescape` one level down: `not_mem_escape` and `unescape_escape`                                            |
 
-`not_mem_escape` and `unescape_escape` are in `Thm/Encoding/Escape.lean`. The first says an escaped value holds no separator: each character is written as itself, which is not a separator unless it is `\r`, or as the escape character and an escape code ID, neither of which is a separator (`delimiters_distinct`, `separators_not_escape_codes`). The second says `unescape` reads every escaped value back, one character at a time.
+`not_mem_escape` and `unescape_escape` are in `Thm/Encoding/Escape.lean`. The first says an escaped value holds no separator. A character is written as itself, which is not a separator unless it is `\r`, or as the escape character and an escape code ID, neither of which is a separator (`delimiters_distinct`, `delimiters_not_escape_codes`). An escape sequence is written as its code between two escape characters, and its code holds no delimiter (`escape_sequence_no_delimiter`). The second says `unescape` reads every escaped value back, one piece at a time: it reads from an escape character to the next one, so it needs the escape character not to be a code letter (`delimiters_not_escape_codes`), no escape character inside a sequence's code (`escape_sequence_no_delimiter`), and no sequence that looks like one of the five character escapes (`escape_sequence_defined`). Lesson 6 reads both.
 
 Two idioms appear on almost every line.
 
@@ -225,7 +228,7 @@ With A1 to A8 in hand, `decode_encode` (lines 107–144) reads as a plan in four
 
 | Lines   | Part                           | What it does                                                                                                                                                                                                              |
 | ------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 108–113 | Gather facts                   | `hm.delimiters_distinct`, `hm.separators_not_escape_codes`, `hm.header`, `hm.segment` from `Thm/WellFormed.lean`, then open up `m` into `d`, `header`, `segments`                                                         |
+| 108–113 | Gather facts                   | `hm.delimiters_distinct`, `hm.delimiters_not_escape_codes`, `hm.header`, `hm.segment` from `Thm/WellFormed.lean`, then open up `m` into `d`, `header`, `segments`                                                         |
 | 114–124 | Hypothesis 1 at the `\r` level | `lines_ok`: no line contains `\r`. For the MSH line, `M`, `S`, `H` by `decide`, the delimiters by `h.tf`, `h.tc`, …, the fields by `not_mem_encodeFields`. For other lines, `id_no_terminator` and `not_mem_encodeFields` |
 | 125–126 | The delimiters come back       | `delims`: `delimitersOf` reads `d` from positions 4 to 8; `simp` computes it                                                                                                                                              |
 | 127–144 | The chain                      | Unfold `decode`, drop the last `\r` (A7), split on `\r` (A2 with `lines_ok`), then prove header and segments separately                                                                                                   |

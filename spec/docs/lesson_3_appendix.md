@@ -40,7 +40,7 @@ theorem second (P Q : Prop) (h : P ∧ Q) : Q := h.2
 
 Lean prints the halves as `both.left` and `both.right`: those are the names it gives `.1` and `.2` for an "and". The two `_` tell Lean to work out `P` and `Q` itself, from `both`.
 
-`Message.WF` is a bundle of eight proofs, one per rule; a pair is a bundle of two. In the real proof, `hm.1` … `hm.8` take the eight proofs out of the bundle, just as `h.2` takes the second proof out of the pair.
+`Message.WF` is a bundle of ten proofs, one per rule; a pair is a bundle of two. In the real proof, `hm.1` … `hm.10` take the ten proofs out of the bundle, just as `h.2` takes the second proof out of the pair.
 
 ## 2. Statement or proof? How does Lean know it is always true?
 
@@ -88,7 +88,7 @@ So `(h : P ∧ Q) : Q` reads: **if** you give me a proof that P and Q are both t
 Truth is checked when someone tries to create the `h`. This example shows an error, on purpose:
 
 ```lean
-def shortId : Message := ⟨Delimiters.suggested, [], [⟨"PI".toList, [[[["1".toList]]]]⟩]⟩
+def shortId : Message := ⟨Delimiters.suggested, [], [⟨"PI".toList, [[[[data "1"]]]]⟩]⟩
 
 theorem idsOk : shortId.delimiters.Distinct ∧ (∀ s ∈ shortId.segments, s.id.length = 3) :=
   ⟨by decide, by decide⟩
@@ -109,11 +109,15 @@ That is why the statements are what you review. Lean guarantees that each proof 
 
 ## 4. Why the `TwoRules` proof matters
 
-```lean
+`TwoRules`, from lesson 3's step 6:
+
+```text
 structure TwoRules (m : Message) : Prop where
   distinct : m.delimiters.Distinct
   idLength : ∀ s ∈ m.segments, s.id.length = 3
+```
 
+```lean
 example (m : Message) :
     TwoRules m ↔ m.delimiters.Distinct ∧ (∀ s ∈ m.segments, s.id.length = 3) := by
   constructor
@@ -125,7 +129,7 @@ example (m : Message) :
 
 The same two rules, written two ways: a box with two **named** slots, and a pair with two **unnamed** slots. The proof moves the two proofs from either container into the other. Nothing is calculated, and nothing about HL7v2 is used. It works because both containers hold the same claims in the same order.
 
-In the real spec, the eight rules are written twice, as `Message.WF` and as `catalogue`. Any time something is written twice, the two copies can drift apart: someone tightens a rule in one place and forgets the other. Then the proofs are about one set of rules while glion is checked against another, and everything still builds. `wf_iff_failures_nil` is the seven-rule version of this example, and because it's proved, the copies can't drift. Changing one catalogue check from `length = 3` to `length ≤ 3` stops the proof building, at the line `exact ⟨hm.1, …⟩`.
+In the real spec, the ten rules are written twice, as `Message.WF` and as `catalogue`. Any time something is written twice, the two copies can drift apart: someone tightens a rule in one place and forgets the other. Then the proofs are about one set of rules while glion is checked against another, and everything still builds. `wf_iff_failures_nil` is the ten-rule version of this example, and because it's proved, the copies can't drift. Changing one catalogue check from `length = 3` to `length ≤ 3` stops the proof building, at the line `exact ⟨hm.1, …⟩`.
 
 You don't need to write proofs like this; an agent can. You need to judge three things:
 
@@ -162,19 +166,19 @@ example {m : Message} : m.WF ↔ m.failures = [] := by
     List.mem_cons, List.not_mem_nil, or_false, forall_eq_or_imp, forall_eq,
     Bool.not_eq_false', decide_eq_true_eq]
   constructor
-  · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩
-    exact ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩
-  · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩
-    exact ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩
+  · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩
+    exact ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩
+  · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩
+    exact ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩
 ```
 
-The original mixes them because the two sides are packaged differently. `Message.WF` is flat, one structure with eight slots, so `hm.1` … `hm.8` reach each rule directly. The eight rules joined by `∧` are nested: `A ∧ B ∧ C` means `A ∧ (B ∧ C)`, so `h.2` is "everything after the first rule":
+The original mixes them because the two sides are packaged differently. `Message.WF` is flat, one structure with ten slots, so `hm.1` … `hm.10` reach each rule directly. The ten rules joined by `∧` are nested: `A ∧ B ∧ C` means `A ∧ (B ∧ C)`, so `h.2` is "everything after the first rule":
 
 ```lean
 example (A B C : Prop) (h : A ∧ B ∧ C) : B ∧ C := h.2
 ```
 
-With `intro` on that side, you'd write `⟨h.1, h.2.1, h.2.2.1, h.2.2.2.1, h.2.2.2.2.1, h.2.2.2.2.2.1, h.2.2.2.2.2.2.1, h.2.2.2.2.2.2.2⟩`. All three versions build; they differ only in how easy they are to read.
+With `intro` on that side, you'd write `⟨h.1, h.2.1, h.2.2.1, h.2.2.2.1, h.2.2.2.2.1, h.2.2.2.2.2.1, h.2.2.2.2.2.2.1, h.2.2.2.2.2.2.2.1, h.2.2.2.2.2.2.2.2.1, h.2.2.2.2.2.2.2.2.2⟩`. All three versions build; they differ only in how easy they are to read.
 
 ## 6. Why both `Message.WF` and `catalogue`?
 
@@ -189,7 +193,7 @@ The spec has two jobs that want the same rules in different shapes.
 
 **With only `catalogue`**, proofs get clumsy: instead of `hm.segment_id_length`, a proof has to say "the second item of the catalogue returns `true` on `m`", then turn that back into a statement. And the rules stop reading like the standard: `segment_id_length : ∀ s ∈ m.segments, s.id.length = 3` reads like §2.5.2; a list of `decide` calls reads like code.
 
-The cost is writing the rules twice, and `wf_iff_failures_nil` pays it. Two other designs exist: generate the catalogue from `Message.WF` with metaprogramming (more machinery than eight rules justify), or define `Message.WF` as `m.failures = []` (one copy, but no named statements for proofs). With eight rules, two copies plus one short proof is the simplest.
+The cost is writing the rules twice, and `wf_iff_failures_nil` pays it. Two other designs exist: generate the catalogue from `Message.WF` with metaprogramming (more machinery than ten rules justify), or define `Message.WF` as `m.failures = []` (one copy, but no named statements for proofs). With ten rules, two copies plus one short proof is the simplest.
 
 ## 7. What `simp only` does, one lemma at a time
 
@@ -199,7 +203,7 @@ simp only [Message.failures, List.map_eq_nil_iff, filter_eq_nil_iff, catalogue,
   Bool.not_eq_false', decide_eq_true_eq]
 ```
 
-The goal starts as `m.WF ↔ m.failures = []`. `simp only` rewrites the right side, using only the names in the brackets, until it becomes the eight rules joined by `∧`. Two of the names are **definitions** (`Message.failures`, `catalogue`), which `simp only` replaces by their contents. The other nine are **lemmas**, each an already-proved "this means the same as that".
+The goal starts as `m.WF ↔ m.failures = []`. `simp only` rewrites the right side, using only the names in the brackets, until it becomes the ten rules joined by `∧`. Two of the names are **definitions** (`Message.failures`, `catalogue`), which `simp only` replaces by their contents. The other nine are **lemmas**, each an already-proved "this means the same as that".
 
 To keep the goals short, the table uses a catalogue of two rules, `r1` (distinct delimiters) and `r2` (three-character IDs). `simp only` doesn't run them in a fixed order; it keeps applying whichever fits. The order below is the order in which they become useful.
 
@@ -234,12 +238,12 @@ Distinct ∧ (∀ s, length = 3)                         the rules themselves
 ```
 
 - **Steps 1 to 4** remove the code: names, filters and the catalogue's list structure.
-- **Steps 5 to 9** turn "for every rule in the list" into one `∧` per rule. With eight rules, `forall_eq_or_imp` is applied seven times, peeling off one rule each time.
+- **Steps 5 to 9** turn "for every rule in the list" into one `∧` per rule. With ten rules, `forall_eq_or_imp` is applied nine times, peeling off one rule each time.
 - **Steps 10 and 11** turn each `Bool` check back into its logical rule.
 
-After all eleven, the goal is `m.WF ↔ rule1 ∧ … ∧ rule8`, and the four lines after `simp only` close it by unpacking and repacking.
+After all eleven, the goal is `m.WF ↔ rule1 ∧ … ∧ rule10`, and the four lines after `simp only` close it by unpacking and repacking.
 
-None of the nine lemmas mentions HL7v2. The only HL7v2 content is what the two definitions unfold into. That's why this proof only shows that the checks and the rules match, and why it fails when they don't: a loosened check produces `length ≤ 3` against the rule's `length = 3` at step 11, and an eighth catalogue check produces eight `∧`s against seven fields at step 9.
+None of the nine lemmas mentions HL7v2. The only HL7v2 content is what the two definitions unfold into. That's why this proof only shows that the checks and the rules match, and why it fails when they don't: a loosened check produces `length ≤ 3` against the rule's `length = 3` at step 11, and an eleventh catalogue check produces eleven `∧`s against ten fields at step 9.
 
 You can watch it yourself on a two-rule catalogue:
 
@@ -343,12 +347,12 @@ Put your cursor on the `simp?` line. The infoview shows:
 
 ```text
 Try this:
-  simp only [Message.failures, catalogue, ne_eq, List.map_eq_nil_iff, List.filter_eq_nil_iff,
-    List.mem_cons, List.not_mem_nil, or_false, Bool.not_eq_eq_eq_not, Bool.not_true,
-    Bool.not_eq_false, forall_eq_or_imp, decide_eq_true_eq, forall_eq]
+  [apply] simp only [Message.failures, catalogue, ne_eq, List.map_eq_nil_iff, List.filter_eq_nil_iff, List.mem_cons,
+    List.not_mem_nil, or_false, Bool.not_eq_eq_eq_not, Bool.not_true, Bool.not_eq_false, forall_eq_or_imp,
+    decide_eq_true_eq, forall_eq]
 ```
 
-That's almost exactly the list in the file. The `sorry` stands in for the rest of the proof, so Lean warns "declaration uses `sorry`", which is expected.
+`[apply]` marks a suggestion you can click to paste in. That's almost exactly the list in the file. The `sorry` stands in for the rest of the proof, so Lean warns "declaration uses `sorry`", which is expected.
 
 | Where you put `simp?`                                   | What happens                                                                                                |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
@@ -386,20 +390,25 @@ These three lemmas in `Thm/WellFormed.lean` **reshape** `Message.WF`. They add n
 `Message.WF` states each rule over the **whole message**, one rule per line, which is the right shape for reading against Chapter 2. But the decoding proof works **one field at a time**, so it wants all the facts about one field in one bundle, and likewise for one segment:
 
 ```text
-def FieldWF (f : Field) : Prop :=
-  f ≠ [] ∧ ∀ r ∈ f, r ≠ [] ∧ ∀ c ∈ r, c ≠ [] ∧ ∀ s ∈ c, segmentTerminator ∉ s
+def ValueWF (d : Delimiters) (v : Subcomponent) : Prop :=
+  Piece.char segmentTerminator ∉ v ∧ ∀ p ∈ v, p.isDefined ∧ p.NoDelimiter d
 
-structure SegmentWF (s : Segment) : Prop where
+def FieldWF (d : Delimiters) (f : Field) : Prop :=
+  f ≠ [] ∧ ∀ r ∈ f, r ≠ [] ∧ ∀ c ∈ r, c ≠ [] ∧ ∀ s ∈ c, ValueWF d s
+
+structure SegmentWF (d : Delimiters) (s : Segment) : Prop where
   id_length : s.id.length = 3
   id_no_terminator : segmentTerminator ∉ s.id
-  fields : ∀ f ∈ s.fields, FieldWF f
+  fields : ∀ f ∈ s.fields, FieldWF d f
 ```
 
-| Theorem              | Statement                              | In words                                            |
-| -------------------- | -------------------------------------- | --------------------------------------------------- |
-| `Message.WF.field`   | `m.WF → f ∈ m.fields → FieldWF f`      | In a well-formed message, each field is well formed |
-| `Message.WF.header`  | `m.WF → ∀ f ∈ m.header, FieldWF f`     | …each MSH field from MSH-3 on is well formed        |
-| `Message.WF.segment` | `m.WF → ∀ s ∈ m.segments, SegmentWF s` | …each segment after MSH is well formed              |
+The three take the delimiters `d`, because the rule about escape sequences says which characters a sequence may not hold, and those are the message's delimiters.
+
+| Theorem              | Statement                                           | In words                                            |
+| -------------------- | --------------------------------------------------- | --------------------------------------------------- |
+| `Message.WF.field`   | `m.WF → f ∈ m.fields → FieldWF m.delimiters f`      | In a well-formed message, each field is well formed |
+| `Message.WF.header`  | `m.WF → ∀ f ∈ m.header, FieldWF m.delimiters f`     | …each MSH field from MSH-3 on is well formed        |
+| `Message.WF.segment` | `m.WF → ∀ s ∈ m.segments, SegmentWF m.delimiters s` | …each segment after MSH is well formed              |
 
 **A proof of "for every" is a function.** These proofs have no `by`; the proof is written directly as a value, which is called **term mode**. A proof of `∀ x ∈ list, P x` is a function: give it an `x` and a proof that `x` is in the list, and it gives you a proof of `P x`.
 
@@ -410,16 +419,20 @@ example (P : Nat → Prop) (h : ∀ n ∈ [1, 2, 3], P n) : P 2 := h 2 (by decid
 Reading `Message.WF.field`, with the first line simplified:
 
 ```text
-theorem Message.WF.field (hm : m.WF) (hf : f ∈ m.fields) : FieldWF f :=
-  ⟨hm.field_has_repetition f hf,                         -- f ≠ []
-   fun r hr =>                                            -- for every repetition r in f:
-    ⟨hm.repetition_has_component f hf r hr,              --   r ≠ []
-     fun c hc =>                                          --   for every component c in r:
-      ⟨hm.component_has_subcomponent f hf r hr c hc,     --     c ≠ []
-       hm.subcomponent_no_terminator f hf r hr c hc⟩⟩⟩    --     no subcomponent of c holds \r
+theorem Message.WF.field (hm : m.WF) (hf : f ∈ m.fields) : FieldWF m.delimiters f :=
+  ⟨hm.field_has_repetition f hf,                                -- f ≠ []
+   fun r hr =>                                                   -- for every repetition r in f:
+    ⟨hm.repetition_has_component f hf r hr,                     --   r ≠ []
+     fun c hc =>                                                 --   for every component c in r:
+      ⟨hm.component_has_subcomponent f hf r hr c hc,            --     c ≠ []
+       fun s hs =>                                               --     for every subcomponent s in c:
+        ⟨hm.subcomponent_no_terminator f hf r hr c hc s hs,     --       s holds no \r
+         fun p hp =>                                             --       for every piece p in s:
+          ⟨hm.escape_sequence_defined f hf r hr c hc s hs p hp,  --         p is defined
+           hm.escape_sequence_no_delimiter f hf r hr c hc s hs p hp⟩⟩⟩⟩⟩  -- p holds no delimiter
 ```
 
-It takes each of the four field rules from `hm` and calls it on this field, its repetitions and its components: unpack and repack again, going down through the levels.
+It takes each of the six field rules from `hm` and calls it on this field, its repetitions, components, subcomponents and pieces: unpack and repack again, going down through the levels.
 
 - **`header`:** a field in `m.header` is also in `m.fields`, because `m.fields` is `header ++ …` (`List.mem_append_left`). So `hm.field` applies.
 - **`segment`:** builds the three slots of `SegmentWF` from the two segment-ID rules, plus `hm.field` for each field (`List.mem_append_right`, `List.mem_flatMap`).
