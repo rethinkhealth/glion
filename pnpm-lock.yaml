@@ -670,8 +670,8 @@ importers:
         specifier: 11.0.5
         version: 11.0.5
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.6.6
+        version: 4.6.6
     devDependencies:
       '@glion/check-readme':
         specifier: workspace:*
@@ -702,7 +702,7 @@ importers:
         version: 4.1.12(@types/node@26.6.5)(@vitest/coverage-v8@4.1.12)(vite@7.3.7(@types/node@26.6.5)(jiti@2.6.1)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
       zod-to-json-schema:
         specifier: 3.25.2
-        version: 3.25.2(zod@3.25.76)
+        version: 3.25.2(zod@4.6.6)
 
   packages/create-glion:
     dependencies:
@@ -893,8 +893,8 @@ importers:
         specifier: 11.0.5
         version: 11.0.5
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.6.6
+        version: 4.6.6
     devDependencies:
       '@glion/builder':
         specifier: workspace:*
@@ -6872,14 +6872,11 @@ packages:
     peerDependencies:
       zod: ^3.25.28 || ^4
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
-  zod@4.4.2:
-    resolution: {integrity: sha512-IynmDyxsEsb9RKzO3J9+4SxXnl2FTFSzNBaKKaMV6tsSk0rw9gYw9gs+JFCq/qk2LCZ78KDwyj+Z289TijSkUw==}
-
   zod@4.6.5:
     resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
 snapshots:
 
@@ -9176,7 +9173,7 @@ snapshots:
 
   mutation-server-protocol@0.4.1:
     dependencies:
-      zod: 4.6.5
+      zod: 4.6.6
 
   mutation-testing-elements@3.8.4: {}
 
@@ -9800,7 +9797,7 @@ snapshots:
       jsonc-parser: 3.3.1
       nypm: 0.6.6
       yaml: 2.8.4
-      zod: 4.4.2
+      zod: 4.6.6
     optionalDependencies:
       oxfmt: 0.67.0
       oxlint: 1.62.0
@@ -10072,12 +10069,10 @@ snapshots:
       cookie: 1.1.1
       youch-core: 0.3.3
 
-  zod-to-json-schema@3.25.2(zod@3.25.76):
+  zod-to-json-schema@3.25.2(zod@4.6.6):
     dependencies:
-      zod: 3.25.76
-
-  zod@3.25.76: {}
-
-  zod@4.4.2: {}
+      zod: 4.6.6
 
   zod@4.6.5: {}
+
+  zod@4.6.6: {}
