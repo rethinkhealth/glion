@@ -19,7 +19,7 @@
 import type { Delimiters } from "@glion/ast";
 import { describe, expect, it } from "vitest";
 
-import { decodeEscapes, encodeEscapes } from "../../src";
+import { escapes } from "../../src";
 
 describe("a value written with a delimiter that is an escape code", () => {
   it("holds no delimiter and is written the same way again when the component separator is `E`", () => {
@@ -30,10 +30,10 @@ describe("a value written with a delimiter that is an escape code", () => {
       repetition: "\\",
       subcomponent: "$",
     };
-    const wire = encodeEscapes("a<b", d);
+    const wire = escapes.write("a<b", d);
 
     expect(wire).not.toContain(d.component);
-    expect(encodeEscapes(decodeEscapes(wire, d), d)).toBe(wire);
+    expect(escapes.write(escapes.read(wire, d), d)).toBe(wire);
   });
 
   it("holds no delimiter and is written the same way again when the subcomponent separator is `E`", () => {
@@ -44,10 +44,10 @@ describe("a value written with a delimiter that is an escape code", () => {
       repetition: "\\",
       subcomponent: "E",
     };
-    const wire = encodeEscapes("a<b", d);
+    const wire = escapes.write("a<b", d);
 
     expect(wire).not.toContain(d.subcomponent);
-    expect(encodeEscapes(decodeEscapes(wire, d), d)).toBe(wire);
+    expect(escapes.write(escapes.read(wire, d), d)).toBe(wire);
   });
 
   it("holds no delimiter and is written the same way again when the field separator is `E`", () => {
@@ -58,10 +58,10 @@ describe("a value written with a delimiter that is an escape code", () => {
       repetition: "^",
       subcomponent: "\\",
     };
-    const wire = encodeEscapes("a~b", d);
+    const wire = escapes.write("a~b", d);
 
     expect(wire).not.toContain(d.field);
-    expect(encodeEscapes(decodeEscapes(wire, d), d)).toBe(wire);
+    expect(escapes.write(escapes.read(wire, d), d)).toBe(wire);
   });
 
   it("is written the same way again when the escape character is `E`", () => {
@@ -73,8 +73,8 @@ describe("a value written with a delimiter that is an escape code", () => {
       subcomponent: "`",
     };
 
-    const wire = encodeEscapes("aEb", d);
+    const wire = escapes.write("aEb", d);
 
-    expect(encodeEscapes(decodeEscapes(wire, d), d)).toBe(wire);
+    expect(escapes.write(escapes.read(wire, d), d)).toBe(wire);
   });
 });

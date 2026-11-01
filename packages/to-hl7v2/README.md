@@ -34,9 +34,9 @@ console.log(String(file));
 
 Register the plugin as the compiler of a `unified` processor. Serializes the AST back to HL7v2 text and sets it as the file contents. Reads `file.data.delimiters` when `@glion/annotate-delimiters` set it.
 
-| Option          | Type      | Description                                                                                                                                                                                                       |
-| --------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `encodeEscapes` | `boolean` | Write each subcomponent value with its delimiters, escape character, and control characters as escape sequences (`true`, the default), or as it is (`false`). MSH-1 and MSH-2 are written as they are either way. |
+| Option          | Type      | Description                                                                                                                                                                                    |
+| --------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `encodeEscapes` | `boolean` | Write each subcomponent value with its separators and control characters as escape sequences (`true`, the default), or as it is (`false`). MSH-1 and MSH-2 are written as they are either way. |
 
 ### `toHl7v2(node, delimiters?, options?)`
 
@@ -60,7 +60,7 @@ toHl7v2(fieldNode); // "DOE\\T\\SMITH" for the value "DOE&SMITH"
 
 ### Escape sequences
 
-Each subcomponent value is written as it must appear on the wire: the field, component, repetition, and subcomponent separators as `\F\`, `\S\`, `\R\`, and `\T\`, and any character below U+0020, such as a carriage return, as `\Xdd\`. A character whose escape code holds a delimiter, such as `|` when `F` is the component separator, is written as `\Xdd\`, the hexadecimal escape of its UTF-8 bytes. A value holding a character that no escape sequence can write with the message's delimiters throws `EscapeSequenceError`, which `@glion/to-hl7v2` exports. An escape sequence in a value, such as `\E\`, `\H\`, `\.br\`, or `\XC3A9\`, is written as it is. An escape character that starts no sequence, or whose sequence would hold a separator, is written as `\E\`: `a\b|c` is written `a\E\b\F\c`. MSH-1 and MSH-2 are written as they are. `encodeEscapes: false` writes every value as it is.
+Each subcomponent value is written as it must appear on the wire: the field, component, repetition, and subcomponent separators as `\F\`, `\S\`, `\R\`, and `\T\`, and any character below U+0020, such as a carriage return, as `\Xdd\`. A character whose escape code holds a delimiter, such as `|` when `F` is the component separator, is written as `\Xdd\`, the hexadecimal escape of its UTF-8 bytes. A value holding a character that no escape sequence can write with the message's delimiters throws `EscapeSequenceError`, which `@glion/to-hl7v2` exports. Every other character is written as it is, the escape character included: an escape sequence in a value, such as `\E\`, `\H\`, `\.br\`, or `\XC3A9\`, and an escape character that starts no sequence, such as the one in `C:\temp`. A data escape character is written `\E\` in the value. MSH-1 and MSH-2 are written as they are. `encodeEscapes: false` writes every value as it is.
 
 ## Round-trip guarantees
 

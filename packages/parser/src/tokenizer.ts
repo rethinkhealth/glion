@@ -37,7 +37,7 @@
 // holds, so `\r\n` counts as one line break.
 
 import type { Delimiters } from "@glion/ast";
-import { DEFAULT_DELIMITERS, decodeEscapes } from "@glion/utils";
+import { DEFAULT_DELIMITERS, escapes } from "@glion/utils";
 import type { Position } from "unist";
 
 import {
@@ -210,7 +210,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     const value =
       // Stryker disable next-line EqualityOperator: no TEXT token starts at decodeFrom, which is a field delimiter, a segment terminator, or the end of the input
       this.decodeEscapes && offset >= this.decodeFrom
-        ? decodeEscapes(text, this.delimiters)
+        ? escapes.read(text, this.delimiters)
         : text;
     return this.take("TEXT", text.length, value);
   }

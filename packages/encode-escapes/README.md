@@ -1,12 +1,12 @@
 # @glion/encode-escapes
 
-Unified plugin to encode special characters as HL7v2 escape sequences in literal values.
+Unified plugin that writes the escape sequences of every subcomponent value with `escapes.write` from `@glion/utils`.
 
 ## What it does
 
-Walks an HL7v2 AST and encodes delimiter and control characters found in `subcomponent` node values as HL7v2 escape sequences. It is the inverse of [`@glion/decode-escapes`](https://github.com/rethinkhealth/glion/tree/main/packages/decode-escapes) for the separators and control characters: a value without the escape character is encoded and decoded back to itself.
+Walks an HL7v2 AST and replaces each `subcomponent` node's `value` with `escapes.write(value, delimiters)`, except in MSH-1 and MSH-2, which hold the delimiters themselves. It applies the same rule as `@glion/to-hl7v2`: only the separators and the characters below U+0020 are written as escape sequences, and everything else is written as it is, the escape character included.
 
-`@glion/to-hl7v2` encodes escape sequences while serializing, so this plugin is for a tree written with `encodeEscapes: false`.
+`@glion/to-hl7v2` already writes escape sequences while serializing, so the plugin is for a tree written with `encodeEscapes: false`.
 
 ## Install
 
@@ -21,14 +21,13 @@ import { hl7v2EncodeEscapes } from "@glion/encode-escapes";
 import { hl7v2ToHl7v2 } from "@glion/to-hl7v2";
 import { unified } from "unified";
 
-// After modifying AST values that may contain delimiters:
 const file = await unified()
-  .use(hl7v2EncodeEscapes) // encode special chars as escape sequences
-  .use(hl7v2ToHl7v2, { encodeEscapes: false }) // serialize AST to HL7v2 text
+  .use(hl7v2EncodeEscapes)
+  .use(hl7v2ToHl7v2, { encodeEscapes: false })
   .stringify(tree);
 ```
 
-Before encoding, a `subcomponent.value` might contain literal delimiters:
+Before the plugin runs, a `subcomponent.value` may hold separators and control characters:
 
 ```json
 {
@@ -37,7 +36,7 @@ Before encoding, a `subcomponent.value` might contain literal delimiters:
 }
 ```
 
-After this plugin runs:
+After it runs:
 
 ```json
 {
@@ -50,7 +49,7 @@ After this plugin runs:
 
 ### `unified().use(hl7v2EncodeEscapes[, options])`
 
-Encode special characters as HL7v2 escape sequences in literal nodes.
+Writes the escape sequences of every `subcomponent` value outside MSH-1 and MSH-2 with `escapes.write`, in place.
 
 ###### Parameters
 
@@ -58,38 +57,26 @@ Encode special characters as HL7v2 escape sequences in literal nodes.
 
 ###### Returns
 
-Nothing (`undefined`). Mutates the AST in-place.
+Nothing (`undefined`). Mutates the AST in-place. Throws `EscapeSequenceError`, exported by `@glion/utils`, when a value holds a character that no escape sequence can write with the delimiters.
 
 ## Behavior
 
-The plugin visits every `subcomponent` node and rewrites `node.value`, substituting separators and control characters with their HL7v2 escape sequences. An escape sequence already in a value, such as `\E\`, `\H\`, `\.br\`, or `\XC3A9\`, is written as it is. An escape character that starts no sequence, or whose sequence would hold a separator, is written as `\E\`: `a\b|c` becomes `a\E\b\F\c`.
+| In the value                                         | On the wire                |
+| ---------------------------------------------------- | -------------------------- |
+| field, component, repetition, subcomponent separator | `\F\`, `\S\`, `\R\`, `\T\` |
+| a character below U+0020, such as a carriage return  | `\Xdd\`, such as `\X0D\`   |
+| any other character, the escape character included   | written as it is           |
 
-| Input                       | Output                         |
-| --------------------------- | ------------------------------ |
-| `\|`                        | `\F\` (field separator)        |
-| `^`                         | `\S\` (component separator)    |
-| `~`                         | `\R\` (repetition separator)   |
-| `&`                         | `\T\` (subcomponent separator) |
-| `\` that starts no sequence | `\E\` (escape character)       |
-| characters below U+0020     | `\Xdd\` (hexadecimal escape)   |
-
-A character whose escape code holds a delimiter, such as `|` when `F` is the component separator, is written as `\Xdd\`, the hexadecimal escape of its UTF-8 bytes. A value holding a character that no escape sequence can write with the delimiters makes the plugin throw `EscapeSequenceError`, exported by `@glion/utils`.
+An escape sequence already in a value, such as `\E\`, `\H\`, `\.br\`, or `\XC3A9\`, is written as it is, and so is an escape character that starts no sequence, such as the one in `C:\temp`. A data escape character is written `\E\` in the value. A separator whose named code holds a delimiter, such as `|` when `F` is the component separator, is written as `\Xdd\`, the hexadecimal escape of its UTF-8 bytes.
 
 Delimiter resolution order: `options.delimiters` → `file.data.delimiters` (set by `@glion/annotate-delimiters`) → HL7 defaults.
 
-This is the inverse of [`@glion/decode-escapes`](https://github.com/rethinkhealth/glion/tree/main/packages/decode-escapes):
+`@glion/decode-escapes` reads a value this plugin wrote back to itself when the value holds no escape character.
 
-```js
-import { hl7v2DecodeEscapes } from "@glion/decode-escapes";
-import { hl7v2EncodeEscapes } from "@glion/encode-escapes";
+## See also
 
-// encode → decode round-trip
-const encoded = await unified().use(hl7v2EncodeEscapes).run(tree);
-const decoded = await unified().use(hl7v2DecodeEscapes).run(encoded);
-// decoded values === original values, for values without the escape character
-```
-
-The plugin only transforms AST nodes and does not execute code.
+- [`escapes` in `@glion/utils`](https://github.com/rethinkhealth/glion/tree/main/packages/utils#escapes) — the function this plugin applies, for a single value.
+- [`@glion/decode-escapes`](https://github.com/rethinkhealth/glion/tree/main/packages/decode-escapes) — the reverse, with `escapes.read`.
 
 ## Part of Glion
 

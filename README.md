@@ -94,8 +94,8 @@ Composable plugins that annotate, enrich, and transform the AST.
 - **[@glion/annotate-profile-datatypes][glion-annotate-profile-datatypes]** — annotate field repetitions, components, and subcomponents with datatype profile metadata.
 - **[@glion/annotate-profile-fields-code-systems][glion-annotate-profile-fields-code-systems]** — annotate field-level coded values with UTG code system metadata (experimental).
 - **[@glion/annotate-profile-tables][glion-annotate-profile-tables]** — annotate primitive values with their entry in the table of the message's HL7v2 version.
-- **[@glion/decode-escapes][glion-decode-escapes]** — decode HL7v2 escape sequences (`\F\`, `\S\`, `\T\`, `\Xdd\`, `\.br\`) in a tree parsed with `decodeEscapes: false`.
-- **[@glion/encode-escapes][glion-encode-escapes]** — encode delimiter characters in subcomponent values as HL7v2 escape sequences before serialization.
+- **[@glion/decode-escapes][glion-decode-escapes]** — read the escape sequences of every value with `escapes.read`, for a tree parsed with `decodeEscapes: false`.
+- **[@glion/encode-escapes][glion-encode-escapes]** — write the escape sequences of every value with `escapes.write`, for a tree written with `encodeEscapes: false`.
 - **[@glion/transform-segment-terminator][glion-transform-segment-terminator]** — end every segment with a carriage return, the segment terminator HL7v2 requires, whatever line break it was read with.
 - **[@glion/transform-trim-trailing-fields][glion-transform-trim-trailing-fields]** — remove the empty fields at the end of each segment, so `PID|1|DOE||` is written as `PID|1|DOE`.
 - **[@glion/transform-profile-groups][glion-transform-profile-groups]** — nest segments in the segment groups their event schema defines, such as `PATIENT_RESULT` and `ORDER_OBSERVATION`.

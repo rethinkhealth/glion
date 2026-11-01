@@ -93,15 +93,15 @@ describe("hl7v2LintWithdrawn", () => {
       expect(message?.actual).toBe("2024\\F\\01");
     });
 
-    // MSH-1 `X` and MSH-2 `E~\&`: the escape character in AL1-6 is written
-    // `\E\` or `\X5C\`, and both hold a delimiter.
+    // MSH-1 `X` and MSH-2 `E~\&`: the tab in AL1-6 is written `\X09\`, which
+    // holds the field separator.
     it("reports the field without its text when the delimiters cannot write it", async () => {
-      // The message is given as text: its value holds an escape character
-      // that no escape sequence can write with these delimiters, so
+      // The message is given as text: its value holds a tab that no escape
+      // sequence can write with these delimiters, so
       // `toHl7v2` throws `EscapeSequenceError` on it.
       const [message, ...rest] = await run(
         parseHL7v2(
-          "MSHXE~\\&XSNDXFACXRCVXRFACX20241201XXADTEA01EADT_A01XMSG001XPX2.7\rAL1X1XXPCNXXX2024\\b\r"
+          "MSHXE~\\&XSNDXFACXRCVXRFACX20241201XXADTEA01EADT_A01XMSG001XPX2.7\rAL1X1XXPCNXXX2024\tb\r"
         )
       );
 

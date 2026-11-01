@@ -1,7 +1,7 @@
 import type { Delimiters, Nodes, Root } from "@glion/ast";
 import { selectAll } from "@glion/util-query";
 import { visit } from "@glion/util-visit";
-import { DEFAULT_DELIMITERS, encodeEscapes } from "@glion/utils";
+import { DEFAULT_DELIMITERS, escapes } from "@glion/utils";
 import type { Plugin } from "unified";
 import type { VFile } from "vfile";
 
@@ -10,10 +10,10 @@ export interface HL7v2EncodeOptions {
 }
 
 /**
- * Unified plugin to encode special characters as HL7v2 escape sequences in
- * subcomponent literals, for a tree that `@glion/to-hl7v2` writes with
- * `encodeEscapes: false`. MSH-1 and MSH-2 are left as they are. A character
- * whose escape code holds a delimiter is written as `\Xdd\`.
+ * Unified plugin to write HL7v2 escape sequences in subcomponent literals,
+ * for a tree that `@glion/to-hl7v2` writes with `encodeEscapes: false`, as
+ * `escapes.write` from `@glion/utils` writes them. MSH-1 and MSH-2 are left
+ * as they are.
  *
  * Delimiter resolution order:
  *
@@ -45,7 +45,7 @@ export const hl7v2EncodeEscapes: Plugin<[HL7v2EncodeOptions?], Root, Root> =
       ) {
         return;
       }
-      node.value = encodeEscapes(node.value, d);
+      node.value = escapes.write(node.value, d);
     });
 
     return tree;

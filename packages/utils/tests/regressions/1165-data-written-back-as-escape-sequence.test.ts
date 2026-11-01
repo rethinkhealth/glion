@@ -25,7 +25,7 @@
 import type { Delimiters } from "@glion/ast";
 import { describe, expect, it } from "vitest";
 
-import { decodeEscapes, encodeEscapes } from "../../src";
+import { escapes } from "../../src";
 
 const d: Delimiters = {
   component: "^",
@@ -39,25 +39,25 @@ describe("data that looks like an escape sequence (HL7v2 §2.7.1)", () => {
   it("is written back as data when it looks like a highlighting command", () => {
     const received = String.raw`see \E\H\E\ in OBX-5`;
 
-    expect(encodeEscapes(decodeEscapes(received, d), d)).toBe(received);
+    expect(escapes.write(escapes.read(received, d), d)).toBe(received);
   });
 
   it("is written back as data when it looks like a formatting command", () => {
     const received = String.raw`\E\.sp\E\ 2`;
 
-    expect(encodeEscapes(decodeEscapes(received, d), d)).toBe(received);
+    expect(escapes.write(escapes.read(received, d), d)).toBe(received);
   });
 
   it("is written back as data when it looks like a locally defined sequence", () => {
     const received = String.raw`C:\E\Zab\E\scan.dcm`;
 
-    expect(encodeEscapes(decodeEscapes(received, d), d)).toBe(received);
+    expect(escapes.write(escapes.read(received, d), d)).toBe(received);
   });
 
   it("reads to a value other than the command it looks like", () => {
     // The receiver's display must tell the two apart, so the tree must too.
-    expect(decodeEscapes(String.raw`a\E\H\E\b`, d)).not.toBe(
-      decodeEscapes(String.raw`a\H\b`, d)
+    expect(escapes.read(String.raw`a\E\H\E\b`, d)).not.toBe(
+      escapes.read(String.raw`a\H\b`, d)
     );
   });
 });

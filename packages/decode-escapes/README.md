@@ -1,12 +1,12 @@
 # @glion/decode-escapes
 
-Unified plugin to decode HL7v2 escape sequences in literal values.
+Unified plugin that reads the escape sequences of every subcomponent value with `escapes.read` from `@glion/utils`.
 
 ## What it does
 
-Walks an HL7v2 AST and decodes escape sequences found in `subcomponent` nodes, replacing `node.value` with the decoded text. It decodes the separator escapes (`\F\`, `\S\`, `\R\`, `\T\`) and the hexadecimal escapes of control characters (`\X0D\`, `\X0A\`, …). Every other sequence stays as written: `\E\`, `\P\`, a formatting command such as `\H\`, `\.br\`, or `\.sp 2\`, any other `\X…\`, a locally defined sequence (`\Z…\`), and a character set switch (`\Cxxyy\`, `\Mxxyyzz\`).
+Walks an HL7v2 AST and replaces each `subcomponent` node's `value` with `escapes.read(value, delimiters)`. It applies the same rule as `@glion/parser`: only the separators and the characters below U+0020 are read from their escape sequences, and everything else stays as written, the escape character included.
 
-`@glion/parser` decodes escape sequences while parsing, so this plugin is for a tree parsed with `decodeEscapes: false`. Decoding a value twice gives the same value as decoding it once: `\E\F\E\` stays `\E\F\E\`.
+`@glion/parser` already reads escape sequences while parsing, so the plugin is for a tree parsed with `decodeEscapes: false`. On a tree the parser has read, it changes nothing: reading a value twice gives the same value as reading it once.
 
 ## Install
 
@@ -29,7 +29,7 @@ const file = await unified()
   .process(msg);
 ```
 
-Before decoding, `subcomponent.value` contains the raw HL7 text:
+Before the plugin runs, `subcomponent.value` holds the text as written:
 
 ```json
 {
@@ -39,7 +39,7 @@ Before decoding, `subcomponent.value` contains the raw HL7 text:
 }
 ```
 
-After this plugin runs:
+After it runs:
 
 ```json
 {
@@ -53,7 +53,7 @@ After this plugin runs:
 
 ### `unified().use(hl7v2DecodeEscapes[, options])`
 
-Decode HL7v2 escape sequences in literal nodes.
+Reads the escape sequences of every `subcomponent` value with `escapes.read`, in place.
 
 ###### Parameters
 
@@ -65,30 +65,21 @@ Nothing (`undefined`). Mutates the AST in-place.
 
 ## Behavior
 
-The plugin visits every `subcomponent` node and rewrites `node.value`.
+| On the wire                               | In the value                                                |
+| ----------------------------------------- | ----------------------------------------------------------- |
+| `\F\`, `\S\`, `\R\`, `\T\`                | the field, component, repetition, or subcomponent separator |
+| `\Xdd\`, such as `\X0D\`                  | the character below U+0020 it names                         |
+| any other escape sequence                 | kept as written                                             |
+| an escape character without a closing one | kept as written                                             |
 
-Each escape sequence is decoded as follows:
-
-| Input     | Output                                         |
-| --------- | ---------------------------------------------- |
-| `\F\`     | field separator (default `\|`)                 |
-| `\S\`     | component separator (default `^`)              |
-| `\R\`     | repetition separator (default `~`)             |
-| `\T\`     | subcomponent separator (default `&`)           |
-| `\Xdd\`   | the character below U+0020 it names            |
-| `\E\`     | kept as written (escape character)             |
-| `\P\`     | kept as written (truncation character)         |
-| `\.br\`   | kept as written (line break command)           |
-| `\XC3A9\` | kept as written (any other hexadecimal data)   |
-| `\H\`     | kept as written (highlight on)                 |
-| `\N\`     | kept as written (normal text)                  |
-| `\.sp 2\` | kept as written (any other formatting command) |
-| `\Z…\`    | kept as written (locally defined sequence)     |
-| `\C2842\` | kept as written (character set switch)         |
+Kept as written: `\E\`, `\P\`, `\H\`, `\N\`, every formatting command such as `\.br\` or `\.sp 2\`, any other `\X…\` such as `\XC3A9\`, `\Z…\`, `\C…\`, `\M…\`, and a code HL7v2 does not define. A separator whose named code holds a delimiter is read from its `\Xdd\`.
 
 Delimiter resolution order: `options.delimiters` → `file.data.delimiters` (set by `@glion/annotate-delimiters`) → HL7 defaults.
 
-The plugin only transforms AST nodes and does not execute code. The inverse operation is provided by [`@glion/encode-escapes`](https://github.com/rethinkhealth/glion/tree/main/packages/encode-escapes).
+## See also
+
+- [`escapes` in `@glion/utils`](https://github.com/rethinkhealth/glion/tree/main/packages/utils#escapes) — the function this plugin applies, for a single value.
+- [`@glion/encode-escapes`](https://github.com/rethinkhealth/glion/tree/main/packages/encode-escapes) — the reverse, with `escapes.write`.
 
 ## Part of Glion
 

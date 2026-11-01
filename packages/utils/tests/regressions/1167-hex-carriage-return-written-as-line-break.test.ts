@@ -22,15 +22,15 @@
  *   horizontal position to the current left margin and increment the vertical
  *   position by 1." It is an instruction for display.
  *
- * Resolution: ADR 0036. `\X0D\` is the one form of a carriage return in the
- * table `decodeEscapes` and `encodeEscapes` share, and `\.br\`, a formatting
+ * Resolution: ADR 0036. `\X0D\` is the one form of a carriage return that
+ * `escapes.read` and `escapes.write` share, and `\.br\`, a formatting
  * command, stays in the value as written, as does `\X0D0A\`.
  */
 
 import type { Delimiters } from "@glion/ast";
 import { describe, expect, it } from "vitest";
 
-import { decodeEscapes, encodeEscapes } from "../../src";
+import { escapes } from "../../src";
 
 const d: Delimiters = {
   component: "^",
@@ -47,7 +47,7 @@ describe("the hexadecimal data `\\X0D\\` (HL7v2 §2.7.6)", () => {
     // not a line break of its own.
     const received = String.raw`a\X0D\b`;
 
-    expect(encodeEscapes(decodeEscapes(received, d), d)).toBe(received);
+    expect(escapes.write(escapes.read(received, d), d)).toBe(received);
   });
 
   it("is written back as `\\X0D0A\\` when the byte 0x0D shares the sequence with 0x0A", () => {
@@ -55,7 +55,7 @@ describe("the hexadecimal data `\\X0D\\` (HL7v2 §2.7.6)", () => {
     // sequence is data; splitting it into `\.br\` and `\X0A\` changes it.
     const received = String.raw`a\X0D0A\b`;
 
-    expect(encodeEscapes(decodeEscapes(received, d), d)).toBe(received);
+    expect(escapes.write(escapes.read(received, d), d)).toBe(received);
   });
 });
 
@@ -65,7 +65,7 @@ describe("the formatting command `\\.br\\` (HL7v2 §2.7.7)", () => {
     // start a new line; it is an instruction, not a character of the value.
     const received = String.raw`1. Normal\.br\2. Stable`;
 
-    expect(encodeEscapes(decodeEscapes(received, d), d)).toBe(received);
+    expect(escapes.write(escapes.read(received, d), d)).toBe(received);
   });
 });
 
@@ -73,8 +73,8 @@ describe("a value with both `\\.br\\` and `\\X0D\\`", () => {
   it("reads the two sequences to different values, as §2.7.7 commands display and §2.7.6 data carries bytes", () => {
     // Two values that differ on the wire must differ once read, or no writer
     // can tell which one to send back.
-    expect(decodeEscapes(String.raw`a\X0D\b`, d)).not.toBe(
-      decodeEscapes(String.raw`a\.br\b`, d)
+    expect(escapes.read(String.raw`a\X0D\b`, d)).not.toBe(
+      escapes.read(String.raw`a\.br\b`, d)
     );
   });
 
@@ -83,6 +83,6 @@ describe("a value with both `\\.br\\` and `\\X0D\\`", () => {
     // before `3. Home` is data. Each keeps its own form.
     const received = String.raw`1. Normal\.br\2. Stable\X0D\3. Home`;
 
-    expect(encodeEscapes(decodeEscapes(received, d), d)).toBe(received);
+    expect(escapes.write(escapes.read(received, d), d)).toBe(received);
   });
 });

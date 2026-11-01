@@ -1,6 +1,6 @@
 import type { Delimiters, Root, Subcomponent } from "@glion/ast";
 import { visit } from "@glion/util-visit";
-import { decodeEscapes, DEFAULT_DELIMITERS } from "@glion/utils";
+import { DEFAULT_DELIMITERS, escapes } from "@glion/utils";
 import type { Plugin } from "unified";
 import type { VFile } from "vfile";
 
@@ -9,9 +9,9 @@ export interface HL7v2DecodeOptions {
 }
 
 /**
- * Unified plugin to decode HL7v2 escape sequences in subcomponent literals,
- * for a tree parsed with `decodeEscapes: false`, as `decodeEscapes` from
- * `@glion/utils` decodes them. Idempotent: a tree `@glion/parser` decoded is
+ * Unified plugin to read HL7v2 escape sequences in subcomponent literals,
+ * for a tree parsed with `decodeEscapes: false`, as `escapes.read` from
+ * `@glion/utils` reads them. Idempotent: a tree `@glion/parser` decoded is
  * left as it is.
  *
  * Delimiter resolution order:
@@ -30,7 +30,7 @@ export const hl7v2DecodeEscapes: Plugin<[HL7v2DecodeOptions?], Root, Root> =
 
     visit(tree, "subcomponent", (node: Subcomponent) => {
       if (node.value !== undefined) {
-        node.value = decodeEscapes(node.value, d);
+        node.value = escapes.read(node.value, d);
       }
     });
 

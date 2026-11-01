@@ -35,10 +35,10 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(subValue(results)).toBe("before\\T\\after");
   });
 
-  it("encodes escape character", async () => {
+  it("leaves the escape character as it is", async () => {
     const tree = m(s("PID", f("before\\after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(results)).toBe("before\\E\\after");
+    expect(subValue(results)).toBe("before\\after");
   });
 
   it("encodes the segment terminator, a carriage return, as \\X0D\\", async () => {
@@ -50,7 +50,7 @@ describe("hl7v2EncodeEscapes plugin", () => {
   it("encodes multiple special characters in one value", async () => {
     const tree = m(s("PID", f("a|b^c~d&e\\f")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(results)).toBe("a\\F\\b\\S\\c\\R\\d\\T\\e\\E\\f");
+    expect(subValue(results)).toBe("a\\F\\b\\S\\c\\R\\d\\T\\e\\f");
   });
 
   it("leaves plain text unchanged", async () => {
@@ -82,11 +82,11 @@ describe("hl7v2EncodeEscapes plugin", () => {
   });
 
   it("writes a character whose escape code is a delimiter as a hexadecimal escape", async () => {
-    const tree = m(s("PID", f("a\\b")));
+    const tree = m(s("PID", f("a|b")));
     const results = await unified()
-      .use(hl7v2EncodeEscapes, { delimiters: { component: "E" } })
+      .use(hl7v2EncodeEscapes, { delimiters: { component: "F" } })
       .run(tree);
-    expect(subValue(results)).toBe("a\\X5C\\b");
+    expect(subValue(results)).toBe("a\\X7C\\b");
   });
 
   it("rejects a value no escape sequence can write with the delimiters", async () => {
@@ -119,14 +119,14 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(subValue(decoded)).toBe(original);
   });
 
-  it("encodes an escape character without a closing one as \\E\\, which decodes as written", async () => {
+  it("leaves an escape character without a closing one as it is, which decodes as written", async () => {
     const tree = m(s("PID", f("a\\b")));
 
     const encoded = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(encoded)).toBe("a\\E\\b");
+    expect(subValue(encoded)).toBe("a\\b");
 
     const decoded = await unified().use(hl7v2DecodeEscapes).run(encoded);
-    expect(subValue(decoded)).toBe("a\\E\\b");
+    expect(subValue(decoded)).toBe("a\\b");
   });
 
   it("options.delimiters override MSH-derived delimiters", async () => {
@@ -182,11 +182,9 @@ describe("hl7v2EncodeEscapes plugin", () => {
   });
 
   it("does not double-encode already-escaped values", async () => {
-    // If a value contains literal backslash (the escape char),
-    // it should be encoded as \E\ — not left as-is
-    const tree = m(s("PID", f("test\\value")));
+    const tree = m(s("PID", f("a\\F\\b|c")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(results)).toBe("test\\E\\value");
+    expect(subValue(results)).toBe("a\\F\\b\\F\\c");
   });
 
   it("does not encode MSH-1 and MSH-2", async () => {
