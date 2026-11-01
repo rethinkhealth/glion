@@ -6,6 +6,7 @@ import type {
   Subcomponent,
 } from "@glion/ast";
 
+import { DEFAULT_DELIMITERS } from "../src/constants";
 import { getByteLength, getLength, isEmptyNode } from "../src/utils";
 
 // ---------------------------------------------------------------------------
@@ -291,6 +292,38 @@ describe(getLength, () => {
     it("should return 0 for null or undefined nodes", () => {
       expect(getLength(null)).toBe(0);
       expect(getLength()).toBe(0);
+    });
+  });
+
+  // HL7v2 §2.7.1: "all the characters inside the escape (all between the
+  // opening and closing \, not including the \ symbols themselves) count
+  // towards the length".
+  describe("with the delimiters of the message", () => {
+    it("counts an escape sequence by the characters between its escape characters", () => {
+      expect(getLength(sub("12\\E\\3"), DEFAULT_DELIMITERS)).toBe(4);
+      expect(getLength(sub("1\\.br\\2"), DEFAULT_DELIMITERS)).toBe(5);
+    });
+
+    it("counts a separator and a control character by the code they are written with", () => {
+      expect(getLength(sub("a&b"), DEFAULT_DELIMITERS)).toBe(3);
+      expect(getLength(sub("a\rb"), DEFAULT_DELIMITERS)).toBe(5);
+    });
+
+    it("counts an escape character without a closing one as one character", () => {
+      expect(getLength(sub("C:\\temp"), DEFAULT_DELIMITERS)).toBe(7);
+      expect(getLength(sub("a\\b|c"), DEFAULT_DELIMITERS)).toBe(5);
+    });
+
+    it("counts a character no escape sequence can write as one character", () => {
+      const d = { ...DEFAULT_DELIMITERS, component: "S", field: "X" };
+
+      expect(getLength(sub("aSb^"), d)).toBe(4);
+    });
+
+    it("passes the delimiters to every child", () => {
+      expect(
+        getLength(comp(sub("12\\E\\3"), sub("a&b")), DEFAULT_DELIMITERS)
+      ).toBe(7);
     });
   });
 

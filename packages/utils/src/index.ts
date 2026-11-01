@@ -2,5 +2,5 @@
 export * from "./constants";
 export * from "./constraints";
 export * from "./errors";
-export * from "./escapes";
+export { escapes, type Escapes } from "./escapes";
 export * from "./utils";

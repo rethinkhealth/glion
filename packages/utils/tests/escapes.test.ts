@@ -13,11 +13,11 @@ const CUSTOM_DELIMITERS: Delimiters = {
   subcomponent: "@",
 };
 
-// The round-trip properties at the end of this file are built from four
-// helpers. Each property first draws a delimiter set with `arbDelimiters`,
-// then chains into `arbValue` to draw a value for that set, and encodes it.
-// A written value is checked with `heldDelimiters` and `escapes.read`; a
-// refused one with `escapeCodesFor`.
+// The round-trip properties at the end of this file draw a delimiter set
+// with `arbDelimiters`, then a value for it: `arbWire` for text as a sender
+// writes it, or `arbValue` for any value. A written value is checked with
+// `heldDelimiters`, `separatorsAndControls`, and `escapes.read`; a refused one
+// with `expectRefused`.
 
 // Characters that are not letters or digits. `.` collides with `\.br\`, but no
 // hexadecimal escape holds one of them, so a delimiter set drawn from them can
@@ -80,7 +80,7 @@ const heldDelimiters = (wire: string, d: Delimiters): string[] =>
   );
 
 // Every escape code that writes the character `ch`: its named code, when
-// `ch` is a separator, and its hexadecimal escape
+// `ch` is a separator or the escape character, and its hexadecimal escape
 // with each digit `A`–`F` in either case. An encoder may refuse `ch` only when
 // every one of them holds a delimiter.
 const escapeCodesFor = (ch: string, d: Delimiters): string[] => {
@@ -89,6 +89,7 @@ const escapeCodesFor = (ch: string, d: Delimiters): string[] => {
     [d.component, "S"],
     [d.repetition, "R"],
     [d.subcomponent, "T"],
+    [d.escape, "E"],
   ]
     .filter(([delimiter]) => delimiter === ch)
     .map(([, code]) => code as string);
@@ -102,6 +103,38 @@ const escapeCodesFor = (ch: string, d: Delimiters): string[] => {
     hex = hex.flatMap((code) => cases.map((form) => code + form));
   }
   return [...named, ...hex];
+};
+
+// A refusal is correct only for a character of the value that every escape
+// code holds a delimiter of.
+const expectRefused = (error: unknown, value: string, d: Delimiters): void => {
+  expect(error).toBeInstanceOf(EscapeSequenceError);
+  const { character } = error as EscapeSequenceError;
+  expect(value).toContain(character);
+  expect(
+    escapeCodesFor(character, d).filter(
+      (code) => heldDelimiters(code, d).length === 0 && !code.includes(d.escape)
+    )
+  ).toEqual([]);
+};
+
+// The separators of `d` and the characters below U+0020 in `text`, in order.
+const separatorsAndControls = (text: string, d: Delimiters): string[] =>
+  [...text].filter(
+    (ch) =>
+      [d.field, d.component, d.repetition, d.subcomponent].includes(ch) ||
+      (ch < " " && ch !== d.escape)
+  );
+
+// Whether `part` is `whole` with some items left out.
+const isSubsequence = (part: string[], whole: string[]): boolean => {
+  let at = 0;
+  for (const item of whole) {
+    if (item === part[at]) {
+      at += 1;
+    }
+  }
+  return at === part.length;
 };
 
 // Whether `text` holds a delimiter of `d`, the escape character, or a
@@ -297,15 +330,15 @@ describe("escapes.read", () => {
 });
 
 describe("escapes.write", () => {
-  it("encodes every separator and a carriage return, and leaves the escape character as it is", () => {
+  it("encodes every separator and a carriage return, and an escape character without a closing one before the carriage return", () => {
     expect(escapes.write("a|b^c~d&e\\f\rg", DEFAULT_DELIMITERS)).toBe(
-      "a\\F\\b\\S\\c\\R\\d\\T\\e\\f\\X0D\\g"
+      "a\\F\\b\\S\\c\\R\\d\\T\\e\\E\\f\\X0D\\g"
     );
   });
 
   it("encodes custom delimiters", () => {
     expect(escapes.write("a*b$c%d@e#f\rg", CUSTOM_DELIMITERS)).toBe(
-      "a#F#b#S#c#R#d#T#e#f#X0D#g"
+      "a#F#b#S#c#R#d#T#e#E#f#X0D#g"
     );
   });
 
@@ -333,15 +366,17 @@ describe("escapes.write", () => {
     ).toBe("\\C2842\\a\\F\\b\\M2442\\c\\M242844\\d");
   });
 
-  it("encodes a delimiter inside a locally defined sequence, and leaves its escape characters as they are", () => {
+  it("encodes a delimiter inside a locally defined sequence, and both of its escape characters as data", () => {
     expect(
       escapes.write("a\\Zfoo|bar\\b\\Zx^y~z&w\\c\\Zq\rr\\d", DEFAULT_DELIMITERS)
-    ).toBe("a\\Zfoo\\F\\bar\\b\\Zx\\S\\y\\R\\z\\T\\w\\c\\Zq\\X0D\\r\\d");
+    ).toBe(
+      "a\\E\\Zfoo\\F\\bar\\E\\b\\E\\Zx\\S\\y\\R\\z\\T\\w\\E\\c\\E\\Zq\\X0D\\r\\E\\d"
+    );
   });
 
   it("encodes a control character inside a locally defined sequence", () => {
     expect(escapes.write("a\\Zfoo\nbar\\b", DEFAULT_DELIMITERS)).toBe(
-      "a\\Zfoo\\X0A\\bar\\b"
+      "a\\E\\Zfoo\\X0A\\bar\\E\\b"
     );
   });
 
@@ -367,21 +402,39 @@ describe("escapes.write", () => {
     );
   });
 
-  it("leaves every escape character as it is, including one without a closing one", () => {
+  it("leaves an escape character as it is when no separator or control character comes before its closing one", () => {
     expect(escapes.write("C:\\temp", DEFAULT_DELIMITERS)).toBe("C:\\temp");
     expect(escapes.write("a\\Q\\b\\.sp|2\\c\\", DEFAULT_DELIMITERS)).toBe(
-      "a\\Q\\b\\.sp\\F\\2\\c\\"
+      "a\\Q\\b\\E\\.sp\\F\\2\\E\\c\\"
     );
   });
 
-  it("writes a separator after an escape character without a closing one as its escape, which pairs with that escape character when read", () => {
-    // HL7v2 §2.7.1 sends a data escape character as `\E\`. A value that holds
-    // a bare one before a separator is not read back as itself: `\b\` is read
-    // as one escape sequence.
+  it("writes an escape character without a closing one as `\\E\\` when a separator follows it, so it does not pair with the separator's escape", () => {
     const wire = escapes.write("a\\b|c", DEFAULT_DELIMITERS);
 
-    expect(wire).toBe("a\\b\\F\\c");
-    expect(escapes.read(wire, DEFAULT_DELIMITERS)).toBe("a\\b\\F\\c");
+    expect(wire).toBe("a\\E\\b\\F\\c");
+    expect(escapes.read(wire, DEFAULT_DELIMITERS)).toBe("a\\E\\b|c");
+  });
+
+  it("writes an escape character as data as its hexadecimal escape when `E` is a delimiter", () => {
+    const d = { ...DEFAULT_DELIMITERS, component: "E" };
+
+    expect(escapes.write("a\\b|c", d)).toBe("a\\X5C\\b\\F\\c");
+  });
+
+  it("keeps a tab after an escape character without a closing one through a relay", () => {
+    // HL7v2 §2.7.1: escape sequences do not nest. `\X09\` written after the
+    // bare `\` would pair with it and lose the tab.
+    const value = escapes.read("see C:\\scans\tnote", DEFAULT_DELIMITERS);
+    const wire = escapes.write(value, DEFAULT_DELIMITERS);
+
+    expect(wire).toBe("see C:\\E\\scans\\X09\\note");
+    expect(escapes.read(wire, DEFAULT_DELIMITERS)).toBe(
+      "see C:\\E\\scans\tnote"
+    );
+    expect(
+      escapes.write(escapes.read(wire, DEFAULT_DELIMITERS), DEFAULT_DELIMITERS)
+    ).toBe(wire);
   });
 
   it("returns a value without special characters as it is", () => {
@@ -464,10 +517,10 @@ describe("escapes.write", () => {
     expect(() => escapes.write("a\uD83Db", d)).toThrow(EscapeSequenceError);
   });
 
-  it("encodes a separator inside a formatting command, and leaves its escape characters as they are", () => {
+  it("encodes a separator inside a formatting command, and both of its escape characters as data", () => {
     const d = { ...DEFAULT_DELIMITERS, component: "H" };
 
-    expect(escapes.write("\\H\\", d)).toBe("\\\\S\\\\");
+    expect(escapes.write("\\H\\", d)).toBe("\\E\\\\S\\\\E\\");
   });
 
   // HL7v2 §2.7.1: a sender escapes every delimiter in a value. A value read
@@ -478,7 +531,8 @@ describe("escapes.write", () => {
   // sender writes with any five delimiters, including one with an escape
   // character that has no closing one.
   //
-  // Mutant: `read` drops its `rule.codeFor(ch, d) === code` check.
+  // Mutant: `read` looks a code up in uppercase. Fails on `\X0d\`, read as a
+  // carriage return and written as `\X0D\`.
   // Fails on `\X7C\`, read as `|` and written as `\F\`.
   it("writes a value read from the wire back as it was read", () => {
     fc.assert(
@@ -510,15 +564,18 @@ describe("escapes.write", () => {
   });
 
   // Any value is written with no separator and no control character, so the
-  // parser splits the message where its delimiters are. The written value is
-  // written the same way again, and read and written back unchanged. With
-  // delimiters that are letters or digits, a value may hold a separator that
-  // no escape code writes; EscapeSequenceError names it, and that outcome is
-  // correct.
+  // parser splits the message where its delimiters are. Every separator and
+  // control character of the value is read back from what is written: an
+  // escape character is written `\E\` where its escape sequence would pair
+  // with the escape of one of them. The written value is written the same way
+  // again, and read and written back unchanged. With delimiters that are
+  // letters or digits, a value may hold a character that no escape code
+  // writes; EscapeSequenceError names it, and that outcome is correct.
   //
-  // Mutant: the rule's `escapes` leaves out the subcomponent separator. Fails
-  // on `&`, written as it is.
-  it("writes any value as a value the parser splits correctly, or throws EscapeSequenceError for a character none can write", () => {
+  // Mutants: the rule leaves out the subcomponent separator, which fails on
+  // `&`, written as it is; and `write` keeps every escape character, which
+  // fails on `\&`, read back as `\T\`.
+  it("writes any value as a value the parser splits correctly and reads back its separators and control characters from, or throws EscapeSequenceError for a character none can write", () => {
     fc.assert(
       fc.property(
         arbDelimiters(
@@ -529,20 +586,17 @@ describe("escapes.write", () => {
           try {
             wire = escapes.write(value, d);
           } catch (error) {
-            expect(error).toBeInstanceOf(EscapeSequenceError);
-            const { character } = error as EscapeSequenceError;
-            expect(value).toContain(character);
-            expect(
-              escapeCodesFor(character, d).filter(
-                (code) =>
-                  heldDelimiters(code, d).length === 0 &&
-                  !code.includes(d.escape)
-              )
-            ).toEqual([]);
+            expectRefused(error, value, d);
             return;
           }
 
           expect(heldDelimiters(wire, d)).toEqual([]);
+          expect(
+            isSubsequence(
+              separatorsAndControls(value, d),
+              separatorsAndControls(escapes.read(wire, d), d)
+            )
+          ).toBe(true);
           expect(escapes.write(wire, d)).toBe(wire);
           expect(escapes.write(escapes.read(wire, d), d)).toBe(wire);
         }
@@ -550,6 +604,8 @@ describe("escapes.write", () => {
       {
         examples: [
           [[DEFAULT_DELIMITERS, "\\|\\&"]],
+          [[DEFAULT_DELIMITERS, "\\&"]],
+          [[DEFAULT_DELIMITERS, "see C:\\scans\tnote"]],
           [[{ ...DEFAULT_DELIMITERS, component: "X", field: "S" }, "^"]],
         ],
       }
@@ -557,24 +613,46 @@ describe("escapes.write", () => {
   });
 
   // A value without the escape character is written and read back as the
-  // same value, with delimiters that are not letters or digits.
+  // same value, with any five delimiters. With delimiters that are letters or
+  // digits, a value may hold a character that no escape code writes;
+  // EscapeSequenceError names it, and that outcome is correct.
   //
-  // Mutant: the rule names the subcomponent separator `S` instead of `T`.
-  // Fails on `&`, read back as `^`.
+  // Mutants: the rule names the subcomponent separator `S` instead of `T`,
+  // which fails on `&`, read back as `^`; and `read` returns its text, which
+  // fails on `|` with `F` as the component separator, read back as `\X7C\`.
   it("reads back any value that holds no escape character", () => {
     fc.assert(
       fc.property(
-        arbDelimiters(fc.constantFrom(...PUNCTUATION)).chain((d) =>
+        arbDelimiters(
+          fc.oneof(
+            fc.constantFrom(...PUNCTUATION),
+            fc.constantFrom(...ESCAPE_CODE_CHARACTERS),
+            fc.char()
+          )
+        ).chain((d) =>
           fc.tuple(
             fc.constant(d),
             arbValue(d).map((value) => value.replaceAll(d.escape, ""))
           )
         ),
         ([d, value]) => {
-          expect(escapes.read(escapes.write(value, d), d)).toBe(value);
+          let wire: string;
+          try {
+            wire = escapes.write(value, d);
+          } catch (error) {
+            expectRefused(error, value, d);
+            return;
+          }
+
+          expect(escapes.read(wire, d)).toBe(value);
         }
       ),
-      { examples: [[[DEFAULT_DELIMITERS, "&"]]] }
+      {
+        examples: [
+          [[DEFAULT_DELIMITERS, "&"]],
+          [[{ ...DEFAULT_DELIMITERS, component: "F" }, "|"]],
+        ],
+      }
     );
   });
 });

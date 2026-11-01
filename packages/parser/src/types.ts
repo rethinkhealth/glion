@@ -24,8 +24,9 @@ export type PreprocessorStep = (ctx: ParserContext) => ParserContext;
 
 export interface ParseOptions {
   /**
-   * Whether a subcomponent value holds the characters its escape sequences
-   * stand for (`true`, the default) or the escape sequences as they are on
+   * Whether a subcomponent value holds the separators and control characters
+   * their escape sequences stand for, as `escapes.read` from `@glion/utils`
+   * reads them (`true`, the default), or every escape sequence as it is on
    * the wire (`false`).
    */
   decodeEscapes?: boolean;

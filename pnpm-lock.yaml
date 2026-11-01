@@ -740,6 +740,9 @@ importers:
 
   packages/decode-escapes:
     dependencies:
+      '@glion/util-query':
+        specifier: workspace:*
+        version: link:../util-query
       '@glion/util-visit':
         specifier: workspace:*
         version: link:../util-visit
@@ -759,6 +762,9 @@ importers:
       '@glion/check-readme':
         specifier: workspace:*
         version: link:../../tools/check-readme
+      '@glion/parser':
+        specifier: workspace:*
+        version: link:../parser
       '@glion/testing':
         specifier: workspace:*
         version: link:../../tools/testing
@@ -1484,6 +1490,9 @@ importers:
       '@glion/ast':
         specifier: workspace:*
         version: link:../ast
+      '@glion/util-query':
+        specifier: workspace:*
+        version: link:../util-query
       '@glion/util-visit':
         specifier: workspace:*
         version: link:../util-visit

@@ -11,9 +11,9 @@
  * Resolution: an escape sequence whose escape code holds a delimiter is
  * written as `\Xdd\`, the hexadecimal escape of HL7v2 §2.7.5, with lowercase
  * digits when an uppercase digit is a delimiter (`~` is `\X7e\` when `E` is
- * the field separator). Since ADR 0036 the escape character is not decoded,
- * so its hexadecimal escape reads back as written, and is written the same
- * way again.
+ * the field separator). Since ADR 0036 the escape character is written as
+ * data only before a separator or a control character, with the same
+ * fallback: `<X3C<` when `E` is a delimiter.
  */
 
 import type { Delimiters } from "@glion/ast";
@@ -22,7 +22,9 @@ import { describe, expect, it } from "vitest";
 import { escapes } from "../../src";
 
 describe("a value written with a delimiter that is an escape code", () => {
-  it("holds no delimiter and is written the same way again when the component separator is `E`", () => {
+  it("writes the escape character as data with its hexadecimal escape when the component separator is `E`", () => {
+    // MSH-2 `E\<$`: `<` before the field separator `^` is data, and `<E<`
+    // would split at the component separator.
     const d: Delimiters = {
       component: "E",
       escape: "<",
@@ -30,41 +32,44 @@ describe("a value written with a delimiter that is an escape code", () => {
       repetition: "\\",
       subcomponent: "$",
     };
-    const wire = escapes.write("a<b", d);
+    const wire = escapes.write("a<b^c", d);
 
-    expect(wire).not.toContain(d.component);
+    expect(wire).toBe("a<X3C<b<F<c");
     expect(escapes.write(escapes.read(wire, d), d)).toBe(wire);
   });
 
-  it("holds no delimiter and is written the same way again when the subcomponent separator is `E`", () => {
+  it("writes a separator with its hexadecimal escape when its named code is the component separator", () => {
+    // `\F\` would split at the component separator `F`.
     const d: Delimiters = {
-      component: "%",
+      component: "F",
       escape: "<",
       field: "^",
       repetition: "\\",
-      subcomponent: "E",
+      subcomponent: "$",
     };
-    const wire = escapes.write("a<b", d);
+    const wire = escapes.write("a^b", d);
 
-    expect(wire).not.toContain(d.subcomponent);
-    expect(escapes.write(escapes.read(wire, d), d)).toBe(wire);
+    expect(wire).toBe("a<X5E<b");
+    expect(escapes.read(wire, d)).toBe("a^b");
   });
 
-  it("holds no delimiter and is written the same way again when the field separator is `E`", () => {
+  it("writes a hexadecimal digit in lowercase when its uppercase form is a delimiter", () => {
+    // `\R\` holds the field separator `R`, and `\X7E\` holds the subcomponent separator `E`.
     const d: Delimiters = {
       component: "|",
-      escape: "~",
-      field: "E",
-      repetition: "^",
-      subcomponent: "\\",
+      escape: "\\",
+      field: "R",
+      repetition: "~",
+      subcomponent: "E",
     };
     const wire = escapes.write("a~b", d);
 
-    expect(wire).not.toContain(d.field);
-    expect(escapes.write(escapes.read(wire, d), d)).toBe(wire);
+    expect(wire).toBe("a\\X7e\\b");
+    expect(escapes.read(wire, d)).toBe("a~b");
   });
 
-  it("is written the same way again when the escape character is `E`", () => {
+  it("writes the escape character as data with its hexadecimal escape when it is `E`", () => {
+    // `EEE` reads as an escape sequence with the code `E`, not as `E`.
     const d: Delimiters = {
       component: ",",
       escape: "E",
@@ -72,9 +77,9 @@ describe("a value written with a delimiter that is an escape code", () => {
       repetition: "+",
       subcomponent: "`",
     };
+    const wire = escapes.write("aEb>c", d);
 
-    const wire = escapes.write("aEb", d);
-
+    expect(wire).toBe("aEX45EbEFEc");
     expect(escapes.write(escapes.read(wire, d), d)).toBe(wire);
   });
 });

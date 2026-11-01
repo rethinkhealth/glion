@@ -4,9 +4,9 @@ Unified plugin that reads the escape sequences of every subcomponent value with 
 
 ## What it does
 
-Walks an HL7v2 AST and replaces each `subcomponent` node's `value` with `escapes.read(value, delimiters)`. It applies the same rule as `@glion/parser`: only the separators and the characters below U+0020 are read from their escape sequences, and everything else stays as written, the escape character included.
+Walks an HL7v2 AST and replaces each `subcomponent` node's `value` with `escapes.read(value, delimiters)`, except in MSH-1 and MSH-2, which hold the delimiters themselves. It applies the same rule as `@glion/parser`: only the separators and the characters below U+0020 are read from their escape sequences, and everything else stays as written, the escape character included.
 
-`@glion/parser` already reads escape sequences while parsing, so the plugin is for a tree parsed with `decodeEscapes: false`. On a tree the parser has read, it changes nothing: reading a value twice gives the same value as reading it once.
+`@glion/parser` already reads escape sequences while parsing, so the plugin is for a tree parsed with `decodeEscapes: false`. On a tree the parser has read, it changes nothing: it reads with the delimiters MSH declares, and reading a value twice gives the same value as reading it once.
 
 ## Install
 
@@ -23,10 +23,10 @@ import { unified } from "unified";
 
 const msg = `OBX|1|TX|ID123||Patient allergic to \\F\\Peanuts\\F\\ and \\.br\\Severe reaction`;
 
-const file = await unified()
+const processor = unified()
   .use(hl7v2Parser, { decodeEscapes: false })
-  .use(hl7v2DecodeEscapes)
-  .process(msg);
+  .use(hl7v2DecodeEscapes);
+const tree = await processor.run(processor.parse(msg));
 ```
 
 Before the plugin runs, `subcomponent.value` holds the text as written:
@@ -53,11 +53,11 @@ After it runs:
 
 ### `unified().use(hl7v2DecodeEscapes[, options])`
 
-Reads the escape sequences of every `subcomponent` value with `escapes.read`, in place.
+Reads the escape sequences of every `subcomponent` value outside MSH-1 and MSH-2 with `escapes.read`, in place.
 
 ###### Parameters
 
-- `options.delimiters` (optional) — Override delimiters. If omitted, the plugin reads them from `file.data.delimiters` (set by `@glion/annotate-delimiters`). Defaults to the HL7 standard (`| ^ ~ & \`).
+- `options.delimiters` (optional) — Override delimiters. If omitted, the plugin reads them from `file.data.delimiters` (set by `@glion/annotate-delimiters`), or else from MSH-1 and MSH-2, with the HL7 standard (`| ^ ~ & \`) for any they do not declare.
 
 ###### Returns
 
@@ -74,7 +74,7 @@ Nothing (`undefined`). Mutates the AST in-place.
 
 Kept as written: `\E\`, `\P\`, `\H\`, `\N\`, every formatting command such as `\.br\` or `\.sp 2\`, any other `\X…\` such as `\XC3A9\`, `\Z…\`, `\C…\`, `\M…\`, and a code HL7v2 does not define. A separator whose named code holds a delimiter is read from its `\Xdd\`.
 
-Delimiter resolution order: `options.delimiters` → `file.data.delimiters` (set by `@glion/annotate-delimiters`) → HL7 defaults.
+Delimiter resolution order: `options.delimiters` → `file.data.delimiters` (set by `@glion/annotate-delimiters`) → MSH-1 and MSH-2 → HL7 defaults.
 
 ## See also
 

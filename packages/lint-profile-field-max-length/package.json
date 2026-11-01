@@ -45,6 +45,7 @@
   "dependencies": {
     "@glion/annotate-profile-fields": "workspace:*",
     "@glion/ast": "workspace:*",
+    "@glion/util-query": "workspace:*",
     "@glion/util-visit": "workspace:*",
     "@glion/utils": "workspace:*",
     "pluralize": "8.0.0",

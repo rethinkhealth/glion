@@ -33,11 +33,11 @@ Register the parser as the reader for a `unified` processor. The parser reads fr
 
 ### Options
 
-| Option          | Type                  | Description                                                                                                                                                                                                     |
-| --------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `decodeEscapes` | `boolean`             | Whether a subcomponent value holds the characters its escape sequences stand for (`true`, the default) or the escape sequences as written. The encoding characters in MSH-2 are never decoded.                  |
-| `lineBreaks`    | `boolean`             | Whether a line feed, or a carriage return and a line feed, also ends a segment (`true`, the default), or only a carriage return does (`false`), as HL7v2 Chapter 2 requires. With `false`, a line feed is data. |
-| `delimiters`    | `Partial<Delimiters>` | Override one or more delimiters. The parser merges with MSH-derived values and defaults.                                                                                                                        |
+| Option          | Type                  | Description                                                                                                                                                                                                                                                                 |
+| --------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `decodeEscapes` | `boolean`             | Whether a subcomponent value holds the separators and control characters their escape sequences stand for, as `escapes.read` from `@glion/utils` reads them (`true`, the default), or every escape sequence as written. The encoding characters in MSH-2 are never decoded. |
+| `lineBreaks`    | `boolean`             | Whether a line feed, or a carriage return and a line feed, also ends a segment (`true`, the default), or only a carriage return does (`false`), as HL7v2 Chapter 2 requires. With `false`, a line feed is data.                                                             |
+| `delimiters`    | `Partial<Delimiters>` | Override one or more delimiters. The parser merges with MSH-derived values and defaults.                                                                                                                                                                                    |
 
 The default delimiters are `|` (field), `^` (component), `~` (repetition), `&` (subcomponent), and `\` (escape). A segment ends with a carriage return, `\r`, which HL7v2 fixes and no setting changes.
 

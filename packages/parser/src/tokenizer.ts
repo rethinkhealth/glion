@@ -56,10 +56,10 @@ interface HeaderToken {
 
 export interface TokenizerOptions {
   /**
-   * Whether a TEXT token holds the characters its escape sequences stand for
-   * (`true`, the default) or the escape sequences as they are on the wire
-   * (`false`). A Segment ID and the encoding characters MSH-2 declares are
-   * never decoded.
+   * Whether a TEXT token holds the separators and control characters its escape
+   * sequences stand for, as `escapes.read` reads them (`true`, the default), or
+   * every escape sequence as it is on the wire (`false`). A Segment ID and the
+   * encoding characters MSH-2 declares are never decoded.
    */
   decodeEscapes?: boolean;
 }

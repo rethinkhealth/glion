@@ -128,7 +128,7 @@ describe("QR4: round-trip data fidelity", () => {
     // `"MSH|^~\\&|||\rAAA|^\r"`.
     //
     // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
-    // `"MSH|^~\\&|||\rAAA|\\E\\ &\r"`.
+    // `"MSH|^~\\&|||\rAAA|\\F\\^~\r"`.
     //
     // Mutant: `to-hl7v2` writes the segment terminator between segments only
     // (#1137). Fails on `"MSH|^~\\&|||\r"`.
@@ -268,9 +268,7 @@ describe("QR4: round-trip data fidelity", () => {
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `"MSH #.+$@@@\rAAA@ @$ "`.
-    //
-    // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
-    // `"MSH-`!>;---\rAAA->E>R>H>-"`.
+
     it("any mutated input stabilizes after one round-trip", async () => {
       await fc.assert(
         fc.asyncProperty(arbMutatedCustomDelimiterMessage, async (msg) => {
@@ -282,7 +280,7 @@ describe("QR4: round-trip data fidelity", () => {
           expect(secondPass).toBe(firstPass);
         }),
         {
-          examples: [["MSH #.+$@@@\rAAA@ @$ "], ["MSH-`!>;---\rAAA->E>R>H>-"]],
+          examples: [["MSH #.+$@@@\rAAA@ @$ "]],
           numRuns: 300,
         }
       );
@@ -297,9 +295,6 @@ describe("QR4: round-trip data fidelity", () => {
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `" SH|^~\\&|||\rAAA| | "`.
     //
-    // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
-    // `"MSH|^~\\&|||\rAAA|\\.br\\\rA"`.
-    //
     // Mutant: the parser decodes the escape sequences of MSH-2 after its fourth
     // character (#1100). Fails on `"MSH|^~\\~\\F\\\\"`.
     it("any mutated input stabilizes after one round-trip", async () => {
@@ -313,11 +308,7 @@ describe("QR4: round-trip data fidelity", () => {
           expect(secondPass).toBe(firstPass);
         }),
         {
-          examples: [
-            [" SH|^~\\&|||\rAAA| | "],
-            ["MSH|^~\\&|||\rAAA|\\.br\\\rA"],
-            ["MSH|^~\\~\\F\\\\"],
-          ],
+          examples: [[" SH|^~\\&|||\rAAA| | "], ["MSH|^~\\~\\F\\\\"]],
           numRuns: 300,
         }
       );
@@ -327,7 +318,9 @@ describe("QR4: round-trip data fidelity", () => {
   describe("fuzz: adversarial inputs", () => {
     // Any text is read as some message, and a second round trip of what was
     // written changes nothing. It is not an exact round trip: a character
-    // below U+0020 inside a value, such as a tab, is written back as `\X09\`.
+    // below U+0020 inside a value, such as a tab, is written back as `\X09\`,
+    // and an escape character whose escape sequence would pair with it as
+    // `\E\`.
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `"| |"`.
@@ -352,13 +345,12 @@ describe("QR4: content round-trips through serialize and parse", () => {
   // from this list collides with a sequence the serializer writes or keeps:
   //
   //   E F R S T       the named codes `\E\ \F\ \R\ \S\ \T\`
-  //   . b r           the segment delimiter's code `\.br\`
+  //   . b r           the formatting command `\.br\`, kept as written
   //   X               the prefix of every hexadecimal escape `\Xdd\`
   //   0-9 A-F a-f     hexadecimal digits, in both cases, since the serializer
   //                   writes a digit in lowercase when its uppercase form
   //                   collides
-  //   H N Z C M       sequences kept as written, such as `\H\` and `\Zsite\`,
-  //                   which must be escaped instead when they hold a delimiter
+  //   H N Z C M       sequences kept as written, such as `\H\` and `\Zsite\`
   //
   // Every other character is still drawn through `fc.char()` below, just not
   // favoured.
@@ -383,14 +375,15 @@ describe("QR4: content round-trips through serialize and parse", () => {
     expect(read(wire)).toBe(content);
   });
 
-  it("writes a delimiter inside a locally defined sequence as its escape, so the sequence is read back as two", () => {
-    // HL7v2 §2.7.1: escape sequences do not nest. The escape characters stay
-    // as written, so `\F\` closes `\Zfoo\` and opens `\bar\`.
+  it("writes a locally defined sequence that holds a delimiter as data", () => {
+    // HL7v2 §2.7.1: escape sequences do not nest. `\F\` inside `\Zfoo…\`
+    // would close it, so both of its escape characters are written `\E\`.
     const content = "a\\Zfoo|bar\\b";
     const wire = write(content);
 
-    expect(wire).toBe("MSH|^~\\&\rPID|1||a\\Zfoo\\F\\bar\\b\r");
-    expect(read(wire)).toBe("a\\Zfoo\\F\\bar\\b");
+    expect(wire).toBe("MSH|^~\\&\rPID|1||a\\E\\Zfoo\\F\\bar\\E\\b\r");
+    expect(read(wire)).toBe("a\\E\\Zfoo|bar\\E\\b");
+    expect(write(read(wire))).toBe(wire);
   });
 
   it("keeps a locally defined sequence and a character set switch as they are", () => {
