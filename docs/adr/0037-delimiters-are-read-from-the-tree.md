@@ -16,12 +16,13 @@ ADR 0014 stored them on `file.data.delimiters`, so that a built tree had them as
 
 After parsing, the tree's MSH-1 and MSH-2 are the only record of a message's delimiters.
 
-| Stage         | Order                                                                                  |
-| ------------- | -------------------------------------------------------------------------------------- |
-| Reading text  | MSH-1 and MSH-2; with no message header, `settings`, then `\|^~\\&`                    |
-| After parsing | an explicit argument, then the tree's MSH-1 and MSH-2, then `settings`, then `\|^~\\&` |
+| Stage         | Order                                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------------- |
+| Reading text  | MSH-1 and MSH-2, filled by the `encodingCharacters` option; with no message header, `settings`, then `\|^~\\&` |
+| After parsing | an explicit argument, then the tree's MSH-1 and MSH-2, then `settings`, then `\|^~\\&`                         |
 
 - `delimiters()` follows the parser's rule for what a message header is: the first segment after any empty lines, named `MSH`, with fields.
+- The parser's `encodingCharacters` option makes the tree truthful: what it fills is the value of MSH-2 in the tree. `MSH|^~&` with `{ subcomponent: "#" }` is written back as `MSH|^~&#`. MSH-2 is positional, so the option fills in order, up to the first delimiter it does not give. A fill that repeats another delimiter's character reaches MSH-2 like any other, the same as a sender's.
 - Only the message header holds MSH-1 and MSH-2. An `MSH` later in a message is any other segment, for the parser, the writer, and the escapes plugins.
 - Without an escape character, a value is written as it is unless it holds a separator or a line break.
 - `file.data.delimiters` and `@glion/annotate-delimiters` are removed.
@@ -29,6 +30,6 @@ After parsing, the tree's MSH-1 and MSH-2 are the only record of a message's del
 ## Consequences
 
 - The header and the body cannot disagree, and a transform changes a message's delimiters by editing MSH-2.
-- A message whose values hold no raw character below U+0020 is written back byte for byte, and so is any message without an escape character whose values hold no line feed read as data.
+- Without the option, a message whose values hold no raw character below U+0020 is written back byte for byte, and so is any message without an escape character whose values hold no line feed read as data. With the option, the written MSH-2 differs from the one received, and declares what the body uses, so a receiver can read it.
 - `lint-profile-*` rules read `delimiters(tree)` and do not see `settings`, because a lint rule has no processor. They report on annotated fields, which need the version in MSH-12, so a message without a message header does not reach them.
 - A removed package must be deprecated on npm.

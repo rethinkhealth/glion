@@ -22,7 +22,20 @@ export type Hl7v2Processor = Processor<
  */
 export type PreprocessorStep = (ctx: ParserContext) => ParserContext;
 
+/**
+ * The delimiters to read a message with where its MSH-2 declares none. A
+ * delimiter MSH-2 declares is read as declared. MSH-2 is positional: each is
+ * filled in order, up to the first that is not given. MSH-2 in the tree holds
+ * what is filled.
+ */
+export type EncodingCharacters = Partial<Omit<Delimiters, "field">>;
+
 export interface ParseOptions {
+  /**
+   * The delimiters to read with where MSH-2 declares none. Each is one
+   * character, and not a line break.
+   */
+  encodingCharacters?: EncodingCharacters | undefined;
   /**
    * Whether a subcomponent value holds the separators and control characters
    * their escape sequences stand for, as `escapes.read` from `@glion/utils`
@@ -49,6 +62,8 @@ export interface ParserContext {
   input: string;
   /** The delimiters the tokenizer splits `input` at. */
   delimiters: Delimiters;
+  /** The value of MSH-2, when it is not the text as written. */
+  encodingCharacters?: string | undefined;
   /**
    * Whether a line feed, or a carriage return and a line feed, also ends a
    * segment. Absent means `true`.

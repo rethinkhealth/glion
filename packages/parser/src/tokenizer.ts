@@ -50,6 +50,8 @@ import type { ParserContext, Token, Tokenizer, TokenType } from "./types";
 
 /** A token of the message header, before `next()` places it. */
 interface HeaderToken {
+  /** How much of the input it spans, which a filled MSH-2 value can outgrow. */
+  span: number;
   type: "FIELD_SEPARATOR" | "TEXT";
   value?: string;
 }
@@ -126,11 +128,19 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
         this.lineBreaks
       );
       this.headerTokens = [
-        { type: "TEXT", value: MESSAGE_HEADER },
-        { type: "FIELD_SEPARATOR" },
-        { type: "TEXT", value: header.fieldSeparator },
-        { type: "FIELD_SEPARATOR" },
-        { type: "TEXT", value: encodingCharacters },
+        { span: MESSAGE_HEADER.length, type: "TEXT", value: MESSAGE_HEADER },
+        { span: 0, type: "FIELD_SEPARATOR" },
+        {
+          span: header.fieldSeparator.length,
+          type: "TEXT",
+          value: header.fieldSeparator,
+        },
+        { span: 0, type: "FIELD_SEPARATOR" },
+        {
+          span: encodingCharacters.length,
+          type: "TEXT",
+          value: ctx.encodingCharacters ?? encodingCharacters,
+        },
       ];
       this.headerStart = header.start;
       // MSH-2 may run past its encoding characters, as `^~\&#` does: the
@@ -144,11 +154,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     const headerToken = this.headerTokens[this.headerTokensEmitted];
     if (headerToken && this.offset >= this.headerStart) {
       this.headerTokensEmitted += 1;
-      return this.take(
-        headerToken.type,
-        headerToken.value?.length ?? 0,
-        headerToken.value
-      );
+      return this.take(headerToken.type, headerToken.span, headerToken.value);
     }
 
     const { input, offset } = this;

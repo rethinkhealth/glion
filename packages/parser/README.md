@@ -33,14 +33,17 @@ Register the parser as the reader for a `unified` processor. The parser reads fr
 
 ### Options
 
-| Option          | Type      | Description                                                                                                                                                                                                                                                                 |
-| --------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `decodeEscapes` | `boolean` | Whether a subcomponent value holds the separators and control characters their escape sequences stand for, as `escapes.read` from `@glion/utils` reads them (`true`, the default), or every escape sequence as written. The encoding characters in MSH-2 are never decoded. |
-| `lineBreaks`    | `boolean` | Whether a line feed, or a carriage return and a line feed, also ends a segment (`true`, the default), or only a carriage return does (`false`), as HL7v2 Chapter 2 requires. With `false`, a line feed is data.                                                             |
+| Option               | Type                                                  | Description                                                                                                                                                                                                                                                                 |
+| -------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `decodeEscapes`      | `boolean`                                             | Whether a subcomponent value holds the separators and control characters their escape sequences stand for, as `escapes.read` from `@glion/utils` reads them (`true`, the default), or every escape sequence as written. The encoding characters in MSH-2 are never decoded. |
+| `encodingCharacters` | `{ component?, repetition?, escape?, subcomponent? }` | The delimiters to read with where MSH-2 declares none. Each is one character, and not a line break; `parseHL7v2` throws a `TypeError` otherwise.                                                                                                                            |
+| `lineBreaks`         | `boolean`                                             | Whether a line feed, or a carriage return and a line feed, also ends a segment (`true`, the default), or only a carriage return does (`false`), as HL7v2 Chapter 2 requires. With `false`, a line feed is data.                                                             |
 
 ### Delimiters
 
 MSH-1 declares the field separator, and MSH-2's encoding characters declare the component separator, repetition separator, escape character, and subcomponent separator, in that order. A delimiter MSH-2 does not declare is absent, and the message is read without it: `MSH|^~&` declares the escape character `&` and no subcomponent separator, so `a&F&b` is the one value `a|b`, and in a message that opens `MSH|^~\`, `&` is data. A message that does not open with a message header segment is read with `|^~\&`, or with the `delimiters` of the processor's `settings`. A segment ends with a carriage return, `\r`, which HL7v2 fixes and no setting changes.
+
+The `encodingCharacters` option gives the parser delimiters to read with where MSH-2 declares none, such as `{ subcomponent: "#" }`, and MSH-2 in the tree then declares them, so `MSH|^~&` is written back as `MSH|^~&#`. A delimiter MSH-2 declares is always read as declared. MSH-2 is positional, so the option fills in order, up to the first delimiter it does not give: `MSH|^` with `{ subcomponent: "#" }` fills nothing. A filled character may repeat another delimiter's: `MSH|^~#` with `{ subcomponent: "#" }` has MSH-2 `^~##`, the same as a message that declares it.
 
 ```ts
 import { parseHL7v2 } from "@glion/parser";

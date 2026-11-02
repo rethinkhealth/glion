@@ -9,7 +9,7 @@ import { DEFAULT_DELIMITERS } from "@glion/utils";
 import { unified } from "unified";
 
 import hl7v2Parser, { parseHL7v2 } from "../src/parser";
-import type { ParseOptions } from "../src/types";
+import type { ParseOptions, ParserContext } from "../src/types";
 
 /**
  * Comprehensive test suite for the HL7v2 parser.
@@ -938,6 +938,223 @@ describe("line breaks off", () => {
   });
 });
 
+describe("encoding characters option", () => {
+  // The values of PID-3's first component.
+  const pid3 = (tree: Root): (string | undefined)[] =>
+    (
+      ((tree.children[1] as Segment).children[2] as Field).children[0]
+        ?.children[0] as Component
+    ).children.map((subcomponent) => subcomponent.value);
+
+  it("reads with the option's delimiter where MSH-2 declares none", () => {
+    const tree = parseHL7v2("MSH|^~&|APP\rPID|1||a#b&F&c\r", {
+      encodingCharacters: { subcomponent: "#" },
+    });
+
+    expect(pid3(tree)).toStrictEqual(["a", "b|c"]);
+  });
+
+  it("keeps a delimiter MSH-2 declares over the option's", () => {
+    const tree = parseHL7v2("MSH|^~\\&|APP\rPID|1||a#b&c\r", {
+      encodingCharacters: { subcomponent: "#" },
+    });
+
+    expect(pid3(tree)).toStrictEqual(["a#b", "c"]);
+  });
+
+  it("reads a message without a message header segment with the parser's delimiters, not the option's", () => {
+    const tree = parseHL7v2("PID|1|a&b#c\r", {
+      encodingCharacters: { subcomponent: "#" },
+    });
+    const component = ((tree.children[0] as Segment).children[1] as Field)
+      .children[0]?.children[0] as Component;
+
+    expect(
+      component.children.map((subcomponent) => subcomponent.value)
+    ).toStrictEqual(["a", "b#c"]);
+  });
+});
+
+describe("MSH-2 with the encoding characters option", () => {
+  const msh2 = (tree: Root): Field | undefined =>
+    (tree.children[0] as Segment).children[1];
+  const value = (field: Field | undefined): string | undefined =>
+    field?.children[0]?.children[0]?.children[0]?.value;
+
+  it("holds what the option fills", () => {
+    const tree = parseHL7v2("MSH|^~&|APP\r", {
+      encodingCharacters: { subcomponent: "#" },
+    });
+
+    expect(msh2(tree)?.children).toMatchObject([
+      {
+        children: [
+          {
+            children: [{ type: "subcomponent", value: "^~&#" }],
+            type: "component",
+          },
+        ],
+        type: "field-repetition",
+      },
+    ]);
+  });
+
+  it("holds only what is declared or filled, in order", () => {
+    const tree = parseHL7v2("MSH|^|APP\r", {
+      encodingCharacters: { repetition: "~" },
+    });
+
+    expect(value(msh2(tree))).toBe("^~");
+  });
+
+  it("is filled in the message header after empty lines", () => {
+    const tree = parseHL7v2("\rMSH|^~&|APP\r", {
+      encodingCharacters: { subcomponent: "#" },
+    });
+
+    expect(
+      (tree.children[1] as Segment).children[1]?.children[0]?.children[0]
+        ?.children[0]?.value
+    ).toBe("^~&#");
+  });
+
+  it("holds every encoding character the option fills in an empty MSH-2", () => {
+    const tree = parseHL7v2("MSH|\r", {
+      encodingCharacters: {
+        component: "^",
+        escape: "\\",
+        repetition: "~",
+        subcomponent: "&",
+      },
+    });
+
+    expect(value(msh2(tree))).toBe("^~\\&");
+  });
+
+  it("keeps its span of the text as given", () => {
+    const tree = parseHL7v2("MSH|^~&|APP\r", {
+      encodingCharacters: { subcomponent: "#" },
+    });
+
+    expect(msh2(tree)?.position).toStrictEqual(
+      msh2(parseHL7v2("MSH|^~&|APP\r"))?.position
+    );
+  });
+
+  it("is as written when the option has nothing to fill", () => {
+    const tree = parseHL7v2("MSH|^~\\&|APP\r", {
+      encodingCharacters: { subcomponent: "#" },
+    });
+
+    expect(tree).toStrictEqual(parseHL7v2("MSH|^~\\&|APP\r"));
+  });
+
+  it("fills in order, and no further than a delimiter neither declares", () => {
+    const tree = parseHL7v2("MSH|^|APP\rPID|a#b\r", {
+      encodingCharacters: { subcomponent: "#" },
+    });
+
+    expect(tree).toStrictEqual(parseHL7v2("MSH|^|APP\rPID|a#b\r"));
+  });
+
+  it("stops at the first delimiter it does not give, with one left after it", () => {
+    expect(
+      parseHL7v2("MSH|^~|APP\rPID|a#b\r", {
+        encodingCharacters: { subcomponent: "#" },
+      })
+    ).toStrictEqual(parseHL7v2("MSH|^~|APP\rPID|a#b\r"));
+  });
+
+  it("is as written when no preprocessing step reads the message header", () => {
+    const tree = parseHL7v2("MSH|^~&|APP\r", { preprocess: [] });
+
+    expect(value(msh2(tree))).toBe("^~&");
+  });
+
+  it("fills a character another delimiter holds, and reads the message as MSH-2 then declares it", () => {
+    const filled = parseHL7v2("MSH|^~#|APP\rPID|a#F#b\r", {
+      encodingCharacters: { subcomponent: "#" },
+    });
+
+    expect(value(msh2(filled))).toBe("^~##");
+    expect(
+      (filled.children[1] as Segment).children[0]?.children[0]?.children[0]
+        ?.children
+    ).toMatchObject([{ value: "a" }, { value: "F" }, { value: "b" }]);
+  });
+
+  it("fills the field separator's character", () => {
+    const tree = parseHL7v2("MSH|^~\\|APP\r", {
+      encodingCharacters: { subcomponent: "|" },
+    });
+
+    expect(value(msh2(tree))).toBe("^~\\|");
+  });
+
+  it("fills a character it has just filled", () => {
+    const tree = parseHL7v2("MSH|^~|APP\r", {
+      encodingCharacters: { escape: "#", subcomponent: "#" },
+    });
+
+    expect(value(msh2(tree))).toBe("^~##");
+  });
+
+  it("rejects a delimiter that is not one character", () => {
+    expect(() =>
+      parseHL7v2("MSH|^~\\&\r", { encodingCharacters: { subcomponent: "##" } })
+    ).toThrow(
+      new TypeError(
+        "`encodingCharacters.subcomponent` is not one character; a delimiter is one character."
+      )
+    );
+    expect(() =>
+      parseHL7v2("MSH|^~\\&\r", { encodingCharacters: { escape: "" } })
+    ).toThrow(
+      new TypeError(
+        "`encodingCharacters.escape` is not one character; a delimiter is one character."
+      )
+    );
+    expect(() =>
+      parseHL7v2("MSH|^~\\&\r", {
+        encodingCharacters: { component: ["^"] as unknown as string },
+      })
+    ).toThrow(
+      new TypeError(
+        "`encodingCharacters.component` is not one character; a delimiter is one character."
+      )
+    );
+  });
+
+  it("rejects a line break as a delimiter", () => {
+    for (const ch of ["\r", "\n"]) {
+      expect(() =>
+        parseHL7v2("MSH|^~\\&\r", { encodingCharacters: { repetition: ch } })
+      ).toThrow(
+        new TypeError(
+          "`encodingCharacters.repetition` is a line break; a line break ends a segment, and is not a delimiter."
+        )
+      );
+    }
+  });
+
+  it("does not add a message header to a message without one", () => {
+    const partial = (ctx: ParserContext) => ({
+      ...ctx,
+      delimiters: { field: "|" },
+    });
+    const opts = {
+      encodingCharacters: { component: "^" },
+      preprocess: [partial],
+    };
+
+    expect(parseHL7v2("PID|1\r", opts).children).toHaveLength(1);
+    expect(parseHL7v2("MSH\r", opts).children).toHaveLength(1);
+    expect(
+      (parseHL7v2("MSH\r", opts).children[0] as Segment).children
+    ).toStrictEqual([]);
+  });
+});
+
 describe("hl7v2Parser plugin", () => {
   it("reads a message without a message header segment with the delimiters of the processor's settings", () => {
     const tree = unified()
@@ -946,5 +1163,20 @@ describe("hl7v2Parser plugin", () => {
       .parse("PID*1*a");
 
     expect((tree.children[0] as Segment).children).toHaveLength(2);
+  });
+
+  it("reads with its encoding characters option", () => {
+    const tree = unified()
+      .use(hl7v2Parser, { encodingCharacters: { subcomponent: "#" } })
+      .parse("MSH|^~&|APP\rPID|1||a#b\r");
+    const component = (
+      ((tree.children[1] as Segment).children[2] as Field).children[0]
+        ?.children[0] as Component
+    ).children;
+
+    expect(component.map((subcomponent) => subcomponent.value)).toStrictEqual([
+      "a",
+      "b",
+    ]);
   });
 });
