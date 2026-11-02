@@ -3,32 +3,32 @@
 // A token is a delimiter, a segment terminator, or a run of text between them,
 // with its span in the input. `MSH|^~\&|A^B\rPID|1` reads as:
 //
-//   TEXT "MSH"        0–3    the Segment ID
-//   FIELD_DELIM       3–3    MSH-1 opens; its delimiter takes no characters,
-//   TEXT "|"          3–4      because the field separator is MSH-1's value
-//   FIELD_DELIM       4–4    MSH-2 opens, also without characters
-//   TEXT "^~\&"       4–8    the encoding characters, read as written
-//   FIELD_DELIM       8–9
-//   TEXT "A"          9–10
-//   COMPONENT_DELIM   10–11
-//   TEXT "B"          11–12
-//   SEGMENT_END "\r"  12–13  the segment terminator, as written
-//   TEXT "PID"        13–16  the Segment ID of the next segment
-//   FIELD_DELIM       16–17
-//   TEXT "1"          17–18
+//   TEXT "MSH"           0–3    the Segment ID
+//   FIELD_SEPARATOR      3–3    MSH-1 opens; its separator takes no characters,
+//   TEXT "|"             3–4    because the field separator is MSH-1's value
+//   FIELD_SEPARATOR      4–4    MSH-2 opens, also without characters
+//   TEXT "^~\&"          4–8    the encoding characters, read as written
+//   FIELD_SEPARATOR      8–9
+//   TEXT "A"             9–10
+//   COMPONENT_SEPARATOR  10–11
+//   TEXT "B"             11–12
+//   SEGMENT_END "\r"     12–13  the segment terminator, as written
+//   TEXT "PID"           13–16  the Segment ID of the next segment
+//   FIELD_SEPARATOR      16–17
+//   TEXT "1"             17–18
 //
 // The five tokens of the message header are read once by `reset()`
 // (`message-header.ts`), and emitted when `next()` reaches `MSH`, after any
-// empty lines before it: the rules below would read MSH-1 as a field delimiter
+// empty lines before it: the rules below would read MSH-1 as a field separator
 // and the encoding characters as delimiters. Every other token is read by
 // `next()`, which tries these rules at the current offset, in order:
 //
 //   1. A segment terminator (`segment-terminators.ts`) ends the segment.
-//   2. The field delimiter opens a field.
-//   3. At the start of a segment, the text up to the first field delimiter or
+//   2. The field separator opens a field.
+//   3. At the start of a segment, the text up to the first field separator or
 //      segment terminator is the Segment ID, whatever it holds: `^A|B` opens
 //      with the Segment ID `^A`.
-//   4. The repetition, component, and subcomponent delimiters.
+//   4. The repetition, component, and subcomponent separators.
 //   5. Text up to the next delimiter or segment terminator, its escape
 //      sequences decoded unless it is part of MSH-2.
 //
@@ -50,7 +50,7 @@ import type { ParserContext, Token, Tokenizer, TokenType } from "./types";
 
 /** A token of the message header, before `next()` places it. */
 interface HeaderToken {
-  type: "FIELD_DELIM" | "TEXT";
+  type: "FIELD_SEPARATOR" | "TEXT";
   value?: string;
 }
 
@@ -117,7 +117,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
 
     const header = readMessageHeader(this.input, this.lineBreaks);
     if (header) {
-      // MSH-2 ends where `next()` ends every field: at the field delimiter the
+      // MSH-2 ends where `next()` ends every field: at the field separator the
       // context gives, which `detectDelimiters` sets to MSH-1.
       const encodingCharacters = readEncodingCharacters(
         this.input,
@@ -127,9 +127,9 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
       );
       this.headerTokens = [
         { type: "TEXT", value: MESSAGE_HEADER },
-        { type: "FIELD_DELIM" },
+        { type: "FIELD_SEPARATOR" },
         { type: "TEXT", value: header.fieldSeparator },
-        { type: "FIELD_DELIM" },
+        { type: "FIELD_SEPARATOR" },
         { type: "TEXT", value: encodingCharacters },
       ];
       this.headerStart = header.start;
@@ -162,14 +162,14 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
       return this.takeSegmentTerminator(terminator);
     }
 
-    // 2. The field delimiter.
+    // 2. The field separator.
     const { component, field, repetition, subcomponent } = this.delimiters;
     const char = input.charAt(offset);
     if (char === field) {
-      return this.take("FIELD_DELIM", 1);
+      return this.take("FIELD_SEPARATOR", 1);
     }
 
-    // 3. A Segment ID runs to the first field delimiter and holds no other
+    // 3. A Segment ID runs to the first field separator and holds no other
     // delimiters or escape sequences (HL7v2 §2.5.2, §2.7): a line `^A|B` opens
     // with the Segment ID `^A`, and `Z\R\Z|B` with `Z\R\Z`.
     if (this.atSegmentStart) {
@@ -177,15 +177,15 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
       return this.take("TEXT", segmentId.length, segmentId);
     }
 
-    // 4. The repetition, component, and subcomponent delimiters.
+    // 4. The repetition, component, and subcomponent separators.
     if (char === repetition) {
-      return this.take("REPETITION_DELIM", 1);
+      return this.take("REPETITION_SEPARATOR", 1);
     }
     if (char === component) {
-      return this.take("COMPONENT_DELIM", 1);
+      return this.take("COMPONENT_SEPARATOR", 1);
     }
     if (char === subcomponent) {
-      return this.take("SUBCOMP_DELIM", 1);
+      return this.take("SUBCOMPONENT_SEPARATOR", 1);
     }
 
     // 5. Text up to the next delimiter or segment terminator.
@@ -208,7 +208,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     // The token spans the text as written; its value may be shorter.
     const text = input.slice(offset, end);
     const value =
-      // Stryker disable next-line EqualityOperator: no TEXT token starts at decodeFrom, which is a field delimiter, a segment terminator, or the end of the input
+      // Stryker disable next-line EqualityOperator: no TEXT token starts at decodeFrom, which is a field separator, a segment terminator, or the end of the input
       this.decodeEscapes && offset >= this.decodeFrom
         ? escapes.read(text, this.delimiters)
         : text;
@@ -221,7 +221,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
   }
 
-  // The offset of the first field delimiter or segment terminator at or after
+  // The offset of the first field separator or segment terminator at or after
   // `from`, or the end of the input.
   private fieldEnd(from: number): number {
     const { input, lineBreaks } = this;

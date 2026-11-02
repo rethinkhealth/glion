@@ -99,12 +99,12 @@ describe("hl7v2DecodeEscapes plugin", () => {
     // MSH has standard delimiters (field = "|"), but options override field to "*"
     const tree = m(s("MSH", f("|"), f("^~\\&"), f("Value\\F\\More")));
 
-    // Override field delimiter via options — should take precedence over MSH
+    // Override field separator via options — should take precedence over MSH
     const results = await unified()
       .use(hl7v2DecodeEscapes, { delimiters: { field: "*" } })
       .run(tree);
 
-    // \F\ should decode to "*" (the option-provided field delimiter), not "|" (from MSH)
+    // \F\ should decode to "*" (the option-provided field separator), not "|" (from MSH)
     expect(
       (results.children[0] as Segment)?.children[2]?.children[0]?.children[0]
         ?.children[0]?.value

@@ -28,24 +28,24 @@ The message `MSH|^~\&|A^B` + CR LF + `PID|1` + CR, 20 characters long.
 
 **Tokenizing.** The tokenizer reads 14 tokens:
 
-| Token             | Value  | Offsets | Rule                                       |
-| ----------------- | ------ | ------- | ------------------------------------------ |
-| `TEXT`            | `MSH`  | 0–3     | message header: the Segment ID             |
-| `FIELD_DELIM`     |        | 3–3     | message header: MSH-1 opens                |
-| `TEXT`            | `\|`   | 3–4     | message header: MSH-1, the field separator |
-| `FIELD_DELIM`     |        | 4–4     | message header: MSH-2 opens                |
-| `TEXT`            | `^~\&` | 4–8     | message header: the encoding characters    |
-| `FIELD_DELIM`     |        | 8–9     | 2. the field delimiter                     |
-| `TEXT`            | `A`    | 9–10    | 5. text                                    |
-| `COMPONENT_DELIM` |        | 10–11   | 4. the component delimiter                 |
-| `TEXT`            | `B`    | 11–12   | 5. text                                    |
-| `SEGMENT_END`     | CR LF  | 12–14   | 1. a segment terminator: CR LF, read whole |
-| `TEXT`            | `PID`  | 14–17   | 3. a Segment ID, on line 2                 |
-| `FIELD_DELIM`     |        | 17–18   | 2. the field delimiter                     |
-| `TEXT`            | `1`    | 18–19   | 5. text                                    |
-| `SEGMENT_END`     | CR     | 19–20   | 1. a segment terminator                    |
+| Token                 | Value  | Offsets | Rule                                       |
+| --------------------- | ------ | ------- | ------------------------------------------ |
+| `TEXT`                | `MSH`  | 0–3     | message header: the Segment ID             |
+| `FIELD_SEPARATOR`     |        | 3–3     | message header: MSH-1 opens                |
+| `TEXT`                | `\|`   | 3–4     | message header: MSH-1, the field separator |
+| `FIELD_SEPARATOR`     |        | 4–4     | message header: MSH-2 opens                |
+| `TEXT`                | `^~\&` | 4–8     | message header: the encoding characters    |
+| `FIELD_SEPARATOR`     |        | 8–9     | 2. the field separator                     |
+| `TEXT`                | `A`    | 9–10    | 5. text                                    |
+| `COMPONENT_SEPARATOR` |        | 10–11   | 4. the component separator                 |
+| `TEXT`                | `B`    | 11–12   | 5. text                                    |
+| `SEGMENT_END`         | CR LF  | 12–14   | 1. a segment terminator: CR LF, read whole |
+| `TEXT`                | `PID`  | 14–17   | 3. a Segment ID, on line 2                 |
+| `FIELD_SEPARATOR`     |        | 17–18   | 2. the field separator                     |
+| `TEXT`                | `1`    | 18–19   | 5. text                                    |
+| `SEGMENT_END`         | CR     | 19–20   | 1. a segment terminator                    |
 
-**Building the tree.** The processor opens the segment MSH at its Segment ID. Each field delimiter opens a field, so MSH holds MSH-1 `|`, MSH-2 `^~\&`, and MSH-3 with the components `A` and `B`. The segment terminator closes MSH, which ends at offset 12, its last character, and records CR LF as MSH's `terminator`. PID holds one field, `1`, covers 14–19, and records CR. The root covers 0–20, both segment terminators included.
+**Building the tree.** The processor opens the segment MSH at its Segment ID. Each field separator opens a field, so MSH holds MSH-1 `|`, MSH-2 `^~\&`, and MSH-3 with the components `A` and `B`. The segment terminator closes MSH, which ends at offset 12, its last character, and records CR LF as MSH's `terminator`. PID holds one field, `1`, covers 14–19, and records CR. The root covers 0–20, both segment terminators included.
 
 ## Rules
 
@@ -68,23 +68,23 @@ Every rule that stops at the end of a segment calls this function: the tokenizer
 
 - The message opens with a message header segment when its first segment, after any empty lines, starts with `MSH` followed by a character that is not a segment terminator. `MSH` followed by a segment terminator is a segment with no fields. In CR + `MSH|^~\&`, MSH-1 and MSH-2 are read, and an empty segment comes before MSH.
 - MSH-1 is the character after `MSH`. No delimiter opens it: the field separator is its value.
-- MSH-2 holds up to four encoding characters, and ends at the next field delimiter or segment terminator. `MSH|^~\|APP` and `MSH|^~\` + CR both declare `^~\`.
+- MSH-2 holds up to four encoding characters, and ends at the next field separator or segment terminator. `MSH|^~\|APP` and `MSH|^~\` + CR both declare `^~\`.
 
-Two steps read the header, each with the field delimiter it splits fields at. `detectDelimiters` ends MSH-2 at MSH-1, the only field delimiter it knows. The tokenizer ends MSH-2 at the field delimiter in its context, which `detectDelimiters` set to MSH-1. They differ only when a caller replaces the preprocessing steps and gives a field delimiter other than MSH-1.
+Two steps read the header, each with the field separator it splits fields at. `detectDelimiters` ends MSH-2 at MSH-1, the only field separator it knows. The tokenizer ends MSH-2 at the field separator in its context, which `detectDelimiters` set to MSH-1. They differ only when a caller replaces the preprocessing steps and gives a field separator other than MSH-1.
 
-The tokenizer emits the header as five tokens, read once in `reset()`, because its general rules would read MSH-1 as a field delimiter and the encoding characters as delimiters. The two `FIELD_DELIM` tokens before MSH-1 and MSH-2 span no characters. An MSH-2 longer than four characters, such as `^~\&#`, is read on by the general rules: `#` is the next token.
+The tokenizer emits the header as five tokens, read once in `reset()`, because its general rules would read MSH-1 as a field separator and the encoding characters as delimiters. The two `FIELD_SEPARATOR` tokens before MSH-1 and MSH-2 span no characters. An MSH-2 longer than four characters, such as `^~\&#`, is read on by the general rules: `#` is the next token.
 
 ### Tokenizing
 
 `next()` emits the header tokens once it reaches the offset where MSH starts, after any empty lines before it. Otherwise it tries these rules at the current offset, in order. The first that applies reads the token:
 
 1. **A segment terminator** ends the segment.
-2. **The field delimiter** opens a field.
-3. **A Segment ID**, at the start of a segment only: the text up to the first field delimiter or segment terminator, whatever it holds. `^A|B` opens with the Segment ID `^A`, and `Z\R\Z|B` with `Z\R\Z`, not decoded. A segment starts at the start of the message and after each segment terminator.
+2. **The field separator** opens a field.
+3. **A Segment ID**, at the start of a segment only: the text up to the first field separator or segment terminator, whatever it holds. `^A|B` opens with the Segment ID `^A`, and `Z\R\Z|B` with `Z\R\Z`, not decoded. A segment starts at the start of the message and after each segment terminator.
 4. **The repetition, component, and subcomponent delimiters.**
 5. **Text**, up to the next delimiter or segment terminator.
 
-The order matters. The segment terminator comes first, so a line break is never read as text. The field delimiter comes before the Segment ID, so a line that starts with `|` has an empty Segment ID. The Segment ID comes before the other delimiters, so `^` at the start of a line is part of a Segment ID, not a component delimiter.
+The order matters. The segment terminator comes first, so a line break is never read as text. The field separator comes before the Segment ID, so a line that starts with `|` has an empty Segment ID. The Segment ID comes before the other delimiters, so `^` at the start of a line is part of a Segment ID, not a component separator.
 
 ### Escape sequences
 
@@ -108,7 +108,7 @@ A token's span covers the text as written, so a decoded value can be shorter tha
 `processor.ts` reads the tokens in order and keeps the segment, field, field repetition, component, and subcomponent being built.
 
 - A Segment ID opens a segment. A delimiter that arrives before any Segment ID opens a segment with an empty Segment ID.
-- Each delimiter opens the next sibling at its level: a field delimiter opens a field, a repetition delimiter a field repetition, and so on. A sibling it skips is added empty, so `PID|~` holds a field with two empty field repetitions.
+- Each delimiter opens the next sibling at its level: a field separator opens a field, a repetition separator a field repetition, and so on. A sibling it skips is added empty, so `PID|~` holds a field with two empty field repetitions.
 - A field, field repetition, or component with no value has `children: []`. `PID|1||` holds three fields, the last two empty.
 - A segment terminator closes the segment, and is recorded as its `terminator`. A segment that the input ends inside has the `terminator` `""`.
 - A segment terminator with no segment open is an empty line, and closes an empty segment: an empty Segment ID, no fields, and no width, at the start of its line. `MSH|^~\&` + CR + CR + `PID|1` holds MSH, an empty segment, and PID.

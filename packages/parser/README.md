@@ -111,7 +111,7 @@ const processor: Hl7v2Processor = unified().use(hl7v2Parser).freeze();
 - **Escape sequences decoded in the same pass.** A text run that holds the escape character is decoded as it is tokenized; a run without one is taken as it is.
 - **`unist`-compatible output.** Nodes follow the `@glion/ast` spec and integrate with `unist-util-visit`, `unist-builder`, and the wider Glion plugin ecosystem.
 - **Streaming-friendly.** The pull-based design is ready for streaming ingestion even though the current public API takes a complete string.
-- **Every field delimiter read as written.** Each field delimiter after the Segment ID opens a field, the last one included: `PID|1||` holds PID-1 and an empty PID-2 and PID-3, `PID|` holds an empty PID-1, and `PID` holds no fields. A line that starts with `|` has an empty Segment ID: `|A` holds one field, `A`.
+- **Every field separator read as written.** Each field separator after the Segment ID opens a field, the last one included: `PID|1||` holds PID-1 and an empty PID-2 and PID-3, `PID|` holds an empty PID-1, and `PID` holds no fields. A line that starts with `|` has an empty Segment ID: `|A` holds one field, `A`.
 
 ### Empty-field representation
 

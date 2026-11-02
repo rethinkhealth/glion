@@ -20,7 +20,7 @@ export const stripBOM: PreprocessorStep = (ctx) => {
 /**
  * Sets the delimiters the message header declares.
  *
- * MSH-1 sets the field delimiter, and MSH-2's encoding characters set the
+ * MSH-1 sets the field separator, and MSH-2's encoding characters set the
  * component, repetition, escape, and subcomponent delimiters, in that order.
  * A delimiter MSH-2 is too short to declare is the default. A message that
  * does not open with a message header segment keeps the delimiters it was
@@ -32,7 +32,7 @@ export const detectDelimiters: PreprocessorStep = (ctx) => {
   if (!header) {
     return ctx;
   }
-  // MSH-2 ends at the field delimiter MSH-1 declares: `MSH|^~\|APP` and
+  // MSH-2 ends at the field separator MSH-1 declares: `MSH|^~\|APP` and
   // `MSH|^~\` then `\r` both declare `^~\`.
   const encodingCharacters = readEncodingCharacters(
     ctx.input,

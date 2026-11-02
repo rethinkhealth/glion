@@ -90,7 +90,7 @@ function createParserCore() {
 
   /**
    * The open segment, or a new segment with an empty Segment ID at `start`
-   * when none is open: a field delimiter or segment terminator before any
+   * when none is open: a field separator or segment terminator before any
    * Segment ID opens one.
    */
   const ensureSegment = (start: Position["start"]): OpenSegment =>
@@ -120,7 +120,7 @@ function createParserCore() {
     currentSub = null;
   };
 
-  // Ensure there's a component to add subcomponents to (for SUBCOMP_DELIM)
+  // Ensure there's a component to add subcomponents to (for SUBCOMPONENT_SEPARATOR)
   // Does NOT add empty sibling components.
   const ensureComponent = (start: Position["start"]) => {
     if (!field) {
@@ -208,26 +208,26 @@ function createParserCore() {
         resetState();
         return;
       }
-      case "FIELD_DELIM": {
+      case "FIELD_SEPARATOR": {
         lastContentEnd = tok.position.end;
-        // A line that starts with a field delimiter has an empty Segment ID
+        // A line that starts with a field separator has an empty Segment ID
         ensureSegment(tok.position.start);
         openField(tok.position.end);
         return;
       }
-      case "REPETITION_DELIM": {
+      case "REPETITION_SEPARATOR": {
         lastContentEnd = tok.position.end;
         openRepetition(tok.position.start, tok.position.end);
         updatePositionsToEnd(tok.position.end);
         return;
       }
-      case "COMPONENT_DELIM": {
+      case "COMPONENT_SEPARATOR": {
         lastContentEnd = tok.position.end;
         openComponent(tok.position.start, tok.position.end);
         updatePositionsToEnd(tok.position.end);
         return;
       }
-      case "SUBCOMP_DELIM": {
+      case "SUBCOMPONENT_SEPARATOR": {
         lastContentEnd = tok.position.end;
         ensureComponent(tok.position.start);
         // If comp has no children yet, add empty first subcomponent

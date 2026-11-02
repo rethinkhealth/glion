@@ -8,7 +8,7 @@
  * Cause: the tokenizer and delimiter detection read MSH-2 as the four
  * characters after MSH-1, whatever they were.
  * Resolution: MSH-2, and the encoding characters delimiter detection reads,
- * end at the first field delimiter or line break.
+ * end at the first field separator or line break.
  */
 
 import type { Field, Segment } from "@glion/ast";
@@ -20,7 +20,7 @@ const encodingCharacters = (segment: Segment): string | undefined =>
   (segment.children[1] as Field).children[0]?.children[0]?.children[0]?.value;
 
 describe("an MSH-2 shorter than four characters", () => {
-  it("ends at the field delimiter, and the next field is read", () => {
+  it("ends at the field separator, and the next field is read", () => {
     const [msh] = parseHL7v2("MSH|^~\\|APP|FAC\rPID|1\r").children as Segment[];
     const msh3 = (msh?.children[2] as Field).children[0]?.children[0]
       ?.children[0]?.value;

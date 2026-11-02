@@ -39,7 +39,7 @@ src/index.ts:85:7
 -     if (!value) {
 +     if (false) {
 Tests ran:
-    hl7v2EncodeEscapes plugin encodes field delimiter
+    hl7v2EncodeEscapes plugin encodes field separator
     ...
 ```
 

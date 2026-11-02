@@ -41,7 +41,7 @@ describe("processor (semantics-agnostic)", () => {
   it("builds segment -> field -> repetition -> component -> subcomponents from tokens (sync iterator)", () => {
     const tokens: Token[] = [
       text("PID"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       text("1"),
       segEnd(),
     ];
@@ -56,12 +56,12 @@ describe("processor (semantics-agnostic)", () => {
     ).toBe("1");
   });
 
-  it("handles leading FIELD_DELIM by creating an empty first field", () => {
-    // SEG||A => TEXT("SEG"), FIELD_DELIM (consumed), FIELD_DELIM (creates empty field), TEXT("A")
+  it("handles leading FIELD_SEPARATOR by creating an empty first field", () => {
+    // SEG||A => TEXT("SEG"), FIELD_SEPARATOR (consumed), FIELD_SEPARATOR (creates empty field), TEXT("A")
     const tokens: Token[] = [
       text("SEG"),
-      tok("FIELD_DELIM"), // This one is skipped (separates segment name from fields)
-      tok("FIELD_DELIM"), // This one creates an empty first field
+      tok("FIELD_SEPARATOR"), // This one is skipped (separates segment name from fields)
+      tok("FIELD_SEPARATOR"), // This one creates an empty first field
       text("A"),
       segEnd(),
     ];
@@ -78,11 +78,11 @@ describe("processor (semantics-agnostic)", () => {
   it("supports repetition and components", () => {
     const tokens: Token[] = [
       text("SEG"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       text("X"),
-      tok("REPETITION_DELIM"),
+      tok("REPETITION_SEPARATOR"),
       text("Y"),
-      tok("COMPONENT_DELIM"),
+      tok("COMPONENT_SEPARATOR"),
       text("Z"),
       segEnd(),
     ];
@@ -101,9 +101,9 @@ describe("processor (semantics-agnostic)", () => {
   it("sUBCOMP_DELIM starts a new empty subcomponent slot", () => {
     const tokens: Token[] = [
       text("SEG"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       text("A"),
-      tok("SUBCOMP_DELIM"),
+      tok("SUBCOMPONENT_SEPARATOR"),
       text("B"),
       segEnd(),
     ];
@@ -132,7 +132,7 @@ describe("processor (semantics-agnostic)", () => {
   });
 
   it("finalizes last segment without trailing SEGMENT_END (sync tokens)", () => {
-    const tokens: Token[] = [text("PID"), tok("FIELD_DELIM"), text("1")];
+    const tokens: Token[] = [text("PID"), tok("FIELD_SEPARATOR"), text("1")];
     const root = parseHL7v2FromIterator(tokens);
     expect(root.children).toHaveLength(1);
     const seg = root.children[0] as Segment;
@@ -150,7 +150,7 @@ describe("processor (semantics-agnostic)", () => {
   it("keeps a trailing named-but-fieldless segment (round-trip idempotency)", () => {
     const tokens: Token[] = [
       text("PID"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       text("1"),
       segEnd(),
       text("AAA-no-fields-here"),
@@ -164,10 +164,10 @@ describe("processor (semantics-agnostic)", () => {
   it("keeps every trailing empty field", () => {
     const tokens: Token[] = [
       text("PID"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       text("1"),
-      tok("FIELD_DELIM"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
+      tok("FIELD_SEPARATOR"),
       segEnd(),
     ];
     const root = parseHL7v2FromIterator(tokens);
@@ -180,12 +180,12 @@ describe("processor (semantics-agnostic)", () => {
     ]);
   });
 
-  it("opens an empty field for a FIELD_DELIM that ends the segment", () => {
+  it("opens an empty field for a FIELD_SEPARATOR that ends the segment", () => {
     const tokens: Token[] = [
       text("PID"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       text("1"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       segEnd(),
     ];
     const root = parseHL7v2FromIterator(tokens);
@@ -194,12 +194,12 @@ describe("processor (semantics-agnostic)", () => {
     expect(seg.children[1]).toMatchObject({ children: [], type: "field" });
   });
 
-  it("keeps trailing empty component when COMPONENT_DELIM is last before SEGMENT_END", () => {
+  it("keeps trailing empty component when COMPONENT_SEPARATOR is last before SEGMENT_END", () => {
     const tokens: Token[] = [
       text("PID"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       text("A"),
-      tok("COMPONENT_DELIM"),
+      tok("COMPONENT_SEPARATOR"),
       segEnd(),
     ];
     const root = parseHL7v2FromIterator(tokens);
@@ -229,12 +229,12 @@ describe("processor (semantics-agnostic)", () => {
     });
   });
 
-  it("keeps trailing empty subcomponent when SUBCOMP_DELIM is last before SEGMENT_END", () => {
+  it("keeps trailing empty subcomponent when SUBCOMPONENT_SEPARATOR is last before SEGMENT_END", () => {
     const tokens: Token[] = [
       text("PID"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       text("A"),
-      tok("SUBCOMP_DELIM"),
+      tok("SUBCOMPONENT_SEPARATOR"),
       segEnd(),
     ];
     const root = parseHL7v2FromIterator(tokens);
@@ -267,12 +267,12 @@ describe("processor (semantics-agnostic)", () => {
     });
   });
 
-  it("keeps trailing empty repetition when REPETITION_DELIM is last before SEGMENT_END", () => {
+  it("keeps trailing empty repetition when REPETITION_SEPARATOR is last before SEGMENT_END", () => {
     const tokens: Token[] = [
       text("OBX"),
-      tok("FIELD_DELIM"),
+      tok("FIELD_SEPARATOR"),
       text("1"),
-      tok("REPETITION_DELIM"),
+      tok("REPETITION_SEPARATOR"),
       segEnd(),
     ];
     const root = parseHL7v2FromIterator(tokens);
