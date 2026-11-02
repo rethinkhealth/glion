@@ -13,9 +13,9 @@ import { EscapeSequenceError } from "./errors";
 //   Smith\E\Jones  →  Smith\E\Jones      C:\temp      →  C:\temp
 //
 // Both directions look characters and codes up in one table, built from the
-// rule once per set of delimiters: `read` turns a code into the character the
-// table writes with it, so `\X7C\` stays as written, since `|` is written
-// `\F\`.
+// rule and reused while the delimiters stay the same: `read` turns a code into
+// the character the table writes with it, so `\X7C\` stays as written, since
+// `|` is written `\F\`.
 //
 // `write` keeps every escape character as it is, except one whose closing
 // escape character, or the end of the value when it has none, comes after a
@@ -73,14 +73,7 @@ export interface Escapes {
   write(value: string, d: Delimiters): string;
 }
 
-/**
- * The characters written as escape sequences with the delimiters `d`, each
- * with the code that writes it, or `undefined` when every code for it holds a
- * delimiter. Never holds the escape character.
- */
-type EscapeRule = (d: Delimiters) => ReadonlyMap<string, string | undefined>;
-
-/** An {@link EscapeRule} for one set of delimiters, ready to look up. */
+/** The rule for one set of delimiters, ready to look up. */
 interface EscapeTable {
   readonly delimiters: Delimiters;
   /** The code that writes each character of the rule. */
@@ -106,9 +99,6 @@ const HEX_RADIX = 16;
 const HEX_PAIR_LENGTH = 2;
 const UTF8_ENCODER = new TextEncoder();
 const NO_POSITIONS: ReadonlySet<number> = new Set();
-// Each set of delimiters costs one table; past this many, the cache starts
-// over, so a stream of messages with ever new delimiters cannot grow it.
-const MAX_CACHED_TABLES = 64;
 
 // The rule HL7v2 structure requires. With the usual delimiters `|^~\&`:
 //
@@ -119,7 +109,14 @@ const MAX_CACHED_TABLES = 64;
 // A separator whose named code holds a delimiter takes the hexadecimal code
 // of its UTF-8 bytes instead: with `R` as the field separator and `E` as the
 // component separator, `~` ↔ `X7e`.
-const separatorsAndControlCharacters: EscapeRule = (d) => {
+/**
+ * The characters written as escape sequences with the delimiters `d`, each
+ * with the code that writes it, or `undefined` when every code for it holds a
+ * delimiter. Never holds the escape character.
+ */
+const separatorsAndControlCharacters = (
+  d: Delimiters
+): ReadonlyMap<string, string | undefined> => {
   const codes = new Map<string, string | undefined>([
     [d.field, namedOrHexCode(d.field, "F", d)],
     [d.component, namedOrHexCode(d.component, "S", d)],
@@ -135,36 +132,15 @@ const separatorsAndControlCharacters: EscapeRule = (d) => {
   return codes;
 };
 
-/**
- * The table of `rule` for a set of delimiters, built once and reused while
- * the delimiters stay the same.
- */
-function createTables(rule: EscapeRule): (d: Delimiters) => EscapeTable {
-  const cache = new Map<string, EscapeTable>();
-  let last: EscapeTable | undefined;
+let lastTable: EscapeTable | undefined;
 
-  const tableFor = (d: Delimiters): EscapeTable => {
-    if (last !== undefined && sameDelimiters(last.delimiters, d)) {
-      return last;
-    }
-    const key =
-      d.field + d.component + d.repetition + d.escape + d.subcomponent;
-    let table = cache.get(key);
-    if (table === undefined) {
-      if (cache.size >= MAX_CACHED_TABLES) {
-        cache.clear();
-      }
-      table = buildTable(rule, d);
-      cache.set(key, table);
-    }
-    last = table;
-    return table;
-  };
-
-  return tableFor;
-}
-
-const tableFor = createTables(separatorsAndControlCharacters);
+/** The table for `d`, reused while the delimiters stay the same. */
+const tableFor = (d: Delimiters): EscapeTable => {
+  if (lastTable === undefined || !sameDelimiters(lastTable.delimiters, d)) {
+    lastTable = buildTable(d);
+  }
+  return lastTable;
+};
 
 /** Reads and writes the characters a value cannot hold as they are. */
 export const escapes: Escapes = {
@@ -186,8 +162,8 @@ export function escapedLength(value: string, d: Delimiters): number {
   return text.length - 2 * Math.floor(escapeCharacters / 2);
 }
 
-function buildTable(rule: EscapeRule, d: Delimiters): EscapeTable {
-  const codes = rule(d);
+function buildTable(d: Delimiters): EscapeTable {
+  const codes = separatorsAndControlCharacters(d);
   const characters = new Map<string, string>();
   const ascii = new Uint8Array(ASCII_END);
   for (const [ch, code] of codes) {
