@@ -175,7 +175,7 @@ export interface Segment extends Parent {
   type: "segment";
   /**
    * The Segment ID, such as `MSH` or `PID`. Empty for an empty line, and for
-   * a line that starts with the field delimiter.
+   * a line that starts with the field separator.
    */
   name: string;
   /**

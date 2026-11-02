@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`the message header is read only at the start of the message > emits MSH as TEXT, then a synthetic FIELD_DELIM, then MSH.2 as TEXT for first segment only 1`] = `
+exports[`the message header is read only at the start of the message > emits MSH as TEXT, then a synthetic FIELD_SEPARATOR, then MSH.2 as TEXT for first segment only 1`] = `
 [
   {
     "position": {
@@ -31,7 +31,7 @@ exports[`the message header is read only at the start of the message > emits MSH
         "offset": 3,
       },
     },
-    "type": "FIELD_DELIM",
+    "type": "FIELD_SEPARATOR",
     "value": undefined,
   },
   {
@@ -63,7 +63,7 @@ exports[`the message header is read only at the start of the message > emits MSH
         "offset": 4,
       },
     },
-    "type": "FIELD_DELIM",
+    "type": "FIELD_SEPARATOR",
     "value": undefined,
   },
   {
@@ -95,7 +95,7 @@ exports[`the message header is read only at the start of the message > emits MSH
         "offset": 8,
       },
     },
-    "type": "FIELD_DELIM",
+    "type": "FIELD_SEPARATOR",
     "value": undefined,
   },
   {
@@ -160,7 +160,7 @@ exports[`the message header is read only at the start of the message > emits MSH
         "offset": 19,
       },
     },
-    "type": "FIELD_DELIM",
+    "type": "FIELD_SEPARATOR",
     "value": undefined,
   },
   {
@@ -225,7 +225,7 @@ exports[`the message header is read only at the start of the message > emits MSH
         "offset": 25,
       },
     },
-    "type": "FIELD_DELIM",
+    "type": "FIELD_SEPARATOR",
     "value": undefined,
   },
   {
@@ -241,7 +241,7 @@ exports[`the message header is read only at the start of the message > emits MSH
         "offset": 26,
       },
     },
-    "type": "COMPONENT_DELIM",
+    "type": "COMPONENT_SEPARATOR",
     "value": undefined,
   },
   {
@@ -257,7 +257,7 @@ exports[`the message header is read only at the start of the message > emits MSH
         "offset": 27,
       },
     },
-    "type": "REPETITION_DELIM",
+    "type": "REPETITION_SEPARATOR",
     "value": undefined,
   },
   {
@@ -289,7 +289,7 @@ exports[`the message header is read only at the start of the message > emits MSH
         "offset": 29,
       },
     },
-    "type": "SUBCOMP_DELIM",
+    "type": "SUBCOMPONENT_SEPARATOR",
     "value": undefined,
   },
   {
@@ -305,7 +305,7 @@ exports[`the message header is read only at the start of the message > emits MSH
         "offset": 30,
       },
     },
-    "type": "FIELD_DELIM",
+    "type": "FIELD_SEPARATOR",
     "value": undefined,
   },
   {

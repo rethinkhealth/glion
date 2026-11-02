@@ -11,25 +11,25 @@ const subValue = (results: Root) =>
     ?.children[0]?.value;
 
 describe("hl7v2EncodeEscapes plugin", () => {
-  it("encodes field delimiter", async () => {
+  it("encodes field separator", async () => {
     const tree = m(s("PID", f("before|after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
     expect(subValue(results)).toBe("before\\F\\after");
   });
 
-  it("encodes component delimiter", async () => {
+  it("encodes component separator", async () => {
     const tree = m(s("PID", f("before^after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
     expect(subValue(results)).toBe("before\\S\\after");
   });
 
-  it("encodes repetition delimiter", async () => {
+  it("encodes repetition separator", async () => {
     const tree = m(s("PID", f("before~after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
     expect(subValue(results)).toBe("before\\R\\after");
   });
 
-  it("encodes subcomponent delimiter", async () => {
+  it("encodes subcomponent separator", async () => {
     const tree = m(s("PID", f("before&after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
     expect(subValue(results)).toBe("before\\T\\after");
@@ -133,12 +133,12 @@ describe("hl7v2EncodeEscapes plugin", () => {
     // MSH has standard delimiters, but options override field to "*"
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("before*after")));
 
-    // Override field delimiter via options — should take precedence over MSH
+    // Override field separator via options — should take precedence over MSH
     const results = await unified()
       .use(hl7v2EncodeEscapes, { delimiters: { field: "*" } })
       .run(tree);
 
-    // "*" is now the field delimiter, so it should be encoded as \F\
+    // "*" is now the field separator, so it should be encoded as \F\
     const pid = (results as Root).children[1];
     const value =
       pid?.type === "segment"

@@ -20,9 +20,9 @@
  *
  *     Message      = MSH segment + 0..n additional segments, each followed by \r
  *     Segment      = NAME | field | field | ...     (segments can repeat in groups)
- *     Field        = repetition [~ repetition ...]  (~ = repetition delimiter; may be empty or single)
- *     Repetition   = component [^ component ...]    (^ = component delimiter; may be single)
- *     Component    = subcomponent [& subcomponent ...] (& = subcomponent delimiter; may be single)
+ *     Field        = repetition [~ repetition ...]  (~ = repetition separator; may be empty or single)
+ *     Repetition   = component [^ component ...]    (^ = component separator; may be single)
+ *     Component    = subcomponent [& subcomponent ...] (& = subcomponent separator; may be single)
  *     Subcomponent = text, with each delimiter written as an escape sequence (may be empty string)
  *
  * At every level, values can be **empty** — an empty field, empty component,
@@ -239,7 +239,7 @@ function arbSubcomponent(
 }
 
 /**
- * Generate a component: 1–3 subcomponents joined by the subcomponent delimiter.
+ * Generate a component: 1–3 subcomponents joined by the subcomponent separator.
  *
  * In HL7v2, components are the parts of a field separated by `^`, and each
  * component can itself contain subcomponents separated by `&`.
@@ -260,7 +260,7 @@ function arbComponent(
 
 /**
  * Generate a field repetition: 1–3 components joined by the component
- * delimiter.
+ * separator.
  *
  * A "field repetition" is a single occurrence of a field value. When a field
  * repeats (e.g., multiple phone numbers), each repetition is separated by `~`.
@@ -278,7 +278,7 @@ function arbFieldRepetition(
 }
 
 /**
- * Generate a field: 1–2 repetitions joined by the repetition delimiter.
+ * Generate a field: 1–2 repetitions joined by the repetition separator.
  *
  * Most fields have a single value, but some (like patient phone numbers)
  * can repeat. Repetitions are separated by `~`.
@@ -298,7 +298,7 @@ function arbField(
  * Generate a non-MSH segment line.
  *
  * A segment is a line in an HL7v2 message: a 3-letter name followed by
- * fields separated by the field delimiter.
+ * fields separated by the field separator.
  *
  * @example
  *   "PID|1|12345|DOE^JOHN" (PID segment with 3 fields)

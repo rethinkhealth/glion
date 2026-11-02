@@ -96,8 +96,8 @@ describe("parser", () => {
     });
   });
 
-  describe("field Delimiter Handling", () => {
-    it("treats first field delimiter as segment name separator", () => {
+  describe("field Separator Handling", () => {
+    it("treats first field separator as segment name separator", () => {
       const input = "PID|123";
       const root = parseHL7v2(input);
       const seg = root.children[0] as Segment;
@@ -122,7 +122,7 @@ describe("parser", () => {
       expect(getFieldValue(seg, 2)).toBe("3");
     });
 
-    it("handles leading field delimiter (creates empty first field)", () => {
+    it("handles leading field separator (creates empty first field)", () => {
       const input = "SEG||A";
       const root = parseHL7v2(input);
       const seg = root.children[0] as Segment;
@@ -153,7 +153,7 @@ describe("parser", () => {
       });
     });
 
-    it("reads a trailing field delimiter as an empty last field", () => {
+    it("reads a trailing field separator as an empty last field", () => {
       const root = parseHL7v2("PID|1|");
       const seg = root.children[0] as Segment;
 
@@ -162,7 +162,7 @@ describe("parser", () => {
       expect(seg.children[1]).toMatchObject({ children: [], type: "field" });
     });
 
-    it("reads every trailing field delimiter as an empty field", () => {
+    it("reads every trailing field separator as an empty field", () => {
       const root = parseHL7v2("PID|1|||");
       const seg = root.children[0] as Segment;
 
@@ -174,7 +174,7 @@ describe("parser", () => {
       ]);
     });
 
-    it("reads a field delimiter right after the Segment ID as one empty field", () => {
+    it("reads a field separator right after the Segment ID as one empty field", () => {
       const root = parseHL7v2("PID|");
       const seg = root.children[0] as Segment;
 
@@ -182,7 +182,7 @@ describe("parser", () => {
       expect(seg.children[0]).toMatchObject({ children: [], type: "field" });
     });
 
-    it("reads a Segment ID with no field delimiter as a segment with no fields", () => {
+    it("reads a Segment ID with no field separator as a segment with no fields", () => {
       const root = parseHL7v2("PID");
       const seg = root.children[0] as Segment;
 
@@ -204,7 +204,7 @@ describe("parser", () => {
     });
   });
 
-  describe("repetition Delimiter Handling", () => {
+  describe("repetition Separator Handling", () => {
     it("creates multiple repetitions within a field", () => {
       const input = "OBX|A~B~C";
       const root = parseHL7v2(input);
@@ -252,7 +252,7 @@ describe("parser", () => {
       expect(root).toMatchSnapshot(); // for control
     });
 
-    it("handles leading repetition delimiter (creates empty first repetition)", () => {
+    it("handles leading repetition separator (creates empty first repetition)", () => {
       const input = "OBX|~B";
       const root = parseHL7v2(input);
       const seg = root.children[0] as Segment;
@@ -304,7 +304,7 @@ describe("parser", () => {
       const seg = root.children[0] as Segment;
       const field = seg.children[0] as Field;
 
-      // Trailing repetition delimiter creates an empty repetition
+      // Trailing repetition separator creates an empty repetition
       expect(field.children).toHaveLength(2);
       expect(getRepetitionValue(field, 0)).toBe("A");
       expect(getRepetitionValue(field, 1)).toBeNull();
@@ -396,7 +396,7 @@ describe("parser", () => {
     });
   });
 
-  describe("component Delimiter Handling", () => {
+  describe("component Separator Handling", () => {
     it("creates multiple components within a repetition", () => {
       const input = "PID|Last^First^Middle";
       const root = parseHL7v2(input);
@@ -437,7 +437,7 @@ describe("parser", () => {
       expect(root).toMatchSnapshot(); // for control
     });
 
-    it("handles leading component delimiter (creates empty first component)", () => {
+    it("handles leading component separator (creates empty first component)", () => {
       const input = "PID|^First";
       const root = parseHL7v2(input);
       const seg = root.children[0] as Segment;
@@ -500,7 +500,7 @@ describe("parser", () => {
     });
   });
 
-  describe("subcomponent Delimiter Handling", () => {
+  describe("subcomponent Separator Handling", () => {
     it("creates multiple subcomponents within a component", () => {
       const input = "PID|ID&Type&System";
       const root = parseHL7v2(input);
@@ -517,7 +517,7 @@ describe("parser", () => {
       expect(root).toMatchSnapshot(); // for control
     });
 
-    it("handles leading subcomponent delimiter (creates empty first subcomponent)", () => {
+    it("handles leading subcomponent separator (creates empty first subcomponent)", () => {
       const input = "PID|&Type";
       const root = parseHL7v2(input);
       const seg = root.children[0] as Segment;
@@ -680,7 +680,7 @@ describe("parser", () => {
       expect(root.children[0]).toMatchObject({ name: "" });
     });
 
-    it("reads a line that starts with a field delimiter as an empty Segment ID and its fields", () => {
+    it("reads a line that starts with a field separator as an empty Segment ID and its fields", () => {
       const seg = parseHL7v2("|A|B").children[0] as Segment;
 
       expect(seg.name).toBe("");
@@ -699,7 +699,7 @@ describe("parser", () => {
       });
     });
 
-    it("reads the text before a line's first field delimiter as its Segment ID", () => {
+    it("reads the text before a line's first field separator as its Segment ID", () => {
       const seg = parseHL7v2("^A~B&C|D").children[0] as Segment;
 
       expect(seg.name).toBe("^A~B&C");
@@ -707,7 +707,7 @@ describe("parser", () => {
       expect(getFieldValue(seg, 0)).toBe("D");
     });
 
-    it("reads a line with no field delimiter as a Segment ID alone", () => {
+    it("reads a line with no field separator as a Segment ID alone", () => {
       const seg = parseHL7v2("PID|1\r^A").children[1] as Segment;
 
       expect(seg).toMatchObject({ children: [], name: "^A" });
@@ -867,7 +867,7 @@ describe("root position", () => {
     });
   });
 
-  it("ends a segment at its last character when that is a field delimiter", () => {
+  it("ends a segment at its last character when that is a field separator", () => {
     const [pid] = parseHL7v2("PID|\rOBX|1").children;
 
     expect(pid?.position?.end.offset).toBe(4);

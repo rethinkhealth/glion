@@ -108,7 +108,7 @@ describe("preprocessor steps", () => {
       });
     });
 
-    it("reads the encoding characters up to a field delimiter before the fourth", () => {
+    it("reads the encoding characters up to a field separator before the fourth", () => {
       const result = detectDelimiters({
         delimiters: DEFAULT_DELIMITERS,
         input: "MSH*%$*APP",
@@ -162,8 +162,8 @@ describe("preprocessor steps", () => {
       expect(result.delimiters).toBe(DEFAULT_DELIMITERS);
     });
 
-    // MSH-1 sets the field delimiter, and each of MSH-2's encoding characters
-    // sets the delimiter of its role, up to the first field delimiter or
+    // MSH-1 sets the field separator, and each of MSH-2's encoding characters
+    // sets the delimiter of its role, up to the first field separator or
     // segment terminator. A role MSH-2 is too short to declare keeps the
     // default.
     //

@@ -72,11 +72,11 @@ describe(readEncodingCharacters, () => {
     expect(encodingCharacters("MSH|^~\\&#|APP")).toBe("^~\\&");
   });
 
-  it("ends at the field delimiter before the fourth character", () => {
+  it("ends at the field separator before the fourth character", () => {
     expect(encodingCharacters("MSH|^~\\|APP")).toBe("^~\\");
   });
 
-  it("ends at the field delimiter it is given", () => {
+  it("ends at the field separator it is given", () => {
     expect(encodingCharacters("MSH|^~*&|APP", "*")).toBe("^~");
   });
 

@@ -80,10 +80,10 @@ export interface Token {
  */
 export type TokenType =
   | "SEGMENT_END"
-  | "FIELD_DELIM"
-  | "REPETITION_DELIM"
-  | "COMPONENT_DELIM"
-  | "SUBCOMP_DELIM"
+  | "FIELD_SEPARATOR"
+  | "REPETITION_SEPARATOR"
+  | "COMPONENT_SEPARATOR"
+  | "SUBCOMPONENT_SEPARATOR"
   | "TEXT";
 
 /** Reads tokens from a context, one at a time. */
