@@ -115,6 +115,8 @@ Linting rules and presets for HL7v2 message quality and conformance.
 - **[@glion/lint-max-message-size][glion-lint-max-message-size]** — report when a message exceeds a configurable maximum size in bytes or segment count.
 - **[@glion/lint-no-trailing-empty-field][glion-lint-no-trailing-empty-field]** — flag empty fields at the end of a segment, which can cause ambiguity or interoperability issues.
 - **[@glion/lint-segment-terminator][glion-lint-segment-terminator]** — warn when a segment ends with a line feed, or with a carriage return and a line feed, or the last segment has no segment terminator.
+- **[@glion/lint-encoding-characters-required][glion-lint-encoding-characters-required]** — warn when `MSH-2` leaves out a delimiter.
+- **[@glion/lint-delimiters-duplicate][glion-lint-delimiters-duplicate]** — report two delimiters that are the same character.
 - **[@glion/lint-segment-header-length][glion-lint-segment-header-length]** — validate that segment headers are exactly three characters, as required by the HL7v2 specification.
 - **[@glion/lint-message-version][glion-lint-message-version]** — warn when a message version is unsupported or outside expected constraints.
 
@@ -224,6 +226,8 @@ HL7® and Health Level Seven® are registered trademarks of Health Level Seven I
 [glion-encode-escapes]: https://github.com/rethinkhealth/glion/tree/main/packages/encode-escapes#readme
 [glion-hl7v2]: https://github.com/rethinkhealth/glion/tree/main/packages/hl7v2#readme
 [glion-jsonify]: https://github.com/rethinkhealth/glion/tree/main/packages/jsonify#readme
+[glion-lint-delimiters-duplicate]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-delimiters-duplicate#readme
+[glion-lint-encoding-characters-required]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-encoding-characters-required#readme
 [glion-lint-max-message-size]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-max-message-size#readme
 [glion-lint-message-version]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme
 [glion-lint-no-trailing-empty-field]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-no-trailing-empty-field#readme

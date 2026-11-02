@@ -45,6 +45,8 @@
     "publint": "publint --strict"
   },
   "dependencies": {
+    "@glion/lint-delimiters-duplicate": "workspace:*",
+    "@glion/lint-encoding-characters-required": "workspace:*",
     "@glion/lint-message-version": "workspace:*",
     "@glion/lint-no-trailing-empty-field": "workspace:*",
     "@glion/lint-required-message-header": "workspace:*",
