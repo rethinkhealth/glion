@@ -1,7 +1,8 @@
+import type { Field } from "@glion/ast";
 import { f, g, m, s } from "@glion/builder";
 import { DEFAULT_DELIMITERS } from "@glion/utils";
 
-import { delimiters } from "../src";
+import { delimiters, msh } from "../src";
 
 describe("delimiters", () => {
   // --- Standard cases ---
@@ -59,24 +60,36 @@ describe("delimiters", () => {
 
   // --- MSH-2 edge cases ---
 
-  it("handles MSH with missing MSH-2", () => {
+  it("has the default delimiters for a message header segment with no fields", () => {
+    expect(delimiters(m(s("MSH")))).toStrictEqual(DEFAULT_DELIMITERS);
+  });
+
+  it("declares only the field separator when MSH-2 is missing", () => {
     const tree = m(s("MSH", f("*")));
+    expect(delimiters(tree)).toStrictEqual({ field: "*" });
+  });
+
+  it("declares only the field separator when MSH-2 is empty", () => {
+    const tree = m(s("MSH", f("|"), f("")));
+    expect(delimiters(tree)).toStrictEqual({ field: "|" });
+  });
+
+  it("declares no escape character and no subcomponent separator when MSH-2 has 2 characters", () => {
+    const tree = m(s("MSH", f("|"), f("^~")));
     expect(delimiters(tree)).toStrictEqual({
-      ...DEFAULT_DELIMITERS,
-      field: "*",
+      component: "^",
+      field: "|",
+      repetition: "~",
     });
   });
 
-  it("handles MSH-2 with empty string value", () => {
-    const tree = m(s("MSH", f("|"), f("")));
-    expect(delimiters(tree)).toStrictEqual(DEFAULT_DELIMITERS);
-  });
-
-  it("handles MSH-2 with fewer than 4 characters", () => {
-    const tree = m(s("MSH", f("|"), f("^~")));
+  // `&` is the escape character, not also the subcomponent separator (#1170).
+  it("declares no subcomponent separator when MSH-2 has 3 characters", () => {
+    const tree = m(s("MSH", f("|"), f("^~&")));
     expect(delimiters(tree)).toStrictEqual({
-      ...DEFAULT_DELIMITERS,
       component: "^",
+      escape: "&",
+      field: "|",
       repetition: "~",
     });
   });
@@ -86,9 +99,14 @@ describe("delimiters", () => {
     expect(delimiters(tree)).toStrictEqual(DEFAULT_DELIMITERS);
   });
 
-  it("accepts multi-byte characters in MSH-2", () => {
-    const tree = m(s("MSH", f("|"), f("^~\\💀")));
-    expect(delimiters(tree).subcomponent).toBe("💀");
+  it("accepts a multi-byte character in MSH-2", () => {
+    const tree = m(s("MSH", f("|"), f("^~\\é")));
+    expect(delimiters(tree).subcomponent).toBe("é");
+  });
+
+  it("reads MSH-2 by UTF-16 code unit, as the parser does", () => {
+    const tree = m(s("MSH", f("|"), f("💀~\\&")));
+    expect(delimiters(tree).escape).toBe("~");
   });
 
   // --- Duplicate/collision cases (resolved, not validated) ---
@@ -139,11 +157,121 @@ describe("delimiters", () => {
     expect(delimiters(tree)).toStrictEqual(DEFAULT_DELIMITERS);
   });
 
+  it("reads a field with no value as no delimiter, at every level of the field", () => {
+    const declared = (msh2: Field) => delimiters(m(s("MSH", f("*"), msh2)));
+    const emptyField: Field = { children: [], type: "field" };
+    const noComponent: Field = {
+      children: [{ children: [], type: "field-repetition" }],
+      type: "field",
+    };
+    const noSubcomponent: Field = {
+      children: [
+        {
+          children: [{ children: [], type: "component" }],
+          type: "field-repetition",
+        },
+      ],
+      type: "field",
+    };
+
+    for (const msh2 of [emptyField, noComponent, noSubcomponent]) {
+      expect(declared(msh2)).toStrictEqual({ field: "*" });
+    }
+  });
+
+  it("has the field separator `|` when MSH-1 holds no value", () => {
+    const tree = m(s("MSH", { children: [], type: "field" }, f("^~\\&")));
+    expect(delimiters(tree)).toStrictEqual(DEFAULT_DELIMITERS);
+  });
+
+  it("reads the delimiters of a message header inside a Group node", () => {
+    const tree = m(g("HEADER", s("MSH", f("*"), f("%$#&"), f("SENDER"))));
+    expect(delimiters(tree)).toStrictEqual({
+      component: "%",
+      escape: "#",
+      field: "*",
+      repetition: "$",
+      subcomponent: "&",
+    });
+  });
+
   it("prefers top-level MSH over MSH inside a Group", () => {
     const tree = m(
       s("MSH", f("*"), f("%$#&"), f("TOP")),
       g("HEADER", s("MSH", f("|"), f("^~\\&"), f("NESTED")))
     );
     expect(delimiters(tree).field).toBe("*");
+  });
+});
+
+describe("delimiters of a message without a message header", () => {
+  const custom = {
+    component: "%",
+    escape: "#",
+    field: "*",
+    repetition: "$",
+    subcomponent: "@",
+  };
+
+  it("has the fallback, over the default delimiters", () => {
+    expect(delimiters(m(s("PID")), custom)).toStrictEqual(custom);
+    expect(delimiters(m(s("PID")), { field: "*" })).toStrictEqual({
+      ...DEFAULT_DELIMITERS,
+      field: "*",
+    });
+  });
+
+  it("has the fallback for a message header segment with no fields", () => {
+    expect(delimiters(m(s("MSH")), custom)).toStrictEqual(custom);
+  });
+
+  it("keeps a message header over the fallback", () => {
+    expect(delimiters(m(s("MSH", f("|"), f("^~&"))), custom)).toStrictEqual({
+      component: "^",
+      escape: "&",
+      field: "|",
+      repetition: "~",
+    });
+  });
+});
+
+describe(msh, () => {
+  it("is the first segment when it is MSH", () => {
+    const tree = m(s("MSH", f("|")), s("PID"));
+    expect(msh(tree)).toBe(tree.children[0]);
+  });
+
+  it("is found after empty lines", () => {
+    const tree = m(s(""), s(""), s("MSH", f("|")));
+    expect(msh(tree)).toBe(tree.children[2]);
+  });
+
+  it("is found inside a segment group", () => {
+    const segment = s("MSH", f("|"));
+    expect(msh(m(g("ROOT", g("HEADER", segment))))).toBe(segment);
+  });
+
+  it("is looked for past an empty segment group", () => {
+    const segment = s("MSH", f("|"));
+    expect(msh(m(g("EMPTY"), segment))).toBe(segment);
+  });
+
+  it("is looked for past a node that is not a segment", () => {
+    const segment = s("MSH", f("*"));
+    const tree = m(segment);
+    tree.children.unshift({ type: "comment", value: "x" } as never);
+
+    expect(msh(tree)).toBe(segment);
+    expect(delimiters(tree).field).toBe("*");
+  });
+
+  it("is `undefined` when the message opens with another segment", () => {
+    expect(msh(m(s("PID"), s("MSH", f("|"))))).toBeUndefined();
+    expect(msh(m(s("", f("A")), s("MSH", f("|"))))).toBeUndefined();
+  });
+
+  it("is `undefined` for a message with no segments", () => {
+    expect(msh(m())).toBeUndefined();
+    expect(msh(m(s("")))).toBeUndefined();
   });
 });

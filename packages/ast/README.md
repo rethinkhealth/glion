@@ -146,7 +146,19 @@ type HL7v2Content =
   Root | Segment | Group | Field | FieldRepetition | Component | Subcomponent
 ```
 
-Delimiters themselves live on `file.data.delimiters` (populated by `@glion/annotate-delimiters`), not on individual nodes — a single source of truth for the six HL7v2 delimiter characters.
+### `Delimiters`
+
+```idl
+interface Delimiters {
+  field: string
+  component: string?
+  repetition: string?
+  escape: string?
+  subcomponent: string?
+}
+```
+
+The delimiters of a message: MSH-1, and the encoding characters of MSH-2 in the order component, repetition, escape, subcomponent. A delimiter MSH-2 does not declare is absent, and the message has no such delimiter. `delimiters()` from `@glion/util-query` reads them from a tree.
 
 ## Part of Glion
 

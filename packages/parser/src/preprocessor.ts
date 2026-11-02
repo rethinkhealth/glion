@@ -1,10 +1,10 @@
-import { DEFAULT_DELIMITERS } from "@glion/utils";
+import type { Delimiters } from "@glion/ast";
+import { DEFAULT_DELIMITERS, ENCODING_CHARACTERS } from "@glion/utils";
 
 import { readEncodingCharacters, readMessageHeader } from "./message-header";
 import type { ParserContext, PreprocessorStep } from "./types";
 
 const BYTE_ORDER_MARK = "\uFEFF";
-
 /**
  * Removes a byte order mark from the start of the input. A byte order mark is
  * not part of the message, so every position counts from the character after
@@ -21,10 +21,10 @@ export const stripBOM: PreprocessorStep = (ctx) => {
  * Sets the delimiters the message header declares.
  *
  * MSH-1 sets the field separator, and MSH-2's encoding characters set the
- * component, repetition, escape, and subcomponent delimiters, in that order.
- * A delimiter MSH-2 is too short to declare is the default. A message that
- * does not open with a message header segment keeps the delimiters it was
- * given.
+ * component separator, repetition separator, escape character, and subcomponent
+ * separator, in that order. A delimiter MSH-2 is too short to declare is
+ * absent: `^~&` declares no subcomponent separator. A message that does not
+ * open with a message header segment keeps the delimiters it was given.
  */
 export const detectDelimiters: PreprocessorStep = (ctx) => {
   const lineBreaks = ctx.lineBreaks ?? true;
@@ -40,14 +40,16 @@ export const detectDelimiters: PreprocessorStep = (ctx) => {
     header.fieldSeparator,
     lineBreaks
   );
-  ctx.delimiters = {
-    component: encodingCharacters.charAt(0) || DEFAULT_DELIMITERS.component,
-    escape: encodingCharacters.charAt(2) || DEFAULT_DELIMITERS.escape,
+  const delimiters: Delimiters = {
     field: header.fieldSeparator || DEFAULT_DELIMITERS.field,
-    repetition: encodingCharacters.charAt(1) || DEFAULT_DELIMITERS.repetition,
-    subcomponent:
-      encodingCharacters.charAt(3) || DEFAULT_DELIMITERS.subcomponent,
   };
+  for (const [i, delimiter] of ENCODING_CHARACTERS.entries()) {
+    const ch = encodingCharacters.charAt(i);
+    if (ch !== "") {
+      delimiters[delimiter] = ch;
+    }
+  }
+  ctx.delimiters = delimiters;
   return ctx;
 };
 

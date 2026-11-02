@@ -51,7 +51,7 @@ Writes the escape sequences of every `subcomponent` value outside MSH-1 and MSH-
 
 ###### Parameters
 
-- `options.delimiters` (optional) — Override delimiters. If omitted, the plugin reads them from `file.data.delimiters` (set by `@glion/annotate-delimiters`), or else from MSH-1 and MSH-2, with the HL7 standard (`| ^ ~ & \`) for any they do not declare.
+- `options.delimiters` (optional) — Override delimiters. If omitted, the plugin reads them from MSH-1 and MSH-2; without a message header segment, from the `delimiters` of the processor's `settings`, or else it uses `|^~\&`. A delimiter MSH-2 does not declare is absent.
 
 ###### Returns
 
@@ -67,7 +67,7 @@ Nothing (`undefined`). Mutates the AST in-place. Throws `EscapeSequenceError`, e
 
 An escape sequence already in a value, such as `\E\`, `\H\`, `\.br\`, or `\XC3A9\`, is written as it is, and so is an escape character that starts no sequence, such as the one in `C:\temp`. An escape character whose closing one, or the end of the value when it has none, comes after a separator or a control character is written `\E\`, so that it does not pair with their escape sequences: `a\b|c` is written `a\E\b\F\c`. A data escape character is written `\E\` in the value, or `\X5C\` when `E` is a delimiter. A separator whose named code holds a delimiter, such as `|` when `F` is the component separator, is written as `\Xdd\`, the hexadecimal escape of its UTF-8 bytes.
 
-Delimiter resolution order: `options.delimiters` → `file.data.delimiters` (set by `@glion/annotate-delimiters`) → MSH-1 and MSH-2 → HL7 defaults.
+Delimiter resolution order: `options.delimiters` → MSH-1 and MSH-2 → the `delimiters` of the processor's `settings` → `|^~\&`.
 
 `@glion/decode-escapes` reads a value this plugin wrote back to itself when the value holds no escape character.
 

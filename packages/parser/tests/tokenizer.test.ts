@@ -9,7 +9,7 @@ import type { Token } from "../src/types";
 function toks(
   input: string,
   options?: TokenizerOptions,
-  delimiters = DEFAULT_DELIMITERS,
+  delimiters: Delimiters = DEFAULT_DELIMITERS,
   lineBreaks?: boolean
 ): Token[] {
   const t = new HL7v2Tokenizer(options);

@@ -24,7 +24,7 @@ Two modules hold rules that steps 2 and 3 share, so that both read the message t
 
 The message `MSH|^~\&|A^B` + CR LF + `PID|1` + CR, 20 characters long.
 
-**Preprocessing.** `detectDelimiters` reads the message header. MSH-1 is `|`, so the field delimiter is `|`. MSH-2 holds `^~\&`, so the component, repetition, escape, and subcomponent delimiters are `^`, `~`, `\`, and `&`. The message header does not declare the segment terminator: HL7v2 fixes it as a carriage return.
+**Preprocessing.** `detectDelimiters` reads the message header. MSH-1 is `|`, so the field separator is `|`. MSH-2 holds `^~\&`, so the component separator, repetition separator, escape character, and subcomponent separator are `^`, `~`, `\`, and `&`. The message header does not declare the segment terminator: HL7v2 fixes it as a carriage return.
 
 **Tokenizing.** The tokenizer reads 14 tokens:
 
@@ -81,14 +81,14 @@ The tokenizer emits the header as five tokens, read once in `reset()`, because i
 1. **A segment terminator** ends the segment.
 2. **The field separator** opens a field.
 3. **A Segment ID**, at the start of a segment only: the text up to the first field separator or segment terminator, whatever it holds. `^A|B` opens with the Segment ID `^A`, and `Z\R\Z|B` with `Z\R\Z`, not decoded. A segment starts at the start of the message and after each segment terminator.
-4. **The repetition, component, and subcomponent delimiters.**
+4. **The repetition, component, and subcomponent separators.**
 5. **Text**, up to the next delimiter or segment terminator.
 
 The order matters. The segment terminator comes first, so a line break is never read as text. The field separator comes before the Segment ID, so a line that starts with `|` has an empty Segment ID. The Segment ID comes before the other delimiters, so `^` at the start of a line is part of a Segment ID, not a component separator.
 
 ### Escape sequences
 
-A text token whose characters include the escape delimiter is read with `escapes.read` from `@glion/utils`, unless `decodeEscapes: false` is given. It decodes the separator escapes and the hexadecimal escapes of control characters, and keeps every other sequence as written: `PID|a\T\b\E\c` gives the value `a&b\E\c`. Two kinds of text are never decoded:
+A text token whose characters include the escape character is read with `escapes.read` from `@glion/utils`, unless `decodeEscapes: false` is given. It decodes the separator escapes and the hexadecimal escapes of control characters, and keeps every other sequence as written: `PID|a\T\b\E\c` gives the value `a&b\E\c`. Two kinds of text are never decoded:
 
 - a Segment ID, which rule 3 reads without decoding;
 - MSH-2, which holds the encoding characters as written. The tokenizer decodes text only from the offset MSH-2 ends at, so the tail of a long MSH-2, `\F\` in `MSH|^~\&\F\|a`, is not decoded either.

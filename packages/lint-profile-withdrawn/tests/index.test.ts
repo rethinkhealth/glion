@@ -1,7 +1,7 @@
 import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileDatatypes } from "@glion/annotate-profile-datatypes";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
-import type { Root, Segment } from "@glion/ast";
+import type { Field, Root, Segment } from "@glion/ast";
 import { c, f, g, m, r, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
@@ -103,6 +103,34 @@ describe("hl7v2LintWithdrawn", () => {
         parseHL7v2(
           "MSHXE~\\&XSNDXFACXRCVXRFACX20241201XXADTEA01EADT_A01XMSG001XPX2.7\rAL1X1XXPCNXXX2024\tb\r"
         )
+      );
+
+      expect(rest).toEqual([]);
+      expect(message?.message).toBe(
+        "The data element has a value; it is withdrawn in v2.7 and must be empty."
+      );
+      expect(message?.actual).toBeUndefined();
+    });
+
+    it("passes on an error that is not about the delimiters, for a tree HL7v2 does not allow", async () => {
+      const broken = {
+        children: [{ type: "field-repetition" }],
+        type: "field",
+      } as Field;
+      const [message, ...rest] = await run(
+        m(msh("2.7"), s("AL1", f("1"), f(), f("PCN"), f(), f(), broken))
+      );
+
+      expect(rest).toEqual([]);
+      expect(message?.fatal).toBe(false);
+      expect(message?.message).toMatch(/^Cannot read properties of undefined/);
+    });
+
+    it("reports the field without its text when its message declares no separator to write it with", async () => {
+      const header = msh("2.7");
+      header.children[1] = f("^~\\");
+      const [message, ...rest] = await run(
+        m(header, s("AL1", f("1"), f(), f("PCN"), f(), f(), f(c("a", "b"))))
       );
 
       expect(rest).toEqual([]);

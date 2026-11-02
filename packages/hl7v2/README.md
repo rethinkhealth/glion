@@ -60,14 +60,12 @@ The syntax tree produced by `parseHL7v2` is defined in [`@glion/ast`](../ast/). 
 ```ts
 import { unified } from "unified";
 import { hl7v2Parser } from "@glion/parser";
-import { hl7v2AnnotateDelimiters } from "@glion/annotate-delimiters";
 import hl7v2PresetLintRecommended from "@glion/preset-lint-recommended";
 import hl7v2PresetLintProfileRecommended from "@glion/preset-lint-profile-recommended";
 import { hl7v2Jsonify } from "@glion/jsonify";
 
 export const parseHL7v2 = unified()
   .use(hl7v2Parser)
-  .use(hl7v2AnnotateDelimiters)
   .use(hl7v2PresetLintRecommended)
   .use(hl7v2PresetLintProfileRecommended)
   .use(hl7v2Jsonify)
@@ -77,7 +75,6 @@ export const parseHL7v2 = unified()
 | Stage                               | Package                                  | What it contributes                                                                                |
 | ----------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `hl7v2Parser`                       | `@glion/parser`                          | Tokenizes HL7v2 text into a `Root` AST following the `@glion/ast` spec, decoding escape sequences. |
-| `hl7v2AnnotateDelimiters`           | `@glion/annotate-delimiters`             | Resolves delimiters from MSH-1/MSH-2 and stores them on `file.data.delimiters`.                    |
 | `hl7v2PresetLintRecommended`        | `@glion/preset-lint-recommended`         | Applies the general lint rule set (structural checks, required segments, version).                 |
 | `hl7v2PresetLintProfileRecommended` | `@glion/preset-lint-profile-recommended` | Applies profile-aware lint rules (field definitions, datatypes, table values).                     |
 | `hl7v2Jsonify`                      | `@glion/jsonify`                         | Compiles the transformed tree to the simplified JSON representation.                               |

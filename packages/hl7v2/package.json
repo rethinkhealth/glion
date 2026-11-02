@@ -50,7 +50,6 @@
     "unified": "11.0.5"
   },
   "devDependencies": {
-    "@glion/annotate-delimiters": "workspace:*",
     "@glion/check-readme": "workspace:*",
     "@glion/testing": "workspace:*",
     "@glion/tsconfig": "workspace:*",

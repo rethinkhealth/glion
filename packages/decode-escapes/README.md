@@ -57,7 +57,7 @@ Reads the escape sequences of every `subcomponent` value outside MSH-1 and MSH-2
 
 ###### Parameters
 
-- `options.delimiters` (optional) — Override delimiters. If omitted, the plugin reads them from `file.data.delimiters` (set by `@glion/annotate-delimiters`), or else from MSH-1 and MSH-2, with the HL7 standard (`| ^ ~ & \`) for any they do not declare.
+- `options.delimiters` (optional) — Override delimiters. If omitted, the plugin reads them from MSH-1 and MSH-2; without a message header segment, from the `delimiters` of the processor's `settings`, or else it uses `|^~\&`. A delimiter MSH-2 does not declare is absent.
 
 ###### Returns
 
@@ -74,7 +74,7 @@ Nothing (`undefined`). Mutates the AST in-place.
 
 Kept as written: `\E\`, `\P\`, `\H\`, `\N\`, every formatting command such as `\.br\` or `\.sp 2\`, any other `\X…\` such as `\XC3A9\`, `\Z…\`, `\C…\`, `\M…\`, and a code HL7v2 does not define. A separator whose named code holds a delimiter is read from its `\Xdd\`.
 
-Delimiter resolution order: `options.delimiters` → `file.data.delimiters` (set by `@glion/annotate-delimiters`) → MSH-1 and MSH-2 → HL7 defaults.
+Delimiter resolution order: `options.delimiters` → MSH-1 and MSH-2 → the `delimiters` of the processor's `settings` → `|^~\&`.
 
 ## See also
 

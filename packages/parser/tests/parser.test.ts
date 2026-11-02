@@ -5,8 +5,10 @@ import type {
   Root,
   Segment,
 } from "@glion/ast";
+import { DEFAULT_DELIMITERS } from "@glion/utils";
+import { unified } from "unified";
 
-import { parseHL7v2 } from "../src/parser";
+import hl7v2Parser, { parseHL7v2 } from "../src/parser";
 import type { ParseOptions } from "../src/types";
 
 /**
@@ -111,7 +113,7 @@ describe("parser", () => {
       expect(root).toMatchSnapshot(); // for control
     });
 
-    it("creates multiple fields with field delimiters", () => {
+    it("creates multiple fields with field separators", () => {
       const input = "PID|1|2|3";
       const root = parseHL7v2(input);
       const seg = root.children[0] as Segment;
@@ -298,7 +300,7 @@ describe("parser", () => {
       expect(root).toMatchSnapshot(); // for control
     });
 
-    it("keeps trailing empty repetition when delimiter ends the field", () => {
+    it("keeps trailing empty repetition when a separator ends the field", () => {
       const input = "OBX|A~";
       const root = parseHL7v2(input);
       const seg = root.children[0] as Segment;
@@ -466,7 +468,7 @@ describe("parser", () => {
       expect(root).toMatchSnapshot(); // for control
     });
 
-    it("keeps trailing empty component when delimiter ends the field", () => {
+    it("keeps trailing empty component when a separator ends the field", () => {
       const input = "PID|Last^";
       const root = parseHL7v2(input);
       const seg = root.children[0] as Segment;
@@ -548,7 +550,7 @@ describe("parser", () => {
       expect(root).toMatchSnapshot(); // for control
     });
 
-    it("keeps trailing empty subcomponent when delimiter ends the field", () => {
+    it("keeps trailing empty subcomponent when a separator ends the field", () => {
       const input = "PID|ID&";
       const root = parseHL7v2(input);
       const seg = root.children[0] as Segment;
@@ -933,5 +935,16 @@ describe("line breaks off", () => {
 
     expect(tree.children).toHaveLength(1);
     expect((tree.children[0] as Segment).terminator).toBe("");
+  });
+});
+
+describe("hl7v2Parser plugin", () => {
+  it("reads a message without a message header segment with the delimiters of the processor's settings", () => {
+    const tree = unified()
+      .data("settings", { delimiters: { ...DEFAULT_DELIMITERS, field: "*" } })
+      .use(hl7v2Parser)
+      .parse("PID*1*a");
+
+    expect((tree.children[0] as Segment).children).toHaveLength(2);
   });
 });

@@ -1,6 +1,6 @@
 import type { Delimiters } from "@glion/ast";
 
-import { EscapeSequenceError } from "./errors";
+import { EscapeSequenceError, MissingEscapeCharacterError } from "./errors";
 
 // `escapes.read` and `escapes.write` change only the characters a value
 // cannot hold as they are, and leave everything else as written. With the
@@ -36,9 +36,10 @@ export interface Escapes {
    * {@link Escapes.write} writes for it. Leaves every other escape sequence as
    * it is written: `\E\`, `\P\`, `\H\`, `\N\`, a formatting command such as
    * `\.br\`, any other `\X…\`, `\Z…\`, `\C…\`, `\M…\`, an unknown code, and an
-   * escape character without a closing one.
+   * escape character without a closing one. With no escape character, `text`
+   * is the value.
    *
-   * Idempotent. `d` MUST hold five distinct characters.
+   * Idempotent. The delimiters `d` holds MUST be distinct characters.
    *
    * @param text - The value as it is on the wire.
    * @param d - The delimiters of the message.
@@ -62,13 +63,17 @@ export interface Escapes {
    *
    * The text holds no separator and no character below U+0020. Idempotent.
    * For every text `w` that holds no separator and no character below U+0020,
-   * `write(read(w, d), d)` is `w`. `d` MUST hold five distinct characters.
+   * `write(read(w, d), d)` is `w`. The delimiters `d` holds MUST be distinct
+   * characters.
    *
    * @param value - The value to write.
    * @param d - The delimiters of the message.
    * @returns The text on the wire.
    * @throws {EscapeSequenceError} When a character must be escaped and every
    *   escape code that writes it holds a delimiter.
+   * @throws {MissingEscapeCharacterError} When `d` has no escape character and
+   *   the value holds a separator or a line break. Without an escape character,
+   *   every other character is written as it is.
    */
   write(value: string, d: Delimiters): string;
 }
@@ -80,8 +85,12 @@ const REGEXP_SYNTAX = /[.*+?^${}()|[\]\\]/g;
 
 /** Reads and writes the characters a value cannot hold as they are. */
 export const escapes: Escapes = {
-  read: (text, d) => read(text, d.escape, tableFor(d)),
-  write: (value, d) => write(value, d.escape, tableFor(d)),
+  read: (text, d) =>
+    d.escape === undefined ? text : read(text, d.escape, tableFor(d)),
+  write: (value, d) =>
+    d.escape === undefined
+      ? writeWithoutEscapeCharacter(value, d)
+      : write(value, d.escape, tableFor(d)),
 };
 
 // ## Reading
@@ -165,6 +174,28 @@ function dataEscapes(
   return data;
 }
 
+/**
+ * `value`, as it is: without an escape character, only a separator and a line
+ * break change what the text reads as.
+ *
+ * @throws {MissingEscapeCharacterError} When it holds one.
+ */
+function writeWithoutEscapeCharacter(value: string, d: Delimiters): string {
+  for (const ch of value) {
+    if (
+      ch === d.field ||
+      ch === d.component ||
+      ch === d.repetition ||
+      ch === d.subcomponent ||
+      ch === "\r" ||
+      ch === "\n"
+    ) {
+      throw new MissingEscapeCharacterError(ch, d);
+    }
+  }
+  return value;
+}
+
 // ## The table
 //
 // Which characters have an escape sequence, and which code writes each, depends
@@ -222,13 +253,17 @@ function buildTable(d: Delimiters): EscapeTable {
     characters,
     codes,
     delimiters: { ...d },
-    escapeCode: namedOrHexCode(d.escape, "E", d),
+    escapeCode:
+      d.escape === undefined ? undefined : namedOrHexCode(d.escape, "E", d),
     escapeSequences: new RegExp(
-      `${escapeRegExp(d.escape)}([\\s\\S]*?)${escapeRegExp(d.escape)}`,
+      `${escapeRegExp(d.escape ?? "")}([\\s\\S]*?)${escapeRegExp(d.escape ?? "")}`,
       "g"
     ),
     holdsCharacter: new RegExp(anyOf([...codes.keys()])),
-    writtenCharacters: new RegExp(anyOf([...codes.keys(), d.escape]), "g"),
+    writtenCharacters: new RegExp(
+      anyOf([...codes.keys(), d.escape ?? ""]),
+      "g"
+    ),
   };
 }
 
@@ -249,12 +284,17 @@ export function escapeRegExp(text: string): string {
 function separatorsAndControlCharacters(
   d: Delimiters
 ): ReadonlyMap<string, string | undefined> {
-  const codes = new Map<string, string | undefined>([
-    [d.field, namedOrHexCode(d.field, "F", d)],
-    [d.component, namedOrHexCode(d.component, "S", d)],
-    [d.repetition, namedOrHexCode(d.repetition, "R", d)],
-    [d.subcomponent, namedOrHexCode(d.subcomponent, "T", d)],
-  ]);
+  const codes = new Map<string, string | undefined>();
+  for (const [ch, named] of [
+    [d.field, "F"],
+    [d.component, "S"],
+    [d.repetition, "R"],
+    [d.subcomponent, "T"],
+  ] as const) {
+    if (ch !== undefined) {
+      codes.set(ch, namedOrHexCode(ch, named, d));
+    }
+  }
   for (let point = 0; point < CONTROL_END; point += 1) {
     const ch = String.fromCodePoint(point);
     if (ch !== d.escape && !codes.has(ch)) {
@@ -302,6 +342,6 @@ export function utf8Hex(ch: string): string {
 
 function holdsDelimiter(code: string, d: Delimiters): boolean {
   return [d.field, d.component, d.repetition, d.escape, d.subcomponent].some(
-    (delimiter) => code.includes(delimiter)
+    (delimiter) => delimiter !== undefined && code.includes(delimiter)
   );
 }

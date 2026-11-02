@@ -1,46 +1,71 @@
-import type { Delimiters, Root } from "@glion/ast";
-import { DEFAULT_DELIMITERS } from "@glion/utils";
+import type { Delimiters, Group, Root, Segment } from "@glion/ast";
+import { DEFAULT_DELIMITERS, ENCODING_CHARACTERS } from "@glion/utils";
 
-import { value } from "./value";
-
-/** Keys of MSH-2 encoding characters in positional order. */
-const MSH2_KEYS = [
-  "component",
-  "repetition",
-  "escape",
-  "subcomponent",
-] as const;
+const firstSegment = (parent: Root | Group): Segment | undefined => {
+  for (const child of parent.children) {
+    if (child.type === "group") {
+      const segment = firstSegment(child);
+      if (segment) {
+        return segment;
+      }
+    } else if (
+      child.type === "segment" &&
+      (child.name !== "" || child.children.length > 0)
+    ) {
+      return child;
+    }
+  }
+  return undefined;
+};
 
 /**
- * Extract delimiters from a Root AST by reading MSH-1 and MSH-2.
+ * The message header segment `root` opens with, after any empty lines, or
+ * `undefined` when it opens with another segment.
  *
- * MSH-1 contains the field separator character (e.g., `|`).
- * MSH-2 contains up to 4 encoding characters: component, repetition,
- * escape, and subcomponent (e.g., `^~\&`).
- *
- * Falls back to DEFAULT_DELIMITERS for any values that cannot be derived.
- *
- * @param root - The Root AST node to extract delimiters from.
- * @returns The resolved Delimiters object.
+ * @param root - The message, or the segment group, to read.
+ * @returns The message header segment.
  */
-export function delimiters(root: Root): Delimiters {
-  const result = { ...DEFAULT_DELIMITERS };
+export function msh(root: Root | Group): Segment | undefined {
+  const first = firstSegment(root);
+  return first?.name === "MSH" ? first : undefined;
+}
 
-  // MSH-1: field separator (single character)
-  const msh1 = value(root, "MSH.1")?.value;
-  if (msh1 && msh1.length === 1) {
-    result.field = msh1;
+/**
+ * The delimiters of `root`, as `@glion/parser` reads a message with them.
+ *
+ * MSH-1 is the field separator, and MSH-2's encoding characters are the
+ * component separator, repetition separator, escape character, and subcomponent
+ * separator, in that order: `MSH|^~\&` declares all five. A delimiter MSH-2 is
+ * too short to declare is absent: `^~&` declares no subcomponent separator. The
+ * field separator is `|` when MSH-1 is not one character. A message that does
+ * not open with a message header segment that has fields, as
+ * {@link msh} reads it, has the delimiters `fallback`, over
+ * `DEFAULT_DELIMITERS`.
+ *
+ * @param root - The message to read.
+ * @param fallback - The delimiters of a message without a message header.
+ * @returns The delimiters.
+ */
+export function delimiters(
+  root: Root,
+  fallback?: Partial<Delimiters>
+): Delimiters {
+  const header = msh(root);
+  if (!header?.children.length) {
+    return { ...DEFAULT_DELIMITERS, ...fallback };
   }
 
-  // MSH-2: encoding characters (up to 4 positional chars)
-  const msh2 = value(root, "MSH.2")?.value;
-  if (msh2) {
-    const chars = [...msh2];
-    for (const [i, key] of MSH2_KEYS.entries()) {
-      const ch = chars[i];
-      if (ch) {
-        result[key] = ch;
-      }
+  const [msh1, msh2] = header.children.map(
+    (field) => field.children[0]?.children[0]?.children[0]?.value
+  );
+  const result: Delimiters = {
+    field: msh1?.length === 1 ? msh1 : DEFAULT_DELIMITERS.field,
+  };
+
+  for (const [i, key] of ENCODING_CHARACTERS.entries()) {
+    const ch = msh2?.charAt(i);
+    if (ch) {
+      result[key] = ch;
     }
   }
 
