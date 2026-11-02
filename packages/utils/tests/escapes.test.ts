@@ -1,9 +1,15 @@
-import type { Delimiters } from "@glion/ast";
+import type { Delimiters as DeclaredDelimiters } from "@glion/ast";
 import fc from "fast-check";
 
 import { DEFAULT_DELIMITERS } from "../src/constants";
-import { EscapeSequenceError } from "../src/errors";
+import {
+  EscapeSequenceError,
+  MissingEscapeCharacterError,
+} from "../src/errors";
 import { escapes } from "../src/escapes";
+
+// The properties below draw all five delimiters.
+type Delimiters = Required<DeclaredDelimiters>;
 
 const CUSTOM_DELIMITERS: Delimiters = {
   component: "$",
@@ -658,5 +664,102 @@ describe("escapes.write", () => {
         ],
       }
     );
+  });
+});
+
+// HL7v2 v2.5.1 §2.5.4: the escape character may be omitted when the message
+// has no escape sequences, and the subcomponent separator when it has no
+// subcomponents. A delimiter the message does not declare is `undefined`.
+describe("escapes with a delimiter the message does not declare", () => {
+  const noEscape: DeclaredDelimiters = {
+    component: "^",
+    field: "|",
+    repetition: "~",
+  };
+  const noSubcomponent: DeclaredDelimiters = {
+    component: "^",
+    escape: "&",
+    field: "|",
+    repetition: "~",
+  };
+
+  it("reads a value as it is when the message declares no escape character", () => {
+    expect(escapes.read("a\\F\\b", noEscape)).toBe("a\\F\\b");
+  });
+
+  it("writes a value as it is when it holds no separator or line break, and the message declares no escape character", () => {
+    expect(escapes.write("Smith\\Jones&Co", noEscape)).toBe("Smith\\Jones&Co");
+  });
+
+  it("refuses a separator when the message declares no escape character to write it with", () => {
+    expect(() => escapes.write("a|b", noEscape)).toThrow(
+      MissingEscapeCharacterError
+    );
+  });
+
+  it("refuses every separator when the message declares no escape character to write it with", () => {
+    const d = { ...noEscape, subcomponent: "&" };
+    for (const value of ["a|b", "a^b", "a~b", "a&b"]) {
+      expect(() => escapes.write(value, d)).toThrow(
+        MissingEscapeCharacterError
+      );
+    }
+  });
+
+  it("refuses a line break when the message declares no escape character to write it with", () => {
+    for (const value of ["a\rb", "a\nb"]) {
+      expect(() => escapes.write(value, noEscape)).toThrow(
+        MissingEscapeCharacterError
+      );
+    }
+  });
+
+  it("writes any other control character as it is when the message declares no escape character", () => {
+    expect(escapes.write("a\tb", noEscape)).toBe("a\tb");
+  });
+
+  it("reports the character it cannot write, and that MSH-2 declares the escape character", () => {
+    const write = () => escapes.write("a~b", noEscape);
+
+    expect(write).toThrow(EscapeSequenceError);
+    expect(write).toThrow(
+      expect.objectContaining({
+        character: "~",
+        delimiters: noEscape,
+        message:
+          "The value holds a character that must be written as an escape sequence, and the message declares no escape character. MSH-2 declares the escape character as its third encoding character.",
+        name: "MissingEscapeCharacterError",
+      })
+    );
+  });
+
+  it("writes `&` as it is when the message declares it as the escape character and no subcomponent separator", () => {
+    expect(escapes.write("a&b", noSubcomponent)).toBe("a&b");
+    expect(escapes.write("a|b", noSubcomponent)).toBe("a&F&b");
+  });
+
+  it("reads `\\T\\` as it is when the message declares no subcomponent separator", () => {
+    expect(escapes.read("a&T&b&F&c", noSubcomponent)).toBe("a&T&b|c");
+  });
+
+  it("does not read a missing delimiter as the text `undefined`", () => {
+    expect(escapes.write("undefined", noEscape)).toBe("undefined");
+    expect(escapes.write("a|undefined", noSubcomponent)).toBe("a&F&undefined");
+  });
+
+  it("keeps two sets that differ in which delimiter is missing apart", () => {
+    const noComponent: DeclaredDelimiters = {
+      escape: "\\",
+      field: "|",
+      repetition: "^",
+    };
+    const noRepetition: DeclaredDelimiters = {
+      component: "^",
+      escape: "\\",
+      field: "|",
+    };
+
+    expect(escapes.write("a^b", noComponent)).toBe("a\\R\\b");
+    expect(escapes.write("a^b", noRepetition)).toBe("a\\S\\b");
   });
 });

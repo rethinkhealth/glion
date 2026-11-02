@@ -12,14 +12,17 @@ declare module "vfile" {
 }
 
 /**
- * HL7v2 Delimiters type
+ * The delimiters of a message: MSH-1 and the encoding characters of MSH-2.
+ *
+ * A delimiter MSH-2 does not declare is `undefined`, and the message has no
+ * such delimiter.
  */
 export interface Delimiters {
   field: string;
-  component: string;
-  subcomponent: string;
-  repetition: string;
-  escape: string;
+  component?: string | undefined;
+  subcomponent?: string | undefined;
+  repetition?: string | undefined;
+  escape?: string | undefined;
 }
 
 // ## Abstract nodes

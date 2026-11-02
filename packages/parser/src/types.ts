@@ -32,9 +32,8 @@ export interface ParseOptions {
   decodeEscapes?: boolean;
   /**
    * Whether a line feed, or a carriage return and a line feed, also ends a
-   * segment (`true`, the default), or only a carriage return and the segment
-   * delimiter do (`false`), as HL7v2 Chapter 2 requires. With `false`, a line
-   * feed is data.
+   * segment (`true`, the default), or only a carriage return does (`false`), as
+   * HL7v2 Chapter 2 requires. With `false`, a line feed is data.
    */
   lineBreaks?: boolean;
   /**
@@ -76,7 +75,7 @@ export interface Token {
 
 /**
  * The kind of a token: a segment terminator (`SEGMENT_END`), a field,
- * repetition, component, or subcomponent delimiter, or a run of text (`TEXT`).
+ * repetition, component, or subcomponent separators, or a run of text (`TEXT`).
  */
 export type TokenType =
   | "SEGMENT_END"

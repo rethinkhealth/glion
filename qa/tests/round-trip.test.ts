@@ -8,7 +8,6 @@
  * Uses fixed fixtures and fuzz-driven verification with the same arbitraries
  * from the crash resilience suite (QR3).
  */
-import { hl7v2AnnotateDelimiters } from "@glion/annotate-delimiters";
 import { f as field, m as message, s as segment } from "@glion/builder";
 import { hl7v2Parser } from "@glion/parser";
 import { hl7v2ToHl7v2, toHl7v2 } from "@glion/to-hl7v2";
@@ -36,7 +35,6 @@ import { discoverFixtures, readFixture } from "../src/fixtures";
  */
 const roundTripProcessor = unified()
   .use(hl7v2Parser)
-  .use(hl7v2AnnotateDelimiters)
   .use(hl7v2ToHl7v2)
   .freeze();
 
@@ -157,7 +155,7 @@ describe("QR4: round-trip data fidelity", () => {
     // the empty lines it was read with, a last segment with nothing after it
     // included (#1158).
     //
-    // Mutant: `to-hl7v2` writes the segment delimiter after every segment.
+    // Mutant: `to-hl7v2` writes the segment terminator after every segment.
     // Fails on `"MSH|^~\\&|||\nAAA|\r"`.
     //
     // Mutant: the parser records no terminator on a segment still open at the
@@ -427,7 +425,7 @@ describe("QR4: content round-trips through serialize and parse", () => {
             { maxLength: 5, minLength: 5 }
           )
           // The content is then built for those delimiters, one unit at a
-          // time from a separator, the segment delimiter, or any grapheme, so
+          // time from a separator, the segment terminator, or any grapheme, so
           // that most values hold characters the serializer must escape. The
           // escape character, `delimiters[3]`, is left out.
           .chain((delimiters) =>

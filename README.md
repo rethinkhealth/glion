@@ -87,7 +87,6 @@ The parser, plugins, and utilities that process HL7v2 messages as structured dat
 
 Composable plugins that annotate, enrich, and transform the AST.
 
-- **[@glion/annotate-delimiters][glion-annotate-delimiters]** — annotate `file.data` with the HL7v2 delimiters derived from `MSH-1` and `MSH-2`.
 - **[@glion/annotate-profile-context][glion-annotate-profile-context]** — load and attach HL7v2 profile context to `file.data` for downstream plugins.
 - **[@glion/annotate-profile-segments][glion-annotate-profile-segments]** — annotate segment nodes with profile metadata.
 - **[@glion/annotate-profile-fields][glion-annotate-profile-fields]** — annotate field nodes with profile metadata.
@@ -211,7 +210,6 @@ HL7® and Health Level Seven® are registered trademarks of Health Level Seven I
 
 [github-unified]: https://github.com/unifiedjs/unified
 [glion-ack]: https://github.com/rethinkhealth/glion/tree/main/packages/ack#readme
-[glion-annotate-delimiters]: https://github.com/rethinkhealth/glion/tree/main/packages/annotate-delimiters#readme
 [glion-annotate-profile-context]: https://github.com/rethinkhealth/glion/tree/main/packages/annotate-profile-context#readme
 [glion-annotate-profile-datatypes]: https://github.com/rethinkhealth/glion/tree/main/packages/annotate-profile-datatypes#readme
 [glion-annotate-profile-fields]: https://github.com/rethinkhealth/glion/tree/main/packages/annotate-profile-fields#readme

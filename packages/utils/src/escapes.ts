@@ -1,6 +1,6 @@
 import type { Delimiters } from "@glion/ast";
 
-import { EscapeSequenceError } from "./errors";
+import { EscapeSequenceError, MissingEscapeCharacterError } from "./errors";
 
 // `escapes.read` and `escapes.write` change only the characters a value
 // cannot hold as they are, and leave everything else as written. With the
@@ -36,9 +36,10 @@ export interface Escapes {
    * {@link Escapes.write} writes for it. Leaves every other escape sequence as
    * it is written: `\E\`, `\P\`, `\H\`, `\N\`, a formatting command such as
    * `\.br\`, any other `\X…\`, `\Z…\`, `\C…\`, `\M…\`, an unknown code, and an
-   * escape character without a closing one.
+   * escape character without a closing one. With no escape character, `text`
+   * is the value.
    *
-   * Idempotent. `d` MUST hold five distinct characters.
+   * Idempotent. The delimiters `d` holds MUST be distinct characters.
    *
    * @param text - The value as it is on the wire.
    * @param d - The delimiters of the message.
@@ -62,13 +63,17 @@ export interface Escapes {
    *
    * The text holds no separator and no character below U+0020. Idempotent.
    * For every text `w` that holds no separator and no character below U+0020,
-   * `write(read(w, d), d)` is `w`. `d` MUST hold five distinct characters.
+   * `write(read(w, d), d)` is `w`. The delimiters `d` holds MUST be distinct
+   * characters.
    *
    * @param value - The value to write.
    * @param d - The delimiters of the message.
    * @returns The text on the wire.
    * @throws {EscapeSequenceError} When a character must be escaped and every
    *   escape code that writes it holds a delimiter.
+   * @throws {MissingEscapeCharacterError} When `d` has no escape character and
+   *   the value holds a separator or a line break. Without an escape character,
+   *   every other character is written as it is.
    */
   write(value: string, d: Delimiters): string;
 }
@@ -117,12 +122,17 @@ const NO_POSITIONS: ReadonlySet<number> = new Set();
 const separatorsAndControlCharacters = (
   d: Delimiters
 ): ReadonlyMap<string, string | undefined> => {
-  const codes = new Map<string, string | undefined>([
-    [d.field, namedOrHexCode(d.field, "F", d)],
-    [d.component, namedOrHexCode(d.component, "S", d)],
-    [d.repetition, namedOrHexCode(d.repetition, "R", d)],
-    [d.subcomponent, namedOrHexCode(d.subcomponent, "T", d)],
-  ]);
+  const codes = new Map<string, string | undefined>();
+  for (const [ch, named] of [
+    [d.field, "F"],
+    [d.component, "S"],
+    [d.repetition, "R"],
+    [d.subcomponent, "T"],
+  ] as const) {
+    if (ch !== undefined) {
+      codes.set(ch, namedOrHexCode(ch, named, d));
+    }
+  }
   for (let point = 0; point < CONTROL_END; point += 1) {
     const ch = String.fromCodePoint(point);
     if (ch !== d.escape && !codes.has(ch)) {
@@ -145,7 +155,10 @@ const tableFor = (d: Delimiters): EscapeTable => {
 /** Reads and writes the characters a value cannot hold as they are. */
 export const escapes: Escapes = {
   read: (text, d) => read(text, d, tableFor(d)),
-  write: (value, d) => write(value, d, tableFor(d), refuse),
+  write: (value, d) =>
+    d.escape === undefined
+      ? writeWithoutEscapeCharacter(value, d)
+      : write(value, d, d.escape, tableFor(d), refuse),
 };
 
 /**
@@ -157,7 +170,10 @@ export const escapes: Escapes = {
  * Never throws.
  */
 export function escapedLength(value: string, d: Delimiters): number {
-  const text = write(value, d, tableFor(d), countAsOne);
+  if (d.escape === undefined) {
+    return value.length;
+  }
+  const text = write(value, d, d.escape, tableFor(d), countAsOne);
   const escapeCharacters = text.split(d.escape).length - 1;
   return text.length - 2 * Math.floor(escapeCharacters / 2);
 }
@@ -172,18 +188,25 @@ function buildTable(d: Delimiters): EscapeTable {
     }
     markAscii(ascii, ch, RULE_CHARACTER);
   }
-  markAscii(ascii, d.escape, ESCAPE_CHARACTER);
+  if (d.escape !== undefined) {
+    markAscii(ascii, d.escape, ESCAPE_CHARACTER);
+  }
   return {
     ascii,
     characters,
     codes,
     delimiters: { ...d },
-    escapeCode: namedOrHexCode(d.escape, "E", d),
+    escapeCode:
+      d.escape === undefined ? undefined : namedOrHexCode(d.escape, "E", d),
   };
 }
 
 function read(text: string, d: Delimiters, table: EscapeTable): string {
-  let start = text.indexOf(d.escape);
+  const { escape } = d;
+  if (escape === undefined) {
+    return text;
+  }
+  let start = text.indexOf(escape);
   if (start === -1) {
     return text;
   }
@@ -194,7 +217,7 @@ function read(text: string, d: Delimiters, table: EscapeTable): string {
   let copied = 0;
 
   while (start !== -1) {
-    const end = text.indexOf(d.escape, start + 1);
+    const end = text.indexOf(escape, start + 1);
     if (end === -1) {
       break;
     }
@@ -204,23 +227,25 @@ function read(text: string, d: Delimiters, table: EscapeTable): string {
       value += text.slice(copied, start) + ch;
       copied = end + 1;
     }
-    start = text.indexOf(d.escape, end + 1);
+    start = text.indexOf(escape, end + 1);
   }
 
   return value + text.slice(copied);
 }
 
 /**
- * The text `value` takes on the wire, with `unwritable` giving the code for a
- * character every escape code of which holds a delimiter.
+ * The text `value` takes on the wire with the escape character `escape`, with
+ * `unwritable` giving the code for a character every escape code of which
+ * holds a delimiter.
  */
 function write(
   value: string,
   d: Delimiters,
+  escape: string,
   table: EscapeTable,
   unwritable: (ch: string, d: Delimiters) => string
 ): string {
-  const data = dataEscapes(value, d, table);
+  const data = dataEscapes(value, escape, table);
   // `copied` marks where the run of characters not yet written starts; the
   // run is copied in one slice when an escape sequence follows it, or at the
   // end.
@@ -234,7 +259,7 @@ function write(
     }
     const ch = value.charAt(i);
     let code: string | undefined;
-    if (ch === d.escape) {
+    if (ch === escape) {
       if (!data.has(i)) {
         continue;
       }
@@ -248,14 +273,33 @@ function write(
     // With `X` and `S` both delimiters, `S` cannot be written: `\S\` holds
     // `S`, and every `\X53\` holds `X`.
     text +=
-      value.slice(copied, i) +
-      d.escape +
-      (code ?? unwritable(ch, d)) +
-      d.escape;
+      value.slice(copied, i) + escape + (code ?? unwritable(ch, d)) + escape;
     copied = i + 1;
   }
 
   return text + value.slice(copied);
+}
+
+/**
+ * `value`, as it is: without an escape character, only a separator and a line
+ * break change what the text reads as.
+ *
+ * @throws {MissingEscapeCharacterError} When it holds one.
+ */
+function writeWithoutEscapeCharacter(value: string, d: Delimiters): string {
+  for (const ch of value) {
+    if (
+      ch === d.field ||
+      ch === d.component ||
+      ch === d.repetition ||
+      ch === d.subcomponent ||
+      ch === "\r" ||
+      ch === "\n"
+    ) {
+      throw new MissingEscapeCharacterError(ch, d);
+    }
+  }
+  return value;
 }
 
 function refuse(ch: string, d: Delimiters): never {
@@ -274,21 +318,21 @@ function countAsOne(ch: string): string {
  */
 function dataEscapes(
   value: string,
-  d: Delimiters,
+  escape: string,
   table: EscapeTable
 ): ReadonlySet<number> {
-  let start = value.indexOf(d.escape);
+  let start = value.indexOf(escape);
   if (start === -1) {
     return NO_POSITIONS;
   }
   const data = new Set<number>();
   while (start !== -1) {
-    const end = value.indexOf(d.escape, start + 1);
+    const end = value.indexOf(escape, start + 1);
     const close = end === -1 ? value.length : end;
     if (holdsTableCharacter(value, start + 1, close, table)) {
       data.add(start).add(close);
     }
-    start = end === -1 ? -1 : value.indexOf(d.escape, end + 1);
+    start = end === -1 ? -1 : value.indexOf(escape, end + 1);
   }
   return data;
 }
@@ -342,11 +386,16 @@ function sameDelimiters(a: Delimiters, b: Delimiters): boolean {
 function holdsDelimiter(code: string, d: Delimiters): boolean {
   return (
     code.includes(d.field) ||
-    code.includes(d.component) ||
-    code.includes(d.repetition) ||
-    code.includes(d.subcomponent) ||
-    code.includes(d.escape)
+    holds(code, d.component) ||
+    holds(code, d.repetition) ||
+    holds(code, d.subcomponent) ||
+    holds(code, d.escape)
   );
+}
+
+/** Whether `code` holds `delimiter`, when the message has one. */
+function holds(code: string, delimiter: string | undefined): boolean {
+  return delimiter !== undefined && code.includes(delimiter);
 }
 
 function namedOrHexCode(

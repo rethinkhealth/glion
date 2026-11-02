@@ -1,4 +1,4 @@
-export { delimiters } from "./delimiters";
+export { delimiters, header } from "./delimiters";
 export { QueryError, QueryErrorCode } from "./errors";
 export { format } from "./format";
 export { matches } from "./matches";

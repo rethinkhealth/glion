@@ -164,12 +164,24 @@ visit(ast, "field", (node, ancestors) => {
 // select(root, format(node, ancestors)) returns node
 ```
 
-### `delimiters(root: Root): Delimiters`
+### `delimiters(root: Root, fallback?: Partial<Delimiters>): Delimiters`
 
-Returns the message's delimiters, read from MSH-1 and MSH-2, with the HL7v2 defaults for any character the message does not give.
+Returns the delimiters the message header declares: MSH-1 is the field separator, and MSH-2's encoding characters are the component separator, repetition separator, escape character, and subcomponent separator, in that order. A delimiter MSH-2 does not declare is absent. The field separator is `|` when MSH-1 is not one character. A message without a message header segment has the delimiters `|^~\&`.
 
 ```typescript
-delimiters(ast); // { field: "|", component: "^", repetition: "~", escape: "\\", subcomponent: "&", … }
+delimiters(ast); // MSH|^~\&  → { field: "|", component: "^", repetition: "~", escape: "\\", subcomponent: "&" }
+delimiters(ast); // MSH|^~&   → { field: "|", component: "^", repetition: "~", escape: "&" }
+```
+
+A message that does not open with a message header segment that has fields has the delimiters `fallback`, over `|^~\&`, as `@glion/parser` reads such a message with its settings.
+
+### `header(root: Root | Group): Segment | undefined`
+
+Returns the message header segment the message opens with, after any empty lines, or `undefined` when it opens with another segment.
+
+```typescript
+header(ast); // MSH|^~\&|A  → the MSH segment
+header(ast); // PID|1 then MSH|^~\&|A  → undefined
 ```
 
 ### `QueryError`

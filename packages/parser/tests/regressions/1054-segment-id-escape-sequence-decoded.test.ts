@@ -32,7 +32,7 @@ const valueOf = (text: string) => ({
 });
 
 describe("a Segment ID that holds the escape character", () => {
-  it("is read as it is written after the segment delimiter", () => {
+  it("is read as it is written after the segment terminator", () => {
     const root = parseHL7v2("MSH|^~\\&|a\rZ\\R\\Z|b");
 
     expect(root.children[1]).toMatchObject({

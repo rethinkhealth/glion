@@ -2,6 +2,14 @@
 // Delimiters
 // -------------
 
+/** The delimiters MSH-2 declares, in the order it declares them. */
+export const ENCODING_CHARACTERS = [
+  "component",
+  "repetition",
+  "escape",
+  "subcomponent",
+] as const;
+
 export const DEFAULT_DELIMITERS = {
   component: "^",
   escape: "\\",

@@ -12,7 +12,6 @@
  * that fit the bundled v2.5 event schemas, whose segments carry only a Set ID
  * so the field and component rules report inside the groups.
  */
-import { hl7v2AnnotateDelimiters } from "@glion/annotate-delimiters";
 import type { Group, Nodes, Root, Segment } from "@glion/ast";
 import { parseHL7v2 } from "@glion/parser";
 import hl7v2PresetAnnotateProfileRecommended from "@glion/preset-annotate-profile-recommended";
@@ -37,15 +36,11 @@ import { discoverFixtures, readFixture } from "../src/fixtures";
 const VERSION = "2.5";
 
 const lint = unified()
-  .use(hl7v2AnnotateDelimiters)
   .use(hl7v2PresetLintRecommended)
   .use(hl7v2PresetLintProfileRecommended)
   .freeze();
 
-const annotate = unified()
-  .use(hl7v2AnnotateDelimiters)
-  .use(hl7v2PresetAnnotateProfileRecommended)
-  .freeze();
+const annotate = unified().use(hl7v2PresetAnnotateProfileRecommended).freeze();
 
 const group = async (tree: Root): Promise<Root> => {
   await unified().use(hl7v2TransformProfileGroups).run(tree, new VFile());

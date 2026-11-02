@@ -169,7 +169,7 @@ Reads and writes the escape sequences of a subcomponent value. It changes only t
 
 #### `escapes.read(text, delimiters)`
 
-The value the wire text `text` stands for. Each escape sequence in the table is read as its character, written exactly as `escapes.write` writes it: `\X0D\` is a carriage return, and `\X0d\` stays as written. Every other escape sequence stays as it is written: `\E\`, `\P\`, `\H\`, `\N\`, a formatting command such as `\.br\`, any other `\X…\`, `\Z…\`, `\C…\`, `\M…\`, a code HL7v2 does not define, and an escape character without a closing one. Reading twice gives the same value as reading once.
+The value the wire text `text` stands for. Each escape sequence in the table is read as its character, written exactly as `escapes.write` writes it: `\X0D\` is a carriage return, and `\X0d\` stays as written. Every other escape sequence stays as it is written: `\E\`, `\P\`, `\H\`, `\N\`, a formatting command such as `\.br\`, any other `\X…\`, `\Z…\`, `\C…\`, `\M…\`, a code HL7v2 does not define, and an escape character without a closing one. With no escape character among the delimiters, the value is `text`. Reading twice gives the same value as reading once.
 
 - `text` (`string`) — the value as it is on the wire.
 - `delimiters` (`Delimiters`) — the delimiters of the message.
@@ -189,12 +189,12 @@ The text `value` takes on the wire. Each character in the table is written as it
 
 Escape sequences do not nest (HL7v2 §2.7.1). An escape character whose closing one, or the end of the value when it has none, comes after a separator or a control character would pair with the escape sequence written for that character, so it is written `\E\`, and so is the closing one: `a\b|c` is written `a\E\b\F\c`, and `C:\scans` followed by a tab is written `C:\E\scans\X09\`. Every separator and control character is read back; the escape character comes back as `\E\`.
 
-A data escape character is written `\E\` in the value, or `\X5C\` when `E` is a delimiter. The five delimiters must be distinct.
+A data escape character is written `\E\` in the value, or `\X5C\` when `E` is a delimiter. A delimiter the message does not declare is absent from `delimiters`, and its character is written as it is: with no subcomponent separator, `&` is data. The delimiters must be distinct characters.
 
 - `value` (`string`) — the value to write.
 - `delimiters` (`Delimiters`) — the delimiters of the message.
 
-Returns the text as a `string`. Throws `EscapeSequenceError` when a character must be escaped and every escape sequence that writes it holds a delimiter.
+Returns the text as a `string`. Throws `EscapeSequenceError` when a character must be escaped and every escape sequence that writes it holds a delimiter, and `MissingEscapeCharacterError` when a character must be escaped and `delimiters` has no escape character.
 
 ```typescript
 import { DEFAULT_DELIMITERS, escapes } from "@glion/utils";
@@ -223,9 +223,19 @@ const delimiters = {
 escapes.write("S", delimiters); // throws EscapeSequenceError
 ```
 
-### `DEFAULT_DELIMITERS` and `SEGMENT_TERMINATOR`
+### `MissingEscapeCharacterError`
 
-`DEFAULT_DELIMITERS` holds the delimiters MSH-1 and MSH-2 declare by default: `|` (field), `^` (component), `~` (repetition), `\` (escape), and `&` (subcomponent). `SEGMENT_TERMINATOR` is `\r`, the carriage return that ends every segment. HL7v2 fixes it, so it is not one of the delimiters a message declares.
+A subclass of `EscapeSequenceError`, thrown by `escapes.write` for a separator or a line break when `delimiters` has no escape character; every other character is written as it is. `character` holds the character and `delimiters` the delimiters it was written with.
+
+```typescript
+import { escapes } from "@glion/utils";
+
+escapes.write("a|b", { component: "^", field: "|", repetition: "~" }); // throws MissingEscapeCharacterError
+```
+
+### `DEFAULT_DELIMITERS`, `ENCODING_CHARACTERS`, and `SEGMENT_TERMINATOR`
+
+`DEFAULT_DELIMITERS` holds the delimiters HL7v2 recommends, which a message without a message header segment is read with: `|` (field), `^` (component), `~` (repetition), `\` (escape), and `&` (subcomponent). `SEGMENT_TERMINATOR` is `\r`, the carriage return that ends every segment. HL7v2 fixes it, so it is not one of the delimiters a message declares.
 
 ### Conformance utilities
 

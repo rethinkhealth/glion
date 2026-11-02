@@ -1,9 +1,8 @@
 import type { Delimiters, Root } from "@glion/ast";
-import { delimiters, select } from "@glion/util-query";
+import { delimiters, header } from "@glion/util-query";
 import { SKIP, visit } from "@glion/util-visit";
 import { escapes } from "@glion/utils";
-import type { Plugin } from "unified";
-import type { VFile } from "vfile";
+import type { Plugin, Processor } from "unified";
 
 export interface HL7v2DecodeOptions {
   delimiters?: Partial<Delimiters>;
@@ -19,28 +18,34 @@ export interface HL7v2DecodeOptions {
  * Delimiter resolution order:
  *
  * 1. `options.delimiters` (explicit override)
- * 2. `file.data.delimiters` (set by hl7v2-annotate-delimiters)
- * 3. MSH-1 and MSH-2 of the tree, and `DEFAULT_DELIMITERS` for any they do not
- *    declare
+ * 2. The delimiters MSH-1 and MSH-2 of the tree declare
+ * 3. Without a message header segment, the `delimiters` of the processor's
+ *    `settings`, or else `|^~\&`
  */
 export const hl7v2DecodeEscapes: Plugin<[HL7v2DecodeOptions?], Root, Root> =
-  (options) => (tree: Root, file: VFile) => {
-    const d = {
-      ...((file.data.delimiters as Delimiters | undefined) ?? delimiters(tree)),
-      ...options?.delimiters,
+  function hl7v2DecodeEscapes(this: Processor, options) {
+    return (tree: Root) => {
+      const settings = this.data("settings") as
+        | { delimiters?: Partial<Delimiters> }
+        | undefined;
+      const d = {
+        ...delimiters(tree, settings?.delimiters),
+        ...options?.delimiters,
+      };
+
+      const msh = header(tree);
+      const msh1 = msh?.children[0];
+      const msh2 = msh?.children[1];
+
+      visit(tree, (node) => {
+        if (node === msh1 || node === msh2) {
+          return SKIP;
+        }
+        if (node.type === "subcomponent" && node.value !== undefined) {
+          node.value = escapes.read(node.value, d);
+        }
+      });
+
+      return tree;
     };
-
-    const msh1 = select(tree, "MSH.1")?.node;
-    const msh2 = select(tree, "MSH.2")?.node;
-
-    visit(tree, (node) => {
-      if (node === msh1 || node === msh2) {
-        return SKIP;
-      }
-      if (node.type === "subcomponent" && node.value !== undefined) {
-        node.value = escapes.read(node.value, d);
-      }
-    });
-
-    return tree;
   };

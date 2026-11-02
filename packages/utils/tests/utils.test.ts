@@ -320,6 +320,12 @@ describe(getLength, () => {
       expect(getLength(sub("aSb^"), d)).toBe(4);
     });
 
+    it("counts every character as one when the message declares no escape character", () => {
+      const d = { component: "^", field: "|", repetition: "~" };
+
+      expect(getLength(sub("a\\E\\b\t"), d)).toBe(6);
+    });
+
     it("passes the delimiters to every child", () => {
       expect(
         getLength(comp(sub("12\\E\\3"), sub("a&b")), DEFAULT_DELIMITERS)
