@@ -181,6 +181,16 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(subValue(results)).toBe("a\\F\\b");
   });
 
+  it("writes subcomponents only, not a value on any other node", async () => {
+    const tree = m(s("PID", f("x")));
+    const other = { type: "comment", value: "a|b" };
+    tree.children.push(other as never);
+
+    await unified().use(hl7v2EncodeEscapes).run(tree);
+
+    expect(other.value).toBe("a|b");
+  });
+
   it("does not double-encode already-escaped values", async () => {
     const tree = m(s("PID", f("a\\F\\b|c")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);

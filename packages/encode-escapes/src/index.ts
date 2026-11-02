@@ -1,6 +1,6 @@
-import type { Delimiters, Nodes, Root } from "@glion/ast";
-import { delimiters, selectAll } from "@glion/util-query";
-import { visit } from "@glion/util-visit";
+import type { Delimiters, Root } from "@glion/ast";
+import { delimiters, select } from "@glion/util-query";
+import { SKIP, visit } from "@glion/util-visit";
 import { escapes } from "@glion/utils";
 import type { Plugin } from "unified";
 import type { VFile } from "vfile";
@@ -32,20 +32,16 @@ export const hl7v2EncodeEscapes: Plugin<[HL7v2EncodeOptions?], Root, Root> =
       ...options?.delimiters,
     };
 
-    const encodingCharacters = new Set<Nodes>(
-      [...selectAll(tree, "MSH.1"), ...selectAll(tree, "MSH.2")].map(
-        (match) => match.node
-      )
-    );
+    const msh1 = select(tree, "MSH.1")?.node;
+    const msh2 = select(tree, "MSH.2")?.node;
 
-    visit(tree, "subcomponent", (node, ancestors) => {
-      if (
-        node.value === undefined ||
-        ancestors.some((ancestor) => encodingCharacters.has(ancestor))
-      ) {
-        return;
+    visit(tree, (node) => {
+      if (node === msh1 || node === msh2) {
+        return SKIP;
       }
-      node.value = escapes.write(node.value, d);
+      if (node.type === "subcomponent" && node.value !== undefined) {
+        node.value = escapes.write(node.value, d);
+      }
     });
 
     return tree;

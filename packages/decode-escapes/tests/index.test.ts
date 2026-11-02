@@ -121,6 +121,17 @@ describe("hl7v2DecodeEscapes plugin", () => {
     expect(JSON.stringify(tree)).toBe(before);
   });
 
+  it("leaves MSH-1 as it is", async () => {
+    const tree = m(s("MSH", f("\\F\\"), f("^~\\&")));
+
+    await unified().use(hl7v2DecodeEscapes).run(tree);
+
+    expect(
+      (tree.children[0] as Segment)?.children[0]?.children[0]?.children[0]
+        ?.children[0]?.value
+    ).toBe("\\F\\");
+  });
+
   it("leaves MSH-2 as it is", async () => {
     // After the four encoding characters, `\\F\\` would read as `|`.
     const tree = parseHL7v2("MSH|^~\\&\\\\F\\|a\r", { decodeEscapes: false });
@@ -131,6 +142,16 @@ describe("hl7v2DecodeEscapes plugin", () => {
       (tree.children[0] as Segment)?.children[1]?.children[0]?.children[0]
         ?.children[0]?.value
     ).toBe("^~\\&\\\\F\\");
+  });
+
+  it("reads subcomponents only, not a value on any other node", async () => {
+    const tree = m(s("PID", f("x")));
+    const other = { type: "comment", value: "a\\F\\b" };
+    tree.children.push(other as never);
+
+    await unified().use(hl7v2DecodeEscapes).run(tree);
+
+    expect(other.value).toBe("a\\F\\b");
   });
 
   it("leaves a subcomponent without a value as it is", async () => {
