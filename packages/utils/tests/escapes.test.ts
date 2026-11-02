@@ -177,19 +177,23 @@ const WIRE_CODES = [
 // A value as a sender writes it on the wire with the delimiter set `d`: plain
 // characters, none a delimiter, the escape character, or a control
 // character, escape sequences from WIRE_CODES that hold no delimiter, and
-// escape characters on their own.
+// escape characters on their own. An array of units, since `fc.string` checks
+// its list of awkward strings against each new unit, which is slow when the
+// unit refuses a letter.
 const arbWire = (d: Delimiters): fc.Arbitrary<string> => {
   const sequences = WIRE_CODES.filter((code) => !holdsSyntax(code, d)).map(
     (code) => `${d.escape}${code}${d.escape}`
   );
-  return fc.string({
-    unit: fc.oneof(
-      fc
-        .string({ maxLength: 1, minLength: 1, unit: "grapheme" })
-        .filter((ch) => !holdsSyntax(ch, d)),
-      fc.constantFrom(...sequences, d.escape)
-    ),
-  });
+  return fc
+    .array(
+      fc.oneof(
+        fc
+          .string({ maxLength: 1, minLength: 1, unit: "grapheme" })
+          .filter((ch) => !holdsSyntax(ch, d)),
+        fc.constantFrom(...sequences, d.escape)
+      )
+    )
+    .map((units) => units.join(""));
 };
 
 describe("escapes.read", () => {
