@@ -83,7 +83,7 @@ export function obxEscapedLine(index: number): Segment {
     f("TX"),
     f("NOTE"),
     f(),
-    f(`Result ${index} holds | and ^ and ~ and & and \\ chars`),
+    f(`Result ${index} holds | and ^ and ~ and & and \\E\\ chars`),
     f(),
     f(),
     f(),

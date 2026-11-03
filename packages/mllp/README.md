@@ -170,7 +170,7 @@ Both are cached — subsequent calls return the same value instantly.
 
 ### `ctx.ast` vs `await ctx.tree()`
 
-Use `ctx.ast` when the parsed message is enough — reading MSH fields, building ACK/NAK responses, route filter functions, or middleware that doesn't need annotations. The parser has already decoded escape sequences, so every value is content:
+Use `ctx.ast` when the parsed message is enough — reading MSH fields, building ACK/NAK responses, route filter functions, or middleware that doesn't need annotations. The parser has already read the escape sequences of the separators and control characters, so `\T\` is `&` in a value; every other escape sequence, such as `\E\` or `\.br\`, stays as written:
 
 ```ts
 // Fast — no pipeline cost.

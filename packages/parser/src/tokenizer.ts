@@ -37,7 +37,7 @@
 // holds, so `\r\n` counts as one line break.
 
 import type { Delimiters } from "@glion/ast";
-import { DEFAULT_DELIMITERS, decodeEscapes } from "@glion/utils";
+import { DEFAULT_DELIMITERS, escapes } from "@glion/utils";
 import type { Position } from "unist";
 
 import {
@@ -56,10 +56,10 @@ interface HeaderToken {
 
 export interface TokenizerOptions {
   /**
-   * Whether a TEXT token holds the characters its escape sequences stand for
-   * (`true`, the default) or the escape sequences as they are on the wire
-   * (`false`). A Segment ID and the encoding characters MSH-2 declares are
-   * never decoded.
+   * Whether a TEXT token holds the separators and control characters its escape
+   * sequences stand for, as `escapes.read` reads them (`true`, the default), or
+   * every escape sequence as it is on the wire (`false`). A Segment ID and the
+   * encoding characters MSH-2 declares are never decoded.
    */
   decodeEscapes?: boolean;
 }
@@ -210,7 +210,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     const value =
       // Stryker disable next-line EqualityOperator: no TEXT token starts at decodeFrom, which is a field delimiter, a segment terminator, or the end of the input
       this.decodeEscapes && offset >= this.decodeFrom
-        ? decodeEscapes(text, this.delimiters)
+        ? escapes.read(text, this.delimiters)
         : text;
     return this.take("TEXT", text.length, value);
   }

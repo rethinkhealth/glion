@@ -302,6 +302,10 @@ describe(getLength, () => {
     it("should handle multi-byte characters as single characters", () => {
       expect(getLength(sub("café"))).toBe(4);
     });
+
+    it("counts every character of an escape sequence the value holds", () => {
+      expect(getLength(sub("12\\E\\3"))).toBe(6);
+    });
   });
 
   describe("component nodes", () => {

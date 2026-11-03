@@ -10,7 +10,7 @@ import type {
   Subcomponent,
 } from "@glion/ast";
 import { delimiters as queryDelimiters } from "@glion/util-query";
-import { DEFAULT_DELIMITERS, encodeEscapes } from "@glion/utils";
+import { DEFAULT_DELIMITERS, escapes } from "@glion/utils";
 import type { Plugin } from "unified";
 import type { Node } from "unist";
 import type { VFile } from "vfile";
@@ -22,8 +22,8 @@ export { SegmentTerminatorError } from "./errors";
 
 export interface Hl7v2ToHl7v2Options {
   /**
-   * Write each subcomponent value with its delimiters, escape character, and
-   * control characters as escape sequences (`true`, the default), or as it is
+   * Write each subcomponent value with its separators and control characters
+   * as escape sequences (`true`, the default), or as it is
    * (`false`). MSH-1 and MSH-2 are written as they are either way.
    */
   encodeEscapes?: boolean;
@@ -79,7 +79,7 @@ export function toHl7v2(
 
   const sub = (s: Subcomponent): string => {
     const value = s.value ?? "";
-    return encode ? encodeEscapes(value, d) : value;
+    return encode ? escapes.write(value, d) : value;
   };
 
   const comp = (c: Component): string =>

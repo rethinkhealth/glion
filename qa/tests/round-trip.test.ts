@@ -128,7 +128,7 @@ describe("QR4: round-trip data fidelity", () => {
     // `"MSH|^~\\&|||\rAAA|^\r"`.
     //
     // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
-    // `"MSH|^~\\&|||\rAAA|\\E\\ &\r"`.
+    // `"MSH|^~\\&|||\rAAA|\\F\\^~\r"`.
     //
     // Mutant: `to-hl7v2` writes the segment terminator between segments only
     // (#1137). Fails on `"MSH|^~\\&|||\r"`.
@@ -268,9 +268,7 @@ describe("QR4: round-trip data fidelity", () => {
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `"MSH #.+$@@@\rAAA@ @$ "`.
-    //
-    // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
-    // `"MSH-`!>;---\rAAA->E>R>H>-"`.
+
     it("any mutated input stabilizes after one round-trip", async () => {
       await fc.assert(
         fc.asyncProperty(arbMutatedCustomDelimiterMessage, async (msg) => {
@@ -282,7 +280,7 @@ describe("QR4: round-trip data fidelity", () => {
           expect(secondPass).toBe(firstPass);
         }),
         {
-          examples: [["MSH #.+$@@@\rAAA@ @$ "], ["MSH-`!>;---\rAAA->E>R>H>-"]],
+          examples: [["MSH #.+$@@@\rAAA@ @$ "]],
           numRuns: 300,
         }
       );
@@ -297,9 +295,6 @@ describe("QR4: round-trip data fidelity", () => {
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `" SH|^~\\&|||\rAAA| | "`.
     //
-    // Mutant: `to-hl7v2` writes each value without escaping it. Fails on
-    // `"MSH|^~\\&|||\rAAA|\\.br\\\rA"`.
-    //
     // Mutant: the parser decodes the escape sequences of MSH-2 after its fourth
     // character (#1100). Fails on `"MSH|^~\\~\\F\\\\"`.
     it("any mutated input stabilizes after one round-trip", async () => {
@@ -313,11 +308,7 @@ describe("QR4: round-trip data fidelity", () => {
           expect(secondPass).toBe(firstPass);
         }),
         {
-          examples: [
-            [" SH|^~\\&|||\rAAA| | "],
-            ["MSH|^~\\&|||\rAAA|\\.br\\\rA"],
-            ["MSH|^~\\~\\F\\\\"],
-          ],
+          examples: [[" SH|^~\\&|||\rAAA| | "], ["MSH|^~\\~\\F\\\\"]],
           numRuns: 300,
         }
       );
@@ -326,8 +317,10 @@ describe("QR4: round-trip data fidelity", () => {
 
   describe("fuzz: adversarial inputs", () => {
     // Any text is read as some message, and a second round trip of what was
-    // written changes nothing. It is not an exact round trip: an escape
-    // character that starts no escape sequence is written back as `\E\`.
+    // written changes nothing. It is not an exact round trip: a character
+    // below U+0020 inside a value, such as a tab, is written back as `\X09\`,
+    // and an escape character whose escape sequence would pair with it as
+    // `\E\`.
     //
     // Mutant: `to-hl7v2` writes each segment without its last field. Fails on
     // `"| |"`.
@@ -352,13 +345,12 @@ describe("QR4: content round-trips through serialize and parse", () => {
   // from this list collides with a sequence the serializer writes or keeps:
   //
   //   E F R S T       the named codes `\E\ \F\ \R\ \S\ \T\`
-  //   . b r           the segment delimiter's code `\.br\`
+  //   . b r           the formatting command `\.br\`, kept as written
   //   X               the prefix of every hexadecimal escape `\Xdd\`
   //   0-9 A-F a-f     hexadecimal digits, in both cases, since the serializer
   //                   writes a digit in lowercase when its uppercase form
   //                   collides
-  //   H N Z C M       sequences kept as written, such as `\H\` and `\Zsite\`,
-  //                   which must be escaped instead when they hold a delimiter
+  //   H N Z C M       sequences kept as written, such as `\H\` and `\Zsite\`
   //
   // Every other character is still drawn through `fc.char()` below, just not
   // favoured.
@@ -375,12 +367,23 @@ describe("QR4: content round-trips through serialize and parse", () => {
       )
     );
 
-  it("keeps a locally defined sequence that holds a delimiter as content", () => {
+  it("writes the escape character of free text as it is", () => {
+    const content = "C:\\temp\\H\\x";
+    const wire = write(content);
+
+    expect(wire).toBe(`MSH|^~\\&\rPID|1||${content}\r`);
+    expect(read(wire)).toBe(content);
+  });
+
+  it("writes a locally defined sequence that holds a delimiter as data", () => {
+    // Escape sequences do not nest. `\F\` inside `\Zfoo…\`
+    // would close it, so both of its escape characters are written `\E\`.
     const content = "a\\Zfoo|bar\\b";
     const wire = write(content);
 
     expect(wire).toBe("MSH|^~\\&\rPID|1||a\\E\\Zfoo\\F\\bar\\E\\b\r");
-    expect(read(wire)).toBe(content);
+    expect(read(wire)).toBe("a\\E\\Zfoo|bar\\E\\b");
+    expect(write(read(wire))).toBe(wire);
   });
 
   it("keeps a locally defined sequence and a character set switch as they are", () => {
@@ -390,19 +393,26 @@ describe("QR4: content round-trips through serialize and parse", () => {
     expect(read(write(content))).toBe(content);
   });
 
+  // Text without the escape character is read back as the value it was given.
+  //
   // Mutant: `to-hl7v2` writes each value without escaping it. Fails on `"&"`.
-  it("reads back any content a value was given", () => {
+  it("reads back any text without the escape character a value was given", () => {
     fc.assert(
-      fc.property(fc.string({ unit: "grapheme" }), (content) => {
-        expect(read(write(content))).toBe(content);
-      }),
-      { examples: [["&"]] }
+      fc.property(
+        fc
+          .string({ unit: "grapheme" })
+          .map((content) => content.replaceAll("\\", "")),
+        (content) => {
+          expect(read(write(content))).toBe(content);
+        }
+      ),
+      { examples: [["&"], ["a|b^c~d\re"]] }
     );
   });
 
   // Mutant: `to-hl7v2` writes each value without escaping it. Fails on the
   // delimiters `S q $ K -` and the content `"S"`.
-  it("reads back any content a value was given, with any delimiters", () => {
+  it("reads back any text without the escape character a value was given, with any delimiters", () => {
     fc.assert(
       fc.property(
         // Five distinct delimiters, in MSH order: field separator, then the
@@ -417,30 +427,29 @@ describe("QR4: content round-trips through serialize and parse", () => {
             { maxLength: 5, minLength: 5 }
           )
           // The content is then built for those delimiters, one unit at a
-          // time from a delimiter, the segment delimiter, a sequence kept as
-          // written (with `delimiters[3]`, the escape character), or any
-          // grapheme, so that most values hold characters the serializer must
-          // escape.
+          // time from a separator, the segment delimiter, or any grapheme, so
+          // that most values hold characters the serializer must escape. The
+          // escape character, `delimiters[3]`, is left out.
           .chain((delimiters) =>
             fc.tuple(
               fc.constant(delimiters),
-              fc.string({
-                unit: fc.oneof(
-                  fc.constantFrom(...delimiters, "\r"),
-                  fc.constantFrom(
-                    `${delimiters[3]}H${delimiters[3]}`,
-                    `${delimiters[3]}Zsite${delimiters[3]}`
+              fc
+                .string({
+                  unit: fc.oneof(
+                    fc.constantFrom(...delimiters, "\r"),
+                    fc.string({ maxLength: 1, minLength: 1, unit: "grapheme" })
                   ),
-                  fc.string({ maxLength: 1, minLength: 1, unit: "grapheme" })
-                ),
-              })
+                })
+                .map((content) =>
+                  content.replaceAll(delimiters[3] as string, "")
+                )
             )
           ),
         ([[fieldSeparator, ...encodingCharacters], content]) => {
           // Write a message whose MSH declares the drawn delimiters and whose
-          // MSH-3 holds the content. A character of the content that no escape
-          // sequence can write with these delimiters is refused with
-          // EscapeSequenceError, and any other error fails the property.
+          // MSH-3 holds the content. A character of the content that no escape sequence can write with
+          // these delimiters is refused with EscapeSequenceError, and any
+          // other error fails the property.
           let wire: string;
           try {
             wire = toHl7v2(

@@ -530,9 +530,9 @@ describe("toHl7v2 escape sequences", () => {
   });
 
   it("writes a character whose escape code is a delimiter as a hexadecimal escape", () => {
-    const tree = m(s("MSH", f("^"), f("E\\<$")), s("PID", f("a<b")));
+    const tree = m(s("MSH", f("^"), f("F\\<$")), s("PID", f("a^b")));
 
-    expect(toHl7v2(tree)).toBe("MSH^E\\<$\rPID^a<X3C<b\r");
+    expect(toHl7v2(tree)).toBe("MSH^F\\<$\rPID^a<X5E<b\r");
   });
 
   it("throws EscapeSequenceError for a value no escape sequence can write with the delimiters", () => {
@@ -541,10 +541,22 @@ describe("toHl7v2 escape sequences", () => {
     expect(() => toHl7v2(tree)).toThrow(EscapeSequenceError);
   });
 
-  it("writes the escape character, the segment delimiter, and control characters as escape sequences", () => {
+  it("writes a carriage return and a line feed as escape sequences, and an escape character before them as data", () => {
     const tree = m(s("PID", f("a\\b\rc\nd")));
 
-    expect(toHl7v2(tree)).toBe("PID|a\\E\\b\\.br\\c\\X0A\\d\r");
+    expect(toHl7v2(tree)).toBe("PID|a\\E\\b\\X0D\\c\\X0A\\d\r");
+  });
+
+  it("writes an escape character without a closing one as it is when nothing after it is escaped", () => {
+    const tree = m(s("PID", f("C:\\temp")));
+
+    expect(toHl7v2(tree)).toBe("PID|C:\\temp\r");
+  });
+
+  it("writes every escape sequence in a value as it is, whatever its code", () => {
+    const tree = m(s("PID", f("a\\E\\b\\.br\\c\\P\\d\\Q\\e\\XC3A9\\")));
+
+    expect(toHl7v2(tree)).toBe("PID|a\\E\\b\\.br\\c\\P\\d\\Q\\e\\XC3A9\\\r");
   });
 
   it("writes a formatting command, a locally defined sequence, and a character set switch as they are", () => {

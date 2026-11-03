@@ -43,6 +43,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@glion/util-query": "workspace:*",
     "@glion/util-visit": "workspace:*",
     "@glion/utils": "workspace:*",
     "unified": "11.0.5"
@@ -51,6 +52,7 @@
     "@glion/ast": "workspace:*",
     "@glion/builder": "workspace:*",
     "@glion/check-readme": "workspace:*",
+    "@glion/parser": "workspace:*",
     "@glion/testing": "workspace:*",
     "@glion/tsconfig": "workspace:*",
     "@stryker-mutator/core": "10.0.0",

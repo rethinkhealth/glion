@@ -85,8 +85,8 @@ describe("escape sequences", () => {
     });
   });
 
-  it("counts lines by the source when .br decodes to the segment terminator", () => {
-    const out = toks("PID|a\\.br\\b\rOBX|1");
+  it("counts lines by the source when \\X0D\\ decodes to the segment terminator", () => {
+    const out = toks("PID|a\\X0D\\b\rOBX|1");
 
     expect(out[2]).toMatchObject({ type: "TEXT", value: "a\rb" });
     expect(out[4]?.position.start).toStrictEqual({

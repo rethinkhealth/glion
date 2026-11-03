@@ -779,10 +779,10 @@ describe("parser escape sequences", () => {
     (root.children[segment] as Segment).children[field]?.children[0]
       ?.children[0]?.children[0]?.value;
 
-  it("decodes escape sequences into subcomponent values", () => {
+  it("decodes the separator escapes into subcomponent values, and keeps \\E\\ as written", () => {
     const root = parseHL7v2("MSH|^~\\&|a\\S\\b\\T\\c\\E\\d");
 
-    expect(first(root, 0, 2)).toBe("a^b&c\\d");
+    expect(first(root, 0, 2)).toBe("a^b&c\\E\\d");
   });
 
   it("keeps the encoding characters MSH-2 declares", () => {
@@ -797,11 +797,17 @@ describe("parser escape sequences", () => {
     expect(first(root, 0, 2)).toBe("a|b");
   });
 
-  it("keeps a decoded segment delimiter inside its value", () => {
-    const root = parseHL7v2("PID|1|line1\\.br\\line2");
+  it("keeps a decoded segment terminator inside its value", () => {
+    const root = parseHL7v2("PID|1|line1\\X0D\\line2");
 
     expect(root.children).toHaveLength(1);
     expect(first(root, 0, 1)).toBe("line1\rline2");
+  });
+
+  it("keeps the formatting command .br as written", () => {
+    const root = parseHL7v2("PID|1|line1\\.br\\line2");
+
+    expect(first(root, 0, 1)).toBe("line1\\.br\\line2");
   });
 
   it("keeps escape sequences when decodeEscapes is false", () => {

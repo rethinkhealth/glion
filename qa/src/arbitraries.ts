@@ -114,15 +114,14 @@ export const arbEncodingChars = fc
  * Generate a value for one subcomponent, as a sender writes it.
  *
  * Each unit is a printable ASCII character that is not a delimiter, or, one
- * time in five, an escape sequence written with `delimiters.escape`:
+ * time in nine, an escape sequence written with `delimiters.escape`, unless
+ * its code holds a delimiter (#1051):
  *
  * - `\F\ \S\ \T\ \R\` for a delimiter in the value
- * - `\E\` for the escape character, followed by a character that starts no
- *   formatting command, locally defined sequence, or character set switch (`H N
- *   Z C M .`): ADR 0031 writes `\E\H\E\` back as `\H\`
- * - `\.br\` for a line break, unless `.` is a delimiter (#1051)
- * - `\X0B\` for a control character
- * - `\H\ \N\`, kept as they are
+ * - `\X0B\ \X0D\ \X0A\` for a control character
+ * - Sequences kept as written: `\E\ \P\ \H\ \N\ \Q\ \.br\ \.sp 2\ \Zsite\
+ *   \C2842\`, and `\X0D0A\ \X0d\ \XC3A9\ \XFF\ \X41\`, which name characters
+ *   with another form or bytes that are not UTF-8 (#1165–#1168)
  *
  * A message built from these values round-trips exactly through the parser
  * and `@glion/to-hl7v2`.
@@ -147,10 +146,29 @@ function arbFieldValue(
   ]);
   const escape = (code: string) =>
     `${delimiters.escape}${code}${delimiters.escape}`;
-  const codes = ["F", "S", "T", "R", "X0B", "H", "N"];
-  if (!forbidden.has(".")) {
-    codes.push(".br");
-  }
+  const codes = [
+    "F",
+    "S",
+    "T",
+    "R",
+    "X0B",
+    "X0D",
+    "X0A",
+    "E",
+    "P",
+    "H",
+    "N",
+    "Q",
+    ".br",
+    ".sp 2",
+    "Zsite",
+    "C2842",
+    "X0D0A",
+    "X0d",
+    "XC3A9",
+    "XFF",
+    "X41",
+  ].filter((code) => ![...code].some((ch) => forbidden.has(ch)));
   const arbChar = fc
     .integer({ max: 0x7e, min: 0x20 })
     .map((code) => String.fromCodePoint(code))
@@ -161,13 +179,7 @@ function arbFieldValue(
     minLength: 0,
     unit: fc.oneof(
       { arbitrary: arbChar, weight: 8 },
-      { arbitrary: fc.constantFrom(...codes).map(escape), weight: 1 },
-      {
-        arbitrary: arbChar
-          .filter((ch) => !"HNZCM.".includes(ch))
-          .map((ch) => `${escape("E")}${ch}`),
-        weight: 1,
-      }
+      { arbitrary: fc.constantFrom(...codes).map(escape), weight: 1 }
     ),
   });
 }
