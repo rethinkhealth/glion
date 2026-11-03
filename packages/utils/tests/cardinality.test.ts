@@ -81,6 +81,10 @@ describe(checkCardinality, () => {
       );
     });
 
+    it("accepts a maximum of zero repetitions", () => {
+      expect(checkCardinality(undefined, 0, 0)).toStrictEqual({ ok: true });
+    });
+
     it("throws error when both min and max are negative", () => {
       expect(() => checkCardinality(fieldWith3Reps, -2, -5)).toThrow(
         "Min and max lengths must be non-negative"

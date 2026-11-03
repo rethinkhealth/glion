@@ -75,11 +75,14 @@ export function checkCardinality(
   min: number,
   max: number | "*"
 ): ValidationResult {
-  if (min < 0 || (max !== "*" && max < 0)) {
+  // Stryker disable next-line ConditionalExpression,StringLiteral: `*` has no limit, and leaving it as `*` is the same, since it compares false with every number
+  const limit = max === "*" ? Number.POSITIVE_INFINITY : max;
+
+  if (min < 0 || limit < 0) {
     throw new Error("Min and max lengths must be non-negative");
   }
 
-  if (max !== "*" && min > max) {
+  if (min > limit) {
     throw new Error("Min length cannot be greater than max length");
   }
 
@@ -97,12 +100,12 @@ export function checkCardinality(
     };
   }
 
-  if (max !== "*" && count > max) {
+  if (count > limit) {
     return {
       error: {
         actual: count,
         code: "CARDINALITY_OVERFLOW",
-        expected: max,
+        expected: limit,
         message: `has ${count} repetitions but allows at most ${max}`,
       },
       ok: false,
@@ -167,6 +170,14 @@ export function checkOptionality(
   const code = optionality.toUpperCase();
 
   switch (code) {
+    case Optionality.RequiredButMayBeEmpty:
+    case Optionality.Optional:
+    case Optionality.Conditional:
+    case Optionality.BackwardCompatible:
+    case Optionality.Withdrawn: {
+      return { ok: true };
+    }
+
     case Optionality.Required: {
       if (!node) {
         return {
@@ -202,14 +213,6 @@ export function checkOptionality(
           ok: false,
         };
       }
-      return { ok: true };
-    }
-
-    case Optionality.RequiredButMayBeEmpty:
-    case Optionality.Optional:
-    case Optionality.Conditional:
-    case Optionality.BackwardCompatible:
-    case Optionality.Withdrawn: {
       return { ok: true };
     }
 
