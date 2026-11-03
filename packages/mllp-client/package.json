@@ -57,7 +57,7 @@
     "@glion/util-query": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/vitest-plugin": "1.4.5",
+    "@cloudflare/vitest-plugin": "1.4.11",
     "@cloudflare/workers-types": "5.20261019.1",
     "@glion/check-readme": "workspace:*",
     "@glion/testing": "workspace:*",
