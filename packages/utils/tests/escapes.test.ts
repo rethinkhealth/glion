@@ -518,6 +518,14 @@ describe("escapes.write", () => {
     );
   });
 
+  it("names the error after its class", () => {
+    const d = { ...CUSTOM_DELIMITERS, component: "S", field: "X" };
+
+    expect(() => escapes.write("aSb", d)).toThrow(
+      expect.objectContaining({ name: "EscapeSequenceError" })
+    );
+  });
+
   it("keeps an escape sequence whose code shares a digit with a delimiter of two UTF-16 units", () => {
     const d = { ...DEFAULT_DELIMITERS, field: "😀" };
 
@@ -684,8 +692,84 @@ describe("escapes.write", () => {
   });
 });
 
+describe("the delimiters of each call", () => {
+  it("is built once while the delimiters stay the same", () => {
+    const d = { ...CUSTOM_DELIMITERS, component: "S", field: "X" };
+    const delimitersOfError = (delimiters: Delimiters): unknown => {
+      try {
+        escapes.write("aSb", delimiters);
+      } catch (error) {
+        return (error as EscapeSequenceError).delimiters;
+      }
+      return undefined;
+    };
+
+    // The error holds the copy of the delimiters its table was built from.
+    expect(delimitersOfError(d)).toBe(delimitersOfError({ ...d }));
+  });
+
+  it("writes with the new field separator when only it changes", () => {
+    expect(escapes.write("a#b", DEFAULT_DELIMITERS)).toBe("a#b");
+    expect(escapes.write("a#b", { ...DEFAULT_DELIMITERS, field: "#" })).toBe(
+      "a\\F\\b"
+    );
+  });
+
+  it("writes with the new component separator when only it changes", () => {
+    expect(escapes.write("a#b", DEFAULT_DELIMITERS)).toBe("a#b");
+    expect(
+      escapes.write("a#b", { ...DEFAULT_DELIMITERS, component: "#" })
+    ).toBe("a\\S\\b");
+  });
+
+  it("writes with the new repetition separator when only it changes", () => {
+    expect(escapes.write("a#b", DEFAULT_DELIMITERS)).toBe("a#b");
+    expect(
+      escapes.write("a#b", { ...DEFAULT_DELIMITERS, repetition: "#" })
+    ).toBe("a\\R\\b");
+  });
+
+  it("writes with the new subcomponent separator when only it changes", () => {
+    expect(escapes.write("a#b", DEFAULT_DELIMITERS)).toBe("a#b");
+    expect(
+      escapes.write("a#b", { ...DEFAULT_DELIMITERS, subcomponent: "#" })
+    ).toBe("a\\T\\b");
+  });
+
+  it("writes with the new escape character when only it changes", () => {
+    expect(escapes.write("#a|b#", DEFAULT_DELIMITERS)).toBe("#a\\F\\b#");
+    expect(escapes.write("#a|b#", { ...DEFAULT_DELIMITERS, escape: "#" })).toBe(
+      "#E#a#F#b#E#"
+    );
+  });
+});
+
+describe("a control character as a delimiter", () => {
+  it("writes a separator that is a control character with its named code", () => {
+    expect(escapes.write("a\tb", { ...DEFAULT_DELIMITERS, field: "\t" })).toBe(
+      "a\\F\\b"
+    );
+  });
+
+  it("leaves the hexadecimal code of an escape character that is a control character as written", () => {
+    const text = "a\tX09\tb";
+
+    expect(escapes.read(text, { ...DEFAULT_DELIMITERS, escape: "\t" })).toBe(
+      text
+    );
+  });
+});
+
 // A delimiter the message does not declare is `undefined`.
 describe("escapes with a delimiter the message does not declare", () => {
+  it("reads every text as the value when there is no escape character", () => {
+    const text = "undefinedFundefined";
+
+    expect(
+      escapes.read(text, { component: "^", field: "|", repetition: "~" })
+    ).toBe(text);
+  });
+
   const noEscape: DeclaredDelimiters = {
     component: "^",
     field: "|",

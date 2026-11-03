@@ -88,6 +88,10 @@ describe(checkLength, () => {
       );
     });
 
+    it("accepts a maximum length of zero", () => {
+      expect(checkLength(undefined, 0, 0)).toStrictEqual({ ok: true });
+    });
+
     it("throws error when both min and max are negative", () => {
       expect(() => checkLength(shortNode, -5, -2)).toThrow(
         "Min and max lengths must be non-negative"

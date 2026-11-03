@@ -86,11 +86,11 @@ const REGEXP_SYNTAX = /[.*+?^${}()|[\]\\]/g;
 /** Reads and writes the characters a value cannot hold as they are. */
 export const escapes: Escapes = {
   read: (text, d) =>
-    d.escape === undefined ? text : read(text, d.escape, tableFor(d)),
+    d.escape === undefined ? text : read(text, d.escape, tableFor(d, d.escape)),
   write: (value, d) =>
     d.escape === undefined
       ? writeWithoutEscapeCharacter(value, d)
-      : write(value, d.escape, tableFor(d)),
+      : write(value, d.escape, tableFor(d, d.escape)),
 };
 
 // ## Reading
@@ -103,6 +103,7 @@ export const escapes: Escapes = {
 //
 // An escape character without a closing one is no pair, so it stays as written.
 function read(text: string, escape: string, table: EscapeTable): string {
+  // Stryker disable next-line BlockStatement,ConditionalExpression: text without an escape character has no pair to replace, so this return only skips the work
   if (!text.includes(escape)) {
     return text;
   }
@@ -124,6 +125,7 @@ function read(text: string, escape: string, table: EscapeTable): string {
 // value that holds no character of the table is returned as it is, which is
 // nearly every value.
 function write(value: string, escape: string, table: EscapeTable): string {
+  // Stryker disable next-line BlockStatement,ConditionalExpression: a value that holds none has no data escapes and nothing to replace, so this return only skips the work
   if (!table.holdsCharacter.test(value)) {
     return value;
   }
@@ -211,7 +213,7 @@ interface EscapeTable {
   /** The code that writes each character, or `undefined` when none can. */
   readonly codes: ReadonlyMap<string, string | undefined>;
   /** The character each code writes. */
-  readonly characters: ReadonlyMap<string, string>;
+  readonly characters: ReadonlyMap<string | undefined, string>;
   /** The code that writes the escape character as data. */
   readonly escapeCode: string | undefined;
   /** Matches each pair of escape characters, and captures the code between. */
@@ -224,9 +226,9 @@ interface EscapeTable {
 
 let lastTable: EscapeTable | undefined;
 
-function tableFor(d: Delimiters): EscapeTable {
+function tableFor(d: Delimiters, escape: string): EscapeTable {
   if (lastTable === undefined || !sameDelimiters(lastTable.delimiters, d)) {
-    lastTable = buildTable(d);
+    lastTable = buildTable(d, escape);
   }
   return lastTable;
 }
@@ -241,29 +243,21 @@ function sameDelimiters(a: Delimiters, b: Delimiters): boolean {
   );
 }
 
-function buildTable(d: Delimiters): EscapeTable {
+function buildTable(d: Delimiters, escape: string): EscapeTable {
   const codes = separatorsAndControlCharacters(d);
-  const characters = new Map<string, string>();
-  for (const [ch, code] of codes) {
-    if (code !== undefined) {
-      characters.set(code, ch);
-    }
-  }
   return {
-    characters,
+    // A character without a code sits under `undefined`, which `read` never
+    // looks up.
+    characters: new Map([...codes].map(([ch, code]) => [code, ch])),
     codes,
     delimiters: { ...d },
-    escapeCode:
-      d.escape === undefined ? undefined : namedOrHexCode(d.escape, "E", d),
+    escapeCode: namedOrHexCode(escape, "E", d),
     escapeSequences: new RegExp(
-      `${escapeRegExp(d.escape ?? "")}([\\s\\S]*?)${escapeRegExp(d.escape ?? "")}`,
+      `${escapeRegExp(escape)}([\\s\\S]*?)${escapeRegExp(escape)}`,
       "g"
     ),
     holdsCharacter: new RegExp(anyOf([...codes.keys()])),
-    writtenCharacters: new RegExp(
-      anyOf([...codes.keys(), d.escape ?? ""]),
-      "g"
-    ),
+    writtenCharacters: new RegExp(anyOf([...codes.keys(), escape]), "g"),
   };
 }
 
@@ -342,6 +336,7 @@ export function utf8Hex(ch: string): string {
 
 function holdsDelimiter(code: string, d: Delimiters): boolean {
   return [d.field, d.component, d.repetition, d.escape, d.subcomponent].some(
+    // Stryker disable next-line ConditionalExpression: without this check, `includes` looks for the text `undefined`, which no code holds
     (delimiter) => delimiter !== undefined && code.includes(delimiter)
   );
 }
