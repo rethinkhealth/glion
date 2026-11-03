@@ -376,7 +376,7 @@ describe("QR4: content round-trips through serialize and parse", () => {
   });
 
   it("writes a locally defined sequence that holds a delimiter as data", () => {
-    // HL7v2 §2.7.1: escape sequences do not nest. `\F\` inside `\Zfoo…\`
+    // Escape sequences do not nest. `\F\` inside `\Zfoo…\`
     // would close it, so both of its escape characters are written `\E\`.
     const content = "a\\Zfoo|bar\\b";
     const wire = write(content);

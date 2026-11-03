@@ -10,7 +10,7 @@ Answers #1165, #1166, #1167, and #1168.
 
 A subcomponent's `value` is one string. ADR 0031 made it the value's content: the parser decodes the five delimiter sequences (`\F\`, `\S\`, `\R\`, `\T\`, `\E\`), `\Xdd…\` as UTF-8, and `\.br\` as a carriage return, and keeps every other sequence in the string as written. The serializer encodes the string again and copies the kept sequences through when they match a fixed list (`\H\`, `\N\`, formatting commands other than `\.br\`, `\Z…\`, `\C…\`, `\M…\`).
 
-Comparing glion with a written-out model of HL7v2 §2.7 in Lean found four ways a message read and written back is not the message that arrived:
+Comparing glion with a written-out model of HL7v2's escape sequences in Lean found four ways a message read and written back is not the message that arrived:
 
 | Issue | Received                  | Value                     | Written back                  |
 | ----- | ------------------------- | ------------------------- | ----------------------------- |
@@ -21,14 +21,14 @@ Comparing glion with a written-out model of HL7v2 §2.7 in Lean found four ways 
 
 All four have one cause. Decoding merges two different wire values into one string whenever the decoded character is the escape character itself (#1165: data `\H\` and the command `\H\`), or whenever the character has a second wire form (#1167: `\X0D\` and `\.br\`; #1168: `\XC3A9\` and a raw `é`). No serializer can write both wire values back from one string. The fixed list then guesses which kept text is a sequence, and guesses wrong for codes not on it (#1166).
 
-HL7v2 (Chapter 2, v2.8.2) gives each sequence one meaning:
+glion's generic packages use what every version of HL7v2 agrees on, unless a rule is explicitly keyed to a version. Chapter 2 gives each sequence one meaning. Each statement below was checked in v2.4, v2.5, v2.5.1, v2.6, v2.7, v2.7.1, v2.8, v2.8.1, and v2.8.2:
 
-- §2.7.1: "When delimiters are included in any component, the delimiters SHALL be escaped." The list it gives for every data type is `\F\`, `\S\`, `\T\`, `\R\`, `\E\`, and `\P\`. A data `\` is always sent as `\E\`, so a raw `\` in a value always starts a sequence.
-- §2.7.1: "Escape sequences SHALL NOT contain nested escape sequences."
-- §2.7.1 limits `\H\`, `\N\`, `\Xdddd…\`, and `\Zdddd…\` to TX, FT, and CF, and says nothing about a code it does not define.
-- §2.7.1: "For the purposes of determining length, all the characters inside the escape (all between the opening and closing \, not including the \ symbols themselves) count towards the length."
-- §2.7.6: "Consecutive pairs of the hexadecimal digits represent 8-bit binary values. The interpretation of the data is entirely left to an agreement between the sending and receiving applications."
-- §2.7.7: `.br` means "Begin new output line." It is an instruction for display, defined for FT.
+- Every version defines `\F\`, `\S\`, `\T\`, `\R\`, and `\E\`. v2.8 and later add `\P\` and state: "When delimiters are included in any component, the delimiters SHALL be escaped." A data `\` is sent as `\E\`, so a raw `\` in a value starts a sequence.
+- Every version forbids nesting: "No escape sequence may contain a nested escape sequence", and from v2.8, "Escape sequences SHALL NOT contain nested escape sequences."
+- Every version limits `\H\`, `\N\`, `\Xdddd…\`, and `\Zdddd…\` to TX, FT, and CF, and says nothing about a code it does not define.
+- Length is not the same in every version. v2.4 to v2.6 define LEN as the "Maximum number of characters that one occurrence of the data field may occupy" and do not mention escape sequences. v2.7 and later add: "For the purposes of determining length, all the characters inside the escape (all between the opening and closing \, not including the \ symbols themselves) count towards the length." What every version agrees on is a number of characters.
+- Every version: "Consecutive pairs of the hexadecimal digits represent 8-bit binary values. The interpretation of the data is entirely left to an agreement between the sending and receiving applications."
+- Every version: `.br` means "Begin new output line." It is an instruction for display, defined for FT.
 
 HAPI's `DefaultEscaping` has the same shape as ADR 0031 and the same ambiguity: it unescapes `\E\` and passes through text shaped like a formatting sequence, so literal text such as `C:\Chris\` "will be interpreted as a formatting code by the receiver". HL7's own XML encoding avoids it by structure: the text is decoded and each sequence is an element, `<escape V="H"/>`.
 
@@ -50,7 +50,7 @@ HAPI's `DefaultEscaping` has the same shape as ADR 0031 and the same ambiguity: 
 
 3. **What glion leaves as written.** Every other escape sequence: `\E\`, `\P\`, `\H\`, `\N\`, every formatting command including `\.br\`, `\X…\` other than a table form, `\Z…\`, `\C…\`, `\M…\`, and a code HL7v2 does not define. And every escape character, including one without a closing one, such as the one in `C:\temp`. The parser keeps each of them in the value, and the serializer copies each of them to the wire.
 
-4. **The one exception: an escape character the table would re-pair.** Escape sequences do not nest (§2.7.1). When a table character comes after an escape character and before its closing one (or the end of the value, when it has none), the escape sequence written for the table character would pair with that escape character, and the reader would lose the table character. The parser produces such a value: `C:\scans␉note` arrives with a raw tab after a bare `\`, and `\X09\` written after it would read as `\scans\` and the text `X09`. So that escape character, and the closing one of its pair, is written as data, `\E\`, or its `\Xdd\` when `E` is a delimiter: `C:\scans␉note` is written `C:\E\scans\X09\note`, `a\b|c` is written `a\E\b\F\c`, and `\Zfoo|bar\` is written `\E\Zfoo\F\bar\E\`. The reader keeps every separator and control character, and the value it reads holds `\E\` where the writer's held `\`; a second relay writes it the same way.
+4. **The one exception: an escape character the table would re-pair.** Escape sequences do not nest. When a table character comes after an escape character and before its closing one (or the end of the value, when it has none), the escape sequence written for the table character would pair with that escape character, and the reader would lose the table character. The parser produces such a value: `C:\scans␉note` arrives with a raw tab after a bare `\`, and `\X09\` written after it would read as `\scans\` and the text `X09`. So that escape character, and the closing one of its pair, is written as data, `\E\`, or its `\Xdd\` when `E` is a delimiter: `C:\scans␉note` is written `C:\E\scans\X09\note`, `a\b|c` is written `a\E\b\F\c`, and `\Zfoo|bar\` is written `\E\Zfoo\F\bar\E\`. The reader keeps every separator and control character, and the value it reads holds `\E\` where the writer's held `\`; a second relay writes it the same way.
 
 5. **The contract.** For every value `w` on the wire that holds no separator and no character below U+0020, `escapes.write(escapes.read(w, d), d)` is `w`. `escapes.read` and `escapes.write` are each idempotent. A written value holds no separator and no character below U+0020, so the parser splits a written message where its delimiters are, and every separator and control character of a value is read back from it. The serializer throws `EscapeSequenceError` only for a character whose form and hexadecimal fallback both hold a delimiter (#1053). The five delimiters MUST be distinct.
 
@@ -65,7 +65,7 @@ HAPI's `DefaultEscaping` has the same shape as ADR 0031 and the same ambiguity: 
 - #1165, #1166, and #1167 are fixed by the contract: every sequence the parser keeps is written back as it arrived. #1168 is answered by the view: a value keeps `\XC3A9\` and `\.br\`, and a reader decodes them.
 - A value holds plain characters for the separators, which are the escapes that occur in identifiers, names, and addresses: `Johnson \T\ Johnson` is the value `Johnson & Johnson`. A lint rule, a table lookup, and `@glion/util-query` see `&`.
 - Breaking changes for consumers of `value`: `\.br\` is no longer a carriage return, `\XC3A9\` is no longer `é`, and `\E\` is no longer the escape character. Each stays as written, and the view gives the old reading. A carriage return in a value is written `\X0D\`, not `\.br\`. An escape character in a value is written as it is, except as decision 4 says.
-- `getLength(node, delimiters)` and `@glion/lint-profile-field-max-length` count a value as §2.7.1 counts it, from what `escapes.write` writes: each escape sequence by the characters between its escape characters, so `\E\` and a separator count one, and a character below U+0020 three, the characters of its form.
+- `getLength(node)` and `@glion/lint-profile-field-max-length` count the characters a value holds, in every version: `12\E\3` counts 6. The escape-sequence counting of v2.7 and later is not applied, since it would apply one version's rule to every message.
 - The values in a tree hold formatting commands as text. Highlighting and formatted-text support will hold each sequence as its own node beside the text, as HL7's XML encoding does; the table and the round trip stay as they are.
 
 ## Drawbacks
@@ -81,7 +81,7 @@ HAPI's `DefaultEscaping` has the same shape as ADR 0031 and the same ambiguity: 
 
 - **Write every stray escape character as `\E\`.** The serializer would repair `C:\temp` to `C:\E\temp` too. Since the parser keeps `\E\` as written, the repair changes a value that loses nothing as it is. Decision 4 repairs only the escape characters that would otherwise cost the reader a character.
 - **Keep every escape character, even before a table character.** A relay of `C:\scans␉note` would lose the tab.
-- **Decode `\E\` and the table, keep the other sequences, and reject the ambiguous values.** The parser would fail a message whose decoded `\E\` forms a recognised sequence, such as `\E\H\E\`, and one with an unknown code. It needs a recogniser of the §2.7 grammar shared by both ends, and that recogniser becomes the contract: teaching it a new code changes how an accepted tree is written.
+- **Decode `\E\` and the table, keep the other sequences, and reject the ambiguous values.** The parser would fail a message whose decoded `\E\` forms a recognised sequence, such as `\E\H\E\`, and one with an unknown code. It needs a recogniser of the escape sequence grammar shared by both ends, and that recogniser becomes the contract: teaching it a new code changes how an accepted tree is written.
 - **Hold each sequence as a node** (`text` and `escape` children of a subcomponent). Lossless and unambiguous, but every consumer of `subcomponent.value` changes. It is the shape planned for highlighting support.
 - **Decode nothing.** The value is the wire text, and the round trip holds without a table. Every consumer then sees `\T\` for `&`, and needs the view for the separators as well.
 - **Decode every sequence a reader would, and reject the rest.** Strict and exact, but a server rejects every result whose OBX-5 holds `\.br\` unless each client configures a table of its own.
@@ -92,4 +92,4 @@ HAPI's `DefaultEscaping` has the same shape as ADR 0031 and the same ambiguity: 
 - The view of a value for display, with formatted-text rendering (#1002).
 - A lint rule that reports malformed escape sequences: an escape character without a closing one, a separator inside a sequence, and a code HL7v2 does not define.
 
-`\.br\` stays out of the table. As the form of a line feed it would make narratives read with line breaks, but it would write an FT formatting command into fields of other types, which §2.7.1 does not allow.
+`\.br\` stays out of the table. As the form of a line feed it would make narratives read with line breaks, but it would write an FT formatting command into fields of other types, which no version allows.

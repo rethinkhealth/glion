@@ -11,16 +11,16 @@
  * so the two sequences gave the same value, and `encodeEscapes` writes a
  * carriage return as `\.br\`.
  *
- * HL7v2 (Chapter 2, v2.8.2) gives the two sequences different meanings, so a
- * message read and written back must keep each one:
+ * Every version of HL7v2 from v2.4 to v2.8.2 gives the two sequences different
+ * meanings, so a message read and written back must keep each one:
  *
- * - §2.7.6, hexadecimal data: "Consecutive pairs of the hexadecimal digits
- *   represent 8-bit binary values. The interpretation of the data is entirely
- *   left to an agreement between the sending and receiving applications."
- *   `\X0D\` is the byte 0x0D, sent as data.
- * - §2.7.7, formatted text: `.br` means "Begin new output line. Set the
- *   horizontal position to the current left margin and increment the vertical
- *   position by 1." It is an instruction for display.
+ * - Hexadecimal data: "Consecutive pairs of the hexadecimal digits represent
+ *   8-bit binary values. The interpretation of the data is entirely left to an
+ *   agreement between the sending and receiving applications." `\X0D\` is the
+ *   byte 0x0D, sent as data.
+ * - Formatted text: `.br` means "Begin new output line. Set the horizontal
+ *   position to the current left margin and increment the vertical position by
+ *   1." It is an instruction for display.
  *
  * Resolution: ADR 0036. `\X0D\` is the one form of a carriage return that
  * `escapes.read` and `escapes.write` share, and `\.br\`, a formatting
@@ -40,7 +40,7 @@ const d: Delimiters = {
   subcomponent: "&",
 };
 
-describe("the hexadecimal data `\\X0D\\` (HL7v2 §2.7.6)", () => {
+describe("the hexadecimal data `\\X0D\\`", () => {
   it("is written back as `\\X0D\\`, the byte the sender wrote", () => {
     // The sender put the byte 0x0D in the value. HL7v2 leaves its meaning to
     // the agreement between sender and receiver, so a relay forwards the byte,
@@ -59,7 +59,7 @@ describe("the hexadecimal data `\\X0D\\` (HL7v2 §2.7.6)", () => {
   });
 });
 
-describe("the formatting command `\\.br\\` (HL7v2 §2.7.7)", () => {
+describe("the formatting command `\\.br\\`", () => {
   it("is written back as `\\.br\\`, the line break the sender wrote", () => {
     // An FT value with two lines. `\.br\` tells the receiver's display to
     // start a new line; it is an instruction, not a character of the value.
@@ -70,7 +70,7 @@ describe("the formatting command `\\.br\\` (HL7v2 §2.7.7)", () => {
 });
 
 describe("a value with both `\\.br\\` and `\\X0D\\`", () => {
-  it("reads the two sequences to different values, as §2.7.7 commands display and §2.7.6 data carries bytes", () => {
+  it("reads the two sequences to different values, as one commands display and the other carries bytes", () => {
     // Two values that differ on the wire must differ once read, or no writer
     // can tell which one to send back.
     expect(escapes.read(String.raw`a\X0D\b`, d)).not.toBe(

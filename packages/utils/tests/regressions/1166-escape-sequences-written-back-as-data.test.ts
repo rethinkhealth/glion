@@ -5,17 +5,17 @@
  *
  * Symptom: some escape sequences were written back as data. `abcde\P\` came
  * back as `abcde\E\P\E\`, the eight characters `abcde\P\` rather than a value
- * the sender truncated (HL7v2 §2.7.2); `\XFF\` came back as `\E\XFF\E\`; and
+ * the sender truncated; `\XFF\` came back as `\E\XFF\E\`; and
  * `\Q\`, a code HL7v2 does not define, as `\E\Q\E\`.
  *
  * Cause: `encodeEscapes` copied a sequence through only when it matched a
  * fixed list (`\H\`, `\N\`, formatting commands other than `\.br\`, `\Z…\`,
  * `\C…\`, `\M…\`), and wrote the escape characters of any other as `\E\`.
  *
- * HL7v2 §2.7.1 lists `\P\` among the sequences every field may use, and
- * §2.7.6 leaves the meaning of `\X…\` to an agreement between the sending and
- * receiving applications. A relay that is not party to that agreement
- * forwards the sequence as it arrived.
+ * HL7v2 v2.8 and later define `\P\`, the truncation character. Every version
+ * from v2.4 to v2.8.2 leaves the meaning of `\X…\` to an agreement between the
+ * sending and receiving applications. A relay that is not party to that
+ * agreement forwards the sequence as it arrived, whatever the version.
  *
  * Resolution: ADR 0036. `escapes.write` writes only separators and control
  * characters as escape sequences, and copies every escape character as it is,
@@ -36,13 +36,13 @@ const d: Delimiters = {
 };
 
 describe("an escape sequence outside the list glion used to copy", () => {
-  it("is written back as the truncation character `\\P\\` (HL7v2 §2.7.2)", () => {
+  it("is written back as the truncation character `\\P\\`", () => {
     const received = "abcde\\P\\";
 
     expect(escapes.write(escapes.read(received, d), d)).toBe(received);
   });
 
-  it("is written back as hexadecimal data whose bytes are not UTF-8 (HL7v2 §2.7.6)", () => {
+  it("is written back as hexadecimal data whose bytes are not UTF-8", () => {
     const received = String.raw`a\XFF\b`;
 
     expect(escapes.write(escapes.read(received, d), d)).toBe(received);

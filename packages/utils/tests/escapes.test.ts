@@ -427,7 +427,7 @@ describe("escapes.write", () => {
   });
 
   it("keeps a tab after an escape character without a closing one through a relay", () => {
-    // HL7v2 §2.7.1: escape sequences do not nest. `\X09\` written after the
+    // Escape sequences do not nest. `\X09\` written after the
     // bare `\` would pair with it and lose the tab.
     const value = escapes.read("see C:\\scans\tnote", DEFAULT_DELIMITERS);
     const wire = escapes.write(value, DEFAULT_DELIMITERS);
@@ -533,7 +533,7 @@ describe("escapes.write", () => {
     expect(escapes.write("\\H\\", d)).toBe("\\E\\\\S\\\\E\\");
   });
 
-  // HL7v2 §2.7.1: a sender escapes every delimiter in a value. A value read
+  // A sender escapes every delimiter in a value. A value read
   // from the wire and written again is the value that arrived: each code of
   // the rule is read as its character and written as that code, and every
   // other escape sequence, and every escape character, stays as written.

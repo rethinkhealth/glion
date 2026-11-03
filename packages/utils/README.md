@@ -123,14 +123,13 @@ const field: Field = {
 const length = getByteLength(field); // Returns: 10
 ```
 
-### `getLength(node[, delimiters])`
+### `getLength(node)`
 
 Calculates the string length of any HL7v2 AST node. Efficiently computes the total serialized character length including all children and separators (assumed to be 1 character each).
 
 #### Parameters
 
 - `node` (`Nodes | null | undefined`) — The AST node to measure.
-- `delimiters` (`Delimiters`, optional) — The delimiters of the message. With them, each value is counted as HL7v2 §2.7.1 counts it: as `escapes.write` writes it, each escape sequence by the characters between its two escape characters. `12\E\3` counts 4, `a&b` counts 3, and a carriage return, written `\X0D\`, counts 3. A character no escape sequence can write with them counts 1.
 
 #### Returns
 
@@ -138,7 +137,7 @@ Calculates the string length of any HL7v2 AST node. Efficiently computes the tot
 
 #### Algorithm
 
-- For literal nodes (Subcomponent, SegmentHeader): returns `value.length` (JavaScript string length), or the §2.7.1 length when `delimiters` is given.
+- For literal nodes (Subcomponent, SegmentHeader): returns `value.length` (JavaScript string length).
 - For parent nodes: recursively sums the string length of all children plus 1 character per separator between children.
 - Handles all node types: Root, Segment, Group, Field, FieldRepetition, Component, Subcomponent.
 
@@ -187,7 +186,7 @@ escapes.read("1. Normal\\.br\\2. Stable", DEFAULT_DELIMITERS); // "1. Normal\\.b
 
 The text `value` takes on the wire. Each character in the table is written as its escape sequence, with a digit `A`–`F` of a `\Xdd\` in lowercase when its uppercase form is a delimiter. Every other character, the escape character included, is written as it is. Writing twice gives the same text as writing once, and a text read with `escapes.read` that holds no separator and no character below U+0020 is written back as it was read.
 
-Escape sequences do not nest (HL7v2 §2.7.1). An escape character whose closing one, or the end of the value when it has none, comes after a separator or a control character would pair with the escape sequence written for that character, so it is written `\E\`, and so is the closing one: `a\b|c` is written `a\E\b\F\c`, and `C:\scans` followed by a tab is written `C:\E\scans\X09\`. Every separator and control character is read back; the escape character comes back as `\E\`.
+Escape sequences do not nest. An escape character whose closing one, or the end of the value when it has none, comes after a separator or a control character would pair with the escape sequence written for that character, so it is written `\E\`, and so is the closing one: `a\b|c` is written `a\E\b\F\c`, and `C:\scans` followed by a tab is written `C:\E\scans\X09\`. Every separator and control character is read back; the escape character comes back as `\E\`.
 
 A data escape character is written `\E\` in the value, or `\X5C\` when `E` is a delimiter. The five delimiters must be distinct.
 

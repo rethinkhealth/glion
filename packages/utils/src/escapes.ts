@@ -82,23 +82,8 @@ const UTF8_ENCODER = new TextEncoder();
 /** Reads and writes the characters a value cannot hold as they are. */
 export const escapes: Escapes = {
   read: (text, d) => read(text, d.escape, tableFor(d)),
-  write: (value, d) => write(value, d.escape, tableFor(d), refuse),
+  write: (value, d) => write(value, d.escape, tableFor(d)),
 };
-
-/**
- * The length HL7v2 §2.7.1 counts for `value` on the wire: the text
- * `escapes.write` writes, each escape sequence by the characters between its
- * two escape characters. A character no escape sequence can write with `d`
- * counts one.
- *
- * Never throws.
- */
-export function escapedLength(value: string, d: Delimiters): number {
-  // `a&b` is written `a\T\b`: 5 characters, less the 2 escape characters, is 3.
-  const text = write(value, d.escape, tableFor(d), countAsOne);
-  const escapeCharacters = text.split(d.escape).length - 1;
-  return text.length - 2 * Math.floor(escapeCharacters / 2);
-}
 
 // ## Reading
 //
@@ -143,12 +128,7 @@ function read(text: string, escape: string, table: EscapeTable): string {
 // An escape character stays as it is, unless `dataEscapes` says otherwise. A
 // value that holds no character of the table is returned as it is, which is
 // nearly every value.
-function write(
-  value: string,
-  escape: string,
-  table: EscapeTable,
-  unwritable: (ch: string, d: Delimiters) => string
-): string {
+function write(value: string, escape: string, table: EscapeTable): string {
   if (!table.holdsCharacter.test(value)) {
     return value;
   }
@@ -161,7 +141,10 @@ function write(
     const code = ch === escape ? table.escapeCode : table.codes.get(ch);
     // With `X` and `S` both delimiters, `S` has no code: `\S\` holds `S`, and
     // every `\X53\` holds `X`.
-    return escape + (code ?? unwritable(ch, table.delimiters)) + escape;
+    if (code === undefined) {
+      throw new EscapeSequenceError(ch, table.delimiters);
+    }
+    return escape + code + escape;
   });
 }
 
@@ -194,17 +177,6 @@ function dataEscapes(
     start = end === -1 ? -1 : value.indexOf(escape, end + 1);
   }
   return data;
-}
-
-// What `write` does with a character that has no code. `escapes.write` refuses
-// it, and `escapedLength`, which never throws, counts it as one character: a
-// code of one character has the length a character counts.
-function refuse(ch: string, d: Delimiters): never {
-  throw new EscapeSequenceError(ch, d);
-}
-
-function countAsOne(ch: string): string {
-  return ch;
 }
 
 // ## The table

@@ -99,56 +99,16 @@ describe("hl7v2LintFieldMaxLength", () => {
     ]);
   });
 
-  // HL7v2 §2.7.1: an escape sequence counts the characters between its two
-  // escape characters, not the escape characters themselves.
   describe("a value with escape sequences", () => {
-    it("counts `\\E\\` as one character", async () => {
-      expect(
-        await lint(
-          msh("2.5"),
-          // PID|12\E\3
-          s("PID", f("12\\E\\3"))
-        )
-      ).toEqual([]);
-    });
-
-    it("counts a carriage return as `X0D`, the three characters it is written with", async () => {
+    it("counts every character of an escape sequence", async () => {
       const [message, ...rest] = await lint(
         msh("2.5"),
-        // PID|12\X0D\
-        s("PID", f("12\r"))
+        // PID|12\E\3
+        s("PID", f("12\\E\\3"))
       );
 
       expect(rest).toEqual([]);
-      expect(message?.actual).toBe("5");
-    });
-
-    it("counts a character the delimiters cannot write as one character", async () => {
-      // MSH-1 `X` and MSH-2 `E~\\&`: the tab in PID-1 is written `\\X09\\`,
-      // which holds the field separator.
-      const file = new VFile();
-      await unified()
-        .use(hl7v2AnnotateProfileContext)
-        .use(hl7v2AnnotateProfileFields)
-        .use(hl7v2LintFieldMaxLength)
-        .run(
-          parseHL7v2(
-            "MSHXE~\\&XSNDXFACXRCVXRFACX20241201XXADTEA01EADT_A01XMSG001XPX2.5\rPIDX123\t\r"
-          ),
-          file
-        );
-
-      expect(file.messages).toEqual([]);
-    });
-
-    it("counts a separator as `T`, the one character it is written with", async () => {
-      expect(
-        await lint(
-          msh("2.5"),
-          // PID|12\T\3
-          s("PID", f("12&3"))
-        )
-      ).toEqual([]);
+      expect(message?.actual).toBe("6");
     });
   });
 
