@@ -9,7 +9,7 @@
  * the component separator, so the parser split the sequence at it. With `E`
  * as the escape character, `EEE` did not decode back to `E` either.
  * Resolution: an escape sequence whose escape code holds a delimiter is
- * written as `\Xdd\`, the hexadecimal escape of HL7v2 §2.7.5, with lowercase
+ * written as `\Xdd\`, the hexadecimal escape of HL7v2, with lowercase
  * digits when an uppercase digit is a delimiter (`~` is `\X7e\` when `E` is
  * the field separator).
  */

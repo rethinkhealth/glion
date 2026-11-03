@@ -170,7 +170,7 @@ export class HL7v2Tokenizer implements Tokenizer, Iterable<Token> {
     }
 
     // 3. A Segment ID runs to the first field delimiter and holds no other
-    // delimiters or escape sequences (HL7v2 §2.5.2, §2.7): a line `^A|B` opens
+    // delimiters or escape sequences: a line `^A|B` opens
     // with the Segment ID `^A`, and `Z\R\Z|B` with `Z\R\Z`.
     if (this.atSegmentStart) {
       const segmentId = input.slice(offset, this.fieldEnd(offset));

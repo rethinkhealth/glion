@@ -8,8 +8,7 @@
  * Cause: the tokenizer decoded every text run that holds the escape
  * character, including the one that opens a segment.
  * Resolution: the text run that opens a segment is read as it is written. A
- * Segment ID is not a field, so it holds no escape sequences (HL7v2 §2.5.2,
- * §2.7).
+ * Segment ID is not a field, so it holds no escape sequences.
  */
 
 import { describe, expect, it } from "vitest";

@@ -62,8 +62,7 @@ type CodedPrimitive = (FieldRepetition | Component | Subcomponent) & {
  *
  * Components and subcomponents a primitive datatype does not define are
  * ignored, as HL7v2 tells the recipient to ignore "components, subcomponents,
- * and extra repetitions of a field that are present but were not expected"
- * (v2.5.1 chapter 2, section 2.6.2).
+ * and extra repetitions of a field that are present but were not expected".
  */
 function primitiveValue(
   node: FieldRepetition | Component | Subcomponent

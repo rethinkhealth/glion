@@ -5,8 +5,9 @@
  * Symptom: every Z-segment the event schema did not name was reported as
  * out of order, such as `Unexpected segment 'ZPI'. Expected: NK1, NTE, OBR,
  * ORC, PD1, PV1` for an ORU_R01 with a `ZPI` after its `PID`.
- * Cause: the runner rejected any segment its schema did not name. HL7v2 allows
- * local Z-segments in any message and segment group (v2.5.1 §2.11.1, §2.11.3).
+ * Cause: the runner rejected any segment its schema did not name. Every HL7v2
+ * version reserves Segment IDs that start with `Z` for local use, and v2.5 and
+ * later allow a Z-segment in an HL7 message and in a segment group.
  * Resolution: the runner accepts a Z-segment the schema does not name at any
  * position unless `allowZSegments` is `false`, and the rule passes its own
  * `allowZSegments` option through.
