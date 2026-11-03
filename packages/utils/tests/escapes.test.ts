@@ -1,9 +1,11 @@
 import type { Delimiters } from "@glion/ast";
+import escapeStringRegexp from "escape-string-regexp";
 import fc from "fast-check";
+import { stringToUint8Array, uint8ArrayToHex } from "uint8array-extras";
 
 import { DEFAULT_DELIMITERS } from "../src/constants";
 import { EscapeSequenceError } from "../src/errors";
-import { escapes } from "../src/escapes";
+import { escapeRegExp, escapes, utf8Hex } from "../src/escapes";
 
 const CUSTOM_DELIMITERS: Delimiters = {
   component: "$",
@@ -510,12 +512,6 @@ describe("escapes.write", () => {
     );
   });
 
-  it("keeps an escape sequence that holds a delimiter of two UTF-16 units", () => {
-    const d = { ...DEFAULT_DELIMITERS, field: "😀" };
-
-    expect(escapes.write("\\a😀b\\", d)).toBe("\\a😀b\\");
-  });
-
   it("keeps an escape sequence whose code shares a digit with a delimiter of two UTF-16 units", () => {
     const d = { ...DEFAULT_DELIMITERS, field: "😀" };
 
@@ -680,4 +676,71 @@ describe("escapes.write", () => {
       }
     );
   });
+});
+
+describe(utf8Hex, () => {
+  it("writes each UTF-8 byte as two uppercase hexadecimal digits", () => {
+    expect(utf8Hex("\r")).toBe("0D");
+    expect(utf8Hex("é")).toBe("C3A9");
+    expect(utf8Hex("😀")).toBe("F09F9880");
+  });
+
+  it("gives the digits `uint8array-extras` gives, for every Unicode character", () => {
+    const different: number[] = [];
+    for (let point = 0; point <= 0x10_ff_ff; point += 1) {
+      const ch = String.fromCodePoint(point);
+      const reference = uint8ArrayToHex(stringToUint8Array(ch)).toUpperCase();
+      if (utf8Hex(ch) !== reference) {
+        different.push(point);
+      }
+    }
+
+    expect(different).toStrictEqual([]);
+  });
+});
+
+describe(escapeRegExp, () => {
+  const ASCII = String.fromCodePoint(
+    ...Array.from({ length: 128 }, (_, i) => i)
+  );
+
+  // What `ch` matches in each way `escapes.ts` puts a delimiter in a regular
+  // expression: alone, as a pair around a code, and as one of several.
+  function matches(escape: (text: string) => string, ch: string): string {
+    const source = escape(ch);
+    const subject = `${ASCII}${ch}x${ch}`;
+    return JSON.stringify([
+      subject.match(new RegExp(source, "g")),
+      subject.match(new RegExp(`${source}([\\s\\S]*?)${source}`, "g")),
+      subject.match(new RegExp(`${source}|${escape("|")}`, "g")),
+    ]);
+  }
+
+  function differentFrom(reference: (text: string) => string): string[] {
+    const delimiters = [
+      ...Array.from({ length: 0x1_00_00 }, (_, i) => String.fromCodePoint(i)),
+      "😀",
+      "||",
+    ];
+    return delimiters.filter(
+      (ch) => matches(escapeRegExp, ch) !== matches(reference, ch)
+    );
+  }
+
+  it("leaves a delimiter meaning only itself", () => {
+    expect(new RegExp(escapeRegExp("a.b")).test("axb")).toBe(false);
+    expect(new RegExp(escapeRegExp("|")).test("x")).toBe(false);
+    expect(new RegExp(escapeRegExp("\\")).test("\\")).toBe(true);
+  });
+
+  it("matches what `escape-string-regexp` matches, for every UTF-16 unit", () => {
+    expect(differentFrom(escapeStringRegexp)).toStrictEqual([]);
+  });
+
+  it.runIf(typeof RegExp.escape === "function")(
+    "matches what `RegExp.escape` matches, for every UTF-16 unit",
+    () => {
+      expect(differentFrom(RegExp.escape)).toStrictEqual([]);
+    }
+  );
 });

@@ -73,24 +73,10 @@ export interface Escapes {
   write(value: string, d: Delimiters): string;
 }
 
-// How a carriage return, character 13, becomes the code `X0D`:
-//
-//   below CONTROL_END                 it is a control character, so it has a code
-//   UTF8_ENCODER.encode               the byte 13
-//   toString(HEX_RADIX), uppercased   `D`
-//   padStart(HEX_PAIR_LENGTH, "0")    `0D`
-//   `X` in front                      `X0D`
-//
-// A character of two UTF-8 bytes takes two pairs: `é` is `XC3A9`.
-
 // The first character that is not a control character.
 const CONTROL_END = 0x20;
-const HEX_RADIX = 16;
-// The hexadecimal digits of one byte.
-const HEX_PAIR_LENGTH = 2;
-// The hexadecimal digits of `\uXXXX` in a regular expression: a tab is `\u0009`.
-const UTF16_UNIT_LENGTH = 4;
-const UTF8_ENCODER = new TextEncoder();
+// The characters that mean something in a regular expression.
+const REGEXP_SYNTAX = /[.*+?^${}()|[\]\\]/g;
 
 /** Reads and writes the characters a value cannot hold as they are. */
 export const escapes: Escapes = {
@@ -238,32 +224,21 @@ function buildTable(d: Delimiters): EscapeTable {
     delimiters: { ...d },
     escapeCode: namedOrHexCode(d.escape, "E", d),
     escapeSequences: new RegExp(
-      `${unicodeEscapes(d.escape)}([\\s\\S]*?)${unicodeEscapes(d.escape)}`,
+      `${escapeRegExp(d.escape)}([\\s\\S]*?)${escapeRegExp(d.escape)}`,
       "g"
     ),
-    holdsCharacter: new RegExp(characterClass([...codes.keys()])),
-    writtenCharacters: new RegExp(
-      characterClass([...codes.keys(), d.escape]),
-      "g"
-    ),
+    holdsCharacter: new RegExp(anyOf([...codes.keys()])),
+    writtenCharacters: new RegExp(anyOf([...codes.keys(), d.escape]), "g"),
   };
 }
 
-// A character class that matches one UTF-16 unit. A delimiter of two units is
-// left out, since the class would match each of its units alone.
-function characterClass(characters: readonly string[]): string {
-  const units = characters.filter((ch) => ch.length === 1).map(unicodeEscapes);
-  return `[${units.join("")}]`;
+function anyOf(characters: readonly string[]): string {
+  return characters.map((ch) => escapeRegExp(ch)).join("|");
 }
 
-// Each UTF-16 unit as `\uXXXX`, so that none means anything in an expression.
-function unicodeEscapes(text: string): string {
-  let source = "";
-  for (let i = 0; i < text.length; i += 1) {
-    const hex = (text.charAt(i).codePointAt(0) ?? 0).toString(HEX_RADIX);
-    source += `\\u${hex.padStart(UTF16_UNIT_LENGTH, "0")}`;
-  }
-  return source;
+// `RegExp.escape` does this, and Node 22 does not have it.
+export function escapeRegExp(text: string): string {
+  return text.replace(REGEXP_SYNTAX, "\\$&");
 }
 
 /**
@@ -311,16 +286,18 @@ function hexCode(ch: string, d: Delimiters): string | undefined {
     return undefined;
   }
   let code = "X";
-  for (const byte of UTF8_ENCODER.encode(ch)) {
-    const pair = byte
-      .toString(HEX_RADIX)
-      .toUpperCase()
-      .padStart(HEX_PAIR_LENGTH, "0");
-    for (const digit of pair) {
-      code += holdsDelimiter(digit, d) ? digit.toLowerCase() : digit;
-    }
+  for (const digit of utf8Hex(ch)) {
+    code += holdsDelimiter(digit, d) ? digit.toLowerCase() : digit;
   }
   return holdsDelimiter(code, d) ? undefined : code;
+}
+
+// The UTF-8 bytes of `ch` as uppercase hexadecimal digits: `é` is `C3A9`.
+export function utf8Hex(ch: string): string {
+  const bytes = new TextEncoder().encode(ch);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
 }
 
 function holdsDelimiter(code: string, d: Delimiters): boolean {
