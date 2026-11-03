@@ -37,7 +37,7 @@ file.messages[0]?.fatal;
 
 ### `unified().use(hl7v2LintDelimitersDuplicate[, severity])`
 
-Reads MSH-1 and MSH-2 of the message header segment the message opens with, as `delimiters()` from `@glion/util-query` reads them. Reports on MSH-2, or on the message header segment when it has no MSH-2. Takes no options. A message that does not open with a message header segment is not reported. Reports at `warning` unless configured at `["error"]`.
+Reads MSH-1 and MSH-2 of the message header segment the message opens with, as `delimiters()` from `@glion/util-query` reads them. Reports on MSH-2. Takes no options. A message that does not open with a message header segment is not reported. Reports at `warning` unless configured at `["error"]`.
 
 ```ts
 import type { Root } from "@glion/ast";
@@ -49,7 +49,7 @@ export default hl7v2LintDelimitersDuplicate;
 
 ## What it checks
 
-A delimiter that is the same character as an earlier one is reported once, against the first delimiter with its character, and the message sets `actual` to the character. The delimiters are taken in the order field separator, component separator, repetition separator, escape character, subcomponent separator. Each message sets `note` to the HL7v2 rule it breaks.
+A delimiter that is the same character as an earlier one is reported once, against the first delimiter with its character, and the message sets `actual` to the character. The delimiters are taken in the order field separator, component separator, repetition separator, escape character, subcomponent separator. Each message sets `note` to the HL7v2 rule it breaks. `@glion/parser` ends MSH-2 at the field separator, so only a tree that was not parsed can repeat the field separator in MSH-2. The truncation character, a fifth character of MSH-2 in some HL7v2 versions, is not compared.
 
 ### Valid
 

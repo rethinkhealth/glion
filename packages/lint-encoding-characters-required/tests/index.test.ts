@@ -1,5 +1,5 @@
 import type { Segment } from "@glion/ast";
-import { f, m, s } from "@glion/builder";
+import { f, g, m, s } from "@glion/builder";
 import { hl7v2Parser, parseHL7v2 } from "@glion/parser";
 import { unified } from "unified";
 import { VFile } from "vfile";
@@ -23,7 +23,7 @@ const reasons = async (text: string) => {
 };
 
 const NOTE =
-  "HL7v2 declares the component separator, the repetition separator, the escape character, and the subcomponent separator, in that order, as the encoding characters of the message header segment. A message may leave out the escape character only when it holds no escape sequences, and the subcomponent separator only when it holds no subcomponents.";
+  "HL7v2 declares the component separator, the repetition separator, the escape character, and the subcomponent separator, in that order, as the encoding characters of the message header segment.";
 
 describe("hl7v2-lint:encoding-characters-required", () => {
   describe("a message header segment that declares four encoding characters", () => {
@@ -47,9 +47,30 @@ describe("hl7v2-lint:encoding-characters-required", () => {
       expect(await lint("PID|1\rMSH|^|APP\r")).toStrictEqual([]);
       expect(await lint("PID|1\rMSH\r")).toStrictEqual([]);
     });
+
+    it("reads only the message header segment the message opens with", async () => {
+      expect(await lint("MSH|^~\\&|APP\rMSH|^|APP\r")).toStrictEqual([]);
+    });
   });
 
-  // #1170.
+  describe("a message header segment that is the first segment, but not the first child", () => {
+    it("is reported after an empty line", async () => {
+      expect(await reasons("\rMSH|^~\\|APP\r")).toStrictEqual([
+        "The encoding characters declare no subcomponent separator.",
+      ]);
+    });
+
+    it("is reported inside a segment group", async () => {
+      const tree = m(g("HEADER", s("MSH", f("|"), f("^~\\"))));
+      const file = new VFile();
+      await unified().use(hl7v2LintEncodingCharactersRequired).run(tree, file);
+
+      expect(file.messages.map((message) => message.reason)).toStrictEqual([
+        "The encoding characters declare no subcomponent separator.",
+      ]);
+    });
+  });
+
   describe("encoding characters that leave out a delimiter", () => {
     it("reports MSH-2 for the subcomponent separator `^~&` leaves out", async () => {
       const text = "MSH|^~&|APP\rPID|1\r";

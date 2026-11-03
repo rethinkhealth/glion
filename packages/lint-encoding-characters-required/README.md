@@ -54,7 +54,7 @@ export default hl7v2LintEncodingCharactersRequired;
 | MSH-2 has fewer than 3 characters | `The encoding characters declare no escape character.`       |
 | MSH-2 has fewer than 4 characters | `The encoding characters declare no subcomponent separator.` |
 
-Each delimiter MSH-2 leaves out is reported. Each message sets `note` to the HL7v2 rule it breaks.
+Each delimiter MSH-2 leaves out is reported. Each message sets `note` to how HL7v2 declares the encoding characters.
 
 ### Valid
 

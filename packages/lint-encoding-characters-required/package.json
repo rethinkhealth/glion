@@ -49,6 +49,7 @@
   "dependencies": {
     "@glion/ast": "workspace:*",
     "@glion/util-query": "workspace:*",
+    "@glion/utils": "workspace:*",
     "unified": "11.0.5",
     "unified-lint-rule": "3.0.1"
   },

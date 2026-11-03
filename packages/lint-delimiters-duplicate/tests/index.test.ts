@@ -1,5 +1,5 @@
 import type { Segment } from "@glion/ast";
-import { f, m, s } from "@glion/builder";
+import { f, g, m, s } from "@glion/builder";
 import { hl7v2Parser, parseHL7v2 } from "@glion/parser";
 import { unified } from "unified";
 import { VFile } from "vfile";
@@ -42,6 +42,28 @@ describe("hl7v2-lint:delimiters-duplicate", () => {
     it("is not reported", async () => {
       expect(await lint("PID|1\r")).toStrictEqual([]);
       expect(await lint("PID|1\rMSH|^^^^|APP\r")).toStrictEqual([]);
+    });
+
+    it("reads only the message header segment the message opens with", async () => {
+      expect(await lint("MSH|^~\\&|APP\rMSH|^^^^|APP\r")).toStrictEqual([]);
+    });
+  });
+
+  describe("a message header segment that is the first segment, but not the first child", () => {
+    it("is reported after an empty line", async () => {
+      expect(await reasons("\rMSH|^^~\\|APP\r")).toStrictEqual([
+        "The repetition separator is the same character as the component separator.",
+      ]);
+    });
+
+    it("is reported inside a segment group", async () => {
+      const tree = m(g("HEADER", s("MSH", f("|"), f("^^~\\"))));
+      const file = new VFile();
+      await unified().use(hl7v2LintDelimitersDuplicate).run(tree, file);
+
+      expect(file.messages.map((message) => message.reason)).toStrictEqual([
+        "The repetition separator is the same character as the component separator.",
+      ]);
     });
   });
 
