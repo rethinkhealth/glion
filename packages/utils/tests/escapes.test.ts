@@ -495,10 +495,16 @@ describe("escapes.write", () => {
 
     expect(error).toBeInstanceOf(EscapeSequenceError);
     expect((error as EscapeSequenceError).character).toBe("S");
-    expect((error as EscapeSequenceError).delimiters).toBe(d);
+    expect((error as EscapeSequenceError).delimiters).toStrictEqual(d);
     expect((error as EscapeSequenceError).message).toBe(
       "The value holds a character that must be written as an escape sequence, and every escape sequence for it holds one of the message's delimiters. With delimiters that are ASCII punctuation, every character can be written."
     );
+  });
+
+  it("keeps an escape sequence whose code shares a digit with a delimiter of two UTF-16 units", () => {
+    const d = { ...DEFAULT_DELIMITERS, field: "😀" };
+
+    expect(escapes.write("\\a0b\\", d)).toBe("\\a0b\\");
   });
 
   it("writes a hex digit in lowercase only where its uppercase form is a delimiter", () => {
