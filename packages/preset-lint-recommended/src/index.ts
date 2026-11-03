@@ -1,3 +1,5 @@
+import hl7v2LintDelimitersDuplicate from "@glion/lint-delimiters-duplicate";
+import hl7v2LintEncodingCharactersRequired from "@glion/lint-encoding-characters-required";
 import hl7v2LintMessageVersion from "@glion/lint-message-version";
 import hl7v2LintNoTrailingEmptyField from "@glion/lint-no-trailing-empty-field";
 import hl7v2LintRequiredMessageHeader from "@glion/lint-required-message-header";
@@ -32,8 +34,10 @@ const hl7v2PresetLintRecommended: Preset = {
     [hl7v2LintSegmentHeaderLength, ["error"]],
     [hl7v2LintRequiredMessageHeader, ["error"]],
     [hl7v2LintMessageVersion, ["error"]],
+    [hl7v2LintDelimitersDuplicate, ["error"]],
     hl7v2LintNoTrailingEmptyField,
     hl7v2LintSegmentTerminator,
+    hl7v2LintEncodingCharactersRequired,
   ],
 };
 

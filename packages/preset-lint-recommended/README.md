@@ -38,15 +38,17 @@ Default export is a `Preset` (unified's `{ plugins: [...] }` shape). No options 
 
 ## What's bundled
 
-The preset applies these rules in order. Three are configured at `error` severity; `no-trailing-empty-field` and `segment-terminator` use their default severity, `warning`.
+The preset applies these rules in order. Four are configured at `error` severity; `no-trailing-empty-field`, `segment-terminator`, and `encoding-characters-required` use their default severity, `warning`.
 
-| Plugin                                                                   | Purpose                                                      |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| [`@glion/lint-segment-header-length`](../lint-segment-header-length)     | Flags segment headers that are not exactly three characters. |
-| [`@glion/lint-required-message-header`](../lint-required-message-header) | Flags messages whose first segment is not `MSH`.             |
-| [`@glion/lint-message-version`](../lint-message-version)                 | Flags `MSH-12` values outside the configured semver range.   |
-| [`@glion/lint-no-trailing-empty-field`](../lint-no-trailing-empty-field) | Flags segments that end with two or more empty fields.       |
-| [`@glion/lint-segment-terminator`](../lint-segment-terminator)           | Flags segments that do not end with a carriage return.       |
+| Plugin                                                                             | Purpose                                                      |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [`@glion/lint-segment-header-length`](../lint-segment-header-length)               | Flags segment headers that are not exactly three characters. |
+| [`@glion/lint-required-message-header`](../lint-required-message-header)           | Flags messages whose first segment is not `MSH`.             |
+| [`@glion/lint-message-version`](../lint-message-version)                           | Flags `MSH-12` values outside the configured semver range.   |
+| [`@glion/lint-delimiters-duplicate`](../lint-delimiters-duplicate)                 | Flags two delimiters that are the same character.            |
+| [`@glion/lint-no-trailing-empty-field`](../lint-no-trailing-empty-field)           | Flags segments that end with two or more empty fields.       |
+| [`@glion/lint-segment-terminator`](../lint-segment-terminator)                     | Flags segments that do not end with a carriage return.       |
+| [`@glion/lint-encoding-characters-required`](../lint-encoding-characters-required) | Flags an `MSH-2` that leaves out a delimiter.                |
 
 The companion `@glion/preset-lint-profile-recommended` covers profile-driven, version-specific lint rules; use both together for comprehensive validation.
 
