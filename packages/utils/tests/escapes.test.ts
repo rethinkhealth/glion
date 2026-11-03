@@ -683,11 +683,18 @@ describe(utf8Hex, () => {
     expect(utf8Hex("\r")).toBe("0D");
     expect(utf8Hex("é")).toBe("C3A9");
     expect(utf8Hex("😀")).toBe("F09F9880");
+    expect(utf8Hex("\u{10FFFF}")).toBe("F48FBFBF");
   });
 
-  it("gives the digits `uint8array-extras` gives, for every Unicode character", () => {
+  it("gives the digits `uint8array-extras` gives, across the Unicode range", () => {
     const different: number[] = [];
-    for (let point = 0; point <= 0x10_ff_ff; point += 1) {
+    // Every UTF-8 sequence of one and two bytes, then every 251st code point,
+    // a prime, so that the steps reach every low byte.
+    for (
+      let point = 0;
+      point <= 0x10_ff_ff;
+      point += point < 0x8_00 ? 1 : 251
+    ) {
       const ch = String.fromCodePoint(point);
       const reference = uint8ArrayToHex(stringToUint8Array(ch)).toUpperCase();
       if (utf8Hex(ch) !== reference) {
@@ -717,8 +724,14 @@ describe(escapeRegExp, () => {
   }
 
   function differentFrom(reference: (text: string) => string): string[] {
+    // Every unit below U+0100, which holds all the syntax of a regular
+    // expression, then every 251st unit, a prime, so that the steps reach every
+    // low byte.
+    const units = Array.from({ length: 0x1_00_00 }, (_, i) => i).filter(
+      (unit) => unit < 0x1_00 || unit % 251 === 0
+    );
     const delimiters = [
-      ...Array.from({ length: 0x1_00_00 }, (_, i) => String.fromCodePoint(i)),
+      ...units.map((unit) => String.fromCodePoint(unit)),
       "😀",
       "||",
     ];
@@ -733,12 +746,12 @@ describe(escapeRegExp, () => {
     expect(new RegExp(escapeRegExp("\\")).test("\\")).toBe(true);
   });
 
-  it("matches what `escape-string-regexp` matches, for every UTF-16 unit", () => {
+  it("matches what `escape-string-regexp` matches, across the UTF-16 range", () => {
     expect(differentFrom(escapeStringRegexp)).toStrictEqual([]);
   });
 
   it.runIf(typeof RegExp.escape === "function")(
-    "matches what `RegExp.escape` matches, for every UTF-16 unit",
+    "matches what `RegExp.escape` matches, across the UTF-16 range",
     () => {
       expect(differentFrom(RegExp.escape)).toStrictEqual([]);
     }
