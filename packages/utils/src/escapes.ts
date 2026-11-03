@@ -73,9 +73,22 @@ export interface Escapes {
   write(value: string, d: Delimiters): string;
 }
 
+// How a carriage return, character 13, becomes the code `X0D`:
+//
+//   below CONTROL_END                 it is a control character, so it has a code
+//   UTF8_ENCODER.encode               the byte 13
+//   toString(HEX_RADIX), uppercased   `D`
+//   padStart(HEX_PAIR_LENGTH, "0")    `0D`
+//   `X` in front                      `X0D`
+//
+// A character of two UTF-8 bytes takes two pairs: `é` is `XC3A9`.
+
+// The first character that is not a control character.
 const CONTROL_END = 0x20;
 const HEX_RADIX = 16;
+// The hexadecimal digits of one byte.
 const HEX_PAIR_LENGTH = 2;
+// The hexadecimal digits of `\uXXXX` in a regular expression: a tab is `\u0009`.
 const UTF16_UNIT_LENGTH = 4;
 const UTF8_ENCODER = new TextEncoder();
 
@@ -87,34 +100,21 @@ export const escapes: Escapes = {
 
 // ## Reading
 //
-// Walks the text one pair of escape characters at a time. The code between a
-// pair is looked up in the table, and a code the table does not hold stays in
-// the value as written. `a\T\b\.br\c` becomes `a&b\.br\c`:
+// Finds each pair of escape characters, left to right, and looks up the code
+// between them. `a\T\b\.br\c` becomes `a&b\.br\c`:
 //
-//   pair \T\     T is in the table:  copy `a`, then `&`
-//   pair \.br\   not in the table:   nothing to copy yet
-//   end                              copy the rest, `b\.br\c`
+//   \T\     `T` stands for `&`:   `&`
+//   \.br\   not in the table:    stays as written
+//
+// An escape character without a closing one is no pair, so it stays as written.
 function read(text: string, escape: string, table: EscapeTable): string {
-  let value = "";
-  // Where the text not yet copied to `value` starts.
-  let copied = 0;
-  let start = text.indexOf(escape);
-
-  while (start !== -1) {
-    const end = text.indexOf(escape, start + 1);
-    if (end === -1) {
-      // An escape character without a closing one stays as written.
-      break;
-    }
-    const ch = table.characters.get(text.slice(start + 1, end));
-    if (ch !== undefined) {
-      value += text.slice(copied, start) + ch;
-      copied = end + 1;
-    }
-    start = text.indexOf(escape, end + 1);
+  if (!text.includes(escape)) {
+    return text;
   }
-
-  return value + text.slice(copied);
+  return text.replace(
+    table.escapeSequences,
+    (sequence, code: string) => table.characters.get(code) ?? sequence
+  );
 }
 
 // ## Writing
@@ -197,6 +197,8 @@ interface EscapeTable {
   readonly characters: ReadonlyMap<string, string>;
   /** The code that writes the escape character as data. */
   readonly escapeCode: string | undefined;
+  /** Matches each pair of escape characters, and captures the code between. */
+  readonly escapeSequences: RegExp;
   /** Matches any character of `codes`. */
   readonly holdsCharacter: RegExp;
   /** Matches every character of `codes`, and the escape character. */
@@ -235,6 +237,10 @@ function buildTable(d: Delimiters): EscapeTable {
     codes,
     delimiters: { ...d },
     escapeCode: namedOrHexCode(d.escape, "E", d),
+    escapeSequences: new RegExp(
+      `${unicodeEscapes(d.escape)}([\\s\\S]*?)${unicodeEscapes(d.escape)}`,
+      "g"
+    ),
     holdsCharacter: new RegExp(characterClass([...codes.keys()])),
     writtenCharacters: new RegExp(
       characterClass([...codes.keys(), d.escape]),
@@ -243,17 +249,21 @@ function buildTable(d: Delimiters): EscapeTable {
   };
 }
 
-// A character class that matches one UTF-16 unit, with each character as
-// `\uXXXX`, so that none means anything in the expression. A delimiter of two
-// units is left out, since the class would match each of its units alone.
+// A character class that matches one UTF-16 unit. A delimiter of two units is
+// left out, since the class would match each of its units alone.
 function characterClass(characters: readonly string[]): string {
-  const units = characters
-    .filter((ch) => ch.length === 1)
-    .map((ch) => {
-      const hex = (ch.codePointAt(0) ?? 0).toString(HEX_RADIX);
-      return `\\u${hex.padStart(UTF16_UNIT_LENGTH, "0")}`;
-    });
+  const units = characters.filter((ch) => ch.length === 1).map(unicodeEscapes);
   return `[${units.join("")}]`;
+}
+
+// Each UTF-16 unit as `\uXXXX`, so that none means anything in an expression.
+function unicodeEscapes(text: string): string {
+  let source = "";
+  for (let i = 0; i < text.length; i += 1) {
+    const hex = (text.charAt(i).codePointAt(0) ?? 0).toString(HEX_RADIX);
+    source += `\\u${hex.padStart(UTF16_UNIT_LENGTH, "0")}`;
+  }
+  return source;
 }
 
 /**
