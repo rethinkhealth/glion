@@ -1,5 +1,59 @@
 # @rethinkhealth/hl7v2
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1169](https://github.com/rethinkhealth/glion/pull/1169) [`d2a29e4`](https://github.com/rethinkhealth/glion/commit/d2a29e4f20510c645847823cdc8c37b0ed01b96e) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** change only the characters that cannot appear in a value as they are, the separators and the control characters, and keep everything else as written in both directions, so a message read and written again is the message that was sent.
+
+  - Decode `\F\`, `\S\`, `\R\`, and `\T\` to the separators, and the `\Xdd\` of a character below U+0020, such as `\X0D\`, to that character. Keep every other sequence in the value as written: `\E\`, `\P\`, `\H\`, `\N\`, `\.br\`, any other `\X…\`, `\Z…\`, `\C…\`, `\M…\`, and a code HL7v2 does not define.
+  - Change `\.br\` to stay as written instead of decoding to a carriage return, `\XC3A9\` to stay as written instead of decoding to `é`, and `\E\` to stay as written instead of decoding to the escape character. A value read by `@glion/parser`, `@glion/hl7v2`, the NAK and ACK text of `@glion/mllp-client`, and the output of `glion send` hold these sequences as written.
+  - Write a carriage return in a value as `\X0D\` instead of `\.br\`, so `\X0D\` is no longer written back as `\.br\`. With `X`, `0`, or both `D` and `d` among the delimiters, a value holding a carriage return now throws `EscapeSequenceError`.
+  - Write every escape sequence in a value as it is, so `\P\`, `\Q\`, and `\XFF\` are no longer written back as `\E\P\E\`, `\E\Q\E\`, and `\E\XFF\E\`, and `C:\temp` is no longer written as `C:\E\temp`. A data escape character is written `\E\` in the value, or `\X5C\` when `E` is a delimiter.
+  - Write an escape character as `\E\` when a separator or a control character comes after it and before its closing one, or the end of the value when it has none, so that it does not pair with their escape sequences: `a\b|c` is written `a\E\b\F\c`, and a tab after a bare `\` is kept through a relay.
+  - Fix `escapes.write` and `escapes.read` for a delimiter of two UTF-16 units, so `a😀b` with the field separator `😀` is written `a\F\b` instead of as it is, and `a🙂T🙂b` with the escape character `🙂` is read as `a&b` ([#1190](https://github.com/rethinkhealth/glion/issues/1190)).
+  - Replace `decodeEscapes(value, delimiters)` and `encodeEscapes(value, delimiters)` in `@glion/utils` with `escapes.read(text, delimiters)` and `escapes.write(value, delimiters)`.
+  - `getLength` and `@glion/lint-profile-field-max-length` count the characters a value holds, so `12\E\3`, which now stays as written, is 6 characters long, not 4.
+  - Change `@glion/decode-escapes` and `@glion/encode-escapes` to apply `escapes.read` and `escapes.write` to every subcomponent value outside MSH-1 and MSH-2, with the delimiters MSH declares when no other delimiters are given, so a plugin reads and writes a value as `@glion/parser` and `@glion/to-hl7v2` do.
+
+- [#1159](https://github.com/rethinkhealth/glion/pull/1159) [`d697238`](https://github.com/rethinkhealth/glion/commit/d697238293eb59554cbe79695c1af882fc4fb9db) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** an empty line is read as a segment with an empty Segment ID, no fields, and the terminator that ended it, so a message is written back with its empty lines. Before, an empty line was dropped without a trace ([#1158](https://github.com/rethinkhealth/glion/issues/1158)). `@glion/lint-segment-header-length` reports each one at `error`, `@glion/lint-required-message-header` reports one before `MSH`, and `@glion/lint-profile-segment-order` reports each one the event schema has no place for: an `Hxx` segment of the event schema can take it. The message header is read after the empty lines before it: an empty line before `MSH` no longer stops MSH-1 and MSH-2 being read, which lost MSH-2 on output. An empty line after the last segment is a segment, so `@glion/lint-profile-segment-order` reports a segment missing at the end of the message next to that line, at its start or its end, rather than at the end of the message.
+
+  `glion send` sends each empty line of a message file as an empty segment, a carriage return alone, and counts it among the segments it reports.
+
+- [#1138](https://github.com/rethinkhealth/glion/pull/1138) [`dcefdc9`](https://github.com/rethinkhealth/glion/commit/dcefdc9ff2af60dc18898f655405c42aae04cfd9) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** the parser reads the text it is given and never rewrites it, so every `position` is a span of that text (ADR 0034). A segment ends at `\r`, `\n`, or `\r\n`. Before, the default preprocessing steps replaced each `\r\n` with `\r`, so every position after a `\r\n` pointed one character early ([#1139](https://github.com/rethinkhealth/glion/issues/1139)). A byte order mark is still removed by `stripBOM`, and positions count from the character after it.
+
+  **Breaking:** the root's `position` covers the message from its first character to its last, the line breaks after its last segment included: `MSH|^~\&\rPID|1\r` gives a root at 0–15, not 0–14. A segment still ends at its last character, before its line break. A finding placed at the end of the message, such as a segment missing at the end in `@glion/lint-profile-segment-order`, is now after those line breaks: with one segment terminator, at the start of the next line.
+
+  **Breaking:** the `normalizeNewlines` preprocessing step is removed, and `defaultPreprocessors` holds `stripBOM` and `detectDelimiters`.
+
+  An MSH-2 shorter than four characters ends at the first field separator or line break, and so do the encoding characters `detectDelimiters` reads: `MSH|^~\` followed by `\r` no longer swallows the next segment into MSH-2, and `MSH|^~\|APP` no longer swallows MSH-3 ([#1140](https://github.com/rethinkhealth/glion/issues/1140)). `MSH` followed by a line break is read as a segment with no fields. `HL7v2Tokenizer.next()` before `reset()` returns `null`. `parseHL7v2` throws a `TypeError` when its input is not a string, such as the `Buffer` a file read without an encoding gives, instead of failing inside a preprocessing step.
+
+- [#1177](https://github.com/rethinkhealth/glion/pull/1177) [`4b1063d`](https://github.com/rethinkhealth/glion/commit/4b1063dc6ae353c77451e6e4e50bb38b4e8a0b1e) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** rename the `TokenType` values for the delimiters to the names HL7v2 gives them.
+
+  - Rename `FIELD_DELIM` to `FIELD_SEPARATOR`, `REPETITION_DELIM` to `REPETITION_SEPARATOR`, `COMPONENT_DELIM` to `COMPONENT_SEPARATOR`, and `SUBCOMP_DELIM` to `SUBCOMPONENT_SEPARATOR`
+
+- [#1156](https://github.com/rethinkhealth/glion/pull/1156) [`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** the segment terminator is a carriage return, `\r`, and no setting changes it, as HL7v2 Chapter 2 requires: "The segment terminator is always a carriage return." `Delimiters` and `DEFAULT_DELIMITERS` no longer have a `segment` key, and a configuration that sets `settings.delimiters.segment` is rejected. `@glion/utils` exports `SEGMENT_TERMINATOR`, `"\r"`. The parser ends a segment at `\r`, and `@glion/to-hl7v2` writes `\r` after each segment.
+
+- [#1148](https://github.com/rethinkhealth/glion/pull/1148) [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00) Thanks [@meleksomai](https://github.com/meleksomai)! - A segment records the characters that end it in `Segment.terminator` (ADR 0035). `@glion/parser` sets it to what ended the segment in the text it was read from (`\r`, `\n`, or `\r\n`), and to `""` for a last segment with nothing after it. `s()` in `@glion/builder` sets it to `\r`, so a built segment carries the key.
+
+  **Breaking:** `Segment.terminator` is required, so a segment made as an object literal states it.
+
+  `@glion/parser` takes a `lineBreaks` option: `true`, the default, reads a line feed and a carriage return and a line feed as segment ends, as before; `false` ends a segment only at a carriage return, as HL7v2 Chapter 2 requires, and reads a line feed as data. A `SEGMENT_END` token's `value` holds the characters it covers.
+
+- [#1178](https://github.com/rethinkhealth/glion/pull/1178) [`6c034fe`](https://github.com/rethinkhealth/glion/commit/6c034fed8da07fb7565ffc1cdea447c23990dbd1) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** a delimiter MSH-2 does not declare is absent, and the message is read without it. `MSH|^~&` declares the escape character `&` and no subcomponent separator, so `a&F&b` is the one value `a|b`, where it was read as the subcomponents `a`, `F`, and `b` ([#1170](https://github.com/rethinkhealth/glion/issues/1170)). In a message that opens `MSH|^~\`, `&` is data.
+
+  - Change `Delimiters` in `@glion/ast`: `component`, `repetition`, `escape`, and `subcomponent` are optional, and absent when MSH-2 does not declare them
+  - Change `detectDelimiters` in `@glion/parser` and `delimiters()` in `@glion/util-query` to leave out a delimiter MSH-2 does not declare, where they gave it its default; a message without a message header segment is still read with `|^~\&`
+  - Add `MissingSeparatorError` to `@glion/to-hl7v2`, thrown for a field, field repetition, or component with more than one child and no separator to write them apart
+  - Add `MissingEscapeCharacterError` to `@glion/utils`, a subclass of `EscapeSequenceError` that `escapes.write` throws for a separator or line break when the delimiters have no escape character, writing every other character as it is; `escapes.read` returns the text as it is
+
+### Patch Changes
+
+- Updated dependencies [[`6c034fe`](https://github.com/rethinkhealth/glion/commit/6c034fed8da07fb7565ffc1cdea447c23990dbd1), [`d2a29e4`](https://github.com/rethinkhealth/glion/commit/d2a29e4f20510c645847823cdc8c37b0ed01b96e), [`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00), [`6c034fe`](https://github.com/rethinkhealth/glion/commit/6c034fed8da07fb7565ffc1cdea447c23990dbd1)]:
+  - @glion/utils@0.32.0
+  - @glion/ast@0.32.0
+  - @glion/config@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes
