@@ -46,14 +46,12 @@ const hl7v2LintEncodingCharactersRequired = lintRule<Root>(
     const msh2 = header.children[1];
     const declared = value(header, "2")?.value ?? "";
 
-    for (const [i, delimiter] of ENCODING_CHARACTERS.entries()) {
-      if (declared.charAt(i) === "") {
-        const message = file.message(MISSING[delimiter], {
-          ancestors: msh2 ? [tree, header, msh2] : [tree, header],
-          place: (msh2 ?? header).position,
-        });
-        message.note = note;
-      }
+    for (const delimiter of ENCODING_CHARACTERS.slice(declared.length)) {
+      const message = file.message(MISSING[delimiter], {
+        ancestors: msh2 ? [tree, header, msh2] : [tree, header],
+        place: (msh2 ?? header).position,
+      });
+      message.note = note;
     }
   }
 );
