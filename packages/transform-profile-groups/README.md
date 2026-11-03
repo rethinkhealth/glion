@@ -64,10 +64,10 @@ value(tree, "PATIENT_RESULT.ORDER_OBSERVATION[1].OBSERVATION[2].OBX.5")?.value; 
 
 ## Options
 
-| Option           | Type                                                   | Default                | Description                                                                                                                                                 |
-| ---------------- | ------------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `definition`     | `EventSchema \| (context) => EventSchema \| undefined` | the schema MSH-9 names | The event schema to group by, or a function of `{ tree, file }` that returns one, sync or async. `undefined` falls back to the schema MSH-9 names.          |
-| `allowZSegments` | `boolean`                                              | `true`                 | Whether a Z-segment the event schema does not name fits at any position, as HL7v2 allows (v2.5.1 §2.11). When `false`, such a segment leaves the tree flat. |
+| Option           | Type                                                   | Default                | Description                                                                                                                                                                                                                                                             |
+| ---------------- | ------------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `definition`     | `EventSchema \| (context) => EventSchema \| undefined` | the schema MSH-9 names | The event schema to group by, or a function of `{ tree, file }` that returns one, sync or async. `undefined` falls back to the schema MSH-9 names.                                                                                                                      |
+| `allowZSegments` | `boolean`                                              | `true`                 | Whether a Z-segment the event schema does not name fits at any position: every HL7v2 version reserves Segment IDs that start with `Z` for local use, and tells the recipient to ignore a segment it does not expect. When `false`, such a segment leaves the tree flat. |
 
 An event schema of your own groups a message the bundled schemas do not define, such as one with a site's Z-segment:
 

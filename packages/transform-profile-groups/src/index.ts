@@ -29,8 +29,9 @@ export interface TransformProfileGroupsOptions {
       ) => EventSchema | undefined | Promise<EventSchema | undefined>);
   /**
    * Whether a Z-segment (a segment ID that starts with `Z`) that the event
-   * schema does not name fits at any position. HL7v2 allows local Z-segments
-   * in any message and segment group (v2.5.1 §2.11). When `false`, such a
+   * schema does not name fits at any position. Every HL7v2 version reserves
+   * Segment IDs that start with `Z` for local use, and tells the recipient to
+   * ignore a segment it does not expect. When `false`, such a
    * segment leaves the tree flat. Default: `true`.
    */
   allowZSegments?: boolean;
