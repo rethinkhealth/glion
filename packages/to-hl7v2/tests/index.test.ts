@@ -370,19 +370,19 @@ describe("segment terminator", () => {
 });
 
 describe("trailing empty fields", () => {
-  it("writes a field delimiter for each trailing empty field", () => {
+  it("writes a field separator for each trailing empty field", () => {
     const tree = m(s("PID", f("12345"), f("DOE", "JOHN"), f(), f()));
 
     expect(toHl7v2(tree)).toBe("PID|12345|DOE^JOHN||\r");
   });
 
-  it("writes a field delimiter for a trailing empty field in MSH", () => {
+  it("writes a field separator for a trailing empty field in MSH", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&"), f("SENDER"), f()));
 
     expect(toHl7v2(tree)).toBe("MSH|^~\\&|SENDER|\r");
   });
 
-  it("writes a segment with one empty field as its Segment ID and a field delimiter", () => {
+  it("writes a segment with one empty field as its Segment ID and a field separator", () => {
     expect(toHl7v2(s("PID", f()))).toBe("PID|");
   });
 
@@ -445,7 +445,7 @@ describe("getSegmentName graceful degradation", () => {
   });
 
   describe("real-world malformed HL7v2 scenarios", () => {
-    it("handles corrupted message starting with field delimiter gracefully", () => {
+    it("handles corrupted message starting with field separator gracefully", () => {
       // This would result from parsing "|SOME_APP|FACILITY|"
       // where the segment name is missing
       const corruptedSegment = s("PID", f(c("")), f("SOME_APP"));

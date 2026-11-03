@@ -9,7 +9,7 @@
 //                        component, repetition, escape, subcomponent
 //
 // No delimiter opens MSH-1: it is whatever character follows `MSH`. MSH-2 holds
-// up to four encoding characters, and ends at the next field delimiter or
+// up to four encoding characters, and ends at the next field separator or
 // segment terminator: `MSH|^~\|APP` and `MSH|^~\` then `\r` both declare
 // `^~\`. Empty lines before `MSH` are skipped: in `\rMSH|^~\&`, `MSH` is at
 // offset 1.
@@ -62,7 +62,7 @@ export const readMessageHeader = (
 
 /**
  * The encoding characters MSH-2 holds: its characters up to the fourth, the
- * field delimiter `field`, a segment terminator, or the end of `input`,
+ * field separator `field`, a segment terminator, or the end of `input`,
  * whichever comes first.
  */
 export const readEncodingCharacters = (
