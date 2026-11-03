@@ -4,6 +4,8 @@
 
 Accepted — supersedes [ADR 0002](./0002-message-metadata-storage.md)
 
+[ADR 0037](./0037-delimiters-are-read-from-the-tree.md) supersedes the delimiters part of this decision: they are read from the tree, and `file.data.delimiters` is removed.
+
 ## Context
 
 The unified ecosystem provides two storage locations for metadata during processing:

@@ -2295,7 +2295,7 @@ exports[`parser > component Separator Handling > handles leading component separ
 }
 `;
 
-exports[`parser > component Separator Handling > keeps trailing empty component when delimiter ends the field 1`] = `
+exports[`parser > component Separator Handling > keeps trailing empty component when a separator ends the field 1`] = `
 {
   "children": [
     {
@@ -4087,7 +4087,7 @@ exports[`parser > subcomponent Separator Handling > handles subcomponents across
 }
 `;
 
-exports[`parser > subcomponent Separator Handling > keeps trailing empty subcomponent when delimiter ends the field 1`] = `
+exports[`parser > subcomponent Separator Handling > keeps trailing empty subcomponent when a separator ends the field 1`] = `
 {
   "children": [
     {

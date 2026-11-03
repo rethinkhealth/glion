@@ -10,7 +10,6 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@glion/annotate-delimiters": "workspace:*",
     "@glion/ast": "workspace:*",
     "@glion/builder": "workspace:*",
     "@glion/hl7v2": "workspace:*",

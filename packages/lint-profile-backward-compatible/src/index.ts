@@ -12,7 +12,11 @@ import type {
   Root,
   Subcomponent,
 } from "@glion/ast";
-import { EscapeSequenceError, toHl7v2 } from "@glion/to-hl7v2";
+import {
+  EscapeSequenceError,
+  MissingSeparatorError,
+  toHl7v2,
+} from "@glion/to-hl7v2";
 import { delimiters } from "@glion/util-query";
 import { SKIP, visit } from "@glion/util-visit";
 import { isEmptyNode, Optionality } from "@glion/utils";
@@ -37,8 +41,10 @@ function hl7v2Text(
   try {
     return toHl7v2(node, d);
   } catch (error) {
-    // Stryker disable next-line ConditionalExpression: toHl7v2 throws only EscapeSequenceError for a field, a component, or a subcomponent
-    if (error instanceof EscapeSequenceError) {
+    if (
+      error instanceof EscapeSequenceError ||
+      error instanceof MissingSeparatorError
+    ) {
       return undefined;
     }
     throw error;

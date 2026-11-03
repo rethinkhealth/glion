@@ -1,7 +1,8 @@
-import type { Delimiters, Segment } from "@glion/ast";
-import { f, m, s } from "@glion/builder";
+import type { Delimiters, Group, Segment } from "@glion/ast";
+import { f, g, m, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
 import { unified } from "unified";
+import type { Settings } from "unified";
 
 import { hl7v2DecodeEscapes } from "../src/index";
 
@@ -175,5 +176,47 @@ describe("hl7v2DecodeEscapes plugin", () => {
       (results.children[0] as Segment)?.children[0]?.children[0]?.children[0]
         ?.children[0]?.value
     ).toBe("PlainValue");
+  });
+
+  it("reads a message without a message header with the delimiters of the processor's settings", async () => {
+    const tree = m(s("PID", f("a\\F\\b")));
+
+    const results = await unified()
+      .data("settings", { delimiters: { field: "*" } } as Settings)
+      .use(hl7v2DecodeEscapes)
+      .run(tree);
+
+    expect(
+      (results.children[0] as Segment)?.children[0]?.children[0]?.children[0]
+        ?.children[0]?.value
+    ).toBe("a*b");
+  });
+
+  it("reads the fields of an MSH later in the message", async () => {
+    const tree = m(s("BHS", f("1")), s("MSH", f("a\\F\\b"), f("c\\F\\d")));
+
+    const results = await unified().use(hl7v2DecodeEscapes).run(tree);
+    const later = results.children[1] as Segment;
+
+    expect(
+      later.children.map(
+        (field) => field.children[0]?.children[0]?.children[0]?.value
+      )
+    ).toStrictEqual(["a|b", "c|d"]);
+  });
+
+  it("leaves MSH-1 and MSH-2 of a message header inside a group as they are", async () => {
+    const tree = m(
+      g("HEADER", s("MSH", f("|"), f("^~\\&\\F\\"), f("a\\F\\b")))
+    );
+
+    const results = await unified().use(hl7v2DecodeEscapes).run(tree);
+    const header = (results.children[0] as Group).children[0] as Segment;
+
+    expect(
+      header.children.map(
+        (field) => field.children[0]?.children[0]?.children[0]?.value
+      )
+    ).toStrictEqual(["|", "^~\\&\\F\\", "a|b"]);
   });
 });

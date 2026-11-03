@@ -6,7 +6,7 @@
  * starts with the field separator lost it: `|a|b` was read as Segment ID `a`
  * with one field `b`, and `|` was dropped.
  * Cause: the flag that skips the field separator after a Segment ID was not
- * cleared at the segment delimiter, so it skipped the next line's first field
+ * cleared at the segment terminator, so it skipped the next line's first field
  * separator instead.
  * Resolution: the parser keeps no such flag (ADR 0033, #1097). A line that
  * starts with the field separator has an empty Segment ID after any segment.

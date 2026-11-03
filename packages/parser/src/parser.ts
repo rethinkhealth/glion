@@ -19,7 +19,7 @@ import type { ParseOptions, ParserContext } from "./types";
 //      terminators, and text (`tokenizer.ts`).
 //   4. The processor, which builds the tree from the tokens (`processor.ts`).
 //
-// No step rewrites the message, so every position is a span of the text as it
+// No step rewrites the input, so every position is a span of the text as it
 // was given, counted from the character after a byte order mark.
 
 /**
@@ -47,25 +47,25 @@ export function parseHL7v2(
     input,
     lineBreaks: opts.lineBreaks,
   };
-  const preprocessed = runPreprocessors(
-    context,
-    opts.preprocess ?? defaultPreprocessors
-  );
   const tokenizer = new HL7v2Tokenizer({ decodeEscapes: opts.decodeEscapes });
-  tokenizer.reset(preprocessed);
+  tokenizer.reset(
+    runPreprocessors(context, opts.preprocess ?? defaultPreprocessors)
+  );
   return parseHL7v2FromIterator(tokenizer);
 }
 
+/**
+ * Reads a message into a tree.
+ *
+ * Reads the delimiters for a message without a message header segment from the
+ * processor's `settings`.
+ */
 const hl7v2Parser: Plugin<[ParseOptions?], string, Root> = function hl7v2Parser(
   this: Processor,
   options = {}
 ) {
-  this.parser = (document: string) => {
-    // Get settings from processor (populated by unified-args from config)
-    const settings = this.data("settings");
-
-    return parseHL7v2(document, options, settings);
-  };
+  this.parser = (document) =>
+    parseHL7v2(document, options, this.data("settings"));
 };
 
 export default hl7v2Parser;

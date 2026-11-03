@@ -5,7 +5,7 @@
  * Symptom: a field, repetition, or component whose text starts with a
  * delimiter was positioned outside its text: in `PID|^|`, the field covered
  * 4–4 instead of `^` at 4–5, and its repetition 5–5, outside the field.
- * Cause: a component or repetition delimiter built the empty node before it at
+ * Cause: a component or repetition separators built the empty node before it at
  * the delimiter's end, and no delimiter extended the end of the nodes holding
  * it; only text did. Only a TEXT token set where the root starts, so the root
  * of `|` covered 0–0.

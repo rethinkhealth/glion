@@ -1,8 +1,9 @@
-import type { Delimiters, Root, Segment } from "@glion/ast";
-import { f, m, s } from "@glion/builder";
+import type { Delimiters, Group, Root, Segment } from "@glion/ast";
+import { f, g, m, s } from "@glion/builder";
 import { hl7v2DecodeEscapes } from "@glion/decode-escapes";
 import { EscapeSequenceError } from "@glion/utils";
 import { unified } from "unified";
+import type { Settings } from "unified";
 
 import { hl7v2EncodeEscapes } from "../src/index";
 
@@ -216,5 +217,45 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(msh.children[2]?.children[0]?.children[0]?.children[0]?.value).toBe(
       "test\\F\\value"
     );
+  });
+
+  it("writes a message without a message header with the delimiters of the processor's settings", async () => {
+    const tree = m(s("PID", f("a*b")));
+
+    const results = await unified()
+      .data("settings", { delimiters: { field: "*" } } as Settings)
+      .use(hl7v2EncodeEscapes)
+      .run(tree);
+
+    expect(
+      (results.children[0] as Segment)?.children[0]?.children[0]?.children[0]
+        ?.children[0]?.value
+    ).toBe("a\\F\\b");
+  });
+
+  it("writes the fields of an MSH later in the message", async () => {
+    const tree = m(s("BHS", f("1")), s("MSH", f("a|b"), f("c|d")));
+
+    const results = await unified().use(hl7v2EncodeEscapes).run(tree);
+    const later = results.children[1] as Segment;
+
+    expect(
+      later.children.map(
+        (field) => field.children[0]?.children[0]?.children[0]?.value
+      )
+    ).toStrictEqual(["a\\F\\b", "c\\F\\d"]);
+  });
+
+  it("leaves MSH-1 and MSH-2 of a message header inside a group as they are", async () => {
+    const tree = m(g("HEADER", s("MSH", f("|"), f("^~\\&"), f("a|b"))));
+
+    const results = await unified().use(hl7v2EncodeEscapes).run(tree);
+    const header = (results.children[0] as Group).children[0] as Segment;
+
+    expect(
+      header.children.map(
+        (field) => field.children[0]?.children[0]?.children[0]?.value
+      )
+    ).toStrictEqual(["|", "^~\\&", "a\\F\\b"]);
   });
 });
