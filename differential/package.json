@@ -10,7 +10,6 @@
     "test:spec": "(cd ../spec && lake build oracle) && vitest run --project harness && vitest run --project properties"
   },
   "devDependencies": {
-    "@glion/annotate-delimiters": "workspace:*",
     "@glion/ast": "workspace:*",
     "@glion/parser": "workspace:*",
     "@glion/testing": "workspace:*",

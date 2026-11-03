@@ -5,19 +5,14 @@
 // the parser must find the same one. Scope: every message `arbSpecMessage`
 // draws; see `src/generators.ts` for what it leaves out.
 //
-// Fails today on a finding (#1165): glion holds a value as one string, so
-// data that looks like an escape sequence and the sequence itself are the same
-// string. With `#` as the escape character, the data `#F#` is sent as
-// `#E#F#E#`, and glion reads it back as the sequence `#F#`:
-// `{"delimiters":"!+&#%","header":[[[["#F#"]]]],"segments":[]}`.
+// Held since #1169 (ADR 0036), which fixed #1165 and the reading of #1168: glion keeps `\E\`
+// and every sequence other than a separator's or a control character's as
+// written, so data that looks like a sequence and the sequence itself are
+// different strings.
 //
-// And on #1168: glion reads hexadecimal data as characters, `\X41\` as `A`,
-// where §2.7.6 leaves its meaning to sender and receiver:
-// `{"delimiters":"|^~\\&","header":[[[[[{"sequence":"X41"}]]]]],"segments":[]}`.
-//
-// Mutant: `decodeEscapes` in `@glion/utils` decodes `\S\` to the repetition
-// separator. Fails on
-// `{"delimiters":"|^~\\&","header":[],"segments":[{"fields":[[[["^",""]],[[""]]]],"id":"AAA"}]}`.
+// Mutant: the escapes table in `@glion/utils` (`src/escapes.ts`) gives `S`
+// to the repetition separator. Fails on
+// `{"delimiters":"&~|!*","header":[[[["~"]],[[""]]]],"segments":[]}`.
 import { hl7v2Parser } from "@glion/parser";
 import fc from "fast-check";
 import { unified } from "unified";

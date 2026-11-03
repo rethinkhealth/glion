@@ -14,7 +14,11 @@ export default mergeConfig(
         // Red: glion and the specification disagree. A finding to decide.
         {
           extends: true,
-          test: { include: ["properties/**/*.prop.ts"], name: "properties" },
+          test: {
+            exclude: ["tests/**"],
+            include: ["properties/**/*.prop.ts"],
+            name: "properties",
+          },
         },
       ],
       testTimeout: 60_000,

@@ -162,9 +162,6 @@ importers:
 
   differential:
     devDependencies:
-      '@glion/annotate-delimiters':
-        specifier: workspace:*
-        version: link:../packages/annotate-delimiters
       '@glion/ast':
         specifier: workspace:*
         version: link:../packages/ast

@@ -83,10 +83,28 @@ describe("toSpecMessage", () => {
     ]);
   });
 
-  it("reads the carriage return glion decodes from \\.br\\ as that sequence", () => {
+  it("reads a formatting command glion kept as that sequence", () => {
     expect(
       toSpecMessage(parser.parse("MSH|^~\\&\rOBX|a\\.br\\b\r")).segments
     ).toEqual([{ fields: [[[[["a", { sequence: ".br" }, "b"]]]]], id: "OBX" }]);
+  });
+
+  it("reads the carriage return glion decodes from \\X0D\\ as that sequence", () => {
+    expect(
+      toSpecMessage(parser.parse("MSH|^~\\&\rOBX|a\\X0D\\b\r")).segments
+    ).toEqual([{ fields: [[[[["a", { sequence: "X0D" }, "b"]]]]], id: "OBX" }]);
+  });
+
+  it("reads the \\E\\ glion kept as the escape character", () => {
+    expect(
+      toSpecMessage(parser.parse("MSH|^~\\&\rOBX|a\\E\\H\\E\\b\r")).segments
+    ).toEqual([{ fields: [[[["a\\H\\b"]]]], id: "OBX" }]);
+  });
+
+  it("reads a control character glion decoded as data", () => {
+    expect(
+      toSpecMessage(parser.parse("MSH|^~\\&\rOBX|a\\X0A\\b\r")).segments
+    ).toEqual([{ fields: [[[["a\nb"]]]], id: "OBX" }]);
   });
 
   it("reads a delimiter glion decoded as data", () => {

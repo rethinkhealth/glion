@@ -43,15 +43,23 @@ import { toSpecSubcomponent } from "./oracle";
 //    (`well_formed_field_has_repetition` and the two after it).
 // 3. glion records what ended each segment; the specification ends every
 //    segment with `\r`, so `terminator` is checked and dropped.
-// 4. glion's value is one string. It decodes the five delimiter sequences and
-//    `\.br\` into characters, and keeps every other sequence as its text. The
+// 4. glion's value is one string. It decodes the four separator sequences
+//    and the `\Xdd\` of each character below U+0020 into characters, and
+//    keeps every other sequence as its text, `\E\` included (ADR 0036). The
 //    specification's value holds characters and sequences apart, so the
 //    string is read back into pieces by glion's own convention:
 //
 //      "240*" → "240*"
+//      "a&b" → "a&b"      `a\T\b`, decoded
+//      "a\nb" → "a\nb"    `a\X0A\b`, decoded
+//      "a\E\b" → "a\b"    the escape character, kept as written
 //      "\H\240*\N\" → [{ sequence: "H" }, "240*", { sequence: "N" }]
-//      "a\rb" → ["a", { sequence: ".br" }, "b"]
+//      "a\rb" → ["a", { sequence: "X0D" }, "b"]
 //      "a\b" → "a\b"     no closing escape character: data
+//
+//    A carriage return is the one character glion decodes that the
+//    specification does not: it writes no carriage return in data, and keeps
+//    `\X0D\` as a sequence.
 //
 // The mapping is one to one. The parser gives a node children only when the
 // text forces them (README of `@glion/parser`, "Empty-field representation"),
@@ -68,10 +76,11 @@ const subcomponent = (value: string, escape: string): SpecSubcomponent => {
   while (i < value.length) {
     const end = value.indexOf(escape, i + 1);
     if (value[i] === escape && end !== -1) {
-      pieces.push({ sequence: value.slice(i + 1, end) });
+      const code = value.slice(i + 1, end);
+      pieces.push(code === "E" ? escape : { sequence: code });
       i = end + 1;
     } else if (value[i] === "\r") {
-      pieces.push({ sequence: ".br" });
+      pieces.push({ sequence: "X0D" });
       i += 1;
     } else {
       pieces.push(value.charAt(i));
