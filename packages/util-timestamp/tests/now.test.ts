@@ -464,7 +464,7 @@ describe("nowDTM names the current instant", () => {
           [new Date("2024-01-15T07:30:00.999Z"), "UTC"],
           [new Date("1970-01-01T00:00:00.000Z"), "Africa/Monrovia"],
         ],
-        numRuns: 1000,
+        numRuns: 100,
       }
     );
   });

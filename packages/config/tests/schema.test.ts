@@ -58,7 +58,7 @@ describe("hL7v2Config schema", () => {
       expect(result.settings.delimiters).toStrictEqual(delimiters);
     });
 
-    it("rejects a segment delimiter: HL7v2 fixes the segment terminator as a carriage return", () => {
+    it("rejects a segment terminator: HL7v2 fixes the segment terminator as a carriage return", () => {
       const result = HL7v2ConfigSchema.safeParse({
         settings: { delimiters: { segment: "\n" } },
       });

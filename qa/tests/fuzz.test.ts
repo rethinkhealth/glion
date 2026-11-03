@@ -79,7 +79,7 @@ describe("QR3: crash resilience", () => {
     // line, a field, repetition, component, or subcomponent at its text with
     // the delimiters inside it.
     //
-    // Mutant: a component delimiter extends no node's end (#1102). Fails on
+    // Mutant: a component separator extends no node's end (#1102). Fails on
     // `"MSH|^~\\&|^|\r"`.
     //
     // Mutant: the root ends at its last segment, before the segment
@@ -154,7 +154,7 @@ describe("QR3: crash resilience", () => {
     // The parser positions every node at the text it was read from, whatever
     // delimiters MSH declares.
     //
-    // Mutant: a component delimiter extends no node's end (#1102). Fails on
+    // Mutant: a component separator extends no node's end (#1102). Fails on
     // `"MSH#*!%+#*#\r"`.
     //
     // Mutant: the root ends at its last segment, before the segment
@@ -176,7 +176,7 @@ describe("QR3: crash resilience", () => {
     // positions every node within the message, inside its parent, after the
     // sibling before it.
     //
-    // Mutant: a component delimiter extends no node's end (#1102). Fails on
+    // Mutant: a component separator extends no node's end (#1102). Fails on
     // `"MSH|^~\\&|^|"`.
     it("never throws, and positions every node inside its parent", () => {
       fc.assert(
@@ -193,7 +193,7 @@ describe("QR3: crash resilience", () => {
     // whatever delimiters MSH declares, and positions every node within the
     // message, inside its parent, after the sibling before it.
     //
-    // Mutant: a component delimiter extends no node's end (#1102). Fails on
+    // Mutant: a component separator extends no node's end (#1102). Fails on
     // `"MSH#*!%+#*#"`.
     it("never throws, and positions every node inside its parent", () => {
       fc.assert(

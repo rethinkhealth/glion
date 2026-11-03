@@ -9,10 +9,9 @@ import { z } from "zod";
  *
  * Priority order (lowest to highest):
  *
- * 1. DEFAULT_DELIMITERS (hardcoded in hl7v2-utils)
- * 2. Settings.delimiters (from config file)
- * 3. Opts.delimiters (direct API parameter)
- * 4. MSH auto-detection (if message starts with MSH)
+ * 1. DEFAULT_DELIMITERS
+ * 2. Settings.delimiters, for a message without a message header segment
+ * 3. MSH-1 and MSH-2, for a message that opens with a message header segment
  */
 const DelimitersSchema = z
   .object({

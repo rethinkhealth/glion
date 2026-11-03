@@ -1779,7 +1779,7 @@ exports[`parser > complex Delimiter Combinations > handles multiple fields with 
 }
 `;
 
-exports[`parser > component Delimiter Handling > creates multiple components within a repetition 1`] = `
+exports[`parser > component Separator Handling > creates multiple components within a repetition 1`] = `
 {
   "children": [
     {
@@ -1951,7 +1951,7 @@ exports[`parser > component Delimiter Handling > creates multiple components wit
 }
 `;
 
-exports[`parser > component Delimiter Handling > handles components within multiple repetitions 1`] = `
+exports[`parser > component Separator Handling > handles components within multiple repetitions 1`] = `
 {
   "children": [
     {
@@ -2173,7 +2173,7 @@ exports[`parser > component Delimiter Handling > handles components within multi
 }
 `;
 
-exports[`parser > component Delimiter Handling > handles leading component delimiter (creates empty first component) 1`] = `
+exports[`parser > component Separator Handling > handles leading component separator (creates empty first component) 1`] = `
 {
   "children": [
     {
@@ -2295,7 +2295,7 @@ exports[`parser > component Delimiter Handling > handles leading component delim
 }
 `;
 
-exports[`parser > component Delimiter Handling > keeps trailing empty component when delimiter ends the field 1`] = `
+exports[`parser > component Separator Handling > keeps trailing empty component when a separator ends the field 1`] = `
 {
   "children": [
     {
@@ -2417,7 +2417,7 @@ exports[`parser > component Delimiter Handling > keeps trailing empty component 
 }
 `;
 
-exports[`parser > component Delimiter Handling > preserves intermediate empty components 1`] = `
+exports[`parser > component Separator Handling > preserves intermediate empty components 1`] = `
 {
   "children": [
     {
@@ -2572,7 +2572,7 @@ exports[`parser > component Delimiter Handling > preserves intermediate empty co
 }
 `;
 
-exports[`parser > field Delimiter Handling > preserves multiple consecutive empty fields except final 1`] = `
+exports[`parser > field Separator Handling > preserves multiple consecutive empty fields except final 1`] = `
 {
   "children": [
     {
@@ -2777,7 +2777,7 @@ exports[`parser > field Delimiter Handling > preserves multiple consecutive empt
 }
 `;
 
-exports[`parser > field Delimiter Handling > treats first field delimiter as segment name separator 1`] = `
+exports[`parser > field Separator Handling > treats first field separator as segment name separator 1`] = `
 {
   "children": [
     {
@@ -2883,7 +2883,7 @@ exports[`parser > field Delimiter Handling > treats first field delimiter as seg
 }
 `;
 
-exports[`parser > repetition Delimiter Handling > creates multiple repetitions within a field 1`] = `
+exports[`parser > repetition Separator Handling > creates multiple repetitions within a field 1`] = `
 {
   "children": [
     {
@@ -3089,7 +3089,7 @@ exports[`parser > repetition Delimiter Handling > creates multiple repetitions w
 }
 `;
 
-exports[`parser > repetition Delimiter Handling > handles leading repetition delimiter (creates empty first repetition) 1`] = `
+exports[`parser > repetition Separator Handling > handles leading repetition separator (creates empty first repetition) 1`] = `
 {
   "children": [
     {
@@ -3211,7 +3211,7 @@ exports[`parser > repetition Delimiter Handling > handles leading repetition del
 }
 `;
 
-exports[`parser > repetition Delimiter Handling > handles repetitions across multiple fields 1`] = `
+exports[`parser > repetition Separator Handling > handles repetitions across multiple fields 1`] = `
 {
   "children": [
     {
@@ -3484,7 +3484,7 @@ exports[`parser > repetition Delimiter Handling > handles repetitions across mul
 }
 `;
 
-exports[`parser > repetition Delimiter Handling > preserves intermediate empty repetitions 1`] = `
+exports[`parser > repetition Separator Handling > preserves intermediate empty repetitions 1`] = `
 {
   "children": [
     {
@@ -3656,7 +3656,7 @@ exports[`parser > repetition Delimiter Handling > preserves intermediate empty r
 }
 `;
 
-exports[`parser > subcomponent Delimiter Handling > creates multiple subcomponents within a component 1`] = `
+exports[`parser > subcomponent Separator Handling > creates multiple subcomponents within a component 1`] = `
 {
   "children": [
     {
@@ -3794,7 +3794,7 @@ exports[`parser > subcomponent Delimiter Handling > creates multiple subcomponen
 }
 `;
 
-exports[`parser > subcomponent Delimiter Handling > handles leading subcomponent delimiter (creates empty first subcomponent) 1`] = `
+exports[`parser > subcomponent Separator Handling > handles leading subcomponent separator (creates empty first subcomponent) 1`] = `
 {
   "children": [
     {
@@ -3916,7 +3916,7 @@ exports[`parser > subcomponent Delimiter Handling > handles leading subcomponent
 }
 `;
 
-exports[`parser > subcomponent Delimiter Handling > handles subcomponents across multiple components 1`] = `
+exports[`parser > subcomponent Separator Handling > handles subcomponents across multiple components 1`] = `
 {
   "children": [
     {
@@ -4087,7 +4087,7 @@ exports[`parser > subcomponent Delimiter Handling > handles subcomponents across
 }
 `;
 
-exports[`parser > subcomponent Delimiter Handling > keeps trailing empty subcomponent when delimiter ends the field 1`] = `
+exports[`parser > subcomponent Separator Handling > keeps trailing empty subcomponent when a separator ends the field 1`] = `
 {
   "children": [
     {
@@ -4209,7 +4209,7 @@ exports[`parser > subcomponent Delimiter Handling > keeps trailing empty subcomp
 }
 `;
 
-exports[`parser > subcomponent Delimiter Handling > preserves intermediate empty subcomponents 1`] = `
+exports[`parser > subcomponent Separator Handling > preserves intermediate empty subcomponents 1`] = `
 {
   "children": [
     {

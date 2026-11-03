@@ -68,7 +68,7 @@ interface HL7v2JsonNode {
   name?: string; // segment name (e.g. "MSH") or field id (e.g. "PID-3")
   index?: number; // positional index where relevant
   value?: string; // leaf value for Field / Component / Subcomponent
-  delimiter?: string; // delimiter character when it is meaningful to preserve
+  separator?: string; // delimiter character when it is meaningful to preserve
   children?: HL7v2JsonNode[]; // recursive shape for composite nodes
 }
 ```

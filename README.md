@@ -87,15 +87,14 @@ The parser, plugins, and utilities that process HL7v2 messages as structured dat
 
 Composable plugins that annotate, enrich, and transform the AST.
 
-- **[@glion/annotate-delimiters][glion-annotate-delimiters]** — annotate `file.data` with the HL7v2 delimiters derived from `MSH-1` and `MSH-2`.
 - **[@glion/annotate-profile-context][glion-annotate-profile-context]** — load and attach HL7v2 profile context to `file.data` for downstream plugins.
 - **[@glion/annotate-profile-segments][glion-annotate-profile-segments]** — annotate segment nodes with profile metadata.
 - **[@glion/annotate-profile-fields][glion-annotate-profile-fields]** — annotate field nodes with profile metadata.
 - **[@glion/annotate-profile-datatypes][glion-annotate-profile-datatypes]** — annotate field repetitions, components, and subcomponents with datatype profile metadata.
 - **[@glion/annotate-profile-fields-code-systems][glion-annotate-profile-fields-code-systems]** — annotate field-level coded values with UTG code system metadata (experimental).
 - **[@glion/annotate-profile-tables][glion-annotate-profile-tables]** — annotate primitive values with their entry in the table of the message's HL7v2 version.
-- **[@glion/decode-escapes][glion-decode-escapes]** — decode HL7v2 escape sequences (`\F\`, `\S\`, `\T\`, `\Xdd\`, `\.br\`) in a tree parsed with `decodeEscapes: false`.
-- **[@glion/encode-escapes][glion-encode-escapes]** — encode delimiter characters in subcomponent values as HL7v2 escape sequences before serialization.
+- **[@glion/decode-escapes][glion-decode-escapes]** — read the escape sequences of every value with `escapes.read`, for a tree parsed with `decodeEscapes: false`.
+- **[@glion/encode-escapes][glion-encode-escapes]** — write the escape sequences of every value with `escapes.write`, for a tree written with `encodeEscapes: false`.
 - **[@glion/transform-segment-terminator][glion-transform-segment-terminator]** — end every segment with a carriage return, the segment terminator HL7v2 requires, whatever line break it was read with.
 - **[@glion/transform-trim-trailing-fields][glion-transform-trim-trailing-fields]** — remove the empty fields at the end of each segment, so `PID|1|DOE||` is written as `PID|1|DOE`.
 - **[@glion/transform-profile-groups][glion-transform-profile-groups]** — nest segments in the segment groups their event schema defines, such as `PATIENT_RESULT` and `ORDER_OBSERVATION`.
@@ -116,6 +115,8 @@ Linting rules and presets for HL7v2 message quality and conformance.
 - **[@glion/lint-max-message-size][glion-lint-max-message-size]** — report when a message exceeds a configurable maximum size in bytes or segment count.
 - **[@glion/lint-no-trailing-empty-field][glion-lint-no-trailing-empty-field]** — flag empty fields at the end of a segment, which can cause ambiguity or interoperability issues.
 - **[@glion/lint-segment-terminator][glion-lint-segment-terminator]** — warn when a segment ends with a line feed, or with a carriage return and a line feed, or the last segment has no segment terminator.
+- **[@glion/lint-encoding-characters-required][glion-lint-encoding-characters-required]** — warn when `MSH-2` leaves out a delimiter.
+- **[@glion/lint-delimiters-duplicate][glion-lint-delimiters-duplicate]** — report two delimiters that are the same character.
 - **[@glion/lint-segment-header-length][glion-lint-segment-header-length]** — validate that segment headers are exactly three characters, as required by the HL7v2 specification.
 - **[@glion/lint-message-version][glion-lint-message-version]** — warn when a message version is unsupported or outside expected constraints.
 
@@ -211,7 +212,6 @@ HL7® and Health Level Seven® are registered trademarks of Health Level Seven I
 
 [github-unified]: https://github.com/unifiedjs/unified
 [glion-ack]: https://github.com/rethinkhealth/glion/tree/main/packages/ack#readme
-[glion-annotate-delimiters]: https://github.com/rethinkhealth/glion/tree/main/packages/annotate-delimiters#readme
 [glion-annotate-profile-context]: https://github.com/rethinkhealth/glion/tree/main/packages/annotate-profile-context#readme
 [glion-annotate-profile-datatypes]: https://github.com/rethinkhealth/glion/tree/main/packages/annotate-profile-datatypes#readme
 [glion-annotate-profile-fields]: https://github.com/rethinkhealth/glion/tree/main/packages/annotate-profile-fields#readme
@@ -226,6 +226,8 @@ HL7® and Health Level Seven® are registered trademarks of Health Level Seven I
 [glion-encode-escapes]: https://github.com/rethinkhealth/glion/tree/main/packages/encode-escapes#readme
 [glion-hl7v2]: https://github.com/rethinkhealth/glion/tree/main/packages/hl7v2#readme
 [glion-jsonify]: https://github.com/rethinkhealth/glion/tree/main/packages/jsonify#readme
+[glion-lint-delimiters-duplicate]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-delimiters-duplicate#readme
+[glion-lint-encoding-characters-required]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-encoding-characters-required#readme
 [glion-lint-max-message-size]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-max-message-size#readme
 [glion-lint-message-version]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-message-version#readme
 [glion-lint-no-trailing-empty-field]: https://github.com/rethinkhealth/glion/tree/main/packages/lint-no-trailing-empty-field#readme

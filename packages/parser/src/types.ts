@@ -24,16 +24,16 @@ export type PreprocessorStep = (ctx: ParserContext) => ParserContext;
 
 export interface ParseOptions {
   /**
-   * Whether a subcomponent value holds the characters its escape sequences
-   * stand for (`true`, the default) or the escape sequences as they are on
+   * Whether a subcomponent value holds the separators and control characters
+   * their escape sequences stand for, as `escapes.read` from `@glion/utils`
+   * reads them (`true`, the default), or every escape sequence as it is on
    * the wire (`false`).
    */
   decodeEscapes?: boolean;
   /**
    * Whether a line feed, or a carriage return and a line feed, also ends a
-   * segment (`true`, the default), or only a carriage return and the segment
-   * delimiter do (`false`), as HL7v2 Chapter 2 requires. With `false`, a line
-   * feed is data.
+   * segment (`true`, the default), or only a carriage return does (`false`), as
+   * HL7v2 Chapter 2 requires. With `false`, a line feed is data.
    */
   lineBreaks?: boolean;
   /**
@@ -75,14 +75,14 @@ export interface Token {
 
 /**
  * The kind of a token: a segment terminator (`SEGMENT_END`), a field,
- * repetition, component, or subcomponent delimiter, or a run of text (`TEXT`).
+ * repetition, component, or subcomponent separators, or a run of text (`TEXT`).
  */
 export type TokenType =
   | "SEGMENT_END"
-  | "FIELD_DELIM"
-  | "REPETITION_DELIM"
-  | "COMPONENT_DELIM"
-  | "SUBCOMP_DELIM"
+  | "FIELD_SEPARATOR"
+  | "REPETITION_SEPARATOR"
+  | "COMPONENT_SEPARATOR"
+  | "SUBCOMPONENT_SEPARATOR"
   | "TEXT";
 
 /** Reads tokens from a context, one at a time. */

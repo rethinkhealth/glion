@@ -216,7 +216,9 @@ export function describeMllpSocketContract(
         const { bytes } = await readAll(reader, sent.length);
         await writing;
 
-        expect(bytes).toEqual(sent);
+        // As text: `toEqual` compares a 1 MiB array one element at a time, which
+        // takes over a second.
+        expect(decodeBytes(bytes)).toBe(decodeBytes(sent));
         reader.releaseLock();
         writer.releaseLock();
         await socket.close();

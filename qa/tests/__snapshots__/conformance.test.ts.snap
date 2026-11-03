@@ -1570,7 +1570,7 @@ exports[`QR1: message conformance > edge-escaped-delimiters.hl7 — pipeline out
         "ST",
         "NOTE",
         "",
-        "Result contains pipe | and ampersand & and caret ^ and tilde ~ and backslash \\ chars",
+        "Result contains pipe | and ampersand & and caret ^ and tilde ~ and backslash \\E\\ chars",
         "",
         "",
         "",

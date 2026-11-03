@@ -5,7 +5,7 @@ export default mergeConfig(
   baseConfig,
   defineConfig({
     test: {
-      name: "hl7v2-annotate-delimiters",
+      name: "hl7v2-lint-delimiters-duplicate",
     },
   })
 );

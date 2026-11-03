@@ -33,6 +33,39 @@ describe("hl7v2-preset-lint-recommended", () => {
     expect(file.messages).toHaveLength(0);
   });
 
+  it("warns when MSH-2 leaves out a delimiter", async () => {
+    const file = new VFile();
+    const tree = parseHL7v2("MSH|^~&|APP\rPID|1\r");
+
+    await unified().use(hl7v2PresetLintRecommended).run(tree, file);
+
+    expect(
+      file.messages
+        .filter((message) => message.ruleId === "encoding-characters-required")
+        .map((message) => [message.reason, message.fatal])
+    ).toStrictEqual([
+      ["The encoding characters declare no subcomponent separator.", false],
+    ]);
+  });
+
+  it("errors when two delimiters are the same character", async () => {
+    const file = new VFile();
+    const tree = parseHL7v2("MSH|^~&&|APP\rPID|1\r");
+
+    await unified().use(hl7v2PresetLintRecommended).run(tree, file);
+
+    expect(
+      file.messages
+        .filter((message) => message.ruleId === "delimiters-duplicate")
+        .map((message) => [message.reason, message.fatal])
+    ).toStrictEqual([
+      [
+        "The subcomponent separator is the same character as the escape character.",
+        true,
+      ],
+    ]);
+  });
+
   it("errors when segment header length is invalid", async () => {
     const tree = m(
       s(

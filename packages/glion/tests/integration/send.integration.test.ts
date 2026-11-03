@@ -183,14 +183,14 @@ describe("runSend (integration, fake socket)", () => {
   });
 
   it("reports an invalid outcome when the delimiters cannot write a value", async () => {
-    // MSH-1 `X` and MSH-2 `E~\&`: the escape character in MSH-3 is written
-    // `\E\` or `\X5C\`, and both hold a delimiter.
+    // MSH-1 `X` and MSH-2 `E~\&`: the tab in MSH-3 is written `\X09\`, which
+    // holds the field separator.
     const { state, stderr, stdout } = capture();
     const code = await runSend({
       argv: ["--host", "h", "--port", "1"],
       socket: fakeSocket(ackFrame("AA")),
       stderr,
-      stdin: Readable.from("MSHXE~\\&XAPP\\bXFAC"),
+      stdin: Readable.from("MSHXE~\\&XAPP\tbXFAC"),
       stdout,
     });
 

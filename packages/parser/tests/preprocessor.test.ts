@@ -86,10 +86,8 @@ describe("preprocessor steps", () => {
 
       expect(result.delimiters).toStrictEqual({
         component: "%",
-        escape: "\\",
         field: "*",
         repetition: "$",
-        subcomponent: "&",
       });
     });
 
@@ -104,11 +102,10 @@ describe("preprocessor steps", () => {
         escape: "#",
         field: "*",
         repetition: "$",
-        subcomponent: "&",
       });
     });
 
-    it("reads the encoding characters up to a field delimiter before the fourth", () => {
+    it("reads the encoding characters up to a field separator before the fourth", () => {
       const result = detectDelimiters({
         delimiters: DEFAULT_DELIMITERS,
         input: "MSH*%$*APP",
@@ -116,10 +113,8 @@ describe("preprocessor steps", () => {
 
       expect(result.delimiters).toStrictEqual({
         component: "%",
-        escape: "\\",
         field: "*",
         repetition: "$",
-        subcomponent: "&",
       });
     });
 
@@ -162,15 +157,15 @@ describe("preprocessor steps", () => {
       expect(result.delimiters).toBe(DEFAULT_DELIMITERS);
     });
 
-    // MSH-1 sets the field delimiter, and each of MSH-2's encoding characters
-    // sets the delimiter of its role, up to the first field delimiter or
-    // segment terminator. A role MSH-2 is too short to declare keeps the
-    // default.
+    // MSH-1 sets the field separator, and each of MSH-2's encoding characters
+    // sets the delimiter of its role, up to the first field separator or
+    // segment terminator. A role MSH-2 is too short to declare has no
+    // delimiter.
     //
     // Mutant: `readEncodingCharacters` does not stop at a segment terminator.
     // Fails on `"MSH|\r\n"`, which declares `\r` and `\n` as the component
-    // and repetition delimiters.
-    it("sets the delimiters MSH-1 and MSH-2 declare, and the default for each role MSH-2 is too short to declare", () => {
+    // and repetition separators.
+    it("sets the delimiters MSH-1 and MSH-2 declare, and no delimiter for a role MSH-2 is too short to declare", () => {
       // Five distinct characters for MSH-1 and the four encoding characters,
       // none of them a segment terminator.
       const arbDeclared = fc.uniqueArray(fc.constantFrom(..."|^~\\&*%#!@+="), {
@@ -191,12 +186,12 @@ describe("preprocessor steps", () => {
               input: `MSH${field}${declared.join("")}${after.replace("<field>", field)}`,
             };
 
+            const roles = ["component", "repetition", "escape", "subcomponent"];
             expect(detectDelimiters(ctx).delimiters).toStrictEqual({
-              component: declared[0] ?? DEFAULT_DELIMITERS.component,
-              escape: declared[2] ?? DEFAULT_DELIMITERS.escape,
               field,
-              repetition: declared[1] ?? DEFAULT_DELIMITERS.repetition,
-              subcomponent: declared[3] ?? DEFAULT_DELIMITERS.subcomponent,
+              ...Object.fromEntries(
+                declared.map((ch, i) => [roles[i] as string, ch])
+              ),
             });
           }
         ),

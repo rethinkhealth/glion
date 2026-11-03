@@ -1,12 +1,29 @@
 {
-  "name": "@glion/annotate-delimiters",
+  "name": "@glion/lint-delimiters-duplicate",
   "version": "0.31.0",
-  "description": "Unified plugin to annotate file.data with HL7v2 delimiters derived from MSH-1/MSH-2",
+  "description": "hl7v2-lint rule to report two delimiters that are the same character",
+  "keywords": [
+    "delimiters",
+    "encoding-characters",
+    "hl7",
+    "hl7v2",
+    "hl7v2-lint",
+    "hl7v2-lint-rule",
+    "lint",
+    "nodejs",
+    "rule",
+    "typescript"
+  ],
+  "homepage": "https://glion.dev",
   "license": "MIT",
+  "author": {
+    "name": "Melek Somai",
+    "email": "melek@rethinkhealth.io"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rethinkhealth/glion.git",
-    "directory": "packages/annotate-delimiters"
+    "directory": "packages/lint-delimiters-duplicate"
   },
   "files": [
     "dist"
@@ -23,30 +40,37 @@
     "build": "tsdown && tsc --emitDeclarationOnly",
     "check-types": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
     "check:readme": "glion-check-readme",
+    "mutate": "stryker run",
+    "publint": "publint --strict",
     "test": "vitest run",
-    "test:watch": "vitest watch",
-    "publint": "publint --strict"
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@glion/util-query": "workspace:*"
+    "@glion/ast": "workspace:*",
+    "@glion/util-query": "workspace:*",
+    "unified": "11.0.5",
+    "unified-lint-rule": "3.0.1"
   },
   "devDependencies": {
-    "@glion/ast": "workspace:*",
     "@glion/builder": "workspace:*",
     "@glion/check-readme": "workspace:*",
+    "@glion/parser": "workspace:*",
     "@glion/testing": "workspace:*",
     "@glion/tsconfig": "workspace:*",
-    "@glion/utils": "workspace:*",
+    "@stryker-mutator/core": "10.0.0",
+    "@stryker-mutator/vitest-runner": "10.0.0",
     "@types/node": "26.6.5",
     "@vitest/coverage-v8": "4.1.12",
     "publint": "0.3.18",
     "tsdown": "0.21.10",
     "typescript": "6.0.3",
-    "unified": "^11.0.5",
     "vfile": "^6.0.3",
+    "vfile-reporter": "^8.1.1",
     "vitest": "4.1.12"
   },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "packageManager": "pnpm@10.14.0"
 }

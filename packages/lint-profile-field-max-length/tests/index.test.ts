@@ -99,6 +99,19 @@ describe("hl7v2LintFieldMaxLength", () => {
     ]);
   });
 
+  describe("a value with escape sequences", () => {
+    it("counts every character of an escape sequence", async () => {
+      const [message, ...rest] = await lint(
+        msh("2.5"),
+        // PID|12\E\3
+        s("PID", f("12\\E\\3"))
+      );
+
+      expect(rest).toEqual([]);
+      expect(message?.actual).toBe("6");
+    });
+  });
+
   it("accepts an empty field", async () => {
     expect(
       await lint(

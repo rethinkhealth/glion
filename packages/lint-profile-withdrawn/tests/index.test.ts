@@ -1,7 +1,7 @@
 import { hl7v2AnnotateProfileContext } from "@glion/annotate-profile-context";
 import { hl7v2AnnotateProfileDatatypes } from "@glion/annotate-profile-datatypes";
 import { hl7v2AnnotateProfileFields } from "@glion/annotate-profile-fields";
-import type { Root, Segment } from "@glion/ast";
+import type { Field, Root, Segment } from "@glion/ast";
 import { c, f, g, m, r, s } from "@glion/builder";
 import { parseHL7v2 } from "@glion/parser";
 import { toHl7v2 } from "@glion/to-hl7v2";
@@ -93,16 +93,44 @@ describe("hl7v2LintWithdrawn", () => {
       expect(message?.actual).toBe("2024\\F\\01");
     });
 
-    // MSH-1 `X` and MSH-2 `E~\&`: the escape character in AL1-6 is written
-    // `\E\` or `\X5C\`, and both hold a delimiter.
+    // MSH-1 `X` and MSH-2 `E~\&`: the tab in AL1-6 is written `\X09\`, which
+    // holds the field separator.
     it("reports the field without its text when the delimiters cannot write it", async () => {
-      // The message is given as text: its value holds an escape character
-      // that no escape sequence can write with these delimiters, so
+      // The message is given as text: its value holds a tab that no escape
+      // sequence can write with these delimiters, so
       // `toHl7v2` throws `EscapeSequenceError` on it.
       const [message, ...rest] = await run(
         parseHL7v2(
-          "MSHXE~\\&XSNDXFACXRCVXRFACX20241201XXADTEA01EADT_A01XMSG001XPX2.7\rAL1X1XXPCNXXX2024\\b\r"
+          "MSHXE~\\&XSNDXFACXRCVXRFACX20241201XXADTEA01EADT_A01XMSG001XPX2.7\rAL1X1XXPCNXXX2024\tb\r"
         )
+      );
+
+      expect(rest).toEqual([]);
+      expect(message?.message).toBe(
+        "The data element has a value; it is withdrawn in v2.7 and must be empty."
+      );
+      expect(message?.actual).toBeUndefined();
+    });
+
+    it("passes on an error that is not about the delimiters, for a tree HL7v2 does not allow", async () => {
+      const broken = {
+        children: [{ type: "field-repetition" }],
+        type: "field",
+      } as Field;
+      const [message, ...rest] = await run(
+        m(msh("2.7"), s("AL1", f("1"), f(), f("PCN"), f(), f(), broken))
+      );
+
+      expect(rest).toEqual([]);
+      expect(message?.fatal).toBe(false);
+      expect(message?.message).toMatch(/^Cannot read properties of undefined/);
+    });
+
+    it("reports the field without its text when its message declares no separator to write it with", async () => {
+      const header = msh("2.7");
+      header.children[1] = f("^~\\");
+      const [message, ...rest] = await run(
+        m(header, s("AL1", f("1"), f(), f("PCN"), f(), f(), f(c("a", "b"))))
       );
 
       expect(rest).toEqual([]);

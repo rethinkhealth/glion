@@ -9,7 +9,7 @@ import type { Token } from "../src/types";
 function toks(
   input: string,
   options?: TokenizerOptions,
-  delimiters = DEFAULT_DELIMITERS,
+  delimiters: Delimiters = DEFAULT_DELIMITERS,
   lineBreaks?: boolean
 ): Token[] {
   const t = new HL7v2Tokenizer(options);
@@ -22,13 +22,13 @@ function toks(
 }
 
 describe("the message header is read only at the start of the message", () => {
-  it("emits MSH as TEXT, then a synthetic FIELD_DELIM, then MSH.2 as TEXT for first segment only", () => {
+  it("emits MSH as TEXT, then a synthetic FIELD_SEPARATOR, then MSH.2 as TEXT for first segment only", () => {
     const out = toks("MSH|^~\\&|SENDER\rPID|1\rMSH|^~\\&|AGAIN"); // later MSH should NOT be bootstrapped
 
     expect(out[0]).toMatchObject({ type: "TEXT", value: "MSH" });
-    expect(out[1]).toMatchObject({ type: "FIELD_DELIM" });
+    expect(out[1]).toMatchObject({ type: "FIELD_SEPARATOR" });
     expect(out[2]).toMatchObject({ type: "TEXT", value: "|" });
-    expect(out[3]).toMatchObject({ type: "FIELD_DELIM" });
+    expect(out[3]).toMatchObject({ type: "FIELD_SEPARATOR" });
     expect(out[4]).toMatchObject({ type: "TEXT", value: "^~\\&" });
     // ensure later MSH is not bootstrapped (the '|' appears as a delimiter, not bootstrap emission)
     const later = out.findIndex(
@@ -47,17 +47,17 @@ describe("the message header is read only at the start of the message", () => {
 });
 
 describe("segment ids", () => {
-  it("emits the text before a line's first field delimiter as one TEXT token", () => {
+  it("emits the text before a line's first field separator as one TEXT token", () => {
     const out = toks("PID|1\r^A~B&C|D");
 
     expect(out.slice(4)).toMatchObject([
       { type: "TEXT", value: "^A~B&C" },
-      { type: "FIELD_DELIM" },
+      { type: "FIELD_SEPARATOR" },
       { type: "TEXT", value: "D" },
     ]);
   });
 
-  it("emits a line with no field delimiter as one TEXT token", () => {
+  it("emits a line with no field separator as one TEXT token", () => {
     expect(toks("^A")).toMatchObject([{ type: "TEXT", value: "^A" }]);
   });
 
@@ -85,8 +85,8 @@ describe("escape sequences", () => {
     });
   });
 
-  it("counts lines by the source when .br decodes to the segment terminator", () => {
-    const out = toks("PID|a\\.br\\b\rOBX|1");
+  it("counts lines by the source when \\X0D\\ decodes to the segment terminator", () => {
+    const out = toks("PID|a\\X0D\\b\rOBX|1");
 
     expect(out[2]).toMatchObject({ type: "TEXT", value: "a\rb" });
     expect(out[4]?.position.start).toStrictEqual({
@@ -193,14 +193,14 @@ describe("line breaks", () => {
     expect(toks("MSH|^~\\&#|A").slice(4, 7)).toMatchObject([
       { type: "TEXT", value: "^~\\&" },
       { type: "TEXT", value: "#" },
-      { type: "FIELD_DELIM" },
+      { type: "FIELD_SEPARATOR" },
     ]);
   });
 
-  it("ends MSH-2 at a field delimiter before its fourth character", () => {
+  it("ends MSH-2 at a field separator before its fourth character", () => {
     expect(toks("MSH|^~\\|APP").slice(4)).toMatchObject([
       { type: "TEXT", value: "^~\\" },
-      { type: "FIELD_DELIM" },
+      { type: "FIELD_SEPARATOR" },
       { type: "TEXT", value: "APP" },
     ]);
   });
@@ -212,7 +212,7 @@ describe("line breaks", () => {
       ["TEXT", "MSH"],
       ["SEGMENT_END", "\r"],
       ["TEXT", "PID"],
-      ["FIELD_DELIM", undefined],
+      ["FIELD_SEPARATOR", undefined],
       ["TEXT", "1"],
     ]);
   });

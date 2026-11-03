@@ -5,7 +5,7 @@
  * Symptom: a field, repetition, or component whose text starts with a
  * delimiter was positioned outside its text: in `PID|^|`, the field covered
  * 4–4 instead of `^` at 4–5, and its repetition 5–5, outside the field.
- * Cause: a component or repetition delimiter built the empty node before it at
+ * Cause: a component or repetition separators built the empty node before it at
  * the delimiter's end, and no delimiter extended the end of the nodes holding
  * it; only text did. Only a TEXT token set where the root starts, so the root
  * of `|` covered 0–0.
@@ -29,7 +29,7 @@ const firstField = (source: string): Field =>
   (parseHL7v2(source).children[0] as Segment).children[0] as Field;
 
 describe("a field whose text starts with a delimiter", () => {
-  it("covers a component delimiter, with an empty component before it", () => {
+  it("covers a component separator, with an empty component before it", () => {
     const field = firstField("PID|^|");
     const [repetition] = field.children;
 
@@ -41,7 +41,7 @@ describe("a field whose text starts with a delimiter", () => {
     ]);
   });
 
-  it("covers a repetition delimiter, with an empty repetition before it", () => {
+  it("covers a repetition separator, with an empty repetition before it", () => {
     const field = firstField("PID|~|");
 
     expect(span(field)).toStrictEqual([4, 5]);
@@ -51,7 +51,7 @@ describe("a field whose text starts with a delimiter", () => {
     ]);
   });
 
-  it("covers a subcomponent delimiter, with an empty subcomponent before it", () => {
+  it("covers a subcomponent separator, with an empty subcomponent before it", () => {
     const field = firstField("PID|&|");
     const component = field.children[0]!.children[0]!;
 

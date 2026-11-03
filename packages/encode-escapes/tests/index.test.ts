@@ -1,8 +1,9 @@
-import type { Delimiters, Root, Segment } from "@glion/ast";
-import { f, m, s } from "@glion/builder";
+import type { Delimiters, Group, Root, Segment } from "@glion/ast";
+import { f, g, m, s } from "@glion/builder";
 import { hl7v2DecodeEscapes } from "@glion/decode-escapes";
 import { EscapeSequenceError } from "@glion/utils";
 import { unified } from "unified";
+import type { Settings } from "unified";
 
 import { hl7v2EncodeEscapes } from "../src/index";
 
@@ -11,46 +12,46 @@ const subValue = (results: Root) =>
     ?.children[0]?.value;
 
 describe("hl7v2EncodeEscapes plugin", () => {
-  it("encodes field delimiter", async () => {
+  it("encodes field separator", async () => {
     const tree = m(s("PID", f("before|after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
     expect(subValue(results)).toBe("before\\F\\after");
   });
 
-  it("encodes component delimiter", async () => {
+  it("encodes component separator", async () => {
     const tree = m(s("PID", f("before^after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
     expect(subValue(results)).toBe("before\\S\\after");
   });
 
-  it("encodes repetition delimiter", async () => {
+  it("encodes repetition separator", async () => {
     const tree = m(s("PID", f("before~after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
     expect(subValue(results)).toBe("before\\R\\after");
   });
 
-  it("encodes subcomponent delimiter", async () => {
+  it("encodes subcomponent separator", async () => {
     const tree = m(s("PID", f("before&after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
     expect(subValue(results)).toBe("before\\T\\after");
   });
 
-  it("encodes escape character", async () => {
+  it("leaves the escape character as it is", async () => {
     const tree = m(s("PID", f("before\\after")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(results)).toBe("before\\E\\after");
+    expect(subValue(results)).toBe("before\\after");
   });
 
-  it("encodes the segment terminator, a carriage return, as .br", async () => {
+  it("encodes the segment terminator, a carriage return, as \\X0D\\", async () => {
     const tree = m(s("PID", f("line1\rline2")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(results)).toBe("line1\\.br\\line2");
+    expect(subValue(results)).toBe("line1\\X0D\\line2");
   });
 
   it("encodes multiple special characters in one value", async () => {
     const tree = m(s("PID", f("a|b^c~d&e\\f")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(results)).toBe("a\\F\\b\\S\\c\\R\\d\\T\\e\\E\\f");
+    expect(subValue(results)).toBe("a\\F\\b\\S\\c\\R\\d\\T\\e\\f");
   });
 
   it("leaves plain text unchanged", async () => {
@@ -82,11 +83,11 @@ describe("hl7v2EncodeEscapes plugin", () => {
   });
 
   it("writes a character whose escape code is a delimiter as a hexadecimal escape", async () => {
-    const tree = m(s("PID", f("a\\b")));
+    const tree = m(s("PID", f("a|b")));
     const results = await unified()
-      .use(hl7v2EncodeEscapes, { delimiters: { component: "E" } })
+      .use(hl7v2EncodeEscapes, { delimiters: { component: "F" } })
       .run(tree);
-    expect(subValue(results)).toBe("a\\X5C\\b");
+    expect(subValue(results)).toBe("a\\X7C\\b");
   });
 
   it("rejects a value no escape sequence can write with the delimiters", async () => {
@@ -108,27 +109,37 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(subValue(decoded)).toBe(original);
   });
 
-  it("round-trips with decode: all delimiter types", async () => {
-    const original = "a|b^c~d&e\\f\rg";
+  it("round-trips with decode: every separator and a carriage return", async () => {
+    const original = "a|b^c~d&e\rf";
     const tree = m(s("PID", f(original)));
 
     const encoded = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(encoded)).toBe("a\\F\\b\\S\\c\\R\\d\\T\\e\\E\\f\\.br\\g");
+    expect(subValue(encoded)).toBe("a\\F\\b\\S\\c\\R\\d\\T\\e\\X0D\\f");
 
     const decoded = await unified().use(hl7v2DecodeEscapes).run(encoded);
     expect(subValue(decoded)).toBe(original);
+  });
+
+  it("leaves an escape character without a closing one as it is, which decodes as written", async () => {
+    const tree = m(s("PID", f("a\\b")));
+
+    const encoded = await unified().use(hl7v2EncodeEscapes).run(tree);
+    expect(subValue(encoded)).toBe("a\\b");
+
+    const decoded = await unified().use(hl7v2DecodeEscapes).run(encoded);
+    expect(subValue(decoded)).toBe("a\\b");
   });
 
   it("options.delimiters override MSH-derived delimiters", async () => {
     // MSH has standard delimiters, but options override field to "*"
     const tree = m(s("MSH", f("|"), f("^~\\&")), s("PID", f("before*after")));
 
-    // Override field delimiter via options — should take precedence over MSH
+    // Override field separator via options — should take precedence over MSH
     const results = await unified()
       .use(hl7v2EncodeEscapes, { delimiters: { field: "*" } })
       .run(tree);
 
-    // "*" is now the field delimiter, so it should be encoded as \F\
+    // "*" is now the field separator, so it should be encoded as \F\
     const pid = (results as Root).children[1];
     const value =
       pid?.type === "segment"
@@ -171,12 +182,20 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(subValue(results)).toBe("a\\F\\b");
   });
 
+  it("writes subcomponents only, not a value on any other node", async () => {
+    const tree = m(s("PID", f("x")));
+    const other = { type: "comment", value: "a|b" };
+    tree.children.push(other as never);
+
+    await unified().use(hl7v2EncodeEscapes).run(tree);
+
+    expect(other.value).toBe("a|b");
+  });
+
   it("does not double-encode already-escaped values", async () => {
-    // If a value contains literal backslash (the escape char),
-    // it should be encoded as \E\ — not left as-is
-    const tree = m(s("PID", f("test\\value")));
+    const tree = m(s("PID", f("a\\F\\b|c")));
     const results = await unified().use(hl7v2EncodeEscapes).run(tree);
-    expect(subValue(results)).toBe("test\\E\\value");
+    expect(subValue(results)).toBe("a\\F\\b\\F\\c");
   });
 
   it("does not encode MSH-1 and MSH-2", async () => {
@@ -198,5 +217,45 @@ describe("hl7v2EncodeEscapes plugin", () => {
     expect(msh.children[2]?.children[0]?.children[0]?.children[0]?.value).toBe(
       "test\\F\\value"
     );
+  });
+
+  it("writes a message without a message header with the delimiters of the processor's settings", async () => {
+    const tree = m(s("PID", f("a*b")));
+
+    const results = await unified()
+      .data("settings", { delimiters: { field: "*" } } as Settings)
+      .use(hl7v2EncodeEscapes)
+      .run(tree);
+
+    expect(
+      (results.children[0] as Segment)?.children[0]?.children[0]?.children[0]
+        ?.children[0]?.value
+    ).toBe("a\\F\\b");
+  });
+
+  it("writes the fields of an MSH later in the message", async () => {
+    const tree = m(s("BHS", f("1")), s("MSH", f("a|b"), f("c|d")));
+
+    const results = await unified().use(hl7v2EncodeEscapes).run(tree);
+    const later = results.children[1] as Segment;
+
+    expect(
+      later.children.map(
+        (field) => field.children[0]?.children[0]?.children[0]?.value
+      )
+    ).toStrictEqual(["a\\F\\b", "c\\F\\d"]);
+  });
+
+  it("leaves MSH-1 and MSH-2 of a message header inside a group as they are", async () => {
+    const tree = m(g("HEADER", s("MSH", f("|"), f("^~\\&"), f("a|b"))));
+
+    const results = await unified().use(hl7v2EncodeEscapes).run(tree);
+    const header = (results.children[0] as Group).children[0] as Segment;
+
+    expect(
+      header.children.map(
+        (field) => field.children[0]?.children[0]?.children[0]?.value
+      )
+    ).toStrictEqual(["|", "^~\\&", "a\\F\\b"]);
   });
 });

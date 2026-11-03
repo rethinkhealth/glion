@@ -1,5 +1,6 @@
 import type {
   Component,
+  Delimiters,
   Field,
   FieldRepetition,
   Nodes,
@@ -7,14 +8,23 @@ import type {
   Subcomponent,
 } from "@glion/ast";
 import { c, f, g, m, r, s } from "@glion/builder";
+import { delimiters } from "@glion/util-query";
 import { unified } from "unified";
+import type { Settings } from "unified";
 
 import {
   EscapeSequenceError,
   hl7v2ToHl7v2,
+  MissingEscapeCharacterError,
+  MissingSeparatorError,
   SegmentTerminatorError,
   toHl7v2,
 } from "../src";
+
+const parseLike = (encodingCharacters: string) =>
+  m(s("MSH", f("|"), f(encodingCharacters)));
+
+const settings = (d: Partial<Delimiters>) => ({ delimiters: d }) as Settings;
 
 describe(toHl7v2, () => {
   it("converts a simple MSH segment back to HL7v2 format", () => {
@@ -31,7 +41,7 @@ describe(toHl7v2, () => {
     expect(toHl7v2(m(s("MSH"), s("PID", f("1"))))).toBe("MSH\rPID|1\r");
   });
 
-  it("handles multiple segments with segment delimiter", () => {
+  it("handles multiple segments with segment terminator", () => {
     const tree = m(
       s("MSH", f("|"), f("^~\\&"), f(""), f("2.5")),
       s("PID", f("12345"))
@@ -292,6 +302,183 @@ describe("hl7v2ToHl7v2 plugin", () => {
   });
 });
 
+describe("a delimiter the message does not declare", () => {
+  const declared = (encodingCharacters: string) =>
+    m(s("MSH", f("|"), f(encodingCharacters), f("APP")));
+
+  it("writes a message whose MSH-2 declares no subcomponent separator", () => {
+    const tree = m(
+      ...declared("^~&").children,
+      s("PID", f("1"), f("a&b"), f("c|d"))
+    );
+
+    expect(toHl7v2(tree)).toBe("MSH|^~&|APP\rPID|1|a&b|c&F&d\r");
+  });
+
+  it("writes an empty component as nothing when the message declares no subcomponent separator", () => {
+    const tree = m(...declared("^~\\").children, s("PID", f(c())));
+
+    expect(toHl7v2(tree)).toBe("MSH|^~\\|APP\rPID|\r");
+  });
+
+  it("throws a MissingSeparatorError for a component of two subcomponents and no subcomponent separator", () => {
+    const pid = s("PID", f(c("a", "b")));
+    const tree = m(...declared("^~\\").children, pid);
+
+    expect(() => toHl7v2(tree)).toThrow(
+      expect.objectContaining({
+        message:
+          "A component holds more than one subcomponent, and the message declares no subcomponent separator. MSH-2 declares the subcomponent separator as its fourth encoding character.",
+        name: "MissingSeparatorError",
+        separator: "subcomponent",
+      })
+    );
+  });
+
+  it("throws a MissingSeparatorError for a field repetition of two components and no component separator", () => {
+    const tree = m(...declared("").children, s("PID", f("a", "b")));
+
+    expect(() => toHl7v2(tree)).toThrow(
+      expect.objectContaining({
+        message:
+          "A field repetition holds more than one component, and the message declares no component separator. MSH-2 declares the component separator as its first encoding character.",
+        separator: "component",
+      })
+    );
+  });
+
+  it("throws a MissingSeparatorError for a field of two field repetitions and no repetition separator", () => {
+    const tree = m(...declared("^").children, s("PID", f(r("a"), r("b"))));
+
+    expect(() => toHl7v2(tree)).toThrow(
+      expect.objectContaining({
+        message:
+          "A field holds more than one field repetition, and the message declares no repetition separator. MSH-2 declares the repetition separator as its second encoding character.",
+        separator: "repetition",
+      })
+    );
+    expect(() => toHl7v2(tree)).toThrow(MissingSeparatorError);
+  });
+
+  it("throws a MissingEscapeCharacterError for a separator in a value and no escape character", () => {
+    const tree = m(...declared("^~").children, s("PID", f("a|b")));
+
+    expect(() => toHl7v2(tree)).toThrow(MissingEscapeCharacterError);
+  });
+
+  it("writes with the delimiters MSH-2 declares after a transform changes it", () => {
+    const tree = m(...declared("^~&").children, s("PID", f("a|b")));
+    const msh2 = (tree.children[0] as Segment).children[1];
+    const value = msh2?.children[0]?.children[0]?.children[0];
+    if (value) {
+      value.value = "%~#@";
+    }
+
+    expect(unified().use(hl7v2ToHl7v2).stringify(tree)).toBe(
+      "MSH|%~#@|APP\rPID|a#F#b\r"
+    );
+  });
+
+  it("writes a message without a message header with the delimiters of the processor's settings", () => {
+    const processor = unified()
+      .data(
+        "settings",
+        settings({
+          component: "%",
+          escape: "#",
+          field: "*",
+          repetition: "$",
+          subcomponent: "@",
+        })
+      )
+      .use(hl7v2ToHl7v2);
+
+    expect(processor.stringify(m(s("PID", f("1"), f(c("a", "b")))))).toBe(
+      "PID*1*a@b\r"
+    );
+  });
+
+  it("writes a lone segment with the delimiters of the processor's settings", () => {
+    const processor = unified()
+      .data("settings", settings({ field: "*" }))
+      .use(hl7v2ToHl7v2);
+
+    expect(processor.stringify(s("PID", f("1"), f("2")) as never)).toBe(
+      "PID*1*2"
+    );
+  });
+
+  it("writes a lone segment with `|^~\\&` when the processor has no settings", () => {
+    const processor = unified().use(hl7v2ToHl7v2);
+
+    expect(processor.stringify(s("PID", f("1"), f("2")) as never)).toBe(
+      "PID|1|2"
+    );
+  });
+
+  it("writes a field with no default for a delimiter its message does not declare", () => {
+    const tree = parseLike("^~\\");
+
+    expect(
+      toHl7v2(s("PID", f("a&b")).children[0] as Field, delimiters(tree))
+    ).toBe("a&b");
+  });
+
+  it("throws a MissingSeparatorError for a lone field its delimiters cannot write", () => {
+    const tree = parseLike("^~\\");
+
+    expect(() => toHl7v2(f(c("a", "b")), delimiters(tree))).toThrow(
+      MissingSeparatorError
+    );
+  });
+
+  it("writes a lone segment with the field separator `|` when the delimiters leave it out", () => {
+    expect(toHl7v2(s("PID", f("1"), f("2")), { component: "^" })).toBe(
+      "PID|1|2"
+    );
+  });
+
+  it("writes a later MSH as any other segment", () => {
+    const later = s("MSH", f("a"), f("b"));
+    const tree = m(s("BHS", f("1")), later, s("PID", f("1")));
+
+    expect(toHl7v2(tree)).toBe("BHS|1\rMSH|a|b\rPID|1\r");
+  });
+
+  it("writes a second MSH as any other segment", () => {
+    const tree = m(
+      s("MSH", f("|"), f("^~\\&"), f("A")),
+      s("MSH", f("a"), f("b"))
+    );
+
+    expect(toHl7v2(tree)).toBe("MSH|^~\\&|A\rMSH|a|b\r");
+  });
+
+  it("writes the message header inside a lone group", () => {
+    const tree = g("HEADER", s("MSH", f("|"), f("^~\\&"), f("A")));
+
+    expect(toHl7v2(tree)).toBe("MSH|^~\\&|A\r");
+  });
+
+  it("writes a lone subcomponent", () => {
+    const processor = unified().use(hl7v2ToHl7v2);
+
+    expect(
+      processor.stringify({ type: "subcomponent", value: "a" } as never)
+    ).toBe("a");
+  });
+
+  it("keeps a message header over the delimiters of the processor's settings", () => {
+    const processor = unified()
+      .data("settings", settings({ field: "*" }))
+      .use(hl7v2ToHl7v2);
+
+    expect(processor.stringify(m(s("MSH", f("|"), f("^~\\&"), f("A"))))).toBe(
+      "MSH|^~\\&|A\r"
+    );
+  });
+});
+
 describe("segment terminator", () => {
   it("writes a message with no segments as empty text", () => {
     expect(toHl7v2(m())).toBe("");
@@ -370,19 +557,19 @@ describe("segment terminator", () => {
 });
 
 describe("trailing empty fields", () => {
-  it("writes a field delimiter for each trailing empty field", () => {
+  it("writes a field separator for each trailing empty field", () => {
     const tree = m(s("PID", f("12345"), f("DOE", "JOHN"), f(), f()));
 
     expect(toHl7v2(tree)).toBe("PID|12345|DOE^JOHN||\r");
   });
 
-  it("writes a field delimiter for a trailing empty field in MSH", () => {
+  it("writes a field separator for a trailing empty field in MSH", () => {
     const tree = m(s("MSH", f("|"), f("^~\\&"), f("SENDER"), f()));
 
     expect(toHl7v2(tree)).toBe("MSH|^~\\&|SENDER|\r");
   });
 
-  it("writes a segment with one empty field as its Segment ID and a field delimiter", () => {
+  it("writes a segment with one empty field as its Segment ID and a field separator", () => {
     expect(toHl7v2(s("PID", f()))).toBe("PID|");
   });
 
@@ -445,7 +632,7 @@ describe("getSegmentName graceful degradation", () => {
   });
 
   describe("real-world malformed HL7v2 scenarios", () => {
-    it("handles corrupted message starting with field delimiter gracefully", () => {
+    it("handles corrupted message starting with field separator gracefully", () => {
       // This would result from parsing "|SOME_APP|FACILITY|"
       // where the segment name is missing
       const corruptedSegment = s("PID", f(c("")), f("SOME_APP"));
@@ -530,9 +717,9 @@ describe("toHl7v2 escape sequences", () => {
   });
 
   it("writes a character whose escape code is a delimiter as a hexadecimal escape", () => {
-    const tree = m(s("MSH", f("^"), f("E\\<$")), s("PID", f("a<b")));
+    const tree = m(s("MSH", f("^"), f("F\\<$")), s("PID", f("a^b")));
 
-    expect(toHl7v2(tree)).toBe("MSH^E\\<$\rPID^a<X3C<b\r");
+    expect(toHl7v2(tree)).toBe("MSH^F\\<$\rPID^a<X5E<b\r");
   });
 
   it("throws EscapeSequenceError for a value no escape sequence can write with the delimiters", () => {
@@ -541,10 +728,22 @@ describe("toHl7v2 escape sequences", () => {
     expect(() => toHl7v2(tree)).toThrow(EscapeSequenceError);
   });
 
-  it("writes the escape character, the segment delimiter, and control characters as escape sequences", () => {
+  it("writes a carriage return and a line feed as escape sequences, and an escape character before them as data", () => {
     const tree = m(s("PID", f("a\\b\rc\nd")));
 
-    expect(toHl7v2(tree)).toBe("PID|a\\E\\b\\.br\\c\\X0A\\d\r");
+    expect(toHl7v2(tree)).toBe("PID|a\\E\\b\\X0D\\c\\X0A\\d\r");
+  });
+
+  it("writes an escape character without a closing one as it is when nothing after it is escaped", () => {
+    const tree = m(s("PID", f("C:\\temp")));
+
+    expect(toHl7v2(tree)).toBe("PID|C:\\temp\r");
+  });
+
+  it("writes every escape sequence in a value as it is, whatever its code", () => {
+    const tree = m(s("PID", f("a\\E\\b\\.br\\c\\P\\d\\Q\\e\\XC3A9\\")));
+
+    expect(toHl7v2(tree)).toBe("PID|a\\E\\b\\.br\\c\\P\\d\\Q\\e\\XC3A9\\\r");
   });
 
   it("writes a formatting command, a locally defined sequence, and a character set switch as they are", () => {

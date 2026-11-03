@@ -20,9 +20,9 @@
  *
  *     Message      = MSH segment + 0..n additional segments, each followed by \r
  *     Segment      = NAME | field | field | ...     (segments can repeat in groups)
- *     Field        = repetition [~ repetition ...]  (~ = repetition delimiter; may be empty or single)
- *     Repetition   = component [^ component ...]    (^ = component delimiter; may be single)
- *     Component    = subcomponent [& subcomponent ...] (& = subcomponent delimiter; may be single)
+ *     Field        = repetition [~ repetition ...]  (~ = repetition separator; may be empty or single)
+ *     Repetition   = component [^ component ...]    (^ = component separator; may be single)
+ *     Component    = subcomponent [& subcomponent ...] (& = subcomponent separator; may be single)
  *     Subcomponent = text, with each delimiter written as an escape sequence (may be empty string)
  *
  * At every level, values can be **empty** — an empty field, empty component,
@@ -114,15 +114,14 @@ export const arbEncodingChars = fc
  * Generate a value for one subcomponent, as a sender writes it.
  *
  * Each unit is a printable ASCII character that is not a delimiter, or, one
- * time in five, an escape sequence written with `delimiters.escape`:
+ * time in nine, an escape sequence written with `delimiters.escape`, unless
+ * its code holds a delimiter (#1051):
  *
  * - `\F\ \S\ \T\ \R\` for a delimiter in the value
- * - `\E\` for the escape character, followed by a character that starts no
- *   formatting command, locally defined sequence, or character set switch (`H N
- *   Z C M .`): ADR 0031 writes `\E\H\E\` back as `\H\`
- * - `\.br\` for a line break, unless `.` is a delimiter (#1051)
- * - `\X0B\` for a control character
- * - `\H\ \N\`, kept as they are
+ * - `\X0B\ \X0D\ \X0A\` for a control character
+ * - Sequences kept as written: `\E\ \P\ \H\ \N\ \Q\ \.br\ \.sp 2\ \Zsite\
+ *   \C2842\`, and `\X0D0A\ \X0d\ \XC3A9\ \XFF\ \X41\`, which name characters
+ *   with another form or bytes that are not UTF-8 (#1165–#1168)
  *
  * A message built from these values round-trips exactly through the parser
  * and `@glion/to-hl7v2`.
@@ -147,10 +146,29 @@ function arbFieldValue(
   ]);
   const escape = (code: string) =>
     `${delimiters.escape}${code}${delimiters.escape}`;
-  const codes = ["F", "S", "T", "R", "X0B", "H", "N"];
-  if (!forbidden.has(".")) {
-    codes.push(".br");
-  }
+  const codes = [
+    "F",
+    "S",
+    "T",
+    "R",
+    "X0B",
+    "X0D",
+    "X0A",
+    "E",
+    "P",
+    "H",
+    "N",
+    "Q",
+    ".br",
+    ".sp 2",
+    "Zsite",
+    "C2842",
+    "X0D0A",
+    "X0d",
+    "XC3A9",
+    "XFF",
+    "X41",
+  ].filter((code) => ![...code].some((ch) => forbidden.has(ch)));
   const arbChar = fc
     .integer({ max: 0x7e, min: 0x20 })
     .map((code) => String.fromCodePoint(code))
@@ -161,13 +179,7 @@ function arbFieldValue(
     minLength: 0,
     unit: fc.oneof(
       { arbitrary: arbChar, weight: 8 },
-      { arbitrary: fc.constantFrom(...codes).map(escape), weight: 1 },
-      {
-        arbitrary: arbChar
-          .filter((ch) => !"HNZCM.".includes(ch))
-          .map((ch) => `${escape("E")}${ch}`),
-        weight: 1,
-      }
+      { arbitrary: fc.constantFrom(...codes).map(escape), weight: 1 }
     ),
   });
 }
@@ -227,7 +239,7 @@ function arbSubcomponent(
 }
 
 /**
- * Generate a component: 1–3 subcomponents joined by the subcomponent delimiter.
+ * Generate a component: 1–3 subcomponents joined by the subcomponent separator.
  *
  * In HL7v2, components are the parts of a field separated by `^`, and each
  * component can itself contain subcomponents separated by `&`.
@@ -248,7 +260,7 @@ function arbComponent(
 
 /**
  * Generate a field repetition: 1–3 components joined by the component
- * delimiter.
+ * separator.
  *
  * A "field repetition" is a single occurrence of a field value. When a field
  * repeats (e.g., multiple phone numbers), each repetition is separated by `~`.
@@ -266,7 +278,7 @@ function arbFieldRepetition(
 }
 
 /**
- * Generate a field: 1–2 repetitions joined by the repetition delimiter.
+ * Generate a field: 1–2 repetitions joined by the repetition separator.
  *
  * Most fields have a single value, but some (like patient phone numbers)
  * can repeat. Repetitions are separated by `~`.
@@ -286,7 +298,7 @@ function arbField(
  * Generate a non-MSH segment line.
  *
  * A segment is a line in an HL7v2 message: a 3-letter name followed by
- * fields separated by the field delimiter.
+ * fields separated by the field separator.
  *
  * @example
  *   "PID|1|12345|DOE^JOHN" (PID segment with 3 fields)

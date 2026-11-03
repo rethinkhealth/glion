@@ -38,15 +38,11 @@ export function isEmptyNode(node?: Nodes | null | undefined): boolean {
 
   // Leaf node (Subcomponent): check its string value
   if ("value" in node) {
-    return !node.value || node.value === "";
+    return !node.value;
   }
 
   // Parent node: empty if ALL children are empty
   if ("children" in node) {
-    if (!node.children || node.children.length === 0) {
-      return true;
-    }
-
     return node.children.every((child) => isEmptyNode(child));
   }
 
@@ -80,11 +76,10 @@ export function getByteLength(node?: Nodes | null | undefined): number {
   }
 
   if ("value" in node) {
-    return Buffer.byteLength(node.value, "utf8");
+    return Buffer.byteLength(node.value);
   }
 
-  const nameLength =
-    node.type === "segment" ? Buffer.byteLength(node.name, "utf8") : 0;
+  const nameLength = node.type === "segment" ? Buffer.byteLength(node.name) : 0;
 
   return (
     nameLength +

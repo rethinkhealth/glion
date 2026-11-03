@@ -2,6 +2,5 @@
 export * from "./constants";
 export * from "./constraints";
 export * from "./errors";
-export * from "./escape-decoding";
-export * from "./escape-encoding";
+export { escapes, type Escapes } from "./escapes";
 export * from "./utils";
