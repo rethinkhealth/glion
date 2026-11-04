@@ -78,16 +78,17 @@ The last two are a slogan of algebraic specification, "no junk, no confusion", f
 
 ## 4. Four candidates
 
-| Representation of a value                  | Expressive                  | No confusion | No junk                      | Where                         |
-| ------------------------------------------ | --------------------------- | ------------ | ---------------------------- | ----------------------------- |
-| Characters; delimiters forbidden in data   | No: no delimiter, no markup | Yes          | Yes                          | This spec, lessons 1–4        |
-| Characters; the five delimiter sequences   | No markup                   | Yes          | Yes                          | This spec, before this lesson |
-| One string, markup kept as its text        | Yes                         | **No**       | Yes                          | glion's tree                  |
-| A list of pieces: characters and sequences | Yes                         | Yes          | Only with a rule (section 9) | This spec now                 |
+| Representation of a value                  | Expressive                  | No confusion                  | No junk                      | Where                         |
+| ------------------------------------------ | --------------------------- | ----------------------------- | ---------------------------- | ----------------------------- |
+| Characters; delimiters forbidden in data   | No: no delimiter, no markup | Yes                           | Yes                          | This spec, lessons 1–4        |
+| Characters; the five delimiter sequences   | No markup                   | Yes                           | Yes                          | This spec, before this lesson |
+| One string, markup kept as its text        | Yes                         | **No**                        | Yes                          | glion's tree before #1169     |
+| One string, every sequence kept, `\E\` too | Yes                         | Only with a rule (section 15) | No: a lone escape character  | glion's tree since #1169      |
+| A list of pieces: characters and sequences | Yes                         | Yes                           | Only with a rule (section 9) | This spec now                 |
 
-The third row is glion. Its tree holds a value as one string: decoded characters, and every sequence it does not decode left as its text. The data `\H\` (sent `\E\H\E\`) and the command `\H\` become the same string. Section 15 proves it.
+The third row is glion until #1169. Its tree held a value as one string: decoded characters, and every sequence it did not decode left as its text. The data `\H\` (sent `\E\H\E\`) and the command `\H\` became the same string. Section 15 proves it. The fourth row is glion since #1169 (ADR 0036): it keeps `\E\` as written too, so the two are two strings. A string with a lone escape character, such as `C:\temp`, is junk: no list of pieces is written that way. Section 15 shows the one confusion left, and the rule that removes it.
 
-The fourth row is the choice this specification makes. A value is a list of pieces, each a character or a sequence. It is expressive, and it has no confusion by construction. It has junk: the piece `sequence F` and the character `|` both mean the field separator. Section 9 shows the rule that removes it.
+The last row is the choice this specification makes. A value is a list of pieces, each a character or a sequence. It is expressive, and it has no confusion by construction. It has junk: the piece `sequence F` and the character `|` both mean the field separator. Section 9 shows the rule that removes it.
 
 # Part III: The model
 
@@ -372,7 +373,7 @@ This is how side conditions are usually found: not by reading the standard more 
 
 ## 15. glion's representation, formally
 
-glion's tree flattens a value into one string: a character goes in as itself, and a sequence goes in as its text. Model that, and prove the confusion of section 4:
+Until #1169, glion's tree flattened a value into one string (ADR 0031): a character went in as itself, and a sequence went in as its text. Model that, and prove the confusion of section 4:
 
 ```lean
 def glionPiece (d : Delimiters) : Piece → List Char
@@ -387,46 +388,58 @@ theorem glionValue_collides :
   decide
 ```
 
-Two different values, one string. Whatever `@glion/to-hl7v2` writes for the string `\H\`, it is wrong for one of them. This is lesson 1's `ambiguous_without_distinct_delimiters` one level down: there, two messages shared a text; here, two values share a tree.
+Two different values, one string. Whatever `@glion/to-hl7v2` wrote for the string `\H\`, it was wrong for one of them. This is lesson 1's `ambiguous_without_distinct_delimiters` one level down: there, two messages shared a text; here, two values share a tree.
 
-The same happens with `\.br\`, which glion decodes to a carriage return:
+Since #1169 (ADR 0036), glion's string keeps every sequence as written, `\E\` included, and decodes only the separators and the control characters, a carriage return among them. A data escape character is therefore the text `\E\`, and the sequence `\X0D\` is a carriage return:
 
 ```lean
-def brData : List Piece := data "a\rb"
-def brMark : List Piece := data "a" ++ [.sequence ".br".toList] ++ data "b"
+def keptPiece (d : Delimiters) : Piece → List Char
+  | .char c => if c = d.escape then [d.escape, 'E', d.escape] else [c]
+  | .sequence code => if code = "X0D".toList then ['\r'] else d.escape :: code ++ [d.escape]
 
-#eval String.ofList (escape Delimiters.suggested brMark)                                   -- "a\\.br\\b"
-#eval glionValue Delimiters.suggested brData == glionValue Delimiters.suggested brMark     -- false
+def keptValue (d : Delimiters) (v : List Piece) : List Char := v.flatMap (keptPiece d)
+
+theorem keptValue_separates :
+    keptValue Delimiters.suggested (data "\\H\\") ≠ keptValue Delimiters.suggested [.sequence ['H']] := by
+  decide
 ```
 
-In the model, `brMark` is markup, and `brData` breaks `well_formed_subcomponent_no_terminator`. glion's flattening keeps them apart (`false`), but its parser puts a carriage return in the tree for `\.br\`, so in glion's actual tree both are `a`, carriage return, `b`. Section 16 shows what that does.
+The collision of `glionValue_collides` is gone: the data is `\E\H\E\`, the command `\H\`. One remains, with the carriage return:
+
+```lean
+def crData : List Piece := data "a\rb"
+def crHex : List Piece := data "a" ++ [.sequence "X0D".toList] ++ data "b"
+
+#eval keptValue Delimiters.suggested crData == keptValue Delimiters.suggested crHex     -- true
+```
+
+Two values, one string, but `crData` breaks `well_formed_subcomponent_no_terminator`. Among well-formed values the representation has no confusion: the model's rule removes the one value that would collide. That is the formal content of the open question of whether the model should adopt glion's reading, a carriage return in data written `\X0D\`: the rule would go, and `crHex` would become `crData`.
 
 ## 16. What glion does to each sequence
 
-Each row was run through `@glion/parser` and `@glion/to-hl7v2` with `|^~\&`:
+Each row was run through `@glion/parser` and `@glion/to-hl7v2` with `|^~\&`, since #1169:
 
-| Received                              | glion's tree holds        | Written back   | Same text |
-| ------------------------------------- | ------------------------- | -------------- | --------- |
-| `a\F\b` (and `\S\` `\T\` `\R\` `\E\`) | the delimiter             | the same       | yes       |
-| `\H\240*\N\`                          | the text `\H\240*\N\`     | the same       | yes       |
-| `\.sp 2\`, `\.in+4\`, …               | the text                  | the same       | yes       |
-| `\Zab\`, `\C2D41\`, `\M2442\`         | the text                  | the same       | yes       |
-| `a\.br\b`                             | `a`, carriage return, `b` | `a\.br\b`      | yes       |
-| `caf\XC3A9\`                          | `café`                    | `café`         | **no**    |
-| `a\X0D\b`                             | `a`, carriage return, `b` | `a\.br\b`      | **no**    |
-| `abcde\P\`                            | the text `abcde\P\`       | `abcde\E\P\E\` | **no**    |
-| `\XFF\` (not UTF-8)                   | the text `\XFF\`          | `\E\XFF\E\`    | **no**    |
-| `Line1\X0A\Line2`                     | a line feed between       | the same       | yes       |
-| `\Q\` (no such code)                  | the text `\Q\`            | `\E\Q\E\`      | **no**    |
-| `\E\H\E\`                             | the text `\H\`            | `\H\`          | **no**    |
-| `\E\.sp\E\`                           | the text `\.sp\`          | `\.sp\`        | **no**    |
+| Received                         | glion's tree holds        | Written back | Same text |
+| -------------------------------- | ------------------------- | ------------ | --------- |
+| `a\F\b` (and `\S\` `\T\` `\R\`)  | the separator             | the same     | yes       |
+| `a\E\b`                          | the text `a\E\b`          | the same     | yes       |
+| `\H\240*\N\`                     | the text `\H\240*\N\`     | the same     | yes       |
+| `\.sp 2\`, `\.br\`, `\.in+4\`, … | the text                  | the same     | yes       |
+| `\Zab\`, `\C2D41\`, `\M2442\`    | the text                  | the same     | yes       |
+| `caf\XC3A9\`, `\XFF\`, `\X7C\`   | the text                  | the same     | yes       |
+| `Line1\X0A\Line2`                | a line feed between       | the same     | yes       |
+| `a\X0D\b`                        | `a`, carriage return, `b` | the same     | yes       |
+| `abcde\P\`, `\Q\` (no such code) | the text                  | the same     | yes       |
+| `\E\H\E\`, `\E\.sp\E\`           | the text                  | the same     | yes       |
 
-Every **no** has one of four causes, and each is an issue:
+Before #1169, seven of these rows were **no**, each from one of four causes, and each an issue:
 
-- **Data and markup share the string** (#1165). `\E\H\E\` and `\E\.sp\E\` come back as commands. This is `glionValue_collides`.
-- **A sequence glion does not know becomes data** (#1166). The decoder keeps `\P\`, `\XFF\` and `\Q\` as text; the encoder recognises markup by a fixed list (`VERBATIM_SEQUENCE` in `@glion/utils`), and none of the three is on it, so each is escaped as data. The receiver of `abcde\E\P\E\` reads eight characters, not a value the sender truncated. In the model, `unescape` reads every code that is not a character as a sequence, whatever its letters.
-- **`\.br\` and the carriage return trade places** (#1167). One piece of markup is read as a character, so a character that arrived as `\X0D\` goes back out as markup.
-- **Hexadecimal data is read by default** (#1168). glion reads `\X41\` as `A` and `caf\XC3A9\` as `café` under its UTF-8 agreement (#659), and writes the characters back. The model carries both as written; reading them is an opt-in transform's job.
+- **Data and markup shared the string** (#1165): `\E\H\E\` came back as the command `\H\`. This is `glionValue_collides`.
+- **A sequence glion did not know became data** (#1166): `abcde\P\` was written back `abcde\E\P\E\`.
+- **`\.br\` and the carriage return traded places** (#1167): `a\X0D\b` was written back `a\.br\b`.
+- **Hexadecimal data was read by default** (#1168): `caf\XC3A9\` was written back `café`.
+
+All four came from decoding a sequence into a string that could no longer tell it from another text. ADR 0036 removed the cause: glion decodes only what the structure of a message requires, and `keptValue_separates` is the representation that results.
 
 The model also says what glion's tree needs: a sequence held apart from the characters around it, a parser that reads any code other than `F`, `S`, `T`, `R`, `E` and a control character's `\Xdd\` as a sequence, and a serializer that writes a sequence back as its code. That is `unescape` and `escape`, and `unescape_escape` proves that the round trip is exact.
 
@@ -434,29 +447,31 @@ The model also says what glion's tree needs: a sequence held apart from the char
 
 Lesson 5's harness checks glion against the model through an **abstraction function** (Hoare, 1972, "Proof of correctness of data representations"): a map from the implementation's state to the model's, here from glion's tree to a `Message`. An implementation is correct when each of its operations, seen through the abstraction function, does what the model's operation does.
 
-For values, the abstraction function reads glion's string by glion's own convention (`differential/src/abstraction.ts`): a sequence glion kept is a sequence, and a carriage return was `\.br\`. With that reading, both properties fail on #1165:
+For values, the abstraction function reads glion's string by glion's own convention (`differential/src/abstraction.ts`): `\E\` is the escape character, a carriage return is the sequence `\X0D\`, and every other sequence glion kept is a sequence. Before #1169 both properties failed on #1165:
 
 ```text
 {"delimiters":"!+&#%","header":[[[["#F#"]]]],"segments":[]}
 ```
 
-`#` is the escape character. The model sends the data `#F#` as `#E#F#E#`; glion reads it back as the string `#F#`; the abstraction function reads that as the sequence `F`. No abstraction function could do better: by `glionValue_collides`, the information is gone from the tree. That is the formal sense in which the defect lies in the tree, not in the parser or the serializer alone.
+`#` is the escape character. The model sent the data `#F#` as `#E#F#E#`; glion read it back as the string `#F#`; the abstraction function read that as the sequence `F`. No abstraction function could do better: by `glionValue_collides`, the information was gone from the tree. That is the formal sense in which the defect lay in the tree, not in the parser or the serializer alone. Since #1169 both properties hold, and each records a mutant that makes it fail.
 
-The generator draws every kind of sequence the model defines, and data that only looks like one, and the properties are left to fail. The harness reports every difference between glion and the model; deciding which ones are defects is the owner's job, not the generator's. A generator narrowed until the properties pass would only record what the harness no longer looks at. Hexadecimal data is the one sequence it does not draw, and that is not a narrowing: in the model it is characters, so there is no `\X41\` value to draw.
+An abstraction function is part of the claim. Each time glion's convention changed, its reading of a value had to change too, and a reading that adapts to every change can hide a difference. The carriage return is the case in point: the abstraction function reads glion's carriage return as the model's `\X0D\`, so the properties pass while the two representations differ, as section 15 shows. Each line of the abstraction function cites the decision it follows, and changing one is a decision, not a fix.
+
+The generator draws every kind of sequence the model defines, and data that only looks like one, and the properties are left to fail. The harness reports every difference between glion and the model; deciding which ones are defects is the owner's job, not the generator's. A generator narrowed until the properties pass would only record what the harness no longer looks at.
 
 ## 18. Sender and receiver: where things go wrong
 
-The model says what a text means. A real exchange has two programs, each with its own way of reading. Each case below was run through the oracle and through today's glion:
+The model says what a text means. A real exchange has two programs, each with its own way of reading. Each case below was run through the oracle and through glion since #1169:
 
-| Case                                  | The sender writes                         | A receiver that reads it right                    | Where it goes wrong                                                                                                                                                                                    |
-| ------------------------------------- | ----------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| A line feed in data                   | `PID\|Line1\X0A\Line2` (the model's text) | reads hexadecimal data: a line feed               | A receiver without hexadecimal data shows `\X0A\`. A sender that writes the line feed raw is worse: glion's parser reads `PID\|Line1␊Line2␍` as two segments, `PID` and one whose ID is `Line2`        |
-| A line break in a report              | `OBX\|1. Normal\.br\2. Stable`            | displays formatted text: two lines                | A consumer that extracts plain text shows `\.br\`, unless it uses the opt-in transform (#1168). glion today puts a carriage return in the value; written raw into another message, it ends the segment |
-| Latin-1 hexadecimal data              | `caf\XE9\`, with MSH-18 `8859/1`          | reads 0xE9 as Latin-1: `café`                     | 0xE9 alone is not UTF-8. glion keeps the text and writes back `caf\E\XE9\E\` (#1166), so the next receiver sees the characters `\XE9\`                                                                 |
-| UTF-8 hexadecimal data                | `caf\XC3A9\`                              | reads UTF-8: `café`                               | A Latin-1 receiver reads two bytes, `cafÃ©`. glion writes back `café` as raw UTF-8, which that receiver misreads the same way: decoding helped no one without the agreement                            |
-| A delimiter as hexadecimal data       | `PID\|\X7C\`                              | splits first, then reads the byte: the value `\|` | A receiver that decodes before it splits breaks the field in two. glion writes back `\F\`: the same value, a different text, so a relay that compares bytes or checks a signature fails                |
-| A carriage return as hexadecimal data | `PID\|a\X0D\b`                            | keeps the sequence, or shows a line break         | A receiver that decodes it and writes the value back raw ends the segment at it. glion writes back `a\.br\b`, turning data into a formatting command (#1167)                                           |
-| A carriage return in data             | `PID\|a␍b`                                | none: every receiver reads two segments           | The oracle names the rule it breaks, `well_formed_subcomponent_no_terminator`, and still writes the text, as `encode` writes text for any message                                                      |
+| Case                                  | The sender writes                         | A receiver that reads it right                    | Where it goes wrong                                                                                                                                                                                                              |
+| ------------------------------------- | ----------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A line feed in data                   | `PID\|Line1\X0A\Line2` (the model's text) | reads hexadecimal data: a line feed               | A receiver without hexadecimal data shows `\X0A\`. A sender that writes the line feed raw is worse: glion's parser reads `PID\|Line1␊Line2␍` as two segments, `PID` and one whose ID is `Line2`                                  |
+| A line break in a report              | `OBX\|1. Normal\.br\2. Stable`            | displays formatted text: two lines                | A consumer that extracts plain text shows `\.br\`, unless it reads formatted text (#1002). glion keeps `\.br\` in the value as written; a program that turns it into a carriage return and writes the value raw ends the segment |
+| Latin-1 hexadecimal data              | `caf\XE9\`, with MSH-18 `8859/1`          | reads 0xE9 as Latin-1: `café`                     | 0xE9 alone is not UTF-8. A receiver that assumes UTF-8 cannot read it. glion keeps `\XE9\` and writes it back as it arrived, so the agreement is left to the next receiver                                                       |
+| UTF-8 hexadecimal data                | `caf\XC3A9\`                              | reads UTF-8: `café`                               | A Latin-1 receiver reads two bytes, `cafÃ©`: decoding helps no one without the agreement. glion keeps `\XC3A9\` as written                                                                                                       |
+| A delimiter as hexadecimal data       | `PID\|\X7C\`                              | splits first, then reads the byte: the value `\|` | A receiver that decodes before it splits breaks the field in two. glion decodes only the code it writes for `                                                                                                                    | `, `\F\`, so it keeps `\X7C\` and writes it back as it arrived |
+| A carriage return as hexadecimal data | `PID\|a\X0D\b`                            | keeps the sequence, or shows a line break         | A receiver that decodes it and writes the value back raw ends the segment at it. glion reads a carriage return and writes back `\X0D\`; the model keeps the sequence (section 15)                                                |
+| A carriage return in data             | `PID\|a␍b`                                | none: every receiver reads two segments           | The oracle names the rule it breaks, `well_formed_subcomponent_no_terminator`, and still writes the text, as `encode` writes text for any message                                                                                |
 
 Three patterns account for every row.
 
