@@ -46,7 +46,7 @@ structure Message.WF (m : Message) : Prop where
   character (`F`, `S`, `T`, `R`, `E`, `X`, a hexadecimal digit), so no such sequence
   holds a delimiter. -/
   delimiters_not_code_characters : ∀ c ∈ codeCharacters, c ∉ m.delimiters.all
-  /-- A segment ID is three characters (§2.5.2). -/
+  /-- A segment ID is three characters (S5, §2.5.2). -/
   segment_id_length : ∀ s ∈ m.segments, s.id.length = 3
   /-- A segment ID does not contain the segment terminator. -/
   segment_id_no_terminator : ∀ s ∈ m.segments, segmentTerminator ∉ s.id
@@ -59,10 +59,10 @@ structure Message.WF (m : Message) : Prop where
   /-- A subcomponent contains no segment terminator. -/
   subcomponent_no_terminator :
     ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, Piece.char segmentTerminator ∉ s
-  /-- Every escape sequence is one §2.7 defines. -/
+  /-- Every escape sequence is one §2.7 defines (E6). -/
   escape_sequence_defined : ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, ∀ p ∈ s, p.isDefined
   /-- No escape sequence holds a delimiter: "Escape sequences SHALL NOT contain
-  nested escape sequences" (§2.7.1), and a separator would end the value. -/
+  nested escape sequences" (E3, §2.7.1), and a separator would end the value. -/
   escape_sequence_no_delimiter :
     ∀ f ∈ m.fields, ∀ r ∈ f, ∀ c ∈ r, ∀ s ∈ c, ∀ p ∈ s, p.NoDelimiter m.delimiters
 

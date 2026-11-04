@@ -7,11 +7,12 @@ MSH-2. Source: HL7 Version 2.x.x, Chapter 2 (Control).
 
 namespace Hl7v2.Spec
 
-/-- "The segment terminator is always a carriage return (in ASCII, a hex 0D)."
+/-- S3: "The segment terminator is always a carriage return (in ASCII, a hex 0D)."
 "This value cannot be changed by implementers." -/
 def segmentTerminator : Char := '\r'
 
-/-- The delimiters a message declares in MSH-1 and MSH-2. -/
+/-- The delimiters a message declares in MSH-1 and MSH-2 (D1). The truncation
+character (D3) is not modelled. -/
 structure Delimiters where
   field : Char
   component : Char

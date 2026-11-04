@@ -18,7 +18,7 @@ def encodeField (d : Delimiters) (f : Field) : List Char :=
     [d.component].intercalate <| r.map fun c =>
       [d.subcomponent].intercalate (c.map (escape d))
 
-/-- "insert field separator" before each field. -/
+/-- "insert field separator" before each field (S4). -/
 def encodeFields (d : Delimiters) (fields : List Field) : List Char :=
   fields.flatMap fun f => d.field :: encodeField d f
 
@@ -27,11 +27,11 @@ def encodeSegment (d : Delimiters) (s : Segment) : List Char :=
 
 /-- MSH: "the field delimiter in the 4th character position, and the other
 delimiters occurring as in the field called Encoding Characters, which is the
-first field after the segment ID" (§2.5.4). -/
+first field after the segment ID" (D1, §2.5.4). -/
 def encodeHeader (d : Delimiters) (header : List Field) : List Char :=
   mshId ++ d.field :: d.encodingCharacters ++ encodeFields d header
 
-/-- The message: MSH first, every segment followed by the segment terminator. -/
+/-- The message: MSH first, every segment followed by the segment terminator (S3). -/
 def encode (m : Message) : List Char :=
   (encodeHeader m.delimiters m.header :: m.segments.map (encodeSegment m.delimiters)).flatMap
     (· ++ [segmentTerminator])
