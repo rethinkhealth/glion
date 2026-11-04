@@ -43,7 +43,7 @@ MSH-2. Which data types may use each sequence (§2.7.1) is not modelled.
 
 namespace Hl7v2.Spec
 
-/-- One piece of a value (E2): a character of data, or an escape sequence of §2.7.2 to
+/-- One piece of a value (`escapeSequenceForm`): a character of data, or an escape sequence of §2.7.2 to
 §2.7.8, held as its escape code ID and data characters (`H` for `\H\`, `.sp 2`
 for `\.sp 2\`). -/
 inductive Piece where
@@ -113,7 +113,7 @@ def isFormattingCommand : List Char → Bool
   | _ => false
 
 /-- Whether `code` is the escape code ID and data characters of a sequence §2.7.2
-to §2.7.8 defines (E6). `\X…\` and `\Z…\` are carried, not read (E5). The five sequences for a delimiter, and `\Xdd\` for a control
+to §2.7.8 defines (`definedEscapeSequences`). `\X…\` and `\Z…\` are carried, not read (`hexAndLocalByAgreement`). The five sequences for a delimiter, and `\Xdd\` for a control
 character, are not: they are characters. -/
 def isDefinedSequence : List Char → Bool
   | ['P'] | ['H'] | ['N'] => true
@@ -124,8 +124,8 @@ def isDefinedSequence : List Char → Bool
   | '.' :: command => isFormattingCommand command
   | _ => false
 
-/-- How a sender writes one character of data (E1). `\P\` is held as a sequence,
-not as the truncation character (D3). -/
+/-- How a sender writes one character of data (`delimitersEscapedInData`). `\P\` is held as a sequence,
+not as the truncation character (`truncationCharacter`). -/
 def escapeChar (d : Delimiters) (c : Char) : List Char :=
   if c = d.field then [d.escape, 'F', d.escape]
   else if c = d.component then [d.escape, 'S', d.escape]

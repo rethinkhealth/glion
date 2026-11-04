@@ -61,30 +61,30 @@ The standard's text leaves some things open. Where the proofs need a rule, the s
 
 ## Statements from Chapter 2
 
-What the specification formalizes, statement by statement, from HL7 Version 2.8.1, Chapter 2. Each Lean definition cites the ID of the statement it formalizes. A row marked **no** is a statement the specification does not formalize yet.
+What the specification formalizes, statement by statement, from HL7 Version 2.8.1, Chapter 2. Each statement has a name, and each Lean definition cites the name of the statement it formalizes. A row marked **no** is a statement the specification does not formalize yet.
 
-| ID  | Statement                                                                                                       | §               | Formalized by                                                  |
-| --- | --------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------- |
-| S1  | A message is segments; a segment is fields; a field holds repetitions, components, then subcomponents           | 2.5             | `Message`, `Segment`, `Field`                                  |
-| S2  | Components and subcomponents do not repeat                                                                      | 2.5.3.6         | `Component`, `Subcomponent`: no repetition level below a field |
-| S3  | The segment terminator is always a carriage return                                                              | 2.5.4           | `segmentTerminator`, `encode`                                  |
-| S4  | The field separator also separates the segment ID from the first field                                          | 2.5.4           | `encodeFields`, `encodeSegment`                                |
-| S5  | A segment ID is three characters                                                                                | 2.5.2           | `well_formed_segment_id_length`                                |
-| D1  | MSH declares the delimiters: the field separator is its 4th character, the encoding characters are MSH-2        | 2.5.4, 2.14.9.2 | `Delimiters`, `encodeHeader`                                   |
-| D2  | A receiver parses a message with the delimiters its MSH declares                                                | 2.5.4           | partly: `decode`, a proof device, not a statement              |
-| D3  | The truncation character is the 5th encoding character                                                          | 2.5.4           | **no**                                                         |
-| E1  | A delimiter in data SHALL be escaped: `\F\`, `\S\`, `\T\`, `\R\`, `\E\`, and `\P\` for the truncation character | 2.7.1, 2.6.1    | `escapeChar`, except `\P\`, which is held as a sequence        |
-| E2  | An escape sequence is the escape character, an escape code ID, data characters, and the escape character        | 2.7.1           | `Piece`, `escapePiece`                                         |
-| E3  | Escape sequences SHALL NOT contain nested escape sequences                                                      | 2.7.1           | `well_formed_escape_sequence_no_delimiter`                     |
-| E4  | `\H\`, `\N\`, `\X…\`, `\Z…\` are for TX, FT and CF; formatting commands for FT                                  | 2.7.1, 2.7.7    | **no**: the message has no data types                          |
-| E5  | The meaning of `\X…\` and `\Z…\` is left to an agreement between sender and receiver                            | 2.7.6, 2.7.8    | `isDefinedSequence`: carried as written                        |
-| E6  | The sequences §2.7 defines: truncation, character sets, highlighting, hexadecimal data, formatted text, local   | 2.7.2–2.7.8     | `isDefinedSequence`, `well_formed_escape_sequence_defined`     |
-| R1  | A receiver ignores segments, fields, components, subcomponents and repetitions it did not expect                | 2.6.2           | **no**: needs a message profile                                |
-| R2  | An expected optional segment that is missing consists of fields that are not present                            | 2.6.2           | **no**: needs a message profile                                |
-| R3  | An expected field or component that is missing is not present                                                   | 2.6.2           | partly: `Field.isPresent`, `trimFields`                        |
-| V1  | A field is populated, not populated, or null                                                                    | 2.5.3.0         | **no**                                                         |
-| V2  | Null is written `""` and means: delete the receiver's value                                                     | 2.5.3.0         | **no**                                                         |
-| V3  | An empty item is not populated, never present with length 0                                                     | 2.5.5.0         | **no**                                                         |
+| Statement name                      | Statement                                                                                                       | §               | Formalized by                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------- |
+| `messageStructure`                  | A message is segments; a segment is fields; a field holds repetitions, components, then subcomponents           | 2.5             | `Message`, `Segment`, `Field`                                  |
+| `componentsDoNotRepeat`             | Components and subcomponents do not repeat                                                                      | 2.5.3.6         | `Component`, `Subcomponent`: no repetition level below a field |
+| `segmentTerminatorIsCarriageReturn` | The segment terminator is always a carriage return                                                              | 2.5.4           | `segmentTerminator`, `encode`                                  |
+| `fieldSeparatorAfterSegmentId`      | The field separator also separates the segment ID from the first field                                          | 2.5.4           | `encodeFields`, `encodeSegment`                                |
+| `segmentIdIsThreeCharacters`        | A segment ID is three characters                                                                                | 2.5.2           | `well_formed_segment_id_length`                                |
+| `delimitersDeclaredInMsh`           | MSH declares the delimiters: the field separator is its 4th character, the encoding characters are MSH-2        | 2.5.4, 2.14.9.2 | `Delimiters`, `encodeHeader`                                   |
+| `receiverUsesDeclaredDelimiters`    | A receiver parses a message with the delimiters its MSH declares                                                | 2.5.4           | partly: `decode`, a proof device, not a statement              |
+| `truncationCharacter`               | The truncation character is the 5th encoding character                                                          | 2.5.4           | **no**                                                         |
+| `delimitersEscapedInData`           | A delimiter in data SHALL be escaped: `\F\`, `\S\`, `\T\`, `\R\`, `\E\`, and `\P\` for the truncation character | 2.7.1, 2.6.1    | `escapeChar`, except `\P\`, which is held as a sequence        |
+| `escapeSequenceForm`                | An escape sequence is the escape character, an escape code ID, data characters, and the escape character        | 2.7.1           | `Piece`, `escapePiece`                                         |
+| `noNestedEscapeSequences`           | Escape sequences SHALL NOT contain nested escape sequences                                                      | 2.7.1           | `well_formed_escape_sequence_no_delimiter`                     |
+| `escapeSequencesByDataType`         | `\H\`, `\N\`, `\X…\`, `\Z…\` are for TX, FT and CF; formatting commands for FT                                  | 2.7.1, 2.7.7    | **no**: the message has no data types                          |
+| `hexAndLocalByAgreement`            | The meaning of `\X…\` and `\Z…\` is left to an agreement between sender and receiver                            | 2.7.6, 2.7.8    | `isDefinedSequence`: carried as written                        |
+| `definedEscapeSequences`            | The sequences §2.7 defines: truncation, character sets, highlighting, hexadecimal data, formatted text, local   | 2.7.2–2.7.8     | `isDefinedSequence`, `well_formed_escape_sequence_defined`     |
+| `ignoreUnexpected`                  | A receiver ignores segments, fields, components, subcomponents and repetitions it did not expect                | 2.6.2           | **no**: needs a message profile                                |
+| `missingSegmentNotPresent`          | An expected optional segment that is missing consists of fields that are not present                            | 2.6.2           | **no**: needs a message profile                                |
+| `missingFieldNotPresent`            | An expected field or component that is missing is not present                                                   | 2.6.2           | partly: `Field.isPresent`, `trimFields`                        |
+| `populationStates`                  | A field is populated, not populated, or null                                                                    | 2.5.3.0         | **no**                                                         |
+| `nullMeansDelete`                   | Null is written `""` and means: delete the receiver's value                                                     | 2.5.3.0         | **no**                                                         |
+| `emptyIsNotPopulated`               | An empty item is not populated, never present with length 0                                                     | 2.5.5.0         | **no**                                                         |
 
 Outside the statements above: the rules for where `\.in\` and `\.ti\` may stand in a line (§2.7.7), batches (§2.10), character sets, and message structure (segment order and groups).
 
