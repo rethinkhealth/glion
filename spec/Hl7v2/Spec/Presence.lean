@@ -1,7 +1,7 @@
 import Hl7v2.Spec.Message
 
 /-!
-# Fields that are not present (`missingFieldNotPresent`, §2.6.2)
+# Fields that are not present (`missing_field_not_present`, §2.6.2)
 
 A recipient shall "treat fields and components that are expected but were not
 included in a segment as not present". A field whose subcomponents are all empty

@@ -3,7 +3,7 @@ import Hl7v2.Spec.Escape
 /-!
 # Message structure (§2.5)
 
-Segments, fields, repetitions, components and subcomponents (`messageStructure`, `componentsDoNotRepeat`).
+Segments, fields, repetitions, components and subcomponents (`message_structure`, `components_do_not_repeat`).
 Source: HL7 Version 2.8.1, Chapter 2 (Control).
 -/
 
@@ -20,7 +20,7 @@ abbrev Repetition := List Component
 abbrev Field := List Repetition
 
 structure Segment where
-  /-- "a unique three-character code known as the Segment ID" (`segmentIdIsThreeCharacters`, §2.5.2). -/
+  /-- "a unique three-character code known as the Segment ID" (`segment_id_is_three_characters`, §2.5.2). -/
   id : List Char
   fields : List Field
   deriving DecidableEq, Repr

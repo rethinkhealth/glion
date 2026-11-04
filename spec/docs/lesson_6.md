@@ -169,7 +169,7 @@ def isDefinedSequence : List Char → Bool
 
 `F` is false on purpose: the five delimiter codes are characters, not sequences. `X0A` is false for the same reason: it is the line feed, a character (section 2). `X41` and `X0D` are true: the first is hexadecimal data the model carries, and the second too, because the model gives a carriage return in data no form at all. `C2d41` is false because §2.7.6 lists the hexadecimal digits as "0, 1, . . . , 9, A, . . . , F", in uppercase. `Z|` is true here: whether a sequence may hold a delimiter is a separate rule (section 9).
 
-A formalization must also say what it leaves out, and this one does (README, "Statements from Chapter 2", row `escapeSequencesByDataType` and the line after the table): which data types may use which sequence, because a message here has no data types; and where in a line `\.in\` and `\.ti\` may stand.
+A formalization must also say what it leaves out, and this one does (README, "Statements from Chapter 2", row `escape_sequences_by_data_type` and the line after the table): which data types may use which sequence, because a message here has no data types; and where in a line `\.in\` and `\.ti\` may stand.
 
 ## 8. Encoding a message
 
