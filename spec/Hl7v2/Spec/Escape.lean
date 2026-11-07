@@ -51,9 +51,6 @@ inductive Piece where
   | sequence (code : List Char)
   deriving DecidableEq, Repr
 
-/-- A value of data characters only: `data "SMITH"`. -/
-def data (s : String) : List Piece := s.toList.map .char
-
 /-- The escape code IDs of the five sequences that stand for a delimiter. -/
 def escapeCodes : List Char := ['F', 'S', 'T', 'R', 'E']
 
