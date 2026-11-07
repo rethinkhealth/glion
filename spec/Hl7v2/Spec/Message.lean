@@ -1,0 +1,38 @@
+import Hl7v2.Spec.Escape
+
+/-!
+# Message structure (§2.5)
+
+Segments, fields, repetitions, components and subcomponents (`message_structure`, `components_do_not_repeat`).
+Source: HL7 Version 2.8.1, Chapter 2 (Control).
+-/
+
+namespace Hl7v2.Spec
+
+/-! Fields hold repetitions, repetitions hold components, components hold
+subcomponents, and a subcomponent is a value: characters and escape sequences
+(§2.7). Every level holds at least one element: a field that is present but empty
+is one repetition of one component of one empty subcomponent. -/
+
+abbrev Subcomponent := List Piece
+abbrev Component := List Subcomponent
+abbrev Repetition := List Component
+abbrev Field := List Repetition
+
+structure Segment where
+  /-- "a unique three-character code known as the Segment ID" (`segment_id_is_three_characters`, §2.5.2). -/
+  id : List Char
+  fields : List Field
+  deriving DecidableEq, Repr
+
+/-- A message: the delimiters declared in MSH-1 and MSH-2, the MSH fields from
+MSH-3 on, and the segments after MSH. -/
+structure Message where
+  delimiters : Delimiters
+  header : List Field
+  segments : List Segment
+  deriving DecidableEq, Repr
+
+def mshId : List Char := ['M', 'S', 'H']
+
+end Hl7v2.Spec

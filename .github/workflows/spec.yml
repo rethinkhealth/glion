@@ -1,0 +1,46 @@
+name: Spec
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "spec/**"
+      - ".github/workflows/spec.yml"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "spec/**"
+      - ".github/workflows/spec.yml"
+
+permissions:
+  contents: read # checkout
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lean:
+    name: Lean specification
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # `lake build` checks every proof and, through `Statements.lean`, fails
+      # when a headline statement, its axioms, or the rule names change.
+      # The axiom audit covers every other declaration (`sorry`,
+      # `native_decide`, a new `axiom`); leanchecker replays the proofs in a
+      # second kernel.
+      - uses: leanprover/lean-action@24581d74d674803a25a81b10b059c5c0cdd344c6 # v1.6.2
+        with:
+          lake-package-directory: spec
+          auto-config: false
+          build: true
+          leanchecker: true
+          leanchecker-args: Hl7v2 Statements
+          axiom-audit: true
+          axiom-audit-allow: propext,Quot.sound
+          axiom-audit-root: Hl7v2

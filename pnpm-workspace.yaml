@@ -1,5 +1,6 @@
 packages:
   - "benchmarks"
+  - "differential"
   - "packages/*"
   - "qa"
   - "tools/*"
