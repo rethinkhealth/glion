@@ -60,3 +60,9 @@ reports
 
 # Research notes from agent research runs
 research_notes/
+
+# Quarto preview cache
+.quarto/
+
+/.quarto/
+**/*.quarto_ipynb

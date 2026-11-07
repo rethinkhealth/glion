@@ -2,7 +2,6 @@
 title: How to run mutation testing and triage survivors
 type: how-to
 audience: contributor
-section: community
 status: stable
 last_reviewed: 2026-09-13
 ---
