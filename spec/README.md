@@ -25,10 +25,11 @@ The layout follows [cedar-spec](https://github.com/cedar-policy/cedar-spec/tree/
 
 - **`Hl7v2.Thm.encode_injective`**: two well-formed messages with the same encoding are the same message. Every well-formed text has exactly one meaning.
 - **`Hl7v2.Thm.ambiguous_without_distinct_delimiters`**: if the component separator equals the field separator, `MSH|||~\&␍PID|a|b␍` is the encoding of two different messages.
+- **`Hl7v2.Thm.ambiguous_without_escaping`**: a sender that writes a delimiter in data as itself writes the component `a^b` and the two components `a` and `b` as one text, `a^b`.
 
 - **`Hl7v2.Thm.wf_iff_failures_nil`**: a message is well formed exactly when `Message.failures` names no rule. The catalogue and the definition cannot drift apart.
 
-All three use only Lean's standard axioms (`propext`, `Quot.sound`).
+All four use only Lean's standard axioms (`propext`, `Quot.sound`).
 
 ## The rules
 

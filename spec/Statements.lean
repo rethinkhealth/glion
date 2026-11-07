@@ -38,6 +38,29 @@ encode twoComponents = encode twoFields ∧ twoComponents ≠ twoFields
 #guard_msgs in
 #print axioms ambiguous_without_distinct_delimiters
 
+/--
+info: ambiguous_without_escaping : have d := Delimiters.suggested;
+have unescaped :=
+  List.flatMap fun x =>
+    match x with
+    | Piece.char c => [c]
+    | Piece.sequence code => escapePiece d (Piece.sequence code);
+have write := fun f =>
+  [d.repetition].intercalate
+    (List.map
+      (fun r => [d.component].intercalate (List.map (fun c => [d.subcomponent].intercalate (List.map unescaped c)) r))
+      f);
+have oneComponent := [[[[Piece.char 'a', Piece.char '^', Piece.char 'b']]]];
+have twoComponents := [[[[Piece.char 'a']], [[Piece.char 'b']]]];
+write oneComponent = write twoComponents ∧ oneComponent ≠ twoComponents
+-/
+#guard_msgs in
+#check @ambiguous_without_escaping
+
+/-- info: 'Hl7v2.Thm.ambiguous_without_escaping' does not depend on any axioms -/
+#guard_msgs in
+#print axioms ambiguous_without_escaping
+
 /-- info: @wf_iff_failures_nil : ∀ {m : Message}, m.WF ↔ m.failures = [] -/
 #guard_msgs in
 #check @wf_iff_failures_nil
