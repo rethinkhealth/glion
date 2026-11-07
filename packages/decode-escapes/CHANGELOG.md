@@ -1,5 +1,46 @@
 # @rethinkhealth/hl7v2-decode-escapes
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1178](https://github.com/rethinkhealth/glion/pull/1178) [`6c034fe`](https://github.com/rethinkhealth/glion/commit/6c034fed8da07fb7565ffc1cdea447c23990dbd1) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** the delimiters of a message are read from its tree, and `file.data.delimiters` is gone. A transform that changes MSH-2 now changes the delimiters the message is written with.
+
+  - Remove `@glion/annotate-delimiters`; `delimiters()` from `@glion/util-query` reads the same delimiters from a tree
+  - Change `delimiters()` to read a message as `@glion/parser` does: only a message header the message opens with declares delimiters, so a later `MSH`, or one after a batch header, is no longer read as the header ([#1172](https://github.com/rethinkhealth/glion/issues/1172))
+  - Add a `fallback` argument to `delimiters()`, and add `msh()` to `@glion/util-query`
+  - Change `hl7v2ToHl7v2`, `hl7v2DecodeEscapes`, and `hl7v2EncodeEscapes` to read `options.delimiters` where they take it, then MSH-1 and MSH-2, then the `delimiters` of the processor's `settings`, then `|^~\&`
+  - Remove `hl7v2AnnotateDelimiters` from the `@glion/hl7v2` pipeline
+  - Change `toHl7v2` to write a node other than a `Root` with the `delimiters` it is given: a delimiter left out is absent, except `field`, where it took the default
+  - Write an `MSH` later in a message as any other segment in `toHl7v2`, and handle its escape sequences in `hl7v2DecodeEscapes` and `hl7v2EncodeEscapes`; `toHl7v2` used to drop its first field
+  - Add `ENCODING_CHARACTERS` to `@glion/utils`, and read MSH-2 by UTF-16 code unit in `delimiters()`, as `@glion/parser` does
+
+- [#1169](https://github.com/rethinkhealth/glion/pull/1169) [`d2a29e4`](https://github.com/rethinkhealth/glion/commit/d2a29e4f20510c645847823cdc8c37b0ed01b96e) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** change only the characters that cannot appear in a value as they are, the separators and the control characters, and keep everything else as written in both directions, so a message read and written again is the message that was sent.
+
+  - Decode `\F\`, `\S\`, `\R\`, and `\T\` to the separators, and the `\Xdd\` of a character below U+0020, such as `\X0D\`, to that character. Keep every other sequence in the value as written: `\E\`, `\P\`, `\H\`, `\N\`, `\.br\`, any other `\X…\`, `\Z…\`, `\C…\`, `\M…\`, and a code HL7v2 does not define.
+  - Change `\.br\` to stay as written instead of decoding to a carriage return, `\XC3A9\` to stay as written instead of decoding to `é`, and `\E\` to stay as written instead of decoding to the escape character. A value read by `@glion/parser`, `@glion/hl7v2`, the NAK and ACK text of `@glion/mllp-client`, and the output of `glion send` hold these sequences as written.
+  - Write a carriage return in a value as `\X0D\` instead of `\.br\`, so `\X0D\` is no longer written back as `\.br\`. With `X`, `0`, or both `D` and `d` among the delimiters, a value holding a carriage return now throws `EscapeSequenceError`.
+  - Write every escape sequence in a value as it is, so `\P\`, `\Q\`, and `\XFF\` are no longer written back as `\E\P\E\`, `\E\Q\E\`, and `\E\XFF\E\`, and `C:\temp` is no longer written as `C:\E\temp`. A data escape character is written `\E\` in the value, or `\X5C\` when `E` is a delimiter.
+  - Write an escape character as `\E\` when a separator or a control character comes after it and before its closing one, or the end of the value when it has none, so that it does not pair with their escape sequences: `a\b|c` is written `a\E\b\F\c`, and a tab after a bare `\` is kept through a relay.
+  - Fix `escapes.write` and `escapes.read` for a delimiter of two UTF-16 units, so `a😀b` with the field separator `😀` is written `a\F\b` instead of as it is, and `a🙂T🙂b` with the escape character `🙂` is read as `a&b` ([#1190](https://github.com/rethinkhealth/glion/issues/1190)).
+  - Replace `decodeEscapes(value, delimiters)` and `encodeEscapes(value, delimiters)` in `@glion/utils` with `escapes.read(text, delimiters)` and `escapes.write(value, delimiters)`.
+  - `getLength` and `@glion/lint-profile-field-max-length` count the characters a value holds, so `12\E\3`, which now stays as written, is 6 characters long, not 4.
+  - Change `@glion/decode-escapes` and `@glion/encode-escapes` to apply `escapes.read` and `escapes.write` to every subcomponent value outside MSH-1 and MSH-2, with the delimiters MSH declares when no other delimiters are given, so a plugin reads and writes a value as `@glion/parser` and `@glion/to-hl7v2` do.
+
+### Patch Changes
+
+- [#1178](https://github.com/rethinkhealth/glion/pull/1178) [`6c034fe`](https://github.com/rethinkhealth/glion/commit/6c034fed8da07fb7565ffc1cdea447c23990dbd1) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** a delimiter MSH-2 does not declare is absent, and the message is read without it. `MSH|^~&` declares the escape character `&` and no subcomponent separator, so `a&F&b` is the one value `a|b`, where it was read as the subcomponents `a`, `F`, and `b` ([#1170](https://github.com/rethinkhealth/glion/issues/1170)). In a message that opens `MSH|^~\`, `&` is data.
+
+  - Change `Delimiters` in `@glion/ast`: `component`, `repetition`, `escape`, and `subcomponent` are optional, and absent when MSH-2 does not declare them
+  - Change `detectDelimiters` in `@glion/parser` and `delimiters()` in `@glion/util-query` to leave out a delimiter MSH-2 does not declare, where they gave it its default; a message without a message header segment is still read with `|^~\&`
+  - Add `MissingSeparatorError` to `@glion/to-hl7v2`, thrown for a field, field repetition, or component with more than one child and no separator to write them apart
+  - Add `MissingEscapeCharacterError` to `@glion/utils`, a subclass of `EscapeSequenceError` that `escapes.write` throws for a separator or line break when the delimiters have no escape character, writing every other character as it is; `escapes.read` returns the text as it is
+
+- Updated dependencies [[`6c034fe`](https://github.com/rethinkhealth/glion/commit/6c034fed8da07fb7565ffc1cdea447c23990dbd1), [`d2a29e4`](https://github.com/rethinkhealth/glion/commit/d2a29e4f20510c645847823cdc8c37b0ed01b96e), [`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7), [`6c034fe`](https://github.com/rethinkhealth/glion/commit/6c034fed8da07fb7565ffc1cdea447c23990dbd1)]:
+  - @glion/utils@0.32.0
+  - @glion/util-query@0.32.0
+  - @glion/util-visit@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes

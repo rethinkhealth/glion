@@ -1,5 +1,24 @@
 # @rethinkhealth/hl7v2-ast
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1156](https://github.com/rethinkhealth/glion/pull/1156) [`1149745`](https://github.com/rethinkhealth/glion/commit/114974584f3e71e4c3ffcf3014a7d4e815be57b7) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** the segment terminator is a carriage return, `\r`, and no setting changes it, as HL7v2 Chapter 2 requires: "The segment terminator is always a carriage return." `Delimiters` and `DEFAULT_DELIMITERS` no longer have a `segment` key, and a configuration that sets `settings.delimiters.segment` is rejected. `@glion/utils` exports `SEGMENT_TERMINATOR`, `"\r"`. The parser ends a segment at `\r`, and `@glion/to-hl7v2` writes `\r` after each segment.
+
+- [#1148](https://github.com/rethinkhealth/glion/pull/1148) [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00) Thanks [@meleksomai](https://github.com/meleksomai)! - A segment records the characters that end it in `Segment.terminator` (ADR 0035). `@glion/parser` sets it to what ended the segment in the text it was read from (`\r`, `\n`, or `\r\n`), and to `""` for a last segment with nothing after it. `s()` in `@glion/builder` sets it to `\r`, so a built segment carries the key.
+
+  **Breaking:** `Segment.terminator` is required, so a segment made as an object literal states it.
+
+  `@glion/parser` takes a `lineBreaks` option: `true`, the default, reads a line feed and a carriage return and a line feed as segment ends, as before; `false` ends a segment only at a carriage return, as HL7v2 Chapter 2 requires, and reads a line feed as data. A `SEGMENT_END` token's `value` holds the characters it covers.
+
+- [#1178](https://github.com/rethinkhealth/glion/pull/1178) [`6c034fe`](https://github.com/rethinkhealth/glion/commit/6c034fed8da07fb7565ffc1cdea447c23990dbd1) Thanks [@meleksomai](https://github.com/meleksomai)! - **Breaking:** a delimiter MSH-2 does not declare is absent, and the message is read without it. `MSH|^~&` declares the escape character `&` and no subcomponent separator, so `a&F&b` is the one value `a|b`, where it was read as the subcomponents `a`, `F`, and `b` ([#1170](https://github.com/rethinkhealth/glion/issues/1170)). In a message that opens `MSH|^~\`, `&` is data.
+
+  - Change `Delimiters` in `@glion/ast`: `component`, `repetition`, `escape`, and `subcomponent` are optional, and absent when MSH-2 does not declare them
+  - Change `detectDelimiters` in `@glion/parser` and `delimiters()` in `@glion/util-query` to leave out a delimiter MSH-2 does not declare, where they gave it its default; a message without a message header segment is still read with `|^~\&`
+  - Add `MissingSeparatorError` to `@glion/to-hl7v2`, thrown for a field, field repetition, or component with more than one child and no separator to write them apart
+  - Add `MissingEscapeCharacterError` to `@glion/utils`, a subclass of `EscapeSequenceError` that `escapes.write` throws for a separator or line break when the delimiters have no escape character, writing every other character as it is; `escapes.read` returns the text as it is
+
 ## 0.31.0
 
 No changes in this release.

@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-encoding-characters-required",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "description": "hl7v2-lint rule to warn when MSH-2 leaves out a delimiter",
   "keywords": [
     "delimiters",

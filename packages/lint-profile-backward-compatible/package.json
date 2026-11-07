@@ -1,6 +1,6 @@
 {
   "name": "@glion/lint-profile-backward-compatible",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "description": "Lint rule that reports a value in an element HL7v2 keeps only for backward compatibility",
   "keywords": [
     "health",
