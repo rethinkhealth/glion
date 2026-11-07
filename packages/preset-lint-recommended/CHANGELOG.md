@@ -1,5 +1,27 @@
 # @rethinkhealth/hl7v2-preset-lint-recommended
 
+## 0.32.0
+
+### Minor Changes
+
+- [#1180](https://github.com/rethinkhealth/glion/pull/1180) [`39ce68e`](https://github.com/rethinkhealth/glion/commit/39ce68eef61b96e69f58416218a349f1a90e12f4) Thanks [@meleksomai](https://github.com/meleksomai)! - Add two lint rules for the delimiters of the message header segment, and add both to `@glion/preset-lint-recommended`.
+
+  - Add `@glion/lint-encoding-characters-required`, which reports each delimiter MSH-2 leaves out, such as `The encoding characters declare no subcomponent separator.`; the preset runs it at `warning`
+  - Add `@glion/lint-delimiters-duplicate`, which reports each delimiter that is the same character as an earlier one, such as `The escape character is the same character as the component separator.`, with the character in `actual`; the preset runs it at `error`
+
+- [#1148](https://github.com/rethinkhealth/glion/pull/1148) [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00) Thanks [@meleksomai](https://github.com/meleksomai)! - `@glion/preset-lint-recommended` runs `@glion/lint-segment-terminator`, at its default severity, `warning`: a segment that ends with `\n` or `\r\n`, or a last segment with no segment terminator, is reported. A message is still accepted; the warning is not fatal.
+
+### Patch Changes
+
+- Updated dependencies [[`39ce68e`](https://github.com/rethinkhealth/glion/commit/39ce68eef61b96e69f58416218a349f1a90e12f4), [`783eda5`](https://github.com/rethinkhealth/glion/commit/783eda533ea9d9b39df95d7dbfcd60495a4beb00)]:
+  - @glion/lint-encoding-characters-required@0.32.0
+  - @glion/lint-delimiters-duplicate@0.32.0
+  - @glion/lint-segment-terminator@0.32.0
+  - @glion/lint-no-trailing-empty-field@0.32.0
+  - @glion/lint-message-version@0.32.0
+  - @glion/lint-required-message-header@0.32.0
+  - @glion/lint-segment-header-length@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes
