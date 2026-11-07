@@ -1,0 +1,55 @@
+name: Differential
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "spec/**"
+      - "differential/**"
+      - "packages/**"
+      - ".github/workflows/differential.yml"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "spec/**"
+      - "differential/**"
+      - "packages/**"
+      - ".github/workflows/differential.yml"
+
+permissions:
+  contents: read # checkout; the pnpm and Lean caches need only read scope
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  differential:
+    name: glion against the Lean specification
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Installs the toolchain named in spec/lean-toolchain; `test:spec` builds
+      # the oracle with it.
+      - uses: leanprover/lean-action@24581d74d674803a25a81b10b059c5c0cdd344c6 # v1.6.2
+        with:
+          lake-package-directory: spec
+          auto-config: false
+          build: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.x
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm ci:install
+      - name: Build
+        run: pnpm build
+      # Runs differential/tests (the harness), then differential/properties
+      # (the claims about glion) only when the harness passes.
+      - name: Differential testing
+        run: pnpm --filter @glion/differential test:spec

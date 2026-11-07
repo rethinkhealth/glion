@@ -1,0 +1,11 @@
+project:
+  type: default
+  render:
+    - "**/*.md"
+    - "!node_modules/"
+    - "!**/node_modules/"
+
+format:
+  html:
+    syntax-definitions:
+      - quarto/lean.xml

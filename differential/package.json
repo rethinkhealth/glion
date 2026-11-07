@@ -1,0 +1,26 @@
+{
+  "name": "@glion/differential",
+  "version": "0.0.0",
+  "private": true,
+  "description": "glion checked against the Lean specification of HL7v2 in spec/",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test:spec": "(cd ../spec && lake build oracle) && vitest run --project harness && vitest run --project properties"
+  },
+  "devDependencies": {
+    "@glion/ast": "workspace:*",
+    "@glion/parser": "workspace:*",
+    "@glion/testing": "workspace:*",
+    "@glion/to-hl7v2": "workspace:*",
+    "@glion/tsconfig": "workspace:*",
+    "@types/node": "26.6.5",
+    "fast-check": "^3.23.2",
+    "unified": "^11.0.5",
+    "vitest": "4.1.12"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

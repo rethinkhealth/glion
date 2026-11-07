@@ -57,3 +57,12 @@ temp
 # Stryker mutation testing
 reports
 .stryker-tmp
+
+# Research notes from agent research runs
+research_notes/
+
+# Quarto preview cache
+.quarto/
+
+/.quarto/
+**/*.quarto_ipynb
