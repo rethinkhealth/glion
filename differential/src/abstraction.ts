@@ -70,14 +70,17 @@ import { toSpecSubcomponent } from "./oracle";
 // Each would map to [[[""]]] and hide a parser that wrote it; each throws.
 
 // glion's string, read as the pieces it stands for (difference 4 above).
-const subcomponent = (value: string, escape: string): SpecSubcomponent => {
+const subcomponent = (
+  value: string,
+  escapeCharacter: string
+): SpecSubcomponent => {
   const pieces: SpecPiece[] = [];
   let i = 0;
   while (i < value.length) {
-    const end = value.indexOf(escape, i + 1);
-    if (value[i] === escape && end !== -1) {
+    const end = value.indexOf(escapeCharacter, i + 1);
+    if (value[i] === escapeCharacter && end !== -1) {
       const code = value.slice(i + 1, end);
-      pieces.push(code === "E" ? escape : { sequence: code });
+      pieces.push(code === "E" ? escapeCharacter : { sequence: code });
       i = end + 1;
     } else if (value[i] === "\r") {
       pieces.push({ sequence: "X0D" });
@@ -91,7 +94,10 @@ const subcomponent = (value: string, escape: string): SpecSubcomponent => {
 };
 
 // An empty component (`^^`) has no subcomponents in glion: [] → [""].
-const component = (node: Component, escape: string): SpecSubcomponent[] => {
+const component = (
+  node: Component,
+  escapeCharacter: string
+): SpecSubcomponent[] => {
   const [only] = node.children;
   if (node.children.length === 1 && only?.value === "") {
     throw new Error(
@@ -100,13 +106,13 @@ const component = (node: Component, escape: string): SpecSubcomponent[] => {
   }
   return node.children.length === 0
     ? [""]
-    : node.children.map((s) => subcomponent(s.value, escape));
+    : node.children.map((s) => subcomponent(s.value, escapeCharacter));
 };
 
 // An empty repetition (`x~`) has no components in glion: [] → [[""]].
 const repetition = (
   node: FieldRepetition,
-  escape: string
+  escapeCharacter: string
 ): SpecSubcomponent[][] => {
   const [only] = node.children;
   if (node.children.length === 1 && only?.children.length === 0) {
@@ -116,11 +122,11 @@ const repetition = (
   }
   return node.children.length === 0
     ? [[""]]
-    : node.children.map((c) => component(c, escape));
+    : node.children.map((c) => component(c, escapeCharacter));
 };
 
 // An empty field (`||`) has no repetitions in glion: [] → [[[""]]].
-const field = (node: Field, escape: string): SpecField => {
+const field = (node: Field, escapeCharacter: string): SpecField => {
   const [only] = node.children;
   if (node.children.length === 1 && only?.children.length === 0) {
     throw new Error(
@@ -129,7 +135,7 @@ const field = (node: Field, escape: string): SpecField => {
   }
   return node.children.length === 0
     ? [[[""]]]
-    : node.children.map((r) => repetition(r, escape));
+    : node.children.map((r) => repetition(r, escapeCharacter));
 };
 
 /**
@@ -163,12 +169,12 @@ export const toSpecMessage = (tree: Root): SpecMessage => {
   // "|" + "^~\&" → "|^~\&": field separator, then the encoding characters in
   // their MSH-2 order, the order of the specification's `Delimiters`.
   const delimiters = `${value(msh.children[0])}${value(msh.children[1])}`;
-  const escape = delimiters.charAt(3);
+  const escapeCharacter = delimiters.charAt(3);
 
   return {
     delimiters,
     // MSH-3 onward; children 0 and 1 are MSH-1 and MSH-2.
-    header: msh.children.slice(2).map((f) => field(f, escape)),
+    header: msh.children.slice(2).map((f) => field(f, escapeCharacter)),
     segments: rest.map((segment) => {
       // The specification has no segment groups; a grouping transform would
       // nest segments under a group node.
@@ -178,7 +184,7 @@ export const toSpecMessage = (tree: Root): SpecMessage => {
       // glion keeps the segment ID as `name`, not as a field, so `fields`
       // starts at field 1, as the specification's segment does.
       return {
-        fields: segment.children.map((f) => field(f, escape)),
+        fields: segment.children.map((f) => field(f, escapeCharacter)),
         id: segment.name,
       };
     }),

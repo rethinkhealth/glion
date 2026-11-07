@@ -103,7 +103,7 @@ export const arbSpecMessage: fc.Arbitrary<SpecMessage> = arbDelimiters.chain(
     // once a sequence; once data that looks like a sequence, `\H\` with `\`
     // the escape character drawn above. 0 pieces is the empty value.
     // fast-check leans toward short arrays, so "" comes up often.
-    const escape = delimiters[3] ?? "\\";
+    const escapeCharacter = delimiters[3] ?? "\\";
     const sequences = SEQUENCES.filter(
       (code) => ![...code].some((c) => delimiters.includes(c))
     );
@@ -118,7 +118,7 @@ export const arbSpecMessage: fc.Arbitrary<SpecMessage> = arbDelimiters.chain(
       {
         arbitrary: fc
           .constantFrom(...LOOKALIKES)
-          .map((code) => `${escape}${code}${escape}`),
+          .map((code) => `${escapeCharacter}${code}${escapeCharacter}`),
         weight: 1,
       }
     );
