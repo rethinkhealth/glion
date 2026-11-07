@@ -104,7 +104,7 @@ The last line asks: if the component separator were also `|`, would all the deli
 
 In the file:
 
-```text
+```lean
 abbrev Subcomponent := List Piece
 abbrev Component := List Subcomponent
 abbrev Repetition := List Component
@@ -128,7 +128,7 @@ Each level adds one pair of brackets:
 
 ### The two records
 
-```text
+```lean
 structure Segment where
   id : List Char          -- "PID"
   fields : List Field     -- one more bracket: the list of fields
@@ -269,7 +269,7 @@ With `^`, one pair of brackets groups all three letters together. With `~`, each
 
 **`encodeField`** works from the inside out:
 
-```text
+```lean
 [d.repetition].intercalate <| f.map fun r =>          -- 3. join repetitions with ~
   [d.component].intercalate <| r.map fun c =>         -- 2. join components with ^
     [d.subcomponent].intercalate (c.map (escape d))   -- 1. write each subcomponent, join with &
@@ -283,7 +283,7 @@ With `^`, one pair of brackets groups all three letters together. With `~`, each
 
 **`encodeFields`** writes the field separator _before_ each field, not between fields:
 
-```text
+```lean
 fields.flatMap fun f => d.field :: encodeField d f
 ```
 

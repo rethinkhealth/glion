@@ -111,7 +111,7 @@ That is why the statements are what you review. Lean guarantees that each proof 
 
 `TwoRules`, from lesson 3's step 6:
 
-```text
+```lean
 structure TwoRules (m : Message) : Prop where
   distinct : m.delimiters.Distinct
   idLength : ∀ s ∈ m.segments, s.id.length = 3
@@ -197,7 +197,7 @@ The cost is writing the rules twice, and `wf_iff_failures_nil` pays it. Two othe
 
 ## 7. What `simp only` does, one lemma at a time
 
-```text
+```lean
 simp only [Message.failures, List.map_eq_nil_iff, filter_eq_nil_iff, catalogue,
   List.mem_cons, List.not_mem_nil, or_false, forall_eq_or_imp, forall_eq,
   Bool.not_eq_false', decide_eq_true_eq]
@@ -389,7 +389,7 @@ These three lemmas in `Thm/WellFormed.lean` **reshape** `Message.WF`. They add n
 
 `Message.WF` states each rule over the **whole message**, one rule per line, which is the right shape for reading against Chapter 2. But the decoding proof works **one field at a time**, so it wants all the facts about one field in one bundle, and likewise for one segment:
 
-```text
+```lean
 def ValueWF (d : Delimiters) (v : Subcomponent) : Prop :=
   Piece.char segmentTerminator ∉ v ∧ ∀ p ∈ v, p.isDefined ∧ p.NoDelimiter d
 
@@ -418,7 +418,7 @@ example (P : Nat → Prop) (h : ∀ n ∈ [1, 2, 3], P n) : P 2 := h 2 (by decid
 
 Reading `Message.WF.field`, with the first line simplified:
 
-```text
+```lean
 theorem Message.WF.field (hm : m.WF) (hf : f ∈ m.fields) : FieldWF m.delimiters f :=
   ⟨hm.field_has_repetition f hf,                                -- f ≠ []
    fun r hr =>                                                   -- for every repetition r in f:

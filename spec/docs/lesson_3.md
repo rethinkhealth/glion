@@ -151,7 +151,7 @@ Read it with steps 2 to 5: split the `↔`; going right, take the two fields out
 
 **Look back at the real proof now.** The last four lines of `wf_iff_failures_nil` are this same proof, with ten rules instead of two:
 
-```text
+```lean
   constructor
   · intro hm
     exact ⟨hm.1, hm.2, hm.3, hm.4, hm.5, hm.6, hm.7, hm.8, hm.9, hm.10⟩
@@ -211,7 +211,7 @@ That is exactly step 6.
 
 You can now read every line of the proof:
 
-```text
+```lean
 theorem wf_iff_failures_nil {m : Message} : m.WF ↔ m.failures = [] := by
   simp only [Message.failures, …]           -- step 7: the catalogue becomes ten rules joined by ∧
   constructor                                -- step 4: split into two directions

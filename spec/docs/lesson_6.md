@@ -56,13 +56,39 @@ The table mixes three different jobs, and a model has to tell them apart.
 
 - **A character.** `\F\`, `\S\`, `\T\`, `\R\`, `\E\` and `\P\` each stand for one character of the value. They exist because that character would otherwise be read as structure. `SMITH\T\JONES` is the value `SMITH&JONES`.
 - **Markup.** `\H\`, `\N\` and the formatting commands are not characters. `\H\240*\N\` is the four characters `240*` with an instruction to make them stand out, and §2.7.4 leaves the how to the receiver: "reverse video, boldface, underlining, blink, an alternate color". `\.br\` belongs here too: §2.7.7 defines it as "Begin new output line", an instruction for display, not a carriage return in the value.
-- **By agreement.** `\X…\` and `\Z…\` mean what sender and receiver agree on, "beyond the scope of this Standard" (§2.7.6, §2.7.8). `\C…\` and `\M…\` change how the characters after them are read.
+- **By agreement.** `\X…\` and `\Z…\` mean what sender and receiver agree on: "The interpretation of the data is entirely left to an agreement between the sending and receiving applications that is beyond the scope of this Standard" (§2.7.6, §2.7.8). `\C…\` and `\M…\` change how the characters after them are read.
 
-The specification adopts no agreement for `\X…\`: it carries hexadecimal data as written, like `\Z…\`, because that is what the standard does. A relay that read `\X41\` as `A` would change the text it forwards, and a sender on ISO 8859-1 means `é` by `\XE9\`, which UTF-8 cannot read.
+### Is `\X41\` the letter `A`?
 
-There is one exception, and it has a reason of its own. A control character (U+0000 to U+001F) other than the carriage return has no safe form in text: many receivers, glion's parser among them, end a segment at a line feed. So the specification writes a line feed as `\X0A\`, and reads `\X0A\` back as the line feed. For control characters alone, hexadecimal data is the first kind. A boundary like this one needs a reason in the standard or in safety; "hexadecimal data is characters" in general has neither, and an earlier draft of this lesson that said so was reversed.
+`\X…\` is hexadecimal data: `\X41\` is the byte `0x41`, which is `A` in ASCII. Should a reader turn it into `A`?
 
-The distinction that matters for a model: a sequence of the first kind is **how a value is written**; a sequence of the other two kinds is **part of what the value is**. `\F\` disappears when a receiver reads the value. `\H\` does not: it is information the sender meant to send.
+No. §2.7.6 defines the form, "1 or more pairs of hexadecimal digits" that "represent 8-bit binary values", but not what those bytes mean: "The interpretation of the data is entirely left to an agreement between the sending and receiving applications that is beyond the scope of this Standard." The same bytes mean different characters under different agreements: `\XE9\` is `é` in ISO 8859-1 and not a character at all in UTF-8.
+
+So translating hexadecimal data is outside the specification. The specification keeps `\X41\` as written, the same way it keeps `\H\`. In glion, a user who has such an agreement reads `\X…\` with a plugin of their own. The parser reads only the control characters below.
+
+### The exception: control characters
+
+A **line feed** (LF, U+000A, written `\n` in most programming languages) is a control character: it tells a device to do something rather than print a symbol. The name comes from the teletype. A line feed moved the paper up one line, and a **carriage return** (CR, U+000D, `\r`) moved the print head back to the left edge, so a new line took both. Operating systems still disagree on which to keep: UNIX ends a line with LF, Windows with CR then LF, and the classic Mac OS with CR alone. HL7v2 ends every segment with a carriage return (§2.5.4) and gives the line feed no meaning of its own.
+
+Take a line feed in data. If the sender wrote it as it is, many receivers, glion's parser among them, would end the segment there. A line feed has no safe way to appear in the text, so the specification writes it as `\X0A\` and reads `\X0A\` back as a line feed. The same goes for every control character from U+0000 to U+001F except the carriage return, which is the segment terminator and is never allowed in data (section 15).
+
+| Text      | What the specification reads |
+| --------- | ---------------------------- |
+| `a\X0A\b` | `a`, a line feed, `b`        |
+| `a\X41\b` | `a`, the sequence `X41`, `b` |
+
+### What to remember
+
+For each sequence, ask: does it disappear when the receiver reads the value?
+
+| Text            | The value             | Disappears?                                     |
+| --------------- | --------------------- | ----------------------------------------------- |
+| `SMITH\T\JONES` | `SMITH&JONES`         | Yes: `\T\` was only how to write `&`            |
+| `a\X0A\b`       | `a`, a line feed, `b` | Yes: `\X0A\` was only how to write a line feed  |
+| `\H\240*\N\`    | `240*`, highlighted   | No: the highlighting is part of what was sent   |
+| `\X41\`, `\Z…\` | kept as written       | No: only sender and receiver know what it means |
+
+A sequence that disappears is **how a value is written**. A sequence that stays is **part of the value**. The rest of this lesson needs that split: a model of a value has to keep the sequences that stay, and must not keep the ones that disappear.
 
 # Part II: Choosing a representation
 
@@ -96,7 +122,7 @@ The last row is the choice this specification makes. A value is a list of pieces
 
 `Spec/Escape.lean` defines the piece:
 
-```text
+```lean
 inductive Piece where
   | char (c : Char)
   | sequence (code : List Char)
@@ -114,7 +140,7 @@ def highlighted : List Piece := [.sequence ['H']] ++ data "240*" ++ [.sequence [
 
 Three definitions, each one level up:
 
-```text
+```lean
 def escapeChar (d : Delimiters) (c : Char) : List Char :=
   if c = d.field then [d.escape, 'F', d.escape]
   else if c = d.component then [d.escape, 'S', d.escape]
@@ -148,7 +174,7 @@ A character that is a delimiter becomes its sequence, a control character become
 
 `isDefinedSequence` says which codes §2.7.2 to §2.7.8 define. Read it against the table of section 1, one line per row:
 
-```text
+```lean
 def isDefinedSequence : List Char → Bool
   | ['P'] | ['H'] | ['N'] => true
   | 'C' :: ds => ds.length == 4 && ds.all isHexDigit
@@ -176,7 +202,7 @@ A formalization must also say what it leaves out, and this one does (README, "St
 
 One line of `Spec/Encoding.lean` uses `escape`: `encodeField` joins the subcomponents of a component, each written through it.
 
-```text
+```lean
 [d.subcomponent].intercalate (c.map (escape d))
 ```
 
@@ -291,7 +317,7 @@ And `ambiguous_without_distinct_delimiters`, whose values are now pieces:
 
 `encode_injective` is proved in one line from `decode_encode`:
 
-```text
+```lean
 theorem encode_injective (h₁ : m₁.WF) (h₂ : m₂.WF) (h : encode m₁ = encode m₂) : m₁ = m₂ := by
   rw [← decode_encode h₁, h, decode_encode h₂]
 ```
@@ -304,7 +330,7 @@ For values, the left inverse is `unescape`, and the lemma to prove is `unescape_
 #check @unescape_escape
 ```
 
-```text
+```lean
 unescape_escape : ∀ (d : Delimiters), ¬d.escape ∈ codeCharacters →
   ∀ (v : List Piece), (∀ (p : Piece), p ∈ v → p.isDefined = true ∧ Piece.NoDelimiter d p) →
     unescape d (escape d v) = v
@@ -314,7 +340,7 @@ unescape_escape : ∀ (d : Delimiters), ¬d.escape ∈ codeCharacters →
 
 The previous reader took the two characters after an escape character without looking at them, which worked because every code had one letter. A code is now any length, so the reader must find the closing escape character. It is a small state machine, in `Thm/Encoding/Escape.lean`:
 
-```text
+```lean
 def readAux (d : Delimiters) : Option (List Char) → List Char → List Piece
   | none, [] => []
   | some code, [] => .char d.escape :: code.map .char
@@ -483,7 +509,7 @@ Three patterns account for every row.
 
 About escape sequences:
 
-- §2.7's sequences stand for a character, for markup, or for something sender and receiver agree on. Only the first kind is encoding; the other two are content.
+- A sequence either disappears when the value is read (a delimiter, a control character) or is part of the value (highlighting, formatting, `\X…\`, `\Z…\`).
 - A value is a list of pieces. Four rules make its encoding unambiguous and readable: no carriage return in data, only defined sequences, no delimiter in a sequence, and no delimiter a code letter.
 
 About formalization:
@@ -530,7 +556,7 @@ def odd : Message :=
 
 **4. Prove it in general.** `glionValue_collides` uses the suggested delimiters. Prove that glion's representation has confusion for every choice of delimiters:
 
-```text
+```lean
 theorem glionValue_not_injective (d : Delimiters) : ∃ v w, v ≠ w ∧ glionValue d v = glionValue d w
 ```
 

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language>
+<!-- Lean 4, for the code blocks of these lessons in Quarto (Pandoc has no Lean syntax). -->
+<language name="Lean" section="Sources" version="1" kateversion="5.0" extensions="*.lean" mimetype="text/x-lean" casesensitive="1">
+  <highlighting>
+    <list name="keywords">
+      <item>abbrev</item>
+      <item>axiom</item>
+      <item>by</item>
+      <item>class</item>
+      <item>def</item>
+      <item>deriving</item>
+      <item>do</item>
+      <item>else</item>
+      <item>end</item>
+      <item>example</item>
+      <item>extends</item>
+      <item>fun</item>
+      <item>have</item>
+      <item>if</item>
+      <item>import</item>
+      <item>in</item>
+      <item>inductive</item>
+      <item>instance</item>
+      <item>lemma</item>
+      <item>let</item>
+      <item>match</item>
+      <item>namespace</item>
+      <item>open</item>
+      <item>private</item>
+      <item>protected</item>
+      <item>section</item>
+      <item>show</item>
+      <item>structure</item>
+      <item>then</item>
+      <item>theorem</item>
+      <item>variable</item>
+      <item>where</item>
+      <item>with</item>
+    </list>
+    <list name="tactics">
+      <item>apply</item>
+      <item>cases</item>
+      <item>constructor</item>
+      <item>decide</item>
+      <item>exact</item>
+      <item>induction</item>
+      <item>intro</item>
+      <item>omega</item>
+      <item>rcases</item>
+      <item>refine</item>
+      <item>rfl</item>
+      <item>rintro</item>
+      <item>rw</item>
+      <item>simp</item>
+      <item>split</item>
+      <item>unfold</item>
+    </list>
+    <list name="types">
+      <item>Bool</item>
+      <item>Char</item>
+      <item>Decidable</item>
+      <item>List</item>
+      <item>Nat</item>
+      <item>Option</item>
+      <item>Prop</item>
+      <item>String</item>
+      <item>Type</item>
+    </list>
+    <list name="constants">
+      <item>false</item>
+      <item>none</item>
+      <item>some</item>
+      <item>true</item>
+      <item>sorry</item>
+    </list>
+    <contexts>
+      <context name="Code" attribute="Normal" lineEndContext="#stay">
+        <Detect2Chars attribute="Comment" context="Comment" char="/" char1="-" beginRegion="comment"/>
+        <Detect2Chars attribute="Comment" context="LineComment" char="-" char1="-"/>
+        <RegExpr attribute="Preprocessor" context="#stay" String="#[a-z_]+"/>
+        <RegExpr attribute="Attribute" context="#stay" String="@\[[^\]]*\]"/>
+        <DetectChar attribute="String" context="String" char="&quot;"/>
+        <RegExpr attribute="Char" context="#stay" String="'(\\.|[^'\\])'"/>
+        <keyword attribute="Keyword" context="#stay" String="keywords"/>
+        <keyword attribute="Function" context="#stay" String="tactics"/>
+        <keyword attribute="DataType" context="#stay" String="types"/>
+        <keyword attribute="Constant" context="#stay" String="constants"/>
+        <RegExpr attribute="Number" context="#stay" String="\b[0-9]+\b"/>
+        <RegExpr attribute="DataType" context="#stay" String="\b[A-Z][A-Za-z0-9_']*"/>
+        <AnyChar attribute="Operator" context="#stay" String=":=→←↔∀∃∧∨¬≠∈∉⟨⟩|·▸"/>
+      </context>
+      <context name="Comment" attribute="Comment" lineEndContext="#stay">
+        <Detect2Chars attribute="Comment" context="Comment" char="/" char1="-" beginRegion="comment"/>
+        <Detect2Chars attribute="Comment" context="#pop" char="-" char1="/" endRegion="comment"/>
+      </context>
+      <context name="LineComment" attribute="Comment" lineEndContext="#pop"/>
+      <context name="String" attribute="String" lineEndContext="#stay">
+        <RegExpr attribute="SpecialChar" context="#stay" String="\\."/>
+        <DetectChar attribute="String" context="#pop" char="&quot;"/>
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal" defStyleNum="dsNormal"/>
+      <itemData name="Keyword" defStyleNum="dsKeyword"/>
+      <itemData name="Function" defStyleNum="dsFunction"/>
+      <itemData name="DataType" defStyleNum="dsDataType"/>
+      <itemData name="Constant" defStyleNum="dsConstant"/>
+      <itemData name="Number" defStyleNum="dsDecVal"/>
+      <itemData name="Char" defStyleNum="dsChar"/>
+      <itemData name="String" defStyleNum="dsString"/>
+      <itemData name="SpecialChar" defStyleNum="dsSpecialChar"/>
+      <itemData name="Comment" defStyleNum="dsComment"/>
+      <itemData name="Preprocessor" defStyleNum="dsPreprocessor"/>
+      <itemData name="Attribute" defStyleNum="dsAttribute"/>
+      <itemData name="Operator" defStyleNum="dsOperator"/>
+    </itemDatas>
+  </highlighting>
+  <general>
+    <comments>
+      <comment name="singleLine" start="--"/>
+      <comment name="multiLine" start="/-" end="-/" region="comment"/>
+    </comments>
+    <keywords casesensitive="1" additionalDeliminator="'."/>
+  </general>
+</language>

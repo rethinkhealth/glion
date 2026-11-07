@@ -34,7 +34,7 @@ These are two different messages that produce the same text, `MSH|^~\&␍PID|a�
 
 **2. `Message.WF`.** WF stands for "well formed". It's a `structure` whose type is `Prop`, so each of its fields is a statement, not a value. A message is well formed only when all ten statements hold. Read each `∀ … ∈ …` as "for every … in …":
 
-```text
+```lean
 field_has_repetition : ∀ f ∈ m.fields, f ≠ []    -- every field holds at least one repetition
 ```
 
@@ -53,7 +53,7 @@ The same rules are now written twice: once as statements in `WF`, and once as ch
 
 `Message.fields` collects every field of a message into one flat list: the MSH fields first, then the fields of each later segment, in order. The rules use it so each one can say "for every field of the message" once, rather than repeating itself for MSH and for every other segment.
 
-```text
+```lean
 def Message.fields (m : Message) : List Field :=
   m.header ++ m.segments.flatMap (·.fields)
 ```
@@ -104,7 +104,7 @@ A **type class** is like a TypeScript interface: it names a capability. An **ins
 
 ### The instance in `WellFormed.lean`
 
-```text
+```lean
 instance (d : Delimiters) : Decidable d.Distinct :=
   inferInstanceAs (Decidable d.all.Nodup)
 ```
@@ -133,7 +133,7 @@ That is why this line works, though lesson 1 needed `decide … .all.Nodup`:
 
 It isn't just a `Bool`. A `Decidable P` value is one of two things:
 
-```text
+```lean
 isTrue  (h : P)     -- "yes", with a proof that P holds
 isFalse (h : ¬P)    -- "no", with a proof that P does not hold
 ```

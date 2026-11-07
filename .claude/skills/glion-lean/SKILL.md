@@ -19,13 +19,14 @@ description: Write, change, or review the Lean 4 specification of HL7v2 in `spec
 
 Follows cedar-spec:
 
-| Tree                 | Holds                                                                                       |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `Hl7v2/Spec/`        | Definitions only: the statements. No theorems.                                              |
-| `Hl7v2/Thm/`         | Headline theorems, one short file per topic                                                 |
-| `Hl7v2/Thm/<Topic>/` | Lemmas and proof devices (`decode`, `unescape`), marked "Proof device" in their doc comment |
-| `Statements.lean`    | `#guard_msgs` over each headline statement, its axioms, and the rule names                  |
-| `Oracle.lean`        | The spec as a program for `differential/`; runs `Spec` definitions only                     |
+| Tree                 | Holds                                                                                               |
+| -------------------- | --------------------------------------------------------------------------------------------------- |
+| `Hl7v2/Spec/`        | Definitions only: the statements. No theorems.                                                      |
+| `Hl7v2/Thm/`         | Headline theorems, one short file per topic                                                         |
+| `Hl7v2/Thm/<Topic>/` | Lemmas and proof devices (`decode`, `unescape`), marked "Proof device" in their doc comment         |
+| `Statements.lean`    | `#guard_msgs` over each headline statement, its axioms, and the rule names                          |
+| `Oracle.lean`        | The spec as a program for `differential/`; runs `Spec` definitions only                             |
+| `Examples.lean`      | Shorthands for lessons (`data`); outside the audited `Hl7v2` library, never used by `Spec` or `Thm` |
 
 ## 3. Naming (Mathlib convention)
 
@@ -57,7 +58,8 @@ A well-formedness rule is a field of `Message.WF`; its catalogue name is `well_f
 
 - Every definition has a doc comment (`/-- … -/`); every module a module comment (`/-! … -/`) naming its sections. Quote HL7v2 where it is the source.
 - Doc comments state what a definition is and which statement it formalizes. No design narrative (same rule as the `glion-tsdoc` skill).
-- A Lean block in `spec/docs/` must compile in order, and every `#eval` comment must match its output. Check by extracting the blocks into a scratch file under the project and running `lake env lean` on it. A statement shown without a proof is a `text` block.
+- Lean code in `spec/docs/` is fenced `lean`, including an excerpt: a statement without its proof, or part of a definition. Lean's output, diagrams, JSON and HL7v2 text are fenced `text`.
+- Every `lean` block that is not an excerpt must compile in order, and every `#eval` comment must match its output. Check by extracting those blocks into a scratch file under the project and running `lake env lean` on it.
 
 ## 7. Before a change is done
 

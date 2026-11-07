@@ -1,0 +1,4 @@
+format:
+  html:
+    syntax-definitions:
+      - lean.xml
