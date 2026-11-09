@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
       # Installs the toolchain named in spec/lean-toolchain; `test:spec` builds
       # the oracle with it.
-      - uses: leanprover/lean-action@24581d74d674803a25a81b10b059c5c0cdd344c6 # v1.6.2
+      - uses: leanprover/lean-action@ba3fdfe5c4476c925da13bf11a005ddb47e47aee # v1.7.1
         with:
           lake-package-directory: spec
           auto-config: false
