@@ -1,0 +1,33 @@
+@glion/to-fhir
+Copyright (c) 2023 Rethink Health, SUARL
+
+This package is distributed under the MIT License; see LICENSE.
+
+The segment maps, datatype maps, and concept maps in this package are derived
+from the HL7 V2-to-FHIR Implementation Guide, published by Health Level Seven
+International ("HL7") at https://github.com/HL7/v2-to-fhir, which states
+Apache-2.0 on GitHub. The Implementation Guide describes itself as
+informational and not an authorized publication. This package is not an HL7
+publication, and HL7 neither endorses nor warrants it.
+
+Derived content, and the source each part comes from:
+
+  * Segment maps and datatype maps under src/schema -- the segment and
+    datatype mapping spreadsheets of the V2-to-FHIR Implementation Guide,
+    read and written out by hand.
+
+  * Concept maps under src/schema/vocabularies.ts -- the ConceptMap resources
+    of the V2-to-FHIR Implementation Guide, and the HL7v2 tables and HL7
+    Terminology (UTG) code systems they reference.
+
+FHIR element names and the US Core profile URLs this package writes are
+reproduced from the FHIR R4 specification and the US Core Implementation
+Guide as published.
+
+The MIT License covering this package applies to Glion's own code and to the
+representation of this data. It does not grant any right in the underlying
+HL7 standard content, and it is not a representation about the terms on which
+that content is published.
+
+HL7(R), Health Level Seven(R), and FHIR(R) are registered trademarks of Health
+Level Seven International.
