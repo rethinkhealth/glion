@@ -125,14 +125,16 @@ Question 3 is the one the standard answers least directly. Until a lesson takes 
 
 ## Properties
 
-A property is a claim about every message, or every well-formed message. The standard states some as requirements and relies on others without stating them. The specification proves each as a theorem.
+A property is a claim about every message, or every well-formed message. The standard states some as requirements and relies on others without stating them. The specification proves each as a theorem. Each is stated as an explicit claim: what must be true of the text, not how a sender or a receiver gets there.
 
-| Property                     | Says                                                                                    | From                                                              | Lean    |
-| ---------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------- |
-| `one_text_one_meaning`       | Two different messages are never written as the same text                               | Implicit. See below                                               | Not yet |
-| `text_declares_delimiters`   | The delimiters of a message can be read from fixed positions of its text                | `delimiters_declared_in_msh`, `receiver_uses_declared_delimiters` | Not yet |
-| `data_may_hold_delimiters`   | A value that holds a delimiter character can be written and is read back as itself      | `special_characters_in_data`, `delimiters_escaped_in_data`        | Not yet |
-| `omission_keeps_the_message` | Leaving out trailing items that are not populated does not change which message is sent | `trailing_not_populated_omitted`, `missing_field_not_present`     | Not yet |
+| Property                     | The claim                                                                                                                                                                                                    | From                                                              | Lean    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ------- |
+| `one_text_one_meaning`       | For all messages `m₁` and `m₂`: if the text of `m₁` is the text of `m₂`, then `m₁` is `m₂`                                                                                                                   | Implicit. See below                                               | Not yet |
+| `text_declares_delimiters`   | For every message `m`: the 4th character of its text is its field separator, and the four characters after it are its component separator, repetition separator, escape character and subcomponent separator | `delimiters_declared_in_msh`, `receiver_uses_declared_delimiters` | Not yet |
+| `data_may_hold_delimiters`   | For every value `v`, whatever characters it holds: the text written for `v` holds no separator, and if `v` and `w` are written as the same text, then `v` is `w`                                             | `special_characters_in_data`, `delimiters_escaped_in_data`        | Not yet |
+| `omission_keeps_the_message` | For all messages `m₁` and `m₂` that differ only in trailing items that are not populated: `m₁` and `m₂` are the same message                                                                                 | `trailing_not_populated_omitted`, `missing_field_not_present`     | Not yet |
+
+**A property is not a procedure.** The pseudocode of §2.6.1.0 gives the escaping of delimiters as a list of substitutions. The specification does not formalize the steps or their order. It states `data_may_hold_delimiters`: what the written value must satisfy. A way of writing a value is correct when the claim holds of it, and a reading of the pseudocode under which the claim fails is not what the standard means.
 
 **`one_text_one_meaning` is not a sentence of the standard.** The standard relies on it in at least three places:
 
@@ -148,19 +150,16 @@ The rules of `Message.WF`, each with its source: a requirement of Part I, or a p
 
 ## Gaps and decisions
 
-Where the standard is silent, or says two things that pull apart, the specification has to choose. Each entry is a question. It is **open** until a lesson decides it, and a decision is recorded below the table with its reason.
+Where the standard is silent, or says two things that pull apart, the specification has to choose. Each entry is a question. It is **open** until a lesson decides it, and a decision is recorded below the table with its reason. A decision is a claim about messages, with what goes wrong without it. How a sender or a receiver is built is never one.
 
-| Question                                                            | What the standard says                                                                                                                                             | Status  |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| Are the delimiters substituted one after another, or per character? | The pseudocode of §2.6.1.0 lists the substitutions in order: field separator, component separator, repetition separator, escape character, subcomponent separator. | Decided |
-| May two delimiters be the same character?                           | Nothing. Figure 2-1 suggests six different characters.                                                                                                             | Open    |
-| Which characters may a value hold?                                  | `string_data_displayable` excludes delimiter and escape characters from string data. `special_characters_in_data` says sequences let data hold them.               | Open    |
-| What is an empty field: no repetition, or one empty one?            | `empty_is_not_populated` says an item with no content is not populated. It does not say how many repetitions, components or subcomponents such a field has.        | Open    |
-| When is an item "populated"?                                        | The pseudocode uses the word at every level and does not define it for a repetition, a component or a subcomponent.                                                | Open    |
-| Is `\|a` the same message as `\|a\|\|`?                             | `trailing_not_populated_omitted` has a sender write the first. `missing_field_not_present` has a receiver treat a missing field as not present.                    | Open    |
-| Is the truncation character part of MSH-2?                          | `encoding_characters_order` lists five characters. Figure 2-1 suggests `^~\&` and gives the truncation character position 5.                                       | Open    |
-
-**Decided: delimiters are substituted one character at a time.** Applied one after another to the whole value, the fourth substitution would rewrite the escape characters the first three wrote: `|` would become `\F\` and then `\E\F\E\`. §2.7.5 shows `\F\` standing for `|`, so the specification reads the lines as one substitution per character of data.
+| Question                                                 | What the standard says                                                                                                                                      | Status |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| May two delimiters be the same character?                | Nothing. Figure 2-1 suggests six different characters.                                                                                                      | Open   |
+| Which characters may a value hold?                       | `string_data_displayable` excludes delimiter and escape characters from string data. `special_characters_in_data` says sequences let data hold them.        | Open   |
+| What is an empty field: no repetition, or one empty one? | `empty_is_not_populated` says an item with no content is not populated. It does not say how many repetitions, components or subcomponents such a field has. | Open   |
+| When is an item "populated"?                             | The pseudocode uses the word at every level and does not define it for a repetition, a component or a subcomponent.                                         | Open   |
+| Is `\|a` the same message as `\|a\|\|`?                  | `trailing_not_populated_omitted` has a sender write the first. `missing_field_not_present` has a receiver treat a missing field as not present.             | Open   |
+| Is the truncation character part of MSH-2?               | `encoding_characters_order` lists five characters. Figure 2-1 suggests `^~\&` and gives the truncation character position 5.                                | Open   |
 
 ## Where each statement is formalized
 
