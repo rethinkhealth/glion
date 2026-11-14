@@ -9,10 +9,10 @@ description: Write, change, or review the Lean 4 specification of HL7v2 in `spec
 
 ## 1. The spec comes from HL7v2, not from glion
 
-- Every definition formalizes a statement of Chapter 2 (HL7 Version 2.8.1). `spec/docs/statements.md` lists them, each with a snake_case name, its quoted sentence, its section, and the Lean definition that formalizes it. A definition's doc comment cites that name and section: `(segment_id_is_three_characters, §2.5.2)`.
-- A new statement gets a row in that list first, with the quoted text and section. A statement marked **Not yet** stays in the list until a lesson formalizes it.
+- Every definition formalizes a statement of Chapter 2 (HL7 Version 2.8.1). Part I of `spec/docs/statements.md` lists them, each with a snake_case name, the statement in plain words, its kind (definition, construction, requirement, receiver rule, recommendation) and its quoted sentence. Part I holds nothing of ours but that wording. A definition's doc comment cites the name and section: `(segment_id_is_three_characters, §2.5.2)`.
+- Part II of that file is the formalization: the questions, the properties to prove, the rules with their sources, the gaps and decisions, and the table of where each statement is formalized. A new statement gets a row in Part I and in that table first; it stays **Not yet** until a lesson formalizes it.
 - Never model glion's AST, its parser, or any implementation choice in `Hl7v2.Spec`.
-- A rule has one of two sources: a statement of the standard, or a fact a proof needs. Where the text leaves something open and a proof needs a rule, state it under "Decisions" in `spec/docs/statements.md`, with the reason (a counterexample theorem when there is one).
+- A rule has one of two sources: a requirement of Part I, or a fact the proof of a property needs. Where the text leaves a question open, record it under "Gaps and decisions" in Part II: open until decided, then decided with the reason (a counterexample theorem when there is one).
 - HL7v2 vocabulary only, as in the rest of the repo.
 
 ## 2. Layout
@@ -24,7 +24,7 @@ Follows cedar-spec:
 | `Hl7v2/Spec/`        | Definitions only: the statements. No theorems.                       |
 | `Hl7v2/Thm/`         | Headline theorems, one short file per topic                          |
 | `Hl7v2/Thm/<Topic>/` | Lemmas and proof devices, marked "Proof device" in their doc comment |
-| `docs/statements.md` | The statements of Chapter 2 and the decisions                        |
+| `docs/statements.md` | Part I: what Chapter 2 says. Part II: the formalization built on it  |
 | `docs/lesson_N.md`   | The lesson that builds a part of the specification                   |
 | `scripts/`           | `check-lessons.py`: compiles the Lean blocks of every lesson         |
 
@@ -63,7 +63,7 @@ Follows cedar-spec:
 
 1. `cd spec && lake build`: every definition and proof.
 2. `python3 scripts/check-lessons.py`: every lesson.
-3. `docs/statements.md` matches the change: rows filled in, decisions recorded.
+3. `docs/statements.md` matches the change: statements marked, properties and rules listed, gaps decided or left open.
 
 ## Banned
 

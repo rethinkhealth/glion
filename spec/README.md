@@ -6,9 +6,9 @@ The specification is built from scratch, one lesson at a time. Each lesson takes
 
 ## How it is built
 
-1. **Statements first.** [`docs/statements.md`](docs/statements.md) lists what Chapter 2 says, sentence by sentence, each with a name, its section and its quoted text. Nothing is written in Lean before its statement is in that list.
+1. **Statements first.** [`docs/statements.md`](docs/statements.md) has two parts. Part I lists what Chapter 2 says, statement by statement, each with a name, its kind and its quoted sentence. Part II is the formalization built on it: the questions it answers, the properties it proves, its rules, and the gaps the standard leaves. Nothing is written in Lean before its statement is in Part I.
 2. **One lesson per step.** A lesson formalizes a few statements, and marks them in the list. The lessons are indexed in [`docs/README.md`](docs/README.md).
-3. **Every rule has a source.** A rule of the specification is either a statement of the standard, or a fact a proof needs. A rule of the second kind is recorded under "Decisions" in the statements list, with the reason.
+3. **Every rule has a source.** A rule of the specification is either a requirement of the standard, or a fact the proof of a property needs. Where the standard leaves a question open, the choice is recorded under "Gaps and decisions", with the reason.
 
 ## Layout
 
@@ -18,7 +18,7 @@ The layout follows [cedar-spec](https://github.com/cedar-policy/cedar-spec/tree/
 | -------------------- | ------------------------------------------------------------------ |
 | `Hl7v2/Spec/`        | Definitions: the statements of the standard                        |
 | `Hl7v2/Thm/`         | Theorems about the definitions, and their proofs                   |
-| `docs/statements.md` | The statements of Chapter 2, and which are formal                  |
+| `docs/statements.md` | What Chapter 2 says, and the formalization built on it             |
 | `docs/`              | The lessons                                                        |
 | `practice/`          | Your own files while following a lesson; Git ignores it            |
 | `scripts/`           | `check-lessons.py`, which compiles the Lean blocks of every lesson |
