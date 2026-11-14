@@ -10,9 +10,9 @@ Read a row against the standard before trusting it: the quoted sentence is the s
 
 This statement is not a sentence of the standard. The standard assumes it everywhere.
 
-| Name                   | The standard says                                                                                               | §     | Lean    |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------- | ----- | ------- |
-| `one_text_one_meaning` | Implicit: two different messages are never written as the same text. Three sentences of the standard rely on it | below | Not yet |
+| Name                   | The standard says                                                                                               | §     | Lean                                                 |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- | ----- | ---------------------------------------------------- |
+| `one_text_one_meaning` | Implicit: two different messages are never written as the same text. Three sentences of the standard rely on it | below | theorem `encode_injective`, for well-formed messages |
 
 - "Both the sender and receiver of the data must have predictable rules for how they will process the data." (§2.6)
 - "When delimiters are included in any component, the delimiters SHALL be escaped. Failure to do so may alter the meaning of the component." (§2.7.1)
@@ -40,7 +40,7 @@ A receiver has only the text. If one text could come from two messages, the rece
 
 | Name                                    | The standard says                                                                                                                                                                                                                            | §        | Lean                                                                                                         |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `message_delimiters`                    | "They are the segment terminator, the field separator, the component separator, subcomponent separator, repetition separator, escape character and truncation character."                                                                    | 2.5.4    | `Delimiters`, without the truncation character                                                               |
+| `message_delimiters`                    | "They are the segment terminator, the field separator, the component separator, subcomponent separator, repetition separator, escape character and truncation character."                                                                    | 2.5.4    | `Delimiters`, `Delimiters.separators`, without the truncation character                                      |
 | `segment_terminator_is_carriage_return` | "The segment terminator is always a carriage return (in ASCII, a hex 0D)." "This value cannot be changed by implementers."                                                                                                                   | 2.5.4    | `segmentTerminator`                                                                                          |
 | `delimiters_declared_in_msh`            | "The other delimiters are defined in the MSH segment, with the field delimiter in the 4th character position, and the other delimiters occurring as in the field called Encoding Characters, which is the first field after the segment ID." | 2.5.4    | `encodeHeader`; theorems `field_separator_is_fourth_character`, `encoding_characters_follow_field_separator` |
 | `encoding_characters_order`             | "This field contains five characters in the following order: the component separator, repetition separator, escape character, subcomponent separator, and truncation character."                                                             | 2.14.9.2 | `Delimiters.encodingCharacters`, without the truncation character                                            |
@@ -102,6 +102,8 @@ The standard gives the construction as pseudocode. Each row quotes its lines.
 The standard's text leaves some things open. A decision is recorded here when the specification has to choose, with the reason. A lesson that makes a decision adds it.
 
 - **Delimiters are substituted one character at a time.** The pseudocode of §2.6.1.0 substitutes in order: the field separator, the component separator, the repetition separator, then the escape character. Applied one after another to the whole value, the fourth line would substitute the escape characters the first three lines wrote: `|` would become `\F\` and then `\E\F\E\`. §2.7.5 shows `\F\` standing for `|`, so the specification reads the lines as one substitution per character of data.
+
+- **The rules `one_text_one_meaning` needs.** The standard does not state the claim, so it does not state what the claim needs. The proof of `encode_injective` uses eight rules, and seven of them are not sentences of Chapter 2: the segment terminator and the four separators are different characters (`separators_distinct`); the escape character is not the segment terminator (`escape_not_terminator`); a Segment ID does not hold the segment terminator (`segment_id_no_terminator`); a field, a repetition and a component each hold at least one element (`field_has_repetition`, `repetition_has_component`, `component_has_subcomponent`); and a subcomponent holds no separator and no segment terminator (`subcomponent_no_separator`). The specification states them as rules of `Message.WF`. A proof shows they are enough, not that each is needed; a rule shown to be needed is recorded with its counterexample.
 
 ## Outside this list
 

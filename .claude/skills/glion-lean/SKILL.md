@@ -24,6 +24,7 @@ Follows cedar-spec:
 | `Hl7v2/Spec/`        | Definitions only: the statements. No theorems.                       |
 | `Hl7v2/Thm/`         | Headline theorems, one short file per topic                          |
 | `Hl7v2/Thm/<Topic>/` | Lemmas and proof devices, marked "Proof device" in their doc comment |
+| `Claims.lean`        | `#guard_msgs` over each headline theorem's statement and axioms      |
 | `docs/statements.md` | The statements of Chapter 2 and the decisions                        |
 | `docs/lesson_N.md`   | The lesson that builds a part of the specification                   |
 | `scripts/`           | `check-lessons.py`: compiles the Lean blocks of every lesson         |
@@ -41,7 +42,7 @@ Follows cedar-spec:
 ## 4. Statements
 
 - State a rule as a `Prop` with a `Decidable` instance, so `decide` proves it on a concrete message. When instance search fails on nested `∀`, name the condition and give it its own instance.
-- A headline theorem's statement is a claim the owner reviews. The PR that changes one says why.
+- A headline theorem's statement is a claim the owner reviews. Changing it changes `Claims.lean`; the PR says why.
 - A new rule needs a source: the sentence of the standard, or a counterexample showing what goes wrong without it.
 
 ## 5. Proofs
