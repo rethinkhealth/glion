@@ -33,4 +33,10 @@ subcomponent separator", in that order (`encoding_characters_order`, §2.14.9.2)
 def Delimiters.encodingCharacters (d : Delimiters) : List Char :=
   [d.component, d.repetition, d.escape, d.subcomponent]
 
+/-- The characters a message is divided at: "the segment terminator, the field
+separator, the component separator, subcomponent separator, repetition separator"
+(`message_delimiters`, §2.5.4). The escape character divides nothing. -/
+def Delimiters.separators (d : Delimiters) : List Char :=
+  [segmentTerminator, d.field, d.component, d.repetition, d.subcomponent]
+
 end Hl7v2.Spec
