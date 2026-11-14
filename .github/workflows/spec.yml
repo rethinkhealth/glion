@@ -36,6 +36,10 @@ jobs:
           # Run only the steps listed below, rather than the ones lean-action
           # would infer from the lakefile.
           auto-config: false
+          # Build from nothing. A restored `.lake` keeps the compiled files of
+          # modules that no longer exist, and leanchecker replays every file
+          # under `Hl7v2`, so a deleted module would fail the check.
+          use-github-cache: false
           # `lake build`: checks every definition and every proof.
           build: true
           # Replays every declaration of these modules through the Lean kernel
