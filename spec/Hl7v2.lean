@@ -1,3 +1,5 @@
+import Hl7v2.Spec
+
 /-!
 # HL7v2 in Lean
 
