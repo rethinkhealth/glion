@@ -4,8 +4,8 @@
 A block fenced `lean` is part of the lesson's file; a block fenced `lean skip`
 is an excerpt or is meant to fail, and is left out. The blocks of one lesson are
 joined in order and compiled with `lake env lean`. The check fails when Lean
-reports an error, or when an `#eval` line ends in a `-- comment` that is not
-what Lean printed for it.
+reports an error, or when an `#eval` ends in a `-- comment` that is not what
+Lean printed for it.
 
 Run from spec/: python3 scripts/check-lessons.py [docs/lesson_1.md ...]
 """
@@ -18,7 +18,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BLOCK = re.compile(r"^```lean\n(.*?)^```", re.S | re.M)
-EXPECTED = re.compile(r"^#eval .*?\s+-- (.+)$")
+COMMENT = re.compile(r"\s+-- (.+)$")
 
 
 def normalize(text: str) -> str:
@@ -33,11 +33,18 @@ def check(lesson: pathlib.Path) -> list[str]:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(source)
 
+    # An `#eval` may continue on indented lines; its comment is on the last one.
     expected = {}
-    for number, line in enumerate(source.splitlines(), start=1):
-        match = EXPECTED.match(line)
+    lines = source.splitlines()
+    for index, line in enumerate(lines):
+        if not line.startswith("#eval "):
+            continue
+        last = index
+        while last + 1 < len(lines) and lines[last + 1].startswith(" "):
+            last += 1
+        match = COMMENT.search(lines[last])
         if match:
-            expected[number] = normalize(match.group(1))
+            expected[index + 1] = normalize(match.group(1))
 
     run = subprocess.run(
         ["lake", "env", "lean", "--json", str(out)], cwd=ROOT, capture_output=True, text=True

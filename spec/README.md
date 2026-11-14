@@ -14,12 +14,14 @@ The specification is built from scratch, one lesson at a time. Each lesson takes
 
 The layout follows [cedar-spec](https://github.com/cedar-policy/cedar-spec/tree/main/cedar-lean): definitions and proofs live in separate trees.
 
-| Path                 | Holds                                             |
-| -------------------- | ------------------------------------------------- |
-| `Hl7v2/Spec/`        | Definitions: the statements of the standard       |
-| `Hl7v2/Thm/`         | Theorems about the definitions, and their proofs  |
-| `docs/statements.md` | The statements of Chapter 2, and which are formal |
-| `docs/`              | The lessons                                       |
+| Path                 | Holds                                                              |
+| -------------------- | ------------------------------------------------------------------ |
+| `Hl7v2/Spec/`        | Definitions: the statements of the standard                        |
+| `Hl7v2/Thm/`         | Theorems about the definitions, and their proofs                   |
+| `docs/statements.md` | The statements of Chapter 2, and which are formal                  |
+| `docs/`              | The lessons                                                        |
+| `practice/`          | Your own files while following a lesson; Git ignores it            |
+| `scripts/`           | `check-lessons.py`, which compiles the Lean blocks of every lesson |
 
 ## Running
 
