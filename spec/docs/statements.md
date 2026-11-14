@@ -127,12 +127,12 @@ Question 3 is the one the standard answers least directly. Until a lesson takes 
 
 A property is a claim about every message, or every well-formed message. The standard states some as requirements and relies on others without stating them. The specification proves each as a theorem. Each is stated as an explicit claim: what must be true of the text, not how a sender or a receiver gets there.
 
-| Property                     | The claim                                                                                                                                                                                                    | From                                                              | Lean    |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ------- |
-| `one_text_one_meaning`       | For all messages `m₁` and `m₂`: if the text of `m₁` is the text of `m₂`, then `m₁` is `m₂`                                                                                                                   | Implicit. See below                                               | Not yet |
-| `text_declares_delimiters`   | For every message `m`: the 4th character of its text is its field separator, and the four characters after it are its component separator, repetition separator, escape character and subcomponent separator | `delimiters_declared_in_msh`, `receiver_uses_declared_delimiters` | Not yet |
-| `data_may_hold_delimiters`   | For every value `v`, whatever characters it holds: the text written for `v` holds no separator, and if `v` and `w` are written as the same text, then `v` is `w`                                             | `special_characters_in_data`, `delimiters_escaped_in_data`        | Not yet |
-| `omission_keeps_the_message` | For all messages `m₁` and `m₂` that differ only in trailing items that are not populated: `m₁` and `m₂` are the same message                                                                                 | `trailing_not_populated_omitted`, `missing_field_not_present`     | Not yet |
+| Property                     | The claim                                                                                                                                                                                                    | From                                                              | Lean                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `one_text_one_meaning`       | For all messages `m₁` and `m₂`: if the text of `m₁` is the text of `m₂`, then `m₁` is `m₂`                                                                                                                   | Implicit. See below                                               | Not yet                                                                             |
+| `text_declares_delimiters`   | For every message `m`: the 4th character of its text is its field separator, and the four characters after it are its component separator, repetition separator, escape character and subcomponent separator | `delimiters_declared_in_msh`, `receiver_uses_declared_delimiters` | `field_separator_is_fourth_character`, `encoding_characters_follow_field_separator` |
+| `data_may_hold_delimiters`   | For every value `v`, whatever characters it holds: the text written for `v` holds no separator, and if `v` and `w` are written as the same text, then `v` is `w`                                             | `special_characters_in_data`, `delimiters_escaped_in_data`        | Not yet                                                                             |
+| `omission_keeps_the_message` | For all messages `m₁` and `m₂` that differ only in trailing items that are not populated: `m₁` and `m₂` are the same message                                                                                 | `trailing_not_populated_omitted`, `missing_field_not_present`     | Not yet                                                                             |
 
 **A property is not a procedure.** The pseudocode of §2.6.1.0 gives the escaping of delimiters as a list of substitutions. The specification does not formalize the steps or their order. It states `data_may_hold_delimiters`: what the written value must satisfy. A way of writing a value is correct when the claim holds of it, and a reading of the pseudocode under which the claim fails is not what the standard means.
 
@@ -146,7 +146,11 @@ A receiver has only the text. If one text could come from two messages, the rece
 
 ## Rules
 
-The rules of `Message.WF`, each with its source: a requirement of Part I, or a property whose proof needs it. No rule yet.
+The rules of `Message.WF`, each with its source: a requirement of Part I, or a property whose proof needs it.
+
+| Rule                | Says                              | Source                           |
+| ------------------- | --------------------------------- | -------------------------------- |
+| `segment_id_length` | A Segment ID has three characters | `segment_id_is_three_characters` |
 
 ## Gaps and decisions
 
@@ -169,7 +173,7 @@ The Lean definition, rule or theorem that formalizes each statement of Part I. *
 | --------------------------------------- | ----------------------------------------------------------------- |
 | `message_is_segments`                   | `Message`                                                         |
 | `segment_is_fields`                     | `Segment`                                                         |
-| `segment_id_is_three_characters`        | Not yet                                                           |
+| `segment_id_is_three_characters`        | rule `segment_id_length`                                          |
 | `field_is_characters`                   | `Subcomponent`                                                    |
 | `field_holds_components`                | `Repetition`                                                      |
 | `component_holds_subcomponents`         | `Component`                                                       |
@@ -180,14 +184,14 @@ The Lean definition, rule or theorem that formalizes each statement of Part I. *
 | `empty_is_not_populated`                | Not yet                                                           |
 | `message_delimiters`                    | `Delimiters`, without the truncation character                    |
 | `segment_terminator_is_carriage_return` | `segmentTerminator`                                               |
-| `delimiters_declared_in_msh`            | `encodeHeader`                                                    |
+| `delimiters_declared_in_msh`            | `encodeHeader`; property `text_declares_delimiters`               |
 | `encoding_characters_order`             | `Delimiters.encodingCharacters`, without the truncation character |
 | `delimiters_hold_for_whole_message`     | `Message.delimiters`: one value per message                       |
 | `suggested_delimiters`                  | `Delimiters.suggested`, without the truncation character          |
 | `field_separator_after_segment_id`      | `encodeFields`                                                    |
 | `truncation_character`                  | Not yet                                                           |
 | `escape_character_use`                  | Not yet                                                           |
-| `segment_starts_with_its_id`            | `encodeSegment`                                                   |
+| `segment_starts_with_its_id`            | `encodeSegment`; theorem `encode_starts_with_msh`                 |
 | `field_separator_before_each_field`     | `encodeFields`                                                    |
 | `repetitions_joined`                    | `encodeField`                                                     |
 | `components_joined`                     | `encodeRepetition`                                                |

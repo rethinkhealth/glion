@@ -4,7 +4,8 @@ Lessons that build the specification in `spec/` from the statements of HL7 Versi
 
 Start with [the statements](statements.md): the list of what Chapter 2 says. Each lesson formalizes a few of them.
 
-| Lesson                              | Formalizes                                                                        | You learn                                                                                |
-| ----------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| [1. A message as data](lesson_1.md) | The delimiters, and the levels of a message from a subcomponent to the message    | Running Lean: `#eval`, `#check`, `def`, `structure`, `abbrev`, lists, `fun` and `map`    |
-| [2. A message as text](lesson_2.md) | The construction of §2.6.1: how a sender writes a message, one function per level | Functions on lists: `++`, `::`, `intercalate`, `flatMap`; a function with an input given |
+| Lesson                              | Formalizes                                                                                                          | You learn                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [1. A message as data](lesson_1.md) | The delimiters, and the levels of a message from a subcomponent to the message                                      | Running Lean: `#eval`, `#check`, `def`, `structure`, `abbrev`, lists, `fun` and `map`    |
+| [2. A message as text](lesson_2.md) | The construction of §2.6.1: how a sender writes a message, one function per level                                   | Functions on lists: `++`, `::`, `intercalate`, `flatMap`; a function with an input given |
+| [3. Claims and rules](lesson_3.md)  | What the standard says of the text of every message, as theorems; the three-character Segment ID, as the first rule | `Prop`, `example`, `theorem`, `rfl`, `decide`, `∀`, and a structure of rules             |
