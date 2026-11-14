@@ -49,9 +49,7 @@ jobs:
           # Fails when any declaration in a module under `Hl7v2` depends on an
           # axiom outside this list: a `sorry` (`sorryAx`), a `native_decide`
           # (`Lean.ofReduceBool`), `Classical.choice`, or a new `axiom`.
-          # Off while the library holds no declaration: the audit fails on an
-          # empty library. The first lesson turns it on.
-          axiom-audit: false
+          axiom-audit: true
           axiom-audit-allow: propext,Quot.sound
           axiom-audit-root: Hl7v2
       # Compiles the Lean blocks of every lesson in spec/docs against the
