@@ -1,10 +1,9 @@
 import Hl7v2.Spec
-import Hl7v2.Thm.Encoding.Decode
 
 /-!
 # Theorems about the encoding
 
-What the text of every message looks like. Each theorem is a statement of the
+What the text a sender writes looks like. Each theorem is a statement of the
 standard about the text, proved of `encode`.
 -/
 
@@ -26,11 +25,5 @@ which is the first field after the segment ID"
 (`delimiters_declared_in_msh`, §2.5.4). -/
 theorem encoding_characters_follow_field_separator (m : Message) :
     ((encode m).drop 4).take 4 = m.delimiters.encodingCharacters := rfl
-
-/-- **One text, one meaning** (`one_text_one_meaning`). Two well-formed messages
-written as the same text are the same message. -/
-theorem encode_injective {m₁ m₂ : Message} (h₁ : m₁.WF) (h₂ : m₂.WF)
-    (h : encode m₁ = encode m₂) : m₁ = m₂ := by
-  rw [← decode_encode h₁, h, decode_encode h₂]
 
 end Hl7v2.Thm

@@ -1,10 +1,11 @@
-import Hl7v2.Spec.Message
+import Hl7v2.Spec.Represents
 
 /-!
-# Encoding (§2.6.1)
+# The sender (§2.6.1)
 
 How a sender writes a message as text: the construction of §2.6.1.0, one
-function per level. Source: HL7 Version 2.8.1, Chapter 2 (Control).
+function per level. `Hl7v2.Thm.encode_represents` proves that the text it
+writes represents the message. Source: HL7 Version 2.8.1, Chapter 2 (Control).
 
 Each value is written as it is, and every field is written: the `substitute`
 lines of the construction (`delimiters_escaped_in_data`) and its "populated"
@@ -12,9 +13,6 @@ conditions (`trailing_not_populated_omitted`) are not formalized here.
 -/
 
 namespace Hl7v2.Spec
-
-/-- The Segment ID of the message header segment. -/
-def mshId : List Char := ['M', 'S', 'H']
 
 /-- A component: its subcomponents, with the subcomponent separator between them
 (`subcomponents_joined`, §2.6.1.0). -/

@@ -1,12 +1,27 @@
-# Lesson 4: One text, one meaning
+# Lesson 4: The sender
 
-A sender writes a message as text and a receiver reads it. The receiver has the text and nothing else. This lesson states the claim that makes that work, tries to prove it, and reads what the proof asks for.
+Lesson 3 said when a text represents a message, and left two questions: does every message have a text, and can it have two? The standard answers the first with a construction: pseudocode that a sender follows to write a message. This lesson turns it into Lean, one level at a time, until `encode` writes a whole message. Then it proves that the text `encode` writes represents the message, and that no other text does.
 
-It proves this property from [the list](statements.md):
+It formalizes these statements from [the list](statements.md):
 
-| Property               | In this lesson                |
-| ---------------------- | ----------------------------- |
-| `one_text_one_meaning` | `encode_injective`, a theorem |
+| Statement                           | In this lesson     |
+| ----------------------------------- | ------------------ |
+| `subcomponents_joined`              | `encodeComponent`  |
+| `components_joined`                 | `encodeRepetition` |
+| `repetitions_joined`                | `encodeField`      |
+| `field_separator_before_each_field` | `encodeFields`     |
+| `field_separator_after_segment_id`  | `encodeFields`     |
+| `segment_starts_with_its_id`        | `encodeSegment`    |
+| `delimiters_declared_in_msh`        | `encodeHeader`     |
+| `segment_terminator_after_segment`  | `encode`           |
+
+And it proves these properties:
+
+| Property                   | In this lesson                                                                      |
+| -------------------------- | ----------------------------------------------------------------------------------- |
+| `sender_writes_a_text`     | `encode_represents`                                                                 |
+| `one_message_one_text`     | `represents_text_unique`                                                            |
+| `text_declares_delimiters` | `field_separator_is_fourth_character`, `encoding_characters_follow_field_separator` |
 
 You need lessons 1 to 3.
 
@@ -17,446 +32,431 @@ Create `spec/practice/Lesson4.lean` and start it with these lines:
 ```lean
 import Hl7v2
 
-open Hl7v2.Spec
+open Hl7v2.Spec (Delimiters Component Repetition Field Segment Message segmentTerminator)
 
 namespace Lesson4
 ```
 
-Paste each `lean` block below them, in order. A block marked "do not paste" is one Lean rejects, shown with its error.
+`open Hl7v2.Spec (…)` brings the names in the brackets into reach: the definitions of lesson 1, from the specification. The functions of this lesson are yours, in the namespace `Lesson4`.
 
-## 1. The claim nobody wrote
+## 1. The construction
 
-Every statement so far is a sentence of the standard. This one is not. The standard never says that two different messages are never written as the same text. It relies on it:
-
-- "Both the sender and receiver of the data must have predictable rules for how they will process the data." (§2.6)
-- "When delimiters are included in any component, the delimiters SHALL be escaped. Failure to do so may alter the meaning of the component." (§2.7.1)
-- "…so that no ambiguity can exist as to the individual or group location of any occurrence of segment X in a message instance." (§2.5.2)
-
-Each sentence guards against one way a text could be read in two ways. None of them states the property they all protect.
-
-**Why it matters.** A receiver reads a text back into a message. If one text can come from two different messages, the receiver has to pick one, and it cannot know which the sender meant. Nothing fails when it picks the wrong one: the text is valid, the receiver parses it, and a value lands in the wrong place. A patient identifier is read as two, a result is filed under another field. No rule for the receiver can repair this, because the information is not in the text any more.
-
-So the claim is about the writer alone, and everything else in the standard stands on it. If it holds, a receiver that reads the text correctly recovers exactly what the sender meant. If it fails, the standard has a hole that no implementation can close.
-
-A statement the standard assumes but does not write is exactly what a formal specification is for: it has to be written down to be checked.
-
-## 2. The claim, in Lean
-
-Two messages written as the same text are the same message (do not paste):
-
-```lean skip
-theorem encode_injective {m₁ m₂ : Message} (h : encode m₁ = encode m₂) : m₁ = m₂
-```
-
-Read it: `m₁` and `m₂` are any two messages, `h` is a proof that their texts are equal, and the conclusion is that the messages are equal. Curly brackets around `m₁ m₂` make them inputs Lean works out from `h`, so they need not be given.
-
-A function with this property is called **injective**: it never sends two inputs to one output. The claim is that `encode` is injective.
-
-It is stated for every message, with no rule: not even lesson 3's. The plan is to try to prove it as it stands and see what happens.
-
-## 3. How to prove it: a reader
-
-How do you show that two messages are equal, knowing only that their texts are? Suppose there were a function `decode` that reads a text back into the message it came from, so that `decode (encode m) = m` for every `m`. Then:
+§2.6.1.0 of the standard, "Message Construction Pseudocode":
 
 ```text
-m₁ = decode (encode m₁)     reading back
-   = decode (encode m₂)     the texts are equal
-   = m₂                     reading back
+foreach segment in ( segment_list ) {
+  insert segment.name;                    /* e.g., MSH */
+  foreach field in ( fields_of( segment ) ) {
+    insert field separator;               /* e.g., | */
+    foreach occurrence in ( occurrences_of( field ) ) {
+      construct_occurrence( occurrence );
+      if not last ( populated occurrence ) insert repetition_separator;   /* e.g., ~ */
+    }
+    break if last ( populated field );
+  }
+  insert segment_terminator;              /* always<cr>! */
+}
+
+procedure construct_occurrence ( occurrence ) {
+  foreach component in ( components_of( occurrence ) ) {
+    foreach subcomponent in ( subcomponents_of( component ) ) {
+      substitute( field_separator, \F\ );
+      substitute( component_separator, \S\ );
+      substitute( repetition_separator, \R\ );
+      substitute( escape_character, \E\ );
+      substitute( subcomponent_separator, \T\ );
+      substitute( truncation_character, \P\ );
+      insert subcomponent;
+      if not last ( populated subcomponent ) insert subcomponent_separator;   /* e.g., & */
+    }
+    if not last ( populated component ) insert component_separator;   /* e.g., ^ */
+  }
+}
 ```
 
-That is the whole argument, and it works for any writer and reader, so prove it once in general:
+This lesson formalizes the lines that insert: the segment name, the separators, the subcomponent, the segment terminator. It leaves two things for later lessons, and the statements list marks both as not yet formalized:
+
+- **The `substitute` lines.** Here, `insert subcomponent` writes the characters of the subcomponent as they are.
+- **The word "populated" and the `break`.** Here, every field, repetition, component and subcomponent of the message is written.
+
+Lesson 3 formalized the same lines as a relation: where each separator stands in a text. Here they become a procedure that produces the text.
+
+The pseudocode is a loop that inserts text piece by piece. Lean has no loops of that kind: a function takes a value and returns a value. So each `foreach` becomes a function from one level of the message to its text.
+
+## 2. Joining lists
+
+Three operations on lists do all the work.
 
 ```lean
-theorem eq_of_read_write {α β : Type} {write : α → β} {read : β → α} {a b : α}
-    (ha : read (write a) = a) (hb : read (write b) = b) (h : write a = write b) : a = b := by
-  rw [← ha, h, hb]
+#eval [1, 2] ++ [3]   -- [1, 2, 3]
+#eval 0 :: [1, 2]     -- [0, 1, 2]
 ```
 
-`α` and `β` are any two types, `write` and `read` any two functions between them. `rw` is a new tactic: `rw [e]` rewrites the goal with an equation `e`, replacing its left side with its right side. `←` uses the equation the other way round. The three rewrites are the three lines above:
-
-| Step        | Goal after it            |
-| ----------- | ------------------------ |
-| start       | `a = b`                  |
-| `rw [← ha]` | `read (write a) = b`     |
-| `rw [h]`    | `read (write b) = b`     |
-| `rw [hb]`   | `b = b`, closed by `rfl` |
-
-So the claim follows from one fact: a reader that undoes the writer. The reader is a **proof device**. It exists to carry the proof, and it is not part of the specification: the specification says how a sender writes, and promises nothing about how any receiver is built.
-
-The writer was built from the inside out (lesson 2), so build the reader the same way, starting with a component.
-
-## 4. A reader for a component
-
-`encodeComponent` joins the subcomponents with the subcomponent separator. The obvious way back is to split the text at that separator. `List.splitOn` does that:
+`++` joins two lists. `::` puts one element in front of a list.
 
 ```lean
-def decodeComponent (d : Delimiters) (text : List Char) : Component :=
-  text.splitOn d.subcomponent
-
-#eval (decodeComponent Delimiters.suggested "HOSP&1.2.3".toList).map String.ofList   -- ["HOSP", "1.2.3"]
+#eval ['&'].intercalate [['a'], ['b', 'c']]   -- ['a', '&', 'b', 'c']
 ```
 
-The fact to prove is `decodeComponent d (encodeComponent d c) = c`. Lean's library has a lemma about splitting a join:
+`sep.intercalate parts` joins the lists in `parts` and puts `sep` between them. Between, not after: the separator appears once for two parts, and not at all for one part.
+
+```lean
+#eval String.ofList (['&'].intercalate ["HOSP".toList, "1.2.3".toList])   -- "HOSP&1.2.3"
+#eval String.ofList (['&'].intercalate ["HOSP".toList])                   -- "HOSP"
+```
+
+That is the pseudocode's "if not last … insert separator": a separator after every part except the last.
+
+## 3. A component, a repetition, a field
+
+Start from the inside. A component is its subcomponents with the subcomponent separator between them:
+
+```lean
+def encodeComponent (d : Delimiters) (c : Component) : List Char :=
+  [d.subcomponent].intercalate c
+
+#eval String.ofList (encodeComponent Delimiters.suggested ["HOSP".toList, "1.2.3".toList])   -- "HOSP&1.2.3"
+```
+
+The function takes two inputs: the delimiters `d`, since the separator is whatever the message declares, and the component `c`. `[d.subcomponent]` is the list of one character that `intercalate` puts between the parts.
+
+Compare with `RepresentsComponent` of lesson 3. The relation said "a text of each subcomponent, with the separator between two". The function computes that text, and `#eval` prints it.
+
+A repetition is its components with the component separator between them. Each component must be written first, and `map` does that (lesson 1):
+
+```lean
+def encodeRepetition (d : Delimiters) (r : Repetition) : List Char :=
+  [d.component].intercalate (r.map (encodeComponent d))
+
+#eval String.ofList (encodeRepetition Delimiters.suggested [["SMITH".toList], ["JOHN".toList]])   -- "SMITH^JOHN"
+```
+
+`encodeComponent d` is `encodeComponent` with its first input given: a function that still waits for a component. `r.map (encodeComponent d)` applies it to each component of `r`, and gives a list of texts for `intercalate` to join.
+
+A field is its repetitions with the repetition separator between them, in the same way:
+
+```lean
+def encodeField (d : Delimiters) (f : Field) : List Char :=
+  [d.repetition].intercalate (f.map (encodeRepetition d))
+
+#eval String.ofList (encodeField Delimiters.suggested [[["123".toList]], [["456".toList]]])   -- "123~456"
+```
+
+The three functions have one shape: write each part of the level below, and join the results with this level's separator.
+
+## 4. The fields of a segment
+
+The next level is different. The pseudocode does not say "if not last": it inserts the field separator before every field.
 
 ```text
-List.splitOn_intercalate (x : α) :
-  (∀ l ∈ ls, x ∉ l) → ls ≠ [] → List.splitOn x ([x].intercalate ls) = ls
+foreach field in ( fields_of( segment ) ) {
+  insert field separator;
 ```
 
-Read it as a function with three inputs and a conclusion: the separator `x`, a proof that no part holds `x`, a proof that there is at least one part. `→` between claims reads "if … then".
+`flatMap` applies a function that returns a list to each element, and joins the results with nothing between them:
 
-Try it (do not paste; read the error):
-
-```lean skip
-example (d : Delimiters) (c : Component) : decodeComponent d (encodeComponent d c) = c := by
-  unfold decodeComponent encodeComponent
-  refine List.splitOn_intercalate _ ?_ ?_
+```lean
+#eval [1, 2, 3].flatMap fun n => [n, n]   -- [1, 1, 2, 2, 3, 3]
 ```
 
-Line by line:
+So the fields of a segment are, for each field, the field separator followed by the field:
 
-- **`unfold decodeComponent encodeComponent`** replaces the two names with their definitions. The goal becomes `List.splitOn d.subcomponent ([d.subcomponent].intercalate c) = c`. The lemma speaks of `splitOn` and `intercalate`, not of your names, so the goal must take that shape before the lemma can match it.
-- **`refine List.splitOn_intercalate _ ?_ ?_`** uses the lemma. `_` means "a value I do not give; find it". `?_` means "a proof I do not have; hand it back as a new goal".
+```lean
+def encodeFields (d : Delimiters) (fields : List Field) : List Char :=
+  fields.flatMap fun f => d.field :: encodeField d f
 
-**How Lean finds `_`.** It matches the lemma's conclusion against the goal. This matching is called unification:
+#eval String.ofList (encodeFields Delimiters.suggested
+  [[[["123".toList]], [["456".toList]]], [[["SMITH".toList], ["JOHN".toList]]]])   -- "|123~456|SMITH^JOHN"
+```
 
-| The lemma's conclusion | The goal                         | So                     |
-| ---------------------- | -------------------------------- | ---------------------- |
-| `List.splitOn ?x …`    | `List.splitOn d.subcomponent …`  | `?x := d.subcomponent` |
-| `[?x].intercalate ?ls` | `[d.subcomponent].intercalate c` | `?ls := c`             |
-| `= ?ls`                | `= c`                            | agrees                 |
+The text starts with `|`. That is the statement `field_separator_after_segment_id`: the field separator "also separates the segment ID from the first data field in each segment." `flatMap` is the function for the shape `Concatenated` of lesson 3, as `intercalate` is the function for `Separated`.
 
-Each unknown takes the only value that makes the two sides the same. Writing `d.subcomponent` in place of `_` gives the same result.
-
-Then the two `?_` are concrete claims, and nothing proves them. Lean reports them:
+## 5. A segment
 
 ```text
-error: unsolved goals
-case refine_1
-d : Delimiters
-c : Component
-⊢ ∀ (l : List Char), l ∈ c → ¬d.subcomponent ∈ l
-
-case refine_2
-d : Delimiters
-c : Component
-⊢ c ≠ []
+insert segment.name;   /* e.g., MSH */
 ```
 
-**How to read a goal.** Above `⊢` is what you have; below it is what is left to prove. Here you have some delimiters `d` and some component `c`, and nothing is known about either.
-
-- `refine_1` reads: no subcomponent `l` of `c` holds the subcomponent separator.
-- `refine_2` reads: the component has at least one subcomponent.
-
-Writing `refine` with `?_` is a way to ask Lean a question: you commit to a lemma, and Lean names exactly the facts that are missing.
-
-## 5. Are the goals true?
-
-Each goal is a claim about `c`, and `c` is any component. A goal like that either follows from something the claim forgot to assume, or it is false for some `c`. The goals themselves say what to try: a component with no subcomponent, and a subcomponent that holds `&`.
+A segment is its ID, then its fields:
 
 ```lean
-#eval (decodeComponent Delimiters.suggested (encodeComponent Delimiters.suggested [])).map String.ofList   -- [""]
-#eval (decodeComponent Delimiters.suggested (encodeComponent Delimiters.suggested ["&".toList])).map String.ofList   -- ["", ""]
+def encodeSegment (d : Delimiters) (s : Segment) : List Char :=
+  s.id ++ encodeFields d s.fields
+
+def pid : Segment :=
+  { id := "PID".toList,
+    fields := [[[["123".toList]], [["456".toList]]], [[["SMITH".toList], ["JOHN".toList]]]] }
+
+#eval String.ofList (encodeSegment Delimiters.suggested pid)   -- "PID|123~456|SMITH^JOHN"
 ```
 
-Both goals are false. `[]` is written as the empty text, which reads back as one empty subcomponent. `["&"]` is written `&`, which reads back as two empty subcomponents.
+## 6. The MSH segment
 
-A component that does not read back means the reader got another component from the same text. So two components share a text:
+> The other delimiters are defined in the MSH segment, with the field delimiter in the 4th character position, and the other delimiters occurring as in the field called Encoding Characters, which is the first field after the segment ID. (§2.5.4)
+
+Its text is `MSH`, the field separator, the encoding characters, and then its other fields like any segment:
 
 ```lean
-example : encodeComponent Delimiters.suggested ["&".toList]
-    = encodeComponent Delimiters.suggested ["".toList, "".toList] := by decide
+def mshId : List Char := ['M', 'S', 'H']
+
+def encodeHeader (d : Delimiters) (header : List Field) : List Char :=
+  mshId ++ d.field :: d.encodingCharacters ++ encodeFields d header
+
+#eval String.ofList (encodeHeader Delimiters.suggested [[[["LAB".toList]]]])   -- "MSH|^~\\&|LAB"
 ```
 
-And that carries all the way up. Here are two messages:
+Lean prints the string with its backslash doubled: the text is `MSH|^~\&|LAB`. The field separator is the 4th character, and the four encoding characters follow it.
 
-```lean
-def one : Message :=
-  { delimiters := Delimiters.suggested, header := [],
-    segments := [{ id := "PID".toList, fields := [[[["&".toList]]]] }] }
-
-def two : Message :=
-  { delimiters := Delimiters.suggested, header := [],
-    segments := [{ id := "PID".toList, fields := [[[["".toList, "".toList]]]] }] }
-
-#eval String.ofList (encode one)   -- "MSH|^~\\&\x0dPID|&\x0d"
-
-example : encode one = encode two ∧ one ≠ two := by decide
-```
-
-`∧` is "and", `≠` is "is not equal to". The last line is a proof that `one` and `two` are written as the same text, `MSH|^~\&␍PID|&␍`, and are different messages.
-
-So the claim of section 2 is false. `encode`, as lesson 2 wrote it from the standard's construction, is not injective. The proof did not stop because it was hard. It stopped at the two places where the claim breaks, and no other lemma or proof would get past them.
-
-## 6. Make the goals hypotheses
-
-A false claim is repaired in one of two ways: exclude the inputs that break it, or change the definition so that they no longer do. The first is the direct one: assume each goal. A fact a theorem assumes is called a hypothesis.
-
-```lean
-theorem decodeComponent_encodeComponent (d : Delimiters) (c : Component) (hc : c ≠ [])
-    (hs : ∀ s ∈ c, d.subcomponent ∉ s) : decodeComponent d (encodeComponent d c) = c :=
-  List.splitOn_intercalate _ hs hc
-```
-
-The proof is the lemma, given its three inputs. With the two hypotheses, a component reads back.
-
-Each hypothesis says something about messages: "a component has a subcomponent", "no subcomponent holds `&`". That makes each one a candidate rule for `Message.WF`. Keep going up first, and collect them.
-
-## 7. One level up
-
-A repetition is components joined with the component separator. Its reader splits there, then reads each component:
-
-```lean
-def decodeRepetition (d : Delimiters) (text : List Char) : Repetition :=
-  (text.splitOn d.component).map (decodeComponent d)
-```
-
-"Split a join, then undo each part" needs a lemma of its own. The specification has it in `Hl7v2/Thm/Data/List.lean`, proved from the library's:
+## 7. The message
 
 ```text
-map_splitOn_intercalate (x : Char) (p : List Char → α) (u : α → List Char) (t : List α) :
-  t ≠ [] → (∀ a ∈ t, x ∉ u a) → (∀ a ∈ t, p (u a) = a) →
-    (([x].intercalate (t.map u)).splitOn x).map p = t
+insert segment_terminator;   /* always<cr>! */
 ```
 
-`u` writes a part and `p` reads it. Try it (do not paste):
-
-```lean skip
-example (d : Delimiters) (r : Repetition) : decodeRepetition d (encodeRepetition d r) = r := by
-  unfold decodeRepetition encodeRepetition
-  refine Hl7v2.Thm.map_splitOn_intercalate _ _ _ _ ?_ ?_ ?_
-```
-
-```text
-error: unsolved goals
-case refine_1
-d : Delimiters
-r : Repetition
-⊢ r ≠ []
-
-case refine_2
-d : Delimiters
-r : Repetition
-⊢ ∀ (a : Component), a ∈ r → ¬d.component ∈ encodeComponent d a
-
-case refine_3
-d : Delimiters
-r : Repetition
-⊢ ∀ (a : Component), a ∈ r → decodeComponent d (encodeComponent d a) = a
-```
-
-Three goals, and they will come back at every level:
-
-| Goal       | Reads                                                   |
-| ---------- | ------------------------------------------------------- |
-| `refine_1` | This level has at least one part                        |
-| `refine_2` | The text of a part does not hold this level's separator |
-| `refine_3` | Each part reads back                                    |
-
-`refine_3` is section 6's theorem. `refine_2` is new: the text of a component must not hold `^`. That text is the subcomponents and the `&` between them, so it holds no `^` when `^` is not `&`, and no subcomponent holds `^`:
+A message is MSH and then each segment, each followed by the segment terminator:
 
 ```lean
-theorem not_mem_encodeComponent {d : Delimiters} {x : Char} (hx : x ≠ d.subcomponent)
-    {c : Component} (h : ∀ s ∈ c, x ∉ s) : x ∉ encodeComponent d c :=
-  Hl7v2.Thm.not_mem_intercalate hx h
+def encode (m : Message) : List Char :=
+  (encodeHeader m.delimiters m.header :: m.segments.map (encodeSegment m.delimiters)).flatMap
+    fun line => line ++ [segmentTerminator]
 ```
 
-With that, the repetition reads back, under more hypotheses than the component did:
+Read it in two steps. `encodeHeader … :: m.segments.map …` is the list of lines: the text of MSH in front of the text of each segment. `flatMap fun line => line ++ [segmentTerminator]` puts the terminator after each line and joins them. Every level below takes the delimiters from `m.delimiters`: one set for the whole message.
+
+A carriage return does not show well on a screen. This helper prints it as `␍`:
 
 ```lean
-theorem decodeRepetition_encodeRepetition (d : Delimiters) (r : Repetition) (hr : r ≠ [])
-    (hne : d.component ≠ d.subcomponent) (hc : ∀ c ∈ r, c ≠ [])
-    (hs : ∀ c ∈ r, ∀ s ∈ c, d.subcomponent ∉ s) (hs' : ∀ c ∈ r, ∀ s ∈ c, d.component ∉ s) :
-    decodeRepetition d (encodeRepetition d r) = r :=
-  Hl7v2.Thm.map_splitOn_intercalate _ _ _ r hr
-    (fun c hc' => not_mem_encodeComponent hne (hs' c hc'))
-    (fun c hc' => decodeComponent_encodeComponent d c (hc c hc') (hs c hc'))
+def render (text : List Char) : String :=
+  String.ofList (text.map fun c => if c = segmentTerminator then '␍' else c)
 ```
 
-The last three lines are the lemma and its three proofs: `hr` for `refine_1`, then a function for `refine_2` and one for `refine_3`. Each function takes a component `c` and a proof `hc'` that it is in `r`, and returns the proof for that component.
-
-Going up one level added three hypotheses: the repetition has a component (`hr`), the two separators differ (`hne`), and no subcomponent holds the component separator either (`hs'`).
-
-## 8. All the way up
-
-The remaining levels repeat the pattern. The specification proves each in `Hl7v2/Thm/Encoding/Decode.lean`; here is what each asks for.
-
-| Level               | Reader                                                             | New hypotheses                                                                                      |
-| ------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Component           | split at `&`                                                       | A component has a subcomponent. No subcomponent holds `&`                                           |
-| Repetition          | split at `^`                                                       | A repetition has a component. `^` is not `&`. No subcomponent holds `^`                             |
-| Field               | split at `~`                                                       | A field has a repetition. `~` is not `^` or `&`. No subcomponent holds `~`                          |
-| Fields of a segment | drop the first `\|`, split at `\|`                                 | `\|` is not `~`, `^` or `&`. No subcomponent holds `\|`                                             |
-| Segment             | the first three characters are the ID                              | A Segment ID has three characters                                                                   |
-| Message             | drop the last `␍`, split at `␍`; delimiters from characters 4 to 8 | `␍` is not `\|`, `^`, `~`, `&` or the escape character. No Segment ID and no subcomponent holds `␍` |
-
-Three things are worth noticing.
-
-**The rule of lesson 3 is needed.** The reader of a segment takes the first three characters as the ID. That is correct only when the ID has three characters. The rule came from a sentence of the standard; the proof now shows what it is for.
-
-**The theorems of lesson 3 are needed.** The reader takes the delimiters from characters 4 to 8 of the text. `field_separator_is_fourth_character` and `encoding_characters_follow_field_separator` are why that is right for every message.
-
-**The escape character appears once.** MSH-2 holds it, so it is in the text, and the text is split at `␍`. So the escape character must not be `␍`. Nothing else is asked of it: this writer never writes it anywhere else.
-
-## 9. The rules the proof asks for
-
-Collect the hypotheses. The separators the table names are the specification's `Delimiters.separators`: the segment terminator and the field, component, repetition and subcomponent separators. `Message.WF` becomes:
-
-| Rule                         | Says                                                         | Source               |
-| ---------------------------- | ------------------------------------------------------------ | -------------------- |
-| `separators_distinct`        | The segment terminator and the four separators are different | the proof            |
-| `escape_not_terminator`      | The escape character is not the segment terminator           | the proof            |
-| `segment_id_length`          | A Segment ID has three characters                            | the standard, §2.5.2 |
-| `segment_id_no_terminator`   | A Segment ID does not hold the segment terminator            | the proof            |
-| `field_has_repetition`       | A field holds at least one repetition                        | the proof            |
-| `repetition_has_component`   | A repetition holds at least one component                    | the proof            |
-| `component_has_subcomponent` | A component holds at least one subcomponent                  | the proof            |
-| `subcomponent_no_separator`  | A subcomponent holds no separator and no segment terminator  | the proof            |
-
-Seven of the eight are not sentences of Chapter 2. They are what the unwritten claim costs, written down.
-
-`decide` checks all eight on a message. The message `two` of section 5 meets them, and `one` does not:
+`if … then … else …` chooses between two values. `render` is for reading only; it is not part of the specification.
 
 ```lean
-example : two.WF := by decide
+def message : Message :=
+  { delimiters := Delimiters.suggested,
+    header := [[[["LAB".toList]]]],
+    segments := [pid, { id := "PV1".toList, fields := [] }] }
 
-example : ¬ one.WF := by decide
+#eval render (encode message)   -- "MSH|^~\\&|LAB␍PID|123~456|SMITH^JOHN␍PV1␍"
 ```
 
-`one` holds `&` in a subcomponent, so it breaks `subcomponent_no_separator`. The pair that broke the claim in section 5 is no longer a pair of well-formed messages.
-
-## 10. The theorem
-
-With the rules as hypotheses, the reader undoes the writer for a whole message. The specification proves it:
+The smallest message has no fields after MSH-2 and no other segment:
 
 ```lean
-#check @Hl7v2.Thm.decode_encode   -- @Hl7v2.Thm.decode_encode : ∀ {m : Message}, m.WF → Hl7v2.Thm.decode (encode m) = m
+#eval render (encode { delimiters := Delimiters.suggested, header := [], segments := [] })   -- "MSH|^~\\&␍"
 ```
 
-And the claim follows by section 3's argument:
+## 8. Other delimiters
+
+The delimiters are an input, so the same message with other delimiters is another text:
 
 ```lean
-theorem encode_injective {m₁ m₂ : Message} (h₁ : m₁.WF) (h₂ : m₂.WF)
-    (h : encode m₁ = encode m₂) : m₁ = m₂ :=
-  eq_of_read_write (Hl7v2.Thm.decode_encode h₁) (Hl7v2.Thm.decode_encode h₂) h
+def otherDelimiters : Delimiters :=
+  { field := '#', component := '*', repetition := '~', escape := '\\', subcomponent := '&' }
+
+#eval render (encode { message with delimiters := otherDelimiters })   -- "MSH#*~\\&#LAB␍PID#123~456#SMITH*JOHN␍PV1␍"
 ```
 
-Two well-formed messages written as the same text are the same message. This is section 2's claim with two hypotheses added, `h₁` and `h₂`, and it is proved for every pair of messages, of any size, with any delimiters.
+`{ message with delimiters := … }` is `message` with one field replaced.
 
-`#print axioms` lists what a proof rests on beyond Lean's logic:
+The escape character is declared in MSH-2 and written there, and the writer uses it nowhere else. It belongs to the `substitute` lines, which this lesson left out.
+
+## 9. The same, in the specification
+
+`Hl7v2/Spec/Encoding.lean` holds these functions, each with the lines of the pseudocode it formalizes. Compare yours with the specification's on the message above:
 
 ```lean
-#print axioms encode_injective   -- 'Lesson4.encode_injective' depends on axioms: [propext, Quot.sound]
+#eval encode message == Hl7v2.Spec.encode message   -- true
 
 end Lesson4
 ```
 
-`propext` and `Quot.sound` are two standard axioms of Lean. Nothing else is assumed: no unproved step, and no trust in the reader beyond what Lean checked.
+## 10. Facts about the text of every message
 
-## 11. What the proof did not settle
+> …with the field delimiter in the 4th character position (§2.5.4)
 
-The theorem holds, and the rules are exactly what this proof used. Two questions are still open, and the next lesson takes them up.
+From here on, the lesson uses the specification's functions and proves claims about them. Open the specification and its theorems:
 
-- **Is each rule needed, or only used?** A proof shows its hypotheses are enough. It does not show the claim fails without them. Section 5 showed that for two rules, with a counterexample each. The others have none yet.
-- **Is each rule acceptable?** A rule excludes messages. `subcomponent_no_separator` excludes every value that holds `|`, `^`, `~` or `&`. Whether HL7v2 can live with that is a question about the standard, not about the proof.
+```lean
+open Hl7v2.Spec Hl7v2.Thm
+
+namespace Lesson4
+```
+
+`encode` is now `Hl7v2.Spec.encode`. The namespace is opened again so that `message` and `render` are in reach.
+
+A claim about the text of every message takes the message as an input (lesson 2). `drop 3` removes the first three characters of a list, and `take 1` keeps the first one of what is left:
+
+```lean
+example (m : Message) : ((encode m).drop 3).take 1 = [m.delimiters.field] := rfl
+```
+
+Nothing is known about `m`, and `rfl` still proves the claim. Lean computes with `m` as an unknown: `encode m` starts with `encodeHeader m.delimiters m.header`, which is `'M' :: 'S' :: 'H' :: m.delimiters.field :: …`. Dropping three characters and taking one leaves `[m.delimiters.field]`, whatever it is.
+
+Compare with a claim that looks the same and is false (do not paste):
+
+```lean skip
+example (m : Message) : (encode m).take 4 = "MSH|".toList := rfl
+```
+
+```text
+error: Type mismatch
+  rfl
+has type
+  ?m.6 = ?m.6
+but is expected to have type
+  List.take 4 (encode m) = "MSH|".toList
+```
+
+The 4th character is `m.delimiters.field`, which is `|` only for some messages.
+
+The specification has three such theorems, in `Hl7v2/Thm/Encoding.lean`:
+
+```lean
+#check @encode_starts_with_msh   -- @encode_starts_with_msh : ∀ (m : Message), List.take 3 (encode m) = mshId
+#check @field_separator_is_fourth_character   -- @field_separator_is_fourth_character : ∀ (m : Message), List.take 1 (List.drop 3 (encode m)) = [m.delimiters.field]
+#check @encoding_characters_follow_field_separator   -- @encoding_characters_follow_field_separator : ∀ (m : Message), List.take 4 (List.drop 4 (encode m)) = m.delimiters.encodingCharacters
+```
+
+Each is proved by `rfl`. A change to `encode` that moved the delimiters would make them fail to build.
+
+## 11. The sender writes a text of its message
+
+Lesson 3 proved that one text represents one message, piece by piece. The claim for every message:
+
+```lean
+example (m : Message) : Represents (encode m) m := encode_represents m
+```
+
+`rfl` cannot prove this one: it is not an equality, and its proof has to follow the segments and fields of `m`, however many there are. That is a proof by **induction**. See it on one shape, `Concatenated`, where the text of an item is `f a` for some function `f`:
+
+```lean
+theorem concatenated_flatMap {α : Type} (f : α → List Char) (items : List α) :
+    Concatenated (fun t a => t = f a) (items.flatMap f) items := by
+  induction items with
+  | nil => exact .nil
+  | cons a as ih => exact .cons rfl ih
+```
+
+`induction items with` splits the claim in two, after the two ways a list is built:
+
+- `nil`: the list is empty. `[].flatMap f` is `[]`, and the case `.nil` of `Concatenated` proves that the empty text is a text of no item.
+- `cons a as ih`: the list is `a :: as`. `ih` is a proof of the claim for `as`, the shorter list: `Concatenated … (as.flatMap f) as`. The text `(a :: as).flatMap f` is `f a ++ as.flatMap f`, so the case `.cons` applies: `rfl` proves that `f a` is the text of `a`, and `ih` covers the rest.
+
+`exact` gives the proof of the goal as a value. `ih` is the induction hypothesis: to prove the claim for a list, one may use it for the list without its first item.
+
+The proof of `encode_represents`, in `Hl7v2/Thm/Represents.lean`, does this at each level: `Separated` for `intercalate`, `Concatenated` for `flatMap`.
+
+Look at what the theorem asks of `m`: nothing. Every value of `Message` has a text, also one that breaks the rule of lesson 2.
+
+## 12. One message, one text
+
+The specification proves more than `encode_represents`: a text represents a message exactly when it is the text the sender writes.
+
+```lean
+#check @represents_iff   -- represents_iff : ∀ (text : List Char) (m : Message), Represents text m ↔ text = encode m
+```
+
+`A ↔ B` reads "`A` exactly when `B`": it is a proof of `A → B` and a proof of `B → A`. For `h : A ↔ B`, `h.1` is the first and `h.2` the second.
+
+So the second question of lesson 3 has an answer. Two texts of one message are both `encode m`:
+
+```lean
+example (t₁ t₂ : List Char) (m : Message) (h₁ : Represents t₁ m) (h₂ : Represents t₂ m) : t₁ = t₂ :=
+  ((represents_iff t₁ m).1 h₁).trans ((represents_iff t₂ m).1 h₂).symm
+```
+
+`(represents_iff t₁ m).1 h₁` turns the proof that `t₁` represents `m` into a proof of `t₁ = encode m`, and the same for `t₂`. `.symm` turns `t₂ = encode m` around, and `.trans` chains `t₁ = encode m` with `encode m = t₂`. The specification names this theorem `represents_text_unique`.
+
+`represents_iff` also makes the relation computable. Whether a text represents a message is now an equality of two lists, and `decide` settles an equality. A text that does not represent `message`:
+
+```lean
+example : ¬ Represents "MSH|^~\\&\r".toList message :=
+  fun h => absurd ((represents_iff _ _).1 h) (by decide)
+```
+
+`¬ A` is "if `A`, then a contradiction", so its proof is a function that takes a proof `h` of `A`. `(represents_iff _ _).1 h` is a proof that the text equals `encode message`; `by decide` proves that it does not; `absurd` puts the two together. The `_` are inputs Lean finds from `h`.
+
+One question of lesson 3 is left: can a text represent two messages? `represents_iff` says what it comes to. If `t` represents `m₁` and `m₂`, then `encode m₁ = encode m₂`. Lesson 5 asks whether that forces `m₁ = m₂`.
+
+```lean
+end Lesson4
+```
 
 ## What you can now say
 
 About HL7v2:
 
-- "One text, one meaning" is not a sentence of the standard. The standard relies on it, and without it a receiver can be wrong with no error anywhere.
-- The construction of §2.6.1.0, with each value written as it is, does not have the property: `MSH|^~\&␍PID|&␍` is the text of two messages.
-- It has the property for messages that meet eight rules, and seven of them are not written in Chapter 2.
+- The text a sender writes represents its message, for every message. No rule is needed.
+- A message has exactly one text.
+- Every text a sender writes starts with `MSH`, its 4th character is the field separator, and the encoding characters follow.
+- A sender writes a message from the inside out: subcomponents joined with their separator, then components, then repetitions.
+- The field separator comes before every field, so it also follows the segment ID.
+- Every segment ends with a carriage return, the last one too.
 
 About Lean:
 
-- A function is injective when equal outputs come only from equal inputs. A reader that undoes the writer proves it.
-- `rw [e]` rewrites the goal with an equation; `←` reverses it.
-- `refine lemma _ ?_ ?_` commits to a lemma and returns the missing facts as goals. Above `⊢` is what you have, below it what is left.
-- An unsolved goal about an arbitrary input is a missing hypothesis or a counterexample. The goal says what to try.
-- A proof shows its hypotheses are enough. It does not show they are needed.
+- A loop that inserts text becomes a function from a value to its text, one function per level.
+- `++` joins two lists, `::` adds an element in front, `intercalate` joins with a separator between, `flatMap` joins with nothing between.
+- A function with its first input given, such as `encodeComponent d`, is a function of the remaining inputs.
+- `induction` proves a claim about every list: once for the empty list, and once for `a :: as` given a proof for `as`.
+- `A ↔ B` is "`A` exactly when `B`". `h.1` uses it from left to right and `h.2` from right to left.
+- `¬ A` is proved by a function that takes a proof of `A` and reaches a contradiction.
 
 ## Exercises
 
-**1. Read the goals.** Without running it, write the three goals Lean reports for the field level:
+**1. Predict.** What does `encodeField Delimiters.suggested [[["A".toList], ["B".toList, "C".toList]], [["D".toList]]]` write?
 
-```lean skip
-example (d : Delimiters) (f : Field) :
-    Hl7v2.Thm.decodeField d (encodeField d f) = f := by
-  unfold Hl7v2.Thm.decodeField encodeField
-  refine Hl7v2.Thm.map_splitOn_intercalate _ _ _ _ ?_ ?_ ?_
+<details><summary>Answer</summary>
+
+`A^B&C~D`. This is the field of lesson 1, exercise 1.
+
+</details>
+
+**2. Empty fields.** What does this write, and why are there two `|` in a row?
+
+```lean
+#eval String.ofList (Hl7v2.Spec.encodeFields Delimiters.suggested
+  [[[["a".toList]]], [[[]]], [[["c".toList]]]])   -- "|a||c"
 ```
 
 <details><summary>Answer</summary>
 
-```text
-⊢ f ≠ []
-⊢ ∀ (a : Repetition), a ∈ f → ¬d.repetition ∈ encodeRepetition d a
-⊢ ∀ (a : Repetition), a ∈ f → Hl7v2.Thm.decodeRepetition d (encodeRepetition d a) = a
-```
-
-The field has a repetition, the text of a repetition does not hold `~`, and each repetition reads back.
+`|a||c`. The second field is one repetition of one component of one subcomponent with no characters, so its text is empty. The field separator still comes before it, and the next field's separator follows at once.
 
 </details>
 
-**2. The other counterexample.** Section 5 built two messages from the subcomponent `&`. Build two messages with the same text from the first goal, a component with no subcomponent, and prove it with `decide`.
+**3. Change the writer.** In your file, replace `flatMap fun f => d.field :: encodeField d f` in `encodeFields` with `[d.field].intercalate (fields.map (encodeField d))`. What does `encode message` write now, and which statement does it break?
+
+<details><summary>Answer</summary>
+
+`MSH|^~\&LAB␍PID123~456|SMITH^JOHN␍PV1␍`. The separator is now between the fields only, so nothing separates the segment ID from the first field: `field_separator_after_segment_id` is broken. The comparison with the specification, in section 9, prints `false`.
+
+</details>
+
+**4. Trailing fields.** The pseudocode says `break if last ( populated field )`. Write a segment whose last two fields are empty and look at its text. What would a sender that follows the pseudocode write?
+
+<details><summary>Things to weigh</summary>
+
+```lean
+#eval String.ofList (Hl7v2.Spec.encodeFields Delimiters.suggested
+  [[[["a".toList]]], [[[]]], [[[]]]])   -- "|a||"
+```
+
+This writer writes `|a||`. A sender that stops after the last populated field writes `|a`. In this specification those are the texts of two messages: a segment of three fields, and a segment of one. By `one_message_one_text`, neither message has the other's text.
+
+The two messages mean the same to a receiver, by §2.6.2: fields "that are expected but were not included in a segment" are "not present". That is a claim about two messages, and the specification does not formalize it yet (`trailing_not_populated_omitted`).
+
+</details>
+
+**5. Not a text.** Prove that the text `MSH|^~\&␍PID␍` does not represent `Lesson4.message`.
 
 <details><summary>Answer</summary>
 
 ```lean
-def noSubcomponent : Message :=
-  { delimiters := Delimiters.suggested, header := [],
-    segments := [{ id := "PID".toList, fields := [[[[]]]] }] }
-
-def emptySubcomponent : Message :=
-  { delimiters := Delimiters.suggested, header := [],
-    segments := [{ id := "PID".toList, fields := [[[["".toList]]]] }] }
-
-example : encode noSubcomponent = encode emptySubcomponent ∧ noSubcomponent ≠ emptySubcomponent := by decide
-
-example : ¬ noSubcomponent.WF := by decide
+example : ¬ Hl7v2.Spec.Represents "MSH|^~\\&\rPID\r".toList Lesson4.message :=
+  fun h => absurd ((Hl7v2.Thm.represents_iff _ _).1 h) (by decide)
 ```
-
-Both are written `MSH|^~\&␍PID|␍`. `noSubcomponent` has a component with no subcomponent and breaks `component_has_subcomponent`. So an empty field is one repetition of one component of one empty subcomponent, and never an empty list: the question lesson 1 left open in its last exercise.
-
-</details>
-
-**3. The theorem, the other way round.** Prove that two well-formed messages that differ have different texts.
-
-```lean skip
-example {m₁ m₂ : Message} (h₁ : m₁.WF) (h₂ : m₂.WF) (h : m₁ ≠ m₂) : encode m₁ ≠ encode m₂
-```
-
-<details><summary>Answer</summary>
-
-```lean
-example {m₁ m₂ : Message} (h₁ : m₁.WF) (h₂ : m₂.WF) (h : m₁ ≠ m₂) : encode m₁ ≠ encode m₂ :=
-  fun he => h (Hl7v2.Thm.encode_injective h₁ h₂ he)
-```
-
-`a ≠ b` means "from `a = b`, a contradiction follows", so its proof is a function that takes a proof of `a = b`. Given `he`, that the texts are equal, the theorem says the messages are equal, which contradicts `h`.
-
-</details>
-
-**4. Equal delimiters.** The proof asked that `^` is not `&`. Build two messages that declare `^` for both the component and the subcomponent separator and are written as the same text.
-
-<details><summary>Answer</summary>
-
-```lean
-def sameSeparators : Delimiters := { Delimiters.suggested with subcomponent := '^' }
-
-def twoComponents : Message :=
-  { delimiters := sameSeparators, header := [],
-    segments := [{ id := "PID".toList, fields := [[[["a".toList], ["b".toList]]]] }] }
-
-def twoSubcomponents : Message :=
-  { delimiters := sameSeparators, header := [],
-    segments := [{ id := "PID".toList, fields := [[[["a".toList, "b".toList]]]] }] }
-
-example : encode twoComponents = encode twoSubcomponents ∧ twoComponents ≠ twoSubcomponents := by
-  decide
-```
-
-Both are written `MSH|^~\^␍PID|a^b␍`. So `separators_distinct` is needed, not only used: without it the claim fails.
 
 </details>
