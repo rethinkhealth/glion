@@ -2,6 +2,8 @@
 
 glion checked against the Lean specification of HL7v2 in [`spec/`](../spec). The specification runs as a program, the oracle, and fast-check compares glion with it on generated messages.
 
+> **Paused.** The specification is being rebuilt from the statements of Chapter 2, one lesson at a time ([`spec/README.md`](../spec/README.md)). It has no oracle yet, so `test:spec` cannot run and the `Differential` workflow is removed. Both return with the lesson that rebuilds the oracle.
+
 | Directory     | Holds                                                                                                                                                              | A failure means                                                  |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
 | `src/`        | The oracle client (`oracle.ts`), the abstraction function from glion's tree to the specification's message (`abstraction.ts`), and the generator (`generators.ts`) |                                                                  |
