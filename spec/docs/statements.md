@@ -206,23 +206,23 @@ The Lean definition, rule or theorem that formalizes each statement of Part I. *
 | `empty_is_not_populated`                         | Not yet                                                           |
 | `message_delimiters`                             | `Delimiters`, without the truncation character                    |
 | `segment_terminator_is_carriage_return`          | `segmentTerminator`                                               |
-| `delimiters_declared_in_msh`                     | Not yet                                                           |
+| `delimiters_declared_in_msh`                     | `Represents`                                                      |
 | `encoding_characters_order`                      | `Delimiters.encodingCharacters`, without the truncation character |
 | `delimiters_hold_for_whole_message`              | `Message.delimiters`: one value per message                       |
 | `suggested_delimiters`                           | `Delimiters.suggested`, without the truncation character          |
-| `field_separator_after_segment_id`               | Not yet                                                           |
-| `component_separator_separates_components`       | Not yet                                                           |
-| `subcomponent_separator_separates_subcomponents` | Not yet                                                           |
-| `repetition_separator_separates_occurrences`     | Not yet                                                           |
-| `segment_terminator_terminates_segment`          | Not yet                                                           |
+| `field_separator_after_segment_id`               | `RepresentsFields`                                                |
+| `component_separator_separates_components`       | `RepresentsRepetition`                                            |
+| `subcomponent_separator_separates_subcomponents` | `RepresentsComponent`                                             |
+| `repetition_separator_separates_occurrences`     | `RepresentsField`                                                 |
+| `segment_terminator_terminates_segment`          | `RepresentsSegments`                                              |
 | `truncation_character`                           | Not yet                                                           |
 | `escape_character_use`                           | Not yet                                                           |
-| `segment_starts_with_its_id`                     | Not yet                                                           |
-| `field_separator_before_each_field`              | Not yet                                                           |
-| `repetitions_joined`                             | Not yet                                                           |
-| `components_joined`                              | Not yet                                                           |
-| `subcomponents_joined`                           | Not yet                                                           |
-| `segment_terminator_after_segment`               | Not yet                                                           |
+| `segment_starts_with_its_id`                     | `RepresentsSegment`                                               |
+| `field_separator_before_each_field`              | `RepresentsFields`                                                |
+| `repetitions_joined`                             | `RepresentsField`                                                 |
+| `components_joined`                              | `RepresentsRepetition`                                            |
+| `subcomponents_joined`                           | `RepresentsComponent`                                             |
+| `segment_terminator_after_segment`               | `RepresentsSegments`                                              |
 | `trailing_not_populated_omitted`                 | Not yet                                                           |
 | `delimiters_escaped_in_data`                     | Not yet                                                           |
 | `receiver_uses_declared_delimiters`              | Not yet                                                           |
