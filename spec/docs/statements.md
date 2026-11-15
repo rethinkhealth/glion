@@ -166,7 +166,11 @@ A receiver has only the text. If one text could represent two messages, the rece
 
 ## Rules
 
-The rules of `Message.WF`, each with its source: a requirement of Part I, or a property whose proof needs it. No rule yet.
+The rules of `Message.WF`, each with its source: a requirement of Part I, or a property whose proof needs it.
+
+| Rule                | Says                              | Source                           |
+| ------------------- | --------------------------------- | -------------------------------- |
+| `segment_id_length` | A Segment ID has three characters | `segment_id_is_three_characters` |
 
 ## Gaps and decisions
 
@@ -191,7 +195,7 @@ The Lean definition, rule or theorem that formalizes each statement of Part I. *
 | ------------------------------------------------ | ----------------------------------------------------------------- |
 | `message_is_segments`                            | `Message`                                                         |
 | `segment_is_fields`                              | `Segment`                                                         |
-| `segment_id_is_three_characters`                 | Not yet                                                           |
+| `segment_id_is_three_characters`                 | rule `segment_id_length`                                          |
 | `field_is_characters`                            | `Subcomponent`                                                    |
 | `field_holds_components`                         | `Repetition`                                                      |
 | `component_holds_subcomponents`                  | `Component`                                                       |

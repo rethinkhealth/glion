@@ -7,3 +7,4 @@ Start with [the statements](statements.md): the list of what Chapter 2 says. Eac
 | Lesson                              | Formalizes                                                                     | You learn                                                                             |
 | ----------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | [1. A message as data](lesson_1.md) | The delimiters, and the levels of a message from a subcomponent to the message | Running Lean: `#eval`, `#check`, `def`, `structure`, `abbrev`, lists, `fun` and `map` |
+| [2. Claims and rules](lesson_2.md)  | The three-character Segment ID, as the first rule                              | `Prop`, `example`, `theorem`, `rfl`, `decide`, `∀`, and a structure of rules          |
