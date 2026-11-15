@@ -187,55 +187,55 @@ Where the standard is silent, or says two things that pull apart, the specificat
 
 The Lean definition, rule or theorem that formalizes each statement of Part I. **Not yet** marks a statement no lesson has reached. A lesson that formalizes a statement fills in its row.
 
-| Statement                                        | Lean    |
-| ------------------------------------------------ | ------- |
-| `message_is_segments`                            | Not yet |
-| `segment_is_fields`                              | Not yet |
-| `segment_id_is_three_characters`                 | Not yet |
-| `field_is_characters`                            | Not yet |
-| `field_holds_components`                         | Not yet |
-| `component_holds_subcomponents`                  | Not yet |
-| `field_may_repeat`                               | Not yet |
-| `components_do_not_repeat`                       | Not yet |
-| `population_states`                              | Not yet |
-| `null_is_two_double_quotes`                      | Not yet |
-| `empty_is_not_populated`                         | Not yet |
-| `message_delimiters`                             | Not yet |
-| `segment_terminator_is_carriage_return`          | Not yet |
-| `delimiters_declared_in_msh`                     | Not yet |
-| `encoding_characters_order`                      | Not yet |
-| `delimiters_hold_for_whole_message`              | Not yet |
-| `suggested_delimiters`                           | Not yet |
-| `field_separator_after_segment_id`               | Not yet |
-| `component_separator_separates_components`       | Not yet |
-| `subcomponent_separator_separates_subcomponents` | Not yet |
-| `repetition_separator_separates_occurrences`     | Not yet |
-| `segment_terminator_terminates_segment`          | Not yet |
-| `truncation_character`                           | Not yet |
-| `escape_character_use`                           | Not yet |
-| `segment_starts_with_its_id`                     | Not yet |
-| `field_separator_before_each_field`              | Not yet |
-| `repetitions_joined`                             | Not yet |
-| `components_joined`                              | Not yet |
-| `subcomponents_joined`                           | Not yet |
-| `segment_terminator_after_segment`               | Not yet |
-| `trailing_not_populated_omitted`                 | Not yet |
-| `delimiters_escaped_in_data`                     | Not yet |
-| `receiver_uses_declared_delimiters`              | Not yet |
-| `ignore_unexpected`                              | Not yet |
-| `missing_segment_not_present`                    | Not yet |
-| `missing_field_not_present`                      | Not yet |
-| `escape_character_declared`                      | Not yet |
-| `escape_sequence_form`                           | Not yet |
-| `delimiter_escape_sequences`                     | Not yet |
-| `special_characters_in_data`                     | Not yet |
-| `no_nested_escape_sequences`                     | Not yet |
-| `text_escape_sequences`                          | Not yet |
-| `truncation_character_escaped`                   | Not yet |
-| `character_set_escape_sequences`                 | Not yet |
-| `hexadecimal_form`                               | Not yet |
-| `hexadecimal_by_agreement`                       | Not yet |
-| `formatting_commands`                            | Not yet |
-| `local_by_agreement`                             | Not yet |
-| `escape_sequence_length`                         | Not yet |
-| `string_data_displayable`                        | Not yet |
+| Statement                                        | Lean                                                              |
+| ------------------------------------------------ | ----------------------------------------------------------------- |
+| `message_is_segments`                            | `Message`                                                         |
+| `segment_is_fields`                              | `Segment`                                                         |
+| `segment_id_is_three_characters`                 | Not yet                                                           |
+| `field_is_characters`                            | `Subcomponent`                                                    |
+| `field_holds_components`                         | `Repetition`                                                      |
+| `component_holds_subcomponents`                  | `Component`                                                       |
+| `field_may_repeat`                               | `Field`                                                           |
+| `components_do_not_repeat`                       | `Field`: no level below it repeats                                |
+| `population_states`                              | Not yet                                                           |
+| `null_is_two_double_quotes`                      | Not yet                                                           |
+| `empty_is_not_populated`                         | Not yet                                                           |
+| `message_delimiters`                             | `Delimiters`, without the truncation character                    |
+| `segment_terminator_is_carriage_return`          | `segmentTerminator`                                               |
+| `delimiters_declared_in_msh`                     | Not yet                                                           |
+| `encoding_characters_order`                      | `Delimiters.encodingCharacters`, without the truncation character |
+| `delimiters_hold_for_whole_message`              | `Message.delimiters`: one value per message                       |
+| `suggested_delimiters`                           | `Delimiters.suggested`, without the truncation character          |
+| `field_separator_after_segment_id`               | Not yet                                                           |
+| `component_separator_separates_components`       | Not yet                                                           |
+| `subcomponent_separator_separates_subcomponents` | Not yet                                                           |
+| `repetition_separator_separates_occurrences`     | Not yet                                                           |
+| `segment_terminator_terminates_segment`          | Not yet                                                           |
+| `truncation_character`                           | Not yet                                                           |
+| `escape_character_use`                           | Not yet                                                           |
+| `segment_starts_with_its_id`                     | Not yet                                                           |
+| `field_separator_before_each_field`              | Not yet                                                           |
+| `repetitions_joined`                             | Not yet                                                           |
+| `components_joined`                              | Not yet                                                           |
+| `subcomponents_joined`                           | Not yet                                                           |
+| `segment_terminator_after_segment`               | Not yet                                                           |
+| `trailing_not_populated_omitted`                 | Not yet                                                           |
+| `delimiters_escaped_in_data`                     | Not yet                                                           |
+| `receiver_uses_declared_delimiters`              | Not yet                                                           |
+| `ignore_unexpected`                              | Not yet                                                           |
+| `missing_segment_not_present`                    | Not yet                                                           |
+| `missing_field_not_present`                      | Not yet                                                           |
+| `escape_character_declared`                      | Not yet                                                           |
+| `escape_sequence_form`                           | Not yet                                                           |
+| `delimiter_escape_sequences`                     | Not yet                                                           |
+| `special_characters_in_data`                     | Not yet                                                           |
+| `no_nested_escape_sequences`                     | Not yet                                                           |
+| `text_escape_sequences`                          | Not yet                                                           |
+| `truncation_character_escaped`                   | Not yet                                                           |
+| `character_set_escape_sequences`                 | Not yet                                                           |
+| `hexadecimal_form`                               | Not yet                                                           |
+| `hexadecimal_by_agreement`                       | Not yet                                                           |
+| `formatting_commands`                            | Not yet                                                           |
+| `local_by_agreement`                             | Not yet                                                           |
+| `escape_sequence_length`                         | Not yet                                                           |
+| `string_data_displayable`                        | Not yet                                                           |
