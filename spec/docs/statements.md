@@ -141,14 +141,14 @@ Question 4 is the one the standard answers least directly, and no lesson has tak
 
 A property is a claim about every message, or every well-formed message. The standard states some as requirements and relies on others without stating them. The specification proves each as a theorem. Each is stated as an explicit claim about the relation: what must be true of a text and a message, not how a sender or a receiver gets there.
 
-| Property                     | The claim                                                                                                                                                                                                                                             | From                                                              | Lean    |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------- |
-| `sender_writes_a_text`       | For every message `m`: the text the sender writes for `m` represents `m`                                                                                                                                                                              | "How a sender writes a message"                                   | Not yet |
-| `one_message_one_text`       | For every message `m` and all texts `t₁` and `t₂`: if `t₁` represents `m` and `t₂` represents `m`, then `t₁` is `t₂`                                                                                                                                  | Implicit. See below                                               | Not yet |
-| `one_text_one_meaning`       | For every text `t` and all messages `m₁` and `m₂`: if `t` represents `m₁` and `t` represents `m₂`, then `m₁` is `m₂`                                                                                                                                  | Implicit. See below                                               | Not yet |
-| `text_declares_delimiters`   | For every message `m` and every text that represents it: the 4th character of the text is the field separator of `m`, and the four characters after it are its component separator, repetition separator, escape character and subcomponent separator | `delimiters_declared_in_msh`, `receiver_uses_declared_delimiters` | Not yet |
-| `data_may_hold_delimiters`   | For every value `v`, whatever characters it holds: a text that represents `v` holds no separator, and if one text represents `v` and `w`, then `v` is `w`                                                                                             | `special_characters_in_data`, `delimiters_escaped_in_data`        | Not yet |
-| `omission_keeps_the_meaning` | For all messages `m₁` and `m₂` that differ only in trailing items that are not populated: `m₁` and `m₂` mean the same                                                                                                                                 | `trailing_not_populated_omitted`, `missing_field_not_present`     | Not yet |
+| Property                     | The claim                                                                                                                                                                                                                                             | From                                                              | Lean                                                                                                               |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `sender_writes_a_text`       | For every message `m`: the text the sender writes for `m` represents `m`                                                                                                                                                                              | "How a sender writes a message"                                   | `encode_represents`                                                                                                |
+| `one_message_one_text`       | For every message `m` and all texts `t₁` and `t₂`: if `t₁` represents `m` and `t₂` represents `m`, then `t₁` is `t₂`                                                                                                                                  | Implicit. See below                                               | `represents_text_unique`                                                                                           |
+| `one_text_one_meaning`       | For every text `t` and all messages `m₁` and `m₂`: if `t` represents `m₁` and `t` represents `m₂`, then `m₁` is `m₂`                                                                                                                                  | Implicit. See below                                               | Not yet                                                                                                            |
+| `text_declares_delimiters`   | For every message `m` and every text that represents it: the 4th character of the text is the field separator of `m`, and the four characters after it are its component separator, repetition separator, escape character and subcomponent separator | `delimiters_declared_in_msh`, `receiver_uses_declared_delimiters` | `field_separator_is_fourth_character`, `encoding_characters_follow_field_separator`, of the text the sender writes |
+| `data_may_hold_delimiters`   | For every value `v`, whatever characters it holds: a text that represents `v` holds no separator, and if one text represents `v` and `w`, then `v` is `w`                                                                                             | `special_characters_in_data`, `delimiters_escaped_in_data`        | Not yet                                                                                                            |
+| `omission_keeps_the_meaning` | For all messages `m₁` and `m₂` that differ only in trailing items that are not populated: `m₁` and `m₂` mean the same                                                                                                                                 | `trailing_not_populated_omitted`, `missing_field_not_present`     | Not yet                                                                                                            |
 
 **A property is not a procedure.** The pseudocode of §2.6.1.0 gives the escaping of delimiters as a list of substitutions. The specification does not formalize the steps or their order. It states `data_may_hold_delimiters`: what the text of a value must satisfy. A way of writing a value is correct when the claim holds of it, and a reading of the pseudocode under which the claim fails is not what the standard means.
 
@@ -191,55 +191,55 @@ Where the standard is silent, or says two things that pull apart, the specificat
 
 The Lean definition, rule or theorem that formalizes each statement of Part I. **Not yet** marks a statement no lesson has reached. A lesson that formalizes a statement fills in its row.
 
-| Statement                                        | Lean                                                              |
-| ------------------------------------------------ | ----------------------------------------------------------------- |
-| `message_is_segments`                            | `Message`                                                         |
-| `segment_is_fields`                              | `Segment`                                                         |
-| `segment_id_is_three_characters`                 | rule `segment_id_length`                                          |
-| `field_is_characters`                            | `Subcomponent`                                                    |
-| `field_holds_components`                         | `Repetition`                                                      |
-| `component_holds_subcomponents`                  | `Component`                                                       |
-| `field_may_repeat`                               | `Field`                                                           |
-| `components_do_not_repeat`                       | `Field`: no level below it repeats                                |
-| `population_states`                              | Not yet                                                           |
-| `null_is_two_double_quotes`                      | Not yet                                                           |
-| `empty_is_not_populated`                         | Not yet                                                           |
-| `message_delimiters`                             | `Delimiters`, without the truncation character                    |
-| `segment_terminator_is_carriage_return`          | `segmentTerminator`                                               |
-| `delimiters_declared_in_msh`                     | `Represents`                                                      |
-| `encoding_characters_order`                      | `Delimiters.encodingCharacters`, without the truncation character |
-| `delimiters_hold_for_whole_message`              | `Message.delimiters`: one value per message                       |
-| `suggested_delimiters`                           | `Delimiters.suggested`, without the truncation character          |
-| `field_separator_after_segment_id`               | `RepresentsFields`                                                |
-| `component_separator_separates_components`       | `RepresentsRepetition`                                            |
-| `subcomponent_separator_separates_subcomponents` | `RepresentsComponent`                                             |
-| `repetition_separator_separates_occurrences`     | `RepresentsField`                                                 |
-| `segment_terminator_terminates_segment`          | `RepresentsSegments`                                              |
-| `truncation_character`                           | Not yet                                                           |
-| `escape_character_use`                           | Not yet                                                           |
-| `segment_starts_with_its_id`                     | `RepresentsSegment`                                               |
-| `field_separator_before_each_field`              | `RepresentsFields`                                                |
-| `repetitions_joined`                             | `RepresentsField`                                                 |
-| `components_joined`                              | `RepresentsRepetition`                                            |
-| `subcomponents_joined`                           | `RepresentsComponent`                                             |
-| `segment_terminator_after_segment`               | `RepresentsSegments`                                              |
-| `trailing_not_populated_omitted`                 | Not yet                                                           |
-| `delimiters_escaped_in_data`                     | Not yet                                                           |
-| `receiver_uses_declared_delimiters`              | Not yet                                                           |
-| `ignore_unexpected`                              | Not yet                                                           |
-| `missing_segment_not_present`                    | Not yet                                                           |
-| `missing_field_not_present`                      | Not yet                                                           |
-| `escape_character_declared`                      | Not yet                                                           |
-| `escape_sequence_form`                           | Not yet                                                           |
-| `delimiter_escape_sequences`                     | Not yet                                                           |
-| `special_characters_in_data`                     | Not yet                                                           |
-| `no_nested_escape_sequences`                     | Not yet                                                           |
-| `text_escape_sequences`                          | Not yet                                                           |
-| `truncation_character_escaped`                   | Not yet                                                           |
-| `character_set_escape_sequences`                 | Not yet                                                           |
-| `hexadecimal_form`                               | Not yet                                                           |
-| `hexadecimal_by_agreement`                       | Not yet                                                           |
-| `formatting_commands`                            | Not yet                                                           |
-| `local_by_agreement`                             | Not yet                                                           |
-| `escape_sequence_length`                         | Not yet                                                           |
-| `string_data_displayable`                        | Not yet                                                           |
+| Statement                                        | Lean                                                                          |
+| ------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `message_is_segments`                            | `Message`                                                                     |
+| `segment_is_fields`                              | `Segment`                                                                     |
+| `segment_id_is_three_characters`                 | rule `segment_id_length`                                                      |
+| `field_is_characters`                            | `Subcomponent`                                                                |
+| `field_holds_components`                         | `Repetition`                                                                  |
+| `component_holds_subcomponents`                  | `Component`                                                                   |
+| `field_may_repeat`                               | `Field`                                                                       |
+| `components_do_not_repeat`                       | `Field`: no level below it repeats                                            |
+| `population_states`                              | Not yet                                                                       |
+| `null_is_two_double_quotes`                      | Not yet                                                                       |
+| `empty_is_not_populated`                         | Not yet                                                                       |
+| `message_delimiters`                             | `Delimiters`, without the truncation character                                |
+| `segment_terminator_is_carriage_return`          | `segmentTerminator`                                                           |
+| `delimiters_declared_in_msh`                     | `Represents`; sender `encodeHeader`; property `text_declares_delimiters`      |
+| `encoding_characters_order`                      | `Delimiters.encodingCharacters`, without the truncation character             |
+| `delimiters_hold_for_whole_message`              | `Message.delimiters`: one value per message                                   |
+| `suggested_delimiters`                           | `Delimiters.suggested`, without the truncation character                      |
+| `field_separator_after_segment_id`               | `RepresentsFields`; sender `encodeFields`                                     |
+| `component_separator_separates_components`       | `RepresentsRepetition`                                                        |
+| `subcomponent_separator_separates_subcomponents` | `RepresentsComponent`                                                         |
+| `repetition_separator_separates_occurrences`     | `RepresentsField`                                                             |
+| `segment_terminator_terminates_segment`          | `RepresentsSegments`                                                          |
+| `truncation_character`                           | Not yet                                                                       |
+| `escape_character_use`                           | Not yet                                                                       |
+| `segment_starts_with_its_id`                     | `RepresentsSegment`; sender `encodeSegment`; theorem `encode_starts_with_msh` |
+| `field_separator_before_each_field`              | `RepresentsFields`; sender `encodeFields`                                     |
+| `repetitions_joined`                             | `RepresentsField`; sender `encodeField`                                       |
+| `components_joined`                              | `RepresentsRepetition`; sender `encodeRepetition`                             |
+| `subcomponents_joined`                           | `RepresentsComponent`; sender `encodeComponent`                               |
+| `segment_terminator_after_segment`               | `RepresentsSegments`; sender `encode`                                         |
+| `trailing_not_populated_omitted`                 | Not yet                                                                       |
+| `delimiters_escaped_in_data`                     | Not yet                                                                       |
+| `receiver_uses_declared_delimiters`              | Not yet                                                                       |
+| `ignore_unexpected`                              | Not yet                                                                       |
+| `missing_segment_not_present`                    | Not yet                                                                       |
+| `missing_field_not_present`                      | Not yet                                                                       |
+| `escape_character_declared`                      | Not yet                                                                       |
+| `escape_sequence_form`                           | Not yet                                                                       |
+| `delimiter_escape_sequences`                     | Not yet                                                                       |
+| `special_characters_in_data`                     | Not yet                                                                       |
+| `no_nested_escape_sequences`                     | Not yet                                                                       |
+| `text_escape_sequences`                          | Not yet                                                                       |
+| `truncation_character_escaped`                   | Not yet                                                                       |
+| `character_set_escape_sequences`                 | Not yet                                                                       |
+| `hexadecimal_form`                               | Not yet                                                                       |
+| `hexadecimal_by_agreement`                       | Not yet                                                                       |
+| `formatting_commands`                            | Not yet                                                                       |
+| `local_by_agreement`                             | Not yet                                                                       |
+| `escape_sequence_length`                         | Not yet                                                                       |
+| `string_data_displayable`                        | Not yet                                                                       |
