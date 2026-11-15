@@ -34,17 +34,21 @@ Each row is one statement. It has a name, the statement in plain words, its kind
 
 ## The delimiters (§2.5.4, §2.14.9)
 
-| Name                                    | Statement                                                                                            | Kind           | Source                                                                                                                                                                                                                                                |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `message_delimiters`                    | A message uses seven special characters                                                              | Definition     | "They are the segment terminator, the field separator, the component separator, subcomponent separator, repetition separator, escape character and truncation character." (§2.5.4)                                                                    |
-| `segment_terminator_is_carriage_return` | The segment terminator is a carriage return, and a message cannot choose another                     | Requirement    | "The segment terminator is always a carriage return (in ASCII, a hex 0D)." "This value cannot be changed by implementers." (§2.5.4)                                                                                                                   |
-| `delimiters_declared_in_msh`            | The message declares its other delimiters at the start of MSH                                        | Requirement    | "The other delimiters are defined in the MSH segment, with the field delimiter in the 4th character position, and the other delimiters occurring as in the field called Encoding Characters, which is the first field after the segment ID." (§2.5.4) |
-| `encoding_characters_order`             | MSH-2 holds the component, repetition, escape, subcomponent and truncation characters, in that order | Requirement    | "This field contains five characters in the following order: the component separator, repetition separator, escape character, subcomponent separator, and truncation character." (§2.14.9.2)                                                          |
-| `delimiters_hold_for_whole_message`     | The delimiters MSH declares are the delimiters of the whole message                                  | Requirement    | "The delimiter values used in the MSH segment are the delimiter values used throughout the entire message." (§2.5.4)                                                                                                                                  |
-| `suggested_delimiters`                  | The suggested delimiters are `\|`, `^`, `~`, `\`, `&`, `#`                                           | Recommendation | "In the absence of other considerations, HL7 recommends the suggested values found in Figure 2-1" (§2.5.4)                                                                                                                                            |
-| `field_separator_after_segment_id`      | The field separator also separates the Segment ID from the first field                               | Requirement    | The field separator "also separates the segment ID from the first data field in each segment." (§2.5.4, Figure 2-1)                                                                                                                                   |
-| `truncation_character`                  | The truncation character marks a value that was cut short                                            | Definition     | "Indicated character to be used for the truncation pattern" (§2.5.4, Figure 2-1)                                                                                                                                                                      |
-| `escape_character_use`                  | The escape character is for ST, TX and FT data                                                       | Definition     | "Escape character for use with any field, component, or sub-component represented by an ST, TX or FT data type." (§2.5.4, Figure 2-1)                                                                                                                 |
+| Name                                             | Statement                                                                                            | Kind           | Source                                                                                                                                                                                                                                                |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `message_delimiters`                             | A message uses seven special characters                                                              | Definition     | "They are the segment terminator, the field separator, the component separator, subcomponent separator, repetition separator, escape character and truncation character." (§2.5.4)                                                                    |
+| `segment_terminator_is_carriage_return`          | The segment terminator is a carriage return, and a message cannot choose another                     | Requirement    | "The segment terminator is always a carriage return (in ASCII, a hex 0D)." "This value cannot be changed by implementers." (§2.5.4)                                                                                                                   |
+| `delimiters_declared_in_msh`                     | The message declares its other delimiters at the start of MSH                                        | Requirement    | "The other delimiters are defined in the MSH segment, with the field delimiter in the 4th character position, and the other delimiters occurring as in the field called Encoding Characters, which is the first field after the segment ID." (§2.5.4) |
+| `encoding_characters_order`                      | MSH-2 holds the component, repetition, escape, subcomponent and truncation characters, in that order | Requirement    | "This field contains five characters in the following order: the component separator, repetition separator, escape character, subcomponent separator, and truncation character." (§2.14.9.2)                                                          |
+| `delimiters_hold_for_whole_message`              | The delimiters MSH declares are the delimiters of the whole message                                  | Requirement    | "The delimiter values used in the MSH segment are the delimiter values used throughout the entire message." (§2.5.4)                                                                                                                                  |
+| `suggested_delimiters`                           | The suggested delimiters are `\|`, `^`, `~`, `\`, `&`, `#`                                           | Recommendation | "In the absence of other considerations, HL7 recommends the suggested values found in Figure 2-1" (§2.5.4)                                                                                                                                            |
+| `field_separator_after_segment_id`               | The field separator also separates the Segment ID from the first field                               | Requirement    | The field separator "also separates the segment ID from the first data field in each segment." (§2.5.4, Figure 2-1)                                                                                                                                   |
+| `component_separator_separates_components`       | The component separator stands between two adjacent components                                       | Definition     | "Separates adjacent components of data fields where allowed." (§2.5.4, Figure 2-1)                                                                                                                                                                    |
+| `subcomponent_separator_separates_subcomponents` | The subcomponent separator stands between two adjacent subcomponents                                 | Definition     | "Separates adjacent subcomponents of data fields where allowed." (§2.5.4, Figure 2-1)                                                                                                                                                                 |
+| `repetition_separator_separates_occurrences`     | The repetition separator stands between two occurrences of a field                                   | Definition     | "Separates multiple occurrences of a field where allowed." (§2.5.4, Figure 2-1)                                                                                                                                                                       |
+| `segment_terminator_terminates_segment`          | The segment terminator ends a segment                                                                | Definition     | "Terminates a segment record." (§2.5.4, Figure 2-1)                                                                                                                                                                                                   |
+| `truncation_character`                           | The truncation character marks a value that was cut short                                            | Definition     | "Indicated character to be used for the truncation pattern" (§2.5.4, Figure 2-1)                                                                                                                                                                      |
+| `escape_character_use`                           | The escape character is for ST, TX and FT data                                                       | Definition     | "Escape character for use with any field, component, or sub-component represented by an ST, TX or FT data type." (§2.5.4, Figure 2-1)                                                                                                                 |
 
 ## How a sender writes a message (§2.6.1)
 
@@ -100,49 +104,65 @@ Chapter 2 also covers message types and trigger events (§2.5.1), segment groups
 
 # Part II: The formalization
 
+## The relation
+
+The formalization starts from one relation between a text and a message: **the text represents the message**. Part I describes it from several sides. Figure 2-1 says where each delimiter stands in a text. The construction of §2.6.1.0 says how a sender produces a text. §2.6.2 says what a receiver makes of one. The relation takes no side: it says which text goes with which message, and a sender and a receiver are each judged against it.
+
+- A **sender** is a function from a message to a text. It is correct when the text it writes represents the message.
+- A **receiver** is correct when, for a text that represents a message, it finds that message. The specification defines no receiver.
+
+A message with a field that is not populated at the end of a segment, and the message without that field, are two messages. They differ in structure, and each has its own text: `|a||` and `|a`. That the two mean the same is a claim about two messages (`omission_keeps_the_meaning`), not a second text for one message. So the relation is meant to be one to one: a message has exactly one text, and a text represents at most one message.
+
 ## The questions
 
-A formalization of the statements above has to answer four questions. Each later section belongs to one of them.
+A formalization of the statements above has to answer five questions. Each later section belongs to one of them.
 
-| Question                           | Answered by                       | Statements it draws on                                                                                  |
-| ---------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 1. What is a message?              | Types                             | "What a message is", "The delimiters"                                                                   |
-| 2. What is its text?               | A function from a message to text | "How a sender writes a message", "Escape sequences"                                                     |
-| 3. When are two messages the same? | A notion of equality              | `population_states`, `empty_is_not_populated`, `trailing_not_populated_omitted`, "What a receiver does" |
-| 4. What must hold between the two? | Properties, proved as theorems    | The properties below                                                                                    |
+| Question                                 | Answered by                                                      | Statements it draws on                                                                                  |
+| ---------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 1. What is a message?                    | Types                                                            | "What a message is", "The delimiters"                                                                   |
+| 2. When does a text represent a message? | A relation between a text and a message                          | "The delimiters", "How a sender writes a message", "Escape sequences"                                   |
+| 3. How does a sender write a message?    | A function from a message to a text, proved against the relation | "How a sender writes a message"                                                                         |
+| 4. When do two messages mean the same?   | A relation between two messages                                  | `population_states`, `empty_is_not_populated`, `trailing_not_populated_omitted`, "What a receiver does" |
+| 5. What must hold?                       | Properties, proved as theorems                                   | The properties below                                                                                    |
 
-Question 3 is the one the standard answers least directly. Until a lesson takes it up, two messages are the same when they are equal as values: the same delimiters, the same segments, level by level.
+Question 4 is the one the standard answers least directly, and no lesson has taken it up. Two messages are the same message when they are equal as values: the same delimiters, the same segments, level by level.
 
 ## How a statement becomes Lean
 
 | Kind           | Becomes                                                                                                                             |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Definition     | A type or a definition                                                                                                              |
-| Construction   | A function, or a part of one                                                                                                        |
+| Definition     | A type, a definition, or a part of the relation                                                                                     |
+| Construction   | A part of the relation, and a part of the sender                                                                                    |
 | Requirement    | A rule of `Message.WF` when some messages break it; a theorem when it holds of every message; a type when the structure enforces it |
 | Receiver rule  | A theorem about what the text determines. The specification defines no receiver                                                     |
 | Recommendation | A named value                                                                                                                       |
 
 ## Properties
 
-A property is a claim about every message, or every well-formed message. The standard states some as requirements and relies on others without stating them. The specification proves each as a theorem. Each is stated as an explicit claim: what must be true of the text, not how a sender or a receiver gets there.
+A property is a claim about every message, or every well-formed message. The standard states some as requirements and relies on others without stating them. The specification proves each as a theorem. Each is stated as an explicit claim about the relation: what must be true of a text and a message, not how a sender or a receiver gets there.
 
-| Property                     | The claim                                                                                                                                                                                                    | From                                                              | Lean    |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ------- |
-| `one_text_one_meaning`       | For all messages `m₁` and `m₂`: if the text of `m₁` is the text of `m₂`, then `m₁` is `m₂`                                                                                                                   | Implicit. See below                                               | Not yet |
-| `text_declares_delimiters`   | For every message `m`: the 4th character of its text is its field separator, and the four characters after it are its component separator, repetition separator, escape character and subcomponent separator | `delimiters_declared_in_msh`, `receiver_uses_declared_delimiters` | Not yet |
-| `data_may_hold_delimiters`   | For every value `v`, whatever characters it holds: the text written for `v` holds no separator, and if `v` and `w` are written as the same text, then `v` is `w`                                             | `special_characters_in_data`, `delimiters_escaped_in_data`        | Not yet |
-| `omission_keeps_the_message` | For all messages `m₁` and `m₂` that differ only in trailing items that are not populated: `m₁` and `m₂` are the same message                                                                                 | `trailing_not_populated_omitted`, `missing_field_not_present`     | Not yet |
+| Property                     | The claim                                                                                                                                                                                                                                             | From                                                              | Lean    |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------- |
+| `sender_writes_a_text`       | For every message `m`: the text the sender writes for `m` represents `m`                                                                                                                                                                              | "How a sender writes a message"                                   | Not yet |
+| `one_message_one_text`       | For every message `m` and all texts `t₁` and `t₂`: if `t₁` represents `m` and `t₂` represents `m`, then `t₁` is `t₂`                                                                                                                                  | Implicit. See below                                               | Not yet |
+| `one_text_one_meaning`       | For every text `t` and all messages `m₁` and `m₂`: if `t` represents `m₁` and `t` represents `m₂`, then `m₁` is `m₂`                                                                                                                                  | Implicit. See below                                               | Not yet |
+| `text_declares_delimiters`   | For every message `m` and every text that represents it: the 4th character of the text is the field separator of `m`, and the four characters after it are its component separator, repetition separator, escape character and subcomponent separator | `delimiters_declared_in_msh`, `receiver_uses_declared_delimiters` | Not yet |
+| `data_may_hold_delimiters`   | For every value `v`, whatever characters it holds: a text that represents `v` holds no separator, and if one text represents `v` and `w`, then `v` is `w`                                                                                             | `special_characters_in_data`, `delimiters_escaped_in_data`        | Not yet |
+| `omission_keeps_the_meaning` | For all messages `m₁` and `m₂` that differ only in trailing items that are not populated: `m₁` and `m₂` mean the same                                                                                                                                 | `trailing_not_populated_omitted`, `missing_field_not_present`     | Not yet |
 
-**A property is not a procedure.** The pseudocode of §2.6.1.0 gives the escaping of delimiters as a list of substitutions. The specification does not formalize the steps or their order. It states `data_may_hold_delimiters`: what the written value must satisfy. A way of writing a value is correct when the claim holds of it, and a reading of the pseudocode under which the claim fails is not what the standard means.
+**A property is not a procedure.** The pseudocode of §2.6.1.0 gives the escaping of delimiters as a list of substitutions. The specification does not formalize the steps or their order. It states `data_may_hold_delimiters`: what the text of a value must satisfy. A way of writing a value is correct when the claim holds of it, and a reading of the pseudocode under which the claim fails is not what the standard means.
 
-**`one_text_one_meaning` is not a sentence of the standard.** The standard relies on it in at least three places:
+**`one_message_one_text` and `one_text_one_meaning` are not sentences of the standard.** Together they say the relation is one to one. The standard relies on both.
+
+It relies on the first wherever it speaks of "the" text of a message: the construction of §2.6.1.0 leaves a sender no choice.
+
+It relies on the second in at least three places:
 
 - "Both the sender and receiver of the data must have predictable rules for how they will process the data." (§2.6)
 - "When delimiters are included in any component, the delimiters SHALL be escaped. Failure to do so may alter the meaning of the component." (§2.7.1)
 - "…so that no ambiguity can exist as to the individual or group location of any occurrence of segment X in a message instance." (§2.5.2)
 
-A receiver has only the text. If one text could come from two messages, the receiver could not know which one the sender meant, and no rule for the receiver could repair that.
+A receiver has only the text. If one text could represent two messages, the receiver could not know which one the sender meant, and no rule for the receiver could repair that.
 
 ## Rules
 
@@ -152,64 +172,70 @@ The rules of `Message.WF`, each with its source: a requirement of Part I, or a p
 
 Where the standard is silent, or says two things that pull apart, the specification has to choose. Each entry is a question. It is **open** until a lesson decides it, and a decision is recorded below the table with its reason. A decision is a claim about messages, with what goes wrong without it. How a sender or a receiver is built is never one.
 
-| Question                                                 | What the standard says                                                                                                                                      | Status |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| May two delimiters be the same character?                | Nothing. Figure 2-1 suggests six different characters.                                                                                                      | Open   |
-| Which characters may a value hold?                       | `string_data_displayable` excludes delimiter and escape characters from string data. `special_characters_in_data` says sequences let data hold them.        | Open   |
-| What is an empty field: no repetition, or one empty one? | `empty_is_not_populated` says an item with no content is not populated. It does not say how many repetitions, components or subcomponents such a field has. | Open   |
-| When is an item "populated"?                             | The pseudocode uses the word at every level and does not define it for a repetition, a component or a subcomponent.                                         | Open   |
-| Is `\|a` the same message as `\|a\|\|`?                  | `trailing_not_populated_omitted` has a sender write the first. `missing_field_not_present` has a receiver treat a missing field as not present.             | Open   |
-| Is the truncation character part of MSH-2?               | `encoding_characters_order` lists five characters. Figure 2-1 suggests `^~\&` and gives the truncation character position 5.                                | Open   |
+| Question                                                 | What the standard says                                                                                                                                      | Status  |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| May two delimiters be the same character?                | Nothing. Figure 2-1 suggests six different characters.                                                                                                      | Open    |
+| Which characters may a value hold?                       | `string_data_displayable` excludes delimiter and escape characters from string data. `special_characters_in_data` says sequences let data hold them.        | Open    |
+| What is an empty field: no repetition, or one empty one? | `empty_is_not_populated` says an item with no content is not populated. It does not say how many repetitions, components or subcomponents such a field has. | Open    |
+| When is an item "populated"?                             | The pseudocode uses the word at every level and does not define it for a repetition, a component or a subcomponent.                                         | Open    |
+| Is `\|a` the same message as `\|a\|\|`?                  | `trailing_not_populated_omitted` has a sender write the first. `missing_field_not_present` has a receiver treat a missing field as not present.             | Decided |
+| Is the truncation character part of MSH-2?               | `encoding_characters_order` lists five characters. Figure 2-1 suggests `^~\&` and gives the truncation character position 5.                                | Open    |
+
+**Decided: `|a` and `|a||` are the texts of two messages.** One has a segment of one field, the other a segment of three. If both texts represented one message, a message would have two texts, and a receiver could not tell which one the sender wrote. The two messages differ in structure and mean the same: that is `omission_keeps_the_meaning`, a claim about two messages. A sender that writes `|a` for the message of three fields has written another message, one with the same meaning.
 
 ## Where each statement is formalized
 
 The Lean definition, rule or theorem that formalizes each statement of Part I. **Not yet** marks a statement no lesson has reached. A lesson that formalizes a statement fills in its row.
 
-| Statement                               | Lean                                                              |
-| --------------------------------------- | ----------------------------------------------------------------- |
-| `message_is_segments`                   | `Message`                                                         |
-| `segment_is_fields`                     | `Segment`                                                         |
-| `segment_id_is_three_characters`        | Not yet                                                           |
-| `field_is_characters`                   | `Subcomponent`                                                    |
-| `field_holds_components`                | `Repetition`                                                      |
-| `component_holds_subcomponents`         | `Component`                                                       |
-| `field_may_repeat`                      | `Field`                                                           |
-| `components_do_not_repeat`              | `Field`: no level below it repeats                                |
-| `population_states`                     | Not yet                                                           |
-| `null_is_two_double_quotes`             | Not yet                                                           |
-| `empty_is_not_populated`                | Not yet                                                           |
-| `message_delimiters`                    | `Delimiters`, without the truncation character                    |
-| `segment_terminator_is_carriage_return` | `segmentTerminator`                                               |
-| `delimiters_declared_in_msh`            | Not yet                                                           |
-| `encoding_characters_order`             | `Delimiters.encodingCharacters`, without the truncation character |
-| `delimiters_hold_for_whole_message`     | `Message.delimiters`: one value per message                       |
-| `suggested_delimiters`                  | `Delimiters.suggested`, without the truncation character          |
-| `field_separator_after_segment_id`      | Not yet                                                           |
-| `truncation_character`                  | Not yet                                                           |
-| `escape_character_use`                  | Not yet                                                           |
-| `segment_starts_with_its_id`            | Not yet                                                           |
-| `field_separator_before_each_field`     | Not yet                                                           |
-| `repetitions_joined`                    | Not yet                                                           |
-| `components_joined`                     | Not yet                                                           |
-| `subcomponents_joined`                  | Not yet                                                           |
-| `segment_terminator_after_segment`      | Not yet                                                           |
-| `trailing_not_populated_omitted`        | Not yet                                                           |
-| `delimiters_escaped_in_data`            | Not yet                                                           |
-| `receiver_uses_declared_delimiters`     | Not yet                                                           |
-| `ignore_unexpected`                     | Not yet                                                           |
-| `missing_segment_not_present`           | Not yet                                                           |
-| `missing_field_not_present`             | Not yet                                                           |
-| `escape_character_declared`             | Not yet                                                           |
-| `escape_sequence_form`                  | Not yet                                                           |
-| `delimiter_escape_sequences`            | Not yet                                                           |
-| `special_characters_in_data`            | Not yet                                                           |
-| `no_nested_escape_sequences`            | Not yet                                                           |
-| `text_escape_sequences`                 | Not yet                                                           |
-| `truncation_character_escaped`          | Not yet                                                           |
-| `character_set_escape_sequences`        | Not yet                                                           |
-| `hexadecimal_form`                      | Not yet                                                           |
-| `hexadecimal_by_agreement`              | Not yet                                                           |
-| `formatting_commands`                   | Not yet                                                           |
-| `local_by_agreement`                    | Not yet                                                           |
-| `escape_sequence_length`                | Not yet                                                           |
-| `string_data_displayable`               | Not yet                                                           |
+| Statement                                        | Lean                                                              |
+| ------------------------------------------------ | ----------------------------------------------------------------- |
+| `message_is_segments`                            | `Message`                                                         |
+| `segment_is_fields`                              | `Segment`                                                         |
+| `segment_id_is_three_characters`                 | Not yet                                                           |
+| `field_is_characters`                            | `Subcomponent`                                                    |
+| `field_holds_components`                         | `Repetition`                                                      |
+| `component_holds_subcomponents`                  | `Component`                                                       |
+| `field_may_repeat`                               | `Field`                                                           |
+| `components_do_not_repeat`                       | `Field`: no level below it repeats                                |
+| `population_states`                              | Not yet                                                           |
+| `null_is_two_double_quotes`                      | Not yet                                                           |
+| `empty_is_not_populated`                         | Not yet                                                           |
+| `message_delimiters`                             | `Delimiters`, without the truncation character                    |
+| `segment_terminator_is_carriage_return`          | `segmentTerminator`                                               |
+| `delimiters_declared_in_msh`                     | Not yet                                                           |
+| `encoding_characters_order`                      | `Delimiters.encodingCharacters`, without the truncation character |
+| `delimiters_hold_for_whole_message`              | `Message.delimiters`: one value per message                       |
+| `suggested_delimiters`                           | `Delimiters.suggested`, without the truncation character          |
+| `field_separator_after_segment_id`               | Not yet                                                           |
+| `component_separator_separates_components`       | Not yet                                                           |
+| `subcomponent_separator_separates_subcomponents` | Not yet                                                           |
+| `repetition_separator_separates_occurrences`     | Not yet                                                           |
+| `segment_terminator_terminates_segment`          | Not yet                                                           |
+| `truncation_character`                           | Not yet                                                           |
+| `escape_character_use`                           | Not yet                                                           |
+| `segment_starts_with_its_id`                     | Not yet                                                           |
+| `field_separator_before_each_field`              | Not yet                                                           |
+| `repetitions_joined`                             | Not yet                                                           |
+| `components_joined`                              | Not yet                                                           |
+| `subcomponents_joined`                           | Not yet                                                           |
+| `segment_terminator_after_segment`               | Not yet                                                           |
+| `trailing_not_populated_omitted`                 | Not yet                                                           |
+| `delimiters_escaped_in_data`                     | Not yet                                                           |
+| `receiver_uses_declared_delimiters`              | Not yet                                                           |
+| `ignore_unexpected`                              | Not yet                                                           |
+| `missing_segment_not_present`                    | Not yet                                                           |
+| `missing_field_not_present`                      | Not yet                                                           |
+| `escape_character_declared`                      | Not yet                                                           |
+| `escape_sequence_form`                           | Not yet                                                           |
+| `delimiter_escape_sequences`                     | Not yet                                                           |
+| `special_characters_in_data`                     | Not yet                                                           |
+| `no_nested_escape_sequences`                     | Not yet                                                           |
+| `text_escape_sequences`                          | Not yet                                                           |
+| `truncation_character_escaped`                   | Not yet                                                           |
+| `character_set_escape_sequences`                 | Not yet                                                           |
+| `hexadecimal_form`                               | Not yet                                                           |
+| `hexadecimal_by_agreement`                       | Not yet                                                           |
+| `formatting_commands`                            | Not yet                                                           |
+| `local_by_agreement`                             | Not yet                                                           |
+| `escape_sequence_length`                         | Not yet                                                           |
+| `string_data_displayable`                        | Not yet                                                           |
