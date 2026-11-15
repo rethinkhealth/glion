@@ -1,19 +1,12 @@
-# Lesson 2: A message as text
+# Lesson 2: Claims and rules
 
-Lesson 1 said what a message is. This lesson says how a sender writes one as text. The standard gives the construction as pseudocode, and the lesson turns it into Lean, one level at a time, until `encode` writes a whole message.
+Lesson 1 wrote definitions and ran them on examples. An example shows one case. This lesson states claims that Lean checks for every value, and it writes the first rule: a statement of the standard that some messages meet and others do not.
 
-It formalizes these statements from [the list](statements.md):
+It formalizes this statement from [the list](statements.md):
 
-| Statement                           | In this lesson     |
-| ----------------------------------- | ------------------ |
-| `subcomponents_joined`              | `encodeComponent`  |
-| `components_joined`                 | `encodeRepetition` |
-| `repetitions_joined`                | `encodeField`      |
-| `field_separator_before_each_field` | `encodeFields`     |
-| `field_separator_after_segment_id`  | `encodeFields`     |
-| `segment_starts_with_its_id`        | `encodeSegment`    |
-| `delimiters_declared_in_msh`        | `encodeHeader`     |
-| `segment_terminator_after_segment`  | `encode`           |
+| Statement                        | In this lesson                         |
+| -------------------------------- | -------------------------------------- |
+| `segment_id_is_three_characters` | `Message.WF.segment_id_length`, a rule |
 
 You need lesson 1.
 
@@ -24,299 +17,260 @@ Create `spec/practice/Lesson2.lean` and start it with these lines:
 ```lean
 import Hl7v2
 
-open Hl7v2.Spec (Delimiters Component Repetition Field Segment Message segmentTerminator)
+open Hl7v2.Spec (Delimiters Segment Message)
 
 namespace Lesson2
-```
 
-`open Hl7v2.Spec (…)` brings the names in the brackets into reach: the definitions of lesson 1, from the specification. The functions of this lesson are yours, in the namespace `Lesson2`.
-
-## 1. The construction
-
-§2.6.1.0 of the standard, "Message Construction Pseudocode":
-
-```text
-foreach segment in ( segment_list ) {
-  insert segment.name;                    /* e.g., MSH */
-  foreach field in ( fields_of( segment ) ) {
-    insert field separator;               /* e.g., | */
-    foreach occurrence in ( occurrences_of( field ) ) {
-      construct_occurrence( occurrence );
-      if not last ( populated occurrence ) insert repetition_separator;   /* e.g., ~ */
-    }
-    break if last ( populated field );
-  }
-  insert segment_terminator;              /* always<cr>! */
-}
-
-procedure construct_occurrence ( occurrence ) {
-  foreach component in ( components_of( occurrence ) ) {
-    foreach subcomponent in ( subcomponents_of( component ) ) {
-      substitute( field_separator, \F\ );
-      substitute( component_separator, \S\ );
-      substitute( repetition_separator, \R\ );
-      substitute( escape_character, \E\ );
-      substitute( subcomponent_separator, \T\ );
-      substitute( truncation_character, \P\ );
-      insert subcomponent;
-      if not last ( populated subcomponent ) insert subcomponent_separator;   /* e.g., & */
-    }
-    if not last ( populated component ) insert component_separator;   /* e.g., ^ */
-  }
-}
-```
-
-This lesson formalizes the lines that insert: the segment name, the separators, the subcomponent, the segment terminator. It leaves two things for later lessons, and the statements list marks both as not yet formalized:
-
-- **The `substitute` lines.** Here, `insert subcomponent` writes the characters of the subcomponent as they are.
-- **The word "populated" and the `break`.** Here, every field, repetition, component and subcomponent of the message is written.
-
-The pseudocode is a loop that inserts text piece by piece. Lean has no loops of that kind: a function takes a value and returns a value. So each `foreach` becomes a function from one level of the message to its text.
-
-## 2. Joining lists
-
-Three operations on lists do all the work.
-
-```lean
-#eval [1, 2] ++ [3]   -- [1, 2, 3]
-#eval 0 :: [1, 2]     -- [0, 1, 2]
-```
-
-`++` joins two lists. `::` puts one element in front of a list.
-
-```lean
-#eval ['&'].intercalate [['a'], ['b', 'c']]   -- ['a', '&', 'b', 'c']
-```
-
-`sep.intercalate parts` joins the lists in `parts` and puts `sep` between them. Between, not after: the separator appears once for two parts, and not at all for one part.
-
-```lean
-#eval String.ofList (['&'].intercalate ["HOSP".toList, "1.2.3".toList])   -- "HOSP&1.2.3"
-#eval String.ofList (['&'].intercalate ["HOSP".toList])                   -- "HOSP"
-```
-
-That is the pseudocode's "if not last … insert separator": a separator after every part except the last.
-
-## 3. A component, a repetition, a field
-
-Start from the inside. A component is its subcomponents with the subcomponent separator between them:
-
-```lean
-def encodeComponent (d : Delimiters) (c : Component) : List Char :=
-  [d.subcomponent].intercalate c
-
-#eval String.ofList (encodeComponent Delimiters.suggested ["HOSP".toList, "1.2.3".toList])   -- "HOSP&1.2.3"
-```
-
-The function takes two inputs: the delimiters `d`, since the separator is whatever the message declares, and the component `c`. `[d.subcomponent]` is the list of one character that `intercalate` puts between the parts.
-
-A repetition is its components with the component separator between them. Each component must be written first, and `map` does that (lesson 1):
-
-```lean
-def encodeRepetition (d : Delimiters) (r : Repetition) : List Char :=
-  [d.component].intercalate (r.map (encodeComponent d))
-
-#eval String.ofList (encodeRepetition Delimiters.suggested [["SMITH".toList], ["JOHN".toList]])   -- "SMITH^JOHN"
-```
-
-`encodeComponent d` is `encodeComponent` with its first input given: a function that still waits for a component. `r.map (encodeComponent d)` applies it to each component of `r`, and gives a list of texts for `intercalate` to join.
-
-A field is its repetitions with the repetition separator between them, in the same way:
-
-```lean
-def encodeField (d : Delimiters) (f : Field) : List Char :=
-  [d.repetition].intercalate (f.map (encodeRepetition d))
-
-#eval String.ofList (encodeField Delimiters.suggested [[["123".toList]], [["456".toList]]])   -- "123~456"
-```
-
-The three functions have one shape: write each part of the level below, and join the results with this level's separator.
-
-## 4. The fields of a segment
-
-The next level is different. The pseudocode does not say "if not last": it inserts the field separator before every field.
-
-```text
-foreach field in ( fields_of( segment ) ) {
-  insert field separator;
-```
-
-`flatMap` applies a function that returns a list to each element, and joins the results with nothing between them:
-
-```lean
-#eval [1, 2, 3].flatMap fun n => [n, n]   -- [1, 1, 2, 2, 3, 3]
-```
-
-So the fields of a segment are, for each field, the field separator followed by the field:
-
-```lean
-def encodeFields (d : Delimiters) (fields : List Field) : List Char :=
-  fields.flatMap fun f => d.field :: encodeField d f
-
-#eval String.ofList (encodeFields Delimiters.suggested
-  [[[["123".toList]], [["456".toList]]], [[["SMITH".toList], ["JOHN".toList]]]])   -- "|123~456|SMITH^JOHN"
-```
-
-The text starts with `|`. That is the statement `field_separator_after_segment_id`: the field separator "also separates the segment ID from the first data field in each segment."
-
-## 5. A segment
-
-```text
-insert segment.name;   /* e.g., MSH */
-```
-
-A segment is its ID, then its fields:
-
-```lean
-def encodeSegment (d : Delimiters) (s : Segment) : List Char :=
-  s.id ++ encodeFields d s.fields
-
-def pid : Segment :=
-  { id := "PID".toList,
-    fields := [[[["123".toList]], [["456".toList]]], [[["SMITH".toList], ["JOHN".toList]]]] }
-
-#eval String.ofList (encodeSegment Delimiters.suggested pid)   -- "PID|123~456|SMITH^JOHN"
-```
-
-## 6. The MSH segment
-
-> The other delimiters are defined in the MSH segment, with the field delimiter in the 4th character position, and the other delimiters occurring as in the field called Encoding Characters, which is the first field after the segment ID. (§2.5.4)
-
-MSH is where a message declares its delimiters. Its text is `MSH`, the field separator, the encoding characters, and then its other fields like any segment:
-
-```lean
-def mshId : List Char := ['M', 'S', 'H']
-
-def encodeHeader (d : Delimiters) (header : List Field) : List Char :=
-  mshId ++ d.field :: d.encodingCharacters ++ encodeFields d header
-
-#eval String.ofList (encodeHeader Delimiters.suggested [[[["LAB".toList]]]])   -- "MSH|^~\\&|LAB"
-```
-
-Lean prints the string with its backslash doubled: the text is `MSH|^~\&|LAB`. The field separator is the 4th character, and the four encoding characters follow it.
-
-This is why lesson 1 kept the delimiters apart from the other fields of MSH. MSH-1 is the field separator itself, and MSH-2 is written with no separators inside: both are the delimiters, written out.
-
-## 7. The message
-
-```text
-insert segment_terminator;   /* always<cr>! */
-```
-
-A message is MSH and then each segment, each followed by the segment terminator:
-
-```lean
-def encode (m : Message) : List Char :=
-  (encodeHeader m.delimiters m.header :: m.segments.map (encodeSegment m.delimiters)).flatMap
-    fun line => line ++ [segmentTerminator]
-```
-
-Read it in two steps. `encodeHeader … :: m.segments.map …` is the list of lines: the text of MSH in front of the text of each segment. `flatMap fun line => line ++ [segmentTerminator]` puts the terminator after each line and joins them. Every level below takes the delimiters from `m.delimiters`: one set for the whole message.
-
-A carriage return does not show well on a screen. This helper prints it as `␍`:
-
-```lean
-def render (text : List Char) : String :=
-  String.ofList (text.map fun c => if c = segmentTerminator then '␍' else c)
-```
-
-`if … then … else …` chooses between two values. `render` is for reading only; it is not part of the specification.
-
-```lean
 def message : Message :=
   { delimiters := Delimiters.suggested,
     header := [[[["LAB".toList]]]],
-    segments := [pid, { id := "PV1".toList, fields := [] }] }
-
-#eval render (encode message)   -- "MSH|^~\\&|LAB␍PID|123~456|SMITH^JOHN␍PV1␍"
+    segments := [{ id := "PID".toList, fields := [[[["123".toList]]]] }, { id := "PV1".toList, fields := [] }] }
 ```
 
-The smallest message has no fields after MSH-2 and no other segment:
+`open Hl7v2.Spec (…)` brings the names in the brackets into reach: the definitions of lesson 1, from the specification.
+
+## 1. A claim is a type
+
+`1 + 1 = 2` is a claim. In Lean a claim is a value like any other, and it has a type:
 
 ```lean
-#eval render (encode { delimiters := Delimiters.suggested, header := [], segments := [] })   -- "MSH|^~\\&␍"
+#check 1 + 1 = 2   -- 1 + 1 = 2 : Prop
 ```
 
-## 8. Other delimiters
+`Prop` is the type of claims, true or false. `1 + 1 = 3` is a `Prop` too.
 
-The delimiters are an input, so the same message with other delimiters is another text:
+A claim is true when it has a **proof**. `example` asks Lean to check one:
 
 ```lean
-def otherDelimiters : Delimiters :=
-  { field := '#', component := '*', repetition := '~', escape := '\\', subcomponent := '&' }
-
-#eval render (encode { message with delimiters := otherDelimiters })   -- "MSH#*~\\&#LAB␍PID#123~456#SMITH*JOHN␍PV1␍"
+example : 1 + 1 = 2 := rfl
 ```
 
-`{ message with delimiters := … }` is `message` with one field replaced.
+Read it like a `def` without a name: after the `:` comes the claim, after the `:=` its proof. The proof here is `rfl`, short for reflexivity: "compute both sides; they are the same value". Lean computes `1 + 1`, gets `2`, and accepts.
 
-The escape character is declared in MSH-2 and written there, and the writer uses it nowhere else. It belongs to the `substitute` lines, which this lesson left out.
+A false claim has no proof. Lean rejects this one (do not paste):
 
-## 9. The same, in the specification
+```lean skip
+example : 1 + 1 = 3 := rfl
+```
 
-`Hl7v2/Spec/Encoding.lean` holds these functions, each with the lines of the pseudocode it formalizes. Compare yours with the specification's on the message above:
+```text
+error: Type mismatch
+  rfl
+has type
+  ?m.16 = ?m.16
+but is expected to have type
+  1 + 1 = 3
+```
+
+`rfl` proves claims of the form `x = x`, and after computing, `2 = 3` is not of that form.
+
+This is the difference from `#eval`. `#eval` prints a value and you compare it with what you expected. An `example` states what you expect, and Lean refuses the file if it does not hold.
+
+## 2. A claim about one value
+
+> This field contains five characters in the following order: the component separator, repetition separator, escape character, subcomponent separator, and truncation character. (§2.14.9.2)
+
+Lesson 1 defined `encodingCharacters` as the first four of them; the specification does not model the truncation character. For the suggested delimiters, as a claim:
 
 ```lean
-#eval encode message == Hl7v2.Spec.encode message   -- true
+example : Delimiters.suggested.encodingCharacters = "^~\\&".toList := rfl
+```
+
+Lean computes the encoding characters of `Delimiters.suggested` and finds the four characters of `^~\&`. In a Lean string a backslash is written twice.
+
+There is a second way to prove a claim like this one. `decide` asks Lean to decide whether the claim is true by running a procedure for it:
+
+```lean
+example : Delimiters.suggested.encodingCharacters = "^~\\&".toList := by decide
+```
+
+`by` starts a proof written as instructions, called tactics; `decide` is one. For an equality of two computed lists, `rfl` and `decide` do the same work. `decide` goes further: it also proves claims that are not equalities, and section 5 needs that.
+
+## 3. A claim about every value
+
+The standard does not speak of one set of delimiters: MSH-2 holds the same number of characters whatever they are. A claim about every `Delimiters` takes one as an input:
+
+```lean
+example (d : Delimiters) : d.encodingCharacters.length = 4 := rfl
+```
+
+`d` is any `Delimiters`. Nothing is known about it: not one of its five characters. And `rfl` still proves the claim. Lean computes with `d` as an unknown: `d.encodingCharacters` is `[d.component, d.repetition, d.escape, d.subcomponent]` by its definition, a list of four elements whatever they are.
+
+That is a proof for every set of delimiters at once, and no amount of `#eval` could give it.
+
+Compare with a claim that looks the same and is false (do not paste):
+
+```lean skip
+example (d : Delimiters) : d.encodingCharacters = "^~\\&".toList := rfl
+```
+
+```text
+error: Type mismatch
+  rfl
+has type
+  ?m.3 = ?m.3
+but is expected to have type
+  d.encodingCharacters = "^~\\&".toList
+```
+
+The first encoding character is `d.component`, which is `^` only for some delimiters. The claim holds for `Delimiters.suggested` and fails for a message that declares `*`. Lean cannot prove it, and it should not.
+
+## 4. Theorems
+
+A `theorem` is a claim with a name and a proof. Once proved, the name can be used wherever the fact is needed.
+
+```lean
+theorem encodingCharacters_length (d : Delimiters) : d.encodingCharacters.length = 4 := rfl
+
+example : message.delimiters.encodingCharacters.length = 4 :=
+  encodingCharacters_length message.delimiters
+```
+
+A theorem is named after what it concludes, in lower case with underscores. The `example` proves a claim about one message by applying the theorem to its delimiters: a theorem about every `Delimiters` is a function from a `Delimiters` to a proof.
+
+`#check` prints the statement of a theorem:
+
+```lean
+#check @encodingCharacters_length   -- @encodingCharacters_length : ∀ (d : Delimiters), d.encodingCharacters.length = 4
+```
+
+`∀ (d : Delimiters), …` reads "for every `d`, …". An input written before the `:` and a `∀` after it are the same thing.
+
+## 5. A rule
+
+> Each segment is identified by a unique three-character code known as the Segment ID. (§2.5.2)
+
+Lesson 1 ended on a segment whose ID has two characters. The type allows it; the standard does not. This statement cannot be a theorem about every message, because it is false for some values of `Message`. It is a **rule**: a claim about a message, true of some and false of others.
+
+For a message `m`, the rule is the claim `∀ s ∈ m.segments, s.id.length = 3`. It reads "for every `s` that is an element of `m.segments`, the ID of `s` has length 3". `∀` is "for every" and `∈` is "is an element of".
+
+For a given message, the claim is true or false, and `decide` finds out which:
+
+```lean
+example : ∀ s ∈ message.segments, s.id.length = 3 := by decide
+
+def shortId : Message := { message with segments := [{ id := "PI".toList, fields := [] }] }
+
+example : ¬ ∀ s ∈ shortId.segments, s.id.length = 3 := by decide
+```
+
+`{ message with segments := … }` is `message` with one field replaced. `¬` is "not". The second example is a proof that `shortId` breaks the rule. `rfl` could prove neither: they are not equalities. `decide` works because the claim can be checked by a procedure: go through the segments, compare each length with 3.
+
+Ask `decide` to prove a false claim and it says so (do not paste):
+
+```lean skip
+example : ∀ s ∈ shortId.segments, s.id.length = 3 := by decide
+```
+
+```text
+error: Tactic `decide` proved that the proposition
+  ∀ (s : Segment), s ∈ shortId.segments → s.id.length = 3
+is false
+```
+
+The error shows the claim as Lean holds it: `∀ s ∈ l, P s` is short for `∀ s, s ∈ l → P s`, "for every `s`, if `s` is in `l` then `P s`". `→` is "if … then".
+
+## 6. The rules of a message
+
+The specification will have several rules. It collects them in one structure, `Message.WF`, for "well formed". A structure whose fields are claims is itself a claim: it holds when every field does.
+
+```lean
+structure WF (m : Message) : Prop where
+  segment_id_length : ∀ s ∈ m.segments, s.id.length = 3
+```
+
+A proof of `WF m` is a proof of each rule, built like any structure value:
+
+```lean
+example : WF message := { segment_id_length := by decide }
+```
+
+And from a proof of `WF m`, each rule can be read back, like any field:
+
+```lean
+example (m : Message) (h : WF m) (s : Segment) (hs : s ∈ m.segments) : s.id.length = 3 :=
+  h.segment_id_length s hs
+```
+
+Read the inputs: `m` is any message, `h` is a proof that `m` is well formed, `s` is any segment, and `hs` is a proof that `s` is one of `m`'s segments. A proof is a value, so it can be an input. The conclusion follows by taking the rule out of `h` and applying it to `s` and `hs`.
+
+This is how a rule will be used from here on: a theorem that holds only for well-formed messages takes a proof of `WF m` as an input.
+
+`WF` has one rule today. A rule enters it in one of two ways: the standard states it, as here, or a proof needs it.
+
+## 7. A rule is not the type
+
+Why not make a two-character ID impossible, with a type that holds exactly three characters? Because the specification must be able to talk about messages that break a rule: to say which rule a message breaks, and to prove what goes wrong without the rule. `shortId` is a value Lean can reason about, and section 5 proved a fact about it.
+
+So the specification keeps two layers apart:
+
+| Layer                       | Says                       | Lesson |
+| --------------------------- | -------------------------- | ------ |
+| Types: `Message`, `Segment` | what a message is made of  | 1      |
+| Rules: `Message.WF`         | which messages are allowed | 2      |
+
+## 8. The same, in the specification
+
+The rule is in `Hl7v2/Spec/WellFormed.lean`, as `Hl7v2.Spec.Message.WF`. Read it out of a proof that a message is well formed, as in section 6:
+
+```lean
+example (m : Message) (h : m.WF) (s : Segment) (hs : s ∈ m.segments) : s.id.length = 3 :=
+  h.segment_id_length s hs
 
 end Lesson2
 ```
+
+`m.WF` is `Message.WF m`: the specification's structure, not the `WF` of your file.
 
 ## What you can now say
 
 About HL7v2:
 
-- A sender writes a message from the inside out: subcomponents joined with their separator, then components, then repetitions.
-- The field separator comes before every field, so it also follows the segment ID.
-- MSH declares the delimiters by writing them: the field separator as its 4th character, then the encoding characters.
-- Every segment ends with a carriage return, the last one too.
+- `encodingCharacters` is four characters for every message, and that is proved.
+- A Segment ID of three characters is a rule: some values of `Message` meet it and some do not.
 
 About Lean:
 
-- A loop that inserts text becomes a function from a value to its text, one function per level.
-- `++` joins two lists, `::` adds an element in front, `intercalate` joins with a separator between, `flatMap` joins with nothing between.
-- A function with its first input given, such as `encodeComponent d`, is a function of the remaining inputs.
+- A claim is a value of type `Prop`. A proof of it is a value too, and can be an input.
+- `example` checks a proof; `theorem` names it.
+- `rfl` proves an equality by computing both sides, also when an input is unknown. `decide` proves any claim Lean can check by a procedure.
+- A claim with an input, `(d : Delimiters)`, is a claim about every `Delimiters`.
+- A rule is a claim about a message, true of some messages and false of others. `Message.WF` is the structure of the rules.
 
 ## Exercises
 
-**1. Predict.** What does `encodeField Delimiters.suggested [[["A".toList], ["B".toList, "C".toList]], [["D".toList]]]` write?
+**1. A claim about every value.** State and prove: the first encoding character of every `Delimiters` is its component separator. `take 1` keeps the first element of a list.
 
 <details><summary>Answer</summary>
-
-`A^B&C~D`. This is the field of lesson 1, exercise 1.
-
-</details>
-
-**2. Empty fields.** What does this write, and why are there two `|` in a row?
 
 ```lean
-#eval String.ofList (Hl7v2.Spec.encodeFields Delimiters.suggested
-  [[[["a".toList]]], [[[]]], [[["c".toList]]]])   -- "|a||c"
+example (d : Delimiters) : d.encodingCharacters.take 1 = [d.component] := rfl
 ```
 
-<details><summary>Answer</summary>
-
-`|a||c`. The second field is one repetition of one component of one subcomponent with no characters, so its text is empty. The field separator still comes before it, and the next field's separator follows at once.
-
 </details>
 
-**3. Change the writer.** In your file, replace `flatMap fun f => d.field :: encodeField d f` in `encodeFields` with `[d.field].intercalate (fields.map (encodeField d))`. What does `encode message` write now, and which statement does it break?
+**2. True for one, false for all.** `d.field = '|'` is not provable for every `d`. Prove that it is false for some `Delimiters`: build one and prove the negation with `decide`.
 
 <details><summary>Answer</summary>
-
-`MSH|^~\&LAB␍PID123~456|SMITH^JOHN␍PV1␍`. The separator is now between the fields only, so nothing separates the segment ID from the first field: `field_separator_after_segment_id` is broken. The last line of your file, the comparison with the specification, prints `false`.
-
-</details>
-
-**4. Trailing fields.** The pseudocode says `break if last ( populated field )`. Write a segment whose last two fields are empty and look at its text. What would a sender that follows the pseudocode write?
-
-<details><summary>Things to weigh</summary>
 
 ```lean
-#eval String.ofList (Hl7v2.Spec.encodeFields Delimiters.suggested
-  [[[["a".toList]]], [[[]]], [[[]]]])   -- "|a||"
+def hashDelimiters : Delimiters := { Delimiters.suggested with field := '#' }
+
+example : ¬ hashDelimiters.field = '|' := by decide
 ```
 
-This writer writes `|a||`. A sender that stops after the last populated field writes `|a`. Both are the same three fields to a receiver, by §2.6.2: fields "that are expected but were not included in a segment" are "not present". The specification does not formalize this yet (`trailing_not_populated_omitted`), and when it does, it has to say what "the same message" means.
+A claim about every value is refuted by one value.
+
+</details>
+
+**3. A rule of your own.** The standard says a message starts with MSH, so no later segment should be MSH. Write that as a claim about `message`, and prove it.
+
+<details><summary>Answer</summary>
+
+```lean
+example : ∀ s ∈ Lesson2.message.segments, s.id ≠ "MSH".toList := by decide
+```
+
+Whether this belongs in `Message.WF` is a different question: a rule needs a source, a sentence of the standard or a proof that needs it. The statements list has no such sentence yet.
 
 </details>
