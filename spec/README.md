@@ -10,18 +10,45 @@ The specification is built from scratch, one lesson at a time. Each lesson takes
 2. **One lesson per step.** A lesson formalizes a few statements, and marks them in the list. The lessons are indexed in [`docs/README.md`](docs/README.md).
 3. **Every rule has a source.** A rule of the specification is either a requirement of the standard, or a fact the proof of a property needs. Where the standard leaves a question open, the choice is recorded under "Gaps and decisions", with the reason.
 
+## What is proved
+
+The specification is built on one relation, `Hl7v2.Spec.Represents text m`: the text represents the message. The theorems say the relation is one to one, and that the sender of §2.6.1 is correct against it.
+
+- **`Hl7v2.Thm.encode_represents`**: the text a sender writes represents its message (`sender_writes_a_text`).
+- **`Hl7v2.Thm.represents_text_unique`**: a message has exactly one text (`one_message_one_text`).
+- **`Hl7v2.Thm.represents_message_unique`**: a text represents at most one well-formed message. The standard relies on this and never states it (`one_text_one_meaning`).
+- **`Hl7v2.Thm.encode_starts_with_msh`**, **`field_separator_is_fourth_character`**, **`encoding_characters_follow_field_separator`**: the text of every message starts with `MSH`, its field separator and its encoding characters.
+
+All use only Lean's standard axioms (`propext`, `Quot.sound`).
+
+## The rules
+
+`Message.WF` holds the rules a message must meet. Each is decidable, so `decide` checks them on a message.
+
+| Rule                         | Says                                                         | Source                 |
+| ---------------------------- | ------------------------------------------------------------ | ---------------------- |
+| `separators_distinct`        | The segment terminator and the four separators are different | `one_text_one_meaning` |
+| `escape_not_terminator`      | The escape character is not the segment terminator           | `one_text_one_meaning` |
+| `segment_id_length`          | A Segment ID has three characters                            | the standard, §2.5.2   |
+| `segment_id_no_terminator`   | A Segment ID does not hold the segment terminator            | `one_text_one_meaning` |
+| `field_has_repetition`       | A field holds at least one repetition                        | `one_text_one_meaning` |
+| `repetition_has_component`   | A repetition holds at least one component                    | `one_text_one_meaning` |
+| `component_has_subcomponent` | A component holds at least one subcomponent                  | `one_text_one_meaning` |
+| `subcomponent_no_separator`  | A subcomponent holds no separator and no segment terminator  | `one_text_one_meaning` |
+
 ## Layout
 
 The layout follows [cedar-spec](https://github.com/cedar-policy/cedar-spec/tree/main/cedar-lean): definitions and proofs live in separate trees.
 
-| Path                 | Holds                                                              |
-| -------------------- | ------------------------------------------------------------------ |
-| `Hl7v2/Spec/`        | Definitions: the statements of the standard                        |
-| `Hl7v2/Thm/`         | Theorems about the definitions, and their proofs                   |
-| `docs/statements.md` | What Chapter 2 says, and the formalization built on it             |
-| `docs/`              | The lessons                                                        |
-| `practice/`          | Your own files while following a lesson; Git ignores it            |
-| `scripts/`           | `check-lessons.py`, which compiles the Lean blocks of every lesson |
+| Path                 | Holds                                                                       |
+| -------------------- | --------------------------------------------------------------------------- |
+| `Hl7v2/Spec/`        | Definitions: the statements of the standard                                 |
+| `Hl7v2/Thm/`         | Theorems about the definitions, and their proofs                            |
+| `docs/statements.md` | What Chapter 2 says, and the formalization built on it                      |
+| `Claims.lean`        | The statement and the axioms of each headline theorem, checked by the build |
+| `docs/`              | The lessons                                                                 |
+| `practice/`          | Your own files while following a lesson; Git ignores it                     |
+| `scripts/`           | `check-lessons.py`, which compiles the Lean blocks of every lesson          |
 
 ## Running
 
@@ -33,4 +60,4 @@ Requires the Lean toolchain named in `lean-toolchain` ([elan](https://github.com
 
 ## What CI checks
 
-The `Spec` workflow builds the library, replays every proof in `leanchecker`, a second kernel, and runs an axiom audit over every declaration: only `propext` and `Quot.sound` are allowed, so `sorry`, `native_decide` and new axioms fail.
+The `Spec` workflow builds the library and `Claims.lean`, which fails when the statement or the axioms of a headline theorem change, replays every proof in `leanchecker`, a second kernel, and runs an axiom audit over every declaration: only `propext` and `Quot.sound` are allowed, so `sorry`, `native_decide` and new axioms fail.

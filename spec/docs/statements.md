@@ -145,7 +145,7 @@ A property is a claim about every message, or every well-formed message. The sta
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `sender_writes_a_text`       | For every message `m`: the text the sender writes for `m` represents `m`                                                                                                                                                                              | "How a sender writes a message"                                   | `encode_represents`                                                                                                |
 | `one_message_one_text`       | For every message `m` and all texts `t₁` and `t₂`: if `t₁` represents `m` and `t₂` represents `m`, then `t₁` is `t₂`                                                                                                                                  | Implicit. See below                                               | `represents_text_unique`                                                                                           |
-| `one_text_one_meaning`       | For every text `t` and all messages `m₁` and `m₂`: if `t` represents `m₁` and `t` represents `m₂`, then `m₁` is `m₂`                                                                                                                                  | Implicit. See below                                               | Not yet                                                                                                            |
+| `one_text_one_meaning`       | For every text `t` and all messages `m₁` and `m₂`: if `t` represents `m₁` and `t` represents `m₂`, then `m₁` is `m₂`                                                                                                                                  | Implicit. See below                                               | `represents_message_unique`, for well-formed messages                                                              |
 | `text_declares_delimiters`   | For every message `m` and every text that represents it: the 4th character of the text is the field separator of `m`, and the four characters after it are its component separator, repetition separator, escape character and subcomponent separator | `delimiters_declared_in_msh`, `receiver_uses_declared_delimiters` | `field_separator_is_fourth_character`, `encoding_characters_follow_field_separator`, of the text the sender writes |
 | `data_may_hold_delimiters`   | For every value `v`, whatever characters it holds: a text that represents `v` holds no separator, and if one text represents `v` and `w`, then `v` is `w`                                                                                             | `special_characters_in_data`, `delimiters_escaped_in_data`        | Not yet                                                                                                            |
 | `omission_keeps_the_meaning` | For all messages `m₁` and `m₂` that differ only in trailing items that are not populated: `m₁` and `m₂` mean the same                                                                                                                                 | `trailing_not_populated_omitted`, `missing_field_not_present`     | Not yet                                                                                                            |
@@ -168,24 +168,39 @@ A receiver has only the text. If one text could represent two messages, the rece
 
 The rules of `Message.WF`, each with its source: a requirement of Part I, or a property whose proof needs it.
 
-| Rule                | Says                              | Source                           |
-| ------------------- | --------------------------------- | -------------------------------- |
-| `segment_id_length` | A Segment ID has three characters | `segment_id_is_three_characters` |
+| Rule                         | Says                                                                    | Source                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `separators_distinct`        | The segment terminator and the four separators are different characters | `one_text_one_meaning`                                                 |
+| `escape_not_terminator`      | The escape character is not the segment terminator                      | `one_text_one_meaning`                                                 |
+| `segment_id_length`          | A Segment ID has three characters                                       | `segment_id_is_three_characters`; `one_text_one_meaning` also needs it |
+| `segment_id_no_terminator`   | A Segment ID does not hold the segment terminator                       | `one_text_one_meaning`                                                 |
+| `field_has_repetition`       | A field holds at least one repetition                                   | `one_text_one_meaning`                                                 |
+| `repetition_has_component`   | A repetition holds at least one component                               | `one_text_one_meaning`                                                 |
+| `component_has_subcomponent` | A component holds at least one subcomponent                             | `one_text_one_meaning`                                                 |
+| `subcomponent_no_separator`  | A subcomponent holds no separator and no segment terminator             | `one_text_one_meaning`                                                 |
+
+A rule whose source is a property is one the proof of that property uses. The proof shows the rules are enough. It does not show each is needed: a rule shown to be needed is recorded with its counterexample under "Gaps and decisions".
 
 ## Gaps and decisions
 
 Where the standard is silent, or says two things that pull apart, the specification has to choose. Each entry is a question. It is **open** until a lesson decides it, and a decision is recorded below the table with its reason. A decision is a claim about messages, with what goes wrong without it. How a sender or a receiver is built is never one.
 
-| Question                                                 | What the standard says                                                                                                                                      | Status  |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| May two delimiters be the same character?                | Nothing. Figure 2-1 suggests six different characters.                                                                                                      | Open    |
-| Which characters may a value hold?                       | `string_data_displayable` excludes delimiter and escape characters from string data. `special_characters_in_data` says sequences let data hold them.        | Open    |
-| What is an empty field: no repetition, or one empty one? | `empty_is_not_populated` says an item with no content is not populated. It does not say how many repetitions, components or subcomponents such a field has. | Open    |
-| When is an item "populated"?                             | The pseudocode uses the word at every level and does not define it for a repetition, a component or a subcomponent.                                         | Open    |
-| Is `\|a` the same message as `\|a\|\|`?                  | `trailing_not_populated_omitted` has a sender write the first. `missing_field_not_present` has a receiver treat a missing field as not present.             | Decided |
-| Is the truncation character part of MSH-2?               | `encoding_characters_order` lists five characters. Figure 2-1 suggests `^~\&` and gives the truncation character position 5.                                | Open    |
+| Question                                                 | What the standard says                                                                                                                                      | Status          |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| May two delimiters be the same character?                | Nothing. Figure 2-1 suggests six different characters.                                                                                                      | Decided         |
+| Which characters may a value hold?                       | `string_data_displayable` excludes delimiter and escape characters from string data. `special_characters_in_data` says sequences let data hold them.        | Decided for now |
+| What is an empty field: no repetition, or one empty one? | `empty_is_not_populated` says an item with no content is not populated. It does not say how many repetitions, components or subcomponents such a field has. | Decided         |
+| When is an item "populated"?                             | The pseudocode uses the word at every level and does not define it for a repetition, a component or a subcomponent.                                         | Open            |
+| Is `\|a` the same message as `\|a\|\|`?                  | `trailing_not_populated_omitted` has a sender write the first. `missing_field_not_present` has a receiver treat a missing field as not present.             | Decided         |
+| Is the truncation character part of MSH-2?               | `encoding_characters_order` lists five characters. Figure 2-1 suggests `^~\&` and gives the truncation character position 5.                                | Open            |
 
 **Decided: `|a` and `|a||` are the texts of two messages.** One has a segment of one field, the other a segment of three. If both texts represented one message, a message would have two texts, and a receiver could not tell which one the sender wrote. The two messages differ in structure and mean the same: that is `omission_keeps_the_meaning`, a claim about two messages. A sender that writes `|a` for the message of three fields has written another message, one with the same meaning.
+
+**Decided: the segment terminator and the four separators are different characters** (`separators_distinct`). With `^` as both the component and the subcomponent separator, `MSH|^~\^␍PID|a^b␍` represents a field of two components and a field of one component with two subcomponents. So `one_text_one_meaning` fails without the rule. The escape character is asked only not to be the segment terminator (`escape_not_terminator`): no text holds it anywhere but in MSH-2.
+
+**Decided: an empty field is one repetition of one component of one empty subcomponent** (`field_has_repetition`, `repetition_has_component`, `component_has_subcomponent`). The empty text represents a component with no subcomponent and a component with one empty subcomponent, so `MSH|^~\&␍PID|␍` would represent two messages. No level of a field is an empty list.
+
+**Decided for now: a value holds no separator and no segment terminator** (`subcomponent_no_separator`). Each value is represented by its own characters, so `MSH|^~\&␍PID|&␍` represents a subcomponent `&` and two empty subcomponents. The rule excludes such values. It agrees with `string_data_displayable` and not with `special_characters_in_data`; the question is taken up again when the relation formalizes escape sequences.
 
 ## Where each statement is formalized
 
@@ -204,7 +219,7 @@ The Lean definition, rule or theorem that formalizes each statement of Part I. *
 | `population_states`                              | Not yet                                                                       |
 | `null_is_two_double_quotes`                      | Not yet                                                                       |
 | `empty_is_not_populated`                         | Not yet                                                                       |
-| `message_delimiters`                             | `Delimiters`, without the truncation character                                |
+| `message_delimiters`                             | `Delimiters`, `Delimiters.separators`, without the truncation character       |
 | `segment_terminator_is_carriage_return`          | `segmentTerminator`                                                           |
 | `delimiters_declared_in_msh`                     | `Represents`; sender `encodeHeader`; property `text_declares_delimiters`      |
 | `encoding_characters_order`                      | `Delimiters.encodingCharacters`, without the truncation character             |
