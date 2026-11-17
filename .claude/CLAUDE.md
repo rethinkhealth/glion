@@ -317,6 +317,9 @@ Run these in order after editing. Each is pass/fail; "looks done" is not done.
 2. `pnpm mutate:changed` if any touched package has a `stryker.config.mjs`. For each surviving mutant, first write one line naming the HL7v2 or MLLP contract it violates, then add a test whose name states that contract. If no contract is violated, add `// Stryker disable next-line <Mutator>: <reason>` and move on. Never lower a `break`. A test named after a mutant is rejected in review.
 3. `pnpm crap:changed` once #738 lands: a touched function above 30 gets a test or a split before the PR.
 4. In the PR description, report killed, equivalent, and open survivor counts for the packages you mutated.
+5. Read your diff against the "Checks by trigger" tables in `REVIEW.md` and run every item whose trigger matches. The automated review runs the same items.
+
+If a check still fails after three attempts to fix it, stop and report the failure with its output. Do not loosen the check.
 
 Steps 1 and 2 correspond to the "Mutation testing" comment CI posts on the PR; the reviewer compares your report against it.
 
@@ -329,6 +332,7 @@ A fast-check property follows the `glion-property-tests` skill: invoke it before
 - Coverage reporters: text, html, json.
 - `expect()` inside `it()` / `test()` blocks.
 - No `.only` / `.skip` in committed tests.
+- A flaky test is never skipped, retried until green, or given a sleep or a longer timeout. Find the root cause; if it cannot be found, delete the test and say why in the PR.
 - `async/await` over done callbacks.
 - Test contracts at the layer that owns them — adapter behaviour at the adapter level, core behaviour at the core level.
 
